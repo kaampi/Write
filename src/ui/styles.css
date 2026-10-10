@@ -4403,7 +4403,8 @@ button:disabled {
   white-space: pre-wrap;
 }
 
-.edit-card.history-card {
+.edit-card.history-card,
+.edit-card.polish-review-card {
   width: min(84rem, 100%);
 }
 

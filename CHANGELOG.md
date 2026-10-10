@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.83] - 2026-10-10
+
+### Fixed
+- The Polish review window was stuck at the same narrow width as a small confirmation dialog, cramming its side-by-side before/after text into two thin, scrolling columns. It now opens as wide as the History comparison view, which uses the same side-by-side layout.
+
 ## [1.0.82] - 2026-10-10
 
 ### Added

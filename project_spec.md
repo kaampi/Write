@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.82
+Status: living document, v1.0.83
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3105,6 +3105,31 @@ för text Polish faktiskt klipper bort (just nu räddas bara darlings
 som redan fanns innan Polish kördes, inte det Polish själv tar bort).
 
 v1.0.81 → v1.0.82.
+
+---
+
+**Ändringslogg v1.0.82 → v1.0.83 (2026-10-10):** Mats skickade en
+skärmdump av Polish-granskningen i bruk — ORIGINAL och POLISH
+SUGGESTION var klämda in i två smala kolumner med egen scrollbar
+vardera, och texten radbröt ord för ord. En rad under skärmdumpen:
+"Fönstret kan vara mycket större". Rätt diagnos: `.polish-review-card`
+återanvänder samma `HistorySplit`-komponent som History-vyns
+jämförelse gör, men saknade historik-kortets breddöverstyrning. Alla
+`.edit-card` är `width: min(36rem, 100%)` som grundinställning — en
+rimlig bredd för en vanlig formulär-dialog, men `.edit-card.history-
+card` höjer den till `min(84rem, 100%)` just för att den har samma
+sida-vid-sida-diff. Polish-kortet fick aldrig den matchande regeln när
+det byggdes i v1.0.82 — ett rent förbiseende, inte ett nytt
+designbeslut. Fixen var en rad: lade till `.edit-card.polish-review-
+card` i samma CSS-selector som `.edit-card.history-card`, så båda
+delar `width: min(84rem, 100%)`. Verifierade live med Playwright mot
+en riktig körning (mock-Ollama-servern från v1.0.82 återanvänd): skapa
+bok, skriv text, klicka Polish, mät `.polish-review-card`s faktiska
+bredd i DOM — 1344px vid 1400px-viewport (= 84rem, samma som History-
+kortet), mot tidigare 36rem (576px). Skärmdump bekräftar båda
+kolumnerna nu har gott om plats, ingen ordvis radbrytning.
+
+v1.0.82 → v1.0.83.
 
 ---
 
