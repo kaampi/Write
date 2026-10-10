@@ -1708,6 +1708,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         maxTokens: 1800,
         signal: abort.signal
       });
+      recordPromptResponse(raw);
       const items = parseChapterFeedback(raw, chapter.prose, {
         voice: resolveVoice(current, chapter),
         ...(kidlitReader(resolveReader(current, chapter)) ? { kidlit: true } : {})

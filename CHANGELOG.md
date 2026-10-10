@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.81] - 2026-10-10
+
+### Fixed
+- Analyze's run never showed up under Tools → "View AI context…" — it recorded the prompt sent to the model but not the model's own reply, the one AI operation in the app missing that. Fixed; "What came back" now appears for Analyze like it already does for every other job.
+
 ## [1.0.80] - 2026-10-10
 
 ### Changed

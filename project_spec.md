@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.80
+Status: living document, v1.0.81
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -2978,6 +2978,45 @@ bekräftade att panelen fortfarande öppnas (`.stats-card` syns i DOM:en)
 testad logik), `npm run build` grön.
 
 v1.0.79 → v1.0.80.
+
+---
+
+**Ändringslogg v1.0.80 → v1.0.81 (2026-10-10):** Direkt uppföljning på
+v1.0.79. Mats körde Analyze igen efter uppdateringen, fick exakt
+samma enda flagga som förut. Bad honom öppna Tools → "View AI
+context…" för att se modellens råa svar och avgöra om bollen låg hos
+filtret eller hos modellens egen täckning — men skärmdumpen han
+skickade visade bara "SYSTEM INSTRUCTIONS" och "WHAT WAS SENT", ingen
+tredje sektion ("Vad modellen svarade") alls, inte ens scrollad förbi.
+
+**Det ledde till den verkliga boven.** Läste `analyzeChapter` i
+`BookStore.tsx` och jämförde mot de sju andra AI-operationerna
+(Draft, Extract, Recast, m.fl.) — alla andra kallar
+`recordPromptResponse(raw)` direkt efter sitt `chat()`-anrop, för att
+spara modellens svar till inspektorn. `analyzeChapter` var ensam om
+att UTELÄMNA den raden helt: den spelade in vad som skickades
+(`recordPrompt`), men aldrig vad som kom tillbaka. Mats skärmdump var
+alltså korrekt — det fanns bokstavligen inget att visa, inte ett UI-
+missförstånd från hans sida.
+
+**Byggt.** En rad: `recordPromptResponse(raw);` tillagd direkt efter
+`chat()`-anropet i `analyzeChapter`, exakt samma plats och mönster
+som de sex andra fungerande call-sites. `tsc --noEmit` rent, 916
+tester gröna (oförändrat — `BookStore.tsx`s hooks har ingen egen
+testsvit, samma gräns som redan gäller för resten av filen; verifierat
+genom att jämföra mot 6 redan fungerande, identiska mönster i samma
+fil snarare än att gissa), `npm run build` grön. Ingen live-körning
+möjlig i den här sandlådan (ingen lokal modell ansluten) — flaggat
+ärligt till Mats, som redan har en riktig lokal modell (qwen2.5-
+coder:7b, synligt i hans egen skärmdump) för att verifiera på riktigt.
+
+**Bonus-upptäckt från skärmdumpen:** Mats modell är `qwen2.5-
+coder:7b` — en KODMODELL, inte en skrivmodell, körd för Review/Analyze.
+Värt att nämna till Mats som en möjlig separat förklaring till svag
+analys-täckning (utöver filtret och nu den här buggen) — inte agerat
+på än, bara noterat.
+
+v1.0.80 → v1.0.81.
 
 ---
 
