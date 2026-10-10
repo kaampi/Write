@@ -228,10 +228,18 @@ function choiceLabel(chapter: Chapter, untitled: string): string {
   return `${chapter.sequence_index + 1} · ${chapter.title.trim() || untitled}`;
 }
 
+/**
+ * The word count plus the Rare/Clichés/Story Bible Names toggles — quiet,
+ * always-visible readouts, not actions you'd reach for the way Draft or
+ * Analyze are. Opening the Stats panel itself used to live here too, as
+ * a fourth button styled the same muted way — easy to mistake for more
+ * readout text instead of the thing that opens a whole panel. Pulled out
+ * into its own real button (see StatsButton) sitting with the other
+ * actions instead.
+ */
 function StatsTrigger({
   words,
   highlighting,
-  onOpen,
   onToggleHighlight,
   ticsHighlighting,
   onToggleTics,
@@ -240,7 +248,6 @@ function StatsTrigger({
 }: {
   words: number;
   highlighting: boolean;
-  onOpen: () => void;
   onToggleHighlight: () => void;
   ticsHighlighting: boolean;
   onToggleTics: () => void;
@@ -250,10 +257,7 @@ function StatsTrigger({
   const { messages: m } = useLocale();
   return (
     <span className="stats-cluster">
-      <button type="button" className="stats-trigger" onClick={onOpen}>
-        <span className="word-count">{count(words, m.stats.wordsShort)}</span>
-        <span className="stats-trigger-label">{m.stats.label}</span>
-      </button>
+      <span className="word-count">{count(words, m.stats.wordsShort)}</span>
       <button
         type="button"
         className={highlighting ? "stats-trigger is-on" : "stats-trigger"}
@@ -284,6 +288,16 @@ function StatsTrigger({
         </button>
       ) : null}
     </span>
+  );
+}
+
+/** Opens the Stats panel — a real action button among Draft/Extract facts/Analyze, not the quiet readout style StatsTrigger's toggles use. Mats: "STATS har blivit en liten text bland andra. Den förtjänar en knapp bredvid Analyse." */
+function StatsButton({ onOpen }: { onOpen: () => void }) {
+  const { messages: m } = useLocale();
+  return (
+    <button type="button" onClick={onOpen}>
+      {m.stats.label}
+    </button>
   );
 }
 
@@ -1346,7 +1360,6 @@ export function Editor() {
                 <StatsTrigger
                   words={countWords(book.brainstorm)}
                   highlighting={highlightRare}
-                  onOpen={() => setStatsOpen(true)}
                   onToggleHighlight={() => {
                     setHighlightRare((on) => !on);
                     setHighlightTics(false);
@@ -1361,27 +1374,30 @@ export function Editor() {
               </>
             }
             extraActions={
-              partnerBusy ? (
-                <button type="button" onClick={store.stopDraft}>
-                  {m.common.stop}
-                </button>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setBrainstormChatOpen(true);
-                      store.startBrainstormChat();
-                    }}
-                    disabled={busy !== null}
-                  >
-                    {m.editor.brainstormChat}
+              <>
+                <StatsButton onOpen={() => setStatsOpen(true)} />
+                {partnerBusy ? (
+                  <button type="button" onClick={store.stopDraft}>
+                    {m.common.stop}
                   </button>
-                  <button type="button" onClick={store.showSynopsis} disabled={busy !== null}>
-                    {m.editor.openSynopsis}
-                  </button>
-                </>
-              )
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBrainstormChatOpen(true);
+                        store.startBrainstormChat();
+                      }}
+                      disabled={busy !== null}
+                    >
+                      {m.editor.brainstormChat}
+                    </button>
+                    <button type="button" onClick={store.showSynopsis} disabled={busy !== null}>
+                      {m.editor.openSynopsis}
+                    </button>
+                  </>
+                )}
+              </>
             }
             onPatch={(mutate) => void store.patchBook(mutate)}
             onSend={() => void store.sendBrainstormToSynopsis()}
@@ -1473,7 +1489,6 @@ export function Editor() {
               <StatsTrigger
                 words={countWords(book.synopsis)}
                 highlighting={highlightRare}
-                onOpen={() => setStatsOpen(true)}
                 onToggleHighlight={() => {
                   setHighlightRare((on) => !on);
                   setHighlightTics(false);
@@ -1494,6 +1509,7 @@ export function Editor() {
               />
               <div className="actions">
                 <MaximizeButton maximized={maximized} onToggle={() => setMaximized((on) => !on)} />
+                <StatsButton onOpen={() => setStatsOpen(true)} />
                 {busy === "extend" || busy === "elaborate" || busy === "instruct" ? (
                   <button type="button" onClick={store.stopDraft}>
                     {m.common.stop}
@@ -1645,7 +1661,6 @@ export function Editor() {
               <StatsTrigger
                 words={countWords(chapter.prose)}
                 highlighting={highlightRare}
-                onOpen={() => setStatsOpen(true)}
                 onToggleHighlight={() => {
                   setHighlightRare((on) => !on);
                   setHighlightTics(false);
@@ -1678,6 +1693,7 @@ export function Editor() {
                 <button type="button" onClick={() => void store.extractChapter()} disabled={busy !== null}>
                   {busy === "extract" ? m.editor.extracting : m.editor.extract}
                 </button>
+                <StatsButton onOpen={() => setStatsOpen(true)} />
                 {busy === "analyze" ? (
                   <button type="button" onClick={store.stopDraft}>
                     {m.common.stop}

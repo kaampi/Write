@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.80] - 2026-10-10
+
+### Changed
+- Stats is now a real button next to Analyze, instead of blending into the quiet word-count/Rare/Clichés/Story Bible Names row where it was easy to miss.
+
 ## [1.0.79] - 2026-10-10
 
 ### Fixed

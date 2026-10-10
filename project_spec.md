@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.79
+Status: living document, v1.0.80
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -2939,6 +2939,45 @@ en eventuell framtida borttagning av hela `looksLikeTell()`-filtret
 om breddningen visar sig otillräcklig i praktiken.
 
 v1.0.78 → v1.0.79.
+
+---
+
+**Ändringslogg v1.0.79 → v1.0.80 (2026-10-10):** Mats, med en
+skärmdump av kapitelfoten: "STATS har blivit en liten text bland
+andra. Den förtjänar en knapp bredvid Analyse."
+
+**Läste `StatsTrigger`-komponenten innan jag ändrade nåt.** Den
+renderade fyra `<button>` i en och samma `.stats-cluster`-`<span>`:
+ordräkning+"Stats" (öppnar Stats-panelen), Rare, Clichés, Story Bible
+Names — alla fyra styrda med samma tysta `.stats-trigger`-klass (ingen
+bakgrund, ingen kant, 0.68rem versaltext). De riktiga knapparna
+(Draft, Extract facts, Analyze, osv) sitter i en annan `<div
+className="actions">`, som redan har en egen CSS-regel
+(`.actions button:not(.primary)`) som ger VILKEN SOM HELST vanlig
+`<button>` där den riktiga kantade knapp-looken — ingen ny CSS
+behövdes, bara rätt plats i trädet.
+
+**Byggt.** Delade `StatsTrigger` i två: samma komponent behåller
+ordräkning (nu ren text, inte en knapp) plus de tre togglarna (Rare/
+Clichés/Story Bible Names), oförändrat i övrigt. Ny `StatsButton`-
+komponent — en vanlig knapp med `m.stats.label` ("Stats") — flyttad
+in i `.actions`-raden på alla tre ställen som använde `StatsTrigger`
+(kapitel, Synopsis, Brainstorm via dess `extraActions`-prop). I
+kapitelpanelen (den Mats skärmdumpade) sitter den direkt FÖRE Analyze-
+knappen — "bredvid Analyse" uppfyllt bokstavligt, inte bara i andan.
+
+**Verifierat live.** Skapade en bok, skrev lite text, skärmdump av
+hela sidan bekräftar layouten: "7 words RARE OFF CLICHÉS OFF STORY
+BIBLE NAMES OFF" kvar som tyst klusterrad till vänster, "Maximize,
+Draft, Extract facts, **Stats**, Analyze, Ask about chapter, History"
+som riktiga kantade knappar till höger — Stats fullt synlig bland de
+andra istället för begravd i småtext. Klickade på Stats-knappen,
+bekräftade att panelen fortfarande öppnas (`.stats-card` syns i DOM:en)
+— ingen regression i de tre ställena som delar komponenten. `tsc
+--noEmit` rent, 916 tester gröna (oförändrat — ren UI-flytt, ingen ny
+testad logik), `npm run build` grön.
+
+v1.0.79 → v1.0.80.
 
 ---
 
