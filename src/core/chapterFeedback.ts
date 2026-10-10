@@ -179,10 +179,31 @@ function looksLikeDialogue(quote: string): boolean {
   return /'(?:[^']{2,})'/.test(quote);
 }
 
+/**
+ * A plausibility gate on the model's own show_vs_tell flags, not a
+ * detector of its own — findAiTicHits-style, catches the shape of
+ * telling language so a weak local model's hallucinated or miscategorized
+ * flag gets dropped. Widened after a real gap: a tester's Gemini
+ * comparison caught three genuine show_vs_tell lines our own Analyze
+ * missed; two ("He pushed the feelings aside...", "a sense of comfort
+ * settling over him") used telling language this list simply didn't
+ * recognize yet, so they were silently dropped even if the model itself
+ * had already flagged them correctly. The third ("the only constant in
+ * his life since Lyra's passing") names a relationship's significance
+ * with no feeling-word at all — no list like this can generalize to it
+ * without also flagging ordinary sentences, so it's still a gap. Widen
+ * further only with real examples, the same way this round grew; don't
+ * guess new trigger words from imagination.
+ */
 function looksLikeTell(quote: string): boolean {
   return (
-    /\b(felt|feels|feeling|seemed|seems|realized|knew that|thought that)\b/i.test(quote) ||
-    /\b(was|were|is|are)\s+(so\s+)?(sad|angry|afraid|tired|lonely|happy|sure|determined|proud|anxious|nervous|guilty|ashamed|hopeful|desperate)\b/i.test(
+    /\b(felt|feels|feeling|feelings|seemed|seems|seeming|realized|realizing|knew that|thought that|sensed|sensing|noticed|noticing|understood|recognized|recognizing|remembered|suspected|wondered if|hoped|feared|wished|longed|ached|yearned)\b/i.test(
+      quote
+    ) ||
+    /\b(settling over|washing over|flooded through|flooding through|filled (him|her|them) with|a (sense|wave|rush|pang|surge) of)\b/i.test(
+      quote
+    ) ||
+    /\b(was|were|is|are)\s+(so\s+)?(sad|angry|afraid|tired|lonely|happy|sure|determined|proud|anxious|nervous|guilty|ashamed|hopeful|desperate|comforted|overwhelmed|relieved|content|uneasy|confident|exhausted|elated|devastated|crushed|numb|torn|conflicted|grateful|bitter|resentful|embarrassed|humiliated|jealous|envious|suspicious|wary|hesitant|comfortable|safe|secure|vulnerable|exposed)\b/i.test(
       quote
     )
   );

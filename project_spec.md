@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.78
+Status: living document, v1.0.79
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -2821,6 +2821,124 @@ hela Rubrik-typografin, Anfangs egna Font/Vikt/Färg, och den sparade
 men avsiktligt uppskjutna idén om riktiga per-font-vikter (#42).
 
 v1.0.77 → v1.0.78.
+
+---
+
+**Ändringslogg v1.0.78 → v1.0.79 (2026-10-10):** Lång designdiskussion
+innan kod, som Mats själv bad om ("vi kan fundera kring det innan
+kod"). Startpunkt: ska högerklicksmenyn vid textredigering få fler
+val — ett som letar efter "Show don't Tell"-brott, och ett "Create
+hook" som föreslår en cliffhanger-avslutning?
+
+**Research innan rekommendation.** Läste `ProseCanvas.tsx`s befintliga
+högerklicksmeny (RewriteMenu/CursorMenu) och hittade att "Show don't
+tell" redan finns som en `rewriteChips`-instruktion (för markerad text
+man redan bestämt sig för att skriva om) — inte en detektor. Jämförde
+med de redan existerande mekaniska detektorerna (Rare words, Clichés/
+`aiTics.ts`, POV-läcka, Echo/fras-upprepning) som alla är ordliste-
+eller regex-baserade, alltid-på/av-togglar i kapitelverktygsfältet.
+"Create hook" passar bäst som en syster till den redan existerande
+"Beat"-markörmenyn (samma mekanik: markör-position, AI skriver en kort
+fortsättning).
+
+**Mats breddade frågan:** inte bara Show-don't-tell och Hooks, utan
+ett menyval "Give writing tips" som letar efter olika skrivfallgropar
+generellt. Hittade då att **"Analyze"-knappen i kapitelverktygsfältet
+redan gör precis det här** (`chapterFeedback.ts`) — `show_vs_tell` är
+dess FÖRSTA kategori av sex (plus `dialogue_purpose`, `voice_drift`,
+`character_fidelity`, och barnlitteratur-specifika `child_agency`/
+`lecture`). Skillnaden mot vad Mats bad om är bara scope: Analyze kör
+på hela kapitlet/scenen via en knapp, inte en markering via
+högerklick.
+
+**Föreslagna nya fallgrops-kategorier** (filtrerade bort allt som
+redan täcks av de mekaniska detektorerna, fokuserade på sånt som
+kräver verklig läsförståelse): info-dump, sammanfattad istället för
+levd scen, oförtjänt känsloskifte, scen utan vändning, övertydlig
+subtext, "As you know, Bob"-dialog, svag kapitelavslutning (den sista
+parar naturligt med Create hook — flagga svag avslutning, erbjud hook
+som fix).
+
+**Mats frågade om `MAX_ITEMS = 10`-taket.** Svar: ingen teknisk
+grund, ren UX-avvägning (prompten säger explicit "prefer the
+strongest flags, not one of each") — och taket är DELAT mellan alla
+kategorier, inte per kategori, så fler kategorier konkurrerar om
+samma lilla utrymme. Flaggade att fler kategorier i samma prompt är
+en verklig kvalitetsrisk på svaga lokala modeller (appens hela
+poäng), och att det inte går att testa i den här sandlådan (ingen
+lokal modell ansluten) — rekommenderade att lägga till 2–3 kategorier
+i taget och låta testare avgöra kvaliteten, inte alla sju på en gång.
+
+**Mats verkliga test blev den riktiga vändpunkten.** Körde Analyze på
+ett eget kapitel, fick EN flagga (`character_fidelity`: "He pushed
+the feelings aside, focusing on the present."). Körde samma kapitel
+genom Gemini separat — hittade tre show_vs_tell-brott (inklusive den
+app redan hittat, men felkategoriserad), klichéer, och konstaterade
+att avslutningen helt saknade en hook. Grävde i koden istället för
+att bara acceptera "Gemini är bättre":
+
+1. **`looksLikeTell()`-filtret var boven, delvis.** Ett efterhands-
+   filter i `parseChapterFeedback` kräver att citatet innehåller
+   specifika ord (felt/seemed/realized/was sad, etc) — testade Mats
+   tre Gemini-citat direkt mot regexet i en Node-snutt: alla tre gav
+   `false`. Så även om modellen korrekt flaggat alla tre som
+   show_vs_tell, hade filtret tyst kastat dem — den enda som
+   överlevde gjorde det bara för att modellen (oavsiktligt) la den
+   under `character_fidelity` istället, en kategori utan filter.
+2. **Mats frågade den viktiga följdfrågan:** läser AI:n och förstår,
+   eller söker den ord? Svar: BÅDA, i två steg — modellen läser och
+   bedömer fritt (steg 1, äkta förståelse), men appen kör sedan ett
+   dumt sök-filter på modellens EGNA svar (steg 2) som kan kasta
+   korrekta bedömningar om de inte råkar använda rätt ord. Filtret
+   finns som en precisions-skyddsmekanism mot svaga lokala modeller
+   som kan hitta på eller felkategorisera — en avvägning mellan att
+   missa riktiga fynd och att visa falska. Just nu för strikt åt det
+   försiktiga hållet.
+3. **"Clichés"-knappen är strukturellt oförmögen** att fånga Mats
+   scifi-troper ("stars like diamonds", "metal arms like skeletal
+   fingers") — det är en fast lista på 22 generiska AI-fraser
+   (`aiTics.ts`), och specifika troper är oändligt många och
+   sammanhangsberoende. Ingen ordlista kan någonsin täcka det; det
+   kräver modell-bedömning (en framtida Analyze-kategori), inte en
+   utökad ordlista.
+4. Mats bad att bredda filtret "så får vi se" — inkrementellt, inte
+   ta bort det helt på en gång.
+
+**Byggt.** `looksLikeTell()` breddad rejält: fler triggerverb
+(sensed, noticed, understood, recognized, remembered, suspected,
+wondered if, hoped, feared, wished, longed, ached, yearned, plural
+"feelings"), nya fraser ("settling over", "washing over", "a sense/
+wave/rush/pang/surge of", "filled [him/her/them] with"), och en
+mycket längre lista känslo-adjektiv för was/were-mönstret (comforted,
+overwhelmed, relieved, numb, torn, conflicted, m.fl.). Verifierade
+mot Mats tre riktiga citat INNAN jag skrev koden, inte efteråt: 2 av
+3 fångas nu ("He pushed the feelings aside..." och "A sense of
+comfort settled over him"). Det tredje ("the only constant in his
+life since Lyra's passing") namnger en relations betydelse utan ett
+enda känsloord — konstaterat, dokumenterat i kodkommentaren som en
+känd, accepterad gräns för vad ett regex kan generalisera till utan
+att börja flagga helt normala meningar. Ny kodkommentar förklarar
+filtrets syfte (en trolighetsspärr på modellens EGNA flaggor, inte en
+egen detektor) och dess kända gräns, så nästa breddning görs mot
+riktiga exempel precis som den här, inte gissade ord.
+
+**Test.** Nytt test i `chapter-feedback.test.ts` (20 totalt, +1) som
+kör exakt Mats tre citat genom `parseChapterFeedback` och bekräftar
+att två nu går igenom medan det tredje (det kända, dokumenterade
+gapet) fortfarande inte gör det — ett test som bevisar både
+förbättringen OCH dess gräns, inte bara det som fungerar. `tsc
+--noEmit` rent, 916 tester gröna, `npm run build` grön. Ingen live-
+Playwright-verifiering den här gången — ren bakgrundslogik utan UI,
+och ingen lokal modell ansluten i den här miljön för att köra en
+riktig Analyze-anrop; unit-testet mot de faktiska funktionerna med
+realistiskt modell-svar som JSON är rätt verifieringsnivå här.
+
+**Kvar, uttryckligen inte med i detta steg:** nya Analyze-kategorier
+(Kliché/trop, svag avslutning, m.fl.), Create hook-funktionen, och
+en eventuell framtida borttagning av hela `looksLikeTell()`-filtret
+om breddningen visar sig otillräcklig i praktiken.
+
+v1.0.78 → v1.0.79.
 
 ---
 

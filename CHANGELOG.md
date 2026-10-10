@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.79] - 2026-10-10
+
+### Fixed
+- Analyze's "show vs tell" check was discarding some of its own correct catches — a sanity filter on the model's output only recognized a short list of feeling-words, so lines like "he pushed the feelings aside" or "a sense of comfort settled over him" were silently dropped even when the model had already flagged them right. The filter now recognizes a much wider range of telling language.
+
 ## [1.0.78] - 2026-10-10
 
 ### Added

@@ -271,6 +271,38 @@ describe("parseChapterFeedback", () => {
     expect(items).toEqual([]);
   });
 
+  it("keeps telling language the original filter missed — a real tester comparison against Gemini found these", () => {
+    const text =
+      "Emma was the only constant in his life since the loss. He pushed the feelings aside, focusing on the present. A sense of comfort settled over him.";
+    const items = parseChapterFeedback(
+      JSON.stringify({
+        items: [
+          {
+            category: "show_vs_tell",
+            quote: "Emma was the only constant in his life since the loss.",
+            observation: "Names the relationship's significance instead of showing it."
+          },
+          {
+            category: "show_vs_tell",
+            quote: "He pushed the feelings aside, focusing on the present.",
+            observation: "Names the feeling and the suppression rather than showing either."
+          },
+          {
+            category: "show_vs_tell",
+            quote: "A sense of comfort settled over him.",
+            observation: "Names the comfort instead of showing it."
+          }
+        ]
+      }),
+      text
+    );
+    // The first still has no feeling-word for the filter to catch — a known, accepted gap (see looksLikeTell's comment).
+    expect(items.map((item) => item.quote)).toEqual([
+      "He pushed the feelings aside, focusing on the present.",
+      "A sense of comfort settled over him."
+    ]);
+  });
+
   it("caps the list at ten items", () => {
     const items = parseChapterFeedback(
       JSON.stringify({
