@@ -1,6 +1,7 @@
 export type PromptOperation =
   | "draft"
   | "recast"
+  | "polish"
   | "extend"
   | "elaborate"
   | "instruct"

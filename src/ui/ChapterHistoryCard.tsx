@@ -156,7 +156,8 @@ export function ChapterHistoryCard({
   );
 }
 
-function HistorySplit({
+/** Also used by PolishReviewCard — a before/after prose diff isn't specific to the revision list. */
+export function HistorySplit({
   hunks,
   empty,
   fromLabel,

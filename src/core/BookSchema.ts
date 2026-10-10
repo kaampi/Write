@@ -18,8 +18,56 @@ import { PlaceholderSchema } from "./placeholders";
 import { DarlingSchema } from "./darlings";
 import { MarkerConversionRuleSchema } from "./markerConversion";
 
-export const PROSE_HISTORY_OPS = ["draft", "recast", "extend", "elaborate", "rewrite", "beat", "restore", "format", "darling"] as const;
+export const PROSE_HISTORY_OPS = [
+  "draft",
+  "recast",
+  "extend",
+  "elaborate",
+  "rewrite",
+  "beat",
+  "restore",
+  "format",
+  "darling",
+  "polish"
+] as const;
 export type ProseHistoryOp = (typeof PROSE_HISTORY_OPS)[number];
+
+/**
+ * Default instructions for the Polish step (Settings → its own "Polish"
+ * section) — a whole-chapter cleanup pass, separate from Draft/Recast,
+ * that the author reviews in a diff before accepting (see
+ * PolishReviewCard.tsx). Mats wrote the original version of this prompt
+ * himself; kept close to his wording, with one addition: the note about
+ * trimming a fact's delivery rather than the fact itself, so an
+ * aggressive cut doesn't silently erase the only place a locked Story
+ * Bible detail was established. Book-level, not a hardcoded constant like
+ * RECAST_SYSTEM, because Mats asked for it to be editable per manuscript.
+ */
+export const DEFAULT_POLISH_PROMPT = `Act as a ruthless literary editor. Rewrite the provided scene to remove all AI writing habits and elevate the prose to high-end literary fiction standards.
+
+APPLY THESE SPECIFIC EDITORIAL CUTS AND CHANGES:
+
+1. CUT ALL EXPOSITORY INSERTS & RELATIONSHIP LABELS:
+   - Remove parenthetical explanations of backstory, dead relatives, or past trauma.
+   - Remove relationship labels when characters are introduced (e.g., cut "his longtime friend and chief engineer"). Let their roles and closeness show purely through dialogue and action.
+   - Trim how a locked Story Bible fact is delivered, never the fact itself — the information must still be recoverable from the scene, just not stated as a label.
+
+2. STRIP ALL EMOTION NOUNS & ADJECTIVES:
+   - Delete any words directly naming feelings (e.g., grief, unease, relief, tension, comfort, dread).
+   - Show physical reactions instead, or cut the line entirely.
+
+3. REPLACE VAGUE/ABSTRACT STATEMENTS WITH CONCRETE DETAILS:
+   - If a character notices "something wrong", "an anomaly", or says "look at this", replace the vague statement with a specific, tangible physical detail (e.g., an exact screen reading, a specific sound, a broken mechanical part, an unexpected flicker).
+
+4. ELIMINATE PURPLE PROSE AND AI CLICHÉS:
+   - Remove overused stock phrases (e.g., "racing heart", "fingers dancing/flying", "inky blackness", "creeping sense of unease", "heavy silence", "shadows dancing").
+   - Cut filler sentences that just describe scenery without driving the scene (e.g., "the endless void stretched before them").
+
+5. TRIM DIALOGUE & END SHARPLY:
+   - Make dialogue more clipped, realistic, and subtextual.
+   - Ensure the scene ends on a sharp physical action or a specific line of dialogue. Cut any final sentence that summarizes the mood or acts as a "Hollywood teaser".
+
+Maintain the core narrative beats, but execute them with precision and restraint. Do not invent new plot, characters, or facts. Return ONLY the edited text.`;
 
 export const ProseRevisionSchema = z.object({
   id: z.string().min(1),
@@ -248,6 +296,14 @@ export const BookSchema = z.object({
     .regex(/^#[0-9a-fA-F]{6}$/)
     .default("#2a2218"),
   /**
+   * Instructions for the Polish step — a whole-chapter cleanup pass the
+   * author reviews in a diff before accepting, separate from Draft/
+   * Recast. Editable per manuscript (Settings → Polish); defaults to
+   * Mats's own ruthless-editor prompt. Missing on older saves — the
+   * default keeps today's Polish behavior.
+   */
+  polish_prompt: z.string().default(DEFAULT_POLISH_PROMPT),
+  /**
    * Language the sentences are written in. Writing instruction, not a world fact.
    * Missing or empty on older saves — Draft infers from the manuscript.
    */
@@ -394,6 +450,7 @@ export function createBook(title: string): Book {
     body_font_weight: "regular",
     body_color_dark: "#f3eadc",
     body_color_light: "#2a2218",
+    polish_prompt: DEFAULT_POLISH_PROMPT,
     prose_language: "",
     brainstorm: "",
     brainstorm_notes: [],

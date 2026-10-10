@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.82] - 2026-10-10
+
+### Added
+- A new Polish step. Runs a cleanup pass over the whole chapter — cuts exposition inserts, emotion-naming, vague statements, purple prose, and tightens dialogue — then shows the original and the rewrite side by side with word-level highlighting before anything is kept. Accept or discard; nothing touches the chapter until you say so. The instructions Polish gives the model are editable per manuscript in Settings → Polish.
+
 ## [1.0.81] - 2026-10-10
 
 ### Fixed

@@ -96,6 +96,7 @@ import { BrainstormChatCard } from "./BrainstormChatCard";
 import { SettingsPanel } from "./SettingsPanel";
 import { ChapterFeedbackCard } from "./ChapterFeedbackCard";
 import { ChapterHistoryCard } from "./ChapterHistoryCard";
+import { PolishReviewCard } from "./PolishReviewCard";
 import { ChapterStartImageBanner } from "./ChapterStartImage";
 import { ContinuityWarning } from "./ContinuityWarning";
 import { PlaceholdersPanel } from "./PlaceholdersPanel";
@@ -1690,6 +1691,20 @@ export function Editor() {
                     {m.editor.draft}
                   </button>
                 )}
+                {busy === "polish" ? (
+                  <button type="button" onClick={store.stopDraft}>
+                    {m.common.stop}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    title={m.editor.polishTitle}
+                    onClick={() => void store.polishChapter()}
+                    disabled={busy !== null || !chapter.prose.trim()}
+                  >
+                    {m.editor.polish}
+                  </button>
+                )}
                 <button type="button" onClick={() => void store.extractChapter()} disabled={busy !== null}>
                   {busy === "extract" ? m.editor.extracting : m.editor.extract}
                 </button>
@@ -1857,6 +1872,15 @@ export function Editor() {
           liveProse={chapter.prose}
           onRestore={(revisionId) => void store.restoreChapterProse(revisionId)}
           onClose={() => setHistoryOpen(false)}
+        />
+      ) : null}
+      {store.polishDraft && store.polishDraft.chapterId === chapter.id ? (
+        <PolishReviewCard
+          original={store.polishDraft.original}
+          candidate={store.polishDraft.candidate}
+          busy={busy !== null}
+          onAccept={() => void store.acceptPolish()}
+          onDiscard={store.discardPolish}
         />
       ) : null}
       {settingsOpen ? (

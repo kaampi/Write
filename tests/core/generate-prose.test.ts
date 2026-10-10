@@ -11,6 +11,7 @@ import {
   formatStorySoFar,
   formatVoiceForPrompt,
   passageUserPrompt,
+  polishUserPrompt,
   recastSceneUserPrompt,
   recastUserPrompt,
   resolveVoice
@@ -658,6 +659,45 @@ describe("recastUserPrompt", () => {
     expect(prompt).toContain("Present tense throughout");
     expect(prompt).toContain("Recast the whole chapter");
     expect(prompt).toContain("3rd limited to Emma");
+  });
+});
+
+describe("polishUserPrompt", () => {
+  it("sends the current prose, Story Bible, and camera, with its own closing instruction", () => {
+    let book = { ...createBook("The Salt Road"), viewpoint: "Emma" };
+    book = updateChapter(book, book.chapters[0]!.id, {
+      tense: "present",
+      prose: "Emma locked the door and waited."
+    });
+    const prompt = polishUserPrompt(book, book.chapters[0]!);
+    expect(prompt).toContain("Emma locked the door and waited.");
+    expect(prompt).toContain("Present tense throughout");
+    expect(prompt).toContain("3rd limited to Emma");
+    expect(prompt).toContain("Apply the editorial instructions above to this chapter.");
+    expect(prompt).not.toContain("Recast the whole chapter");
+  });
+
+  it("includes locked Story Bible facts, so cuts can preserve them", () => {
+    let book = createBook("The Salt Road");
+    book = updateChapter(book, book.chapters[0]!.id, { prose: "Emma locked the door." });
+    book = {
+      ...book,
+      facts: [
+        {
+          id: "f1",
+          entity_ref: "emma",
+          entity_label: "Emma",
+          predicate: "core.trait" as const,
+          value: "Slow to trust",
+          sequence_index: 0,
+          status: "locked" as const,
+          source: "author" as const,
+          created_at: book.created_at
+        }
+      ]
+    };
+    const prompt = polishUserPrompt(book, book.chapters[0]!);
+    expect(prompt).toContain("Slow to trust");
   });
 });
 

@@ -298,6 +298,33 @@ export function recastUserPrompt(book: Book, chapter: Chapter): string {
   return parts.filter(Boolean).join("\n\n");
 }
 
+/**
+ * User message for the Polish step. Same shape as recastUserPrompt — the
+ * editorial instructions themselves live in the system message instead
+ * (book.polish_prompt, wrapped with the writing primer like every other
+ * writing job), so this only needs to supply the chapter's own grounding:
+ * Story Bible, Voice, Reader, language, and the current prose. Keeping
+ * Story Bible in the context (not just the prose) matters here
+ * specifically — Polish's whole job is cutting exposition and relationship
+ * labels, so the model needs to see which facts are locked to avoid
+ * silently erasing the only place one was established.
+ */
+export function polishUserPrompt(book: Book, chapter: Chapter): string {
+  const craft = resolveCraft(book, chapter);
+  const parts = [
+    `Manuscript: ${book.title}`,
+    formatCraftForDraft(craft, book),
+    formatVoiceForPrompt(resolveVoice(book, chapter), book.voice),
+    formatReaderForPrompt(resolveReader(book, chapter), book.reader_age),
+    formatLanguageForPrompt(book.prose_language),
+    `Story Bible:\n${formatBibleForPrompt(book)}`,
+    `Chapter ${chapter.sequence_index + 1}: ${chapter.title.trim() || "Untitled"}`,
+    `Current prose:\n${chapter.prose.trim()}`,
+    `Apply the editorial instructions above to this chapter. Keep the same story and the same point of view. Output only the edited prose.`
+  ];
+  return parts.filter(Boolean).join("\n\n");
+}
+
 export type PassageMode = "extend" | "elaborate" | "instruct" | "beat";
 
 export function passageUserPrompt(args: {

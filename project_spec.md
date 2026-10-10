@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.81
+Status: living document, v1.0.82
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3017,6 +3017,94 @@ analys-täckning (utöver filtret och nu den här buggen) — inte agerat
 på än, bara noterat.
 
 v1.0.80 → v1.0.81.
+
+---
+
+**Ändringslogg v1.0.81 → v1.0.82 (2026-10-10):** Mats, en idé att
+fundera på innan kod: en arbetsgång med Draft följt av en "städar-
+omgång" — en egen hård redaktörsprompt han skrev själv (ta bort
+expositionsinskott och relationsetiketter, strippa känsloord, byt ut
+vaga påståenden mot konkreta detaljer, ta bort klyschor/purple prose,
+knip åt dialogen) — som en egen knapp.
+
+**Research innan rekommendation.** Läste `recastChapter` i
+`BookStore.tsx` och fann att arkitekturen redan fanns, nästan
+komponent för komponent: helkapitel-omskrivning, Story Bible/Voice/
+Reader-kontext skickad med, sparad som en egen History-post. Mats två
+följdfrågor — måste prompten gå att redigera i Settings, och ska det
+bli en modal med original/omskrivning sida vid sida — visade sig
+redan lösta: Voice-fältet är exakt samma mönster (fritext sparat på
+boken, textarea i Settings), och History-panelen har redan en
+komponent (`HistorySplit`/`DiffHunks` i `ChapterHistoryCard.tsx`) med
+precis den sida-vid-sida-vyn, synkad scrollning och ord-för-ord-diff
+— byggd för att jämföra revisioner, återanvändbar rakt av för att
+jämföra Original mot ett Polish-förslag.
+
+**Design bekräftad innan kod:** egen "Polish"-knapp i kapitelfoten
+bredvid Draft (inte streamad direkt in i redigeraren som Draft/
+Recast, eftersom resultatet måste granskas först); genererar men
+skriver ingenting förrän författaren godkänner; en ny `op: "polish"`
+i historiken, skild från Recast.
+
+**Byggt:**
+- `BookSchema.ts`: `DEFAULT_POLISH_PROMPT` (Mats egen text, nästan
+  ordagrant — tillagd en enda rad: "Trim how a locked Story Bible
+  fact is delivered, never the fact itself", eftersom en aggressiv
+  klippning annars riskerar att radera den enda platsen ett låst
+  faktum nämns, samma resonemang som redan styrde Recasts egen
+  Story-Bible-kontext). Nytt fält `polish_prompt` (bok-nivå, inte en
+  hårdkodad konstant som `RECAST_SYSTEM`, eftersom Mats bad om att
+  redigera den per manus). `"polish"` tillagd i `PROSE_HISTORY_OPS`.
+- `generateProse.ts`: `polishUserPrompt(book, chapter)` — samma form
+  som `recastUserPrompt` (Story Bible, Voice, Reader, språk, aktuell
+  prosa), men de redaktionella instruktionerna själva ligger i
+  systemmeddelandet (`writingSystem(book.polish_prompt)`) istället
+  för en hårdkodad konstant.
+- `BookStore.tsx`: ny `polishChapter()` — till skillnad från Recast
+  som strömmar rakt in i redigeraren, väntar Polish in hela svaret
+  och lägger det i ett `polishDraft`-state (`{chapterId, original,
+  candidate}`) istället för att skriva nåt. `acceptPolish()` sparar
+  via `persistProseWrite` med `op: "polish"` (formatering/
+  platshållare rensas som vid Recast — ett helomskrivet kapitel gör
+  gamla positioner ogiltiga — men darlings behålls, samma
+  resonemang). `discardPolish()` rensar bara draften. Hittade och
+  fixade samma `recordPromptResponse`-mönster direkt (lärdomen från
+  v1.0.81 satt färskt) så Polish syns korrekt i View AI context från
+  start.
+- Nytt `PolishReviewCard.tsx` — återanvänder `HistorySplit` (nu
+  exporterad från `ChapterHistoryCard.tsx`) istället för att bygga en
+  andra diff-vy.
+- `SettingsPanel.tsx`: ny "Polish"-sektion, textarea bunden direkt
+  till `book.polish_prompt` via befintlig `onPatch` (enklare än
+  Writing-primerns eget localStorage-baserade flöde, eftersom det
+  här är ett vanligt bok-fält), med samma "Återställ till
+  standard"-knapp-mönster.
+- i18n: nya nycklar i alla tre språk (`editor.polish*`,
+  `polishReview.*`, `aiContext.operations.polish`,
+  `history.ops.polish`, `errors.polishEmpty`).
+
+**Verifierat live, på riktigt — inte bara UI-skelett.** Ingen lokal
+modell finns i den här sandlådan, så byggde en minimal Ollama-
+kompatibel mock-server (Node `http`, `/api/tags` + `/api/chat`,
+CORS-headers) på port 11434 för att faktiskt kunna klicka igenom hela
+flödet i en riktig webbläsare: skapade en bok, skrev prosa, öppnade
+Settings → Polish (textarea visar default-prompten, Återställ-knappen
+korrekt avstängd tills man ändrar), klickade Polish-knappen, fick
+upp "Review Polish"-modalen med verklig ord-för-ord-diff (skärmdump
+bekräftar både Original- och Polish-suggestion-kolumnerna), klickade
+"Keep this version", bekräftade att kapitlets prosa faktiskt byttes
+ut, och att History-panelen visar en ny "POLISH"-post med rätt
+tidsstämpel och den gamla texten bevarad för återställning. `tsc
+--noEmit` rent, 918 tester gröna (916 + 2 nya för `polishUserPrompt`
+i `generate-prose.test.ts`), `npm run build` grön.
+
+**Kvar, inte en del av detta steg:** per-scen Polish (ScenesPanel har
+egna Draft/Recast/Analyze-knappar per scen — Polish fick bara
+kapitelnivån den här gången), och eventuell integration med Darlings
+för text Polish faktiskt klipper bort (just nu räddas bara darlings
+som redan fanns innan Polish kördes, inte det Polish själv tar bort).
+
+v1.0.81 → v1.0.82.
 
 ---
 

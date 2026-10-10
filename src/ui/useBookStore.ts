@@ -26,6 +26,7 @@ export type Busy =
   | "ask-manuscript"
   | "ask-passage"
   | "recast"
+  | "polish"
   | "analyze"
   | "proofread"
   | "illustrate"
@@ -38,6 +39,9 @@ export type Busy =
   | "develop"
   | "summarize"
   | null;
+
+/** A Polish result waiting on the author's review (PolishReviewCard) — not yet written to the chapter. */
+export type PolishDraft = { chapterId: string; original: string; candidate: string };
 
 export type BookStoreValue = {
   summaries: BookSummary[];
@@ -56,6 +60,7 @@ export type BookStoreValue = {
   busy: Busy;
   error: string | null;
   chapterFeedback: ChapterFeedback | null;
+  polishDraft: PolishDraft | null;
   modelAsides: string[];
   lastPrompt: PromptDebugEntry | null;
   askManuscriptAnswer: AskManuscriptAnswer | null;
@@ -100,6 +105,9 @@ export type BookStoreValue = {
   setHistoryLimit: (n: number) => void;
   draftChapter: () => Promise<void>;
   recastChapter: () => Promise<void>;
+  polishChapter: () => Promise<boolean>;
+  acceptPolish: () => Promise<void>;
+  discardPolish: () => void;
   draftScene: (sceneId: string) => Promise<void>;
   recastScene: (sceneId: string) => Promise<void>;
   analyzeScene: (sceneId: string) => Promise<boolean>;

@@ -66,6 +66,7 @@ import {
   draftSceneUserPrompt,
   draftUserPrompt,
   passageUserPrompt,
+  polishUserPrompt,
   recastSceneUserPrompt,
   recastUserPrompt,
   resolveVoice
@@ -122,7 +123,7 @@ import {
 } from "@core/manuscriptBackup";
 import { forgetLastJsonBackup, recordLastJsonBackup } from "./jsonBackupStamp";
 import type { PromptDebugEntry, PromptDebugMessage, PromptOperation, PromptDebugTarget } from "./promptDebug";
-import { BookStoreContext, type BookStoreValue, type Busy } from "./useBookStore";
+import { BookStoreContext, type BookStoreValue, type Busy, type PolishDraft } from "./useBookStore";
 import { count, format, getMessages, STORE_ERROR } from "./i18n";
 
 const MODEL_KEY = "storybook-ai.model";
@@ -257,6 +258,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
   const [chapterFeedback, setChapterFeedback] = useState<ChapterFeedback | null>(null);
+  const [polishDraft, setPolishDraft] = useState<PolishDraft | null>(null);
   const [modelAsides, setModelAsides] = useState<string[]>([]);
   const [lastPrompt, setLastPrompt] = useState<PromptDebugEntry | null>(null);
   const [askManuscriptAnswer, setAskManuscriptAnswer] = useState<AskManuscriptAnswer | null>(null);
@@ -1725,6 +1727,86 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [busy, reviewModel, models.length, ollamaError]);
 
+  /**
+   * Generates a Polish candidate but does not write it anywhere — unlike
+   * Draft/Recast, which stream straight into the live chapter, Polish is
+   * an aggressive cut-and-rewrite pass the author needs to see before it
+   * touches their prose. The result sits in polishDraft until
+   * acceptPolish or discardPolish resolves it (PolishReviewCard shows the
+   * diff in between).
+   */
+  const polishChapter = useCallback(async () => {
+    const current = bookRef.current;
+    const id = chapterRef.current;
+    if (!current || !id || busy) return false;
+    const chapter = current.chapters.find((item) => item.id === id);
+    if (!chapter?.prose.trim()) {
+      setError(STORE_ERROR.polishEmpty);
+      return false;
+    }
+    if (models.length === 0) {
+      setError(ollamaError ?? STORE_ERROR.noModel);
+      return false;
+    }
+
+    abortRef.current?.abort();
+    const abort = new AbortController();
+    abortRef.current = abort;
+    setBusy("polish");
+    setError(null);
+    try {
+      const polishMessages: PromptDebugMessage[] = [
+        { role: "system", content: writingSystem(current.polish_prompt) },
+        { role: "user", content: polishUserPrompt(current, chapter) }
+      ];
+      recordPrompt("polish", model, polishMessages);
+      const raw = await makeProvider(model).chat({
+        messages: polishMessages,
+        temperature: 0.4,
+        maxTokens: 1800,
+        signal: abort.signal
+      });
+      recordPromptResponse(raw);
+      const candidate = manuscriptFromModel(raw, "");
+      if (!candidate.trim()) {
+        setError(STORE_ERROR.polishEmpty);
+        return false;
+      }
+      setPolishDraft({ chapterId: id, original: chapter.prose, candidate });
+      return true;
+    } catch (err) {
+      if ((err as { name?: string }).name === "AbortError") return false;
+      setError(ollamaHint(err));
+      return false;
+    } finally {
+      setBusy(null);
+      abortRef.current = null;
+    }
+  }, [busy, model, models.length, ollamaError]);
+
+  const acceptPolish = useCallback(async () => {
+    const draft = polishDraft;
+    const latest = bookRef.current;
+    if (!draft || !latest) return;
+    const chapter = latest.chapters.find((item) => item.id === draft.chapterId);
+    // A whole-chapter rewrite, same as Recast: old formatting/placeholder positions no
+    // longer line up with the new prose, so they're cleared rather than shifted. Darlings
+    // hold real authored text, not just a position, so they're kept through the rewrite.
+    await persistProseWrite(
+      latest,
+      draft.chapterId,
+      draft.candidate,
+      "polish",
+      draft.original,
+      [],
+      [],
+      chapter?.darlings ?? []
+    );
+    setPolishDraft(null);
+  }, [polishDraft, persistProseWrite]);
+
+  const discardPolish = useCallback(() => setPolishDraft(null), []);
+
   const generateIllustrationPrompt = useCallback(
     async (passage: string) => {
       const current = bookRef.current;
@@ -2690,6 +2772,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     busy,
     error,
     chapterFeedback,
+    polishDraft,
     modelAsides,
     lastPrompt,
     askManuscriptAnswer,
@@ -2734,6 +2817,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     setHistoryLimit,
     draftChapter,
     recastChapter,
+    polishChapter,
+    acceptPolish,
+    discardPolish,
     draftScene,
     recastScene,
     analyzeScene,

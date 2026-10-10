@@ -73,6 +73,11 @@ export const sv: Messages = {
     primerLede: "Den går ut före varje skrivjobb. Kapitlets regler följer ändå. Tom betyder bara de reglerna.",
     primerRestore: "Använd startprompten",
     primerAria: "Startprompt för {model}",
+    polishPromptLabel: "Polish-instruktioner",
+    polishPromptLede:
+      "Vad Polish-steget ber modellen göra — en hårdhänt redaktörsomgång som default. Ändra fritt efter vad som passar ditt manus; Polish visar alltid en diff att granska innan något sparas.",
+    polishPromptRestore: "Återställ till standard",
+    polishPromptAria: "Polish-instruktioner",
     review: "Granskning",
     noModels: "Inga lokala modeller hittades",
     backup: "Säkerhetskopia",
@@ -207,6 +212,8 @@ export const sv: Messages = {
     recast: "Omskriv prosan",
     recasting: "Omskriver…",
     recastTitle: "Omskriv kapitlet till nuvarande perspektiv, tempus och synvinkel",
+    polish: "Polish",
+    polishTitle: "Kör en städomgång på kapitlet, granska ändringarna innan de sparas",
     stop: "Stopp",
     brainstormChat: "Bolla idéer…",
     openSynopsis: "Öppna synopsis",
@@ -331,6 +338,7 @@ export const sv: Messages = {
     operations: {
       draft: "Skriv utkast",
       recast: "Recast",
+      polish: "Polish",
       extend: "Fortsätt",
       elaborate: "Utveckla",
       instruct: "Skriv om",
@@ -1520,6 +1528,7 @@ export const sv: Messages = {
     ops: {
       draft: "Utkast",
       recast: "Omskrivning",
+      polish: "Polish",
       extend: "Förläng",
       elaborate: "Utvidga",
       rewrite: "Skriv om",
@@ -1528,6 +1537,16 @@ export const sv: Messages = {
       format: "Formatering",
       darling: "Älskling"
     }
+  },
+  polishReview: {
+    title: "Granska Polish",
+    hint: "Modellens städomgång, inte sparad än. Jämför de två versionerna, godkänn eller förkasta.",
+    original: "Original",
+    candidate: "Polish-förslag",
+    originalHint: "Det du behåller om du förkastar",
+    candidateHint: "Det du får om du godkänner",
+    accept: "Behåll den här versionen",
+    discard: "Förkasta"
   },
   markerConvert: {
     nav: "Konvertera markeringar",
@@ -1558,6 +1577,7 @@ export const sv: Messages = {
     recastEmpty: "Skriv eller ta fram lite prosa innan du omskriver.",
     extractEmpty: "Skriv eller ta fram lite prosa innan du extraherar fakta.",
     analyzeEmpty: "Skriv eller ta fram lite prosa innan du analyserar kapitlet.",
+    polishEmpty: "Skriv eller ta fram lite prosa innan du putsar kapitlet.",
     extractorNone: "Extraktorn hittade inga uttalade fakta i det här kapitlet.",
     interviewExtractorNone: "Extraktorn hittade inga uttalade fakta i det här samtalet.",
     brainstormExtractorNone: "Extraktorn hittade inga uttalade fakta i den här lappen.",

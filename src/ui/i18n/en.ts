@@ -371,6 +371,11 @@ export const en = {
     primerLede: "This goes out before every writing job. The chapter rules still follow. Empty means those rules only.",
     primerRestore: "Use start prompt",
     primerAria: "Start prompt for {model}",
+    polishPromptLabel: "Polish instructions",
+    polishPromptLede:
+      "What the Polish step tells the model to do — a ruthless-editor cleanup pass by default. Edit this however suits your manuscript; Polish always shows a diff to review before anything is kept.",
+    polishPromptRestore: "Reset to default",
+    polishPromptAria: "Polish instructions",
     review: "Review",
     noModels: "No local models found",
     backup: "Backup",
@@ -505,6 +510,8 @@ export const en = {
     recast: "Recast prose",
     recasting: "Recasting…",
     recastTitle: "Rewrite this chapter to the current POV, tense, and viewpoint",
+    polish: "Polish",
+    polishTitle: "Run a cleanup pass over this chapter, then review the changes before they're kept",
     stop: "Stop",
     brainstormChat: "Talk it through…",
     openSynopsis: "Open synopsis",
@@ -629,6 +636,7 @@ export const en = {
     operations: {
       draft: "Draft",
       recast: "Recast",
+      polish: "Polish",
       extend: "Extend",
       elaborate: "Elaborate",
       instruct: "Rewrite",
@@ -1530,6 +1538,7 @@ export const en = {
     ops: {
       draft: "Draft",
       recast: "Recast",
+      polish: "Polish",
       extend: "Extend",
       elaborate: "Elaborate",
       rewrite: "Rewrite",
@@ -1538,6 +1547,16 @@ export const en = {
       format: "Formatting",
       darling: "Darling"
     }
+  },
+  polishReview: {
+    title: "Review Polish",
+    hint: "The model's cleanup pass, not yet kept. Compare the two versions, then accept or discard.",
+    original: "Original",
+    candidate: "Polish suggestion",
+    originalHint: "What you keep if you discard",
+    candidateHint: "What you get if you accept",
+    accept: "Keep this version",
+    discard: "Discard"
   },
   markerConvert: {
     nav: "Convert markers",
@@ -1568,6 +1587,7 @@ export const en = {
     recastEmpty: "Write or draft some prose before recasting the camera.",
     extractEmpty: "Write or draft some prose before extracting facts.",
     analyzeEmpty: "Write or draft some prose before analyzing the chapter.",
+    polishEmpty: "Write or draft some prose before polishing the chapter.",
     extractorNone: "Extractor found no stated facts in this chapter.",
     interviewExtractorNone: "Extractor found no stated facts in this conversation.",
     brainstormExtractorNone: "Extractor found no stated facts in this note.",

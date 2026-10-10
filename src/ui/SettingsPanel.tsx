@@ -13,7 +13,7 @@ import { MIN_PROSE_HISTORY_LIMIT, MAX_PROSE_HISTORY_LIMIT } from "@core/proseHis
 import { READER_CATEGORIES, READER_TIER_AGE, applyReaderAge, readerCategory, type ReaderCategory } from "@core/reader";
 import { findStyleByPromptText, ILLUSTRATION_ORIENTATIONS, type IllustrationStyle } from "@core/illustrationStyle";
 import { PUBLISH_FONTS } from "@core/publishFonts";
-import type { Book } from "@core/BookSchema";
+import { DEFAULT_POLISH_PROMPT, type Book } from "@core/BookSchema";
 import type { LlmEngine } from "@llm/provider";
 import { MIN_CONTEXT_WINDOW, MAX_CONTEXT_WINDOW } from "@llm/contextWindow";
 import {
@@ -477,6 +477,36 @@ export function SettingsPanel({
                   disabled={writingPrimer.trim() === DEFAULT_WRITING_PRIMER.trim()}
                 >
                   {m.editor.primerRestore}
+                </button>
+              </div>
+            </section>
+
+            <section className="settings-block">
+              <h2 className="settings-heading">{m.editor.polish}</h2>
+              <label className="voice-field">
+                <span className="field-label-row">
+                  {m.editor.polishPromptLabel}
+                  <HelpTip
+                    body={m.editor.polishPromptLede}
+                    ariaLabel={format(m.common.infoAbout, { field: m.editor.polishPromptLabel })}
+                  />
+                </span>
+                <textarea
+                  className="primer-field"
+                  value={book.polish_prompt}
+                  onChange={(event) => onPatch((current) => ({ ...current, polish_prompt: event.target.value }))}
+                  rows={10}
+                  aria-label={m.editor.polishPromptAria}
+                />
+              </label>
+              <div className="edit-actions">
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => onPatch((current) => ({ ...current, polish_prompt: DEFAULT_POLISH_PROMPT }))}
+                  disabled={book.polish_prompt.trim() === DEFAULT_POLISH_PROMPT.trim()}
+                >
+                  {m.editor.polishPromptRestore}
                 </button>
               </div>
             </section>
