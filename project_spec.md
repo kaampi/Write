@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.84
+Status: living document, v1.0.85
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3196,6 +3196,68 @@ scen, gränsborttagningsfallet, idempotens vid omkörning på en redan
 egen scen). 928 tester gröna, tsc rent.
 
 v1.0.83 → v1.0.84.
+
+---
+
+**Ändringslogg v1.0.84 → v1.0.85 (2026-10-11):** Feedback vidarebefordrad
+från en tester, två punkter. (1) Förslag: kollapsningsbara
+sammanfattningar i sidopanelen — kollade koden, Kapitel-panelen
+kollapsar redan automatiskt alla kapitel utom det öppna (`expandedBriefs`
+i Editor.tsx, sedan tidigare), så det är oklart om testaren menar
+något annat (Story Bible-panelen? en "fäll ihop alla"-knapp?) — svarade
+Mats med vad som redan finns och bad om förtydligande innan jag bygger
+fel sak. (2) Möjlig bugg, allvarligare: testaren körde PolyStrata (en
+OpenAI-kompatibel lokal servercloner, fler modeller än Ollama) —
+anslutningen funkade (`/v1/models` svarade), men Skriv utkast på ett
+nytt kapitel gav noll ord, ingen felruta, två identiska försök,
+testat med "thinking" både på låg nivå och avstängt. Strandens egen
+monitor visade dock ~900 utdata-tokens.
+
+**Root cause, hittad genom att läsa koden, inte gissa:** `draftChapter`
+(och Recast/Beat/alla andra strömmande operationer) använder
+`provider.streamChat()`, vars strömtolkning bara läser
+`choices[0].delta.content` (OpenAI-kompatibel) respektive
+`message.content` (Ollama). Den icke-strömmande `chat()`-varianten i
+samma filer har redan ett vakt-kast — "X returned an empty reply." —
+om svaret är tomt, men motsvarande vakt saknades helt i de strömmande
+varianterna: om servern avslutar strömmen (ett `done`/`finish_reason`,
+eller bara stänger anslutningen) utan att någonsin ha skickat en enda
+`text_delta`, avslutades generatorn tyst — exakt "inget fel, bara noll
+utdata". Troligaste förklaringen: en resonerande modell som PolyStrata
+serverar strömmar hela sitt svar som `reasoning_content` (eller
+motsvarande eget fält) snarare än `content`, oavsett "thinking"-läge på
+klientsidan — appen läser bara `content`, så allt försvinner tyst.
+
+**Fixen:** symmetrisk tom-ström-vakt i båda adaptrarna
+(`OpenAICompatibleLocalProvider.streamChat` i provider.ts,
+`OllamaProvider.streamCompletion` i ollama.ts) — håller koll på om
+någon `text_delta` någonsin mottagits; om strömmen avslutas (explicit
+`done`, eller bara att anslutningen stängs utan ett done alls) utan att
+det hänt, skickas ett `error`-chunk istället för att tyst returnera.
+Felmeddelandet namnger möjligheten rakt ut: "...check whether it
+streams its answer as reasoning content rather than the final reply —
+StoryBook AI only reads the final reply." Draft/Recast/etc:s befintliga
+felhantering (samma `ollamaHint`/felbanner som allt annat) fångar detta
+precis som vilket annat fel som helst — ingen ny kod behövdes i
+BookStore.tsx.
+
+Verifierat på två nivåer: (1) 4 nya enhetstester i provider.test.ts,
+inklusive ett som exakt återskapar testarens scenario (en mockad SSE-
+ström som bara skickar `reasoning_content`-deltor, aldrig `content`,
+sen `[DONE]`) för båda adaptrarna, plus fallet där anslutningen bara
+stängs utan ett done-meddelande alls. (2) Ett riktigt end-to-end-test:
+byggde en minimal mock-server som efterliknar exakt det testaren
+beskrev (`/v1/models` svarar, `/v1/chat/completions` strömmar bara
+`reasoning_content`), kopplade StoryBook AI mot den som "LM Studio /
+annan lokal server" i Settings, klickade Skriv utkast i en riktig
+körning — felbannern dök upp direkt: "local-openai:reasoning-model-
+fake finished without sending any reply text. If this is a
+reasoning/thinking model, check whether it streams its answer as
+reasoning content rather than the final reply...". Kapitlet förblev
+orört (0 ord, ingen trasig text skriven) istället för att tyst
+"lyckas" med ingenting. 930 tester gröna, tsc rent.
+
+v1.0.84 → v1.0.85.
 
 ---
 

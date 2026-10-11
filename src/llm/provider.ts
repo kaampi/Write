@@ -241,6 +241,7 @@ export class OpenAICompatibleLocalProvider implements LocalModelProvider {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
+    let receivedText = false;
     try {
       while (true) {
         const { done, value } = await reader.read();
@@ -250,15 +251,41 @@ export class OpenAICompatibleLocalProvider implements LocalModelProvider {
         buffer = lines.pop() ?? "";
         for (const line of lines) {
           const result = this.parseSseLine(line);
-          if (result) {
-            yield result;
-            if (result.type === "done" || result.type === "error") return;
+          if (!result) continue;
+          if (result.type === "text_delta") receivedText = true;
+          if (result.type === "done" && !receivedText) {
+            yield this.emptyStreamError();
+            return;
           }
+          yield result;
+          if (result.type === "done" || result.type === "error") return;
         }
       }
+      if (!receivedText) yield this.emptyStreamError();
     } finally {
       reader.releaseLock();
     }
+  }
+
+  /**
+   * The server closed the connection having streamed `finish_reason` (or
+   * nothing at all) without ever sending `delta.content` — the exact
+   * symptom a reasoning/thinking model produces when it streams its answer
+   * as `delta.reasoning_content` (or another field this app doesn't read)
+   * instead of `delta.content`: the server's own token counter shows real
+   * output, but every chunk here parses to nothing. Previously this ended
+   * the generator silently, so Draft/Recast/etc. quietly kept whatever
+   * prose was already there with no error at all — indistinguishable from
+   * "nothing changed" until a tester noticed the model clearly ran (their
+   * own server logged ~900 output tokens) but the editor stayed untouched.
+   * Mirrors the same guard `chat()` already has for a non-streaming empty
+   * reply, so both paths fail loudly instead of one of them failing silently.
+   */
+  private emptyStreamError(): StreamChunk {
+    return {
+      type: "error",
+      message: `${this.name} finished without sending any reply text. If this is a reasoning/thinking model, check whether it streams its answer as reasoning content rather than the final reply — StoryBook AI only reads the final reply.`
+    };
   }
 
   private parseSseLine(line: string): StreamChunk | undefined {

@@ -130,6 +130,30 @@ describe("OllamaModelProvider", () => {
     ]);
   });
 
+  it("streamChat() errors instead of finishing silently when the stream never carries any reply text", async () => {
+    // Regression: a reasoning/thinking model can stream its whole answer under a
+    // field this app doesn't read (its own server may show real output tokens)
+    // while every parsed line here is content-less — previously the generator
+    // just ended, so Draft/Recast quietly kept the chapter unchanged with no
+    // error at all. Covers both ways the stream can end emptyhanded: an
+    // explicit `done` line, and the body just closing with no `done` at all.
+    const doneOnly = new OllamaModelProvider({
+      model: "m",
+      fetchImpl: async () => streamResponse([`${JSON.stringify({ done: true, done_reason: "stop" })}\n`])
+    });
+    expect(await collect(doneOnly.streamChat({ messages: [{ role: "user", content: "hi" }] }))).toEqual([
+      { type: "error", message: expect.stringContaining("Ollama finished without sending any reply text") }
+    ]);
+
+    const closesWithoutDone = new OllamaModelProvider({
+      model: "m",
+      fetchImpl: async () => streamResponse([])
+    });
+    expect(await collect(closesWithoutDone.streamChat({ messages: [{ role: "user", content: "hi" }] }))).toEqual([
+      { type: "error", message: expect.stringContaining("Ollama finished without sending any reply text") }
+    ]);
+  });
+
   it("listModels() and healthCheck() reflect the Ollama /api/tags response", async () => {
     const provider = new OllamaModelProvider({
       model: "m",
@@ -208,6 +232,34 @@ describe("OpenAICompatibleLocalProvider", () => {
       { type: "text_delta", text: "foo" },
       { type: "text_delta", text: "bar" },
       { type: "done", finishReason: "stop" }
+    ]);
+  });
+
+  it("streamChat() errors instead of finishing silently when the stream never carries any reply text", async () => {
+    // Same regression as OllamaModelProvider above — the concrete report that
+    // prompted both guards: a reasoning model's server showed ~900 real output
+    // tokens, but the only field this app reads (`delta.content`) never
+    // appeared, so Draft used to just sit there with no error at all.
+    const reasoningOnly = new OpenAICompatibleLocalProvider({
+      model: "m",
+      baseUrl: "http://localhost:8080",
+      fetchImpl: async () =>
+        streamResponse([
+          `data: ${JSON.stringify({ choices: [{ delta: { reasoning_content: "thinking it over..." } }] })}\n\n`,
+          `data: [DONE]\n\n`
+        ])
+    });
+    expect(await collect(reasoningOnly.streamChat({ messages: [{ role: "user", content: "hi" }] }))).toEqual([
+      { type: "error", message: expect.stringContaining("finished without sending any reply text") }
+    ]);
+
+    const closesWithoutDone = new OpenAICompatibleLocalProvider({
+      model: "m",
+      baseUrl: "http://localhost:8080",
+      fetchImpl: async () => streamResponse([])
+    });
+    expect(await collect(closesWithoutDone.streamChat({ messages: [{ role: "user", content: "hi" }] }))).toEqual([
+      { type: "error", message: expect.stringContaining("finished without sending any reply text") }
     ]);
   });
 

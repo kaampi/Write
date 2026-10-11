@@ -122,6 +122,24 @@ export class OllamaProvider implements LLMProvider {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
+    let receivedText = false;
+    const emptyError = () => this.emptyStreamError();
+
+    // Shared per-line handling for both the streamed lines and the one
+    // trailing unterminated line left in `buffer` once the body closes —
+    // yields what the line actually parsed to (swapping a content-less
+    // "done" for the empty-stream error), and reports whether the caller
+    // should stop reading.
+    function* handle(result: StreamChunk | undefined): Generator<StreamChunk, boolean> {
+      if (!result) return false;
+      if (result.type === "text_delta") receivedText = true;
+      if (result.type === "done" && !receivedText) {
+        yield emptyError();
+        return true;
+      }
+      yield result;
+      return result.type === "done" || result.type === "error";
+    }
 
     try {
       while (true) {
@@ -131,20 +149,22 @@ export class OllamaProvider implements LLMProvider {
         const lines = buffer.split("\n");
         buffer = lines.pop() ?? "";
         for (const line of lines) {
-          const result = this.parseLine(line, request.maxTokens);
-          if (result) {
-            yield result;
-            if (result.type === "done" || result.type === "error") return;
-          }
+          if (yield* handle(this.parseLine(line, request.maxTokens))) return;
         }
       }
-      if (buffer.trim()) {
-        const result = this.parseLine(buffer, request.maxTokens);
-        if (result) yield result;
-      }
+      if (buffer.trim() && (yield* handle(this.parseLine(buffer, request.maxTokens)))) return;
+      if (!receivedText) yield emptyError();
     } finally {
       reader.releaseLock();
     }
+  }
+
+  /** Same empty-stream guard as `OpenAICompatibleLocalProvider` — see its own comment for why this matters. */
+  private emptyStreamError(): StreamChunk {
+    return {
+      type: "error",
+      message: "Ollama finished without sending any reply text. If this is a reasoning/thinking model, check whether it streams its answer as reasoning content rather than the final reply — StoryBook AI only reads the final reply."
+    };
   }
 
   private parseLine(line: string, maxTokens?: number): StreamChunk | undefined {

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.85] - 2026-10-11
+
+### Fixed
+- Draft, Recast, and every other streaming AI operation could finish without writing anything — no error, no change, nothing — when a model streamed its reply under a field the app doesn't read (a reasoning/thinking model sending `reasoning_content` instead of the final answer, for example). The server's own usage logs could show real output while the editor stayed untouched. Both local-server connections (Ollama and the OpenAI-compatible one used for LM Studio and similar servers) now raise a clear error instead of finishing silently when a streamed reply never carries any actual reply text.
+
 ## [1.0.84] - 2026-10-11
 
 ### Added
