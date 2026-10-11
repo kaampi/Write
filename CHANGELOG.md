@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.86] - 2026-10-11
+
+### Fixed
+- Find & Replace made the chapter's prose render as a garbled double-exposure of overlapping text. The real editable text and the highlight overlay that marks your matches were both fully visible and drawn on top of each other — not a data problem, chapter text was always intact underneath.
+
 ## [1.0.85] - 2026-10-11
 
 ### Fixed

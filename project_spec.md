@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.85
+Status: living document, v1.0.86
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3258,6 +3258,51 @@ orört (0 ord, ingen trasig text skriven) istället för att tyst
 "lyckas" med ingenting. 930 tester gröna, tsc rent.
 
 v1.0.84 → v1.0.85.
+
+---
+
+**Ändringslogg v1.0.85 → v1.0.86 (2026-10-11):** Mats skickade en
+skärmdump från kapitel 12: Find & replace öppen, sökt på "sta" (86 av
+105 träffar), och huvudtexten såg ut som en dubbelexponerad röra —
+två överlappande kopior av stycken, läsbara men omöjliga att skilja
+åt. Fråga: "Ser man alla historikens texter?"
+
+Svaret är nej — inget med History inblandat, och kapitlets lagrade
+prosa var aldrig skadad. Kollade `FindReplaceCard`/`findReplace.ts`
+först för säkerhets skull: `FindScope` har bara `"manuscript"` (med
+valfri `includeBrainstorm`), `"chapter"` eller andra ytor — ingen kod
+väg in i revisionshistoriken alls, så 86/105 var bara whole-manuscript-
+sökningens riktiga träffantal (chapter + 11 andra), inget larmande i
+sig.
+
+**Root cause**, hittad i CSS: `ProseCanvas` ritar highlight-overlayer
+(Rare/AI-tics/Story Bible-namn/Find) som en separat `.prose-rare`-
+div, absolut positionerad `inset:0` ovanpå den riktiga
+`contenteditable`:n, aria-hidden, med sin egen fullständiga kopia av
+texten plus `<mark>`-taggar. För att bara EN kopia ska synas gör en
+regel i styles.css den riktiga `.prose`-texten transparent när en
+overlay är aktiv: `.prose-wrap.is-rare .prose, .prose-wrap.is-tics
+.prose, .prose-wrap.is-facts .prose { color: transparent; ... }`.
+`is-find` — klassen `ProseCanvas` sätter på wrappern när Find &
+replace är öppen — stod inte med i den listan. Troligen en ren
+förbiseende när Find & replace-overlayen byggdes (dess egen `mark`-
+färgregel, `.prose-wrap.is-find .prose-rare mark`, finns och funkar
+fint) — glömde bara koppla in motsvarande "göm den riktiga texten"-
+regeln. Resultatet: så fort Find var öppen stod två fullständiga,
+oberoende radbrutna kopior av samma stycken synliga samtidigt —
+overlayn (med gula sök-markeringar) ovanpå, den riktiga
+redigeringstexten i normalt flöde under/bakom, båda fullt synliga,
+exakt det sönderplockade dubbla intrycket i skärmdumpen.
+
+**Fixen:** en rad — lade till `.prose-wrap.is-find .prose` i samma
+selector-lista. Verifierat live: skrev två stycken, öppnade Find,
+sökte "sta" — mätte `getComputedStyle` på den riktiga `.prose`-
+elementets `color` (nu `rgba(0,0,0,0)`, transparent som den ska vara)
+och skärmdump bekräftar normal, läsbar text med bara sökträffarna
+gulmarkerade, ingen dubblettrendering alls. 930 tester gröna, tsc rent,
+build grön.
+
+v1.0.85 → v1.0.86.
 
 ---
 

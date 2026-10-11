@@ -3409,9 +3409,23 @@ button:disabled {
   background: var(--fact-mark);
 }
 
+/*
+ * Whenever the .prose-rare overlay is showing marked-up text underneath
+ * (Rare words, AI tics, Story Bible names, or — missing here until a
+ * tester's screenshot caught it — Find) the real contenteditable's own
+ * text must turn transparent, or both layers render their own full copy
+ * of the prose on top of each other: the overlay is absolutely positioned
+ * at the body's top-left corner while the real .prose stays in normal
+ * flow, so two independently-wrapped copies of the same paragraphs show
+ * through at once, reading as garbled double-exposed text. is-find was
+ * left out when Find & Replace's highlight overlay was added, so opening
+ * Find (or typing into it) always looked like this — nothing to do with
+ * History; chapter.prose itself was never touched.
+ */
 .prose-wrap.is-rare .prose,
 .prose-wrap.is-tics .prose,
-.prose-wrap.is-facts .prose {
+.prose-wrap.is-facts .prose,
+.prose-wrap.is-find .prose {
   position: relative;
   z-index: 1;
   color: transparent;
