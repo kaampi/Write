@@ -1787,6 +1787,30 @@ härnäst), inte en uppföljning till Vikt-fältet i sig.
 
 ---
 
+### 43. Språkversioner av ett manus
+
+Mats: "Ett manus borde kunna ha språkversioner." Bara sparad, inget
+djupare samtal om den ännu.
+
+Idag är ett manus enspråkigt rakt igenom: `Book.prose_language` är ett
+enda fritextfält (Settings → Craft), och varje kapitels `prose` är en
+enda textsträng på det språket — inte en lista per språk. Samma för
+Synopsis, Brainstorm, kapitelbriefs. "Språkversioner" väcker en
+arkitekturfråga i stil med Serier (#29) eller Story Core (#31): är det
+flera PARALLELLA kapitel-prosasträngar under samma manus (samma Story
+Bible, samma struktur, en `prose`-karta språk→text istället för en
+sträng), eller en helt separat, länkad bok per språk (egen fil, eget
+`prose_language`, med Story Bible-fakta kopierade eller refererade
+från originalet)? Påverkar i så fall mer än bara `Chapter.prose` —
+NarrativeFact.value, entity_label, Synopsis, allt som är skriven text
+snarare än strukturell metadata skulle behöva samma fråga besvarad.
+
+**Status: inte påbörjad, bara idén sparad.** Inget beslut om
+datamodell än — kräver ett eget samtal, inte en snabb
+genomförbarhetskoll som #42.
+
+---
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**
