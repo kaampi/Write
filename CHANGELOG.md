@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.87] - 2026-10-11
+
+### Fixed
+- Pasting multi-paragraph text could leave stray blank lines behind — real, but only ever visual: the chapter's stored prose was always clean underneath, and the gaps vanished the moment any other edit (typing a `>` quote line, for instance) forced a redraw. Paste now builds one paragraph at a time instead of handing the browser the whole clipboard text at once, so the stray blank blocks never appear in the first place.
+
 ## [1.0.86] - 2026-10-11
 
 ### Fixed

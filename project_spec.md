@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.86
+Status: living document, v1.0.87
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3303,6 +3303,51 @@ gulmarkerade, ingen dubblettrendering alls. 930 tester gröna, tsc rent,
 build grön.
 
 v1.0.85 → v1.0.86.
+
+---
+
+**Ändringslogg v1.0.86 → v1.0.87 (2026-10-11):** Mats, en iakttagelse:
+"När jag klistrar in texter så får jag ofta dubbla radmatningar (är
+det markup som strular?) men om jag skapar en linje med > så tas
+dessa extra radbrytningar bort." Ingen gissning den här gången —
+spårade hela kedjan i koden innan jag sa något.
+
+**Mekaniken:** `onPaste` i ProseCanvas.tsx körde hela det inklistrade
+klippbordstexten genom ett enda `document.execCommand("insertText",
+false, pasted)`, inklusive inbäddade tomrader. Chrome bestämmer själv
+hur `\n`-tecken i en insertText-sträng blir DOM-struktur — det blev
+ett nytt block PER RAD, tomrader inräknat, inte ett block per riktigt
+stycke. `proseFromElement` (som läser DOM:en tillbaka till
+`chapter.prose`) filtrerar bort tomma block när den bygger strängen,
+så `value` blev alltid rätt — inget i den lagrade prosan var någonsin
+trasigt. Men de extra tomma `<p>`-elementen låg kvar SYNLIGT i den
+levande DOM:en som extra tomradsmellanrum, osynliga för
+reconcile-effektens "hoppa över omritning om texten redan matchar
+value"-genväg (en tom block ändrar ju ingenting den genvägen
+kollar) — ända tills en ANNAN redigering tvingade fram en full
+omritning från `value` (`area.innerHTML = htmlFromProse(value, ...)`,
+som bara någonsin bygger riktiga, icke-tomma stycken). Att skriva "> "
+för ett citat är precis en sådan trigger (`blockMarkupNeedsSync`
+upptäcker att stycket nu borde ha `prose-quote`-klassen) — därför
+försvann mellanrummen just då, exakt vad Mats observerade.
+
+**Fixen:** bygg inklistringen stycke för stycke istället — dela upp
+den inklistrade texten med `splitFlowParagraphs` (samma
+styckesmodell appen redan använder överallt annars, kollapsar
+godtyckligt många tomrader till exakt en styckesgräns) och infoga
+varje stycke för sig, med samma `insertParagraph` en riktig
+Enter-tryckning redan använder mellan dem. Skapar aldrig de tomma
+blocken överhuvudtaget, istället för att städa upp dem i efterhand.
+
+**Verifierat både före och efter**, inte bara efter: `git stash` på
+fixen, klistrade in tre stycken separerade med tomrad via en riktig
+`ClipboardEvent`/`DataTransfer` i en levande körning, räknade DOM-
+blocken direkt — 5 block (3 riktiga + 2 tomma `<p>`), precis Mats
+beskrivning. `git stash pop`, samma test igen — exakt 3 rena block,
+inga tomma alls. Skärmdump bekräftar normal, enkelradad text utan
+mellanrum. 930 tester gröna, tsc rent.
+
+v1.0.86 → v1.0.87.
 
 ---
 

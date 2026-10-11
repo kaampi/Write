@@ -702,7 +702,25 @@ export function ProseCanvas({
         onPaste={(event) => {
           event.preventDefault();
           const pasted = event.clipboardData.getData("text/plain");
-          document.execCommand("insertText", false, pasted);
+          // One insertText call with the whole clipboard text, embedded blank
+          // lines included, left Chrome to decide how to turn each "\n" into
+          // DOM structure — it makes a new block per line, blank lines
+          // included, rather than one block per real paragraph. Those stray
+          // empty blocks don't corrupt the stored prose (proseFromElement
+          // drops empty blocks when deriving it), but they DO sit in the live
+          // DOM as extra visible blank-line gaps, invisible to the reconcile
+          // effect's "skip rebuild when the derived text already matches
+          // value" fast path since an empty block changes nothing that path
+          // checks — until some unrelated edit forces a real rebuild (typing
+          // "> " for a quote, say) and the gaps vanish along with it. Insert
+          // paragraph-by-paragraph instead, the same `insertParagraph` an
+          // actual Enter keystroke uses between them (see the handler above),
+          // so paste only ever creates one block per real paragraph and never
+          // leaves an empty one behind to begin with.
+          for (const [index, paragraph] of splitFlowParagraphs(pasted).entries()) {
+            if (index > 0) document.execCommand("insertParagraph");
+            document.execCommand("insertText", false, paragraph);
+          }
         }}
       />
       {placeholdersEnabled && placeholderMarks.length > 0 ? (
