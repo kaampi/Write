@@ -103,6 +103,7 @@ export function ProseCanvas({
   darlings = [],
   onDarlingsChange,
   onCutToDarling,
+  onCreateScene,
   dropCapLines = 0,
   bodyFontStack,
   bodyFontWeight,
@@ -165,6 +166,8 @@ export function ProseCanvas({
   onDarlingsChange?: (next: Darling[]) => void;
   /** Cuts the selected span out to the Darlings tray — a history row, unlike an ordinary edit. Omitted hides the "Cut to Darlings" menu action entirely — Synopsis and Brainstorm have no use for it. */
   onCutToDarling?: (span: TextSpan) => void;
+  /** Carves the selected span out as its own scene. Omitted hides the "Create scene" menu action entirely — only chapter prose has scenes. */
+  onCreateScene?: (span: TextSpan) => void;
   /** Drop-cap ("anfang") height in lines for the opening letter of the first paragraph — 0 (the default) renders plainly. Chapter prose only; Synopsis and Brainstorm never pass this. */
   dropCapLines?: number;
   /** CSS font-family stack for the manuscript's chosen body typeface (Settings → Typography → Font). Omitted keeps the app's own default prose font — Synopsis and Brainstorm never pass this, only chapter prose does. */
@@ -332,7 +335,7 @@ export function ProseCanvas({
     const span = spanFromArea();
     if (span) {
       event.preventDefault();
-      const at = placeMenu(event, (onLift ? 210 : 168) + (onCutToDarling ? 36 : 0));
+      const at = placeMenu(event, (onLift ? 210 : 168) + (onCutToDarling ? 36 : 0) + (onCreateScene ? 36 : 0));
       setMenu({ kind: "rewrite", ...at, span });
       return;
     }
@@ -378,7 +381,9 @@ export function ProseCanvas({
     return () => abort.abort();
   }, [menu]);
 
-  function run(kind: "extend" | "elaborate" | "instruct" | "manual" | "lift" | "illustrate" | "ask" | "darling") {
+  function run(
+    kind: "extend" | "elaborate" | "instruct" | "manual" | "lift" | "illustrate" | "ask" | "darling" | "create-scene"
+  ) {
     if (!menu || menu.kind !== "rewrite") return;
     const span = menu.span;
     setMenu(null);
@@ -388,6 +393,10 @@ export function ProseCanvas({
     }
     if (kind === "darling") {
       onCutToDarling?.(span);
+      return;
+    }
+    if (kind === "create-scene") {
+      onCreateScene?.(span);
       return;
     }
     if (kind === "instruct") {
@@ -788,6 +797,11 @@ export function ProseCanvas({
           {onIllustrate ? (
             <button type="button" role="menuitem" onClick={() => run("illustrate")}>
               {m.canvas.illustrate}
+            </button>
+          ) : null}
+          {onCreateScene ? (
+            <button type="button" role="menuitem" onClick={() => run("create-scene")}>
+              {m.canvas.createScene}
             </button>
           ) : null}
           <button type="button" role="menuitem" onClick={() => run("manual")}>

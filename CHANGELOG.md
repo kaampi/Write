@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.84] - 2026-10-11
+
+### Added
+- A new way to split a chapter into scenes: mark the text that should be its own scene and pick "Create scene" from the selection menu, instead of hunting for the right paragraph in the Scenes panel's "Split in two…" list.
+
 ## [1.0.83] - 2026-10-10
 
 ### Fixed

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.83
+Status: living document, v1.0.84
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3130,6 +3130,72 @@ kortet), mot tidigare 36rem (576px). Skärmdump bekräftar båda
 kolumnerna nu har gott om plats, ingen ordvis radbrytning.
 
 v1.0.82 → v1.0.83.
+
+---
+
+**Ändringslogg v1.0.83 → v1.0.84 (2026-10-11):** Mats är igång med sitt
+första riktiga bokförsök (en full Synopsis + 8 kapiteldispositioner,
+ett sci-fi-drama om kapten Kael, ingenjören Emma, en hemlig
+reaktorextraktor och ett moraliskt uppoffringsslut) och ställde en rad
+praktiska "hur jobbar man"-frågor efter hand som han faktiskt
+använder appen: hur Synopsis/Brief/Story Bible-extraktion hänger ihop
+(extraktorn läser bara sin egen källa — Synopsis-knappen bara
+Synopsis, kapitlets knapp bara den brief:en, aldrig korsvis; hans
+förvirring kring "Source: Synopsis"-kort i Review-kön visade sig vara
+att kön är global för hela boken, inte scopead till vad man just
+extraherade — gamla, aldrig åtgärdade kandidater låg kvar och blandas
+in), hur man tar bort en scen (ingen egen "ta bort"-knapp — man slår
+ihop den med grannen via "Slå ihop med nästa", texten försvinner
+aldrig, bara gränsen), och hur man skapar en scen överhuvudtaget
+(upptäckte att "Dela i två…" bara ger en lista att välja styckesstart
+ur, ingen fri textmarkering).
+
+Det sista ledde till en riktig invändning: "Vore det inte logiskt att
+man väljer det man vill ha som en scen och sedan klickar på (typ)
+'Skapa scen från markering'?" — och efter att ha läst igenom hur
+markeringsmenyn redan fungerar (Extend/Elaborate/Instruct/Fråga/Lyft
+till synopsis/Klipp till älsklingar/Illustrationsprompt — samma
+meny, samma `TextSpan`-mekanik i ProseCanvas.tsx redan i produktion)
+var svaret: ja, bygg den, den passar rakt in.
+
+**Bygget:** `createSceneFromSpan(chapter, span)` i `bookScene.ts` —
+tar en rå teckenoffset-markering (samma `TextSpan` som Extend/
+Elaborate redan använder) och snäpper ut den till hela de stycken den
+rör vid (en scen kan bara börja vid en styckesgräns, aldrig mitt i en
+mening — exporterade `splitFlowParagraphsWithOffsets` ur
+proseFlow.ts, som redan fanns för formatteringsintervall, för att
+hitta styckenas offset). Återanvänder `splitSceneAtParagraph` två
+gånger (en split före markeringen, en efter) snarare än att bygga ny
+delningslogik — alla dess no-op-vakter (paragraf 0, bortom slutet,
+redan en scengräns) ärvs gratis.
+
+Lade till en detalj utöver det raka fallet: om markeringen korsar en
+redan existerande scengräns (t.ex. man markerar över två befintliga
+scener), tas den gamla gränsen mitt i bort — markeringen vinner alltid
+över vad som delade den innan, annars skulle "skapa EN scen från
+markeringen" tyst ljuga och ge två. Skrev ett regressionstest just för
+det fallet (fyra-styckes-kapitel, fyra existerande scener, markering
+över två mittenstycken — den inre gränsen försvinner, de yttre
+behåller sina id:n/titlar orört).
+
+Menyn: ny `onCreateScene`-prop i ProseCanvas.tsx, villkorlig
+menyrad "Create scene" (sv: "Skapa scen") precis som
+`onCutToDarling`/`onIllustrate` redan är villkorliga. Kopplad i
+Editor.tsx direkt via `store.patchBook` — inget nytt i BookStore
+behövdes, exakt samma mönster som `onPatch` på ScenesPanel redan
+använder för `chapter.scenes`.
+
+Verifierat live: skrev tre stycken i en riktig körning, markerade
+mittenstycket via `window.getSelection()`/Range (samma som en
+användares musdrag ger), högerklick, "Create scene" i menyn — Scener-
+panelen visade genast 3 scener med rätt innehåll vardera. 9 nya
+enhetstester i `book-scene.test.ts` (tom markering, ingen prosa än,
+markering som börjar vid kapitlets första stycke, markering till
+kapitlets slut, hela kapitlet markerat kollapsar tillbaka till en
+scen, gränsborttagningsfallet, idempotens vid omkörning på en redan
+egen scen). 928 tester gröna, tsc rent.
+
+v1.0.83 → v1.0.84.
 
 ---
 

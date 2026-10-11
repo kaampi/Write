@@ -1293,6 +1293,7 @@ export const en = {
     illustrate: "Illustration prompt…",
     lift: "Lift to synopsis",
     cutToDarling: "Cut to Darlings",
+    createScene: "Create scene",
     formatToolbar: "Formatting",
     bold: "Bold",
     italic: "Italic",

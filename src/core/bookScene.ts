@@ -1,7 +1,8 @@
 import { z } from "zod";
 import type { Chapter } from "./BookSchema";
 import { newId } from "./ids";
-import { splitFlowParagraphs } from "./proseFlow";
+import { splitFlowParagraphs, splitFlowParagraphsWithOffsets } from "./proseFlow";
+import { normalizeSpan, type TextSpan } from "./textSpan";
 
 /**
  * Where a chapter's scenes split, plus author-facing metadata for each.
@@ -101,6 +102,49 @@ export function splitSceneAtParagraph(chapter: Chapter, paragraphIndex: number):
   return [...base, { id: newId(), startParagraph: paragraphIndex }].sort(
     (a, b) => a.startParagraph - b.startParagraph
   );
+}
+
+/**
+ * Carves the paragraphs touched by `span` (a raw character-offset selection
+ * into `chapter.prose`, e.g. from the editor's selection menu) into their
+ * own scene. A scene can only begin at a paragraph boundary, so the
+ * selection snaps outward to cover every paragraph it touches, even
+ * partially. Any existing split that used to fall strictly inside that
+ * range is dropped — the selection always wins over whatever divided it
+ * before, so the result is always exactly one scene spanning the pick,
+ * never one still cut in two by an old boundary. No-ops on an empty
+ * selection or a chapter with no prose yet.
+ */
+export function createSceneFromSpan(chapter: Chapter, span: TextSpan): SceneMeta[] {
+  const { start, end } = normalizeSpan(span.start, span.end);
+  if (end <= start) return chapter.scenes ?? [];
+  const paragraphs = splitFlowParagraphsWithOffsets(chapter.prose);
+  if (paragraphs.length === 0) return chapter.scenes ?? [];
+
+  function paragraphAt(offset: number): number {
+    let index = 0;
+    for (let i = 0; i < paragraphs.length; i++) {
+      if (paragraphs[i]!.start <= offset) index = i;
+      else break;
+    }
+    return index;
+  }
+
+  const startParagraph = paragraphAt(start);
+  const splitAfter = paragraphAt(Math.max(start, end - 1)) + 1;
+  if (splitAfter <= startParagraph) return chapter.scenes ?? [];
+
+  const current = normalizeSceneMetas(chapter.scenes, paragraphs.length);
+  const base = current.length > 0 ? current : [{ id: `${chapter.id}:scene-1`, startParagraph: 0 }];
+  const trimmed = base.filter((meta) => meta.startParagraph <= startParagraph || meta.startParagraph >= splitAfter);
+  const withStart = trimmed.some((meta) => meta.startParagraph === startParagraph)
+    ? trimmed
+    : [...trimmed, { id: newId(), startParagraph }];
+  const withEnd =
+    splitAfter >= paragraphs.length || withStart.some((meta) => meta.startParagraph === splitAfter)
+      ? withStart
+      : [...withStart, { id: newId(), startParagraph: splitAfter }];
+  return withEnd.sort((a, b) => a.startParagraph - b.startParagraph);
 }
 
 /**

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   addScene,
   chapterScenes,
+  createSceneFromSpan,
   mergeSceneWithNext,
   replaceSceneProse,
   sceneIdRemovedByMerge,
@@ -15,6 +16,19 @@ function threeParagraphChapter(): Chapter {
     ...createChapter(0, "One"),
     prose: "The dock at dawn.\n\nA gull cried overhead.\n\nEmma untied the rope."
   };
+}
+
+function fourParagraphChapter(): Chapter {
+  return {
+    ...createChapter(0, "One"),
+    prose: "The dock at dawn.\n\nA gull cried overhead.\n\nEmma untied the rope.\n\nThe tide pulled free."
+  };
+}
+
+/** Finds `needle` in `chapter.prose` and returns a span covering it — stand-in for a real text selection. */
+function spanOf(chapter: Chapter, needle: string) {
+  const start = chapter.prose.indexOf(needle);
+  return { start, end: start + needle.length };
 }
 
 describe("chapterScenes", () => {
@@ -284,5 +298,98 @@ describe("replaceSceneProse", () => {
   it("no-ops on an unknown scene id", () => {
     const chapter: Chapter = { ...threeParagraphChapter(), scenes: [{ id: "s1", startParagraph: 0 }] };
     expect(replaceSceneProse(chapter, "ghost", "New text.")).toEqual({ prose: chapter.prose, scenes: chapter.scenes });
+  });
+});
+
+describe("createSceneFromSpan", () => {
+  it("snaps a selection inside one paragraph out to carve that whole paragraph into its own scene", () => {
+    const chapter = threeParagraphChapter();
+    const next = createSceneFromSpan(chapter, spanOf(chapter, "gull cried"));
+    expect(next.map((s) => s.startParagraph)).toEqual([0, 1, 2]);
+  });
+
+  it("snaps a selection spanning two paragraphs out to cover both in full", () => {
+    const chapter = threeParagraphChapter();
+    const span = { start: spanOf(chapter, "dock at dawn").start, end: spanOf(chapter, "gull cried").end };
+    const next = createSceneFromSpan(chapter, span);
+    expect(next.map((s) => s.startParagraph)).toEqual([0, 2]);
+  });
+
+  it("a selection starting at the very first paragraph just closes off scene 1's end, not a duplicate start at 0", () => {
+    const chapter = threeParagraphChapter();
+    const span = { start: 0, end: spanOf(chapter, "dock at dawn").end };
+    const next = createSceneFromSpan(chapter, span);
+    expect(next.map((s) => s.startParagraph)).toEqual([0, 1]);
+  });
+
+  it("a selection reaching the chapter's end just stops at the last paragraph, no empty trailing scene", () => {
+    const chapter = threeParagraphChapter();
+    const span = { start: spanOf(chapter, "gull cried").start, end: chapter.prose.length };
+    const next = createSceneFromSpan(chapter, span);
+    expect(next.map((s) => s.startParagraph)).toEqual([0, 1]);
+  });
+
+  it("selecting the whole chapter collapses every existing split back to one scene", () => {
+    const chapter: Chapter = {
+      ...threeParagraphChapter(),
+      scenes: [
+        { id: "s1", startParagraph: 0 },
+        { id: "s2", startParagraph: 1 },
+        { id: "s3", startParagraph: 2 }
+      ]
+    };
+    const next = createSceneFromSpan(chapter, { start: 0, end: chapter.prose.length });
+    expect(next).toEqual([{ id: "s1", startParagraph: 0 }]);
+  });
+
+  it("drops an existing split that falls strictly inside the new scene's range — the selection wins", () => {
+    const chapter: Chapter = {
+      ...fourParagraphChapter(),
+      scenes: [
+        { id: "s1", startParagraph: 0 },
+        { id: "s2", startParagraph: 1 },
+        { id: "s3", startParagraph: 2 },
+        { id: "s4", startParagraph: 3 }
+      ]
+    };
+    const span = { start: spanOf(chapter, "gull cried").start, end: spanOf(chapter, "untied the rope").end };
+    const next = createSceneFromSpan(chapter, span);
+    // s3 (paragraph 2) used to split the selected range in two — gone. s2's own
+    // start (1) and s4's own start (3) already bound the selection exactly, so
+    // both survive untouched, titles and all.
+    expect(next).toEqual([
+      { id: "s1", startParagraph: 0 },
+      { id: "s2", startParagraph: 1 },
+      { id: "s4", startParagraph: 3 }
+    ]);
+  });
+
+  it("re-running on a range that is already its own scene is a no-op", () => {
+    const chapter: Chapter = {
+      ...threeParagraphChapter(),
+      scenes: [
+        { id: "s1", startParagraph: 0 },
+        { id: "s2", startParagraph: 1 },
+        { id: "s3", startParagraph: 2 }
+      ]
+    };
+    const next = createSceneFromSpan(chapter, spanOf(chapter, "gull cried"));
+    expect(next).toEqual(chapter.scenes);
+  });
+
+  it("no-ops on an empty selection", () => {
+    const chapter = threeParagraphChapter();
+    expect(createSceneFromSpan(chapter, { start: 5, end: 5 })).toEqual(chapter.scenes ?? []);
+  });
+
+  it("no-ops on a chapter with no prose yet", () => {
+    const chapter = { ...createChapter(0, "One"), prose: "" };
+    expect(createSceneFromSpan(chapter, { start: 0, end: 0 })).toEqual(chapter.scenes ?? []);
+  });
+
+  it("materializes the implicit scene-1 before carving, for a chapter never split before", () => {
+    const chapter = threeParagraphChapter();
+    const next = createSceneFromSpan(chapter, spanOf(chapter, "gull cried"));
+    expect(next[0]).toEqual({ id: `${chapter.id}:scene-1`, startParagraph: 0 });
   });
 });

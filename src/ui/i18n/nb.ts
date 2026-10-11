@@ -1283,6 +1283,7 @@ export const nb: Messages = {
     illustrate: "Illustrasjonsprompt…",
     lift: "Løft til synopsis",
     cutToDarling: "Klipp til yndlinger",
+    createScene: "Lag scene",
     formatToolbar: "Formatering",
     bold: "Fet",
     italic: "Kursiv",

@@ -1283,6 +1283,7 @@ export const sv: Messages = {
     illustrate: "Illustrationsprompt…",
     lift: "Lyft till synopsis",
     cutToDarling: "Klipp till älsklingar",
+    createScene: "Skapa scen",
     formatToolbar: "Formatering",
     bold: "Fet",
     italic: "Kursiv",

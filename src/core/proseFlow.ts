@@ -18,7 +18,7 @@ export function splitFlowParagraphs(text: string): string[] {
  * which is the only kind of prose formatting ranges are ever computed
  * against.
  */
-function splitFlowParagraphsWithOffsets(text: string): { text: string; start: number }[] {
+export function splitFlowParagraphsWithOffsets(text: string): { text: string; start: number }[] {
   const normalized = text.replace(/\r\n/g, "\n");
   const result: { text: string; start: number }[] = [];
   let index = 0;

@@ -65,7 +65,7 @@ import {
 } from "@core/BookSchema";
 import { computeGoalPace, manuscriptWordCount } from "@core/writingGoal";
 import { moveStoryTimeOrder, timelineEntries } from "@core/timeline";
-import { chapterScenes } from "@core/bookScene";
+import { chapterScenes, createSceneFromSpan } from "@core/bookScene";
 import { timelineBoardColumns } from "@core/timelineBoard";
 import { knowledgeLeaksForChapter } from "@core/continuity";
 import { addPlotline, plotlinesForChapter, removePlotline, toggleChapterPlotline, updatePlotline } from "@core/plotlines";
@@ -1606,6 +1606,9 @@ export function Editor() {
               darlings={chapter.darlings ?? []}
               onDarlingsChange={(next) => void store.patchBook((current) => updateChapter(current, chapter.id, { darlings: next }))}
               onCutToDarling={(span) => void store.cutChapterDarling(span)}
+              onCreateScene={(span) =>
+                void store.patchBook((current) => updateChapter(current, chapter.id, { scenes: createSceneFromSpan(chapter, span) }))
+              }
               dropCapLines={book.drop_cap_lines}
               bodyFontStack={publishFontById(book.body_font).stack}
               bodyFontWeight={book.body_font_weight}
