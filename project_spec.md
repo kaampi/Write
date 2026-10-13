@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.95
+Status: living document, v1.0.96
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4000,6 +4000,67 @@ gick till Hem och bekräftade att hyllan grupperar källa + "SVENSKA"
 som en indragen syskon-rad under samma kort.
 
 v1.0.94 → v1.0.95.
+
+---
+
+**Ändringslogg v1.0.95 → v1.0.96 (2026-10-13):** #45-uppföljning —
+Mats klistrade in hela texten till "StoryScope: Investigating
+idiosyncrasies in AI fiction" (Univ. of Maryland/Google DeepMind,
+2026-08-10) efter att nätverksåtkomst till arxiv.org visat sig saknas
+i sandboxen. Sammanfattad direkt i roadmap-ideas.md #45 (se den
+posten för hela sammanfattningen och de fem AI-modellernas
+"fingeravtryck"). Mats följdfråga: "Kan man justera prompten som går
+till AI så att texten som genereras blir bättre?"
+
+Rapportens tre starkaste, mest kapitel-nivå-åtgärdsbara fynd (jämfört
+med mänsklig prosa i samma genre/premiss): AI-narration förklarar
+temat/moralen rakt ut (77% vs 52%); AI visar känslor nästan
+uteslutande kroppsligt istället för att namnge dem (81% vs 38%
+kroppsligt; människor namnger rakt av 29% vs 8%); AI löser scener
+oftare via huvudpersonens eget val eller tyst acceptans (69%/47% vs
+46%/27%), människor tillåter mer tvetydighet. Valde dessa tre
+specifikt eftersom de går att instruera BORT utan att först bygga om
+datamodellen eller manusstrukturen — till skillnad från t.ex.
+subplot-antal eller icke-linjär tidsstruktur, som är manus-nivå-beslut
+Draft inte kan fatta åt författaren per kapitel.
+
+**`generateProse.ts`:** ny rad tillagd sist i både `DRAFT_SYSTEM` och
+`PASSAGE_SYSTEM` (före slutraden om output-format): "Let the scene's/
+passage's meaning emerge from what happens, not from the narration
+explaining it... Name a character's feeling plainly sometimes, not
+only through bodily sensation and metaphor." `DRAFT_SYSTEM` fick
+dessutom en tredje mening om upplösning ("need not resolve neatly
+through the protagonist's own choice or quiet acceptance") — utelämnad
+ur `PASSAGE_SYSTEM` eftersom en enskild markerad passage eller infogad
+beat sällan ÄR scenens upplösning, så den meningen skulle sakna
+sammanhang där. `RECAST_SYSTEM` rörd INTE — dess hela jobb är att
+bevara exakt samma händelser/innebörd genom en kamera-/tempusändring,
+inte forma nya narrativa val.
+
+**`BookSchema.ts` (`DEFAULT_POLISH_PROMPT`):** en konkret motsägelse
+hittad och flaggad innan ändring — punkt 2 i Mats egen handskrivna
+Polish-prompt sa "STRIP ALL EMOTION NOUNS & ADJECTIVES... Show
+physical reactions instead", vilket rakt motsäger rapportens fynd
+(namngiven känsla är en MÄNSKLIG markör, kroppslig skildring en
+AI-markör) — den gamla absoluta regeln drev alltså varje Polish-körning
+ÅT det AI-hållet på just den axeln. Flaggat som en fråga ("medveten
+stilistisk smak eller ska jag mjuka upp den") snarare än tyst ändrat,
+eftersom det är Mats egen handskrivna text. Mats svarade: mjuka upp
+den. Punkt 2 omdöpt till "VARY HOW EMOTION IS CONVEYED" — behåller
+båda bullets struktur men vänder riktningen: namngiven känsla
+tillåten som "sometimes the sharper, more human choice", kroppslig
+ersättning bara när ordet är ren utfyllnad handlingen redan visar.
+Doc-kommentaren ovanför konstanten utökad till att förklara båda
+tilläggen (fakta-trimning sedan tidigare, nu även denna).
+
+**Verifierat:** tsc rent, 1002 tester gröna (oförändrat antal — inga
+tester asserterar den exakta prompttexten utöver några `toContain`/
+`toMatch`-kontroller som fortfarande matchar), `npm run build` grön.
+Ingen Playwright-verifiering — ren prompttextändring utan någon ny
+eller ändrad UI-yta att klicka igenom; AI-beteendet den styr går inte
+att verifiera utan en ansluten modell.
+
+v1.0.95 → v1.0.96.
 
 ---
 

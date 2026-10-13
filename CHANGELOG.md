@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.96] - 2026-10-13
+
+### Changed
+- Draft, Extend/Elaborate/Beat, and the default Polish instructions now push back on three AI storytelling habits documented in a recent research paper on narrative idiosyncrasies in AI fiction (roadmap-ideas.md #45): over-explaining a scene's theme or lesson through the narration, conveying emotion almost exclusively through physical sensation rather than ever naming it plainly, and resolving every scene neatly through the protagonist's own choice. Polish's instructions also stopped treating every emotion word as something to strip — naming a feeling plainly is sometimes the stronger choice, not always a tell.
+
 ## [1.0.95] - 2026-10-13
 
 ### Added

@@ -151,6 +151,7 @@ Reader, if set, is who the prose is for. It retunes diction and sentence length.
 If a prose language is given, write in that language. Otherwise write in the same language as the synopsis, the chapter brief, and any existing prose.
 A paragraph may be long if one motive holds it. Start a new paragraph when focus shifts between present action, background, and interior thought. Do not pack a physical beat, a life history, and a philosophy into the same breath.
 Write the scene as it is lived, not as a film treatment. Do not mention a camera, a shot, or a cut.
+Let the scene's meaning emerge from what happens, not from the narration explaining it — do not have the prose state the theme or the lesson outright. Name a character's feeling plainly sometimes, not only through bodily sensation and metaphor. A scene need not resolve neatly through the protagonist's own choice or quiet acceptance — leave room for circumstance, loose ends, or real ambiguity.
 No title, no chapter heading, no analysis — only the prose.`;
 
 export function draftUserPrompt(book: Book, chapter: Chapter): string {
@@ -273,6 +274,7 @@ If a prose language is given, write in that language. Otherwise write in the sam
 Reader, if set, retunes diction and sentence length. It does not rewrite the story into a children's book.
 A paragraph may be long if one motive holds it. Start a new paragraph when focus shifts between present action, background, and interior thought. Do not pack a physical beat, a life history, and a philosophy into the same breath.
 Write the scene as it is lived, not as a film treatment. Do not mention a camera, a shot, or a cut.
+Let the passage's meaning emerge from what happens, not from the narration explaining it — do not have the prose state the theme or the lesson outright. Name a character's feeling plainly sometimes, not only through bodily sensation and metaphor.
 The passage itself is prose only — no title, no heading, no Rewritten passage: label, no quotes around it, no commentary inside it.
 A trailing NOTE: line after a blank line is allowed for a rewrite (extend, elaborate, instruct) — never for an inserted beat, and never inside the passage.`;
 

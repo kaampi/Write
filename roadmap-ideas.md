@@ -1942,7 +1942,7 @@ v1.0.93 för hela bygget.
 
 ---
 
-### 45. "StoryScope: Investigating idiosyncrasies in AI fiction" — läst, inget beslut om byggåtgärd än
+### 45. "StoryScope: Investigating idiosyncrasies in AI fiction" ✅ åtgärd 1 byggd (v1.0.96)
 
 Mats (2026-10-13), mitt under research-samtalet om #43
 (språkversioner): "Innan vi sätter igång kan du lägga in på To-do att
@@ -2008,8 +2008,20 @@ genererade var för sig, inte modellerna StoryBook AI:s användare
 faktiskt kör lokalt) — lagt fram som diskussionsunderlag, inte ett
 förslag att köra på.
 
-**Status: läst och sammanfattat (2026-10-13). Väntar på Mats beslut**
-om något av ovanstående (eller inget) är värt att bygga.
+**Status: läst, sammanfattat, och åtgärd 1 byggd (v1.0.96).** Mats:
+"Kan man justera prompten som går till AI så att texten som genereras
+blir bättre?" — svarade ja och byggde. `DRAFT_SYSTEM`/`PASSAGE_SYSTEM`
+(generateProse.ts) fick en ny rad vardera som instruerar bort de tre
+starkaste, kapitel-nivå-åtgärdsbara AI-mönstren (överexplicit tematik,
+kroppslig-bara känsloskildring, protagonist-val-styrd upplösning).
+`DEFAULT_POLISH_PROMPT` (BookSchema.ts) punkt 2 mjukades också upp —
+den sa tidigare "strip all emotion nouns/adjectives", vilket rakt
+motsade rapportens fynd (namngiven känsla är en mänsklig markör, inte
+en AI-markör); flaggat som fråga innan ändring eftersom det var Mats
+egen handskrivna text, han svarade mjuka upp. Se project_spec.md
+v1.0.95 → v1.0.96 för fullt protokoll. Åtgärd 2 (en egen
+struktur-flagga i Proofread) inte byggd — kvar som öppen fråga om det
+ens är värt det.
 
 ---
 

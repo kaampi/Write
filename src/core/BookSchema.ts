@@ -38,11 +38,17 @@ export type ProseHistoryOp = (typeof PROSE_HISTORY_OPS)[number];
  * section) — a whole-chapter cleanup pass, separate from Draft/Recast,
  * that the author reviews in a diff before accepting (see
  * PolishReviewCard.tsx). Mats wrote the original version of this prompt
- * himself; kept close to his wording, with one addition: the note about
+ * himself; kept close to his wording, with two additions: the note about
  * trimming a fact's delivery rather than the fact itself, so an
  * aggressive cut doesn't silently erase the only place a locked Story
- * Bible detail was established. Book-level, not a hardcoded constant like
- * RECAST_SYSTEM, because Mats asked for it to be editable per manuscript.
+ * Bible detail was established; and rule 2 (originally "strip all emotion
+ * nouns and adjectives") softened to "vary how emotion is conveyed" —
+ * the StoryScope paper (roadmap-ideas.md #45) found human prose names a
+ * feeling plainly far more often than AI prose does (29% vs. 8%), while
+ * AI leans on bodily sensation almost exclusively (81% vs. 38%); the old
+ * absolute rule pushed every rewrite toward the AI-leaning pattern on
+ * this one axis. Book-level, not a hardcoded constant like RECAST_SYSTEM,
+ * because Mats asked for it to be editable per manuscript.
  */
 export const DEFAULT_POLISH_PROMPT = `Act as a ruthless literary editor. Rewrite the provided scene to remove all AI writing habits and elevate the prose to high-end literary fiction standards.
 
@@ -53,9 +59,9 @@ APPLY THESE SPECIFIC EDITORIAL CUTS AND CHANGES:
    - Remove relationship labels when characters are introduced (e.g., cut "his longtime friend and chief engineer"). Let their roles and closeness show purely through dialogue and action.
    - Trim how a locked Story Bible fact is delivered, never the fact itself — the information must still be recoverable from the scene, just not stated as a label.
 
-2. STRIP ALL EMOTION NOUNS & ADJECTIVES:
-   - Delete any words directly naming feelings (e.g., grief, unease, relief, tension, comfort, dread).
-   - Show physical reactions instead, or cut the line entirely.
+2. VARY HOW EMOTION IS CONVEYED:
+   - Don't strip every emotion noun or adjective automatically — naming a feeling plainly (grief, unease, relief, tension, comfort, dread) is sometimes the sharper, more human choice, not always a tell.
+   - Replace an emotion word with a physical reaction only when the label is pure padding the action already conveys. Don't force every feeling through the body.
 
 3. REPLACE VAGUE/ABSTRACT STATEMENTS WITH CONCRETE DETAILS:
    - If a character notices "something wrong", "an anomaly", or says "look at this", replace the vague statement with a specific, tangible physical detail (e.g., an exact screen reading, a specific sound, a broken mechanical part, an unexpected flicker).
