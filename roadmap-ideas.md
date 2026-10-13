@@ -44,7 +44,7 @@ inte en ensidig lista.
 | 26 | Dölj snabbstartskorten på förstasidan när en lokal AI redan är ansluten | ⬜ ej påbörjad — avvaktar, se nedan |
 | 27 | Riktig mobilanpassning av redigeringsytan | ⬜ ej påbörjad — avvaktar, se nedan |
 | 28 | Import från andra skrivverktyg — adapterarkitektur | ⬜ ej påbörjad — se nedan |
-| 29 | Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok | ⬜ ej påbörjad — se nedan |
+| 29 | Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok | ❌ struken — se nedan |
 | 30 | Extract facts känner inte igen namn-varianter av samma person | ⬜ ej påbörjad — se nedan |
 | 31 | Story Core — gemensam bas för StoryBook, Sandbox (RPG) och möjliga framtida appar | ⬜ 2.0-riktning, medvetet inte nu — se nedan |
 | 32 | Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text | ⬜ ej påbörjad — se nedan |
@@ -887,7 +887,13 @@ klassificering eller gren efter typ — det är fortfarande steg 2 och 3,
 inte påbörjade. Byggsteg 2–6 (SillyTavern m.fl. formatadaptrar) inte
 påbörjade.
 
-### 29. Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok
+### 29. ~~Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok~~ ❌ struken
+
+**Struken (2026-10-13).** Mats: det här täcks nu av ett eget, redan
+startat projekt (ComicbookAI — se ComicBook-AI-syskonprojektet,
+project_spec.md's StoryCore-avsnitt) istället för en funktion inom
+StoryBook AI självt. Behållen nedan som historik, inte som öppen idé.
+
 Författarens förslag: kunna markera att ett manus är del av en serie och
 fortsätter från en tidigare bok, och då ta med den bokens Lore/Story
 Bible istället för att börja om från noll.
@@ -983,6 +989,15 @@ att städa upp när det ändå händer. Ingetdera byggt än.
 
 **Status: idé nedskriven, inte påbörjad.** Inget kodat än (utöver
 v0.99.57-fixen ovan, som är en förutsättning, inte samma sak).
+
+**Återkommit (2026-10-13), oberoende av ovanstående.** Mats tog upp
+exakt samma behov från scratch, med ett nytt eget exempel: "Kapten
+Kael" vs. "Kaptenen" vs. "Kael" som tre separata kort för samma
+person. Samma funktion som väg 2 ovan — "slå ihop kort" — inte en ny
+idé, men ett tecken på att det är ett återkommande, konkret upplevt
+problem snarare än ett engångsfynd från Baskervilles hund. UX-planen
+från 2026-09-27 (markera flera kort → "Slå samman" → justerbart
+förslag → samma behåll båda/ersätt-mönster per predikat) står fast.
 
 ---
 
