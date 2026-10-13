@@ -2038,6 +2038,32 @@ ens är värt det.
 
 ---
 
+### 46. Förstasidan känns som en webbsida, inte som "programmet"
+
+Mats (2026-10-13): "Något jag vill titta på men som vi kan ta senare
+är startsidan. Den känns som en webbsida medans resten andas
+'program'..." Sparad, inget djupare samtal än — Mats tar upp det vid
+ett senare tillfälle.
+
+**Grov diagnos, inte en lösning** (grundat i `Home.tsx`/`styles.css`
+som redan lästs i den här sessionen, ingen ny efterforskning gjord):
+Förstasidan öppnar med ett centrerat hero-block (stor logga, en
+rubrik i två rader — "Write the prose." / "The Story Bible holds
+truth." — och en lede-paragraf under), samma uppbyggnad som en
+marknadsförings-/landningssida. Kapitel-editorn ett klick bort är
+raka motsatsen: täta verktygsfält, flera paneler sida vid sida, inga
+marknadsföringstexter alls. "Connect a local AI"/"Import backup"-
+knapparna på förstasidan är dessutom konturerade ("outline"-stil,
+text+kant, ingen fylld bakgrund) snarare än editorns solida knappar
+— ett till konkret, litet skäl till att de två ytorna känns som olika
+sorters mjukvara.
+
+**Status: sparad, inte diskuterad.** Inget beslut om vad som ska
+ändras — hero-blocket, knappstilen, bägge, eller något annat Mats
+syftar på. Väntar på ett eget samtal.
+
+---
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**
