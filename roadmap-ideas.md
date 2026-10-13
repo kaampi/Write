@@ -628,7 +628,7 @@ innehåll.
 
 ## Positionsmedvetna Story Bible-fakta (2026-09-25)
 
-### 24. Positionsmedvetna Story Bible-fakta — story-tid, inte lässordning
+### 24. Positionsmedvetna Story Bible-fakta — story-tid, inte lässordning ✅ byggd (v0.99.26)
 Författarens iakttagelse: manuset grenar via Continues from (kapitel 4
 fortsätter från kapitel 1, kapitel 7 fortsätter från kapitel 5) — det
 löper inte nödvändigtvis linjärt. En fakta låst "efter" kapitel 5
