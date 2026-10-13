@@ -1919,6 +1919,23 @@ v1.0.93 för hela bygget.
 
 ---
 
+### 45. Läsvärd rapport att titta på — sparad, inte granskad än
+
+Mats (2026-10-13), mitt under research-samtalet om #43
+(språkversioner): "Innan vi sätter igång kan du lägga in på To-do att
+vi ska titta på denna rapport https://arxiv.org/html/2604.03136v6 Vi
+tar det sen men lägg in det så att vi har den kvar."
+
+Kunde inte hämta sidan för en titel/sammanfattning här (ingen
+nätverksåtkomst till arxiv.org från den här miljön — `getaddrinfo
+ENOTFOUND arxiv.org`), så bara länken sparad rakt av. Okänt ännu om
+den är relevant för #43 specifikt eller ett separat ämne.
+
+**Status: sparad, inte granskad.** Mats läser/diskuterar den vid ett
+senare tillfälle.
+
+---
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**
