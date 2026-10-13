@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.92] - 2026-10-13
+
+### Fixed
+- Clicking into an existing block-quote line (the `>` convention) and pressing Enter near its start could corrupt it — the quote's hidden marker would duplicate, and the two paragraphs' text would run together with no break between them, intermittently and without an obvious trigger. The marker is invisible, so a click or Home near the start of a quote line had no way to land anywhere predictable relative to it; Enter there now always produces a clean new paragraph instead.
+
 ## [1.0.91] - 2026-10-13
 
 ### Added

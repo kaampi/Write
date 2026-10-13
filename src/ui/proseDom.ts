@@ -164,6 +164,79 @@ export function blockMarkupNeedsSync(root: HTMLElement): boolean {
   return false;
 }
 
+/**
+ * A collapsed caret can land INSIDE a `.prose-quote-marker` span — it's
+ * visually hidden (font-size: 0) but still ordinary editable text, so a
+ * click anywhere near the start of a quote line (nothing visible there to
+ * aim at) lands ambiguously between "before the marker" and "inside it",
+ * and Home does the same. Left there, pressing Enter makes the browser's
+ * own `insertParagraph` split badly — reproduced live (click near a quote
+ * line's start, then Home, then Enter): the marker ends up duplicated
+ * and the two paragraphs' text runs together with no break, a real loss
+ * of the split, not just a display glitch.
+ *
+ * Three narrower fixes were tried and live-verified wrong before this one:
+ * - `contenteditable="false"` on the marker stops a caret landing inside
+ *   it, but also broke ordinary live typing of a brand-new "> " line (the
+ *   mid-keystroke reconcile rebuild doesn't get on with a non-editable
+ *   span).
+ * - Moving the caret to just AFTER the marker (into the real quote text)
+ *   before calling insertParagraph: the browser's split then leaves the
+ *   marker behind in the FIRST half and doesn't carry a copy into the
+ *   second, so the quote's own class ends up on text that no longer
+ *   starts with ">" — caught, forcing another rebuild that silently
+ *   dropped the quote formatting instead of preserving it.
+ * - Moving the caret to the very START of the paragraph (before the
+ *   marker) and still calling insertParagraph: same merge-with-no-break
+ *   failure as the original bug. Splitting the DOM directly here instead
+ *   of asking execCommand to do it fixed the split itself, but left the
+ *   caret collapsed at that same "paragraph offset 0" boundary — which
+ *   turned out to be just as unstable for the NEXT keystroke as the
+ *   original click: typing landed back inside the marker, reproducing
+ *   the corruption one character later instead of immediately.
+ *
+ * What actually holds up: build the empty paragraph and leave the caret
+ * ON it, never back at the original paragraph's marker-adjacent boundary
+ * at all. Nothing about the marker is touched or re-approached, so there
+ * is no boundary left for a later keystroke to land ambiguously on.
+ * Diverges slightly from a plain paragraph's Enter-at-start behavior
+ * (which leaves the caret glued to the pushed-down text, not the new
+ * blank line) — an acceptable, arguably more useful difference for this
+ * one case, since a click near a quote's invisible start is usually an
+ * author about to write a new paragraph before it, not resume the quote
+ * itself. Called from the Enter handler before it runs insertParagraph;
+ * a no-op whenever the caret isn't inside a marker, so normal Enter
+ * elsewhere is untouched.
+ */
+export function escapeQuoteMarkerCaret(): boolean {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || !selection.isCollapsed) return false;
+  const range = selection.getRangeAt(0);
+  const node = range.startContainer;
+  const element = node instanceof Element ? node : node.parentElement;
+  const marker = element?.closest(".prose-quote-marker");
+  const block = marker?.parentElement;
+  if (!marker || !block || !block.parentElement) return false;
+  const empty = document.createElement(block.tagName);
+  const lineBreak = document.createElement("br");
+  empty.appendChild(lineBreak);
+  block.parentElement.insertBefore(empty, block);
+  const next = new Range();
+  next.setStartBefore(lineBreak);
+  next.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(next);
+  // A plain DOM mutation (insertBefore), unlike execCommand, fires no
+  // native `input` event — ProseCanvas's onInput={emitProse} is the only
+  // thing that reads this change back into `value`, so without this the
+  // split was invisible to React: the next real keystroke's reconcile
+  // effect saw its own (correct, post-split) DOM disagree with the still-
+  // stale `value` and rebuilt right over it, silently undoing the split.
+  const root = block.closest('[contenteditable="true"]');
+  root?.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  return true;
+}
+
 function textOffsetIn(block: HTMLElement, target: Node, targetOffset: number): number {
   if (target === block) {
     return targetOffset <= 0 ? 0 : (block.textContent ?? "").length;

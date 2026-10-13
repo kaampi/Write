@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.91
+Status: living document, v1.0.92
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3643,6 +3643,94 @@ faktiskt skapas utan att kasta — det visuella är redan verifierat
 separat ovan). 960 tester gröna, tsc rent, build grön.
 
 v1.0.90 → v1.0.91.
+
+---
+
+**Ändringslogg v1.0.91 → v1.0.92 (2026-10-13):** Mats, efter att ha
+testat v1.0.91: "ibland funkar inte > (ofta men inte ibland, jag har
+inte hittat något mönster och ingen work-around)." Ingen reproducerbar
+beskrivning att gå efter, så byggde flera Playwright-repro-skript och
+provade olika realistiska redigeringsmönster tills en faktiskt visade
+buggen, istället för att gissa i koden.
+
+**Reproducerad:** blixtsnabb skrivning rakt av fungerade perfekt i
+alla varianter (delay=0, fem citat i rad, mitt i manuset via
+tangentbord). Felet visade sig först när jag simulerade hur en
+författare FAKTISKT redigerar en redan skriven citatrad — klickade
+nära början av en befintlig `>`-rad (ingenting synligt där att sikta
+på, markören "> " är dold via `font-size: 0`), tryckte Home, tryckte
+Enter. Resultatet: markören dubblerades och de två styckenas text
+flöt ihop utan brytning — en riktig förlust av delningen (och delar
+av författarens text), inte bara ett visuellt glapp.
+
+**Rotorsak:** markörens span är fortfarande vanlig redigerbar text
+(bara visuellt dold), så webbläsaren har inget sätt att veta att en
+klick-position "precis innan" den är något annat än en position
+"inuti" den — och om markören lämnar insättningspunkten där, splittar
+webbläsarens egen `insertParagraph` dåligt.
+
+**Tre smalare försök, alla levande-verifierade fel innan den som
+höll:**
+1. `contenteditable="false"` på markör-spannet — stoppar markören
+   från att hamna inuti, men bröt helt vanlig skrivning av en
+   NY "> "-rad (mitt-i-tangenttryckning-ombyggnaden kommer inte
+   överens med ett icke-redigerbart span).
+2. Flytta insättningspunkten till precis EFTER markören innan
+   `insertParagraph` körs — webbläsarens delning lämnar då markören
+   kvar i FÖRSTA halvan och kopierar den inte till den andra, så
+   `.prose-quote`-klassen hamnar på text som inte längre börjar med
+   ">" — fångat av synkroniseringslogiken, som tvingade fram en NY
+   ombyggnad som tyst tappade citatformateringen istället för att
+   bevara den.
+3. Flytta insättningspunkten till styckets absoluta BÖRJAN (innan
+   markören) och fortfarande låta `insertParagraph` köra — samma
+   ihopflytande fel som ursprungsbuggen. Att själv bygga om DOM:en
+   istället för att be `execCommand` göra det fixade själva
+   delningen, men insättningspunkten hamnade kvar på exakt samma
+   "stycke-offset 0"-gräns som visade sig lika instabil för NÄSTA
+   tangenttryckning som den ursprungliga klicken — skrivning hamnade
+   tillbaka inuti markören, samma korruption en bokstav försenad.
+
+**Det som faktiskt höll:** bygg det tomma nya stycket själv (samma
+form som `blockMarkupNeedsSync` redan behandlar som en vanlig
+nyss-delad tom block) och lämna insättningspunkten PÅ det — rör aldrig
+vid eller närmar sig markörens gräns alls, så det finns ingen gräns
+kvar för en senare tangenttryckning att hamna tvetydigt på. Avviker
+lite från ett vanligt styckes Enter-vid-start-beteende (som lämnar
+insättningspunkten kvar vid den nedflyttade texten, inte den nya
+tomma raden) — en rimlig, snarare mer användbar skillnad här, eftersom
+en klick nära en citatrads osynliga start oftast betyder att
+författaren är på väg att skriva ett nytt stycke FÖRE den, inte
+återuppta citatet självt.
+
+Eftersom den manuella DOM-ombyggnaden (till skillnad från
+`execCommand`) inte triggar en nativ `input`-händelse, skickas en
+syntetisk sådan explicit efteråt — annars såg nästa riktiga
+tangenttrycknings synk-effekt sin egen (korrekta) DOM vara oense med
+det fortfarande gamla `value`, och byggde om rakt över den, vilket
+tyst upphävde delningen.
+
+**Verifierat:** fem separata Playwright-repro-skript (blixtsnabb
+skrivning i flera varianter, tangentbord-navigering via Ctrl+Home,
+klick+Home+Enter på en befintlig citatrad, steg-för-steg-spårning av
+varje mellanliggande DOM-tillstånd) — alla visar nu rent, korrekt
+resultat: två separata, korrekt formade citatstycken istället för
+ihopflutna/dubblerade. `window.getSelection()`/Range-API:erna som
+behövs för att enhetstesta detta kräver en riktig DOM (`vitest`-miljön
+är `node`, inte `jsdom`, i det här projektet) — litar på den levande
+Playwright-verifieringen istället, samma mönster som resten av
+`proseDom.ts`/`ProseCanvas.tsx` redan gör. 960 tester gröna
+(oförändrat — ren DOM-redigeringslogik, inget nytt att testa i
+`core/`), tsc rent, build grön.
+
+**Mats andra fråga, HR "blev väldigt kort":** inte en bugg — den
+korta linjen (`.prose-hr`, ~3.5rem) är och har alltid varit
+standardutseendet, oförändrat av v1.0.91:s nya scenbrytarstilar.
+Svarade separat i chatten att om han vill ha den längre/mer
+dekorativ finns nu fyra alternativ i Settings → Typography →
+Scene break.
+
+v1.0.91 → v1.0.92.
 
 ---
 

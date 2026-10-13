@@ -27,6 +27,7 @@ import { findMarksByParagraph, type FindFlags } from "@core/findReplace";
 import {
   blockMarkupNeedsSync,
   currentCaretOffset,
+  escapeQuoteMarkerCaret,
   formattingFromElement,
   isCaretAtEnd,
   offsetFromPoint,
@@ -707,7 +708,7 @@ export function ProseCanvas({
           }
           if (event.key !== "Enter" || event.shiftKey) return;
           event.preventDefault();
-          document.execCommand("insertParagraph");
+          if (!escapeQuoteMarkerCaret()) document.execCommand("insertParagraph");
         }}
         onPaste={(event) => {
           event.preventDefault();
