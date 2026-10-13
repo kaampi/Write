@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.87
+Status: living document, v1.0.88
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3348,6 +3348,51 @@ inga tomma alls. Skärmdump bekräftar normal, enkelradad text utan
 mellanrum. 930 tester gröna, tsc rent.
 
 v1.0.86 → v1.0.87.
+
+---
+
+**Ändringslogg v1.0.87 → v1.0.88 (2026-10-13):** Mats bad om en
+genomgång av hela roadmap-idéns öppna läge ("Vad ligger på vår todo
+och vad anser du är rimligt att påbörja?"). Gick igenom tabellen och
+varje punkts egen statusrad (de stämmer inte alltid överens — några
+rubriker saknar ✅ trots att tabellen säger byggd, t.ex. #24/#33/#34 —
+litade på statusraderna, inte bara rubrikerna). Rekommenderade #39
+(varna om öppna platshållare innan Korrekturläsning) som bästa
+startpunkt: minst risk, redan fullt scoped ner till filnamn och
+funktion, ingen öppen designfråga.
+
+Mats två tillägg innan vi satte igång: (1) stryk #29 (Serier) — täcks
+nu av ett eget startat projekt, ComicbookAI, inte längre aktuellt
+inom StoryBook AI. Markerad struken i tabellen och i sin egen sektion
+(behållen som historik, inte borttagen — i linje med dokumentets egen
+regel att bevara idéer). (2) Tog upp #30 (slå ihop Story Bible-kort
+för samma person under olika namn) på nytt, oberoende, med ett eget
+exempel — "Kapten Kael" / "Kaptenen" / "Kael" som tre separata kort.
+Exakt samma funktion som redan fanns designad i detalj sedan ett
+tidigare samtal (2026-09-27): markera flera kort → "Slå samman" → ett
+justerbart förslag innan det låses. La till en notering om att det
+återkom oberoende — tecken på ett återkommande problem, inte ett
+engångsfynd.
+
+**Byggde #39.** `ProofreadSetupCard.tsx` fick en ny `chapters`-prop
+(samma lösa form `collectPlaceholders` redan tar), räknar öppna
+platshållare via `collectPlaceholders` och visar en icke-blockerande
+rad ovanför Starta-knappen — texten byter mellan "i det här kapitlet"
+och "i manuset" beroende på vilken Omfattning-radio som är vald,
+live, utan att behöva en ny prop. Återanvände `count()`-
+pluraliseringshjälparen (samma mönster som `PlaceholdersPanel`
+redan använder) istället för att uppfinna en ny. Ingen ny
+BookStore-logik behövdes — `chapters` fanns redan tillgänglig i
+Editor.tsx där kortet renderas.
+
+Verifierat live: skapade ett kapitel, lade till en platshållare via
+högerklicksmenyn ("Drop a placeholder…"), öppnade Korrekturläsning —
+varningen "1 open placeholder note across the manuscript…" syntes
+direkt ovanför Starta-knappen, bytte korrekt till "...in this
+chapter…" när Omfattning växlades till det öppna kapitlet. 930 tester
+gröna, tsc rent, build grön.
+
+v1.0.87 → v1.0.88.
 
 ---
 

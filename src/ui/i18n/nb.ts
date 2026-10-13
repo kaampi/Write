@@ -1065,6 +1065,14 @@ export const nb: Messages = {
     setupScopeManuscript: "Hele manuset",
     setupScopeChapter: "Bare \"{chapter}\" (det åpne kapitlet)",
     setupScopeChapterHint: "Gjelder bare Grammatikk og Faktasjekk — de eneste to stegene som skalerer med antall kapitler. De andre sammenligner alltid mellom kapitler, så de kjøres over hele manuset uansett.",
+    openPlaceholdersChapter: {
+      one: "{count} åpen plassholder-notat i dette kapitlet — lett å kjøre korrekturlesing og glemme at den fortsatt er der.",
+      other: "{count} åpne plassholder-notater i dette kapitlet — lett å kjøre korrekturlesing og glemme at de fortsatt er der."
+    },
+    openPlaceholdersManuscript: {
+      one: "{count} åpen plassholder-notat i manuset — lett å kjøre korrekturlesing og glemme at den fortsatt er der.",
+      other: "{count} åpne plassholder-notater i manuset — lett å kjøre korrekturlesing og glemme at de fortsatt er der."
+    },
     setupStart: "Start korrekturlesing",
     setupNothingSelected: "Velg minst én ting å kontrollere."
   },

@@ -1065,6 +1065,14 @@ export const sv: Messages = {
     setupScopeManuscript: "Hela manuset",
     setupScopeChapter: "Bara \"{chapter}\" (det öppna kapitlet)",
     setupScopeChapterHint: "Gäller bara Grammatik och Faktakontroll — de är de enda två stegen som skalar med antal kapitel. De andra jämför alltid mellan kapitel, så de körs över hela manuset oavsett.",
+    openPlaceholdersChapter: {
+      one: "{count} öppen platshållar-not i det här kapitlet — lätt att köra korrekturläsning och glömma att den finns kvar.",
+      other: "{count} öppna platshållar-noter i det här kapitlet — lätt att köra korrekturläsning och glömma att de finns kvar."
+    },
+    openPlaceholdersManuscript: {
+      one: "{count} öppen platshållar-not i manuset — lätt att köra korrekturläsning och glömma att den finns kvar.",
+      other: "{count} öppna platshållar-noter i manuset — lätt att köra korrekturläsning och glömma att de finns kvar."
+    },
     setupStart: "Starta korrekturläsning",
     setupNothingSelected: "Välj minst en sak att kontrollera."
   },

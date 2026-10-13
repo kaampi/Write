@@ -1807,6 +1807,7 @@ export function Editor() {
       {proofreadOpen && proofreadSetupOpen ? (
         <ProofreadSetupCard
           chapter={{ id: chapter.id, title: chapter.title.trim() || m.editor.untitled }}
+          chapters={chapters}
           onStart={(options) => {
             setProofreadSetupOpen(false);
             void store.startProofread({ restart: true, ...options });

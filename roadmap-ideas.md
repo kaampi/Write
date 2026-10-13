@@ -1641,7 +1641,7 @@ uppdaterad tooltip-text för `position_override`-knappen i
 
 ---
 
-### 39. Korrekturläsning: varna om öppna platshållare innan körning
+### 39. Korrekturläsning: varna om öppna platshållare innan körning ✅ byggd (v1.0.88)
 
 Mats observation: om man har satt platshållare (post-it-lappar på en
 textposition, `Chapter.placeholders`) så borde Korrekturläsning
@@ -1665,8 +1665,10 @@ påminnelse, inte ett hinder) — platshållare är medvetet designade att
 aldrig påverka vad som skickas till modellen, så det finns ingen
 teknisk anledning att hindra körningen.
 
-**Status: inte påbörjad.** Mats bad att spara idén här istället för
-att bygga direkt.
+**Status: byggd (v1.0.88).** `ProofreadSetupCard.tsx` räknar öppna
+platshållare via `collectPlaceholders` och visar en icke-blockerande
+rad ovanför Starta-knappen, texten följer vald Omfattning (kapitel/
+manus) live.
 
 ---
 

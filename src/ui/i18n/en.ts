@@ -1075,6 +1075,14 @@ export const en = {
     setupScopeManuscript: "Whole manuscript",
     setupScopeChapter: "Just \"{chapter}\" (the open chapter)",
     setupScopeChapterHint: "Only affects Grammar and Fact-check — the only two stages that scale with chapter count. The others always compare chapters to each other, so they run over the whole manuscript regardless.",
+    openPlaceholdersChapter: {
+      one: "{count} open placeholder note in this chapter — easy to run proofreading and forget it's still there.",
+      other: "{count} open placeholder notes in this chapter — easy to run proofreading and forget they're still there."
+    },
+    openPlaceholdersManuscript: {
+      one: "{count} open placeholder note across the manuscript — easy to run proofreading and forget it's still there.",
+      other: "{count} open placeholder notes across the manuscript — easy to run proofreading and forget they're still there."
+    },
     setupStart: "Start proofreading",
     setupNothingSelected: "Pick at least one thing to check."
   },

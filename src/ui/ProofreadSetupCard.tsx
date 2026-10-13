@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PROOFREAD_STAGES, type ProofreadStage } from "@core/proofread";
-import { format, useLocale } from "./i18n";
+import { collectPlaceholders, type Placeholder } from "@core/placeholders";
+import { count, format, useLocale } from "./i18n";
 
 /**
  * Shown before every proofread run (first start and "run again" alike) so
@@ -12,16 +13,23 @@ import { format, useLocale } from "./i18n";
  */
 export function ProofreadSetupCard({
   chapter,
+  chapters,
   onStart,
   onClose
 }: {
   chapter: { id: string; title: string } | undefined;
+  /** Every chapter's own placeholders, for the open-placeholders reminder below — not reduced to the current chapter even when scoping, so toggling scope can recount without a prop change. */
+  chapters: { id: string; title: string; placeholders?: Placeholder[] | undefined }[];
   onStart: (options: { stages: ProofreadStage[]; scopeChapterId?: string }) => void;
   onClose: () => void;
 }) {
   const { messages: m } = useLocale();
   const [stages, setStages] = useState<Set<ProofreadStage>>(new Set(PROOFREAD_STAGES));
   const [scopeToChapter, setScopeToChapter] = useState(false);
+  const openPlaceholders = useMemo(() => collectPlaceholders(chapters), [chapters]);
+  const scopedPlaceholderCount = scopeToChapter
+    ? openPlaceholders.filter((item) => item.chapterId === chapter?.id).length
+    : openPlaceholders.length;
 
   function toggleStage(stage: ProofreadStage) {
     setStages((prev) => {
@@ -73,6 +81,15 @@ export function ProofreadSetupCard({
             </label>
             {scopeToChapter ? <p className="quiet">{m.proofread.setupScopeChapterHint}</p> : null}
           </fieldset>
+        ) : null}
+
+        {scopedPlaceholderCount > 0 ? (
+          <p className="quiet proofread-setup-placeholder-warning">
+            {count(
+              scopedPlaceholderCount,
+              scopeToChapter ? m.proofread.openPlaceholdersChapter : m.proofread.openPlaceholdersManuscript
+            )}
+          </p>
         ) : null}
 
         <div className="edit-actions">

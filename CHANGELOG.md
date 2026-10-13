@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.88] - 2026-10-13
+
+### Added
+- Proofread now warns if there's an open placeholder note before it runs — easy to forget one's still waiting once you've moved on, and it's never been checked for before. Not a blocker, just a reminder; it updates to match whichever scope (whole manuscript or just the open chapter) you pick.
+
 ## [1.0.87] - 2026-10-11
 
 ### Fixed
