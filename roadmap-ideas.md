@@ -1840,7 +1840,7 @@ härnäst), inte en uppföljning till Vikt-fältet i sig.
 
 ---
 
-### 43. Språkversioner av ett manus
+### 43. Språkversioner av ett manus ✅ byggd (v1.0.95)
 
 Mats: "Ett manus borde kunna ha språkversioner." Bara sparad, inget
 djupare samtal om den ännu.
@@ -1858,9 +1858,16 @@ från originalet)? Påverkar i så fall mer än bara `Chapter.prose` —
 NarrativeFact.value, entity_label, Synopsis, allt som är skriven text
 snarare än strukturell metadata skulle behöva samma fråga besvarad.
 
-**Status: inte påbörjad, bara idén sparad.** Inget beslut om
-datamodell än — kräver ett eget samtal, inte en snabb
-genomförbarhetskoll som #42.
+**Status: byggd (v1.0.95).** Arkitektursamtalet landade på den lättare
+formen — separat, länkad bok per språk (inte parallella prosasträngar
+i samma bok) — grundat i användningsfallet (publicera översatta
+utgåvor), med Story Bible-synk avsiktligt utelämnad (översätt en gång,
+underhåll separat) snarare än flerspråkiga `NarrativeFact`-värden.
+Inaktualitet spåras per kapitel med en ögonblicksbild + `proseHash`-
+jämförelse (återanvänt från Proofread), inte manus-breda
+versionsnummer; diff-vyn återanvänder `diffProse`/`HistorySplit` från
+History-panelen. Se project_spec.md v1.0.94 → v1.0.95 för fullt
+genomförandeprotokoll.
 
 ---
 

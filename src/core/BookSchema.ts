@@ -28,7 +28,8 @@ export const PROSE_HISTORY_OPS = [
   "restore",
   "format",
   "darling",
-  "polish"
+  "polish",
+  "translate"
 ] as const;
 export type ProseHistoryOp = (typeof PROSE_HISTORY_OPS)[number];
 
@@ -135,6 +136,26 @@ export const ChapterSchema = z.object({
    * in this schema. Missing/empty on older saves.
    */
   context_refs: z.array(ChapterContextRefSchema).default([]),
+  /**
+   * The chapter in the SOURCE book (Book.translated_from_book_id) this one
+   * is a translation of — only set on chapters belonging to a translated
+   * book (roadmap-ideas.md #43). Set once, when the language version is
+   * first created or a chapter is explicitly linked afterward; chapter ids
+   * are stable, so this survives the source book being reordered or
+   * resplit. Missing on an original, never-translated chapter.
+   */
+  translated_from_chapter_id: z.string().min(1).optional(),
+  /**
+   * The source chapter's own prose, exactly as it read the last time this
+   * chapter's translation was generated or accepted — not a hash, because
+   * the point isn't just to detect that the source changed but to show
+   * WHAT changed, by diffing this snapshot against the source's current
+   * prose with the same diffProse/HistorySplit the History panel already
+   * uses (same-language diff; translated vs. source text side by side
+   * would compare two different languages and say nothing useful).
+   * Missing until the first translation is generated.
+   */
+  translated_from_snapshot: z.string().optional(),
   /**
    * When set, the chapter sits in Discarded chapters until restored or thrown away.
    * Missing on older saves — live chapters stay loadable.
@@ -339,6 +360,25 @@ export const BookSchema = z.object({
    */
   prose_language: z.string().default(""),
   /**
+   * Shared by every book in a translation family (roadmap-ideas.md #43) —
+   * the original manuscript and each of its language versions all carry
+   * the same id, generated once when the first translation is spun off
+   * from a book that didn't have one yet. Lets the shelf (Home.tsx) group
+   * them and the editor offer a language switcher without a separate
+   * lookup table; `prose_language` already tells them apart within the
+   * group. Missing on a manuscript with no translations.
+   */
+  translation_group_id: z.string().min(1).optional(),
+  /**
+   * The book this one was translated FROM — unset on the original/source
+   * book in a translation group, set on every language version spun off
+   * from it. A straight book id, not a chapter-level pointer: chapter
+   * correspondence within the pair is each Chapter's own
+   * translated_from_chapter_id instead, since chapters can be added,
+   * reordered, or resplit independently in either book afterward.
+   */
+  translated_from_book_id: z.string().min(1).optional(),
+  /**
    * Intended reader age. Writing instruction, not a world fact.
    * Missing on older saves — empty keeps the adult Dale–Chall baseline.
    */
@@ -455,7 +495,10 @@ export const BookSummarySchema = z.object({
   title: z.string().min(1),
   chapterCount: z.number().int().nonnegative(),
   factCount: z.number().int().nonnegative(),
-  updated_at: z.string().min(1)
+  updated_at: z.string().min(1),
+  prose_language: z.string().optional(),
+  translation_group_id: z.string().optional(),
+  translated_from_book_id: z.string().optional()
 });
 export type BookSummary = z.infer<typeof BookSummarySchema>;
 
@@ -466,7 +509,10 @@ export function summarizeBook(book: Book): BookSummary {
     chapterCount: sortedChapters(book).length,
     factCount: book.facts.filter((fact) => fact.superseded_by === undefined && fact.status === "locked")
       .length,
-    updated_at: book.updated_at
+    updated_at: book.updated_at,
+    ...(book.prose_language.trim() ? { prose_language: book.prose_language } : {}),
+    ...(book.translation_group_id ? { translation_group_id: book.translation_group_id } : {}),
+    ...(book.translated_from_book_id ? { translated_from_book_id: book.translated_from_book_id } : {})
   };
 }
 

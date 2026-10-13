@@ -343,6 +343,7 @@ export const en = {
     delete: "Delete",
     deleteConfirm: "Delete “{title}”? This cannot be undone.",
     replaceConfirm: "Replace “{title}” with this backup? Anything written since that backup will be lost.",
+    languageVersionUnset: "Untitled language",
     chapters: { one: "{count} chapter", other: "{count} chapters" },
     facts: { one: "{count} locked fact", other: "{count} locked facts" },
     connectFound: { one: "Connected — {count} model found.", other: "Connected — {count} models found." },
@@ -377,6 +378,24 @@ export const en = {
     polishPromptRestore: "Reset to default",
     polishPromptAria: "Polish instructions",
     review: "Review",
+    translateModelLabel: "Translate",
+    translateModelFollowWriting: "Use Writing model",
+    languageSwitcherOriginal: "Original",
+    languageSwitcherCurrentHint: "This manuscript's language",
+    languageSwitcherNew: "New language version…",
+    languageSwitcherNewPlaceholder: "Language, e.g. Svenska",
+    languageSwitcherAdd: "Create",
+    translationStatusLoading: "Checking source chapter…",
+    translationStatusOrphaned: "The source chapter this was translated from no longer exists.",
+    translationStatusUntranslated: "Not translated yet",
+    translationStatusStale: "Source changed since this was translated",
+    translationStatusCurrent: "Up to date with the source",
+    translationStatusShowDiff: "Show what changed",
+    translationStatusHideDiff: "Hide what changed",
+    translationStatusSnapshotLabel: "Last translated from",
+    translationStatusLiveSourceLabel: "Source now",
+    translateChapterAction: "Translate chapter",
+    retranslateChapterAction: "Re-translate chapter",
     noModels: "No local models found",
     backup: "Backup",
     backupDue: "! Backup",
@@ -672,7 +691,8 @@ export const en = {
       "extract-brief": "Extract facts (brief)",
       "import-lore": "Import lore",
       beat: "Write a beat",
-      summarize: "Summarize chapter"
+      summarize: "Summarize chapter",
+      translate: "Translate chapter"
     }
   },
   askManuscript: {
@@ -1591,7 +1611,8 @@ export const en = {
       beat: "Beat",
       restore: "Restore",
       format: "Formatting",
-      darling: "Darling"
+      darling: "Darling",
+      translate: "Translate"
     }
   },
   polishReview: {
@@ -1644,6 +1665,8 @@ export const en = {
     proofreadEmpty: "Write or draft some chapter prose before proofreading.",
     askManuscriptEmpty: "Write or draft some chapter prose before asking about the manuscript.",
     askManuscriptNoMatch: "Nothing in the manuscript matches that question.",
+    translateSourceEmpty: "The source chapter has no prose yet — write or draft it there first.",
+    translateSourceMissing: "Could not load the source manuscript this chapter is linked to.",
     serverUrlMissing: "Enter your local server's address in Settings.",
     busy: "Another action is already running. Wait for it to finish, then try again.",
     timeout: "The local model didn't respond in time. It may still be loading, or your hardware may need longer than usual — check that it's running, then try again.",

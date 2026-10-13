@@ -38,6 +38,7 @@ export type Busy =
   | "import-lore"
   | "develop"
   | "summarize"
+  | "translate"
   | null;
 
 /** A Polish result waiting on the author's review (PolishReviewCard) — not yet written to the chapter. */
@@ -52,6 +53,7 @@ export type BookStoreValue = {
   model: string;
   writingPrimer: string;
   reviewModel: string;
+  translateModel: string;
   engine: LlmEngine;
   baseUrl: string;
   contextWindow: number;
@@ -78,6 +80,9 @@ export type BookStoreValue = {
   openBook: (id: string) => Promise<void>;
   closeBook: () => void;
   newBook: (title: string) => Promise<void>;
+  newLanguageVersion: (targetLanguage: string) => Promise<void>;
+  /** Loads another manuscript by id without opening it — used by the language switcher/stale check (roadmap-ideas.md #43). */
+  loadBook: (id: string) => Promise<Book>;
   importManuscript: (file: File) => Promise<void>;
   deleteBook: (id: string) => Promise<void>;
   patchBook: (mutate: (book: Book) => Book) => Promise<void>;
@@ -98,6 +103,7 @@ export type BookStoreValue = {
   setWritingPrimer: (text: string) => void;
   resetWritingPrimer: () => void;
   setReviewModel: (name: string) => void;
+  setTranslateModel: (name: string) => void;
   setEngine: (engine: LlmEngine) => void;
   setBaseUrl: (url: string) => void;
   setContextWindow: (n: number) => void;
@@ -105,6 +111,7 @@ export type BookStoreValue = {
   setHistoryLimit: (n: number) => void;
   draftChapter: () => Promise<void>;
   recastChapter: () => Promise<void>;
+  translateChapter: () => Promise<void>;
   polishChapter: () => Promise<boolean>;
   acceptPolish: () => Promise<void>;
   discardPolish: () => void;

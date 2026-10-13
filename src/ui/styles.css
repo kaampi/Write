@@ -1074,6 +1074,57 @@ button:disabled {
   color: var(--text-faint);
 }
 
+/*
+ * A manuscript with language versions (roadmap-ideas.md #43) renders as one
+ * shelf row grouping the source and its translations, instead of flattening
+ * them into separate top-level rows — `.book-shelf li` already forces every
+ * li into a 2-column [card, delete] grid, which fit the old flat shelf but
+ * would also try to lay out this row's nested sibling <ul> as a second grid
+ * column, so the group <li> itself opts back out to a plain block and the
+ * 2-column layout moves down to `.book-shelf-row` and the sibling rows.
+ */
+.book-shelf li.book-shelf-group {
+  display: block;
+}
+
+.book-shelf-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.book-shelf-siblings {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0 0 0 1.4rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.book-shelf-siblings li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.book-card-sibling {
+  padding: 0.6rem 0.9rem;
+}
+
+.book-language-tag {
+  display: inline-block;
+  margin-right: 0.5rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+}
+
 /* Editor */
 
 .editor {
@@ -1112,6 +1163,44 @@ button:disabled {
   align-self: stretch;
   margin: 0.4rem 0;
   background: var(--border-soft);
+}
+
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+}
+
+.language-switcher-current {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  color: var(--text-dim);
+}
+
+.language-switcher-add-form {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.language-switcher-add-form input {
+  width: 9rem;
+}
+
+.translation-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.translation-status-stale {
+  color: var(--accent, #c96a43);
 }
 
 .editor-top-tabs {

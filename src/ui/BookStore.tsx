@@ -63,14 +63,17 @@ import {
   DRAFT_SYSTEM,
   PASSAGE_SYSTEM,
   RECAST_SYSTEM,
+  TRANSLATE_SYSTEM,
   draftSceneUserPrompt,
   draftUserPrompt,
   passageUserPrompt,
   polishUserPrompt,
   recastSceneUserPrompt,
   recastUserPrompt,
-  resolveVoice
+  resolveVoice,
+  translateChapterUserPrompt
 } from "@core/generateProse";
+import { createLanguageVersion } from "@core/translation";
 import {
   readProseHistoryLimit,
   recordProseRevision,
@@ -128,6 +131,7 @@ import { count, format, getMessages, STORE_ERROR } from "./i18n";
 
 const MODEL_KEY = "storybook-ai.model";
 const REVIEW_MODEL_KEY = "storybook-ai.review-model";
+const TRANSLATE_MODEL_KEY = "storybook-ai.translate-model";
 const LAST_BOOK_KEY = "storybook-ai.last-book";
 const ENGINE_KEY = "storybook-ai.engine";
 const BASE_URL_KEY = "storybook-ai.base-url";
@@ -249,6 +253,16 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   );
   const [reviewModel, setReviewModelState] = useState(
     () => localStorage.getItem(REVIEW_MODEL_KEY) ?? DEFAULT_REVIEW_MODEL
+  );
+  /**
+   * AI model for chapter translation (roadmap-ideas.md #43). Empty string
+   * means "use the Writing model" — unlike `reviewModel`, this has no
+   * hardcoded default of its own and no auto-pick-on-model-list-load
+   * logic, since falling back to whatever `model` already resolved to is
+   * simpler and always valid.
+   */
+  const [translateModel, setTranslateModelState] = useState(
+    () => localStorage.getItem(TRANSLATE_MODEL_KEY) ?? ""
   );
   const [engine, setEngineState] = useState<LlmEngine>(readEngine);
   const [baseUrl, setBaseUrlState] = useState(() => localStorage.getItem(BASE_URL_KEY) ?? "");
@@ -530,6 +544,33 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     [repo]
   );
 
+  const newLanguageVersion = useCallback(
+    async (targetLanguage: string) => {
+      const current = bookRef.current;
+      if (!current) return;
+      const { book: created, groupId } = createLanguageVersion(current, targetLanguage);
+      if (current.translation_group_id !== groupId) {
+        const patchedSource = touch(current, { translation_group_id: groupId });
+        await repo.save(patchedSource);
+        bookRef.current = patchedSource;
+        setBook(patchedSource);
+      }
+      await repo.save(created);
+      setSummaries(await repo.list());
+      withViewTransition(() => {
+        setBook(created);
+        setChapterIdState(sortedChapters(created)[0]?.id ?? null);
+        setSurface(openingSurface(created));
+        setChapterFeedback(null);
+      });
+      localStorage.setItem(LAST_BOOK_KEY, created.id);
+      setError(null);
+    },
+    [repo]
+  );
+
+  const loadBook = useCallback((id: string) => repo.get(id), [repo]);
+
   const importManuscript = useCallback(
     async (file: File) => {
       let parsed: unknown;
@@ -621,6 +662,11 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const setReviewModel = useCallback((name: string) => {
     setReviewModelState(name);
     localStorage.setItem(REVIEW_MODEL_KEY, name);
+  }, []);
+
+  const setTranslateModel = useCallback((name: string) => {
+    setTranslateModelState(name);
+    localStorage.setItem(TRANSLATE_MODEL_KEY, name);
   }, []);
 
   const setEngine = useCallback((next: LlmEngine) => {
@@ -945,6 +991,130 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       abortRef.current = null;
     }
   }, [busy, flushSave, model, models.length, ollamaError, persistProseWrite]);
+
+  const translateChapter = useCallback(async () => {
+    const current = bookRef.current;
+    const id = chapterRef.current;
+    if (!current || !id || busy) return;
+    const chapter = current.chapters.find((item) => item.id === id);
+    if (!chapter?.translated_from_chapter_id || !current.translated_from_book_id) return;
+    if (models.length === 0) {
+      setError(ollamaError ?? STORE_ERROR.noModel);
+      return;
+    }
+
+    let sourceBook: Book;
+    try {
+      sourceBook = await repo.get(current.translated_from_book_id);
+    } catch {
+      setError(STORE_ERROR.translateSourceMissing);
+      return;
+    }
+    const sourceChapter = sourceBook.chapters.find((item) => item.id === chapter.translated_from_chapter_id);
+    if (!sourceChapter?.prose.trim()) {
+      setError(STORE_ERROR.translateSourceEmpty);
+      return;
+    }
+
+    abortRef.current?.abort();
+    const abort = new AbortController();
+    abortRef.current = abort;
+    setBusy("translate");
+    setError(null);
+    setModelAsides([]);
+
+    const original = chapter.prose;
+    const originalFormatting = chapter.formatting ?? [];
+    const originalPlaceholders = chapter.placeholders ?? [];
+    const originalDarlings = chapter.darlings ?? [];
+    const snapshotProse = sourceChapter.prose;
+    let assembled = "";
+    let raw = "";
+
+    try {
+      const translateModelName = translateModel.trim() || model;
+      const provider = makeProvider(translateModelName);
+      const translateMessages: PromptDebugMessage[] = [
+        { role: "system", content: writingSystem(TRANSLATE_SYSTEM) },
+        { role: "user", content: translateChapterUserPrompt(sourceBook, sourceChapter, current.prose_language) }
+      ];
+      recordPrompt("translate", translateModelName, translateMessages);
+      for await (const chunk of provider.streamChat({
+        messages: translateMessages,
+        temperature: 0.4,
+        maxTokens: 1600,
+        signal: abort.signal
+      })) {
+        if (chunk.type === "text_delta") {
+          raw += chunk.text;
+          assembled = manuscriptFromModel(raw, "");
+          const finished = assembled.trim() ? assembled : original;
+          setBook((prev) =>
+            prev
+              ? updateChapter(prev, id, {
+                  prose: finished,
+                  formatting: assembled.trim() ? [] : originalFormatting,
+                  placeholders: assembled.trim() ? [] : originalPlaceholders,
+                  darlings: originalDarlings
+                })
+              : prev
+          );
+        } else if (chunk.type === "error") {
+          throw new Error(chunk.message);
+        }
+      }
+      const latest = bookRef.current;
+      if (latest) {
+        const finished = assembled.trim() ? assembled : original;
+        await persistProseWrite(
+          latest,
+          id,
+          finished,
+          "translate",
+          original,
+          assembled.trim() ? [] : originalFormatting,
+          assembled.trim() ? [] : originalPlaceholders,
+          originalDarlings
+        );
+        if (assembled.trim()) {
+          const withSnapshot = bookRef.current;
+          if (withSnapshot) await flushSave(updateChapter(withSnapshot, id, { translated_from_snapshot: snapshotProse }));
+        }
+      }
+    } catch (err) {
+      if ((err as { name?: string }).name === "AbortError") {
+        const latest = bookRef.current;
+        if (latest) {
+          const finished = assembled.trim() ? assembled : original;
+          await persistProseWrite(
+            latest,
+            id,
+            finished,
+            "translate",
+            original,
+            assembled.trim() ? [] : originalFormatting,
+            assembled.trim() ? [] : originalPlaceholders,
+            originalDarlings
+          );
+        }
+      } else {
+        setError(ollamaHint(err));
+        const latest = bookRef.current;
+        if (latest)
+          await flushSave(
+            updateChapter(latest, id, {
+              prose: original,
+              formatting: originalFormatting,
+              placeholders: originalPlaceholders,
+              darlings: originalDarlings
+            })
+          );
+      }
+    } finally {
+      setBusy(null);
+      abortRef.current = null;
+    }
+  }, [busy, flushSave, model, translateModel, models.length, ollamaError, persistProseWrite, repo]);
 
   const draftScene = useCallback(
     async (sceneId: string) => {
@@ -2765,6 +2935,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     model,
     writingPrimer,
     reviewModel,
+    translateModel,
     engine,
     baseUrl,
     contextWindow,
@@ -2791,6 +2962,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     openBook,
     closeBook,
     newBook,
+    newLanguageVersion,
+    loadBook,
     importManuscript,
     deleteBook,
     patchBook,
@@ -2811,6 +2984,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     setWritingPrimer,
     resetWritingPrimer,
     setReviewModel,
+    setTranslateModel,
     setEngine,
     setBaseUrl,
     setContextWindow,
@@ -2818,6 +2992,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     setHistoryLimit,
     draftChapter,
     recastChapter,
+    translateChapter,
     polishChapter,
     acceptPolish,
     discardPolish,

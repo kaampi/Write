@@ -45,6 +45,7 @@ export const nb: Messages = {
     delete: "Slett",
     deleteConfirm: "Slett “{title}”? Dette kan ikke angres.",
     replaceConfirm: "Erstatt “{title}” med denne sikkerhetskopien? Alt som er skrevet siden den filen går tapt.",
+    languageVersionUnset: "Navnløst språk",
     chapters: { one: "{count} kapittel", other: "{count} kapitler" },
     facts: { one: "{count} låst faktum", other: "{count} låste fakta" },
     connectFound: { one: "Tilkoblet — {count} modell funnet.", other: "Tilkoblet — {count} modeller funnet." },
@@ -79,6 +80,24 @@ export const nb: Messages = {
     polishPromptRestore: "Tilbakestill til standard",
     polishPromptAria: "Polish-instruksjoner",
     review: "Gjennomgang",
+    translateModelLabel: "Oversettelse",
+    translateModelFollowWriting: "Bruk skrivemodellen",
+    languageSwitcherOriginal: "Original",
+    languageSwitcherCurrentHint: "Dette manuskriptets språk",
+    languageSwitcherNew: "Ny språkversjon…",
+    languageSwitcherNewPlaceholder: "Språk, f.eks. Svensk",
+    languageSwitcherAdd: "Opprett",
+    translationStatusLoading: "Sjekker kildekapittelet…",
+    translationStatusOrphaned: "Kildekapittelet dette ble oversatt fra finnes ikke lenger.",
+    translationStatusUntranslated: "Ikke oversatt ennå",
+    translationStatusStale: "Kilden er endret siden dette ble oversatt",
+    translationStatusCurrent: "Oppdatert mot kilden",
+    translationStatusShowDiff: "Vis hva som er endret",
+    translationStatusHideDiff: "Skjul hva som er endret",
+    translationStatusSnapshotLabel: "Sist oversatt fra",
+    translationStatusLiveSourceLabel: "Kilden nå",
+    translateChapterAction: "Oversett kapittel",
+    retranslateChapterAction: "Oversett kapittel på nytt",
     noModels: "Ingen lokale modeller funnet",
     backup: "Sikkerhetskopi",
     backupDue: "! Sikkerhetskopi",
@@ -374,7 +393,8 @@ export const nb: Messages = {
       "extract-brief": "Hent ut fakta (brief)",
       "import-lore": "Importer lore",
       beat: "Skriv en beat",
-      summarize: "Oppsummer kapittel"
+      summarize: "Oppsummer kapittel",
+      translate: "Oversett kapittel"
     }
   },
   askManuscript: {
@@ -1581,7 +1601,8 @@ export const nb: Messages = {
       beat: "Beat",
       restore: "Gjenopprett",
       format: "Formatering",
-      darling: "Yndling"
+      darling: "Yndling",
+      translate: "Oversettelse"
     }
   },
   polishReview: {
@@ -1634,6 +1655,8 @@ export const nb: Messages = {
     proofreadEmpty: "Skriv eller ta fram litt kapittelprosa før korrektur.",
     askManuscriptEmpty: "Skriv eller ta fram litt kapittelprosa før du spør om manuset.",
     askManuscriptNoMatch: "Ingenting i manuset matcher det spørsmålet.",
+    translateSourceEmpty: "Kildekapittelet har ingen tekst ennå — skriv eller lag utkast der først.",
+    translateSourceMissing: "Kunne ikke laste inn kildemanuset dette kapittelet er lenket til.",
     serverUrlMissing: "Skriv inn den lokale serverens adresse i Innstillinger.",
     busy: "En annen handling pågår allerede. Vent til den er ferdig, og prøv igjen.",
     timeout: "Den lokale modellen svarte ikke i tide. Den kan fortsatt laste, eller datamaskinen din kan trenge lengre tid enn vanlig — sjekk at den kjører, prøv så igjen.",

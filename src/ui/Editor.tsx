@@ -114,6 +114,7 @@ import { DarlingsPanel } from "./DarlingsPanel";
 import { collectDarlings } from "@core/darlings";
 import { ScenesPanel } from "./ScenesPanel";
 import { GuidePanel, GuideHelpButton, HelpTip, type GuideSectionId } from "./GuidePanel";
+import { LanguageSwitcher, TranslationStatus } from "./LanguageVersions";
 import { HandbookPanel } from "./HandbookPanel";
 import { DevelopmentMethodPanel } from "./DevelopmentMethodPanel";
 import { ChapterBriefCopy } from "./ChapterBriefCopy";
@@ -405,7 +406,7 @@ function TopMenu({ label, children }: { label: string; children: React.ReactNode
 export function Editor() {
   const store = useBookStore();
   const { messages: m } = useLocale();
-  const { book, chapterId, surface, busy, error, models, model, writingPrimer, reviewModel, ollamaError, chapterFeedback, modelAsides } = store;
+  const { book, chapterId, surface, busy, error, models, model, writingPrimer, reviewModel, translateModel, ollamaError, chapterFeedback, modelAsides } = store;
   if (!book) return null;
 
   const chapters = sortedChapters(book);
@@ -828,6 +829,13 @@ export function Editor() {
           value={book.title}
           onChange={(event) => void store.patchBook((current) => ({ ...current, title: event.target.value }))}
           aria-label={m.editor.manuscriptTitle}
+        />
+        <LanguageSwitcher
+          book={book}
+          summaries={store.summaries}
+          busy={busy !== null}
+          onOpenBook={(id) => void store.openBook(id)}
+          onCreate={(language) => void store.newLanguageVersion(language)}
         />
         <div className="editor-top-divider" />
         <div className="editor-top-tabs">
@@ -1704,6 +1712,21 @@ export function Editor() {
                     {m.editor.draft}
                   </button>
                 )}
+                {chapter.translated_from_chapter_id ? (
+                  busy === "translate" ? (
+                    <button type="button" onClick={store.stopDraft}>
+                      {m.common.stop}
+                    </button>
+                  ) : (
+                    <TranslationStatus
+                      book={book}
+                      chapter={chapter}
+                      busy={busy !== null}
+                      loadBook={store.loadBook}
+                      onTranslate={() => void store.translateChapter()}
+                    />
+                  )
+                ) : null}
                 {busy === "polish" ? (
                   <button type="button" onClick={store.stopDraft}>
                     {m.common.stop}
@@ -1903,6 +1926,7 @@ export function Editor() {
           models={models}
           model={model}
           reviewModel={reviewModel}
+          translateModel={translateModel}
           engine={store.engine}
           baseUrl={store.baseUrl}
           contextWindow={store.contextWindow}
@@ -1912,6 +1936,7 @@ export function Editor() {
           onPatch={(mutate) => void store.patchBook(mutate)}
           onModel={store.setModel}
           onReviewModel={store.setReviewModel}
+          onTranslateModel={store.setTranslateModel}
           onEngine={store.setEngine}
           onBaseUrl={store.setBaseUrl}
           onContextWindow={store.setContextWindow}

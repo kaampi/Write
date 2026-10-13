@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.94
+Status: living document, v1.0.95
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3871,6 +3871,135 @@ går att ändra, och värdet överlever att stänga och återöppna
 Settings. 986 tester gröna, tsc rent, build grön.
 
 v1.0.93 → v1.0.94.
+
+---
+
+**Ändringslogg v1.0.94 → v1.0.95 (2026-10-13):** #43 (Språkversioner
+av ett manus) — efter ett separat arkitektursnack innan bygget drog
+igång ("Då tar vi ett snack om 43"). Användningsfallet (bekräftat via
+fråga): publicera översatta utgåvor av samma manus. Det avgjorde valet
+mellan de två tänkbara formerna — flerspråkig prosa i EN bok (Story
+Bible-fakta taggade per språk, kapitel med parallella textversioner)
+kontra separata, länkade böcker — till förmån för den lättare formen:
+separata böcker. Story Bible-synk bedömdes inte kritisk (bekräftat via
+fråga) — översätt en gång, underhåll separat i den översatta boken,
+ingen tvåvägs-synk att bygga. Mats föreslog versionsnummer för att visa
+vilket språk som "ligger efter"; föreslog istället att återanvända två
+redan byggda mekanismer i kodbasen snarare än att uppfinna en tredje:
+`proseHash`-mönstret från Proofread (en ögonblicksbild-hash istället
+för globala versionsnummer, ett fält per kapitel) för inaktualitets-
+flaggan, och `diffProse`/`HistorySplit` (redan delad mellan History-
+panelen och Polish-granskningen) för att visa VAD som ändrats i
+källan. Mats höll med om resonemanget. Granskade även vilka befintliga
+AI-jobb som använder `model` (Writing) kontra `reviewModel` (Review) —
+Writing driver stora kreativa jobb (Draft, Recast, Brainstorm-chatt,
+Polish, Develop), Review driver mindre/analytiska (extraktion, analys,
+grammatiknivå, sammanfattning) — och det motiverade en TREDJE,
+dedikerad "Translate"-modellinställning snarare än att återanvända
+någon av de två, med fallback till Writing-modellen om den inte är
+satt.
+
+**Schema** (`BookSchema.ts`): `Chapter` fick
+`translated_from_chapter_id?: string` (vilket käll-kapitel i käll-
+boken detta är en översättning av — sätts en gång när språkversionen
+skapas) och `translated_from_snapshot?: string` (käll-kapitlets EGEN
+prosa exakt som den löd senast översättningen genererades eller
+accepterades — inte en hash, eftersom poängen är att kunna visa VAD
+som ändrats, inte bara ATT något ändrats). `Book` fick
+`translation_group_id?: string` (delas av original och alla dess
+språkversioner — genereras en gång när den första översättningen
+knoppas av) och `translated_from_book_id?: string` (boken denna
+översattes FRÅN — en ren bok-id, eftersom kapitel-korrespondensen
+redan sköts av varje kapitels egen `translated_from_chapter_id`).
+Alla fyra fält `.optional()`, inte `.default()` — medvetet, för att
+slippa röra `createChapter()`/`createBook()` eller några
+testfixturer alls. `BookSummarySchema`/`summarizeBook()` fick
+`prose_language`/`translation_group_id`/`translated_from_book_id`
+(alla valfria, spreadas in bara när satta) så att hyllan (Home.tsx)
+kan gruppera syskon utan att läsa in varje bok i sin helhet. tsc rent,
+986 tester gröna direkt — inga fixture-ändringar behövdes.
+
+**Kärnmodul** (ny fil `translation.ts`): `createLanguageVersion
+(sourceBook, targetLanguage)` klonar kapitel-titlar/ordning från
+källan med TOM prosa, varje nytt kapitel länkat till sin käll-
+motsvarighet; kopierar också skriv-/typsnittsinställningar (voice,
+kamera, typsnitt, scene-break-stil, läsarålder,
+korrekturläsnings-grundlighet) så språkversionen känns som ett syskon
+— men INTE synopsis, eftersom Story Bible medvetet stannar
+källspråkigt enligt arkitektursnacket. `translationStatus(chapter,
+sourceChapter)` → `"none" | "untranslated" | "stale" | "current" |
+"orphaned"` (orphaned = käll-kapitlet pekar på finns inte längre,
+samma "bara upplöses till inget"-hantering som andra döda referenser
+i schemat). `sourceChangesSinceTranslation` wrappar `diffProse` mot
+den sparade ögonblicksbilden. `acceptTranslation` skriver ny prosa +
+uppdaterar ögonblicksbilden. `languageGroup`/`groupManuscripts` för
+syskon-uppslagning (källa först, sedan språk bokstavsordning) —
+`groupManuscripts` dedupar hela hyllan till distinkta kluster i
+först-sedd-ordning. 16 nya enhetstester i `translation.test.ts`.
+
+**Prompt** (`generateProse.ts`): ny `TRANSLATE_SYSTEM` +
+`translateChapterUserPrompt(sourceBook, sourceChapter, targetLanguage)`
+— läser bara käll-bokens EGNA Voice/Story Bible (den översatta boken
+har ingen egen Bible), målboken bidrar bara med målspråket.
+
+**BookStore.tsx:** nytt `translateModel`-state (localStorage-
+persisterat som `reviewModel`, men tom sträng = "följ Writing-
+modellen", ingen egen hårdkodad default eller auto-pick-logik —
+enklare att bara falla tillbaka på vad `model` redan löstes till).
+`newLanguageVersion(targetLanguage)`: speglar `newBook`, men sparar
+även käll-boken med ny `translation_group_id` om den saknade en
+sedan innan (samma spara). `translateChapter()`: speglar
+`recastChapter` (helkapitel-regenerering, samma streaming/abort-
+mönster) men läser först in käll-boken via `repo.get
+(current.translated_from_book_id)`, validerar att käll-kapitlet har
+prosa, och efter en lyckad generering sätter `translated_from_snapshot`
+till käll-kapitlets prosa VID DEN TIDPUNKTEN (fångad innan
+streaming startar, så en redigering av källan medan översättningen
+pågår inte smyger in). Ny `loadBook(id)` — ren passthrough till
+`repo.get`, exponerad för UI:t som behöver slå upp en annan bok utan
+att öppna den (språkväxlaren, inaktualitets-kollen) — beräknas
+alltså lat/on-demand, inte förberäknat in i varje hyll-rad, exakt
+som planerat.
+
+**UI:** `SettingsPanel.tsx`/`Home.tsx` fick en tredje `ModelSelect`
+("Translate"), med ett nytt `followLabel`-stöd i `ModelSelect` self
+("Use Writing model" som första alternativ, stannar vald istället
+för att tvingas till första modellen i listan). Ny fil
+`LanguageVersions.tsx`: `LanguageSwitcher` (visas i `editor-top`
+bredvid titel-fältet, listar språksyskon rent från `summaries` — ingen
+bok-inläsning behövs för grupperingen — plus ett inline-formulär för
+"New language version…") och `TranslationStatus` (visas i kapitel-
+editorns åtgärdsrad, bara för kapitel med `translated_from_chapter_id`
+satt — laddar käll-boken en gång per kapitelbyte via `loadBook`,
+visar status-etikett, en "Show what changed"-knapp som fäller ut
+`HistorySplit`-diffen när inaktuell, och "Translate chapter"/
+"Re-translate chapter"-knappen). `Home.tsx`s hylla grupperar nu källa
++ språkversioner i en rad med indragna syskon-rader istället för att
+lista dem platt — `.book-shelf li` (som tvingade alla `<li>` till ett
+2-kolumns-grid för [kort, radera]) fick en override för grupp-`<li>`:n
+till `display: block`, 2-kolumns-layouten flyttades ner till
+`.book-shelf-row`/`.book-shelf-siblings li`.
+
+**i18n:** nya nycklar i alla tre språk (en/sv/nb) för modellväljaren,
+språkväxlaren, inaktualitets-status/diff-vyn, samt `"translate"`
+tillagt i `PROSE_HISTORY_OPS`/`PromptOperation`/historik- och
+prompt-debug-etiketterna (tvingat fram av TypeScripts
+`Record<ProseHistoryOp, string>`-fullständighetskrav — fångade varje
+ställe som behövde uppdateras).
+
+**Verifierat:** tsc rent, 1002 enhetstester gröna (986 + 16 nya),
+`npm run build` grön. Live Playwright-verifiering av hela flödet:
+skapade manus, skrev käll-prosa, skapade en svensk språkversion via
+växlaren (titel oförändrad, språketikett "Svenska"), öppnade kapitel 1
+i den nya boken — tomt, "Not translated yet" + Translate-knapp;
+skrev manuellt in text (simulerar en hand-översättning) — status
+växlade till "Source changed since this was translated" (ingen
+ögonblicksbild sparad än), diff-vyn visade käll-texten korrekt som
+helt infogad; växlade tillbaka till originalet via syskon-knappen;
+gick till Hem och bekräftade att hyllan grupperar källa + "SVENSKA"
+som en indragen syskon-rad under samma kort.
+
+v1.0.94 → v1.0.95.
 
 ---
 

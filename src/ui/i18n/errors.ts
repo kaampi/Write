@@ -18,6 +18,8 @@ export const STORE_ERROR = {
   proofreadEmpty: "store:proofread-empty",
   askManuscriptEmpty: "store:ask-manuscript-empty",
   askManuscriptNoMatch: "store:ask-manuscript-no-match",
+  translateSourceEmpty: "store:translate-source-empty",
+  translateSourceMissing: "store:translate-source-missing",
   serverUrlMissing: "store:server-url-missing",
   busy: "store:busy",
   timeout: "store:timeout"
@@ -45,6 +47,8 @@ const STORE_ERROR_KEYS: Record<StoreErrorCode, keyof import("./en").Messages["er
   [STORE_ERROR.proofreadEmpty]: "proofreadEmpty",
   [STORE_ERROR.askManuscriptEmpty]: "askManuscriptEmpty",
   [STORE_ERROR.askManuscriptNoMatch]: "askManuscriptNoMatch",
+  [STORE_ERROR.translateSourceEmpty]: "translateSourceEmpty",
+  [STORE_ERROR.translateSourceMissing]: "translateSourceMissing",
   [STORE_ERROR.serverUrlMissing]: "serverUrlMissing",
   [STORE_ERROR.busy]: "busy",
   [STORE_ERROR.timeout]: "timeout"

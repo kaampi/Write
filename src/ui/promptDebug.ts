@@ -23,7 +23,8 @@ export type PromptOperation =
   | "extract"
   | "analyze"
   | "illustrate"
-  | "proofread";
+  | "proofread"
+  | "translate";
 
 export type PromptDebugTarget = "prose" | "synopsis" | "brainstorm";
 

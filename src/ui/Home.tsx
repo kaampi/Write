@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { groupManuscripts } from "@core/translation";
 import { useBookStore } from "./useBookStore";
 import { HandbookPanel } from "./HandbookPanel";
 import { ModelSelect } from "./SettingsPanel";
@@ -42,11 +43,13 @@ export function Home({
     models,
     model,
     reviewModel,
+    translateModel,
     ollamaError,
     setEngine,
     setBaseUrl,
     setModel,
-    setReviewModel
+    setReviewModel,
+    setTranslateModel
   } = useBookStore();
   const { messages: m } = useLocale();
   const [title, setTitle] = useState("");
@@ -230,6 +233,14 @@ export function Home({
                   emptyLabel={m.editor.noModels}
                   onChange={setReviewModel}
                 />
+                <ModelSelect
+                  label={m.editor.translateModelLabel}
+                  value={translateModel}
+                  models={models}
+                  emptyLabel={m.editor.noModels}
+                  followLabel={m.editor.translateModelFollowWriting}
+                  onChange={setTranslateModel}
+                />
               </div>
             ) : null}
           </>
@@ -275,29 +286,59 @@ export function Home({
 
         {filteredSummaries.length > 0 ? (
           <ul>
-            {filteredSummaries.map((item) => (
-              <li key={item.id}>
-                <button type="button" className="book-card" onClick={() => void openBook(item.id)}>
-                  <strong>{item.title}</strong>
-                  <span>
-                    {count(item.chapterCount, m.home.chapters)}
-                    <span className="dot">·</span>
-                    {count(item.factCount, m.home.facts)}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="text-button danger"
-                  onClick={() => {
-                    if (window.confirm(format(m.home.deleteConfirm, { title: item.title }))) {
-                      void deleteBook(item.id);
-                    }
-                  }}
-                >
-                  {m.home.delete}
-                </button>
-              </li>
-            ))}
+            {groupManuscripts(filteredSummaries).map((group) => {
+              const [primary, ...siblings] = group;
+              if (!primary) return null;
+              return (
+                <li key={primary.id} className="book-shelf-group">
+                  <div className="book-shelf-row">
+                    <button type="button" className="book-card" onClick={() => void openBook(primary.id)}>
+                      <strong>{primary.title}</strong>
+                      <span>
+                        {primary.prose_language ? <span className="book-language-tag">{primary.prose_language}</span> : null}
+                        {count(primary.chapterCount, m.home.chapters)}
+                        <span className="dot">·</span>
+                        {count(primary.factCount, m.home.facts)}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className="text-button danger"
+                      onClick={() => {
+                        if (window.confirm(format(m.home.deleteConfirm, { title: primary.title }))) {
+                          void deleteBook(primary.id);
+                        }
+                      }}
+                    >
+                      {m.home.delete}
+                    </button>
+                  </div>
+                  {siblings.length > 0 ? (
+                    <ul className="book-shelf-siblings">
+                      {siblings.map((sibling) => (
+                        <li key={sibling.id}>
+                          <button type="button" className="book-card book-card-sibling" onClick={() => void openBook(sibling.id)}>
+                            <span className="book-language-tag">{sibling.prose_language || m.home.languageVersionUnset}</span>
+                            <span>{count(sibling.chapterCount, m.home.chapters)}</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="text-button danger"
+                            onClick={() => {
+                              if (window.confirm(format(m.home.deleteConfirm, { title: sibling.title }))) {
+                                void deleteBook(sibling.id);
+                              }
+                            }}
+                          >
+                            {m.home.delete}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         ) : null}
       </section>

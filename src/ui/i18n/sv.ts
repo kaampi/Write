@@ -45,6 +45,7 @@ export const sv: Messages = {
     delete: "Radera",
     deleteConfirm: "Radera “{title}”? Det går inte att ångra.",
     replaceConfirm: "Ersätt “{title}” med den här säkerhetskopian? Allt som skrivits sedan den filen går förlorat.",
+    languageVersionUnset: "Namnlöst språk",
     chapters: { one: "{count} kapitel", other: "{count} kapitel" },
     facts: { one: "{count} låst faktum", other: "{count} låsta fakta" },
     connectFound: { one: "Ansluten — {count} modell hittad.", other: "Ansluten — {count} modeller hittade." },
@@ -79,6 +80,24 @@ export const sv: Messages = {
     polishPromptRestore: "Återställ till standard",
     polishPromptAria: "Polish-instruktioner",
     review: "Granskning",
+    translateModelLabel: "Översättning",
+    translateModelFollowWriting: "Använd skrivmodellen",
+    languageSwitcherOriginal: "Original",
+    languageSwitcherCurrentHint: "Detta manus språk",
+    languageSwitcherNew: "Ny språkversion…",
+    languageSwitcherNewPlaceholder: "Språk, t.ex. Svenska",
+    languageSwitcherAdd: "Skapa",
+    translationStatusLoading: "Kontrollerar källkapitlet…",
+    translationStatusOrphaned: "Källkapitlet detta översattes från finns inte längre.",
+    translationStatusUntranslated: "Inte översatt än",
+    translationStatusStale: "Källan har ändrats sedan detta översattes",
+    translationStatusCurrent: "Uppdaterad mot källan",
+    translationStatusShowDiff: "Visa vad som ändrats",
+    translationStatusHideDiff: "Dölj vad som ändrats",
+    translationStatusSnapshotLabel: "Senast översatt från",
+    translationStatusLiveSourceLabel: "Källan nu",
+    translateChapterAction: "Översätt kapitel",
+    retranslateChapterAction: "Översätt om kapitel",
     noModels: "Inga lokala modeller hittades",
     backup: "Säkerhetskopia",
     backupDue: "! Säkerhetskopia",
@@ -374,7 +393,8 @@ export const sv: Messages = {
       "extract-brief": "Extrahera fakta (brief)",
       "import-lore": "Importera lore",
       beat: "Skriv en beat",
-      summarize: "Sammanfatta kapitel"
+      summarize: "Sammanfatta kapitel",
+      translate: "Översätt kapitel"
     }
   },
   askManuscript: {
@@ -1581,7 +1601,8 @@ export const sv: Messages = {
       beat: "Beat",
       restore: "Återställ",
       format: "Formatering",
-      darling: "Älskling"
+      darling: "Älskling",
+      translate: "Översättning"
     }
   },
   polishReview: {
@@ -1634,6 +1655,8 @@ export const sv: Messages = {
     proofreadEmpty: "Skriv eller ta fram lite kapitelprosa innan korrekturläsning.",
     askManuscriptEmpty: "Skriv eller ta fram lite kapitelprosa innan du frågar om manuset.",
     askManuscriptNoMatch: "Inget i manuset matchar den frågan.",
+    translateSourceEmpty: "Källkapitlet har ingen text än — skriv eller skapa utkast där först.",
+    translateSourceMissing: "Kunde inte läsa in källmanuset detta kapitel är länkat till.",
     serverUrlMissing: "Ange din lokala servers adress i Inställningar.",
     busy: "En annan åtgärd pågår redan. Vänta tills den är klar och försök igen.",
     timeout: "Den lokala modellen svarade inte i tid. Den kanske fortfarande laddas, eller så behöver din dator längre tid än vanligt — kolla att den kör, försök sedan igen.",

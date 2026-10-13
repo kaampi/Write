@@ -303,6 +303,31 @@ export function recastUserPrompt(book: Book, chapter: Chapter): string {
   return parts.filter(Boolean).join("\n\n");
 }
 
+export const TRANSLATE_SYSTEM = `You are a literary translator producing a faithful translation of one chapter of prose.
+Preserve meaning, tone, imagery, pacing, and paragraph structure. Do not summarize, expand, cut, or add scenes or facts.
+Keep character names and established terms consistent with the Story Bible, unless the target language's grammar genuinely requires a different form.
+If a word, idiom, or reference has no natural equivalent, translate the meaning rather than leaving it untranslated.
+No title, no chapter heading, no commentary — only the translated prose.`;
+
+/**
+ * User message for translating one chapter of `sourceBook` into
+ * `targetLanguage` (roadmap-ideas.md #43). Reads only the SOURCE book's
+ * own Voice/Story Bible for consistency (a translated book carries no
+ * Bible of its own — see `createLanguageVersion`'s doc comment) — the
+ * target book only supplies the destination language.
+ */
+export function translateChapterUserPrompt(sourceBook: Book, sourceChapter: Chapter, targetLanguage: string): string {
+  const parts = [
+    `Manuscript: ${sourceBook.title}`,
+    formatVoiceForPrompt(resolveVoice(sourceBook, sourceChapter), sourceBook.voice),
+    `Story Bible (for consistent names and terms):\n${formatBibleForPrompt(sourceBook)}`,
+    `Chapter ${sourceChapter.sequence_index + 1}: ${sourceChapter.title.trim() || "Untitled"}`,
+    `Translate the following chapter prose into ${targetLanguage.trim() || "the target language"}. Output only the translated prose.`,
+    `Source prose:\n${sourceChapter.prose.trim()}`
+  ];
+  return parts.filter(Boolean).join("\n\n");
+}
+
 /**
  * User message for the Polish step. Same shape as recastUserPrompt — the
  * editorial instructions themselves live in the system message instead

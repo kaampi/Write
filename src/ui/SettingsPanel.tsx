@@ -32,6 +32,7 @@ export function SettingsPanel({
   models,
   model,
   reviewModel,
+  translateModel,
   engine,
   baseUrl,
   contextWindow,
@@ -41,6 +42,7 @@ export function SettingsPanel({
   onPatch,
   onModel,
   onReviewModel,
+  onTranslateModel,
   onEngine,
   onBaseUrl,
   onContextWindow,
@@ -55,6 +57,7 @@ export function SettingsPanel({
   models: string[];
   model: string;
   reviewModel: string;
+  translateModel: string;
   engine: LlmEngine;
   baseUrl: string;
   contextWindow: number;
@@ -64,6 +67,7 @@ export function SettingsPanel({
   onPatch: (mutate: (book: Book) => Book) => void;
   onModel: (name: string) => void;
   onReviewModel: (name: string) => void;
+  onTranslateModel: (name: string) => void;
   onEngine: (engine: LlmEngine) => void;
   onBaseUrl: (url: string) => void;
   onContextWindow: (n: number) => void;
@@ -418,6 +422,14 @@ export function SettingsPanel({
                   emptyLabel={m.editor.noModels}
                   onChange={onReviewModel}
                 />
+                <ModelSelect
+                  label={m.editor.translateModelLabel}
+                  value={translateModel}
+                  models={models}
+                  emptyLabel={m.editor.noModels}
+                  followLabel={m.editor.translateModelFollowWriting}
+                  onChange={onTranslateModel}
+                />
               </div>
               <label className="reader-field">
                 <span className="field-label-row">
@@ -757,24 +769,34 @@ export function ModelSelect({
   value,
   models,
   emptyLabel,
-  onChange
+  onChange,
+  followLabel
 }: {
   label: string;
   value: string;
   models: string[];
   emptyLabel: string;
   onChange: (name: string) => void;
+  /**
+   * When set, adds a leading "follow another model" option (value "") that
+   * stays selected rather than being forced to `models[0]` — used by the
+   * Translate model select (roadmap-ideas.md #43), which has no hardcoded
+   * default of its own and falls back to the Writing model when unset.
+   */
+  followLabel?: string;
 }) {
+  const resolved = value === "" && followLabel !== undefined ? "" : models.includes(value) ? value : models[0] ?? "";
   return (
     <label className="model-field settings-model">
       <span>{label}</span>
       <select
-        value={models.includes(value) ? value : models[0] ?? ""}
+        value={resolved}
         onChange={(event) => onChange(event.target.value)}
         disabled={models.length === 0}
         aria-label={label}
       >
         {models.length === 0 ? <option value="">{emptyLabel}</option> : null}
+        {followLabel !== undefined && models.length > 0 ? <option value="">{followLabel}</option> : null}
         {models.map((name) => (
           <option key={name} value={name}>
             {name}

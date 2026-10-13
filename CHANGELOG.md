@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.95] - 2026-10-13
+
+### Added
+- Language versions of a manuscript. A manuscript can now spin off a separate, linked edition in another language (title bar → the language switcher next to the manuscript title → "New language version…"), with its own chapters pre-created empty and linked to their source counterparts — translate each one from the chapter editor ("Translate chapter"), which carries over the source chapter's prose plus the manuscript's Story Bible and Voice for consistent names and terms. A translated chapter flags when its source has changed since the last translation ("Source changed since this was translated"), with a same-language diff ("Show what changed") of exactly what moved, and a "Re-translate chapter" action. The manuscript shelf now groups a source manuscript with its language versions instead of listing them as unrelated rows. Settings → AI settings gained a third model choice, Translate, alongside Writing and Review — defaults to the Writing model until set.
+
 ## [1.0.94] - 2026-10-13
 
 ### Added
