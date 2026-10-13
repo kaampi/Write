@@ -770,23 +770,31 @@ formateringsintervallen korrekt när texten ändras.
   kursiven/understrykningen** — publicerad text kommer ut ren, som innan.
   Naturligt nästa litet steg om/när det blir aktuellt.
 
-### 26. Dölj snabbstartskorten på förstasidan när en lokal AI redan är ansluten
-Snabbstartskorten ("Kom igång med en lokal AI") visas just nu alltid
-på förstasidan (v0.99.15). Frågan är om de ska försvinna automatiskt
+### 26. Dölj snabbstartskorten på förstasidan när en lokal AI redan är ansluten ✅ löst (annan väg, v1.0.15)
+Snabbstartskorten ("Kom igång med en lokal AI") visades tidigare alltid
+på förstasidan (v0.99.15). Frågan var om de skulle försvinna automatiskt
 när uppsättningen är klar.
 
-**Föreslagen lösning:** koppla synligheten till samma koll appen
-redan gör på andra ställen — `models.length > 0` (om StoryBook AI
-just nu faktiskt hittar en ansluten modell). Det har en bieffekt som
-är en fördel, inte ett problem: korten dyker upp igen som påminnelse
-om anslutningen skulle falla bort en dag (t.ex. glömt starta Ollama),
-istället för att vara en engångs-onboarding kopplad till om man har
-manus sen tidigare.
+**Föreslagen lösning (ursprunglig):** koppla synligheten till samma
+koll appen redan gör på andra ställen — `models.length > 0`.
 
-**Status: avvaktar.** Författaren vill kunna se sidan som en ny
-användare skulle se den ett tag till, innan korten börjar gömma sig.
-Enkelt att bygga när det blir aktuellt — en villkorsrendering runt
-`<QuickstartCards />` i `Home.tsx`.
+**Vad som faktiskt hände, i senare commits (upptäckt 2026-10-13 när
+Mats bad om att ta punkten — korten själva fanns inte längre kvar att
+dölja):** själva snabbstartskorten togs bort från förstasidan helt
+(`4e07d28`, "Ta bort dubblerade quickstart-kort") och ersattes av den
+riktiga "Connect a local AI"-rutan med Engine/modell-kontroller direkt
+på sidan (`0b8cc14`). Den rutan fick sedan (`c45b612`, v1.0.15) exakt
+den föreslagna auto-döljningen ovan: infälld som standard när `models.
+length > 0 && !ollamaError` (anslutet), utfälld annars — och fälls ut
+igen av sig själv om anslutningen skulle falla bort, samma bieffekt
+som ursprungsförslaget ville ha. Statusraden ("Connected — N models
+found"/felmeddelande) syns alltid oavsett infällt/utfällt läge.
+`Home.tsx`, `isConnectOpen`/`connectOpen`.
+
+**Status: löst, fast via en annan väg än den ursprungliga idén
+beskrev** (ingen `<QuickstartCards />` kvar i `Home.tsx` att villkora
+— den ersattes av den riktiga anslutningsrutan, som redan har
+beteendet). Inget kvar att bygga här.
 
 ### 27. Riktig mobilanpassning av redigeringsytan
 Uppstod ur en fråga om appen är mobilanpassad. Testat i en simulerad
