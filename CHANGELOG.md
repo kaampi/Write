@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.89] - 2026-10-13
+
+### Added
+- Merge Story Bible cards. Pick "Merge cards…" in the Story Bible panel, select two or more cards of the same kind (say, "Kael" and "the Captain" that turned out to be the same person), and merge them into one. Nothing is deleted — every fact moves onto the merged card, you choose which value wins wherever the cards disagreed, and each old name becomes an alias so a later mention of either still resolves to it. Optionally replaces the old names in the manuscript text too.
+
+### Fixed
+- Deleting a Story Bible entity left its tracked aliases and exclusions behind under the deleted entity's id. Harmless on its own, but needless clutter — now cleaned up along with everything else `deleteEntity` already removed.
+
 ## [1.0.88] - 2026-10-13
 
 ### Added

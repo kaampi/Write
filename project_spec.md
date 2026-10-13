@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.88
+Status: living document, v1.0.89
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3393,6 +3393,91 @@ chapter…" när Omfattning växlades till det öppna kapitlet. 930 tester
 gröna, tsc rent, build grön.
 
 v1.0.87 → v1.0.88.
+
+---
+
+**Ändringslogg v1.0.88 → v1.0.89 (2026-10-13):** Mats: "Då kör vi med
+#30" — slå ihop Story Bible-kort för samma person under olika namn
+(Kapten Kael / Kaptenen / Kael), redan designad i detalj sedan ett
+samtal 2026-09-27 och återbekräftad av Mats i samband med
+todo-genomgången inför v1.0.88.
+
+**Research innan kod:** kartlade ALLT i `Book` som är nyckel på
+`entity_ref` innan jag skrev något, via `deleteEntity.ts` (som redan
+gör en jämförbar operation) plus en grep efter varje förekomst av
+`entity_ref` i `src/core/`: `facts`, `profiles`, `event_profiles`
+(+ dess EGNA `participants`/`where`-korsreferenser till ANDRA
+entiteter), `media`, `hidden_entities`, `entity_kinds` — och en som
+`deleteEntity.ts` själv missade: `entity_tracking` (alias/exklusion-
+listorna från "Build entity aliases + exclusion list"-arbetet).
+Fixade den luckan i `deleteEntity.ts` samtidigt (ren bieffekt av att
+behöva exakt samma lista för sammanslagningen — kommenterad i båda
+filerna om varandra).
+
+**Kärnlogik** (`src/core/mergeEntities.ts`, ny fil):
+- `canMergeEntities` — vakt: minst två kort, alla måste lösa till
+  samma `BibleKind` (blockerar, enligt den öppna frågan i #30:s
+  ursprungstext — "troligen varna eller blockera").
+- `buildMergeProposal` — grupperar de sammanslagna kortens aktiva
+  låsta fakta per predikat; ett predikat med EN gemensam värdesträng
+  (även om flera kort upprepar den exakt) hoppar helt över
+  förslaget — inget att välja. Flera olika värden → en rad i
+  förslaget, en kryssruta per unikt värde.
+- `applyMerge` — flyttar varje fakta (alla statusar, även
+  superseded, till den vinnande `entity_ref` + det valda namnet;
+  äkta dubbletter (samma predikat, samma värde) kollapsas till EN
+  kvarvarande fakta (äldst `created_at` vinner), resten superseded
+  av den — aldrig raderade, i linje med `NarrativeFact`s egen regel
+  "fakta raderas aldrig, bara efterträds". Värden författaren INTE
+  kryssade i superseded av det kvarvarande valda värdets fakta.
+  Profil/bild/event-profil: behåll vinnarens egen om den har
+  innehåll, annars adoptera första förlorarens; taggar/bilder
+  unionas (bilder takade vid `MAX_ENTITY_PICTURES`); ANDRA event-
+  profilers `participants`/`where` som pekade på en förlorande ref
+  skrivs om till vinnaren istället för att tas bort (skillnaden mot
+  en riktig radering) — deduplicerat. `hidden_entities`: dold om
+  NÅGON av de sammanslagna var dold (konservativt, exponerar aldrig
+  något författaren medvetet gömt). Alias: varje förlorande korts
+  GAMLA namn blir ett nytt alias på det sammanslagna kortet (själva
+  poängen — en senare omnämning av "Kaptenen" ska fortfarande hitta
+  kortet), plus union av redan existerande alias/exklusioner.
+
+**UI** (`BiblePanel.tsx`): "Slå samman kort…" växlar ett
+markeringsläge i roster-listan (kryssrutor istället för att öppna
+kortet vid klick); "Slå samman (N)" öppnar `MergeEntitiesCard` —
+namnväljare (radioknappar över kortens nuvarande namn + fritext),
+en sektion per predikat där korten är oense (kryssrutor, minst en
+måste vara ikryssad). Vid bekräftelse: `applyMerge` körs, och om
+någon förlorande kort hade ett namn som fortfarande förekommer i
+manustexten visas EN samlad "byt ut dessa också?"-ruta (en rad per
+namn med egen kryssruta och träffantal) — återanvänder
+`replaceNameInManuscript`, samma mekanik som den befintliga
+namnbytesfunktionen.
+
+**En bugg hittad under testskrivandet, inte i produktionskoden:**
+mitt första testfixture-hjälpobjekt spred `...overrides` EFTER det
+beräknade `id`-fältet, så två fakta med samma `overrides.id`-sträng
+("identity") för olika entiteter kolliderade till bokstavligen samma
+fakta-id — fick båda att "efterträda sig själva". Hittade det genom
+att faktiskt köra och skriva ut mellanresultatet (inte gissa), rättade
+testhjälparen (beräkna id EFTER spreaden), inte produktionskoden, som
+var korrekt hela tiden.
+
+**Verifierat grundligt:** 20 nya enhetstester i merge-entities.test.ts
+(vakten, förslags-grupperingen, dubblett-kollaps, konfliktlösning i
+båda riktningarna, profil/bild/event-profil-sammanslagning,
+korsreferens-omskrivning, alias-tillägg, alla no-op-fall). Full
+Playwright-körning: skapade två kort (Kael/Kaptenen) med gemensam
+identitetsfakta och olika trait-fakta, nämnde "Kaptenen" i
+kapiteltexten, markerade båda i rostern, slog samman, behöll Kaels
+trait i konfliktvalet, bekräftade att "Steady under pressure." är
+kvar aktiv och "Haunted by the mutiny." ligger kvar i Historik (inte
+borttagen) men inte bland de aktiva fakta, bekräftade
+"byt ut i manustexten"-rutan dök upp med rätt träffantal och att
+texten faktiskt blev "Kael walked onto the bridge." efter bekräftelse.
+950 tester gröna, tsc rent, build grön.
+
+v1.0.88 → v1.0.89.
 
 ---
 

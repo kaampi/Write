@@ -45,7 +45,7 @@ inte en ensidig lista.
 | 27 | Riktig mobilanpassning av redigeringsytan | ⬜ ej påbörjad — avvaktar, se nedan |
 | 28 | Import från andra skrivverktyg — adapterarkitektur | ⬜ ej påbörjad — se nedan |
 | 29 | Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok | ❌ struken — se nedan |
-| 30 | Extract facts känner inte igen namn-varianter av samma person | ⬜ ej påbörjad — se nedan |
+| 30 | Extract facts känner inte igen namn-varianter av samma person | ✅ väg 2 byggd (v1.0.89) — väg 1 kvar, se nedan |
 | 31 | Story Core — gemensam bas för StoryBook, Sandbox (RPG) och möjliga framtida appar | ⬜ 2.0-riktning, medvetet inte nu — se nedan |
 | 32 | Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text | ⬜ ej påbörjad — se nedan |
 | 33 | Timeline som gantschema, ihopslaget med Plotlines | ✅ byggd som punktbaserad vy (v0.99.62) — se nedan |
@@ -929,7 +929,7 @@ av den större frågan.
    "missing on older saves"-mönster som `continues_from`, `discarded_at`
    m.fl. redan använder — ingen brytande ändring.
 
-### 30. Extract facts känner inte igen namn-varianter av samma person
+### 30. Extract facts känner inte igen namn-varianter av samma person — väg 2 (slå ihop kort) ✅ byggd (v1.0.89)
 Upptäckt via faktisk testning (Baskervilles hund, v0.99.57): efter
 faktaplockning ur ett kapitel hamnade "Dr. James Mortimer" och "Dr.
 Mortimer" som två separata Story Bible-kort, likaså "Henry Baskerville"
@@ -998,6 +998,16 @@ idé, men ett tecken på att det är ett återkommande, konkret upplevt
 problem snarare än ett engångsfynd från Baskervilles hund. UX-planen
 från 2026-09-27 (markera flera kort → "Slå samman" → justerbart
 förslag → samma behåll båda/ersätt-mönster per predikat) står fast.
+
+**Väg 2 byggd (v1.0.89).** "Markera i rostern → Slå samman → justera
+förslaget → bekräfta", precis enligt UX-planen ovan, inklusive
+kind-mismatch-vakten (blockerar, inte bara varnar) och "byt ut i
+manustexten också"-frågan för varje förlorande namn. Se
+project_spec.md v1.0.88 → v1.0.89 för hela bygget
+(`src/core/mergeEntities.ts`). **Väg 1 (ge extraktorn kontext om
+redan etablerade namn, så dubbletter uppstår mer sällan från
+början) är fortfarande inte byggd** — väg 2 är ett sätt att städa
+upp när det ändå händer, inte ett sätt att förhindra det.
 
 ---
 

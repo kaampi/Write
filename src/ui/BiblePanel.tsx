@@ -41,9 +41,10 @@ import {
   type EntityMedia,
   type EntityPicture
 } from "@core/entityMedia";
-import { sortedChapters, touch, type Chapter } from "@core/BookSchema";
+import { sortedChapters, touch, type Book, type Chapter } from "@core/BookSchema";
 import { manuscriptNameHits, renameEntityLabel, replaceNameInManuscript } from "@core/renameEntity";
 import { deleteEntity } from "@core/deleteEntity";
+import { applyMerge, buildMergeProposal, canMergeEntities, type MergeChoice, type MergeFactGroup } from "@core/mergeEntities";
 import { storyTimeRankByChapterId } from "@core/timeline";
 import { entityIsHidden, nextPositionOverride, setFactHidden, setFactPositionOverride, toggleHiddenEntity } from "@core/visibility";
 import { trackingFor, upsertEntityTracking, type EntityTracking, type EntityTrackingInput } from "@core/entityTracking";
@@ -59,7 +60,8 @@ type Overlay =
   | { type: "entity"; ref: string }
   | { type: "asOfEntity"; ref: string }
   | { type: "new"; kind: BibleKind }
-  | { type: "interviewPicker" };
+  | { type: "interviewPicker" }
+  | { type: "merge" };
 
 function chapterLabel(chapterId: string | undefined, chapters: Chapter[], untitled: string): string {
   const chapter = chapterId ? chapters.find((item) => item.id === chapterId) : undefined;
@@ -93,11 +95,29 @@ export function BiblePanel({
   const [query, setQuery] = useState("");
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [asOfChapterId, setAsOfChapterId] = useState<string | null>(null);
+  const [merging, setMerging] = useState(false);
+  const [mergeSelection, setMergeSelection] = useState<Set<string>>(new Set());
+  /** Every losing label from the last confirmed merge that still shows up in the manuscript text — offered one combined "replace these too?" prompt, same spirit as the single-name `nameOffer` but for however many names a merge drops at once. */
+  const [mergeReplaceOffer, setMergeReplaceOffer] = useState<{ names: { from: string; hits: number }[]; to: string } | null>(null);
   const pendingSeen = useRef(0);
 
   useEffect(() => {
     if (openEntitySignal) setOverlay({ type: "entity", ref: openEntitySignal.ref });
   }, [openEntitySignal]);
+
+  function toggleMergeSelect(ref: string) {
+    setMergeSelection((current) => {
+      const next = new Set(current);
+      if (next.has(ref)) next.delete(ref);
+      else next.add(ref);
+      return next;
+    });
+  }
+
+  function exitMergeSelection() {
+    setMerging(false);
+    setMergeSelection(new Set());
+  }
 
   const sections = useMemo(() => (book ? groupBibleEntities(book.facts, book.entity_kinds) : []), [book]);
   const liveChapters = useMemo(() => (book ? sortedChapters(book) : []), [book]);
@@ -117,6 +137,7 @@ export function BiblePanel({
       section.entities.length > 0
   );
   const hasAnyEntities = sections.some((section) => section.entities.length > 0);
+  const mergeGuard = book ? canMergeEntities(book, [...mergeSelection]) : { ok: false as const, reason: "too-few" as const };
 
   useEffect(() => {
     if (pending.length > pendingSeen.current) setOverlay({ type: "review" });
@@ -262,7 +283,29 @@ export function BiblePanel({
             {m.bible.exportCards}
           </button>
         )}
+        {asOfChapter || merging || !hasAnyEntities ? null : (
+          <button type="button" className="text-button" onClick={() => setMerging(true)}>
+            {m.bible.mergeStart}
+          </button>
+        )}
       </div>
+      {merging ? (
+        <div className="bible-merge-toolbar" role="status">
+          <span className="quiet">{count(mergeSelection.size, m.bible.mergeSelectedCount)}</span>
+          <button type="button" className="text-button" onClick={exitMergeSelection}>
+            {m.common.cancel}
+          </button>
+          <button
+            type="button"
+            className="primary"
+            disabled={!mergeGuard.ok}
+            title={!mergeGuard.ok && mergeGuard.reason === "kind-mismatch" ? m.bible.mergeKindMismatch : undefined}
+            onClick={() => setOverlay({ type: "merge" })}
+          >
+            {format(m.bible.mergeAction, { count: mergeSelection.size })}
+          </button>
+        </div>
+      ) : null}
       {asOfChapter ? (
         <p className="banner bible-asof-banner" role="status">
           {format(m.bible.asOfBanner, { chapter: chapterLabel(asOfChapter.id, liveChapters, m.editor.untitled) })}
@@ -318,6 +361,9 @@ export function BiblePanel({
                 thumbs={book.media}
                 hiddenEntities={book.hidden_entities}
                 onOpen={(ref) => setOverlay(asOfChapter ? { type: "asOfEntity", ref } : { type: "entity", ref })}
+                selecting={merging}
+                selectedRefs={mergeSelection}
+                onToggleSelect={toggleMergeSelect}
               />
             </div>
           ))
@@ -327,6 +373,9 @@ export function BiblePanel({
             thumbs={book.media}
             hiddenEntities={book.hidden_entities}
             onOpen={(ref) => setOverlay(asOfChapter ? { type: "asOfEntity", ref } : { type: "entity", ref })}
+            selecting={merging}
+            selectedRefs={mergeSelection}
+            onToggleSelect={toggleMergeSelect}
           />
         )}
       </section>
@@ -512,6 +561,45 @@ export function BiblePanel({
           </div>
         </div>
       ) : null}
+
+      {overlay?.type === "merge" ? (
+        <MergeEntitiesCard
+          book={book}
+          refs={[...mergeSelection]}
+          sections={sections}
+          onConfirm={({ winnerRef, finalLabel, choices }) => {
+            const refs = [...mergeSelection];
+            const label = finalLabel.trim();
+            const losingLabels = refs
+              .filter((ref) => ref !== winnerRef)
+              .map((ref) => sections.flatMap((section) => section.entities).find((entity) => entity.entity_ref === ref)?.entity_label)
+              .filter((candidate): candidate is string => Boolean(candidate) && candidate !== label);
+            void patchBook((current) => applyMerge(current, { refs, winnerRef, finalLabel: label, choices }));
+            setOverlay(null);
+            exitMergeSelection();
+            const withHits = [...new Set(losingLabels)]
+              .map((from) => ({ from, hits: manuscriptNameHits(book, from) }))
+              .filter((item) => item.hits > 0);
+            if (withHits.length > 0) setMergeReplaceOffer({ names: withHits, to: label });
+          }}
+          onClose={() => setOverlay(null)}
+        />
+      ) : null}
+
+      {mergeReplaceOffer ? (
+        <MergeReplaceNamesCard
+          offer={mergeReplaceOffer}
+          onApply={(selectedNames) => {
+            void patchBook((current) => {
+              let next = current;
+              for (const from of selectedNames) next = replaceNameInManuscript(next, from, mergeReplaceOffer.to);
+              return next;
+            });
+            setMergeReplaceOffer(null);
+          }}
+          onClose={() => setMergeReplaceOffer(null)}
+        />
+      ) : null}
     </aside>
   );
 }
@@ -520,12 +608,19 @@ function RosterList({
   entities,
   thumbs,
   hiddenEntities,
-  onOpen
+  onOpen,
+  selecting = false,
+  selectedRefs,
+  onToggleSelect
 }: {
   entities: BibleEntityGroup[];
   thumbs: EntityMedia[];
   hiddenEntities: string[];
   onOpen: (ref: string) => void;
+  /** Merge-selection mode: clicking a card toggles it instead of opening it. Omitted (default false) everywhere but the main roster. */
+  selecting?: boolean;
+  selectedRefs?: Set<string>;
+  onToggleSelect?: (ref: string) => void;
 }) {
   const { messages: m } = useLocale();
   return (
@@ -533,6 +628,7 @@ function RosterList({
       {entities.map((entity) => {
         const thumb = picturesFor(thumbs, entity.entity_ref)[0]?.thumbDataUrl;
         const hidden = entityIsHidden(hiddenEntities, entity.entity_ref);
+        const checked = selecting && (selectedRefs?.has(entity.entity_ref) ?? false);
         return (
           <li key={entity.entity_ref}>
             <button
@@ -540,8 +636,12 @@ function RosterList({
               className={[thumb ? "bible-name has-thumb" : "bible-name", hidden ? "is-hidden-from-model" : ""]
                 .filter(Boolean)
                 .join(" ")}
-              onClick={() => onOpen(entity.entity_ref)}
+              aria-pressed={selecting ? checked : undefined}
+              onClick={() => (selecting ? onToggleSelect?.(entity.entity_ref) : onOpen(entity.entity_ref))}
             >
+              {selecting ? (
+                <input type="checkbox" className="bible-name-check" checked={checked} readOnly tabIndex={-1} />
+              ) : null}
               {thumb ? <img className="bible-name-thumb" src={thumb} alt="" /> : null}
               <span>{entity.entity_label}</span>
               {hidden ? <span className="bible-hidden-mark">{m.bible.hidden}</span> : null}
@@ -550,6 +650,189 @@ function RosterList({
         );
       })}
     </ul>
+  );
+}
+
+function MergeEntitiesCard({
+  book,
+  refs,
+  sections,
+  onConfirm,
+  onClose
+}: {
+  book: Book;
+  refs: string[];
+  sections: { kind: BibleKind; label: string; entities: BibleEntityGroup[] }[];
+  onConfirm: (params: { winnerRef: string; finalLabel: string; choices: MergeChoice[] }) => void;
+  onClose: () => void;
+}) {
+  const { messages: m } = useLocale();
+  const entities = useMemo(() => {
+    const all = sections.flatMap((section) => section.entities);
+    return refs.map((ref) => ({ ref, label: all.find((entity) => entity.entity_ref === ref)?.entity_label ?? ref }));
+  }, [refs, sections]);
+  const [finalLabel, setFinalLabel] = useState(entities[0]?.label ?? "");
+  const [customLabel, setCustomLabel] = useState(false);
+  const proposal = useMemo(() => buildMergeProposal(book, refs), [book, refs]);
+  const [kept, setKept] = useState<Record<string, Set<string>>>(() =>
+    Object.fromEntries(proposal.map((group) => [group.predicate, new Set(group.options.map((option) => option.value))]))
+  );
+
+  function toggleOption(predicate: CorePredicate, value: string) {
+    setKept((current) => {
+      const next = new Set(current[predicate] ?? []);
+      if (next.has(value)) {
+        if (next.size <= 1) return current; // at least one value must survive per predicate
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return { ...current, [predicate]: next };
+    });
+  }
+
+  const label = finalLabel.trim();
+
+  return (
+    <div
+      className="edit-overlay"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="edit-card bible-merge-card" role="dialog" aria-modal="true" aria-labelledby="merge-title">
+        <h2 id="merge-title">{format(m.bible.mergeTitle, { count: refs.length })}</h2>
+        <p className="quiet">{m.bible.mergeLede}</p>
+
+        <fieldset className="proofread-setup-scope">
+          <legend className="chapter-craft-label">{m.bible.mergeLabelLegend}</legend>
+          {entities.map((entity) => (
+            <label key={entity.ref} className="proofread-setup-scope-option">
+              <input
+                type="radio"
+                name="merge-label"
+                checked={!customLabel && finalLabel === entity.label}
+                onChange={() => {
+                  setCustomLabel(false);
+                  setFinalLabel(entity.label);
+                }}
+              />
+              {entity.label}
+            </label>
+          ))}
+          <label className="proofread-setup-scope-option">
+            <input type="radio" name="merge-label" checked={customLabel} onChange={() => setCustomLabel(true)} />
+            {m.bible.mergeLabelCustom}
+          </label>
+          {customLabel ? (
+            <input
+              type="text"
+              value={finalLabel}
+              onChange={(event) => setFinalLabel(event.target.value)}
+              aria-label={m.bible.mergeLabelCustom}
+              autoFocus
+            />
+          ) : null}
+        </fieldset>
+
+        {proposal.length > 0 ? (
+          <div className="bible-merge-conflicts">
+            <p className="chapter-craft-label">{m.bible.mergeConflictsLabel}</p>
+            {proposal.map((group) => (
+              <fieldset key={group.predicate} className="proofread-setup-scope">
+                <legend className="chapter-craft-label">{m.bible.predicates[group.predicate]}</legend>
+                {group.options.map((option) => {
+                  const checked = kept[group.predicate]?.has(option.value) ?? true;
+                  return (
+                    <label key={option.value} className="proofread-setup-stage">
+                      <input type="checkbox" checked={checked} onChange={() => toggleOption(group.predicate, option.value)} />
+                      {option.value}
+                    </label>
+                  );
+                })}
+              </fieldset>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="edit-actions">
+          <button type="button" className="text-button" onClick={onClose}>
+            {m.common.cancel}
+          </button>
+          <button
+            type="button"
+            className="primary"
+            disabled={!label}
+            onClick={() =>
+              onConfirm({
+                winnerRef: refs[0]!,
+                finalLabel: label,
+                choices: proposal.map((group) => ({
+                  predicate: group.predicate,
+                  keptValues: [...(kept[group.predicate] ?? [])]
+                }))
+              })
+            }
+          >
+            {m.bible.mergeConfirm}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MergeReplaceNamesCard({
+  offer,
+  onApply,
+  onClose
+}: {
+  offer: { names: { from: string; hits: number }[]; to: string };
+  onApply: (selectedNames: string[]) => void;
+  onClose: () => void;
+}) {
+  const { messages: m } = useLocale();
+  const [checked, setChecked] = useState<Set<string>>(() => new Set(offer.names.map((item) => item.from)));
+
+  function toggle(from: string) {
+    setChecked((current) => {
+      const next = new Set(current);
+      if (next.has(from)) next.delete(from);
+      else next.add(from);
+      return next;
+    });
+  }
+
+  return (
+    <div
+      className="edit-overlay"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="edit-card" role="dialog" aria-modal="true" aria-labelledby="merge-replace-title">
+        <h2 id="merge-replace-title">{m.bible.mergeReplaceTitle}</h2>
+        <p className="quiet">{format(m.bible.mergeReplaceBody, { to: offer.to })}</p>
+        <fieldset className="proofread-setup-scope">
+          {offer.names.map((item) => (
+            <label key={item.from} className="proofread-setup-stage">
+              <input type="checkbox" checked={checked.has(item.from)} onChange={() => toggle(item.from)} />
+              {format(m.bible.mergeReplaceRow, { from: item.from, places: count(item.hits, m.bible.places) })}
+            </label>
+          ))}
+        </fieldset>
+        <div className="edit-actions">
+          <button type="button" className="text-button" onClick={onClose}>
+            {m.bible.keepTexts}
+          </button>
+          <button type="button" className="primary" onClick={() => onApply([...checked])}>
+            {m.bible.replace}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

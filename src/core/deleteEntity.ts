@@ -3,7 +3,9 @@ import { touch, type Book } from "./BookSchema";
 /**
  * Fully erases a Story Bible entity — every fact under this entity_ref
  * (locked, pending, and superseded alike), its character profile, its
- * pictures, its hidden-from-draft flag, and any manual kind override.
+ * pictures, its hidden-from-draft flag, any manual kind override, and its
+ * tracked aliases/exclusions (found missing from this cleanup, alongside
+ * mergeEntities.ts, which needed the same list and goes through it fully).
  * Unlike revising a fact (which supersedes, keeping history intact for
  * something that still exists), this is a real delete: for an entity that
  * should never have been there at all — a duplicate, a test card, a
@@ -32,6 +34,7 @@ export function deleteEntity(book: Book, entity_ref: string): Book {
     event_profiles,
     media: book.media.filter((row) => row.entity_ref !== entity_ref),
     hidden_entities: book.hidden_entities.filter((ref) => ref !== entity_ref),
-    entity_kinds: book.entity_kinds.filter((row) => row.entity_ref !== entity_ref)
+    entity_kinds: book.entity_kinds.filter((row) => row.entity_ref !== entity_ref),
+    entity_tracking: book.entity_tracking.filter((row) => row.entity_ref !== entity_ref)
   });
 }

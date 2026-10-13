@@ -4840,10 +4840,29 @@ button:disabled {
 }
 
 .bible-name.has-thumb,
-.bible-name.is-hidden-from-model {
+.bible-name.is-hidden-from-model,
+.bible-name:has(.bible-name-check) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.bible-name-check {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.bible-merge-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.5rem 0 0;
+}
+
+.bible-merge-conflicts {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.6rem;
 }
 
 .bible-name.is-hidden-from-model {
