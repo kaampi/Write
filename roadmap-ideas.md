@@ -1942,20 +1942,74 @@ v1.0.93 för hela bygget.
 
 ---
 
-### 45. Läsvärd rapport att titta på — sparad, inte granskad än
+### 45. "StoryScope: Investigating idiosyncrasies in AI fiction" — läst, inget beslut om byggåtgärd än
 
 Mats (2026-10-13), mitt under research-samtalet om #43
 (språkversioner): "Innan vi sätter igång kan du lägga in på To-do att
 vi ska titta på denna rapport https://arxiv.org/html/2604.03136v6 Vi
 tar det sen men lägg in det så att vi har den kvar."
 
-Kunde inte hämta sidan för en titel/sammanfattning här (ingen
-nätverksåtkomst till arxiv.org från den här miljön — `getaddrinfo
-ENOTFOUND arxiv.org`), så bara länken sparad rakt av. Okänt ännu om
-den är relevant för #43 specifikt eller ett separat ämne.
+Första försöket att hämta länken misslyckades (ingen nätverksåtkomst
+till arxiv.org från sandboxen). Mats klistrade in hela artikeltexten
+2026-10-13, så den är nu läst och sammanfattad.
 
-**Status: sparad, inte granskad.** Mats läser/diskuterar den vid ett
-senare tillfälle.
+**Vad rapporten är:** en akademisk studie (Univ. of Maryland/Google
+DeepMind) som bygger "StoryScope" — en pipeline som extraherar 304
+tolkningsbara, DISKURSNIVÅ-drag ur skönlitterär prosa (inte ordval/
+stil, utan t.ex. hur tematik görs explicit, hur orsakskedjor byggs,
+hur tid hoppar, hur känslor förmedlas) och använder dem för att skilja
+AI-skriven från mänskligt skriven fiktion. Tränat/testat på 61 608
+berättelser (10 272 mänskliga + fem AI-modeller: Claude, GPT, Gemini,
+DeepSeek, Kimi). Huvudfynd: diskursdragen ensamma särskiljer AI från
+människa med 93,2% macro-F1 — nästan lika bra som med stil inräknad,
+och robust mot att efterredigera bort "AI-stilen" (ytredigering sänker
+bara träffsäkerheten 1,6 poäng).
+
+**Konkreta, återkommande AI-mönster rapporten hittar** (jämfört med
+mänsklig prosa i samma genre/premiss):
+- Överförklarar tema/moral rakt ut via berättarrösten (77% vs 52%)
+  istället för att lita på att läsaren förstår.
+- Tightare, mer linjär orsakskedja; färre subplots (79% "inga
+  subplots" vs 57%); upplösning oftare styrd av huvudpersonens eget
+  val (69% vs 46%) snarare än yttre händelser eller tvetydighet.
+  Människor är mer bekväma med moraliskt tvetydiga/oklara avslut.
+  - Känslor visas nästan uteslutande via kropp/sinnesintryck ("en
+  klump i magen", kallsvettning) snarare än att namnges rakt av (81%
+  vs 38% kroppsligt; människor namnger känslan rakt av 29% vs 8%).
+- Färre tidshopp/flashbacks/icke-linjär struktur — människor bryter
+  kronologin betydligt oftare för att iscensätta en avslöjande vändning.
+- Färre brutna fjärde väggar, mindre direkt läsartilltal, mer vaga
+  ("som en...") snarare än namngivna referenser till andra verk.
+- Generellt: AI-modellerna klustrar tätt ihop i samma "berättelse-
+  rum", mänsklig prosa sprider sig betydligt bredare och ligger
+  statistiskt "mer sällsynt" (en proxy författarna kopplar till
+  upphovsrättens originalitetskrav).
+
+**Koppling till StoryBook AI, för diskussion — inget beslut taget:**
+Punkt 17 (AI-skrivtics-markering, byggd v0.95) jobbar redan på exakt
+den YTNIVÅ rapporten själv kallar "flyktig och lätt bortredigerad"
+(ordval, tankstreck) — helt skild nivå från det rapporten faktiskt
+hittar signal i. Två tänkbara, olika stora, åtgärder om Mats vill gå
+vidare:
+1. **Billigt: skärpa Polish/Draft-promptarna** (`DEFAULT_POLISH_PROMPT`,
+   `DRAFT_SYSTEM`/`RECAST_SYSTEM` i `generateProse.ts`) med konkreta
+   mothugg mot de tydligaste mönstren ovan — t.ex. "förklara inte temat
+   rakt ut genom berättarrösten", "tillåt moraliskt tvetydiga avslut",
+   "namnge en känsla ibland istället för att alltid visa den kroppsligt".
+   Ren textändring, inget nytt AI-anrop, samma risk/kostnad som när
+   Polish-prompten en gång skrevs.
+2. **Dyrare: en ny Proofread-liknande "struktur"-flagga** som bedömer
+   ett kapitel mot några av dragen (för linjärt? för internt löst?) —
+   kräver ett eget modellanrop per kapitel/manus och en bedömning av
+   om de lokala modeller författaren faktiskt kör (inte de fem
+   frontier-modeller rapporten testar) ens visar samma mönster.
+Osäkert om detta är värt att bygga alls (dessa fem AI-modeller
+genererade var för sig, inte modellerna StoryBook AI:s användare
+faktiskt kör lokalt) — lagt fram som diskussionsunderlag, inte ett
+förslag att köra på.
+
+**Status: läst och sammanfattat (2026-10-13). Väntar på Mats beslut**
+om något av ovanstående (eller inget) är värt att bygga.
 
 ---
 
