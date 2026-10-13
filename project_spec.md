@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.90
+Status: living document, v1.0.91
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3545,6 +3545,104 @@ klickbar efter z-index-fixet, Kael har båda traits kvar efteråt). 950
 tester gröna, tsc rent, build grön.
 
 v1.0.89 → v1.0.90.
+
+---
+
+**Ändringslogg v1.0.90 → v1.0.91 (2026-10-13):** #41 (Dekorativa
+scenbrytare), nästa i den ordning Mats själv föreslog (41, 44, 28, 43)
+och jag höll med om — minst omfattande och helt självständig av de
+fyra. Bad Mats om de fyra exakta stilarna/symbolerna istället för att
+gissa på den gamla, ospecifika anteckningen ("fyra CSS-stilar" utan
+detaljer utöver vinjetten); fick en bild tillbaka med alla fyra:
+Klassisk bokvinjett (❦, uttonande sepialinje), Minimalistisk diamant
+(❖, solid grå linje), Fransk elegans (⚜, uttonande guldlinje),
+Glimmer/Stjärna (✦, solid silverlinje). Mats skickade även exakta
+Unicode-kodpunkter för tre av fyra i efterhand (❦ U+2766, ⚜ U+269C,
+✦ U+2726) — stämde med bilden. Diamanten (❖ U+2756) fick jag själv
+välja, samma Dingbats-block som de andra tre (bra typsnittsstöd).
+
+**Upptäckt innan någon kod skrevs:** `manuscriptExport.ts` kände inte
+alls igen `---`-scenbrytare i NÅGOT exportformat — varje format
+(HTML/ePub/ODT/RTF/PDF) skrev bara ut de tre bindestrecken som vanlig
+text. Inte en regression, aldrig byggt. Fixad som en nödvändig
+förutsättning för hela funktionen (kan inte dekorera något exporten
+inte ens känner igen), inte en sidoeffekt att separat besluta om.
+
+**Fyra implementationslager, samma "olika trohet per format"-princip
+Anfang (drop cap) redan etablerade:**
+1. **Redigeraren** (`styles.css`): `.prose-hr` (oförändrad för
+   "plain") plus fyra `.scene-break-*`-klasser — bredare uttonande
+   gradientlinje (`linear-gradient`), symbolen centrerad via
+   `::before`, en "stans" i linjen bakom symbolen via en solid
+   bakgrundsfärg i exakt samma ton som panelen den ligger på.
+2. **HTML/ePub** (`manuscriptExport.ts`, `sceneBreakCss`/
+   `sceneBreakHtml`): samma teknik, egen CSS-kopia (som `dropCapCss`
+   redan har sin egen oberoende bisekterade kopia av talet 1.5 —
+   samma motivering, två separata statiska CSS-baser).
+3. **ODT/RTF** (förenklat, ingen uttoning möjlig): en ensam centrerad
+   rad med den riktiga symbolen — ODT via en ny `SceneBreak`-
+   stycke-stil (`fo:text-align="center"`), RTF via `{\qc ...\par}`,
+   inkapslad i en egen grupp så `\qc` aldrig läcker in i
+   efterföljande stycken (RTF:s "spaced"-gren återställer annars
+   aldrig justeringen explicit).
+4. **PDF** (mest begränsat): `pdf-lib` kan bara rita tecken det
+   inbäddade typsnittet faktiskt innehåller, och inget av de 13
+   brödtextsnitten har dingbat-glyfer — att försöka `drawText()` med
+   ❦/❖/⚜/✦ hade kastat ett fel. Löst med handritade vektorformer
+   istället för en bunlad symbolfont (roadmap-idéns ursprungliga
+   reservplan): diamant = en roterad kvadrat, stjärna/fleur-de-lis =
+   handskrivna SVG-path:er (tre överlappande "kronblad" + en bas-list
+   för fleur-de-lis, fyra uddar för stjärnan), löv = en enkel
+   mandelformad siluett för vinjetten. Linjens uttoning byggs av ~12
+   korta `drawLine`-segment med interpolerad opacitet (`pdf-lib` har
+   ingen inbyggd gradient). Inte pixel-exakt mot bilden — ett
+   kalligrafiskt löv/fleur-de-lis är inget värt att frihandsrita
+   bezier-exakt — men läsbart som "dekorativ avdelare" i den lilla
+   storlek en scenbrytare faktiskt renderas i.
+
+**Verifiering, PDF-formerna specifikt:** kunde inte lita på att gissa
+rätt blint, så byggde en visuell loop: skrev varje stils PDF via ett
+scratch-vitest-test (direkt `tsx`-körning misslyckas på
+typsnitts-assets, samma kända begränsning som tidigare i sessionen),
+rastrerade med `ghostscript` (`gs -sDEVICE=png16m`, redan installerat)
+till PNG, croppade/zoomade med ImageMagick och faktiskt TITTADE på
+resultatet innan jag gick vidare. Diamant och stjärna blev exakta;
+fleur-de-lis blev förvånansvärt igenkännbar trots att den är
+handskriven blint; lövet är den svagaste av de fyra (liten,
+mandelformad) men godkänd. LibreOffice headless (`--convert-to pdf`)
+fanns installerat men fungerade inte i den här sandlådan — misslyckades
+även på en ren textfil, så inte en bugg i min kod. Verifierade ODT/RTF
+strukturellt istället (XML-validering, brace-balans, rätt
+Unicode-kodpunkter i RTF:s `\uNNNN?`-escape) snarare än visuellt.
+
+**Två buggar hittade och fixade under den visuella Playwright-
+verifieringen, inte i teorin:**
+- Symbolens "stans" i linjen i redigeraren använde `var(--paper)`
+  (panel-ytans färg) som bakgrund — men redigeringsytan själv ligger
+  på `--bg`, en skugga mörkare, vilket lämnade en synlig felmatchad
+  rektangel bakom symbolen. Hittad genom att faktiskt sampla pixlar
+  (`convert -format "%[pixel:p{x,y}]"`) mot en Playwright-skärmdump,
+  inte genom att gissa. Fixad: `var(--bg)`.
+- HTML-exportens "plain"-stil (den korta vanliga linjen) renderades
+  helt osynlig — bredd och marginal var satta i `em`, men samma
+  element sätter sin egen `font-size` till 0 (för att dölja
+  textnoden "---"), så `em`-värden löstes mot den nollan och
+  kollapsade till bredd 0. Exakt samma fälla som `.prose-hr` i
+  `styles.css` redan har en kommentar om — men jag föll i den själv i
+  den nya exportkoden ändå. Hittad genom `boundingBox()` i Playwright
+  (bredd: 0), inte genom att läsa CSS:en. Fixad: `px` istället för
+  `em`.
+
+**Enhetstester** (`manuscript-export.test.ts`, nytt "scene break"-
+block, 10 nya tester): default-värdet, HTML i båda styckeslägena,
+ePub:s delade stylesheet, ODT i båda lägena inklusive asterismen
+("* * *") för "plain" istället för bokstavliga bindestreck, RTF:s
+gruppscopade `\qc`, och en PDF-rundtur för alla fem stilar (kan inte
+assert:a det visuella innehållet i ett enhetstest, bara att sidorna
+faktiskt skapas utan att kasta — det visuella är redan verifierat
+separat ovan). 960 tester gröna, tsc rent, build grön.
+
+v1.0.90 → v1.0.91.
 
 ---
 

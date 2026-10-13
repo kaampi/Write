@@ -3326,6 +3326,7 @@ button:disabled {
 
 .prose .prose-hr {
   display: block;
+  position: relative;
   height: 1px;
   /* rem, not em: `font-size: 0` below means an em value on THIS element
      resolves against its own (zero) font-size, collapsing to 0 — the line
@@ -3337,6 +3338,84 @@ button:disabled {
   color: transparent;
   background: var(--border);
   overflow: hidden;
+}
+
+/*
+ * Named scene-break ornaments (Settings → Typography → Scene break,
+ * BookSchema's scene_break_style — "plain" is the rule above, unchanged).
+ * Each widens the rule and fades it toward both ends (a gradient instead
+ * of a flat color — "overflow: hidden" above would clip the symbol below,
+ * so it's turned back on per style), then centers one Unicode ornament on
+ * top via ::before. The symbol's own font-size/line-height are reset away
+ * from the 0 above (inherited from .prose-hr, meant only to hide the
+ * literal "---" text) rather than removing them there, so "plain" keeps
+ * its exact prior rendering. manuscriptExport.ts's own sceneBreakCss()
+ * mirrors these four by hand for HTML/ePub (a separate, static CSS base,
+ * same duplication dropCapCss already has for its own numbers).
+ */
+.scene-break-vignette .prose-hr,
+.scene-break-fleur .prose-hr,
+.scene-break-diamond .prose-hr,
+.scene-break-sparkle .prose-hr {
+  width: 14rem;
+  overflow: visible;
+}
+
+.scene-break-vignette .prose-hr {
+  background: linear-gradient(to right, transparent, #9c7a52, transparent);
+}
+
+.scene-break-vignette .prose-hr::before {
+  content: "\2766";
+  color: #8a6640;
+}
+
+.scene-break-fleur .prose-hr {
+  background: linear-gradient(to right, transparent, #c9a227, transparent);
+}
+
+.scene-break-fleur .prose-hr::before {
+  content: "\269C";
+  color: #b8923f;
+}
+
+.scene-break-diamond .prose-hr {
+  width: 8rem;
+  background: linear-gradient(to right, transparent, #8f8f8f, transparent);
+}
+
+.scene-break-diamond .prose-hr::before {
+  content: "\2756";
+  color: #7a7a7a;
+}
+
+.scene-break-sparkle .prose-hr {
+  background: linear-gradient(to right, transparent, #a8a8a8, transparent);
+}
+
+.scene-break-sparkle .prose-hr::before {
+  content: "\2726";
+  color: #adadad;
+}
+
+.scene-break-vignette .prose-hr::before,
+.scene-break-fleur .prose-hr::before,
+.scene-break-diamond .prose-hr::before,
+.scene-break-sparkle .prose-hr::before {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.05rem;
+  line-height: 1;
+  /* --bg, not --paper: the editor canvas sits on --bg (a shade darker,
+     see styles.css's :root), not the panel-surface --paper — using
+     --paper here left a visibly mismatched rectangle behind the symbol,
+     caught by sampling actual rendered pixels rather than eyeballing a
+     screenshot (rgb(20,17,14)=--bg vs rgb(35,30,24)=--paper, confirmed
+     with ImageMagick against a live Playwright screenshot). */
+  background: var(--bg);
+  padding: 0 0.6em;
 }
 
 .prose p + p,

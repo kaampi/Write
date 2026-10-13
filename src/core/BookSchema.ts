@@ -296,6 +296,15 @@ export const BookSchema = z.object({
     .regex(/^#[0-9a-fA-F]{6}$/)
     .default("#2a2218"),
   /**
+   * Decorative style for scene breaks (a `---` paragraph on its own) — the
+   * third piece of Typography, same manuscript-wide/live-editor-plus-export
+   * wiring as drop_cap_lines and body_font. "plain" keeps today's short
+   * unadorned rule; the other four are named ornaments (fading rule plus a
+   * centered symbol) the author picks from rather than typing free
+   * CSS/Unicode. Missing on older saves — "plain" keeps today's look.
+   */
+  scene_break_style: z.enum(["plain", "vignette", "diamond", "fleur", "sparkle"]).default("plain"),
+  /**
    * Instructions for the Polish step — a whole-chapter cleanup pass the
    * author reviews in a diff before accepting, separate from Draft/
    * Recast. Editable per manuscript (Settings → Polish); defaults to
@@ -450,6 +459,7 @@ export function createBook(title: string): Book {
     body_font_weight: "regular",
     body_color_dark: "#f3eadc",
     body_color_light: "#2a2218",
+    scene_break_style: "plain",
     polish_prompt: DEFAULT_POLISH_PROMPT,
     prose_language: "",
     brainstorm: "",

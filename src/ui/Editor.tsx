@@ -1610,6 +1610,7 @@ export function Editor() {
                 void store.patchBook((current) => updateChapter(current, chapter.id, { scenes: createSceneFromSpan(chapter, span) }))
               }
               dropCapLines={book.drop_cap_lines}
+              sceneBreakStyle={book.scene_break_style}
               bodyFontStack={publishFontById(book.body_font).stack}
               bodyFontWeight={book.body_font_weight}
               bodyColorDark={book.body_color_dark}

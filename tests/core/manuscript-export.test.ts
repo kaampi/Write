@@ -480,6 +480,96 @@ describe("drop cap", () => {
   });
 });
 
+describe("scene break", () => {
+  function bookWithSceneBreak(style: "plain" | "vignette" | "diamond" | "fleur" | "sparkle") {
+    let book = { ...createBook("Night Keys"), scene_break_style: style };
+    book = updateChapter(book, book.chapters[0]!.id, {
+      title: "The quay",
+      prose: "Emma locked the door.\n---\nShe waited for the tide."
+    });
+    return book;
+  }
+
+  it("is plain by default", () => {
+    const doc = buildManuscriptExport({ ...createBook("Night Keys") });
+    expect(doc.sceneBreakStyle).toBe("plain");
+  });
+
+  it("renders a short rule in HTML for the plain default, not a plain paragraph of literal dashes exports used to show", () => {
+    const doc = buildManuscriptExport(bookWithSceneBreak("plain"));
+    const html = formatExportHtml(doc);
+    expect(html).not.toContain("<p>---</p>");
+    // px, not em: this paragraph also sets its own font-size to 0 (to hide
+    // the "---" text node it still contains), so an em width/margin here
+    // would resolve against that zero and collapse to 0 — a real bug this
+    // guards against, caught live via Playwright, not from reading the CSS.
+    expect(html).toContain('style="height:1px;width:56px;margin:21px auto;background:#ccc;font-size:0;line-height:0;color:transparent">---</p>');
+    expect(html).toContain("<p>Emma locked the door.</p>");
+    expect(html).toContain("<p>She waited for the tide.</p>");
+  });
+
+  it("renders the named ornament as a .scene-break paragraph plus its CSS, in HTML (spaced)", () => {
+    const doc = buildManuscriptExport(bookWithSceneBreak("vignette"));
+    const html = formatExportHtml(doc);
+    expect(html).toContain('<p class="scene-break"><span aria-hidden="true"> </span></p>');
+    expect(html).toContain('.scene-break::before{content:"❦"');
+    expect(html).toContain("#9c7a52");
+  });
+
+  it("detects a `---` paragraph the same way in indented mode", () => {
+    const doc = buildManuscriptExport(bookWithSceneBreak("diamond"));
+    const html = formatExportHtml(doc, undefined, "indented");
+    expect(html).toContain('<p class="scene-break"><span aria-hidden="true"> </span></p>');
+    expect(html).not.toContain(">---<");
+  });
+
+  it("does the same in ePub, with the rule in the shared stylesheet", () => {
+    const doc = buildManuscriptExport(bookWithSceneBreak("sparkle"));
+    const text = new TextDecoder().decode(packEpub(doc));
+    expect(text).toContain('<p class="scene-break"><span aria-hidden="true"> </span></p>');
+    expect(text).toContain('.scene-break::before{content:"✦"');
+  });
+
+  it("collapses to a single centered SceneBreak paragraph in ODT, with the real symbol", () => {
+    const doc = buildManuscriptExport(bookWithSceneBreak("fleur"));
+    const odtText = new TextDecoder().decode(packOdt(doc));
+    expect(odtText).toContain('<text:p text:style-name="SceneBreak">⚜</text:p>');
+    expect(odtText).toContain('<style:style style:name="SceneBreak"');
+    expect(odtText).toContain('fo:text-align="center"');
+  });
+
+  it("uses the old-fashioned asterism, not literal dashes, for plain in ODT", () => {
+    const doc = buildManuscriptExport(bookWithSceneBreak("plain"));
+    const odtText = new TextDecoder().decode(packOdt(doc));
+    expect(odtText).toContain('<text:p text:style-name="SceneBreak">* * *</text:p>');
+    expect(odtText).not.toContain(">---<");
+  });
+
+  it("works the same in ODT's indented mode", () => {
+    const doc = buildManuscriptExport(bookWithSceneBreak("diamond"));
+    const odtText = new TextDecoder().decode(packOdt(doc, undefined, "indented"));
+    expect(odtText).toContain('<text:p text:style-name="SceneBreak">❖</text:p>');
+  });
+
+  it("renders a centered line in RTF, scoped in its own {...} group so \\qc never leaks into the paragraphs around it (neither is itself wrapped in a group)", () => {
+    const doc = buildManuscriptExport(bookWithSceneBreak("vignette"));
+    const rtf = formatExportRtf(doc);
+    expect(rtf).toContain("{\\qc \\u10086?\\par}");
+    expect(rtf).not.toContain("---");
+    expect(rtf).toContain("Emma locked the door.\\par");
+    expect(rtf).toContain("She waited for the tide.\\par");
+  });
+
+  it("doesn't throw and still produces pages for every style in PDF (vector-drawn ornaments, not glyphs)", async () => {
+    for (const style of ["plain", "vignette", "diamond", "fleur", "sparkle"] as const) {
+      const doc = buildManuscriptExport(bookWithSceneBreak(style));
+      const bytes = await packPdf(doc);
+      const loaded = await PDFDocument.load(bytes);
+      expect(loaded.getPageCount()).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("body text weight", () => {
   function bookForWeight() {
     let book = createBook("Night Keys");

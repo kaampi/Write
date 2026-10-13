@@ -130,6 +130,14 @@ export const nb: Messages = {
       "En stor forbokstav på hvert kapittels første avsnitt, som strekker seg over valgt antall linjer. Vises direkte i skriveflaten og følger med til Publish-eksport (HTML, ePub, RTF, ODT; PDF ikke ennå).",
     dropCapOff: "Av",
     dropCapLines: "{n} linjer",
+    sceneBreakLabel: "Scenebrudd",
+    sceneBreakLede:
+      "Dekorasjon for et scenebrudd (et eget `---`-avsnitt) — en uttonende linje med et sentrert symbol istedenfor en enkel kort linje. Vises direkte i skriveflaten og følger med til Publish-eksport, med forenklede varianter i formater som ikke klarer en ekte uttoning (ODT, RTF) eller selve symbolet (PDF tegner en form istedenfor tegnet).",
+    sceneBreakPlain: "Enkel (dagens korte linje)",
+    sceneBreakVignette: "Klassisk bokvignett (❦)",
+    sceneBreakDiamond: "Minimalistisk diamant (❖)",
+    sceneBreakFleur: "Fransk eleganse (⚜)",
+    sceneBreakSparkle: "Glimmer / stjerne (✦)",
     bodyFontLabel: "Skrift",
     bodyFontLede:
       "Skrifttypen for manusets brødtekst — i selve redigeringen, og med i hver eksport fra Publish, så det blir ett valg istedenfor et separat, ulagret valg hver gang.",

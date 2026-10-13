@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.91] - 2026-10-13
+
+### Added
+- Decorative scene-break styles. Settings → Typography → Scene break now offers four named ornaments for a `---` paragraph — Classic book vignette (❦), Minimalist diamond (❖), French elegance (⚜), and Glimmer / star (✦) — alongside today's plain short rule. Shows live in the editor and carries into every Publish export, with simpler versions where a format can't do a true fade (ODT, RTF use a centered symbol, no fading line) or the ornament itself (PDF draws a small vector shape instead of the character, since the manuscript's chosen body font has no dingbat glyphs to draw).
+
+### Fixed
+- A scene break (`---` on its own line) was never recognized by any Publish export — HTML, ePub, ODT, RTF, and PDF all rendered the literal three dashes as ordinary text. All five now render a proper rule (the default "plain" style, or one of the new named ornaments), matching what the editor has always shown.
+
 ## [1.0.90] - 2026-10-13
 
 ### Added

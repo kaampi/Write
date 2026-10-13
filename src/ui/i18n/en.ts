@@ -428,6 +428,14 @@ export const en = {
       'A large opening letter for each chapter\'s first paragraph, spanning the chosen number of lines — sometimes called an "anfang". Shows live in the editor and carries into Publish exports (HTML, ePub, RTF, ODT; PDF not yet).',
     dropCapOff: "Off",
     dropCapLines: "{n} lines",
+    sceneBreakLabel: "Scene break",
+    sceneBreakLede:
+      "Decoration for a scene break (a `---` paragraph on its own) — a fading rule with a centered ornament instead of a plain short line. Shows live in the editor and carries into Publish exports, with simpler versions in formats that can't do a true fade (ODT, RTF) or the ornament itself (PDF uses a drawn shape instead of the character).",
+    sceneBreakPlain: "Plain (today's short rule)",
+    sceneBreakVignette: "Classic book vignette (❦)",
+    sceneBreakDiamond: "Minimalist diamond (❖)",
+    sceneBreakFleur: "French elegance (⚜)",
+    sceneBreakSparkle: "Glimmer / star (✦)",
     bodyFontLabel: "Font",
     bodyFontLede:
       "The typeface for the manuscript's prose — in the editor itself, and carried into every Publish export, so there's one choice instead of a separate, unsaved pick each time.",

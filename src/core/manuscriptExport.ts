@@ -1,10 +1,10 @@
 import fontkit from "@pdf-lib/fontkit";
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFImage, type PDFPage } from "pdf-lib";
+import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFImage, type PDFPage } from "pdf-lib";
 import { groupBibleEntities } from "./bibleGroups";
 import { sortedChapters, type Book } from "./BookSchema";
 import { profileFor } from "./characterProfile";
 import { PREDICATE_LABELS } from "./predicates";
-import { peelModelAsides, splitFlowParagraphs } from "./proseFlow";
+import { HR_BLOCK, peelModelAsides, splitFlowParagraphs } from "./proseFlow";
 import { newId } from "./ids";
 
 export type PublishFont = {
@@ -58,6 +58,8 @@ export type ManuscriptExport = {
   readerAge?: number;
   /** Drop-cap ("anfang") height in lines for each chapter's opening letter — 0 turns it off (BookSchema's drop_cap_lines). */
   dropCapLines: number;
+  /** Decorative scene-break ornament (BookSchema's scene_break_style) — "plain" keeps today's unadorned rule. */
+  sceneBreakStyle: Book["scene_break_style"];
   chapters: ManuscriptExportChapter[];
   bible: ManuscriptExportSection[];
 };
@@ -89,6 +91,7 @@ export function buildManuscriptExport(book: Book, note = "", exportedAt = new Da
     viewpoint: book.viewpoint.trim(),
     ...(book.reader_age !== undefined ? { readerAge: book.reader_age } : {}),
     dropCapLines: book.drop_cap_lines,
+    sceneBreakStyle: book.scene_break_style,
     chapters: sortedChapters(book).map((chapter) => ({
       heading: `${chapter.sequence_index + 1}. ${chapter.title.trim() || `Chapter ${chapter.sequence_index + 1}`}`,
       voice: chapter.voice?.trim() ?? "",
@@ -202,6 +205,49 @@ function dropCapCss(lines: number): string {
   return `.has-drop-cap p.drop-cap::first-letter{float:left;font-weight:700;font-size:${size}em;line-height:1;padding:0 0.08em 0 0}`;
 }
 
+/**
+ * The four named scene-break ornaments (BookSchema's scene_break_style,
+ * "plain" excluded — that's today's unadorned rule, unchanged). Same
+ * Unicode characters and colors as styles.css's own .scene-break-* rules
+ * for the live editor — a separate, independently maintained copy (same
+ * duplication dropCapCss's 1.5 multiplier already has against styles.css's
+ * own, for the same reason: two different static CSS bases, nothing to
+ * share a constant against at runtime).
+ */
+const SCENE_BREAK_ORNAMENTS: Record<Exclude<Book["scene_break_style"], "plain">, { char: string; line: string; symbol: string; width: string }> = {
+  vignette: { char: "❦", line: "#9c7a52", symbol: "#8a6640", width: "14rem" },
+  fleur: { char: "⚜", line: "#c9a227", symbol: "#b8923f", width: "14rem" },
+  diamond: { char: "❖", line: "#8f8f8f", symbol: "#7a7a7a", width: "8rem" },
+  sparkle: { char: "✦", line: "#a8a8a8", symbol: "#adadad", width: "14rem" }
+};
+
+/** HTML/ePub CSS for one document's chosen scene-break style — "plain" needs none (the default short rule is inline on the paragraph itself, see sceneBreakHtml). `pageBg` punches a gap in the line behind the symbol; both exports render on a plain white page, unlike the live editor's themed --bg. */
+function sceneBreakCss(style: Book["scene_break_style"], pageBg = "#fff"): string {
+  if (style === "plain") return "";
+  const o = SCENE_BREAK_ORNAMENTS[style];
+  return `.scene-break{display:block;position:relative;height:1px;margin:1.3em auto;width:${o.width};background:linear-gradient(to right,transparent,${o.line},transparent)}.scene-break::before{content:"${o.char}";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:1.05em;line-height:1;color:${o.symbol};background:${pageBg};padding:0 0.6em}`;
+}
+
+/** The scene-break paragraph itself (shared by formatExportHtml and packEpub). "plain" keeps the exact markup/look this always had — a short solid rule, no symbol — everything else gets the decorated .scene-break class sceneBreakCss() styles. px, not em: this element also sets its own font-size to 0 (to hide the literal "---" text it still contains, same trick styles.css's .prose-hr already uses), so an em value here would resolve against that zero and collapse to 0 width/margin — caught the same way, against actual rendered pixels, not by inspecting the CSS alone (Playwright reported a 0-width box until this was fixed). */
+function sceneBreakHtml(style: Book["scene_break_style"]): string {
+  if (style === "plain") return `<p style="height:1px;width:56px;margin:21px auto;background:#ccc;font-size:0;line-height:0;color:transparent">---</p>`;
+  return `<p class="scene-break"><span aria-hidden="true"> </span></p>`;
+}
+
+/**
+ * ODT/RTF scene-break text — neither format can do a fading rule or an
+ * overlaid symbol the way HTML/ePub's CSS can (same "different fidelity
+ * per format" tradeoff Anfang/drop-cap already made), so every style
+ * collapses to a single centered line: the four named ornaments render
+ * their real character, "plain" is the old-fashioned asterism (three
+ * centered asterisks) rather than the literal "---" both formats rendered
+ * before this — unchanged markup, not a dash a reader would mistake for a
+ * typo.
+ */
+function sceneBreakSymbol(style: Book["scene_break_style"]): string {
+  return style === "plain" ? "* * *" : SCENE_BREAK_ORNAMENTS[style].char;
+}
+
 function base64FromBytes(bytes: Uint8Array): string {
   let binary = "";
   const chunkSize = 0x8000;
@@ -228,10 +274,11 @@ function htmlFontCss(font: PublishFont | undefined, bodyWeight: BodyWeight, body
   return `${faces}body{font-family:${stack};font-weight:${bodyWeight === "bold" ? 700 : 400}${color}}`;
 }
 
-function htmlParagraphs(text: string, paragraphStyle: ParagraphStyle, dropCap: boolean): string {
+function htmlParagraphs(text: string, paragraphStyle: ParagraphStyle, dropCap: boolean, sceneBreakStyle: Book["scene_break_style"]): string {
   if (paragraphStyle === "indented") {
     return splitFlowParagraphs(text)
       .map((paragraph, index) => {
+        if (HR_BLOCK.test(paragraph)) return sceneBreakHtml(sceneBreakStyle);
         const classes = [index === 0 ? "first" : "", index === 0 && dropCap ? "drop-cap" : ""].filter(Boolean);
         return `<p${classes.length > 0 ? ` class="${classes.join(" ")}"` : ""}>${xmlEscape(paragraph)}</p>`;
       })
@@ -243,6 +290,7 @@ function htmlParagraphs(text: string, paragraphStyle: ParagraphStyle, dropCap: b
   return lines
     .map((line) => {
       if (!line) return "<p><br/></p>";
+      if (HR_BLOCK.test(line)) return sceneBreakHtml(sceneBreakStyle);
       const cls = dropCapUsed ? "" : ' class="drop-cap"';
       dropCapUsed = true;
       return `<p${cls}>${xmlEscape(line)}</p>`;
@@ -270,7 +318,7 @@ export function formatExportHtml(
     body.push(`<h2 class="chapter">${xmlEscape(chapter.heading)}</h2>`);
     if (chapter.startImageDataUrl) body.push(`<img class="chapter-image" src="${chapter.startImageDataUrl}" alt=""/>`);
     if (chapter.voice) body.push(`<p class="meta">Voice: ${xmlEscape(chapter.voice)}</p>`);
-    if (chapter.prose) body.push(htmlParagraphs(chapter.prose, paragraphStyle, doc.dropCapLines > 0));
+    if (chapter.prose) body.push(htmlParagraphs(chapter.prose, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
   }
   if (doc.bible.length > 0) {
     body.push("<h2>Story Bible</h2>");
@@ -292,7 +340,7 @@ export function formatExportHtml(
 <head>
 <meta charset="utf-8"/>
 <title>${xmlEscape(doc.title)}</title>
-<style>${HTML_EXPORT_CSS_BASE}${INDENTED_PARAGRAPHS_CSS}${dropCapCss(doc.dropCapLines)}${htmlFontCss(font, bodyWeight, bodyColor)}</style>
+<style>${HTML_EXPORT_CSS_BASE}${INDENTED_PARAGRAPHS_CSS}${dropCapCss(doc.dropCapLines)}${sceneBreakCss(doc.sceneBreakStyle)}${htmlFontCss(font, bodyWeight, bodyColor)}</style>
 </head>
 <body${bodyClasses.length > 0 ? ` class="${bodyClasses.join(" ")}"` : ""}>
 ${body.join("\n")}
@@ -335,7 +383,7 @@ export function formatExportRtf(
     parts.push("\\page", `{\\fs32\\b ${rtfEscape(chapter.heading)}}\\par`);
     if (chapter.voice) parts.push(`${rtfEscape(`Voice: ${chapter.voice}`)}\\par`);
     if (chapter.prose) {
-      parts.push("\\par", rtfBlock(chapter.prose, paragraphStyle));
+      parts.push("\\par", rtfBlock(chapter.prose, paragraphStyle, doc.sceneBreakStyle));
       if (paragraphStyle === "indented") parts.push("\\pard");
     }
   }
@@ -363,7 +411,10 @@ export function packOdt(
   return zipStore([
     { name: "mimetype", data: utf8("application/vnd.oasis.opendocument.text") },
     { name: "content.xml", data: utf8(odtContentXml(doc, paragraphStyle)) },
-    { name: "styles.xml", data: utf8(odtStyles(font?.name ?? "Liberation Serif", doc.dropCapLines, bodyWeight, bodyColor)) },
+    {
+      name: "styles.xml",
+      data: utf8(odtStyles(font?.name ?? "Liberation Serif", doc.dropCapLines, bodyWeight, bodyColor, doc.sceneBreakStyle))
+    },
     { name: "META-INF/manifest.xml", data: utf8(ODT_MANIFEST) }
   ]);
 }
@@ -428,7 +479,7 @@ export function packEpub(
       parts.push(`<img src="../images/chapter-${index}.jpg" alt=""/>`);
     }
     if (chapter.voice) parts.push(`<p class="meta">Voice: ${xmlEscape(chapter.voice)}</p>`);
-    if (chapter.prose) parts.push(htmlParagraphs(chapter.prose, paragraphStyle, doc.dropCapLines > 0));
+    if (chapter.prose) parts.push(htmlParagraphs(chapter.prose, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
     const bodyClasses = [paragraphStyle === "indented" ? "indented" : "", doc.dropCapLines > 0 ? "has-drop-cap" : ""].filter(
       Boolean
     );
@@ -522,7 +573,7 @@ ${navList}
     { name: "OEBPS/nav.xhtml", data: utf8(nav) },
     {
       name: "OEBPS/styles/stylesheet.css",
-      data: utf8(EPUB_CSS_BASE + INDENTED_PARAGRAPHS_CSS + dropCapCss(doc.dropCapLines) + epubFontCss(font, bodyWeight, bodyColor))
+      data: utf8(EPUB_CSS_BASE + INDENTED_PARAGRAPHS_CSS + dropCapCss(doc.dropCapLines) + sceneBreakCss(doc.sceneBreakStyle) + epubFontCss(font, bodyWeight, bodyColor))
     },
     ...images.map((image) => ({ name: `OEBPS/images/${image.name}`, data: image.data })),
     ...(font?.embed
@@ -539,6 +590,73 @@ const PDF_PAGE_WIDTH = 595.28;
 const PDF_PAGE_HEIGHT = 841.89;
 const PDF_MARGIN = 56;
 const PDF_META_COLOR = rgb(0.4, 0.4, 0.4);
+
+/** Simple leaf silhouette (24x24 viewBox) — "vignette"'s PDF stand-in for ❦. */
+const PDF_LEAF_PATH = "M12 2 C18 7 18 17 12 22 C6 17 6 7 12 2 Z";
+
+/** Three overlapping petal lobes plus a base band (24x24 viewBox) — "fleur"'s PDF stand-in for ⚜. */
+const PDF_FLEUR_PATH =
+  "M12 2 C9 6 8 10 9 14 C9.5 16 10.5 17 12 18 C13.5 17 14.5 16 15 14 C16 10 15 6 12 2 Z " +
+  "M12 10 C9 9 5 9 3 11 C2 12.2 2.3 14 4 15 C6.5 16.3 9.5 15 11 12.5 Z " +
+  "M12 10 C15 9 19 9 21 11 C22 12.2 21.7 14 20 15 C17.5 16.3 14.5 15 13 12.5 Z " +
+  "M7 17 L17 17 L17 19 L7 19 Z";
+
+/** Classic four-point sparkle (24x24 viewBox) — "sparkle"'s PDF stand-in for ✦. */
+const PDF_SPARKLE_PATH = "M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z";
+
+/**
+ * A handful of short line segments with interpolated opacity — pdf-lib's
+ * drawLine has no native gradient, so this is the closest stand-in for the
+ * editor/HTML CSS's linear-gradient fade. fadeFrom "left" fades out toward
+ * xStart and is solid at xEnd (for the rule's left half); "right" mirrors
+ * it (for the right half, solid near the symbol, fading toward the edge).
+ */
+function drawFadingRule(
+  page: PDFPage,
+  xStart: number,
+  xEnd: number,
+  y: number,
+  color: ReturnType<typeof rgb>,
+  fadeFrom: "left" | "right"
+): void {
+  const segments = 12;
+  const width = xEnd - xStart;
+  for (let i = 0; i < segments; i += 1) {
+    const t0 = i / segments;
+    const t1 = (i + 1) / segments;
+    const mid = (t0 + t1) / 2;
+    const opacity = Math.max(0.08, fadeFrom === "left" ? mid : 1 - mid);
+    page.drawLine({ start: { x: xStart + t0 * width, y }, end: { x: xStart + t1 * width, y }, thickness: 0.75, color, opacity });
+  }
+}
+
+/**
+ * Vector approximations of the four named ornaments, drawn by hand rather
+ * than rendering the real Unicode glyph — pdf-lib can only draw characters
+ * the embedded font actually contains, and the manuscript's chosen body
+ * font (Lora, Literata, etc.) has no dingbat glyphs, so drawText would
+ * throw on them. Not pixel-exact to the reference image (a hand-curled
+ * fleuron and a true fleur-de-lis are calligraphic forms, not something
+ * worth freehanding bezier-exact); good enough to read as "ornamental
+ * divider" at the small size a scene break actually renders at. (x, y) is
+ * the ornament's intended center.
+ */
+function drawOrnament(page: PDFPage, style: Exclude<Book["scene_break_style"], "plain">, x: number, y: number, color: ReturnType<typeof rgb>): void {
+  if (style === "diamond") {
+    page.drawRectangle({ x: x - 3.2, y: y - 3.2, width: 6.4, height: 6.4, rotate: degrees(45), color });
+    return;
+  }
+  const paths: Record<"vignette" | "fleur" | "sparkle", { path: string; scale: number }> = {
+    vignette: { path: PDF_LEAF_PATH, scale: 0.5 },
+    fleur: { path: PDF_FLEUR_PATH, scale: 0.42 },
+    sparkle: { path: PDF_SPARKLE_PATH, scale: 0.42 }
+  };
+  const { path, scale } = paths[style];
+  // The path's own viewBox is 24x24; centering it on (x, y) means offsetting
+  // by half its scaled size in both axes (drawSvgPath anchors at the path's
+  // own top-left origin, not its center).
+  page.drawSvgPath(path, { x: x - 12 * scale, y: y + 12 * scale, scale, color });
+}
 
 class PdfWriter {
   private readonly pdf: PDFDocument;
@@ -618,16 +736,35 @@ class PdfWriter {
     }
   }
 
-  /** Chapter body text. "spaced" keeps the long-standing line-by-line behavior (a blank source line opens a small gap). "indented" sets each paragraph flush against the next, first line indented — except the chapter's opening paragraph, left flush by convention. */
-  prose(text: string, paragraphStyle: ParagraphStyle, size = 11): void {
+  /** Chapter body text. "spaced" keeps the long-standing line-by-line behavior (a blank source line opens a small gap). "indented" sets each paragraph flush against the next, first line indented — except the chapter's opening paragraph, left flush by convention. A `---` paragraph (either style) draws sceneBreak() instead of the literal dashes it used to. */
+  prose(text: string, paragraphStyle: ParagraphStyle, sceneBreakStyle: Book["scene_break_style"], size = 11): void {
     if (paragraphStyle === "spaced") {
-      this.lines(text, { size });
+      const lineHeight = size * 1.45;
+      for (const raw of text.split(/\r\n|\n|\r/)) {
+        if (!raw) {
+          this.y -= lineHeight * 0.6;
+          continue;
+        }
+        if (HR_BLOCK.test(raw)) {
+          this.sceneBreak(sceneBreakStyle);
+          continue;
+        }
+        for (const line of this.wrap(raw, this.body, size, this.maxWidth)) {
+          this.ensureSpace(lineHeight);
+          this.page.drawText(line, { x: PDF_MARGIN, y: this.y, size, font: this.body, ...(this.color ? { color: this.color } : {}) });
+          this.y -= lineHeight;
+        }
+      }
       return;
     }
     const font = this.body;
     const lineHeight = size * 1.45;
     const indent = 20;
     splitFlowParagraphs(text).forEach((paragraph, index) => {
+      if (HR_BLOCK.test(paragraph)) {
+        this.sceneBreak(sceneBreakStyle);
+        return;
+      }
       this.wrap(paragraph, font, size, this.maxWidth).forEach((line, lineIndex) => {
         this.ensureSpace(lineHeight);
         const x = index > 0 && lineIndex === 0 ? PDF_MARGIN + indent : PDF_MARGIN;
@@ -635,6 +772,29 @@ class PdfWriter {
         this.y -= lineHeight;
       });
     });
+  }
+
+  /** Draws one scene-break ornament centered on the page and advances past it. "plain" is a short solid rule, no symbol — everything else fades a wider rule toward both edges (drawFadingRule) with drawOrnament() centered in the gap. */
+  sceneBreak(style: Book["scene_break_style"]): void {
+    const rowHeight = 28;
+    this.ensureSpace(rowHeight);
+    const centerX = PDF_MARGIN + this.maxWidth / 2;
+    const lineY = this.y - rowHeight / 2;
+    if (style === "plain") {
+      const half = 25;
+      this.page.drawLine({ start: { x: centerX - half, y: lineY }, end: { x: centerX + half, y: lineY }, thickness: 0.75, color: rgb(0.75, 0.75, 0.75) });
+      this.y -= rowHeight;
+      return;
+    }
+    const spec = SCENE_BREAK_ORNAMENTS[style];
+    const lineColor = pdfRgb(spec.line);
+    const symbolColor = pdfRgb(spec.symbol);
+    const half = style === "diamond" ? 55 : 95;
+    const gap = 10;
+    drawFadingRule(this.page, centerX - half, centerX - gap, lineY, lineColor, "left");
+    drawFadingRule(this.page, centerX + gap, centerX + half, lineY, lineColor, "right");
+    drawOrnament(this.page, style, centerX, lineY, symbolColor);
+    this.y -= rowHeight;
   }
 
   bullet(text: string, size = 11): void {
@@ -721,7 +881,7 @@ export async function packPdf(
       writer.image(image);
     }
     if (chapter.voice) writer.lines(`Voice: ${chapter.voice}`, { size: 9, meta: true });
-    if (chapter.prose) writer.prose(chapter.prose, paragraphStyle);
+    if (chapter.prose) writer.prose(chapter.prose, paragraphStyle, doc.sceneBreakStyle);
   }
 
   if (doc.bible.length > 0) {
@@ -743,13 +903,23 @@ export async function packPdf(
 /** 567 twips ≈ 0.4in, a common manuscript first-line indent. */
 const RTF_INDENT_TWIPS = 567;
 
-function rtfBlock(text: string, paragraphStyle: ParagraphStyle): string {
+function rtfBlock(text: string, paragraphStyle: ParagraphStyle, sceneBreakStyle: Book["scene_break_style"]): string {
+  // Wrapped in its own `{...}` group so `\qc` (centered) never leaks into
+  // the paragraphs after it — RTF alignment otherwise persists until
+  // explicitly reset, and the "spaced" branch below never resets it.
+  const sceneBreak = `{\\qc ${rtfEscape(sceneBreakSymbol(sceneBreakStyle))}\\par}`;
   if (paragraphStyle === "indented") {
     return splitFlowParagraphs(text)
-      .map((paragraph, index) => `\\pard\\sa0\\fi${index === 0 ? 0 : RTF_INDENT_TWIPS} ${rtfEscape(paragraph)}\\par`)
+      .map((paragraph, index) => {
+        if (HR_BLOCK.test(paragraph)) return sceneBreak;
+        return `\\pard\\sa0\\fi${index === 0 ? 0 : RTF_INDENT_TWIPS} ${rtfEscape(paragraph)}\\par`;
+      })
       .join("\n");
   }
-  return text.split(/\r\n|\n|\r/).map((line) => `${rtfEscape(line)}\\par`).join("\n");
+  return text
+    .split(/\r\n|\n|\r/)
+    .map((line) => (HR_BLOCK.test(line) ? sceneBreak : `${rtfEscape(line)}\\par`))
+    .join("\n");
 }
 
 /** Parses a BookSchema-validated "#RRGGBB" string (the schema's regex already guarantees this shape) into 0-255 channel ints. */
@@ -791,13 +961,14 @@ function xmlEscape(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-function odtParagraphs(text: string, style = "Standard", firstStyle = style): string {
+function odtParagraphs(text: string, style = "Standard", firstStyle = style, sceneBreakStyle: Book["scene_break_style"] = "plain"): string {
   const lines = text.split(/\r\n|\n|\r/);
   if (lines.length === 0) return `<text:p text:style-name="${style}"/>`;
   let firstUsed = false;
   return lines
     .map((line) => {
       if (!line) return `<text:p text:style-name="${style}"/>`;
+      if (HR_BLOCK.test(line)) return `<text:p text:style-name="SceneBreak">${xmlEscape(sceneBreakSymbol(sceneBreakStyle))}</text:p>`;
       const lineStyle = firstUsed ? style : firstStyle;
       firstUsed = true;
       return `<text:p text:style-name="${lineStyle}">${xmlEscape(line)}</text:p>`;
@@ -805,10 +976,13 @@ function odtParagraphs(text: string, style = "Standard", firstStyle = style): st
     .join("");
 }
 
-function odtProse(text: string, paragraphStyle: ParagraphStyle, dropCap: boolean): string {
-  if (paragraphStyle === "spaced") return odtParagraphs(text, "Standard", dropCap ? "StandardDropCap" : "Standard");
+function odtProse(text: string, paragraphStyle: ParagraphStyle, dropCap: boolean, sceneBreakStyle: Book["scene_break_style"]): string {
+  if (paragraphStyle === "spaced") {
+    return odtParagraphs(text, "Standard", dropCap ? "StandardDropCap" : "Standard", sceneBreakStyle);
+  }
   return splitFlowParagraphs(text)
     .map((paragraph, index) => {
+      if (HR_BLOCK.test(paragraph)) return `<text:p text:style-name="SceneBreak">${xmlEscape(sceneBreakSymbol(sceneBreakStyle))}</text:p>`;
       const firstStyle = dropCap ? "IndentedFirstDropCap" : "IndentedFirst";
       return `<text:p text:style-name="${index === 0 ? firstStyle : "Indented"}">${xmlEscape(paragraph)}</text:p>`;
     })
@@ -833,7 +1007,7 @@ function odtContentXml(doc: ManuscriptExport, paragraphStyle: ParagraphStyle): s
   for (const chapter of doc.chapters) {
     body.push(odtChapterHeading(chapter.heading));
     if (chapter.voice) body.push(odtParagraphs(`Voice: ${chapter.voice}`));
-    if (chapter.prose) body.push(odtProse(chapter.prose, paragraphStyle, doc.dropCapLines > 0));
+    if (chapter.prose) body.push(odtProse(chapter.prose, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
   }
   if (doc.bible.length > 0) {
     body.push(odtHeading(2, "Story Bible"));
@@ -855,7 +1029,13 @@ function odtContentXml(doc: ManuscriptExport, paragraphStyle: ParagraphStyle): s
 `;
 }
 
-function odtStyles(fontName: string, dropCapLines = 0, bodyWeight: BodyWeight = "regular", bodyColor?: string): string {
+function odtStyles(
+  fontName: string,
+  dropCapLines = 0,
+  bodyWeight: BodyWeight = "regular",
+  bodyColor?: string,
+  sceneBreakStyle: Book["scene_break_style"] = "plain"
+): string {
   const dropCapStyles =
     dropCapLines > 0
       ? `
@@ -866,6 +1046,12 @@ function odtStyles(fontName: string, dropCapLines = 0, bodyWeight: BodyWeight = 
       <style:paragraph-properties><style:drop-cap style:lines="${dropCapLines}" style:length="1"/></style:paragraph-properties>
     </style:style>`
       : "";
+  const sceneBreakColor = sceneBreakStyle === "plain" ? "" : ` fo:color="${SCENE_BREAK_ORNAMENTS[sceneBreakStyle].symbol}"`;
+  const sceneBreakStyleXml = `
+    <style:style style:name="SceneBreak" style:family="paragraph" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:text-align="center" fo:margin-top="0.3cm" fo:margin-bottom="0.3cm"/>
+      <style:text-properties fo:font-size="14pt"${sceneBreakColor}/>
+    </style:style>`;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" office:version="1.3">
   <office:styles>
@@ -894,7 +1080,7 @@ function odtStyles(fontName: string, dropCapLines = 0, bodyWeight: BodyWeight = 
     </style:style>
     <style:style style:name="IndentedFirst" style:family="paragraph" style:parent-style-name="Standard">
       <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in" fo:text-indent="0in"/>
-    </style:style>${dropCapStyles}
+    </style:style>${dropCapStyles}${sceneBreakStyleXml}
   </office:styles>
 </office:document-styles>
 `;

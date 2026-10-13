@@ -331,6 +331,28 @@ export function SettingsPanel({
                     ))}
                   </select>
                 </label>
+                <label className="craft-field">
+                  <span className="field-label-row">
+                    {m.editor.sceneBreakLabel}
+                    <HelpTip
+                      body={m.editor.sceneBreakLede}
+                      ariaLabel={format(m.common.infoAbout, { field: m.editor.sceneBreakLabel })}
+                    />
+                  </span>
+                  <select
+                    value={book.scene_break_style}
+                    onChange={(event) =>
+                      onPatch((current) => ({ ...current, scene_break_style: event.target.value as Book["scene_break_style"] }))
+                    }
+                    aria-label={m.editor.sceneBreakLabel}
+                  >
+                    <option value="plain">{m.editor.sceneBreakPlain}</option>
+                    <option value="vignette">{m.editor.sceneBreakVignette}</option>
+                    <option value="diamond">{m.editor.sceneBreakDiamond}</option>
+                    <option value="fleur">{m.editor.sceneBreakFleur}</option>
+                    <option value="sparkle">{m.editor.sceneBreakSparkle}</option>
+                  </select>
+                </label>
               </div>
             </section>
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import type { Book } from "@core/BookSchema";
 import { applyReplace, isNonEmptySpan, selectedText, type TextSpan } from "@core/textSpan";
 import { htmlFromProse, splitFlowParagraphs } from "@core/proseFlow";
 import {
@@ -105,6 +106,7 @@ export function ProseCanvas({
   onCutToDarling,
   onCreateScene,
   dropCapLines = 0,
+  sceneBreakStyle,
   bodyFontStack,
   bodyFontWeight,
   bodyColorDark,
@@ -170,6 +172,8 @@ export function ProseCanvas({
   onCreateScene?: (span: TextSpan) => void;
   /** Drop-cap ("anfang") height in lines for the opening letter of the first paragraph — 0 (the default) renders plainly. Chapter prose only; Synopsis and Brainstorm never pass this. */
   dropCapLines?: number;
+  /** Decorative style for a `---` scene-break paragraph (Settings → Typography → Scene break). Omitted/"plain" renders today's unadorned short rule. Chapter prose only; Synopsis and Brainstorm never pass this. */
+  sceneBreakStyle?: Book["scene_break_style"];
   /** CSS font-family stack for the manuscript's chosen body typeface (Settings → Typography → Font). Omitted keeps the app's own default prose font — Synopsis and Brainstorm never pass this, only chapter prose does. */
   bodyFontStack?: string;
   /** Body text weight (Settings → Typography → Weight). Omitted keeps the normal weight — Synopsis and Brainstorm never pass this, only chapter prose does. */
@@ -634,7 +638,13 @@ export function ProseCanvas({
       ) : null}
       <div
         ref={areaRef}
-        className={dropCapLines > 0 ? "prose has-drop-cap" : "prose"}
+        className={[
+          "prose",
+          dropCapLines > 0 ? "has-drop-cap" : "",
+          sceneBreakStyle && sceneBreakStyle !== "plain" ? `scene-break-${sceneBreakStyle}` : ""
+        ]
+          .filter(Boolean)
+          .join(" ")}
         style={
           {
             ...(dropCapLines > 0 ? { "--drop-cap-lines": dropCapLines } : {}),

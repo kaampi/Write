@@ -1749,7 +1749,7 @@ hanterbart snarare än en fast gräns för alla.
 
 ---
 
-### 41. Dekorativa scenbrytare (HR-vinjetter) — egen Setting, likt Drop cap
+### 41. Dekorativa scenbrytare (HR-vinjetter) — egen Setting, likt Drop cap ✅ byggd (v1.0.91)
 
 Mats visade en bild med fyra CSS-stilar för scenbrytare (`<hr>`) —
 t.ex. "Klassisk bokvinjett": en gradientlinje som tonar ut mot
@@ -1779,10 +1779,17 @@ Drop cap — ett urval av fördefinierade scenbrytarstilar (inte fri
 CSS/symbol-inmatning), så export-koden bara behöver känna till ett
 fast antal kombinationer av linje+symbol per format.
 
-**Status: inte påbörjad.** Mats bad att spara idén här. Naturlig
-uppföljning efter Rubrik- och Anfang-kontrollerna i det pågående
-Typography-arbetet (steg 2), eftersom den delar samma
-Settings-sektion.
+**Status: byggd (v1.0.91).** Settings → Typography → Scene break,
+fyra namngivna stilar plus dagens korta linje ("plain"). Samma
+"olika trohet per format"-princip som ovan föreslog, PDF löst med
+handritade vektorformer istället för en bundlad symbolfont (diamant
+och stjärna blev exakta, fleur-de-lis överraskande igenkännbar,
+lövet den svagaste av de fyra men godkänd). Se project_spec.md
+v1.0.90 → v1.0.91 för hela bygget, inklusive en upptäckt
+förutsättning (ingen export kände alls igen `---`-scenbrytare innan
+detta, oavsett stil) och två buggar hittade via Playwright
+(bakgrundsfärgen på symbolens "stans" i redigeraren, och ett
+`em`-mot-`font-size:0`-kollaps i HTML-exportens standardlinje).
 
 ---
 

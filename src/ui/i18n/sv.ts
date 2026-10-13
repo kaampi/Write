@@ -130,6 +130,14 @@ export const sv: Messages = {
       "En stor begynnelsebokstav på varje kapitels första stycke, som sträcker sig över valt antal rader. Visas direkt i skrivytan och följer med till Publish-export (HTML, ePub, RTF, ODT; PDF inte än).",
     dropCapOff: "Av",
     dropCapLines: "{n} rader",
+    sceneBreakLabel: "Scenbrytare",
+    sceneBreakLede:
+      "Dekoration för en scenbrytare (ett eget `---`-stycke) — en uttonande linje med en centrerad symbol istället för en enkel kort linje. Visas direkt i skrivytan och följer med till Publish-export, med förenklade varianter i format som inte klarar en riktig uttoning (ODT, RTF) eller själva symbolen (PDF ritar en form istället för tecknet).",
+    sceneBreakPlain: "Enkel (dagens korta linje)",
+    sceneBreakVignette: "Klassisk bokvinjett (❦)",
+    sceneBreakDiamond: "Minimalistisk diamant (❖)",
+    sceneBreakFleur: "Fransk elegans (⚜)",
+    sceneBreakSparkle: "Glimmer / stjärna (✦)",
     bodyFontLabel: "Typsnitt",
     bodyFontLede:
       "Typsnittet för manusets brödtext — i själva redigeraren, och med i varje export från Publish, så det blir ett val istället för ett separat, osparat val varje gång.",
