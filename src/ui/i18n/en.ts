@@ -1182,6 +1182,7 @@ export const en = {
     mergeReplaceTitle: "Replace the old names in the manuscript too?",
     mergeReplaceBody: "The merged card is now called “{to}”. These earlier names still appear in your text — replace them there as well?",
     mergeReplaceRow: "“{from}” in {places}",
+    mergeWithPlaceholder: "Merge with…",
     history: "History",
     historyAside: "(Replacing a claim below adds an entry here.)",
     historyCurrent: "current",

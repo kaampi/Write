@@ -3961,6 +3961,17 @@ button:disabled {
 }
 
 /*
+ * "Merge with…" on a pending fact can prompt a replace/keep-both choice
+ * while the review queue itself stays open underneath (the fact is still
+ * in the queue until that choice resolves) — the same fight as above, one
+ * layer up. The choice modal is reacting to something the author just
+ * clicked, so it must win over the review card it was opened from.
+ */
+.edit-overlay.merge-fact-choice-overlay {
+  z-index: 70;
+}
+
+/*
  * A tester's review queue can run long — the whole card used to scroll as
  * one block, so scrolling down to a later fact also scrolled the "Review
  * facts" heading and Close button out of view (page-level scroll, since
@@ -5528,6 +5539,16 @@ button:disabled {
   gap: 0.5rem;
   align-items: center;
   margin-top: 0.45rem;
+}
+
+.proposal-merge-with {
+  margin-left: auto;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.3rem 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
 }
 
 .proposal textarea,

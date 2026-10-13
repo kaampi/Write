@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.89
+Status: living document, v1.0.90
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3478,6 +3478,73 @@ texten faktiskt blev "Kael walked onto the bridge." efter bekräftelse.
 950 tester gröna, tsc rent, build grön.
 
 v1.0.88 → v1.0.89.
+
+---
+
+**Ändringslogg v1.0.89 → v1.0.90 (2026-10-13):** Mats om Extract
+Facts-flödet: "Redan där skulle man istället få välja 'Merge with...'.
+Känns som en omväg att man först ska låsa faktan för att sedan göra en
+merge." — rätt observation: det gamla flödet krävde Lock → öppna kortet
+→ Slå samman kort → välja värde, bara för att flytta en enda fakta till
+ett redan existerande kort. Byggde "Merge with…" direkt på det väntande
+faktakortet i granskningskön, väg 2 av #30 (väg 1, att ge extractorn
+kontext för att undvika dubbletter från början, är fortfarande obyggd).
+
+**Varför inte `addFact`:** BiblePanels befintliga `addFact`-omslag
+härleder `entity_ref` som `slugify(label)` — osäkert här, eftersom
+`entity_ref` och `slugify(nuvarande namn)` kan divergera efter ett
+namnbyte (`renameEntityLabel` uppdaterar bara `entity_label`, aldrig
+`entity_ref`). Ett val av "Kael" i Merge with…-listan måste landa på
+Kaels FAKTISKA `entity_ref`, inte en nygissad slug av hans nuvarande
+namn. Anropar därför `applyAuthorDraft`/`applyAuthorAddition`
+(`ConsistencyGate.ts`) direkt via `patchBook`, med målets riktiga
+`entity_ref` explicit — samma primitiv som redan driver den befintliga
+"Replace or add?"-dialogen i EntityOverlays manuella fakta-formulär,
+nu återanvänd.
+
+**Flöde** (`BiblePanel.tsx`): varje väntande faktakort i
+`ReviewOverlay` får en "Merge with…"-väljare (bara när det finns
+existerande kort av samma `BibleKind` — klassificerat via
+`classifyEntity`, exkluderar faktans egen ref). Vid val:
+- Ingen konflikt (målet saknar en låst fakta för samma predikat, eller
+  har exakt samma värde) → slås samman direkt: `applyAuthorDraft`
+  skriver/ersätter, `withRelationshipMirrorFor` lägger till den
+  omvända relationsfaktan om predikatet är `core.relationship`,
+  `rejectFact` tar bort den gamla väntande raden ur kön, och om
+  faktans ursprungliga `entity_label` skiljer sig från målets namn
+  blir det ett nytt alias via den nya `addAlias`-hjälparen i
+  `entityTracking.ts`.
+- Konflikt (målet har redan ett annat värde för samma predikat) →
+  samma "Replace or add?"-dialog som den befintliga manuella
+  fakta-formuläret (återanvänder `addChoiceTitle`/`addChoiceBody`/
+  `addChoiceKeepBoth`/`addChoiceReplace`), med "Lägg till som en till"
+  → `applyAuthorAddition` (båda värden kvar) eller "Ersätt den
+  befintliga" → `applyAuthorDraft` (ersätter).
+
+**Bugg hittad och fixad under Playwright-verifiering:** konfliktdialogen
+öppnas OVANPÅ den fortfarande öppna granskningskön (fakta kvar i kön
+tills valet är klart) — samma typ av z-index-krock som redan löstes för
+Interview vs. granskningskön (`.edit-overlay:has(.bible-review-card) {
+z-index: 60; }`), men ett lager till: granskningsköns textarea fångade
+klick menade för konfliktdialogens knappar ("Add as another" gick inte
+att klicka — Playwright rapporterade att review-kortets `<textarea
+aria-label="Fact text">` avlyssnade pekarhändelserna). Gav
+konfliktdialogen en egen klass (`merge-fact-choice-overlay`) och
+`z-index: 70` i styles.css, ett steg högre än granskningskön — den
+reagerar på ett klick författaren precis gjorde och ska alltid vinna
+över kön den öppnades från.
+
+**Verifierat:** två levande Playwright-körningar mot en mockad
+OpenAI-kompatibel extractor-server (alltid samma påstådda fakta för
+"the Captain", Trait: "Scarred hands from engine work.") — ett utan
+konflikt (Kael utan existerande Trait-fakta: faktan landar direkt på
+Kael, granskningskön blir tom, kortet visar den nya traiten) och ett
+med konflikt (Kael har redan "Steady under pressure.": "Replace or
+add?"-dialogen visas med rätt befintligt värde, "Add as another"
+klickbar efter z-index-fixet, Kael har båda traits kvar efteråt). 950
+tester gröna, tsc rent, build grön.
+
+v1.0.89 → v1.0.90.
 
 ---
 

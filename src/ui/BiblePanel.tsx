@@ -11,7 +11,9 @@ import {
   type BibleEntityGroup,
   type BibleKind
 } from "@core/bibleGroups";
-import { activeFacts, type FactOrigin, type NarrativeFact } from "@core/NarrativeFact";
+import { activeFacts, type FactDraft, type FactOrigin, type NarrativeFact } from "@core/NarrativeFact";
+import { applyAuthorAddition, applyAuthorDraft, rejectFact } from "@core/ConsistencyGate";
+import { withRelationshipMirrorFor } from "@core/relationshipMirror";
 import { chainsWithHistory, factHistoryForEntity, factsAsOfSequence, type FactHistoryChain } from "@core/bibleHistory";
 import { mentionsForEntity, type MentionHit } from "@core/bibleMentions";
 import { type CorePredicate } from "@core/predicates";
@@ -44,10 +46,10 @@ import {
 import { sortedChapters, touch, type Book, type Chapter } from "@core/BookSchema";
 import { manuscriptNameHits, renameEntityLabel, replaceNameInManuscript } from "@core/renameEntity";
 import { deleteEntity } from "@core/deleteEntity";
-import { applyMerge, buildMergeProposal, canMergeEntities, type MergeChoice, type MergeFactGroup } from "@core/mergeEntities";
+import { applyMerge, buildMergeProposal, canMergeEntities, type MergeChoice } from "@core/mergeEntities";
 import { storyTimeRankByChapterId } from "@core/timeline";
 import { entityIsHidden, nextPositionOverride, setFactHidden, setFactPositionOverride, toggleHiddenEntity } from "@core/visibility";
-import { trackingFor, upsertEntityTracking, type EntityTracking, type EntityTrackingInput } from "@core/entityTracking";
+import { addAlias, trackingFor, upsertEntityTracking, type EntityTracking, type EntityTrackingInput } from "@core/entityTracking";
 import { count, format, useLocale } from "./i18n";
 import { picturesFromFile, EntityImageError } from "./entityImage";
 import { downloadJson } from "./downloadJson";
@@ -99,6 +101,13 @@ export function BiblePanel({
   const [mergeSelection, setMergeSelection] = useState<Set<string>>(new Set());
   /** Every losing label from the last confirmed merge that still shows up in the manuscript text — offered one combined "replace these too?" prompt, same spirit as the single-name `nameOffer` but for however many names a merge drops at once. */
   const [mergeReplaceOffer, setMergeReplaceOffer] = useState<{ names: { from: string; hits: number }[]; to: string } | null>(null);
+  /** A pending fact's "Merge with…" pick landed on a predicate the target already has a different locked value for — same ambiguity the ongoing "Add fact" form already resolves with Keep both/Replace, asked here before the merge actually happens instead of silently picking one. */
+  const [mergeFactChoice, setMergeFactChoice] = useState<{
+    fact: NarrativeFact;
+    targetRef: string;
+    targetLabel: string;
+    existingValue: string;
+  } | null>(null);
   const pendingSeen = useRef(0);
 
   useEffect(() => {
@@ -117,6 +126,35 @@ export function BiblePanel({
   function exitMergeSelection() {
     setMerging(false);
     setMergeSelection(new Set());
+  }
+
+  /** "Merge with…" on a still-pending fact: approves it straight onto an existing card instead of locking it as its own new one first. If the target already has a different locked value for this predicate, that's the same ambiguity the ongoing "Add fact" form resolves with Keep both/Replace — ask here too, rather than silently picking a side. */
+  function mergeFactWithExisting(fact: NarrativeFact, targetRef: string, targetLabel: string) {
+    const existing = sections
+      .flatMap((section) => section.entities)
+      .find((entity) => entity.entity_ref === targetRef)
+      ?.facts.find((row) => row.predicate === fact.predicate && row.status === "locked");
+    if (existing && normalizeValue(existing.value) !== normalizeValue(fact.value)) {
+      setMergeFactChoice({ fact, targetRef, targetLabel, existingValue: existing.value });
+      return;
+    }
+    finalizeMergeFact(fact, targetRef, targetLabel, "replace");
+  }
+
+  function finalizeMergeFact(fact: NarrativeFact, targetRef: string, targetLabel: string, mode: "replace" | "add") {
+    const draft: FactDraft = { entity_ref: targetRef, entity_label: targetLabel, predicate: fact.predicate, value: fact.value };
+    void patchBook((current) => {
+      const apply = mode === "add" ? applyAuthorAddition : applyAuthorDraft;
+      const withNewFact = apply(current.facts, draft, fact.sequence_index, fact.chapter_id, fact.scene_id);
+      const withMirror = withRelationshipMirrorFor(withNewFact, draft, current.entity_kinds);
+      const facts = rejectFact(withMirror, fact.id);
+      const entity_tracking =
+        fact.entity_label && fact.entity_label !== targetLabel
+          ? addAlias(current.entity_tracking, targetRef, fact.entity_label)
+          : current.entity_tracking;
+      return touch(current, { facts, entity_tracking });
+    });
+    setMergeFactChoice(null);
   }
 
   const sections = useMemo(() => (book ? groupBibleEntities(book.facts, book.entity_kinds) : []), [book]);
@@ -389,12 +427,57 @@ export function BiblePanel({
       {overlay?.type === "review" ? (
         <ReviewOverlay
           pending={pending}
+          sections={sections}
           against={(id) => book.facts.find((row) => row.id === id)}
           onLock={(id, value) => void approve(id, value)}
           onReject={(id) => void reject(id)}
           onKeepSeparate={(id, value) => void keepSeparate(id, value)}
+          onMergeWith={mergeFactWithExisting}
           onClose={() => setOverlay(null)}
         />
+      ) : null}
+
+      {mergeFactChoice ? (
+        <div
+          className="edit-overlay merge-fact-choice-overlay"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setMergeFactChoice(null);
+          }}
+        >
+          <div className="edit-card" role="dialog" aria-modal="true" aria-labelledby="merge-fact-choice-title">
+            <h2 id="merge-fact-choice-title">{m.bible.addChoiceTitle}</h2>
+            <p className="quiet">
+              {format(m.bible.addChoiceBody, {
+                predicate: m.bible.predicates[mergeFactChoice.fact.predicate],
+                existing: mergeFactChoice.existingValue
+              })}
+            </p>
+            <div className="edit-actions">
+              <button type="button" className="text-button" onClick={() => setMergeFactChoice(null)}>
+                {m.common.cancel}
+              </button>
+              <button
+                type="button"
+                className="text-button"
+                onClick={() =>
+                  finalizeMergeFact(mergeFactChoice.fact, mergeFactChoice.targetRef, mergeFactChoice.targetLabel, "add")
+                }
+              >
+                {m.bible.addChoiceKeepBoth}
+              </button>
+              <button
+                type="button"
+                className="primary"
+                onClick={() =>
+                  finalizeMergeFact(mergeFactChoice.fact, mergeFactChoice.targetRef, mergeFactChoice.targetLabel, "replace")
+                }
+              >
+                {m.bible.addChoiceReplace}
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
 
       {overlay?.type === "entity" && openEntity && openSection ? (
@@ -962,17 +1045,22 @@ function AsOfEntityOverlay({
 
 function ReviewOverlay({
   pending,
+  sections,
   against,
   onLock,
   onReject,
   onKeepSeparate,
+  onMergeWith,
   onClose
 }: {
   pending: NarrativeFact[];
+  /** For the "Merge with…" picker — same-kind existing cards to offer instead of locking this as its own new one. */
+  sections: { kind: BibleKind; label: string; entities: BibleEntityGroup[] }[];
   against: (id: string) => { value: string } | undefined;
   onLock: (id: string, value: string) => void;
   onReject: (id: string) => void;
   onKeepSeparate: (id: string, value: string) => void;
+  onMergeWith: (fact: NarrativeFact, targetRef: string, targetLabel: string) => void;
   onClose: () => void;
 }) {
   const { messages: m } = useLocale();
@@ -983,14 +1071,20 @@ function ReviewOverlay({
         <ul className="bible-review-list">
           {pending.map((fact) => {
             const conflict = fact.conflict_with ? against(fact.conflict_with) : undefined;
+            const kind = classifyEntity([fact]);
+            const mergeOptions = (sections.find((section) => section.kind === kind)?.entities ?? []).filter(
+              (entity) => entity.entity_ref !== fact.entity_ref
+            );
             return (
               <PendingFact
                 key={fact.id}
                 fact={fact}
                 {...(conflict ? { against: conflict } : {})}
+                mergeOptions={mergeOptions}
                 onLock={(value) => onLock(fact.id, value)}
                 onReject={() => onReject(fact.id)}
                 onKeepSeparate={(value) => onKeepSeparate(fact.id, value)}
+                onMergeWith={(targetRef, targetLabel) => onMergeWith(fact, targetRef, targetLabel)}
               />
             );
           })}
@@ -1808,9 +1902,11 @@ function NewEntityOverlay({
 function PendingFact({
   fact,
   against,
+  mergeOptions,
   onLock,
   onReject,
-  onKeepSeparate
+  onKeepSeparate,
+  onMergeWith
 }: {
   fact: {
     id: string;
@@ -1822,9 +1918,12 @@ function PendingFact({
     is_merge_suggestion?: boolean | undefined;
   };
   against?: { value: string };
+  /** Existing same-kind cards this pending fact could belong to instead of becoming its own new one. Empty hides the picker entirely. */
+  mergeOptions: { entity_ref: string; entity_label: string }[];
   onLock: (value: string) => void;
   onReject: () => void;
   onKeepSeparate: (value: string) => void;
+  onMergeWith: (targetRef: string, targetLabel: string) => void;
 }) {
   const [draft, setDraft] = useState(fact.value);
   const { messages: m } = useLocale();
@@ -1858,6 +1957,26 @@ function PendingFact({
         <button type="button" className="text-button" onClick={onReject}>
           {m.bible.reject}
         </button>
+        {mergeOptions.length > 0 ? (
+          <select
+            className="proposal-merge-with"
+            value=""
+            aria-label={m.bible.mergeWithPlaceholder}
+            onChange={(event) => {
+              const target = mergeOptions.find((option) => option.entity_ref === event.target.value);
+              if (target) onMergeWith(target.entity_ref, target.entity_label);
+            }}
+          >
+            <option value="" disabled>
+              {m.bible.mergeWithPlaceholder}
+            </option>
+            {mergeOptions.map((option) => (
+              <option key={option.entity_ref} value={option.entity_ref}>
+                {option.entity_label}
+              </option>
+            ))}
+          </select>
+        ) : null}
       </div>
     </li>
   );

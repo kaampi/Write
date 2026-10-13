@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.90] - 2026-10-13
+
+### Added
+- Pending facts from Extract Facts can now be merged straight onto an existing Story Bible card of the same kind, right from the review queue — no more locking a fact first just to merge it afterward. Pick "Merge with…" on the card, and if the target already has a conflicting value for that same fact, you'll be asked whether to keep both or replace the old one, exactly like the existing "Replace or add?" choice on manual fact entry.
+
 ## [1.0.89] - 2026-10-13
 
 ### Added

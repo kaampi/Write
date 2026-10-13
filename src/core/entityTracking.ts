@@ -60,6 +60,15 @@ export function upsertEntityTracking(rows: EntityTracking[], input: EntityTracki
   return [...others, cleaned];
 }
 
+/** Appends one alias if not already present (same case-insensitive de-dupe as everything else here) — the single-alias case a full `mergeEntities.ts` merge builds by hand, and the review queue's "merge this pending fact into an existing card" both need, without the caller reading and rebuilding the whole tracking row itself. */
+export function addAlias(rows: EntityTracking[], entity_ref: string, alias: string): EntityTracking[] {
+  const trimmed = alias.trim();
+  if (!trimmed) return rows;
+  const current = trackingFor(rows, entity_ref);
+  if (current.aliases.some((item) => item.toLowerCase() === trimmed.toLowerCase())) return rows;
+  return upsertEntityTracking(rows, { entity_ref, aliases: [...current.aliases, trimmed], exclusions: current.exclusions });
+}
+
 function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

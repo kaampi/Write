@@ -45,7 +45,7 @@ inte en ensidig lista.
 | 27 | Riktig mobilanpassning av redigeringsytan | ⬜ ej påbörjad — avvaktar, se nedan |
 | 28 | Import från andra skrivverktyg — adapterarkitektur | ⬜ ej påbörjad — se nedan |
 | 29 | Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok | ❌ struken — se nedan |
-| 30 | Extract facts känner inte igen namn-varianter av samma person | ✅ väg 2 byggd (v1.0.89) — väg 1 kvar, se nedan |
+| 30 | Extract facts känner inte igen namn-varianter av samma person | ✅ väg 2 byggd (v1.0.89), granskningsköns genväg byggd (v1.0.90) — väg 1 kvar, se nedan |
 | 31 | Story Core — gemensam bas för StoryBook, Sandbox (RPG) och möjliga framtida appar | ⬜ 2.0-riktning, medvetet inte nu — se nedan |
 | 32 | Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text | ⬜ ej påbörjad — se nedan |
 | 33 | Timeline som gantschema, ihopslaget med Plotlines | ✅ byggd som punktbaserad vy (v0.99.62) — se nedan |
@@ -1008,6 +1008,17 @@ project_spec.md v1.0.88 → v1.0.89 för hela bygget
 redan etablerade namn, så dubbletter uppstår mer sällan från
 början) är fortfarande inte byggd** — väg 2 är ett sätt att städa
 upp när det ändå händer, inte ett sätt att förhindra det.
+
+**Genväg byggd (v1.0.90).** Mats: "Redan där [i granskningskön] skulle
+man istället få välja 'Merge with...'. Känns som en omväg att man
+först ska låsa faktan för att sedan göra en merge." Rätt observation
+— väg 2 ovan löste sammanslagning av REDAN låsta kort, men en väntande
+fakta i Extract Facts-kön behövde fortfarande låsas och sedan slås
+samman separat. Nu kan ett väntande faktakort väljas direkt till ett
+existerande kort av samma slag ("Merge with…"), med samma behåll
+båda/ersätt-val som väg 2 om målet redan har ett annat värde för
+samma predikat. Se project_spec.md v1.0.89 → v1.0.90. Väg 1 ovan är
+fortfarande inte byggd.
 
 ---
 

@@ -1172,6 +1172,7 @@ export const nb: Messages = {
     mergeReplaceTitle: "Bytt ut de gamle navnene i manusteksten også?",
     mergeReplaceBody: "Det sammenslåtte kortet heter nå “{to}”. De tidligere navnene finnes fortsatt i teksten din — skal de byttes ut der også?",
     mergeReplaceRow: "“{from}” i {places}",
+    mergeWithPlaceholder: "Slå sammen med…",
     history: "Historikk",
     historyAside: "(Å erstatte et påstand under legger til en rad her.)",
     historyCurrent: "nå",
