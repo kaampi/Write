@@ -394,7 +394,8 @@ export const sv: Messages = {
       "import-lore": "Importera lore",
       beat: "Skriv en beat",
       summarize: "Sammanfatta kapitel",
-      translate: "Översätt kapitel"
+      translate: "Översätt kapitel",
+      developmental: "Developmental analys"
     }
   },
   askManuscript: {
@@ -1110,6 +1111,37 @@ export const sv: Messages = {
     setupStart: "Starta korrekturläsning",
     setupNothingSelected: "Välj minst en sak att kontrollera."
   },
+  developmental: {
+    action: "Developmental analys",
+    runningTitle: "Developmental analys pågår — det här täcker hela manuset, så det kan ta ett tag.",
+    resultsTitle: "Developmental-rapport",
+    lede: "En strukturell läsning av hela manuset — tempo, spänning, och vilka trådar som betalas av. Scen för scen, sedan kapitel för kapitel, sedan en slutgiltig rapport. Inget skrivs om.",
+    stageScene: "Läser scener",
+    stageChapter: "Syntetiserar kapitel",
+    stageReport: "Skriver rapporten",
+    sceneProgress: "Scener — {done} av {total} lästa",
+    chapterProgress: "Kapitel — {done} av {total} syntetiserade",
+    reportProgress: "Skriver den slutgiltiga rapporten",
+    now: "Nu: {detail}",
+    nowScene: "läser kapitel {chapter}, scen {scene}…",
+    nowChapter: "syntetiserar kapitel {n}…",
+    nowReport: "skriver den slutgiltiga rapporten…",
+    stillWorking: "Jobbar fortfarande — det här täcker hela manuset, så det kan ta ett bra tag på långsammare hårdvara. Inget har fastnat.",
+    percent: "{n}%",
+    continue: "Fortsätt",
+    runAgain: "Kör igen",
+    emptyResults: "Ingen rapport än.",
+    summaryLabel: "Sammanfattning",
+    concernsLabel: "Värt en titt",
+    clickHint: "Klicka på ett kapitel för att öppna det.",
+    chapter: "Kapitel {n}",
+    paused: "Pausad. Det som är klart är sparat.",
+    error: "Körningen stannade. Det som är klart är sparat.",
+    setupTitle: "Innan vi kör detta",
+    setupLede: "En manuellt startad körning över hela manuset — scen för scen, sedan kapitel för kapitel, sedan en slutgiltig rapport. Kan ta ett tag; starta gärna och kom tillbaka senare.",
+    setupNoThreadsWarning: "Inga trådar är taggade någonstans i det här manuset än (Plotlines) — läsningen fungerar ändå, bara lite grövre utan den grunden.",
+    setupStart: "Starta analys"
+  },
   craft: {
     pov: "Perspektiv",
     povAria: "Berättarperspektiv",
@@ -1653,6 +1685,7 @@ export const sv: Messages = {
     importLoreNone: "Extraktorn hittade inga uttalade fakta i den inklistrade texten.",
     summarizeNone: "Kunde inte sammanfatta det här kapitlet — försök igen, eller skriv sammanfattningen för hand.",
     proofreadEmpty: "Skriv eller ta fram lite kapitelprosa innan korrekturläsning.",
+    developmentalEmpty: "Skriv eller ta fram lite kapitelprosa innan en developmental analys.",
     askManuscriptEmpty: "Skriv eller ta fram lite kapitelprosa innan du frågar om manuset.",
     askManuscriptNoMatch: "Inget i manuset matchar den frågan.",
     translateSourceEmpty: "Källkapitlet har ingen text än — skriv eller skapa utkast där först.",

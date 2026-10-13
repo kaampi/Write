@@ -397,10 +397,23 @@ fyller Plotlines-matrisen korrekt när man öppnar den, och Snowflakes
 "Skicka till Synopsis" som faktiskt lyfter texten till
 Synopsis-sidan.
 
-### 14. Hel-manus developmental analys
+### 14. Hel-manus developmental analys ✅ byggd (v1.0.97)
 Hierarkisk: scen-analys → kapitel-syntes → akt-syntes →
 manus-rapport. Aldrig hela manuset i ett enda modellanrop. Sist i kön
 — störst att bygga rätt, minst värde utan allt ovanstående på plats.
+
+**Status: byggd (v1.0.97), akt-lagret medvetet bortvalt i v1.** Ett
+kort arkitektursamtal innan bygget (Mats bad om det explicit) landade
+på scen → kapitel → manus direkt — inget `Book.acts`-koncept finns i
+schemat, och samma "bygg det mindre först"-princip #33 redan följde.
+Analyze (#32) visade sig vara fel verktyg att återanvända rakt av —
+linjenivå (flaggade citat) löser inte en strukturfråga (eskalerar
+spänningen, betalar trådarna av sig) — så scen-/kapitelstegen fick en
+egen, ny prompt/schema istället, med Plotlines/Timeline/Continuity
+återanvänt som gratis grundande kontext snarare än output att gissa
+fram. Proofreads flerstegs-, återupptagbara job-mönster
+(`proofreadRun.ts`) speglades rakt av för orkestreringen. Se
+project_spec.md v1.0.96 → v1.0.97 för fullt genomförandeprotokoll.
 
 ---
 

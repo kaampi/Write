@@ -394,7 +394,8 @@ export const nb: Messages = {
       "import-lore": "Importer lore",
       beat: "Skriv en beat",
       summarize: "Oppsummer kapittel",
-      translate: "Oversett kapittel"
+      translate: "Oversett kapittel",
+      developmental: "Developmental analyse"
     }
   },
   askManuscript: {
@@ -1110,6 +1111,37 @@ export const nb: Messages = {
     setupStart: "Start korrekturlesing",
     setupNothingSelected: "Velg minst én ting å kontrollere."
   },
+  developmental: {
+    action: "Developmental analyse",
+    runningTitle: "Developmental analyse pågår — dette dekker hele manuset, så det kan ta en stund.",
+    resultsTitle: "Developmental-rapport",
+    lede: "En strukturell lesning av hele manuset — tempo, spenning, og hvilke tråder som betales av. Scene for scene, så kapittel for kapittel, så en endelig rapport. Ingenting skrives om.",
+    stageScene: "Leser scener",
+    stageChapter: "Syntetiserer kapitler",
+    stageReport: "Skriver rapporten",
+    sceneProgress: "Scener — {done} av {total} lest",
+    chapterProgress: "Kapitler — {done} av {total} syntetisert",
+    reportProgress: "Skriver den endelige rapporten",
+    now: "Nå: {detail}",
+    nowScene: "leser kapittel {chapter}, scene {scene}…",
+    nowChapter: "syntetiserer kapittel {n}…",
+    nowReport: "skriver den endelige rapporten…",
+    stillWorking: "Jobber fortsatt — dette dekker hele manuset, så det kan ta en god stund på tregere maskinvare. Ingenting har stoppet opp.",
+    percent: "{n}%",
+    continue: "Fortsett",
+    runAgain: "Kjør igjen",
+    emptyResults: "Ingen rapport ennå.",
+    summaryLabel: "Sammendrag",
+    concernsLabel: "Verdt et blikk",
+    clickHint: "Klikk på et kapittel for å åpne det.",
+    chapter: "Kapittel {n}",
+    paused: "Pauset. Det som er ferdig er lagret.",
+    error: "Kjøringen stoppet. Det som er ferdig er lagret.",
+    setupTitle: "Før vi kjører dette",
+    setupLede: "En manuelt startet kjøring over hele manuset — scene for scene, så kapittel for kapittel, så en endelig rapport. Kan ta en stund; start gjerne og kom tilbake senere.",
+    setupNoThreadsWarning: "Ingen tråder er tagget noe sted i dette manuset ennå (Plotlines) — lesningen fungerer likevel, bare litt grovere uten det grunnlaget.",
+    setupStart: "Start analyse"
+  },
   craft: {
     pov: "Perspektiv",
     povAria: "Fortellerperspektiv",
@@ -1653,6 +1685,7 @@ export const nb: Messages = {
     importLoreNone: "Ekstraktoren fant ingen uttalte fakta i den innlimte teksten.",
     summarizeNone: "Kunne ikke oppsummere dette kapittelet — prøv igjen, eller skriv sammendraget for hånd.",
     proofreadEmpty: "Skriv eller ta fram litt kapittelprosa før korrektur.",
+    developmentalEmpty: "Skriv eller ta fram litt kapittelprosa før en developmental analyse.",
     askManuscriptEmpty: "Skriv eller ta fram litt kapittelprosa før du spør om manuset.",
     askManuscriptNoMatch: "Ingenting i manuset matcher det spørsmålet.",
     translateSourceEmpty: "Kildekapittelet har ingen tekst ennå — skriv eller lag utkast der først.",

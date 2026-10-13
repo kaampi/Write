@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.96
+Status: living document, v1.0.97
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4061,6 +4061,136 @@ eller ändrad UI-yta att klicka igenom; AI-beteendet den styr går inte
 att verifiera utan en ansluten modell.
 
 v1.0.95 → v1.0.96.
+
+---
+
+**Ändringslogg v1.0.96 → v1.0.97 (2026-10-13):** #14 (Hel-manus
+developmental analys) — sista obyggda punkten av betydelse på hela
+roadmapen, efter att en rutinkoll samma dag avslöjade att #24/#26/#33/
+#34/#35 redan var klara men saknade sina byggd-markeringar. #14 var
+uttryckligen "sist i kön — störst att bygga rätt, minst värde utan allt
+ovanstående på plats"; det "ovanstående" (scen-medvetenhet, Story
+Bible-provenience, Timeline, Plotlines, setup/payoff-spårningens
+Proofread-steg, pluggbara utvecklingsmetoder) var nu klart, så punkten
+var mogen.
+
+**Arkitektursamtal innan bygget** (Mats bad uttryckligen om det):
+grundlig kodgenomgång av vad som redan fanns att bygga vidare på —
+`proofreadRun.ts`s flerstegs-, återupptagbara job-mönster (`ProofreadJob`
+som ETT fält på Book, per-steg done-listor, `io.complete`/`io.save`-
+abstraktion) identifierades som rätt mall att spegla. Tre beslut togs i
+samtalet:
+1. **Hoppa över akt-lagret i v1.** Inget `Book.acts`-koncept finns
+   någonstans i schemat (grundligt sökt igenom innan påstått). Kör
+   scen → kapitel → manus direkt, samma "bygg det mindre, bevisa värdet
+   först"-princip som #33 redan följde för sitt gantschema-beslut.
+2. **Analyze (#32) kan INTE återanvändas som den är.** Separat,
+   grundlig diskussion: Analyze (`chapterFeedback.ts`) är linjenivå
+   (show-vs-tell, dialog-syfte, röstdrift — flaggade citat inom ETT
+   kapitel), #14 är strukturnivå (eskalerar spänningen genom boken,
+   sjunker mitten, betalar trådarna av sig). Att stapla Analyze-resultat
+   från alla kapitel ger "99 lokala anmärkningar", inte en läsning av
+   bokens form. Beslutat: helt ny prompt/schema för scen- och
+   kapitelstegen, men Plotlines-taggning, Timeline-position och
+   Continuity-läckor återanvänds som GRATIS grundande kontext (facit
+   istället för gissning) — aldrig omvandlat till output.
+3. **Manuellt startad, OK att ta tid.** Mats ville ha en synlig
+   "jobbar"-indikator — visade sig redan finnas (Proofreads tre
+   pulserande prickar, `proofread-pulse-dot`). Generaliserade den till
+   `.pulse-dots`/`@keyframes pulse-dot` i `styles.css` (bytte namn,
+   flyttade ProofreadCard.tsx:s enda användning) istället för att
+   duplicera samma animation under ett missvisande proofread-scopat
+   klassnamn.
+
+Utöver det, i en separat fråga från Mats: bekräftade i kod att ett
+manus utan ifylld Timeline eller tomma kapitelbriefs INTE blir svårare
+— `storyTimeOrder` faller tillbaka exakt till läsordning
+(`chapter.story_time_order ?? chapter.sequence_index`, se
+`timeline.ts`) när Timeline aldrig rörts, och brief är en
+skrivinstruktion för Draft, inte något analysen läser. Plotlines-
+taggning är den enda signalen där komplettering faktiskt höjer
+precisionen.
+
+**Schema** (ny fil `developmentalSchema.ts`, mönster speglat från
+`proofreadSchema.ts`): `DEVELOPMENTAL_STAGES = ["scene","chapter",
+"report"]`. `SceneReadSchema` (chapterId, sceneId, function:
+advance_plot|reveal_character|build_world|breather|other, tension:
+rises|falls|flat, note) — ALDRIG visad för författaren, bara
+mellanliggande data uppåt till kapitelsteget. `ChapterReadSchema`
+(pacing: too_slow|right_pace|too_fast, tension, threads: array av
+{plotlineId, status: advanced|stalled|resolved}, note). `Developmental
+ReportSchema` (summary: string, concerns: array av {chapterId, note})
+— det enda författaren faktiskt läser. `DevelopmentalJobSchema`
+speglar `ProofreadJobSchema`s form (status/stage/done-listor/
+updated_at) men enklare: inga `enabledStages`/`scopeChapterId` — en
+manusbred läsning ger ingen mening scopead till ett kapitel. `Book`
+fick `developmental: DevelopmentalJobSchema.optional()`.
+
+**Kärnmodul** (ny fil `developmental.ts`): tre system-prompts
+(`SCENE_READ_SYSTEM`/`CHAPTER_SYNTHESIS_SYSTEM`/`REPORT_SYSTEM`), alla
+JSON-only, alla med `recoverJsonObject`-baserade parsers som faller
+tillbaka säkert på okända enum-värden (aldrig kraschar på ett
+missformat svar, matchar `parseSetupResult`-mönstret). Trådnamn
+mappas till `plotlineId` via exakt namn-matchning mot `plotlinesForChapter`
+— ett påhittat trådnamn från modellen bara droppas tyst, aldrig sparat
+som en ogiltig referens. `reportUserPrompt` slår upp trådnamnen igen
+från `plotlineId` för att skicka läsbara namn till sista steget, inte
+interna id:n. `hasAnyTaggedThread(book)` grundar förhandsvarningen i
+setup-kortet.
+
+**Orkestrering** (ny fil `developmentalRun.ts`, speglar
+`proofreadRun.ts`s struktur rakt av): `runDevelopmental` kör
+`runScenes` → `runChapters` → `runReport` sekventiellt, sparar efter
+VARJE scen/kapitel (inte bara efter varje steg) så en krasch eller
+paus mitt i återupptas exakt där den var. `throwIfAborted`-hjälparen
+dupliceras lokalt (samma fem rader som proofreadRun.ts egen,
+oexporterad privat funktion där — hellre en liten duplicering än att
+öppna en ny beroenderiktning för fem rader kod).
+
+**BookStore.tsx:** `startDevelopmentalAnalysis({restart?})` speglar
+`startProofread` nästan exakt (samma lås-ref-mönster, samma `reviewModel`,
+samma `EXTRACTOR_MAX_TOKENS`), minus stage/scope-alternativen. Egen
+`developmentalLock`-ref (separat från `proofreadLock`, de två körs
+oberoende). Auto-återupptagnings-`useEffect` om jobbet var "running"
+vid en sidladdning, exakt som Proofreads egen.
+
+**UI:** `DevelopmentalSetupCard.tsx` (nytt) — inget steg-/scope-val
+alls (till skillnad från `ProofreadSetupCard`), bara ett villkorligt
+varningsmeddelande om `hasAnyTaggedThread(book)` är falskt. `Developmental
+Card.tsx` (nytt) — tre-stegs progress-lista (återanvänder `.proofread-stages`/
+`.proofread-mark`-klasserna rakt av, generiska nog), sedan BARA den
+slutgiltiga rapporten (sammanfattning som styckeindelad text + en
+klickbar "Worth a look"-lista som hoppar till kapitlet) — scen- och
+kapitelnivå-datan visas aldrig i UI:t, exakt det ursprungliga
+"aldrig rådata, alltid syntetiserat"-beslutet. Ny post i `Tools`-menyn
+i `Editor.tsx`, bredvid Proofread, med samma öppna/stäng-mönster
+(`dismissDevelopmental()`/`dismissProofread()` stänger varandra
+ömsesidigt när den andra öppnas).
+
+**i18n:** ny `developmental:`-namnrymd i alla tre språk, samma
+nyckelform som `proofread:`s (action/setupTitle/runningTitle/
+percent/now-detaljer/etc.), plus `"developmental"` tillagt i
+`PromptOperation` och `aiContext.operations` (tvingat fram av
+TypeScript, fångade varje ställe som behövde uppdateras, samma mönster
+som `"translate"` i v1.0.95).
+
+**Verifierat:** tsc rent, 1025 tester gröna (986 + 16 från v1.0.95 +
+23 nya i `developmental.test.ts` — scen-/kapitel-/rapport-prompter och
+parsers var för sig, plus tre `runDevelopmental`-orkestreringstester:
+fullt lyckat lopp scen→kapitel→rapport med `brainstorm` aldrig skickat,
+återupptagning som INTE kör om en redan klar scen igen, AbortError
+innan ett senare steg skrivs), `npm run build` grön. Live
+Playwright-verifiering: Tools-menyns nya post syns och öppnar
+setup-kortet; förhandsvarningen om otaggade trådar syns med exakt rätt
+text när manuset saknar Plotlines-taggning; taggade sedan kapitel 1
+mot en ny tråd via Timeline-brädet (samma `TimelineBoardPanel` #33
+byggde) och bekräftade live att varningen försvinner — den riktiga
+UI-kopplingen till `hasAnyTaggedThread(book)`, inte bara den isolerade
+funktionen. Själva scen/kapitel/rapport-AI-kedjan kunde INTE
+verifieras live (ingen ansluten modell i den här sandlådan) — samma
+begränsning som genomgående den här sessionen.
+
+v1.0.96 → v1.0.97.
 
 ---
 

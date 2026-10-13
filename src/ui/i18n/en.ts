@@ -692,7 +692,8 @@ export const en = {
       "import-lore": "Import lore",
       beat: "Write a beat",
       summarize: "Summarize chapter",
-      translate: "Translate chapter"
+      translate: "Translate chapter",
+      developmental: "Developmental analysis"
     }
   },
   askManuscript: {
@@ -1119,6 +1120,37 @@ export const en = {
     },
     setupStart: "Start proofreading",
     setupNothingSelected: "Pick at least one thing to check."
+  },
+  developmental: {
+    action: "Developmental analysis",
+    runningTitle: "Developmental analysis in progress — this covers the whole manuscript, so it can take a while.",
+    resultsTitle: "Developmental report",
+    lede: "A structural read of the whole manuscript — pacing, tension, and which threads pay off. Scene by scene, then chapter by chapter, then one final report. Nothing is rewritten.",
+    stageScene: "Reading scenes",
+    stageChapter: "Synthesizing chapters",
+    stageReport: "Writing the report",
+    sceneProgress: "Scenes — {done} of {total} read",
+    chapterProgress: "Chapters — {done} of {total} synthesized",
+    reportProgress: "Writing the final report",
+    now: "Now: {detail}",
+    nowScene: "reading chapter {chapter}, scene {scene}…",
+    nowChapter: "synthesizing chapter {n}…",
+    nowReport: "writing the final report…",
+    stillWorking: "Still working — this covers the whole manuscript, so it can take a good while on slower hardware. Nothing is stuck.",
+    percent: "{n}%",
+    continue: "Continue",
+    runAgain: "Run again",
+    emptyResults: "No report yet.",
+    summaryLabel: "Summary",
+    concernsLabel: "Worth a look",
+    clickHint: "Click a chapter to open it.",
+    chapter: "Chapter {n}",
+    paused: "Paused. What finished is saved.",
+    error: "The pass stopped. What finished is saved.",
+    setupTitle: "Before we run this",
+    setupLede: "A manually started pass over the whole manuscript — scene by scene, then chapter by chapter, then a final report. It can take a while; feel free to start it and come back later.",
+    setupNoThreadsWarning: "No threads are tagged anywhere in this manuscript yet (Plotlines) — the read still works, just a bit coarser without that grounding.",
+    setupStart: "Start analysis"
   },
   craft: {
     pov: "POV",
@@ -1663,6 +1695,7 @@ export const en = {
     importLoreNone: "Extractor found no stated facts in the pasted text.",
     summarizeNone: "Could not summarize this chapter — try again, or write the summary by hand.",
     proofreadEmpty: "Write or draft some chapter prose before proofreading.",
+    developmentalEmpty: "Write or draft some chapter prose before running a developmental analysis.",
     askManuscriptEmpty: "Write or draft some chapter prose before asking about the manuscript.",
     askManuscriptNoMatch: "Nothing in the manuscript matches that question.",
     translateSourceEmpty: "The source chapter has no prose yet — write or draft it there first.",

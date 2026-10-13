@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.97] - 2026-10-13
+
+### Added
+- Developmental analysis (Tools menu). A manually started, resumable pass over the whole manuscript that reads structure rather than line-level prose: scene by scene, then chapter by chapter, then one final report — never the whole manuscript in a single model call. The report covers pacing, whether tension escalates, and which Plotlines threads advance, stall, or get resolved, with specific chapters flagged worth a look. Grounded in whatever Plotlines tags and Timeline positions the manuscript already has; works without either, just with a coarser read, and says so before starting.
+
 ## [1.0.96] - 2026-10-13
 
 ### Changed

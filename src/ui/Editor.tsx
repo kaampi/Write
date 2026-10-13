@@ -125,6 +125,8 @@ import { ProseStatsCard } from "./ProseStatsCard";
 import { FindReplaceCard, type FindHighlight, type FindLaunch } from "./FindReplaceCard";
 import { ProofreadCard } from "./ProofreadCard";
 import { ProofreadSetupCard } from "./ProofreadSetupCard";
+import { DevelopmentalCard } from "./DevelopmentalCard";
+import { DevelopmentalSetupCard } from "./DevelopmentalSetupCard";
 import { ProgressCard } from "./ProgressCard";
 import { PromptInspectorCard } from "./PromptInspector";
 import type { FindOccurrence } from "@core/findReplace";
@@ -476,6 +478,8 @@ export function Editor() {
   const [markerConvertOpen, setMarkerConvertOpen] = useState(false);
   const [proofreadOpen, setProofreadOpen] = useState(false);
   const [proofreadSetupOpen, setProofreadSetupOpen] = useState(false);
+  const [developmentalOpen, setDevelopmentalOpen] = useState(false);
+  const [developmentalSetupOpen, setDevelopmentalSetupOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [aiContextOpen, setAiContextOpen] = useState(false);
   const [askManuscriptOpen, setAskManuscriptOpen] = useState(false);
@@ -692,6 +696,7 @@ export function Editor() {
     setFindOpen(false);
     setFindHighlight(null);
     setBoardOpen(false);
+    dismissDevelopmental();
     setProofreadOpen(true);
     if (!book?.proofread) setProofreadSetupOpen(true);
   }
@@ -700,6 +705,28 @@ export function Editor() {
     if (busy === "proofread") return;
     setProofreadOpen(false);
     setProofreadSetupOpen(false);
+  }
+
+  function openDevelopmental() {
+    setBackupOpen(false);
+    setPublishOpen(false);
+    setProgressOpen(false);
+    setBrainstormChatOpen(false);
+    store.closeBrainstormChat();
+    setStatsOpen(false);
+    setNotesOpen(false);
+    setFindOpen(false);
+    setFindHighlight(null);
+    setBoardOpen(false);
+    dismissProofread();
+    setDevelopmentalOpen(true);
+    if (!book?.developmental) setDevelopmentalSetupOpen(true);
+  }
+
+  function dismissDevelopmental() {
+    if (busy === "developmental") return;
+    setDevelopmentalOpen(false);
+    setDevelopmentalSetupOpen(false);
   }
 
   function openSettings() {
@@ -978,6 +1005,15 @@ export function Editor() {
               disabled={busy !== null && busy !== "proofread"}
             >
               {m.editor.proofread}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className={developmentalOpen || busy === "developmental" ? "app-top-menu-item is-on" : "app-top-menu-item"}
+              onClick={openDevelopmental}
+              disabled={busy !== null && busy !== "developmental"}
+            >
+              {m.developmental.action}
             </button>
             <button
               type="button"
@@ -1861,6 +1897,33 @@ export function Editor() {
           onRunAgain={() => setProofreadSetupOpen(true)}
           onOpenChapter={(id) => {
             setProofreadOpen(false);
+            store.setChapterId(id);
+          }}
+        />
+      ) : null}
+      {developmentalOpen && developmentalSetupOpen ? (
+        <DevelopmentalSetupCard
+          book={book}
+          onStart={() => {
+            setDevelopmentalSetupOpen(false);
+            void store.startDevelopmentalAnalysis({ restart: true });
+          }}
+          onClose={() => {
+            setDevelopmentalSetupOpen(false);
+            if (!book.developmental) setDevelopmentalOpen(false);
+          }}
+        />
+      ) : developmentalOpen && book.developmental ? (
+        <DevelopmentalCard
+          book={book}
+          job={book.developmental}
+          running={busy === "developmental"}
+          onClose={() => setDevelopmentalOpen(false)}
+          onStop={store.stopDraft}
+          onContinue={() => void store.startDevelopmentalAnalysis()}
+          onRunAgain={() => setDevelopmentalSetupOpen(true)}
+          onOpenChapter={(id) => {
+            setDevelopmentalOpen(false);
             store.setChapterId(id);
           }}
         />

@@ -39,6 +39,7 @@ export type Busy =
   | "develop"
   | "summarize"
   | "translate"
+  | "developmental"
   | null;
 
 /** A Polish result waiting on the author's review (PolishReviewCard) — not yet written to the chapter. */
@@ -148,6 +149,7 @@ export type BookStoreValue = {
   extractChapter: () => Promise<void>;
   analyzeChapter: () => Promise<boolean>;
   startProofread: (opts?: { restart?: boolean; stages?: ProofreadStage[]; scopeChapterId?: string }) => Promise<void>;
+  startDevelopmentalAnalysis: (opts?: { restart?: boolean }) => Promise<void>;
   generateIllustrationPrompt: (passage: string) => Promise<string | null>;
   askManuscript: (question: string) => Promise<void>;
   askAboutPassage: (args: { span?: TextSpan; question: string }) => Promise<boolean>;

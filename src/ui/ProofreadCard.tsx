@@ -112,7 +112,7 @@ export function ProofreadCard({
             {viewed.detail ? (
               <p className="quiet proofread-now">
                 {live ? (
-                  <span className="proofread-pulse" aria-hidden="true">
+                  <span className="pulse-dots" aria-hidden="true">
                     <span></span>
                     <span></span>
                     <span></span>

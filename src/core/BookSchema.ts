@@ -12,6 +12,7 @@ import { NarrativeFactSchema, type NarrativeFact } from "./NarrativeFact";
 import { ensureBrainstormNotes, NOTE_COLORS } from "./brainstormNotes";
 import { parsePlotlineColor, PLOTLINE_COLORS } from "./plotlineColors";
 import { ProofreadJobSchema } from "./proofreadSchema";
+import { DevelopmentalJobSchema } from "./developmentalSchema";
 import { SceneMetaSchema } from "./bookScene";
 import { ProseFormattingRangeSchema } from "./proseFormatting";
 import { PlaceholderSchema } from "./placeholders";
@@ -478,6 +479,8 @@ export const BookSchema = z.object({
    * Last-pass Review job over the manuscript. Missing on older saves.
    */
   proofread: ProofreadJobSchema.optional(),
+  /** Whole-manuscript developmental analysis (roadmap-ideas.md #14) — a manually started, resumable job, same shape as `proofread`. */
+  developmental: DevelopmentalJobSchema.optional(),
   /**
    * Optional author-set word target and deadline. Missing means no goal —
    * no pace UI shown. Missing on older saves.

@@ -59,6 +59,8 @@ import type { LoreArticleCandidate } from "@core/loreImport";
 import { SUMMARIZE_CHAPTER_SYSTEM, summarizeChapterUserPrompt } from "@core/chapterSummary";
 import { proseChapters, startProofreadJob, touchProofread, type ProofreadStage } from "@core/proofread";
 import { runProofread } from "@core/proofreadRun";
+import { startDevelopmentalJob, touchDevelopmental } from "@core/developmental";
+import { runDevelopmental } from "@core/developmentalRun";
 import {
   DRAFT_SYSTEM,
   PASSAGE_SYSTEM,
@@ -308,6 +310,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const surfaceRef = useRef<EditorSurface>("brainstorm");
   const abortRef = useRef<AbortController | null>(null);
   const proofreadLock = useRef(false);
+  const developmentalLock = useRef(false);
   const saveTimer = useRef<number | null>(null);
   const writingPrimerRef = useRef(writingPrimer);
   const historyLimitRef = useRef(historyLimit);
@@ -2850,6 +2853,87 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     void startProofread();
   }, [book?.id, book?.proofread?.status, busy, models.length, startProofread]);
 
+  const startDevelopmentalAnalysis = useCallback(
+    async (opts?: { restart?: boolean }) => {
+      const current = bookRef.current;
+      if (!current || busy || developmentalLock.current) return;
+      if (proseChapters(current).length === 0) {
+        setError(STORE_ERROR.developmentalEmpty);
+        return;
+      }
+      if (models.length === 0) {
+        setError(ollamaError ?? STORE_ERROR.noModel);
+        return;
+      }
+
+      const existing = current.developmental;
+      const restart = Boolean(opts?.restart);
+      const job =
+        !restart && existing && (existing.status === "paused" || existing.status === "running" || existing.status === "error")
+          ? touchDevelopmental(existing, { status: "running" })
+          : startDevelopmentalJob();
+
+      developmentalLock.current = true;
+      const abort = new AbortController();
+      abortRef.current = abort;
+      setBusy("developmental");
+      setError(null);
+      await flushSave(touch(current, { developmental: job }));
+      try {
+        await runDevelopmental(
+          job,
+          {
+            complete: (system, user, signal) => {
+              const developmentalMessages: PromptDebugMessage[] = [
+                { role: "system", content: system },
+                { role: "user", content: user }
+              ];
+              recordPrompt("developmental", reviewModel, developmentalMessages);
+              return makeProvider(reviewModel).chat({
+                messages: developmentalMessages,
+                temperature: 0.2,
+                maxTokens: EXTRACTOR_MAX_TOKENS,
+                signal
+              });
+            },
+            getBook: () => bookRef.current ?? current,
+            save: async (next) => {
+              const latest = bookRef.current;
+              if (!latest) return;
+              await flushSave(touch(latest, { developmental: next }));
+            }
+          },
+          abort.signal
+        );
+      } catch (err) {
+        const latest = bookRef.current;
+        const developmental = latest?.developmental;
+        if ((err as { name?: string }).name === "AbortError") {
+          if (latest && developmental) {
+            await flushSave(touch(latest, { developmental: touchDevelopmental(developmental, { status: "paused" }) }));
+          }
+          return;
+        }
+        setError(ollamaHint(err));
+        if (latest && developmental) {
+          await flushSave(touch(latest, { developmental: touchDevelopmental(developmental, { status: "error" }) }));
+        }
+      } finally {
+        developmentalLock.current = false;
+        setBusy(null);
+        abortRef.current = null;
+      }
+    },
+    [busy, flushSave, models.length, ollamaError, reviewModel]
+  );
+
+  useEffect(() => {
+    if (!book?.developmental || book.developmental.status !== "running") return;
+    if (busy) return;
+    if (models.length === 0) return;
+    void startDevelopmentalAnalysis();
+  }, [book?.id, book?.developmental?.status, busy, models.length, startDevelopmentalAnalysis]);
+
   const addFact = useCallback(
     async (input: { label: string; predicate: CorePredicate; value: string; mode?: "replace" | "add" }) => {
       const current = bookRef.current;
@@ -3018,6 +3102,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     extractChapter,
     analyzeChapter,
     startProofread,
+    startDevelopmentalAnalysis,
     generateIllustrationPrompt,
     askManuscript,
     askAboutPassage,

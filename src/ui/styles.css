@@ -4116,29 +4116,30 @@ button:disabled {
   gap: 0.5rem;
 }
 
-.proofread-pulse {
+/* Three pulsing dots — "the app is working" indicator, shared by any long-running AI job's progress UI (Proofread, Developmental analysis, …). */
+.pulse-dots {
   display: inline-flex;
   gap: 0.2rem;
   flex: none;
 }
 
-.proofread-pulse span {
+.pulse-dots span {
   width: 4px;
   height: 4px;
   border-radius: 50%;
   background: var(--text-dim);
-  animation: proofread-pulse-dot 1.2s ease-in-out infinite;
+  animation: pulse-dot 1.2s ease-in-out infinite;
 }
 
-.proofread-pulse span:nth-child(2) {
+.pulse-dots span:nth-child(2) {
   animation-delay: 0.15s;
 }
 
-.proofread-pulse span:nth-child(3) {
+.pulse-dots span:nth-child(3) {
   animation-delay: 0.3s;
 }
 
-@keyframes proofread-pulse-dot {
+@keyframes pulse-dot {
   0%,
   60%,
   100% {
@@ -4156,7 +4157,7 @@ button:disabled {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .proofread-pulse span {
+  .pulse-dots span {
     animation: none;
     opacity: 0.7;
   }
