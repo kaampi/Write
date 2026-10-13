@@ -1811,6 +1811,55 @@ genomförbarhetskoll som #42.
 
 ---
 
+### 44. Manuellt bifogad kontext från andra kapitel/scener till Draft/Recast
+
+En testare: "I'm fighting a losing battle with context" — efter ett
+kapitel som introducerade en ny plats och en ny karaktär märkte de att
+enda sättet att få modellen att inte uppfinna om dem igen är att lägga
+in allt i Story Bible, vilket bara gör den tyngre och tyngre över tid.
+Efterlyste att kunna ge modellen manuellt utvalda tidigare
+kapitel — eller bara utvalda textbitar ur dem — som extra kontext.
+
+**Kollade exakt vad Draft/Recast redan får innan jag svarade**, för att
+inte gissa: (1) Story Bible — låsta fakta, positionsmedvetna, men
+atomära meningar, inte prosa. (2) "Story so far"
+(`formatStorySoFar` i generateProse.ts) — EN rad per tidigare kapitel,
+byggd från `chapter.summary`. (3) Föregångar-svansen
+(`formatPredecessorForDraft` i continuesFrom.ts) — bara de SISTA TRE
+styckena av det omedelbart föregående kapitlet (eller ett namngivet
+"continues from"-kapitel), aldrig något längre bak. Inget av detta
+täcker "det kapitel som introducerade platsen, oavsett var det ligger
+i manuset" — testarens iakttagelse stämmer, det är inte ett
+missförstånd av vad som redan finns.
+
+**Varför det inte räcker att bara skriva in det i Story Bible:**
+fakta är atomära ("Platsen X: en övergiven fyr") och tappar röst,
+sinnesintryck, HUR platsen faktiskt beskrevs i prosan — precis det en
+modell behöver för att återanvända samma känsla, inte bara samma
+sakuppgifter.
+
+**Teknisk bedömning:** mindre jobb än det låter, eftersom Scener redan
+är en befintlig, avgränsad enhet (`chapterScenes`) — "utvalda
+textbitar" kan mappas mot "fäst den här specifika scenen" istället för
+att behöva en ny fri textmarkerings-väljare:
+- Nytt fält på `Chapter` (t.ex. `context_refs`: kapitel/scen-id:n
+  författaren fäster som extra kontext för just det här kapitlet).
+- Liten UI för att välja dem — kan återanvända samma kapitel/scen-
+  väljarmönster `continues_from` redan har.
+- Nytt promptblock i generateProse.ts, samma form som
+  `formatStorySoFar`/`formatPredecessorForDraft`, som injicerar hela
+  texten för det som fästs.
+- Den egentliga designfrågan är kontextbudget: till skillnad från
+  sammanfattningar är hel scentext dyrt, och appen visar redan
+  context window-storlek i Settings — bör visa ungefär vad det
+  kostar när man fäster något.
+
+**Status: inte påbörjad, idén sparad.** Större än en engångsfix,
+mindre än Story Core (#31) — ett eget, avgränsat bygge när det blir
+aktuellt, inte en uppföljning till något pågående.
+
+---
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**
