@@ -1236,7 +1236,7 @@ att bygga här.
 
 ---
 
-### 34. Startskript för Mac och Linux (som `starta.bat`)
+### 34. Startskript för Mac och Linux (som `starta.bat`) ✅ byggd (v0.99.71)
 Uppstod ur diskussionen om webbsidans "Download"-knapp (2026-09-28):
 istället för en riktig paketerad installerare (Electron/Tauri — stor,
 löpande kostnad: kodsignering, macOS-notarisering, separata byggen per
@@ -1284,7 +1284,7 @@ avvägning #35 gör.
 
 ---
 
-### 35. Riktig installerare/uppdaterare för Windows (Tauri) — helhetsidé
+### 35. Riktig installerare/uppdaterare för Windows (Tauri) — helhetsidé ✅ i allt väsentligt byggd, installer-stub otestad på riktig hårdvara
 
 **Bakgrund.** Uppföljning på #34: dagen "om/när en riktig
 installerare någon gång byggs" är nu, efter att Mats installerade
