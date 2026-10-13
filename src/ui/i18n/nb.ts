@@ -120,6 +120,12 @@ export const nb: Messages = {
     contextWindowSuggested: "Satt til {value}, modellens egen rapporterte maksverdi.",
     contextWindowSuggestError: "Klarte ikke hente dette fra modellen — angi det for hånd.",
     contextWindowOpenAiNote: "For LM Studio og andre OpenAI-kompatible servere settes kontekstlengden når du laster modellen der, ikke her.",
+    proofreadThoroughnessLabel: "Korrekturlesingens grundighet",
+    proofreadThoroughnessLede:
+      "Hvor hardt Korrekturlesingens Scener-steg leter etter gjentatte scener — flere kandidatpar gir et grundigere søk, men flere modellkall, altså en lengre kjøring. Style-stegets egen tekstsampling (hvor mye av hvert kapittel det leser etter en register-/stemningsglipp) skalerer allerede på egen hånd fra Context window ovenfor; dette gjelder spesifikt Scener-stegets antall kall, der Context window ikke er en god målestokk.",
+    proofreadThoroughnessFast: "Rask — færre kandidater, raskere kjøring",
+    proofreadThoroughnessBalanced: "Balansert (standard)",
+    proofreadThoroughnessThorough: "Grundig — flere kandidater, tregere kjøring",
     filterLoreLabel: "Vis bare relevant lore for Skriv utkast",
     filterLoreLede: "Avslått som standard. Lore-fakta (importert, ikke skrevet i et kapittel) tas ellers alltid med, uansett om kapittelet faktisk handler om dem. Slå på denne hvis Story Bible-en din har mye importert lore og prompten begynner å bli for stor — da tas bare lore med hvis navnet (eller, for Hendelser, en deltaker eller et sted) nevnes i kapittelets brief eller tekst så langt. Pin en enkelt lore-fakta for å alltid ta den med uansett, med samme knapp som allerede finnes i Story Bible.",
     historyLimit: "Versjoner",

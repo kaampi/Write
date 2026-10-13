@@ -418,6 +418,12 @@ export const en = {
     contextWindowSuggested: "Set to {value}, the model's own reported maximum.",
     contextWindowSuggestError: "Couldn't get this from the model — set it by hand.",
     contextWindowOpenAiNote: "For LM Studio and other OpenAI-compatible servers, the context length is set when you load the model there, not here.",
+    proofreadThoroughnessLabel: "Proofread thoroughness",
+    proofreadThoroughnessLede:
+      "How hard Proofread's Scenes stage looks for repeated scenes — more candidate pairs means a more thorough search but more model calls, so a longer run. Style's own sampling (how much of each chapter it reads for a register/mood slip) already scales on its own from Context window above; this is specifically about Scenes' call count, which Context window isn't a good proxy for.",
+    proofreadThoroughnessFast: "Fast — fewer candidates, quicker run",
+    proofreadThoroughnessBalanced: "Balanced (default)",
+    proofreadThoroughnessThorough: "Thorough — more candidates, slower run",
     filterLoreLabel: "Only show relevant lore for Draft",
     filterLoreLede: "Off by default. Lore facts (imported, not written in a chapter) are otherwise always included, whether or not the chapter is actually about them. Turn this on if your Story Bible has a lot of imported lore and the prompt is getting too large — only lore whose name (or, for Events, a participant or location) is mentioned in the chapter's brief or text so far gets included. Pin an individual lore fact to always include it regardless, with the same button already in the Story Bible.",
     historyLimit: "Revisions",

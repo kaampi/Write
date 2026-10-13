@@ -1693,7 +1693,7 @@ manus) live.
 
 ---
 
-### 40. Korrekturläsning: gör Style-stegets textsampling och Scenes-stegets kandidattak hanterbara efter användarens dator
+### 40. Korrekturläsning: gör Style-stegets textsampling och Scenes-stegets kandidattak hanterbara efter användarens dator ✅ byggd (v1.0.94)
 
 Upptäckt under en diskussion om lokal vs moln-AI (Reddit-citat om en
 240k-ords molngenomgång på 1,5h, Mats jämförde med sin Nvidia P4000,
@@ -1745,7 +1745,15 @@ hanterbart snarare än en fast gräns för alla.
    `MAX_CANDIDATES` eller Style-samplingen gör körningen mer grundlig,
    inte nödvändigtvis snabbare på flerkorts-hårdvara.
 
-**Status: inte påbörjad, bara research.**
+**Status: byggd (v1.0.94).** Båda signalerna exakt som föreslaget
+ovan: Style skalar från Context window (hela kapitlet skickas om det
+redan ryms, annars huvud+svans klippt mot en skalad budget, aldrig
+mindre än dagens gamla 420/280-golv); Scenes fick en egen Settings-
+nivå (Snabb/Balanserad/Grundlig) istället för att återanvända
+Context window som proxy. Punkt 3 ovan (sekventiell körning, flera
+GPU:er ger inte dubbel hastighet) kvarstår som en separat, större
+ändring — inte rörd av det här bygget. Se project_spec.md v1.0.93 →
+v1.0.94 för hela bygget.
 
 ---
 

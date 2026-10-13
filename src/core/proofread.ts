@@ -319,23 +319,72 @@ Do not flag a deliberate tonal turn the story itself sets up.
 Empty is allowed: {"items":[]}.
 At most 8 items. quote must be verbatim.`;
 
-export function styleUserPrompt(book: Book): string {
+/** Mirrors llm/contextWindow.ts's own DEFAULT_CONTEXT_WINDOW — duplicated rather than imported, to keep core/ free of a dependency on the llm/ connection layer (no core/*.ts file imports from llm/ today; same tradeoff this codebase already accepts elsewhere for numbers that have to live in two places, e.g. dropCapCss's independently-bisected multiplier). */
+const STYLE_FALLBACK_CONTEXT_WINDOW = 8192;
+const STYLE_CHARS_PER_TOKEN = 4;
+/** Room left for the system prompt, the Voice block, and the model's own reply — not available for chapter samples. */
+const STYLE_RESERVE_TOKENS = 1200;
+/** Today's fixed sampling, kept as a floor: a tiny Context window never samples less than this always did. */
+const STYLE_MIN_HEAD_CHARS = 420;
+const STYLE_MIN_TAIL_CHARS = 280;
+/** Ceiling per chapter so a handful of chapters at a huge Context window doesn't balloon into sending each one almost whole regardless — "more sampling", not "no limit". */
+const STYLE_MAX_HEAD_CHARS = 3000;
+const STYLE_MAX_TAIL_CHARS = 2000;
+
+/**
+ * Per-chapter head/tail sampling budget for Style (roadmap-ideas.md #40) —
+ * scales from Settings' Context window, the same value every other AI call
+ * already budgets its own prompt against. A size question, not a how-many-
+ * calls one (this is a single call for the whole manuscript), so Context
+ * window is the right proxy here, unlike Scenes' candidate cap below.
+ */
+export function styleSampleBudget(contextWindow: number, chapterCount: number): { head: number; tail: number } {
+  const availableChars = Math.max(0, contextWindow - STYLE_RESERVE_TOKENS) * STYLE_CHARS_PER_TOKEN;
+  const perChapter = chapterCount > 0 ? availableChars / chapterCount : availableChars;
+  const clampTo = (value: number, min: number, max: number) => Math.round(Math.min(max, Math.max(min, value)));
+  return {
+    head: clampTo(perChapter * 0.6, STYLE_MIN_HEAD_CHARS, STYLE_MAX_HEAD_CHARS),
+    tail: clampTo(perChapter * 0.4, STYLE_MIN_TAIL_CHARS, STYLE_MAX_TAIL_CHARS)
+  };
+}
+
+/**
+ * The chapter whole, if it already fits the combined budget — directly
+ * answers "a register shift mid-chapter is never seen", since nothing is
+ * sampled away at all. Otherwise falls back to today's shape (first two
+ * paragraphs, last paragraph), clipped to the scaled budget instead of the
+ * old fixed 420/280. That budget is bigger than 420/280 even at today's
+ * default Context window for a typical chapter count — intentional, not a
+ * regression: the 420/280 split was never actually sized from the context
+ * window at all, just a flat number picked once; sizing it for real means
+ * using the room a manuscript-wide Style call already has, not reproducing
+ * a number nobody derived from the window to begin with.
+ */
+function styleChapterSample(paras: string[], headBudget: number, tailBudget: number): { head: string; tail: string } {
+  const whole = paras.join(" ");
+  if (whole.length <= headBudget + tailBudget) return { head: whole, tail: "" };
+  const head = clip(paras.slice(0, 2).join(" "), headBudget);
+  const tail = paras.length > 2 ? clip(paras[paras.length - 1]!, tailBudget) : "";
+  return { head, tail };
+}
+
+export function styleUserPrompt(book: Book, contextWindow: number = STYLE_FALLBACK_CONTEXT_WINDOW): string {
   const voice = book.voice.trim();
   const chapters = proseChapters(book);
+  const budget = styleSampleBudget(contextWindow, chapters.length);
   const samples = chapters.map((chapter) => {
     const craft = resolveCraft(book, chapter);
     const n = chapter.sequence_index + 1;
     const title = chapter.title.trim() || `Chapter ${n}`;
     const chapterVoice = resolveVoice(book, chapter);
     const paras = splitFlowParagraphs(chapter.prose);
-    const head = paras.slice(0, 2).join(" ");
-    const tail = paras.length > 2 ? paras[paras.length - 1] : "";
+    const { head, tail } = styleChapterSample(paras, budget.head, budget.tail);
     return [
       `Chapter ${n}: ${title}`,
       `Camera: ${summarizeCraft(craft)}`,
       chapterVoice && chapterVoice !== voice ? `Chapter voice: ${chapterVoice}` : "",
-      clip(head, 420),
-      tail ? clip(tail, 280) : ""
+      head,
+      tail
     ]
       .filter(Boolean)
       .join("\n");

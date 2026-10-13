@@ -406,6 +406,18 @@ export const BookSchema = z.object({
    */
   filter_lore_by_relevance: z.boolean().default(false),
   /**
+   * How hard Proofread's Scenes stage looks for repeated-scene pairs
+   * (roadmap-ideas.md #40) — scales the number of candidate pairs actually
+   * sent to the model for judgment, after the free local pre-ranking.
+   * Unlike Style's sampling (which scales from Context window, a size
+   * question — how much fits in one call), this is a how-many-calls-am-I-
+   * willing-to-wait-for question Context window is the wrong proxy for:
+   * each candidate pair is already small regardless of context window
+   * size. "balanced" keeps today's long-standing cap (24) — existing
+   * manuscripts proofread exactly as before. Missing on older saves.
+   */
+  proofread_thoroughness: z.enum(["fast", "balanced", "thorough"]).default("balanced"),
+  /**
    * Named threads (plotlines) an author can mark chapters against, shown
    * as a chapter × plotline matrix. Missing on older saves.
    */
@@ -495,6 +507,7 @@ export function createBook(title: string): Book {
     entity_kinds: [],
     entity_tracking: [],
     filter_lore_by_relevance: false,
+    proofread_thoroughness: "balanced",
     plotlines: [],
     created_at: timestamp,
     updated_at: timestamp

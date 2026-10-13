@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.94] - 2026-10-13
+
+### Added
+- Proofread now scales two previously-fixed limits to the author's own setup instead of using the same hard caps for everyone. Style's chapter sampling (how much of each chapter it reads for a register or mood slip) now scales from Settings' Context window — a short chapter can be sent whole once it fits, instead of always trimming to a fixed snippet. Scenes' repeated-scene search gets a new Settings → AI settings → Proofread thoroughness level (Fast/Balanced/Thorough), controlling how many candidate pairs are sent to the model — a call-count question Context window isn't a good fit for. Both default to today's existing behavior unchanged.
+
 ## [1.0.93] - 2026-10-13
 
 ### Added

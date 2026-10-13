@@ -16,7 +16,9 @@ import {
   proofreadPercent,
   PROOFREAD_STAGES,
   proseHash,
-  startProofreadJob
+  startProofreadJob,
+  styleSampleBudget,
+  styleUserPrompt
 } from "@core/proofread";
 import { collectSceneScan } from "@core/proofreadScenes";
 import { runProofread } from "@core/proofreadRun";
@@ -100,6 +102,108 @@ describe("scene scan", () => {
     });
     const scan = collectSceneScan(book, ["Emma"]);
     expect(scan.candidates.some((item) => item.chapterId === id && item.chapterIdB === id)).toBe(false);
+  });
+});
+
+describe("scene scan thoroughness (roadmap-ideas.md #40)", () => {
+  // Ten chapters, two paragraphs each, every paragraph a near-paraphrase of
+  // the others (shares the name and enough content words) — enough distinct
+  // cross-chapter pairs to exceed even "thorough"'s cap of 48, so the test
+  // actually exercises the cap rather than just reporting whatever fewer
+  // candidates happened to qualify naturally.
+  function manyCandidatePairsBook() {
+    let book = createBook("Night Keys");
+    for (let i = 1; i < 10; i++) book = addChapter(book);
+    book.chapters.forEach((chapter, index) => {
+      book = updateChapter(book, chapter.id, {
+        prose: [
+          `Emma locked the quay door and counted the night keys by the lamp on the wet planks before the stranger spoke a single word, chapter ${index}.`,
+          `Emma numbered the night keys and locked the quay door under the lamp on the wet planks while the stranger waited and said nothing, variant ${index}.`
+        ].join("\n\n")
+      });
+    });
+    return book;
+  }
+
+  it("defaults to balanced — today's long-standing cap of 24, unchanged", () => {
+    const book = manyCandidatePairsBook();
+    expect(book.proofread_thoroughness).toBe("balanced");
+    const scan = collectSceneScan(book, ["Emma"]);
+    expect(scan.total).toBeGreaterThan(24);
+    expect(scan.candidates).toHaveLength(24);
+  });
+
+  it("fast caps lower, for a quicker run on weaker hardware", () => {
+    const book = { ...manyCandidatePairsBook(), proofread_thoroughness: "fast" as const };
+    const scan = collectSceneScan(book, ["Emma"]);
+    expect(scan.candidates).toHaveLength(12);
+  });
+
+  it("thorough caps higher, for a more exhaustive run", () => {
+    const book = { ...manyCandidatePairsBook(), proofread_thoroughness: "thorough" as const };
+    const scan = collectSceneScan(book, ["Emma"]);
+    expect(scan.candidates).toHaveLength(48);
+  });
+
+  it("never reports more candidates than genuinely qualified, regardless of the cap", () => {
+    const { book } = twoChapters();
+    const thorough = { ...book, proofread_thoroughness: "thorough" as const };
+    const scan = collectSceneScan(thorough, ["Emma"]);
+    expect(scan.candidates.length).toBeLessThan(48);
+  });
+});
+
+describe("style sampling budget (roadmap-ideas.md #40)", () => {
+  it("never drops below today's old fixed 420/280 floor, even at a tiny Context window", () => {
+    const budget = styleSampleBudget(1024, 20);
+    expect(budget.head).toBe(420);
+    expect(budget.tail).toBe(280);
+  });
+
+  it("grows with a bigger Context window", () => {
+    const small = styleSampleBudget(4096, 10);
+    const large = styleSampleBudget(32768, 10);
+    expect(large.head).toBeGreaterThan(small.head);
+    expect(large.tail).toBeGreaterThan(small.tail);
+  });
+
+  it("shrinks per chapter as chapter count grows, for the same Context window", () => {
+    const few = styleSampleBudget(32768, 5);
+    const many = styleSampleBudget(32768, 50);
+    expect(many.head).toBeLessThanOrEqual(few.head);
+  });
+
+  it("never exceeds the ceiling even at a huge Context window with very few chapters", () => {
+    const budget = styleSampleBudget(131072, 1);
+    expect(budget.head).toBe(3000);
+    expect(budget.tail).toBe(2000);
+  });
+
+  it("sends a short chapter whole once it fits the budget — no clipping ellipsis at all", () => {
+    const { book, first } = twoChapters();
+    const prompt = styleUserPrompt(book, 32768);
+    const chapterOne = book.chapters.find((c) => c.id === first)!;
+    expect(prompt).toContain(chapterOne.prose);
+    expect(prompt).not.toContain("…");
+  });
+
+  it("falls back to head/tail only (middle paragraphs dropped) for a chapter too long to fit the budget", () => {
+    let book = createBook("Night Keys");
+    const id = book.chapters[0]!.id;
+    const longProse = Array.from({ length: 80 }, (_, i) => `Paragraph number ${i} goes on for a while about the sea and the lamp and the keys.`).join(
+      "\n\n"
+    );
+    book = updateChapter(book, id, { prose: longProse });
+    const prompt = styleUserPrompt(book, 2048);
+    expect(prompt).toContain("Paragraph number 0");
+    expect(prompt).toContain("Paragraph number 79");
+    expect(prompt).not.toContain("Paragraph number 40");
+    expect(prompt).not.toContain(longProse);
+  });
+
+  it("falls back to its own default Context window when none is given", () => {
+    const { book } = twoChapters();
+    expect(styleUserPrompt(book)).toBe(styleUserPrompt(book, 8192));
   });
 });
 

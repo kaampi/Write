@@ -8,8 +8,21 @@ import { proseChapters, type SceneQueueItem } from "./proofread";
 const MIN_PARA_WORDS = 20;
 const MIN_STEM_OVERLAP = 5;
 const MIN_NAME_OVERLAP = 1;
-const MAX_CANDIDATES = 24;
 const SAME_CHAPTER_GAP = 2;
+
+/**
+ * How many of the locally pre-ranked candidate pairs actually go to the
+ * model (roadmap-ideas.md #40) — a how-many-calls question, not a size
+ * one: each pair is already small (two ~900-character clips) regardless
+ * of Context window, which is why this scales from Settings' separate
+ * Proofread thoroughness level instead. "balanced" is the long-standing
+ * 24 every manuscript proofread against before this setting existed.
+ */
+const MAX_CANDIDATES_BY_THOROUGHNESS: Record<Book["proofread_thoroughness"], number> = {
+  fast: 12,
+  balanced: 24,
+  thorough: 48
+};
 
 export type ScenePara = {
   chapterId: string;
@@ -59,6 +72,7 @@ export function listSceneParagraphs(book: Book, names: Iterable<string> = []): S
 }
 
 export function collectSceneScan(book: Book, names: Iterable<string> = entityLabels(book.facts, book.entity_kinds)): SceneScan {
+  const maxCandidates = MAX_CANDIDATES_BY_THOROUGHNESS[book.proofread_thoroughness];
   const paras = listSceneParagraphs(book, names);
   let total = 0;
   const scored: { item: SceneQueueItem; score: number }[] = [];
@@ -84,7 +98,7 @@ export function collectSceneScan(book: Book, names: Iterable<string> = entityLab
     }
   }
   scored.sort((a, b) => b.score - a.score || a.item.chapterId.localeCompare(b.item.chapterId));
-  return { total, candidates: scored.slice(0, MAX_CANDIDATES).map((row) => row.item) };
+  return { total, candidates: scored.slice(0, maxCandidates).map((row) => row.item) };
 }
 
 function skipPair(left: ScenePara, right: ScenePara): boolean {

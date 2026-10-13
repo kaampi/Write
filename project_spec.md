@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.93
+Status: living document, v1.0.94
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3804,6 +3804,73 @@ Scener-panelens "Split into two…", fäste specifikt "Scene 2", såg
 build grön.
 
 v1.0.92 → v1.0.93.
+
+---
+
+**Ändringslogg v1.0.93 → v1.0.94 (2026-10-13):** #40 (gör
+Korrekturläsningens Style-sampling och Scenes-kandidattak hanterbara
+efter användarens dator) — nästa i Mats ordning efter att han pausade
+#28 i väntan på testarens exempelexporter. Redan grundligt utredd i
+roadmap-ideas.md (research från en tidigare Reddit/hårdvaru-
+diskussion), så research-steget var redan klart — gick direkt på
+den föreslagna lösningens två separata signaler.
+
+**Style** (`proofread.ts`, `styleUserPrompt`): skalar nu från
+Settings → Context window istället för de hårdkodade 420/280-
+teckengränserna. Ny `styleSampleBudget(contextWindow, chapterCount)`:
+räknar ut tillgängliga tecken (`(contextWindow - 1200 reserverade
+token) × 4 tecken/token`), delar per kapitel, 60/40-split mellan
+huvud/svans (samma förhållande 420/280 redan hade), med golv
+(420/280, dagens gamla gräns — aldrig mindre även vid ett litet
+Context window) och tak (3000/2000, så ett fåtal kapitel vid ett
+enormt Context window inte äter hela budgeten själva). Ny
+`styleChapterSample`: skickar HELA kapitlet om det redan ryms inom
+den kombinerade budgeten — löser direkt "en registerglidning mitt i
+ett kapitel syns aldrig", eftersom inget sampling sker alls när
+kapitlet får plats — annars samma form som förut (första två
+styckena + sista stycket), bara klippt mot den skalade budgeten
+istället för de gamla fasta talen. Viktigt att vara ärlig om i
+koden: vid DAGENS standard-Context window (8192) blir budgeten redan
+betydligt större än 420/280 för ett typiskt kapitelantal — inte en
+regression, bara att 420/280 aldrig faktiskt var härlett ur
+context-fönstret till att börja med, bara ett fast tal valt en gång.
+
+`ProofreadIO` (`proofreadRun.ts`) fick ett nytt `contextWindow?:
+number`-fält — valfritt så befintliga testers `ProofreadIO`-literal
+inte behövde uppdateras, `styleUserPrompt`s eget defaultvärde
+(8192, samma som `llm/contextWindow.ts`s `DEFAULT_CONTEXT_WINDOW`,
+medvetet duplicerat snarare än importerat — `core/` har idag ingen
+beroende alls på `llm/`-lagret, och jag ville inte bryta den
+gränsen för ett enda tal) tar vid om det saknas. BookStore.tsx
+trådar in `contextWindowRef.current` vid anropet.
+
+**Scenes** (`proofreadScenes.ts`): nytt fält `Book.proofread_thoroughness:
+"fast" | "balanced" | "thorough"`, default `"balanced"` = dagens
+långvariga gräns på 24 — oförändrat för alla befintliga manus.
+`MAX_CANDIDATES_BY_THOROUGHNESS`-karta: fast=12, balanced=24,
+thorough=48. Till skillnad från Style är det här en antal-anrop-
+fråga, inte en storleksfråga (varje kandidatpar är redan litet oavsett
+Context window) — därför egen Settings-nivå istället för att återanvända
+Context window som proxy, exakt som roadmap-idén föreslog.
+
+**UI** (`SettingsPanel.tsx`): ny "Proofread thoroughness"-väljare i
+AI settings, direkt under Context window-fältet (Snabb/Balanserad
+(standard)/Grundlig).
+
+**Verifierat:** nya enhetstester i `proofread.test.ts` — Scenes:
+en fixture med fler kandidatpar än ens "thorough"s tak (tio kapitel,
+varsina två nästan-parafraserade stycken) bekräftar att taket
+faktiskt appliceras på alla tre nivåer, inte bara råkar stämma.
+Style: `styleSampleBudget`s golv/tak/skalning direkt, plus
+`styleUserPrompt`-integrationstester (ett kort kapitel skickas helt
+utan klipp-ellips vid ett rymligt Context window; ett kapitel på 80
+stycken faller tillbaka till huvud+svans med mellanstyckena
+uteslutna vid ett snålt). Live Playwright-verifiering av den nya
+Settings-väljaren: syns, visar "Balanced (default)" som startvärde,
+går att ändra, och värdet överlever att stänga och återöppna
+Settings. 986 tester gröna, tsc rent, build grön.
+
+v1.0.93 → v1.0.94.
 
 ---
 

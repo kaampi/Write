@@ -42,6 +42,8 @@ export type ProofreadIO = {
   save: (job: ProofreadJob) => Promise<void>;
   /** Persists newly extracted/merged facts as the facts stage adds them. */
   saveFacts: (facts: Book["facts"]) => Promise<void>;
+  /** Settings' Context window (roadmap-ideas.md #40) — Style's own sampling scales from this, the same value every other AI call already budgets against. Not part of Book: it's a connection/hardware setting, not a manuscript one. Optional so existing ProofreadIO callers (tests included) that don't care about it don't need to supply one — styleUserPrompt falls back to its own default. */
+  contextWindow?: number;
 };
 
 export async function runProofread(job: ProofreadJob, io: ProofreadIO, signal: AbortSignal): Promise<ProofreadJob> {
@@ -161,7 +163,7 @@ async function runStyle(job: ProofreadJob, io: ProofreadIO, signal: AbortSignal)
   await io.save(current);
   const book = io.getBook();
   const notes = craftDriftNotes(book);
-  const raw = await io.complete(STYLE_SYSTEM, styleUserPrompt(book), signal);
+  const raw = await io.complete(STYLE_SYSTEM, styleUserPrompt(book, io.contextWindow), signal);
   const parsed = parseStyleItems(raw, book);
     current = touchProofread(current, {
       craftNotes: notes,

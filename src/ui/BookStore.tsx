@@ -2646,7 +2646,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
               const latest = bookRef.current;
               if (!latest) return;
               await flushSave(touch(latest, { facts }));
-            }
+            },
+            contextWindow: contextWindowRef.current
           },
           abort.signal
         );

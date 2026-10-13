@@ -467,6 +467,29 @@ export function SettingsPanel({
               ) : (
                 <p className="quiet">{m.editor.contextWindowOpenAiNote}</p>
               )}
+              <label className="craft-field">
+                <span className="field-label-row">
+                  {m.editor.proofreadThoroughnessLabel}
+                  <HelpTip
+                    body={m.editor.proofreadThoroughnessLede}
+                    ariaLabel={format(m.common.infoAbout, { field: m.editor.proofreadThoroughnessLabel })}
+                  />
+                </span>
+                <select
+                  value={book.proofread_thoroughness}
+                  onChange={(event) =>
+                    onPatch((current) => ({
+                      ...current,
+                      proofread_thoroughness: event.target.value as Book["proofread_thoroughness"]
+                    }))
+                  }
+                  aria-label={m.editor.proofreadThoroughnessLabel}
+                >
+                  <option value="fast">{m.editor.proofreadThoroughnessFast}</option>
+                  <option value="balanced">{m.editor.proofreadThoroughnessBalanced}</option>
+                  <option value="thorough">{m.editor.proofreadThoroughnessThorough}</option>
+                </select>
+              </label>
               <div className="settings-checkbox-row">
                 <label className="settings-checkbox-field">
                   <input
