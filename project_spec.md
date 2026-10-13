@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.92
+Status: living document, v1.0.93
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -3731,6 +3731,79 @@ dekorativ finns nu fyra alternativ i Settings → Typography →
 Scene break.
 
 v1.0.91 → v1.0.92.
+
+---
+
+**Ändringslogg v1.0.92 → v1.0.93 (2026-10-13):** #44 (Manuellt bifogad
+kontext från andra kapitel/scener till Draft/Recast) — nästa i Mats
+egen föreslagna ordning (41, 44, 28, 43) efter att #41 var klart.
+
+**Research innan kod**, samma princip som #30: läste `continuesFrom.ts`
+(`formatPredecessorForDraft`, `earlierChapters`, `chapterChoiceLabel`)
+och `generateProse.ts`s fem prompt-byggande funktioner
+(`draftUserPrompt`, `draftSceneUserPrompt`, `recastUserPrompt`,
+`recastSceneUserPrompt`, `polishUserPrompt`/`passageUserPrompt`)
+innan jag skrev något, för att återanvända exakt samma mönster
+istället för att uppfinna ett nytt. Bestämde scope utifrån idéns egen
+rubrik: bara Draft och Recast (båda hel-kapitel- och
+scen-varianterna) — inte Polish eller Passage, som redan ser hela
+den aktuella prosan och inte uppenbart behöver "bifoga en annan del
+av manuset" på samma sätt.
+
+**Datamodell** (`BookSchema.ts`): nytt fält `Chapter.context_refs:
+ChapterContextRef[]` — `{chapter_id, scene_id?}`, inte bara
+bar-sträng-id:n, eftersom kapitel-id:n och scen-id:n kommer från
+samma `newId()`-pool och jag inte ville bygga en "gissa vad den här
+strängen pekar på"-uppslagning. `scene_id` frånvarande = hela
+kapitlet; närvarande = bara den scenen. Utökade `clearPointersTo`
+(redan `continues_from`s egen städning vid `discardChapter`) att
+även strippa `context_refs` som pekar på det kasserade kapitlet —
+samma typ av upptäckt lucka som `entity_tracking`-fixen i #30, fast
+den här gången förebyggd direkt istället för upptäckt i efterhand.
+
+**Kärnlogik** (`src/core/chapterContext.ts`, ny fil):
+`attachableChapters`/`attachableScenes` — bara tidigare kapitel/scener
+med faktisk prosa (inget att bifoga från ett tomt kapitel, och ett
+senare kapitel har per definition inget skrivet än).
+`resolveContextRefs` — slår upp `context_refs` mot bokens nuvarande
+kapitel/scener, hoppar tyst över allt som inte längre finns eller
+blivit tomt (en scen som slagits ihop bort av en ny delning, ett
+kapitel som tömts efter att ha fästs) — samma tysta-hoppa-över-mönster
+som alla andra referenser i schemat redan har.
+`formatAttachedContextForPrompt` — bygger promptblocket, hel prosa
+per fäst kapitel/scen, inte bara en sammanfattningsrad som
+`formatStorySoFar` ger. Trådat in i alla fyra Draft/Recast-funktioner
+i `generateProse.ts`, direkt efter `formatStorySoFar`s eget block.
+
+**UI** (`Editor.tsx`, ny `AttachedContextField`-komponent i
+"Chapter settings", efter Continues from): en lista över redan fästa
+kapitel/scener (var och en med en ×-borttagningsknapp, samma
+`.icon-button`-mönster som kapitel-raderingsknappen), en väljare
+(kapitel-dropdown, följt av en scen-dropdown som bara visas om det
+valda kapitlet faktiskt har fler än en scen) plus en Fäst-knapp, och
+en grov token-kostnadsuppskattning (återanvänder `estimateTokens` från
+`promptDebug.ts`, redan byggd för AI Context Inspector — ingen ny
+uppskattningslogik). Egen `key={chapter.id}` på komponenten så att en
+halvvald kapitel/scen-kombination i väljaren nollställs rent vid
+kapitelbyte, istället för att läcka in i nästa kapitels Attached
+context. Bröt ut komponenten ur `.craft-field`s vanliga
+overlay-etikett-grid (samma lösning som `body_color`-fältet redan
+behövde för `<input type="color">` — en lista-plus-väljare passar
+inte det enda-inputs-mönstret) men behöll `craft-field`-klassen för
+dess `span:first-child`-etikettstil.
+
+**Verifierat:** 15 nya enhetstester i `chapter-context.test.ts`
+(attachable-filtrering, hel-kapitel- och scen-upplösning, tyst
+hoppa-över av trasiga referenser, `addContextRef`/`removeContextRef`,
+städning vid `discardChapter`, integrationstest mot
+`draftUserPrompt` direkt). Två fulla Playwright-körningar: en för
+hel-kapitel-fästning (fäst, se i listan, se token-kostnaden, ta
+bort), en för scen-nivå (delade ett kapitel i två scener via
+Scener-panelens "Split into two…", fäste specifikt "Scene 2", såg
+"1 · Chapter 1 — Scene 2" i listan). 975 tester gröna, tsc rent,
+build grön.
+
+v1.0.92 → v1.0.93.
 
 ---
 

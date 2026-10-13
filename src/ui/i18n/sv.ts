@@ -1104,6 +1104,15 @@ export const sv: Messages = {
     previousChapter: "Föregående kapitel",
     previousChapterNamed: "Föregående kapitel · {label}",
     noneStrand: "Ingen · ny tråd",
+    attachedContextLabel: "Bifogad kontext",
+    attachedContextLede:
+      "Fäst ett tidigare kapitel — eller bara en av dess scener — som extra kontext för Skriv utkast och Omskriv på det här kapitlet. Skickar hela prosan, inte bara en sammanfattningsrad: användbart när en plats, ett föremål eller en karaktär behöver läsas exakt som den beskrevs första gången, något \"Story so far\" ensamt kan tappa.",
+    attachedContextPickChapter: "Välj ett kapitel…",
+    attachedContextWholeChapter: "Hela kapitlet",
+    attachedContextSceneFallback: "Scen {index}",
+    attachedContextAdd: "Fäst",
+    attachedContextRemove: "Ta bort {label} från bifogad kontext",
+    attachedContextCost: "~{n} token bifogad kontext",
     modes: {
       limited: "Tredje person begränsad",
       first: "Första person",

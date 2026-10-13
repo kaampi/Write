@@ -3191,6 +3191,64 @@ button:disabled {
   min-width: 0;
 }
 
+/*
+ * A list-plus-picker, not a single overlapping input — doesn't fit
+ * .craft-field's floating-label-over-the-input grid trick (same reason
+ * the color-input field above breaks out of it). Keeping the .craft-field
+ * class anyway, just for its span:first-child label styling.
+ */
+.craft-field.chapter-attached-context {
+  display: block;
+  margin: 0.6rem 0 0;
+}
+
+.craft-field.chapter-attached-context > span.field-label-row:first-child {
+  position: static;
+  padding: 0 0 0.35rem;
+  pointer-events: auto;
+}
+
+.attached-context-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  list-style: none;
+}
+
+.attached-context-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--paper);
+  font-size: 0.84rem;
+}
+
+.attached-context-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.attached-context-picker select {
+  flex: 1 1 10rem;
+  min-width: 0;
+  font-size: 0.84rem;
+  padding: 0.4rem 1.7rem 0.4rem 0.6rem;
+}
+
+.attached-context-cost {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
 .chapter-craft-label {
   margin: 0 0 0.45rem;
   font-size: 0.68rem;

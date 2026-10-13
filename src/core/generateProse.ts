@@ -1,4 +1,5 @@
 import { withCharacterProfiles } from "./characterProfile";
+import { formatAttachedContextForPrompt } from "./chapterContext";
 import { formatPredecessorForDraft } from "./continuesFrom";
 import { filterLoreFactsByRelevance, relevantContextText } from "./loreRelevance";
 import { PREDICATE_LABELS } from "./predicates";
@@ -167,6 +168,7 @@ export function draftUserPrompt(book: Book, chapter: Chapter): string {
       : "",
     `Story Bible:\n${formatBibleForPromptAtPosition(book, chapter)}`,
     formatStorySoFar(book, chapter),
+    formatAttachedContextForPrompt(book, chapter),
     `Chapter ${chapter.sequence_index + 1}: ${chapter.title.trim() || "Untitled"}`,
     chapter.brief.trim() ? `Chapter brief (writing instruction):\n${chapter.brief.trim()}` : "No brief. Continue the story naturally.",
     formatPlotlinesForPrompt(book, chapter),
@@ -221,6 +223,7 @@ export function draftSceneUserPrompt(book: Book, chapter: Chapter, sceneId: stri
       : "",
     `Story Bible:\n${formatBibleForPromptAtPosition(book, chapter, scene.id)}`,
     formatStorySoFar(book, chapter),
+    formatAttachedContextForPrompt(book, chapter),
     `Chapter ${chapter.sequence_index + 1}: ${chapter.title.trim() || "Untitled"}`,
     chapter.brief.trim() ? `Chapter brief (writing instruction):\n${chapter.brief.trim()}` : "",
     formatPlotlinesForPrompt(book, chapter),
@@ -250,6 +253,7 @@ export function recastSceneUserPrompt(book: Book, chapter: Chapter, sceneId: str
     formatReaderForPrompt(resolveReader(book, chapter), book.reader_age),
     formatLanguageForPrompt(book.prose_language),
     `Story Bible:\n${formatBibleForPrompt(book)}`,
+    formatAttachedContextForPrompt(book, chapter),
     `Chapter ${chapter.sequence_index + 1}: ${chapter.title.trim() || "Untitled"}`,
     chapter.brief.trim() ? `Chapter brief (writing instruction):\n${chapter.brief.trim()}` : "",
     `You are recasting scene ${index + 1} of ${scenes.length} in this chapter.`,
@@ -290,6 +294,7 @@ export function recastUserPrompt(book: Book, chapter: Chapter): string {
     formatReaderForPrompt(resolveReader(book, chapter), book.reader_age),
     formatLanguageForPrompt(book.prose_language),
     `Story Bible:\n${formatBibleForPrompt(book)}`,
+    formatAttachedContextForPrompt(book, chapter),
     `Chapter ${chapter.sequence_index + 1}: ${chapter.title.trim() || "Untitled"}`,
     chapter.brief.trim() ? `Chapter brief (writing instruction):\n${chapter.brief.trim()}` : "",
     `Current prose:\n${chapter.prose.trim()}`,

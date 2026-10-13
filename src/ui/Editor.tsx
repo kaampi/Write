@@ -13,6 +13,14 @@ import {
   strandLinksForChapter
 } from "@core/continuesFrom";
 import {
+  addContextRef,
+  attachableChapters,
+  attachableScenes,
+  removeContextRef,
+  resolveContextRefs
+} from "@core/chapterContext";
+import { estimateTokens } from "./promptDebug";
+import {
   ADVANCED_POV_MODES,
   PRIMARY_POV_MODES,
   TENSES,
@@ -61,6 +69,7 @@ import {
   updateChapter,
   type Book,
   type Chapter,
+  type ChapterContextRef,
   type WritingGoal
 } from "@core/BookSchema";
 import { computeGoalPace, manuscriptWordCount } from "@core/writingGoal";
@@ -104,7 +113,7 @@ import { collectPlaceholders } from "@core/placeholders";
 import { DarlingsPanel } from "./DarlingsPanel";
 import { collectDarlings } from "@core/darlings";
 import { ScenesPanel } from "./ScenesPanel";
-import { GuidePanel, GuideHelpButton, type GuideSectionId } from "./GuidePanel";
+import { GuidePanel, GuideHelpButton, HelpTip, type GuideSectionId } from "./GuidePanel";
 import { HandbookPanel } from "./HandbookPanel";
 import { DevelopmentMethodPanel } from "./DevelopmentMethodPanel";
 import { ChapterBriefCopy } from "./ChapterBriefCopy";
@@ -2282,6 +2291,127 @@ function ChapterSettingsSection({
   );
 }
 
+/**
+ * Draft/Recast's manually-pinned extra context (roadmap-ideas.md #44) —
+ * pick an earlier chapter, optionally just one of its scenes, and its full
+ * prose gets sent alongside the Story Bible and "Story so far" summary.
+ * Hidden entirely once there's nothing to offer AND nothing already pinned
+ * (chapter 1, or a manuscript with no earlier written chapter yet) — same
+ * reasoning `continues_from`'s own picker already hides past that point.
+ */
+function AttachedContextField({
+  chapter,
+  chapters,
+  onPatch
+}: {
+  chapter: Chapter;
+  chapters: Chapter[];
+  onPatch: (patch: { context_refs: ChapterContextRef[] }) => void;
+}) {
+  const { messages: m } = useLocale();
+  const [pickChapterId, setPickChapterId] = useState("");
+  const [pickSceneId, setPickSceneId] = useState("");
+
+  const resolved = resolveContextRefs(chapters, chapter);
+  const options = attachableChapters(chapters, chapter);
+  const pickedChapter = options.find((item) => item.id === pickChapterId);
+  const sceneOptions = pickedChapter ? attachableScenes(pickedChapter) : [];
+
+  if (options.length === 0 && resolved.length === 0) return null;
+
+  function sceneLabel(scene: { title?: string; sequence_index: number }): string {
+    return scene.title ?? format(m.craft.attachedContextSceneFallback, { index: scene.sequence_index + 1 });
+  }
+
+  function attach() {
+    if (!pickChapterId) return;
+    const next = addContextRef(chapter.context_refs, {
+      chapter_id: pickChapterId,
+      ...(pickSceneId ? { scene_id: pickSceneId } : {})
+    });
+    onPatch({ context_refs: next });
+    setPickChapterId("");
+    setPickSceneId("");
+  }
+
+  return (
+    <div className="craft-field chapter-attached-context">
+      <span className="field-label-row">
+        {m.craft.attachedContextLabel}
+        <HelpTip
+          body={m.craft.attachedContextLede}
+          ariaLabel={format(m.common.infoAbout, { field: m.craft.attachedContextLabel })}
+        />
+      </span>
+      {resolved.length > 0 ? (
+        <ul className="attached-context-list">
+          {resolved.map((item) => {
+            const label = item.scene
+              ? `${choiceLabel(item.chapter, m.editor.untitled)} — ${sceneLabel(item.scene)}`
+              : choiceLabel(item.chapter, m.editor.untitled);
+            return (
+              <li key={`${item.ref.chapter_id}:${item.ref.scene_id ?? ""}`}>
+                <span>{label}</span>
+                <button
+                  type="button"
+                  className="icon-button"
+                  aria-label={format(m.craft.attachedContextRemove, { label })}
+                  onClick={() => onPatch({ context_refs: removeContextRef(chapter.context_refs, item.ref) })}
+                >
+                  ×
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+      {options.length > 0 ? (
+        <div className="attached-context-picker">
+          <select
+            value={pickChapterId}
+            onChange={(event) => {
+              setPickChapterId(event.target.value);
+              setPickSceneId("");
+            }}
+            aria-label={m.craft.attachedContextPickChapter}
+          >
+            <option value="">{m.craft.attachedContextPickChapter}</option>
+            {options.map((item) => (
+              <option key={item.id} value={item.id}>
+                {choiceLabel(item, m.editor.untitled)}
+              </option>
+            ))}
+          </select>
+          {pickedChapter && sceneOptions.length > 1 ? (
+            <select
+              value={pickSceneId}
+              onChange={(event) => setPickSceneId(event.target.value)}
+              aria-label={m.craft.attachedContextWholeChapter}
+            >
+              <option value="">{m.craft.attachedContextWholeChapter}</option>
+              {sceneOptions.map((scene) => (
+                <option key={scene.id} value={scene.id}>
+                  {sceneLabel(scene)}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          <button type="button" className="text-button" disabled={!pickChapterId} onClick={attach}>
+            {m.craft.attachedContextAdd}
+          </button>
+        </div>
+      ) : null}
+      {resolved.length > 0 ? (
+        <p className="attached-context-cost">
+          {format(m.craft.attachedContextCost, {
+            n: estimateTokens(resolved.map((item) => item.prose).join("\n\n"))
+          })}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function ChapterCraftFields({
   bookPov,
   bookTense,
@@ -2308,6 +2438,7 @@ function ChapterCraftFields({
     tense?: Tense | undefined;
     viewpoint?: string | undefined;
     continues_from?: string | undefined;
+    context_refs?: ChapterContextRef[];
   }) => void;
 }) {
   const { messages: m } = useLocale();
@@ -2406,6 +2537,7 @@ function ChapterCraftFields({
           </label>
         ) : null}
       </div>
+      <AttachedContextField key={chapter.id} chapter={chapter} chapters={chapters} onPatch={onPatch} />
       <div className="chapter-craft-actions">
         <button
           type="button"

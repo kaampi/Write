@@ -1114,6 +1114,15 @@ export const en = {
     previousChapter: "Previous chapter",
     previousChapterNamed: "Previous chapter · {label}",
     noneStrand: "None · new strand",
+    attachedContextLabel: "Attached context",
+    attachedContextLede:
+      "Pin an earlier chapter — or just one of its scenes — as extra context for Draft and Recast on this chapter. Sends its full prose, not just a summary line: useful when a place, object, or character needs to read exactly as it was first described, something \"Story so far\" alone can lose.",
+    attachedContextPickChapter: "Pick a chapter…",
+    attachedContextWholeChapter: "Whole chapter",
+    attachedContextSceneFallback: "Scene {index}",
+    attachedContextAdd: "Attach",
+    attachedContextRemove: "Remove {label} from attached context",
+    attachedContextCost: "~{n} tokens of attached context",
     modes: {
       limited: "3rd limited",
       first: "1st person",

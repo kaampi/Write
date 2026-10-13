@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.93] - 2026-10-13
+
+### Added
+- Attached context for Draft and Recast. A chapter can now pin an earlier chapter — or just one of its scenes — as extra reference material, from Chapter settings → Attached context. Its full prose is sent alongside the Story Bible, not just a one-line summary, for when a place, object, or character needs to read exactly as it was first described. Shows a rough token-cost estimate for whatever's pinned.
+
 ## [1.0.92] - 2026-10-13
 
 ### Fixed

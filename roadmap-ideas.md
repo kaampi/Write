@@ -1856,7 +1856,7 @@ genomförbarhetskoll som #42.
 
 ---
 
-### 44. Manuellt bifogad kontext från andra kapitel/scener till Draft/Recast
+### 44. Manuellt bifogad kontext från andra kapitel/scener till Draft/Recast ✅ byggd (v1.0.93)
 
 En testare: "I'm fighting a losing battle with context" — efter ett
 kapitel som introducerade en ny plats och en ny karaktär märkte de att
@@ -1899,9 +1899,15 @@ att behöva en ny fri textmarkerings-väljare:
   context window-storlek i Settings — bör visa ungefär vad det
   kostar när man fäster något.
 
-**Status: inte påbörjad, idén sparad.** Större än en engångsfix,
-mindre än Story Core (#31) — ett eget, avgränsat bygge när det blir
-aktuellt, inte en uppföljning till något pågående.
+**Status: byggd (v1.0.93).** Exakt den skisserade planen ovan,
+byggsteg för byggsteg: `context_refs` på `Chapter` ({chapter_id,
+scene_id?}, inte en bar sträng — kapitel- och scen-id:n kommer från
+samma id-pool), återanvänder `continues_from`s kapitel/scen-
+väljarmönster, nytt promptblock trådat in i alla fyra Draft/Recast-
+funktionerna direkt efter `formatStorySoFar`. Kontextbudget-frågan
+löst med en grov token-uppskattning (återanvänder `estimateTokens`,
+redan byggd för AI Context Inspector). Se project_spec.md v1.0.92 →
+v1.0.93 för hela bygget.
 
 ---
 

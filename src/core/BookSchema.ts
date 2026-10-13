@@ -77,6 +77,14 @@ export const ProseRevisionSchema = z.object({
 });
 export type ProseRevision = z.infer<typeof ProseRevisionSchema>;
 
+/** One author-pinned chapter/scene reference — see Chapter.context_refs below. */
+export const ChapterContextRefSchema = z.object({
+  chapter_id: z.string().min(1),
+  /** Absent = the whole chapter; present = just this one scene within it. */
+  scene_id: z.string().min(1).optional()
+});
+export type ChapterContextRef = z.infer<typeof ChapterContextRefSchema>;
+
 export const ChapterSchema = z.object({
   id: z.string().min(1),
   title: z.string(),
@@ -114,6 +122,19 @@ export const ChapterSchema = z.object({
    * Missing on older saves — default keeps IndexedDB loadable.
    */
   continues_from: z.string().min(1).optional(),
+  /**
+   * Earlier chapters/scenes the author manually pinned as extra context for
+   * Draft/Recast on this chapter (roadmap-ideas.md #44) — the model sees
+   * their full prose, not just a `formatStorySoFar` summary line, for the
+   * cases a summary loses (the exact wording a place or character was
+   * first described in). `scene_id` absent pins the whole chapter; present,
+   * only that one scene. Author-curated, so never auto-populated and never
+   * auto-cleared except when the pinned chapter itself is discarded (see
+   * `clearPointersTo`) — a merged-away scene id or a re-split chapter just
+   * resolves to nothing and is skipped, same as any other stale reference
+   * in this schema. Missing/empty on older saves.
+   */
+  context_refs: z.array(ChapterContextRefSchema).default([]),
   /**
    * When set, the chapter sits in Discarded chapters until restored or thrown away.
    * Missing on older saves — live chapters stay loadable.
@@ -517,7 +538,8 @@ export function createChapter(sequence_index: number, title = ""): Chapter {
     summary: "",
     prose: "",
     revisions: [],
-    sequence_index
+    sequence_index,
+    context_refs: []
   };
 }
 
@@ -555,9 +577,12 @@ function reindexLive(chapters: Chapter[]): Chapter[] {
 
 function clearPointersTo(chapters: Chapter[], chapterId: string): Chapter[] {
   return chapters.map((chapter) => {
-    if (chapter.continues_from !== chapterId) return chapter;
+    const pointsAtIt = chapter.continues_from === chapterId;
+    const pinsIt = chapter.context_refs.some((ref) => ref.chapter_id === chapterId);
+    if (!pointsAtIt && !pinsIt) return chapter;
     const next: Chapter = { ...chapter };
-    delete next.continues_from;
+    if (pointsAtIt) delete next.continues_from;
+    if (pinsIt) next.context_refs = next.context_refs.filter((ref) => ref.chapter_id !== chapterId);
     return next;
   });
 }

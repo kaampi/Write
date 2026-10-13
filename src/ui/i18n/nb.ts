@@ -1104,6 +1104,15 @@ export const nb: Messages = {
     previousChapter: "Forrige kapittel",
     previousChapterNamed: "Forrige kapittel · {label}",
     noneStrand: "Ingen · ny tråd",
+    attachedContextLabel: "Vedlagt kontekst",
+    attachedContextLede:
+      "Fest et tidligere kapittel — eller bare en av scenene dets — som ekstra kontekst for Lag utkast og Omskriv på dette kapittelet. Sender hele prosaen, ikke bare en oppsummeringslinje: nyttig når et sted, en gjenstand eller en karakter må leses akkurat som den ble beskrevet første gang, noe \"Story so far\" alene kan miste.",
+    attachedContextPickChapter: "Velg et kapittel…",
+    attachedContextWholeChapter: "Hele kapittelet",
+    attachedContextSceneFallback: "Scene {index}",
+    attachedContextAdd: "Fest",
+    attachedContextRemove: "Fjern {label} fra vedlagt kontekst",
+    attachedContextCost: "~{n} tokens vedlagt kontekst",
     modes: {
       limited: "Tredje person begrenset",
       first: "Første person",
