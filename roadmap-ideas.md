@@ -1181,7 +1181,7 @@ aldrig, ändrar inget — som Ask Manuscript.
 
 ---
 
-### 33. Timeline som gantschema, ihopslaget med Plotlines
+### 33. Timeline som gantschema, ihopslaget med Plotlines ✅ byggd (punktvarianten, v0.99.62)
 Uppstod ur arbetet med webbsidans mockup (2026-09-28): skärmdumparna på
 sajten är påhittade, men "Timeline som ett gantschema" var en idé värd
 att spara på riktigt.
@@ -1224,7 +1224,15 @@ kolumnernas bredd är rangordning, inte verklig tidsdistans. Den
 riktiga stapel/längd-varianten (start + längd, en faktisk
 schemautvidgning) är avfärdad, inte bara uppskjuten.
 
-**Status: idé nedskriven, inte påbörjad.** Inget kodat.
+**Status: byggd (v0.99.62), fast punktvarianten — se "Beslut" ovan.**
+Den tidigare "idé nedskriven, inte påbörjad"-raden här blev liggande
+kvar efter att beslutet och bygget faktiskt skedde (upptäckt
+2026-10-13 vid en rutinkoll av öppna punkter). `TimelineBoardPanel`
+(`TimelineBoard.tsx`) + `timelineBoardColumns()` (`timelineBoard.ts`)
+är kopplade in i `Editor.tsx` och ersätter både den gamla Timeline-
+listan och Trådmatrisen bakom samma nav-knapp. Den riktiga stapel/
+längd-Gantt-varianten är avfärdad, inte bara uppskjuten — inget kvar
+att bygga här.
 
 ---
 
