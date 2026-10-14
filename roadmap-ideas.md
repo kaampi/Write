@@ -908,6 +908,40 @@ klassificering eller gren efter typ — det är fortfarande steg 2 och 3,
 inte påbörjade. Byggsteg 2–6 (SillyTavern m.fl. formatadaptrar) inte
 påbörjade.
 
+**Tekniskt fynd om Campfire (2026-10-14):** Mats skickade en HAR-fil
+(nätverksinspelning från webbläsaren, inte en exportfil) från en
+session i Campfires "write"-vy. Analyserad direkt i sandlådan
+(`node` + `fs`/`JSON.parse` på filen). Avslöjar:
+- **Campfire har ingen traditionell exportfil att parsa** — hela
+  appen pratar mot ett reaktivt REST-API
+  (`backend-dot-campfire-blaze.uc.r.appspot.com`) som webbläsaren
+  POLLAR löpande (`pollInterval` ~30-35s per modul, `bufferDelay`).
+  En Campfire-adapter skulle alltså behöva prata mot en LIVE tjänst
+  (inloggning, polling), inte bara läsa en fil — ett materiellt tyngre
+  och mer sårbart (bryts av Campfires egna API-ändringar) åtagande än
+  vad "byggsteg 4" ursprungligen föreställde sig.
+- **Projektstruktur bekräftad:** ett `story`-dokument pekar ut 18
+  separata "moduler" via id-referenser: characters, locations, magic,
+  maps, items, encyclopedia, timeline, arcs, languages, systems,
+  relationships, manuscript, species, cultures, religions,
+  philosophies, research, calendar. Det är den kategori-taxonomi en
+  adapter skulle behöva mappa mot StoryBook AI:s Story Bible-typer.
+- Varje modul-dokument har ett `entries`-fält (ett nyckel-objekt, inte
+  en array — matchar URL-parametern `arrayKeys:{entries:"key"}`) som
+  håller de faktiska posterna.
+- **Rik text lagras som Slate.js-liknande JSON-nodträd**
+  (`[{"type":"paragraph","children":[{"text":"..."}]}]`), inte
+  vanlig text eller Markdown.
+- **Inspelningen fångade ett nästan tomt testprojekt** ("The dripping
+  stone") — inga karaktärer/platser/kapitel skapade än, så alla
+  `entries`-fält var tomma `{}`. Fält-nivå-strukturen för en riktigt
+  ifylld karaktär/plats/kapitel är alltså fortfarande okänd. En ny
+  HAR-inspelning från ett projekt med riktigt innehåll skulle ge det.
+- Autentisering i den fångade trafiken syntes bara som `userId`/
+  `email`-query-parametrar, ingen synlig `Authorization`-header i
+  HAR-filen (troligen sessionscookie som inte togs med i exporten,
+  inte verifierat).
+
 ### 29. ~~Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok~~ ❌ struken
 
 **Struken (2026-10-13).** Mats: det här täcks nu av ett eget, redan
