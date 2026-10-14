@@ -9094,6 +9094,22 @@ testarfeedback faktiskt pekar ut — inte genom att jaga fler
 konkurrentjämförelser. Ny funktionalitet vägs mot om den hjälper
 skrivandet, inte mot vad ett annat verktyg råkar erbjuda.
 
+**Samma princip, bekräftad från en annan vinkel (2026-10-14).** Under
+researchen för en tänkt Campfire-importadapter (roadmap-ideas.md #28)
+blev det tydligt att StoryBook AI:s eventuella användare kommer från
+olika håll med olika förväntningar — rena författare (Scrivener-typen)
+kontra de som rollspelar fram sin berättelse (Campfire/SillyTavern-
+typen, med RPG-stats, kartor, relationsgrafer). Mats: "Det känns
+faktiskt bra att vi avgränsar vad Storybook ska göra. Annars finns
+risken att Storybook blir lite av varje och tappar sin styrka som är
+författande. Det kan bli en app som kan göra allt men inte passar
+någon." Samma slutsats som 2026-09-27, nu med en konkret
+positionering att stå på: **StoryBook AI är ett verktyg för att SKRIVA
+en berättelse; SandboxAI är en motor för att SPELA den.** En funktion
+som hör hemma i "spela"-sidan (t.ex. RPG-stats, en relationsgraf,
+kartor) hör av princip inte hemma i StoryBook AI, oavsett om ett
+annat skrivverktyg som Campfire råkar erbjuda den.
+
 ---
 
 ## 3. Systemöversikt
