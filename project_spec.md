@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.99
+Status: living document, v1.0.100
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4309,6 +4309,35 @@ v1.0.98 → v1.0.99. Återstår: Writing, Revise, Images/Publishing/
 Backup, citattecken-FAQ:n (som nu delvis är inaktuell sedan Smarta
 citattecken v1.0.98), mindre uppdateringar, och översiktssektionerna
 sist.
+
+**Ändringslogg v1.0.99 → v1.0.100 (2026-10-14):** Guide-uppdatering,
+steg 2 av 7: Writing-kategorin. Fyra nya sektioner:
+- **Attached context**: skillnaden mot Story Bible förklarad konkret
+  — fakta ("ett övergivet fyrtorn") vs. den faktiska prosan ett
+  tidigare kapitel/en scen faktiskt målades upp med, när det exakta
+  ordvalet spelar roll.
+- **Darlings**: "döda dina älsklingar, behåll kropparna" — Cut to
+  Darlings, en bokgemensam hylla, återställ eller kasta för gott.
+- **Placeholders**: högerklicksmarkör mitt i skrivandet, pricken i
+  kapitellistan, panelen som listar alla öppna, kopplingen till att
+  Proofread nu varnar om en är öppen.
+- **Smart quotes**: kort sektion, pekar på både den löpande
+  konverteringen och Tools → Convert markers →
+  "Smarten quotes in whole manuscript".
+
+Placerades i Guidens befintliga ordning: `attached-context` efter
+`write-with-ai`, `darlings`/`placeholders` efter `ai-not-autopilot`,
+`smart-quotes` efter `author-voice` (sist i kategorin, innan
+`analyze-chapter` som inleder Revise). Samma mönster som steg 1: nya
+sektions-id:n i `HANDBOOK_SECTION_IDS`/`HANDBOOK_SECTION_CATEGORY`,
+innehåll skrivet för hand på alla tre språk.
+
+**Verifierat:** tsc rent, 1036 tester gröna, `npm run build` grön.
+Live Playwright: öppnade Guiden, klickade kategori 5 (Writing),
+bekräftade att alla fyra nya sektioner syns.
+
+v1.0.99 → v1.0.100. Återstår: Revise, Images/Publishing/Backup,
+citattecken-FAQ:n, mindre uppdateringar, översiktssektionerna.
 
 ---
 

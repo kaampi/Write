@@ -244,6 +244,10 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
     heading: "Write together with AI",
     body: "AI doesn't have to write whole chapters. Choose the smallest tool that solves the problem.\n\nDraft — when the chapter has no text yet.\nExtend — when you've started writing but need to move forward.\nElaborate — when a passage moves too fast or needs more content.\nRewrite — when you know what you want to change. Example: \"Make the dialogue more uncomfortable without the characters saying outright what they're angry about.\"\nWrite a beat — when you know exactly which smaller event should happen. Example: \"Nora hears footsteps on the stairs and hides the letter before the door opens.\""
   },
+  "attached-context": {
+    heading: "Attached context",
+    body: "Story Bible holds the facts, but not always the exact words a place, object, or character was first described in — and sometimes that's what matters. Chapter settings → Attached context lets a chapter pin an earlier chapter, or just one of its scenes, as extra reference material for Draft and Recast.\n\nUnlike Story Bible facts, what's pinned is sent as its actual prose, not a summary — useful when the lighthouse, say, needs to read exactly as it was first painted in chapter 2, not just as the Story Bible fact \"an abandoned lighthouse on the northern point.\" A rough token-cost estimate shows next to whatever's pinned, so you can see what it's adding to the prompt."
+  },
   "smallest-tool": {
     heading: "Choose the smallest tool",
     body: "Completely empty chapter → Draft\nA smaller event is missing → Write a beat\nThe passage is too thin → Elaborate\nI need to move forward → Extend\nI know what I want to change → Rewrite\nI want to know if the chapter works → Analyze\n\nThis gives you more control than regenerating large amounts of text."
@@ -251,6 +255,14 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   "ai-not-autopilot": {
     heading: "AI is not autopilot",
     body: "StoryBook AI isn't built around: \"Write my book.\"\n\nThe idea is instead:\nYou decide the direction.\n↓\nAI helps where you want help.\n↓\nYou read the result.\n↓\nYou change, keep, or discard it.\n↓\nThe story develops.\n\nYou can write several chapters entirely without AI. You can use AI only when you get stuck. Or generate rough drafts that you then rewrite heavily. All of these are normal ways to use StoryBook AI."
+  },
+  darlings: {
+    heading: "Darlings — kill your darlings, keep the bodies",
+    body: "A passage can be wrong for this draft without being worth losing for good. Select it and choose \"Cut to Darlings\" from the right-click menu, and it's pulled out of the chapter without being deleted — it lands in a \"N darlings kept\" tray shared across the whole book.\n\nFrom there, restore it to its original spot, or discard it for good once you're sure. A cut or a restore gets its own row in the chapter's History too, so there's always a record of what moved where."
+  },
+  placeholders: {
+    heading: "Placeholders",
+    body: "A question mid-draft doesn't have to break your flow. Right-click where it comes up — \"what was this character's last name again?\" — and drop a placeholder note, then keep writing. A small pin marks where it sits in the text; click it any time to read the note, edit it, or mark it resolved.\n\nA chapter with an open placeholder gets a small dot in the chapter list, and a compact \"N placeholders to come back to\" panel lists every open one in the book with a jump straight to its chapter. Proofread also checks for any still open before it runs, in case one's been forgotten."
   },
   "pov-tense-voice": {
     heading: "Point of view, tense, and narrative voice",
@@ -263,6 +275,10 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   "author-voice": {
     heading: "Author voice",
     body: "Two authors can describe the same event in completely different ways. Author voice helps AI understand how you want the prose to feel. It can involve:\n• sentence length\n• amount of setting description\n• dialogue\n• rhythm\n• direct or restrained language\n• other stylistic traits\n\nIt's guidance for AI. Not rules for how you must write. Your own text always has the final word."
+  },
+  "smart-quotes": {
+    heading: "Smart quotes",
+    body: "A straight \" typed in the chapter editor becomes a real opening or closing curly quote automatically, based on what comes right before it — nothing to think about, nothing to switch on.\n\nAlready have text with straight quotes — pasted in, or imported from elsewhere? Tools → Convert markers → \"Smarten quotes in whole manuscript\" converts every one already in the manuscript the same way, in a single pass."
   },
   "analyze-chapter": {
     heading: "Analyze a chapter",

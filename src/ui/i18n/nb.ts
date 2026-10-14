@@ -910,6 +910,10 @@ export const nb: Messages = {
         heading: "Skriv sammen med AI",
         body: "AI trenger ikke skrive hele kapitler. Velg det minste verktøyet som løser problemet.\n\nSkriv utkast — når kapittelet ennå ikke har noen tekst.\nForleng — når du har begynt å skrive men trenger å komme videre.\nUtdyp — når en passasje går for fort eller trenger mer innhold.\nSkriv om — når du vet hva du vil forandre. Eksempel: ”Gjør dialogen mer ubehagelig uten at personene sier rett ut hva de er sinte for.”\nSkriv en beat — når du vet nøyaktig hvilken mindre hendelse som skal skje. Eksempel: ”Nora hører steg i trappen og gjemmer brevet før døren åpnes.”"
       },
+      "attached-context": {
+        heading: "Vedlagt kontekst",
+        body: "Story Bible holder fakta, men ikke alltid de nøyaktige ordene et sted, en gjenstand eller en karakter først ble beskrevet med — og noen ganger er det nettopp det som teller. Kapittelinnstillinger → Vedlagt kontekst lar et kapittel feste et tidligere kapittel, eller bare en av scenene dets, som ekstra referansemateriale for Skriv utkast og Recast.\n\nI motsetning til Story Bible-fakta sendes det som festes som sin faktiske prosa, ikke et sammendrag — nyttig når fyrtårnet, for eksempel, trenger å leses nøyaktig som det først ble malt opp i kapittel 2, ikke bare som Story Bible-fakta ”et forlatt fyrtårn på nordspissen”. Et omtrentlig anslag over kostnaden i tokens vises ved siden av det som festes, slik at du ser hva det legger til prompten."
+      },
       "smallest-tool": {
         heading: "Velg det minste verktøyet",
         body: "Helt tomt kapittel → Skriv utkast\nEn mindre hendelse mangler → Skriv en beat\nPassasjen er for tynn → Utdyp\nJeg trenger å komme videre → Forleng\nJeg vet hva jeg vil forandre → Skriv om\nJeg vil vite om kapittelet fungerer → Analyser\n\nDet gir deg mer kontroll enn å generere om store mengder tekst."
@@ -917,6 +921,14 @@ export const nb: Messages = {
       "ai-not-autopilot": {
         heading: "AI er ikke autopilot",
         body: "StoryBook AI er ikke bygget rundt: ”Skriv boken min.”\n\nTanken er heller:\nDu bestemmer retningen.\n↓\nAI hjelper der du vil ha hjelp.\n↓\nDu leser resultatet.\n↓\nDu endrer, beholder eller forkaster det.\n↓\nHistorien utvikler seg.\n\nDu kan skrive flere kapitler helt uten AI. Du kan bruke AI bare når du sitter fast. Eller lage råutkast som du deretter skriver kraftig om. Alt dette er normale måter å bruke StoryBook AI på."
+      },
+      darlings: {
+        heading: "Darlings — drep dine kjæledyr, behold likene",
+        body: "En passasje kan være feil for akkurat dette utkastet uten å være verdt å miste for godt. Marker den og velg ”Cut to Darlings” fra høyreklikk-menyen, så løftes den ut av kapittelet uten å slettes — den havner i en felles hylle, ”N darlings kept”, delt av hele boken.\n\nDerfra kan du gjenopprette den til sin opprinnelige plass, eller forkaste den for godt når du er sikker. Både en klipping og en gjenoppretting får sin egen rad i kapittelets Historikk, så det alltid finnes et spor av hva som flyttet hvor."
+      },
+      placeholders: {
+        heading: "Plassholdere",
+        body: "Et spørsmål midt i skrivingen trenger ikke bryte flyten. Høyreklikk der det dukker opp — ”hva het egentlig etternavnet til denne karakteren?” — og slipp en plassholder-notis, fortsett så å skrive. En liten nål markerer hvor den sitter i teksten; klikk på den når som helst for å lese notisen, redigere den eller merke den som løst.\n\nEt kapittel med en åpen plassholder får en liten prikk i kapittellisten, og et kompakt ”N plassholdere å komme tilbake til”-panel lister opp hver åpne i boken med en direktelenke til kapittelet. Korrekturlesing sjekker også om noen fortsatt er åpen før den kjøres, i tilfelle en er glemt."
       },
       "pov-tense-voice": {
         heading: "Perspektiv, tid og fortellerstemme",
@@ -929,6 +941,10 @@ export const nb: Messages = {
       "author-voice": {
         heading: "Forfatterstemme",
         body: "To forfattere kan beskrive den samme hendelsen på helt ulike måter. Forfatterstemmen hjelper AI å forstå hvordan du vil at prosaen skal føles. Det kan dreie seg om:\n• setningslengde\n• mengden miljøbeskrivelse\n• dialog\n• rytme\n• direkte eller tilbakeholdent språk\n• andre stilistiske trekk\n\nDet er veiledning for AI. Ikke regler for hvordan du må skrive. Din egen tekst har alltid siste ord."
+      },
+      "smart-quotes": {
+        heading: "Smarte anførselstegn",
+        body: "Et rett \" du skriver i kapittelredigeringen blir automatisk et ekte åpnende eller lukkende, kurvet anførselstegn, avhengig av hva som kommer rett før — ingenting å tenke på, ingenting å slå på.\n\nHar du allerede tekst med rette anførselstegn — limt inn, eller importert fra et annet sted? Tools → Convert markers → ”Smarten quotes in whole manuscript” konverterer hvert ett som allerede finnes i manuset på samme måte, i ett eneste sveip."
       },
       "analyze-chapter": {
         heading: "Analyser et kapittel",
