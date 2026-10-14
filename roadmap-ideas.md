@@ -2306,7 +2306,7 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
-### 49. IDML-export (InDesign) — delsteg 1 klart, formatet självt kvar
+### 49. IDML-export (InDesign) ✅ byggd (v1.0.107), ej InDesign-testad
 
 Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
 till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
@@ -2329,14 +2329,26 @@ Italic-fontfil inbäddad för något av de 13 typsnitten, Mats
 bekräftade via fråga att hoppa över det snarare än att skaffa
 fontfiler nu).
 
-**Status: grunden klar, själva IDML-formatet återstår.** Nästa steg
-är den faktiska IDML-strukturen (designmap/Spreads/Stories/Resources,
-en ZIP-av-XML-struktur likt hur ODT/ePub redan byggs i
-`manuscriptExport.ts`), med en pragmatisk paginering för v1 (en
-generöst hög sida per kapitel snarare än äkta flerspaltspaginering —
-InDesign-författaren gör den riktiga sidlayouten själv när manuset
-väl är i InDesign), UI-knapp i Publish-dialogen, i18n på alla tre
-språk, tester, och shipping.
+**Delsteg 2 (klart, v1.0.107): själva IDML-formatet.** Byggd helt
+från grunden i `manuscriptExport.ts` — designmap/Spreads/Stories/
+Resources, en ZIP-av-XML-struktur likt ODT/ePub. Ett textblock per
+kapitel på en egen generöst hög sida (ingen äkta flerspaltspaginering
+i v1 — InDesign-författaren gör den riktiga sidlayouten själv), fet/
+kursiv/understruket som lokala CharacterStyleRange-overrides, Story
+Bible med samma synlighetsregel som alla andra format. Ny "IDML
+(InDesign)"-post i Publish-dialogens format-väljare, i18n på alla tre
+språk. Se `project_spec.md`, Ändringslogg v1.0.106 → v1.0.107, för
+fullständig teknisk genomgång.
+
+**Status: byggd, men ej InDesign-verifierad.** Till skillnad från
+varje annat exportformat i appen kunde den här inte öppnas i riktig
+InDesign för att bekräfta att den faktiskt fungerar — inte
+tillgängligt i byggmiljön. Det som är verifierat: giltig zip,
+well-formed XML, konsekventa interna korsreferenser, och att formatet
+faktiskt visar rätt innehåll (bekräftat både i tester och genom en
+riktig export genom UI:t, uppackad med systemets egen `unzip`). Mats
+bör öppna en riktig export i InDesign och rapportera tillbaka om
+något behöver rättas.
 
 ---
 

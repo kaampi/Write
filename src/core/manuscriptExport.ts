@@ -1074,6 +1074,333 @@ function rtfBlock(
     .join("\n");
 }
 
+// ===================== IDML (InDesign Markup Language) =====================
+//
+// A from-scratch IDML writer — ComicBook AI, the sibling repo Mats pointed
+// at as a reference, turned out to have no IDML export anywhere in it
+// (confirmed by searching the repo directly: zero hits for "idml",
+// "InDesign", or "icml" in its code, PROJECT_SPEC.md, or README). Built
+// instead against the documented IDML package shape: a zip of XML resource
+// and content files, assembled the same way packOdt/packEpub already build
+// their own zip-of-XML packages, with `zipStore` reused as-is.
+//
+// Unlike every other format in this file, this one could not be verified
+// by actually opening the result in InDesign — not available in this
+// environment, the same kind of gap as an AI chain nobody here can run
+// end to end without a connected model. What IS verified (see the "IDML
+// structure" tests): the zip is valid, every XML file parses, and every
+// Self/src cross-reference in designmap.xml resolves to something the
+// package actually contains. Treat the first real export as a first draft
+// to open in InDesign and report back on.
+
+let idmlIdCounter = 0;
+function idmlId(prefix: string): string {
+  idmlIdCounter += 1;
+  return `${prefix}${idmlIdCounter}`;
+}
+
+const IDML_PAGE_WIDTH = 432; // 6in
+const IDML_MARGIN = 54; // 0.75in
+const IDML_COLUMN_WIDTH = IDML_PAGE_WIDTH - IDML_MARGIN * 2;
+const IDML_BODY_SIZE = 12;
+const IDML_LINE_HEIGHT = IDML_BODY_SIZE * 1.4;
+const IDML_TITLE_PAGE_HEIGHT = 720; // 10in, fixed — title/metadata never runs long enough to need estimating
+const IDML_MIN_CHAPTER_HEIGHT = 400;
+const IDML_MAX_CHAPTER_HEIGHT = 14000; // comfortably under InDesign's own page-size ceiling
+const IDML_PARA_END = "&#13;"; // the paragraph-end mark IDML stories expect — a literal \r byte would be silently normalized away by any XML parser per the XML 1.0 spec, so it has to be a character reference, not raw text
+
+/**
+ * Every chapter gets its own single text frame, not threaded to any other
+ * frame — so unlike a real book layout, there's no "add another page and
+ * it keeps flowing": the frame has to be tall enough to hold the whole
+ * chapter up front, or InDesign clips what doesn't fit. Estimated from
+ * character count at a deliberately generous chars-per-line for a 12pt
+ * body in a 324pt column, times a further 1.5 safety factor, clamped to a
+ * sane range. The accepted tradeoff: a short chapter's page has a lot of
+ * empty space at the bottom — cosmetic, and the first thing an author
+ * reflowing into real pages in InDesign would touch anyway, unlike an
+ * underestimate, which would silently cut text off.
+ */
+function estimateChapterPageHeight(text: string, paragraphCount: number): number {
+  const charsPerLine = Math.max(20, Math.floor(IDML_COLUMN_WIDTH / (IDML_BODY_SIZE * 0.5)));
+  const estimatedLines = Math.ceil(text.length / charsPerLine) + paragraphCount;
+  const estimated = IDML_MARGIN * 2 + estimatedLines * IDML_LINE_HEIGHT * 1.5 + 80;
+  return Math.min(IDML_MAX_CHAPTER_HEIGHT, Math.max(IDML_MIN_CHAPTER_HEIGHT, estimated));
+}
+
+function idmlCharacterAttrs(styles: ProseFormattingStyle[]): string {
+  const bold = styles.includes("bold");
+  const italic = styles.includes("italic");
+  const underline = styles.includes("underline");
+  const fontStyle = bold && italic ? "Bold Italic" : bold ? "Bold" : italic ? "Italic" : "Regular";
+  return ` FontStyle="${fontStyle}"${underline ? ` Underline="true"` : ""}`;
+}
+
+/** One `<CharacterStyleRange>` — a local FontStyle/Underline override on the reserved "no character style", rather than named CharacterStyle resources (IDML allows either; local overrides need no Styles.xml entries to stay in sync). `paragraphEnd` appends the paragraph-end mark IDML expects on the last run of every paragraph. */
+function idmlRun(run: FormattedRun, paragraphEnd = false): string {
+  const content = `<Content>${xmlEscape(run.text)}${paragraphEnd ? IDML_PARA_END : ""}</Content>`;
+  const attrs = run.styles.length === 0 ? "" : idmlCharacterAttrs(run.styles);
+  return `<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"${attrs}>${content}</CharacterStyleRange>`;
+}
+
+function idmlParagraphRuns(text: string, offset: number, formatting: ProseFormattingRange[]): string {
+  const runs = formattedRuns(text, offset, formatting);
+  if (runs.length === 0) return idmlRun({ text: "", styles: [] }, true);
+  return runs.map((run, index) => idmlRun(run, index === runs.length - 1)).join("");
+}
+
+function idmlParagraph(paragraphStyleName: string, runsXml: string, extraAttrs = ""): string {
+  return `<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/${paragraphStyleName}"${extraAttrs}>${runsXml}</ParagraphStyleRange>`;
+}
+
+/** Chapter body paragraphs, mirroring the same spaced/indented split and HR_BLOCK scene-break detection every other rich format uses — `splitFlowParagraphsWithOffsets`/`splitLinesWithOffsets` are exactly the offset-preserving tools this needs. */
+function idmlChapterParagraphs(
+  text: string,
+  formatting: ProseFormattingRange[],
+  paragraphStyle: ParagraphStyle,
+  dropCapLines: number,
+  sceneBreakStyle: Book["scene_break_style"]
+): string {
+  const dropCapAttr = (isFirst: boolean) => (isFirst && dropCapLines > 0 ? ` DropCapCharacters="1" DropCapLines="${dropCapLines}"` : "");
+  const sceneBreakParagraph = () =>
+    idmlParagraph("SceneBreak", idmlRun({ text: sceneBreakSymbol(sceneBreakStyle), styles: [] }, true));
+
+  if (paragraphStyle === "indented") {
+    let firstUsed = false;
+    return splitFlowParagraphsWithOffsets(text)
+      .map((paragraph) => {
+        if (HR_BLOCK.test(paragraph.text)) return sceneBreakParagraph();
+        const isFirst = !firstUsed;
+        firstUsed = true;
+        const style = isFirst ? "BodyFirst" : "BodyIndented";
+        return idmlParagraph(style, idmlParagraphRuns(paragraph.text, paragraph.start, formatting), dropCapAttr(isFirst));
+      })
+      .join("");
+  }
+  let firstUsed = false;
+  return splitLinesWithOffsets(text)
+    .map((line) => {
+      if (!line.text) return idmlParagraph("Body", idmlRun({ text: "", styles: [] }, true));
+      if (HR_BLOCK.test(line.text)) return sceneBreakParagraph();
+      const isFirst = !firstUsed;
+      firstUsed = true;
+      return idmlParagraph("Body", idmlParagraphRuns(line.text, line.start, formatting), dropCapAttr(isFirst));
+    })
+    .join("");
+}
+
+function idmlBibleParagraphs(bible: ManuscriptExportSection[]): string {
+  const parts: string[] = [idmlParagraph("ChapterHeading", idmlParagraphRuns("Story Bible", 0, []))];
+  for (const section of bible) {
+    parts.push(idmlParagraph("ChapterHeading", idmlParagraphRuns(section.heading, 0, [])));
+    for (const entity of section.entities) {
+      parts.push(idmlParagraph("Body", idmlRun({ text: entity.name, styles: ["bold"] }, true)));
+      for (const line of entity.lines) parts.push(idmlParagraph("Body", idmlParagraphRuns(line, 0, [])));
+    }
+  }
+  return parts.join("");
+}
+
+function idmlStoryXml(storyId: string, paragraphsXml: string): string {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
+  <Story Self="${storyId}" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="" AppliedNamedGrid="n">
+    <StoryPreference OpticalMarginAlignment="false" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+    ${paragraphsXml}
+  </Story>
+</idPkg:Story>
+`;
+}
+
+function idmlSpreadXml(spreadId: string, pageId: string, frameId: string, storyId: string, pageHeight: number, label: string): string {
+  const textFrameBounds = `${IDML_MARGIN} ${IDML_MARGIN} ${pageHeight - IDML_MARGIN} ${IDML_PAGE_WIDTH - IDML_MARGIN}`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idPkg:Spread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
+  <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="true" ItemTransform="1 0 0 1 0 0" ShowMasterItems="false">
+    <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${IDML_PAGE_WIDTH}" ItemTransform="1 0 0 1 0 0">
+      <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${IDML_MARGIN}" Bottom="${IDML_MARGIN}" Left="${IDML_MARGIN}" Right="${IDML_MARGIN}"/>
+    </Page>
+    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="n" NextTextFrame="n" ContentType="TextType" ItemTransform="1 0 0 1 0 0" GeometricBounds="${textFrameBounds}">
+      <TextFramePreference TextColumnCount="1" TextColumnFixedWidth="${IDML_COLUMN_WIDTH}" UseFlexibleColumnWidth="false" FirstBaselineOffset="AscentOffset" VerticalJustification="TopAlign" InsetSpacing="0 0 0 0"/>
+    </TextFrame>
+  </Spread>
+</idPkg:Spread>
+`;
+}
+
+const IDML_CONTAINER_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<container xmlns="http://ns.adobe.com/AdobeInDesign/container/schema/1.0/">
+	<rootfiles>
+		<rootfile path="designmap.xml" />
+	</rootfiles>
+</container>
+`;
+
+const IDML_TAGS_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idPkg:Tags xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
+</idPkg:Tags>
+`;
+
+/** The reserved color/swatch names ("Black", "Paper", "Registration", "None") InDesign expects any IDML package to define — none of them are referenced with a custom value anywhere in this writer, but the entries themselves are part of what makes a package well-formed. */
+function idmlGraphicXml(): string {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idPkg:Graphic xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
+  <Color Self="Color/Black" Model="Process" Space="CMYK" ColorValue="0 0 0 100" Name="Black" ColorEditable="false" ColorRemovable="false"/>
+  <Color Self="Color/Paper" Model="Spot" Space="CMYK" ColorValue="0 0 0 0" Name="Paper" ColorEditable="false" ColorRemovable="false"/>
+  <Color Self="Color/Registration" Model="Registration" Space="CMYK" ColorValue="100 100 100 100" Name="Registration" ColorEditable="false" ColorRemovable="false"/>
+  <Swatch Self="Swatch/None" Name="None" ColorEditable="false" ColorRemovable="false"/>
+</idPkg:Graphic>
+`;
+}
+
+/** Declares the chosen font family exists, the same way RTF/ODT reference a font by name and leave finding it to whatever opens the file — not an embedded font file. InDesign shows its own missing-font warning if it isn't actually installed, same as Word/LibreOffice would for RTF/ODT. */
+function idmlFontsXml(fontName: string): string {
+  const escaped = xmlEscape(fontName);
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idPkg:Fonts xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
+  <FontFamily Self="FontFamily/${escaped}" Name="${escaped}">
+    <Font Self="Font/${escaped}-Regular" FontFamily="${escaped}" Name="${escaped}" PostScriptName="${escaped}" FontStyleName="Regular" Status="INSTALLED" WritingScript="0" PlatformName="${escaped}"/>
+  </FontFamily>
+</idPkg:Fonts>
+`;
+}
+
+function idmlPreferencesXml(pageCount: number): string {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idPkg:Preferences xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
+  <DocumentPreference PageWidth="${IDML_PAGE_WIDTH}" PageHeight="${IDML_TITLE_PAGE_HEIGHT}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection"/>
+  <ViewPreference HorizontalMeasurementUnits="Points" VerticalMeasurementUnits="Points"/>
+</idPkg:Preferences>
+`;
+}
+
+/** A single, empty master spread — required for the package to be structurally complete, but applied to none of the real pages (`AppliedMaster="n"` throughout `idmlSpreadXml`), so there's nothing on it to get wrong. */
+function idmlMasterSpreadXml(masterSelf: string, masterPageSelf: string): string {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idPkg:MasterSpread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
+  <MasterSpread Self="${masterSelf}" Name="A" NamePrefix="A" BaseName="A" ShowMasterItems="true" PageCount="1">
+    <Page Self="${masterPageSelf}" Name="A" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${IDML_TITLE_PAGE_HEIGHT} ${IDML_PAGE_WIDTH}" ItemTransform="1 0 0 1 0 0"/>
+  </MasterSpread>
+</idPkg:MasterSpread>
+`;
+}
+
+/** Title/ChapterHeading/Body(+First/+Indented)/SceneBreak paragraph styles, plus the two reserved "no style" entries every IDML Styles.xml defines. Character formatting (bold/italic/underline) is never a named style here — see `idmlRun`'s local FontStyle/Underline overrides instead. */
+function idmlStylesXml(fontName: string, bodyWeight: BodyWeight): string {
+  const escaped = xmlEscape(fontName);
+  const bodyFontStyle = bodyWeight === "bold" ? "Bold" : "Regular";
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idPkg:Styles xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
+  <RootCharacterStyleGroup Self="u_ccg">
+    <CharacterStyle Self="CharacterStyle/$ID/[No character style]" Name="$ID/[No character style]"/>
+  </RootCharacterStyleGroup>
+  <RootParagraphStyleGroup Self="u_pcg">
+    <ParagraphStyle Self="ParagraphStyle/$ID/[No paragraph style]" Name="$ID/[No paragraph style]"/>
+    <ParagraphStyle Self="ParagraphStyle/Title" Name="Title" PointSize="28" FontStyle="Bold" Justification="LeftAlign" SpaceAfter="18">
+      <Properties><AppliedFont type="string">${escaped}</AppliedFont></Properties>
+    </ParagraphStyle>
+    <ParagraphStyle Self="ParagraphStyle/ChapterHeading" Name="ChapterHeading" PointSize="20" FontStyle="Bold" Justification="LeftAlign" SpaceBefore="24" SpaceAfter="14">
+      <Properties><AppliedFont type="string">${escaped}</AppliedFont></Properties>
+    </ParagraphStyle>
+    <ParagraphStyle Self="ParagraphStyle/Body" Name="Body" PointSize="${IDML_BODY_SIZE}" Leading="${IDML_LINE_HEIGHT}" FontStyle="${bodyFontStyle}" SpaceAfter="${IDML_BODY_SIZE}">
+      <Properties><AppliedFont type="string">${escaped}</AppliedFont></Properties>
+    </ParagraphStyle>
+    <ParagraphStyle Self="ParagraphStyle/BodyFirst" Name="BodyFirst" BasedOn="ParagraphStyle/Body" FirstLineIndent="0"/>
+    <ParagraphStyle Self="ParagraphStyle/BodyIndented" Name="BodyIndented" BasedOn="ParagraphStyle/Body" FirstLineIndent="18" SpaceAfter="0"/>
+    <ParagraphStyle Self="ParagraphStyle/SceneBreak" Name="SceneBreak" BasedOn="ParagraphStyle/Body" Justification="CenterAlign" SpaceBefore="10" SpaceAfter="10"/>
+  </RootParagraphStyleGroup>
+</idPkg:Styles>
+`;
+}
+
+/**
+ * Packs the manuscript as an IDML package — one text frame per chapter, on
+ * its own generously tall page (see `estimateChapterPageHeight`), no
+ * threading between them. `bodyColor` isn't carried into IDML: unlike a
+ * screen-reading preference, a print-layout document's color is squarely
+ * the author's own call to make once it's in InDesign, not something worth
+ * guessing a swatch for here.
+ */
+export function packIdml(
+  doc: ManuscriptExport,
+  font?: PublishFont,
+  paragraphStyle: ParagraphStyle = "spaced",
+  bodyWeight: BodyWeight = "regular"
+): Uint8Array {
+  idmlIdCounter = 0;
+  const fontName = font?.name ?? "Times New Roman";
+  const masterSelf = idmlId("uMaster");
+  const masterPageSelf = idmlId("uMasterPage");
+  const docSelf = idmlId("uDoc");
+
+  const otherFiles: { name: string; data: Uint8Array }[] = [];
+  const storyIds: string[] = [];
+  const spreadRefs: string[] = [];
+  const storyRefs: string[] = [];
+
+  function addPage(label: string, height: number, paragraphsXml: string): void {
+    const spreadSelf = idmlId("uSpread");
+    const pageSelf = idmlId("uPage");
+    const frameSelf = idmlId("uFrame");
+    const storySelf = idmlId("uStory");
+    storyIds.push(storySelf);
+    otherFiles.push({ name: `Spreads/Spread_${spreadSelf}.xml`, data: utf8(idmlSpreadXml(spreadSelf, pageSelf, frameSelf, storySelf, height, label)) });
+    otherFiles.push({ name: `Stories/Story_${storySelf}.xml`, data: utf8(idmlStoryXml(storySelf, paragraphsXml)) });
+    spreadRefs.push(`  <idPkg:Spread src="Spreads/Spread_${spreadSelf}.xml"/>`);
+    storyRefs.push(`  <idPkg:Story src="Stories/Story_${storySelf}.xml"/>`);
+  }
+
+  const titleParts: string[] = [idmlParagraph("Title", idmlParagraphRuns(doc.title, 0, []))];
+  titleParts.push(idmlParagraph("Body", idmlParagraphRuns(doc.exportedLabel, 0, [])));
+  if (doc.note) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(doc.note, 0, [])));
+  if (doc.voice) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Voice: ${doc.voice}`, 0, [])));
+  if (doc.viewpoint) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Viewpoint: ${doc.viewpoint}`, 0, [])));
+  if (doc.readerAge !== undefined) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Reader: ${doc.readerAge}`, 0, [])));
+  addPage(doc.title, IDML_TITLE_PAGE_HEIGHT, titleParts.join(""));
+
+  for (const chapter of doc.chapters) {
+    const parts: string[] = [idmlParagraph("ChapterHeading", idmlParagraphRuns(chapter.heading, 0, []))];
+    if (chapter.voice) parts.push(idmlParagraph("Body", idmlParagraphRuns(`Voice: ${chapter.voice}`, 0, [])));
+    if (chapter.rawProse) {
+      parts.push(idmlChapterParagraphs(chapter.rawProse, chapter.formatting, paragraphStyle, doc.dropCapLines, doc.sceneBreakStyle));
+    }
+    const height = estimateChapterPageHeight(chapter.rawProse, splitLinesWithOffsets(chapter.rawProse).length);
+    addPage(chapter.heading, height, parts.join(""));
+  }
+
+  if (doc.bible.length > 0) {
+    const bibleText = doc.bible.flatMap((section) => section.entities.flatMap((entity) => [entity.name, ...entity.lines])).join(" ");
+    const paragraphCount = doc.bible.reduce((count, section) => count + section.entities.length * 2, 1);
+    addPage("Story Bible", estimateChapterPageHeight(bibleText, paragraphCount), idmlBibleParagraphs(doc.bible));
+  }
+
+  const designmap = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Document xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" xmlns="http://ns.adobe.com/AdobeInDesign/4.0/" DOMVersion="8.0" Self="${docSelf}" StoryList="${storyIds.join(" ")}" zeroPoint="0 0">
+  <idPkg:Graphic src="Resources/Graphic.xml"/>
+  <idPkg:Fonts src="Resources/Fonts.xml"/>
+  <idPkg:Styles src="Resources/Styles.xml"/>
+  <idPkg:Preferences src="Resources/Preferences.xml"/>
+  <idPkg:Tags src="Resources/Tags.xml"/>
+  <idPkg:MasterSpread src="MasterSpreads/MasterSpread_${masterSelf}.xml"/>
+${spreadRefs.join("\n")}
+${storyRefs.join("\n")}
+</Document>
+`;
+
+  return zipStore([
+    { name: "mimetype", data: utf8("application/vnd.adobe.indesign-idml-package") },
+    { name: "META-INF/container.xml", data: utf8(IDML_CONTAINER_XML) },
+    { name: "designmap.xml", data: utf8(designmap) },
+    { name: "Resources/Graphic.xml", data: utf8(idmlGraphicXml()) },
+    { name: "Resources/Fonts.xml", data: utf8(idmlFontsXml(fontName)) },
+    { name: "Resources/Styles.xml", data: utf8(idmlStylesXml(fontName, bodyWeight)) },
+    { name: "Resources/Preferences.xml", data: utf8(idmlPreferencesXml(otherFiles.length / 2)) },
+    { name: "Resources/Tags.xml", data: utf8(IDML_TAGS_XML) },
+    { name: `MasterSpreads/MasterSpread_${masterSelf}.xml`, data: utf8(idmlMasterSpreadXml(masterSelf, masterPageSelf)) },
+    ...otherFiles
+  ]);
+}
+
 /** Parses a BookSchema-validated "#RRGGBB" string (the schema's regex already guarantees this shape) into 0-255 channel ints. */
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   return { r: parseInt(hex.slice(1, 3), 16), g: parseInt(hex.slice(3, 5), 16), b: parseInt(hex.slice(5, 7), 16) };

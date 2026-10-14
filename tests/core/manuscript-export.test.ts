@@ -10,6 +10,7 @@ import {
   formatExportPlainText,
   formatExportRtf,
   packEpub,
+  packIdml,
   packOdt,
   packPdf,
   type PublishFont
@@ -368,6 +369,144 @@ describe("formatting fidelity", () => {
     const doc = buildManuscriptExport(book);
     expect(formatExportHtml(doc)).toContain("<p>Emma locked the door.</p>");
     expect(formatExportRtf(doc)).toContain("Emma locked the door.\\par");
+  });
+});
+
+/** Walks `zipStore`'s own local-file-header layout (STORE method, no data descriptor) — the mirror image of how it's written, so it can pull individual entries back out for the IDML structure checks below. */
+function unzipStore(bytes: Uint8Array): Record<string, Uint8Array> {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const files: Record<string, Uint8Array> = {};
+  let offset = 0;
+  while (offset + 4 <= bytes.length && view.getUint32(offset, true) === 0x04034b50) {
+    const compressedSize = view.getUint32(offset + 18, true);
+    const nameLen = view.getUint16(offset + 26, true);
+    const extraLen = view.getUint16(offset + 28, true);
+    const nameStart = offset + 30;
+    const name = new TextDecoder().decode(bytes.slice(nameStart, nameStart + nameLen));
+    const dataStart = nameStart + nameLen + extraLen;
+    files[name] = bytes.slice(dataStart, dataStart + compressedSize);
+    offset = dataStart + compressedSize;
+  }
+  return files;
+}
+
+/** A minimal tag-balance check — not a real XML validator, but enough to catch a mismatched or unclosed tag in hand-written template strings, which is the actual risk in generated XML with no CDATA, comments, or `>` inside attribute values. */
+function assertWellFormedXml(xml: string, label: string): void {
+  const body = xml.replace(/^<\?xml[^?]*\?>\s*/, "");
+  const stack: string[] = [];
+  const tagRe = /<\/?([a-zA-Z0-9:_-]+)(?:\s[^>]*?)?(\/?)>/g;
+  let match: RegExpExecArray | null;
+  while ((match = tagRe.exec(body))) {
+    const [full, name, selfClose] = match;
+    if (full!.startsWith("</")) {
+      const top = stack.pop();
+      if (top !== name) throw new Error(`${label}: mismatched closing tag </${name}>, expected </${top}>`);
+    } else if (!selfClose) {
+      stack.push(name!);
+    }
+  }
+  if (stack.length > 0) throw new Error(`${label}: unclosed tag(s) — ${stack.join(", ")}`);
+}
+
+describe("IDML export", () => {
+  function bookWithTwoChapters() {
+    let book = { ...createBook("Night Keys"), brainstorm: "secret stowaway" };
+    book = updateChapter(book, book.chapters[0]!.id, {
+      title: "The quay",
+      prose: "Emma locked the door.",
+      formatting: [{ start: 5, end: 11, style: "bold" }]
+    });
+    book = {
+      ...book,
+      chapters: [...book.chapters, { ...book.chapters[0]!, id: "ch2", title: "The tide", sequence_index: 1, prose: "Water rose.", formatting: [] }]
+    };
+    return book;
+  }
+
+  it("packs a well-formed zip with mimetype first and uncompressed", () => {
+    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    expect(idml[0]).toBe(0x50);
+    expect(idml[1]).toBe(0x4b);
+    const files = unzipStore(idml);
+    expect(new TextDecoder().decode(files["mimetype"])).toBe("application/vnd.adobe.indesign-idml-package");
+    expect(Object.keys(files)[0]).toBe("mimetype");
+  });
+
+  it("produces only well-formed XML files, and leaves brainstorm out", () => {
+    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    for (const [name, data] of Object.entries(files)) {
+      if (!name.endsWith(".xml")) continue;
+      assertWellFormedXml(new TextDecoder().decode(data), name);
+    }
+    const everyXmlText = Object.entries(files)
+      .filter(([name]) => name.endsWith(".xml"))
+      .map(([, data]) => new TextDecoder().decode(data))
+      .join("\n");
+    expect(everyXmlText).not.toContain("secret stowaway");
+  });
+
+  it("gives every chapter its own Spread and Story file, referenced from designmap.xml", () => {
+    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const designmap = new TextDecoder().decode(files["designmap.xml"]!);
+    const spreadFiles = Object.keys(files).filter((name) => name.startsWith("Spreads/"));
+    const storyFiles = Object.keys(files).filter((name) => name.startsWith("Stories/"));
+    // Title page + 2 chapters = 3 of each.
+    expect(spreadFiles.length).toBe(3);
+    expect(storyFiles.length).toBe(3);
+    for (const path of [...spreadFiles, ...storyFiles]) {
+      expect(designmap).toContain(`src="${path}"`);
+    }
+  });
+
+  it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", () => {
+    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const storyWithLocked = Object.entries(files)
+      .filter(([name]) => name.startsWith("Stories/"))
+      .map(([, data]) => new TextDecoder().decode(data))
+      .find((text) => text.includes("locked"));
+    expect(storyWithLocked).toBeDefined();
+    expect(storyWithLocked).toContain('FontStyle="Bold"');
+    expect(storyWithLocked).toMatch(/<Content>locked<\/Content>/);
+  });
+
+  it("adds a Story Bible page only when there are locked facts to show", () => {
+    let book = bookWithTwoChapters();
+    book = {
+      ...book,
+      facts: [
+        {
+          id: "f1",
+          entity_ref: "emma",
+          entity_label: "Emma",
+          predicate: "core.identity",
+          value: "Bartender at the Aurora Room",
+          sequence_index: 0,
+          status: "locked",
+          source: "author",
+          created_at: "2026-09-15T00:00:00.000Z"
+        }
+      ]
+    };
+    const withBibleText = new TextDecoder().decode(packIdml(buildManuscriptExport(book)));
+    expect(withBibleText).toContain("Story Bible");
+    expect(withBibleText).toContain("Bartender at the Aurora Room");
+
+    const emptyBibleText = new TextDecoder().decode(packIdml(buildManuscriptExport(bookWithTwoChapters())));
+    expect(emptyBibleText).not.toContain("Story Bible");
+  });
+
+  it("keeps the master spread unapplied to every real page", () => {
+    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const spreadTexts = Object.entries(files)
+      .filter(([name]) => name.startsWith("Spreads/"))
+      .map(([, data]) => new TextDecoder().decode(data));
+    for (const text of spreadTexts) {
+      expect(text).toContain('AppliedMaster="n"');
+    }
   });
 });
 

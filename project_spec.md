@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.106
+Status: living document, v1.0.107
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4559,7 +4559,75 @@ giltig PDF-fil.
 v1.0.105 → v1.0.106. Grunden för IDML-exporten är nu korrekt —
 nästa steg är IDML-formatet självt.
 
----
+**Ändringslogg v1.0.106 → v1.0.107 (2026-10-14):** IDML-exporten
+själv (roadmap-ideas.md #49, delsteg 2 av 2). Byggd helt från grunden
+i `manuscriptExport.ts`, samma fil och samma `zipStore`-mönster som
+ODT/ePub redan använder.
+
+**Designbeslut, medvetet enkla för v1:**
+- **Ett textblock per kapitel, ingen trådning mellan sidor.** Varje
+  kapitel får en EGEN, generöst hög sida (`estimateChapterPageHeight`:
+  uppskattad från teckenantal vid en konservativ tecken-per-rad-siffra
+  för en 324pt-bred spalt vid 12pt, gånger en säkerhetsfaktor på 1.5,
+  inklämd mellan 400pt och 14000pt). Medvetet val: en underskattning
+  skulle TYST klippa bort text i InDesign (ett litet overflow-märke
+  man lätt missar), medan en överskattning bara ger tomt utrymme
+  längst ner på sidan — något en författare som flödar om i InDesign
+  ändå åtgärdar först av allt. Ingen äkta flerspaltspaginering i v1;
+  InDesign-författaren gör den riktiga sidlayouten själv.
+- **Ingen MasterSpread tillämpas på någon riktig sida**
+  (`AppliedMaster="n"` genomgående) — paketet innehåller en nästan
+  tom MasterSpread bara för strukturell fullständighet, inget att få
+  fel på eftersom inget sitter på den.
+- **Tecken-formatering som lokala overrides, inte namngivna
+  CharacterStyle-resurser.** `idmlRun` sätter `FontStyle`/`Underline`
+  direkt på varje `<CharacterStyleRange>` mot den reserverade "no
+  character style" — enklare än ODT:s sju namngivna stilar, eftersom
+  IDML tillåter det och slipper hålla Styles.xml i synk.
+- **`bodyColor` bärs INTE in i IDML**, till skillnad från alla andra
+  format — ett tryck-layout-dokuments färg är författarens eget beslut
+  att göra i InDesign, inte något värt att gissa en swatch för här.
+
+**Paragraf-end-tecknet** (`&#13;`) är en explicit XML-teckenreferens,
+inte en rå \r-byte — XML 1.0-specen kräver att parsrar normaliserar
+bort rena \r/\r\n-tecken vid inläsning om de inte är escapade som en
+teckenreferens, så en rå byte hade tyst försvunnit.
+
+**Återanvänder samma delade plumbing som v1.0.106 byggde**
+(`formattedRuns`, `splitFlowParagraphsWithOffsets`,
+`splitLinesWithOffsets`) rakt av — samma HR_BLOCK-scenbrytdetektion,
+samma spaced/indented-uppdelning som RTF/ODT/HTML redan har.
+
+**Ärlig begränsning, sagd rakt ut till Mats:** till skillnad från
+varje annat format i den här filen kunde den här INTE verifieras
+genom att faktiskt öppnas i InDesign — inte tillgängligt i den här
+miljön, samma sorts lucka som en AI-kedja ingen kan köra end-to-end
+utan en ansluten modell. Vad som ÄR verifierat: zippen är giltig,
+varje XML-fil är well-formed (ett eget litet tagg-balans-test, ingen
+riktig XML-validator fanns tillgänglig i Node utan att lägga till ett
+nytt beroende), och varje Self/src-korsreferens i designmap.xml
+pekar på något paketet faktiskt innehåller. Mats bör öppna den
+första riktiga exporten i InDesign och rapportera tillbaka vad som
+eventuellt behöver rättas.
+
+**Verifierat:** tsc rent, full svit 1049 tester gröna (1043 + 6 nya i
+en ny "IDML export"-testgrupp: giltig zip med mimetype först,
+well-formed XML + brainstorm uteslutet, en Spread+Story per kapitel
+korrekt refererade från designmap.xml, fet formatering som ett lokalt
+FontStyle-override i Story-XML:en, Story Bible-sidan bara när det
+finns låsta fakta, MasterSpread aldrig tillämpad). `npm run build`
+grön. Live Playwright, den riktiga vägen genom UI:t: skapade ett
+manus, satte "locked" i fetstil via Ctrl+B, exporterade IDML genom
+den riktiga Publish-dialogen (nytt "IDML (InDesign)"-alternativ i
+format-väljaren), bekräftade med systemets egen `unzip` (oberoende av
+testernas egen packare) att zippen är giltig, att
+`Content>locked</Content` sitter i en `CharacterStyleRange
+FontStyle="Bold"`, och att designmap.xml/container.xml/mimetype ser
+strukturellt rätt ut.
+
+v1.0.106 → v1.0.107. **Hela #49 klar från StoryBook AI:s sida** —
+återstår bara Mats verkliga InDesign-test.
+
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
 riktiga byggsteget, efter flera rundors arkitekturdiskussion (se

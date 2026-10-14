@@ -1036,7 +1036,7 @@ export const sv: Messages = {
   },
   publish: {
     title: "Publicera",
-    body: "En läsbar kopia av berättelsen. Lämnar brainstorm utanför. RTF och ODT öppnas i Scrivener. HTML öppnas i valfri webbläsare. ePub öppnas i en e-boksläsare. PDF är redo att skriva ut.",
+    body: "En läsbar kopia av berättelsen. Lämnar brainstorm utanför. RTF och ODT öppnas i Scrivener. HTML öppnas i valfri webbläsare. ePub öppnas i en e-boksläsare. PDF är redo att skriva ut. IDML öppnas i InDesign, för den som vill göra bokens egna sidlayout där — en hög sida per kapitel, ingen sidlayout redan vald åt dig.",
     documentName: "Dokumentnamn",
     format: "Format",
     font: "Typsnitt",
@@ -1052,7 +1052,8 @@ export const sv: Messages = {
     odt: "ODT",
     html: "HTML",
     epub: "ePub",
-    pdf: "PDF"
+    pdf: "PDF",
+    idml: "IDML (InDesign)"
   },
   progress: {
     title: "Framsteg",

@@ -9,7 +9,10 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
-## [1.0.106] - 2026-10-14
+## [1.0.107] - 2026-10-14
+
+### Added
+- IDML export (Publish → IDML (InDesign)), for an author doing the book's own typesetting in Adobe InDesign. One text frame per chapter, each on its own generously tall page sized to hold the whole chapter without threading to another page — not a finished book layout, raw material for the author to lay out themselves. Carries chapter headings, prose (with real bold/italic/underline, drop caps, and scene-break ornaments), and the Story Bible, the same content every other Publish format includes. Built from scratch — no existing reference to work from, confirmed by searching ComicBook AI's repo directly — and not verifiable by actually opening the result in InDesign in this environment; the zip structure, XML well-formedness, and every internal cross-reference are tested, but treat a first export as a first draft worth opening and reporting back on.
 
 ### Fixed
 - Bold, italic, and underline applied in the chapter editor were silently dropped by every Publish export format — RTF, ODT, HTML, ePub, and PDF all flattened formatted prose to plain text, with no warning. All five now carry it through: real `<b>`/`<i>`/`<u>` in HTML and ePub, RTF control words, named ODT character styles, and bold plus a drawn underline rule in PDF. Italic is the one deliberate exception in PDF specifically — the app draws its own PDF text and has no italic font file embedded for any of its 13 typefaces, so an italic run there renders in the regular weight rather than faking a slant; every other format renders italic correctly, since they leave font selection to the reading application.

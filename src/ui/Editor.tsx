@@ -51,6 +51,7 @@ import {
   formatExportPlainText,
   formatExportRtf,
   packEpub,
+  packIdml,
   packOdt,
   packPdf,
   type ParagraphStyle
@@ -471,7 +472,7 @@ export function Editor() {
   const [backupFilename, setBackupFilename] = useState("");
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishFilename, setPublishFilename] = useState("");
-  const [publishFormat, setPublishFormat] = useState<"md" | "txt" | "rtf" | "odt" | "html" | "epub" | "pdf">("md");
+  const [publishFormat, setPublishFormat] = useState<"md" | "txt" | "rtf" | "odt" | "html" | "epub" | "pdf" | "idml">("md");
   const [publishParagraphStyle, setPublishParagraphStyle] = useState<ParagraphStyle>("spaced");
   const [findOpen, setFindOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -571,7 +572,7 @@ export function Editor() {
     noteClearedContinues(cleared);
   }
 
-  async function saveExport(kind: "md" | "txt" | "rtf" | "odt" | "html" | "epub" | "pdf") {
+  async function saveExport(kind: "md" | "txt" | "rtf" | "odt" | "html" | "epub" | "pdf" | "idml") {
     if (!book) return;
     const packed = packManuscriptBackup(book);
     const doc = buildManuscriptExport(book, packed.note, packed.exportedAt);
@@ -611,11 +612,17 @@ export function Editor() {
         packEpub(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
         "application/epub+zip"
       );
-    } else {
+    } else if (kind === "pdf") {
       downloadBytes(
         ensureDownloadFilename(publishFilename, "pdf"),
         await packPdf(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
         "application/pdf"
+      );
+    } else {
+      downloadBytes(
+        ensureDownloadFilename(publishFilename, "idml"),
+        packIdml(doc, font, publishParagraphStyle, book.body_font_weight),
+        "application/vnd.adobe.indesign-idml-package"
       );
     }
     setPublishOpen(false);
@@ -2195,6 +2202,7 @@ export function Editor() {
               <option value="html">{m.publish.html}</option>
               <option value="epub">{m.publish.epub}</option>
               <option value="pdf">{m.publish.pdf}</option>
+              <option value="idml">{m.publish.idml}</option>
             </select>
             <span className="field-label">{m.publish.font}</span>
             <p className="quiet">

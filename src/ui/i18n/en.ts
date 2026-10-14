@@ -1046,7 +1046,7 @@ export const en = {
   },
   publish: {
     title: "Publish",
-    body: "A readable copy of the story. Leaves brainstorm out. RTF and ODT open in Scrivener. HTML opens in any browser. ePub opens in an e-reader. PDF is ready to print.",
+    body: "A readable copy of the story. Leaves brainstorm out. RTF and ODT open in Scrivener. HTML opens in any browser. ePub opens in an e-reader. PDF is ready to print. IDML opens in InDesign, for an author doing the book's own typesetting there — one tall page per chapter, no page layout decided for you.",
     documentName: "Document name",
     format: "Format",
     font: "Font",
@@ -1062,7 +1062,8 @@ export const en = {
     odt: "ODT",
     html: "HTML",
     epub: "ePub",
-    pdf: "PDF"
+    pdf: "PDF",
+    idml: "IDML (InDesign)"
   },
   progress: {
     title: "Progress",
