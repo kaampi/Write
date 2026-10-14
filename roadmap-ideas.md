@@ -1041,6 +1041,37 @@ trattas ner. Förslag:
   privata anteckningar, inte canon — inget motsvarande fack finns
   (närmast Brainstorm, men inte heller rätt plats).
 
+**Positionering: StoryBook AI skriver, SandboxAI spelar
+(2026-10-14).** Mats, efter Campfire-genomgången ovan: "Jag tror att
+vi får se om någon vill gå från Campfire till Storybook. Det är nog
+så att våra eventuella användare kommer från olika håll. Du har rena
+författare (Scrivener) men även de som rollspelar sin berättelse
+(Campfire). Kanske även andra ingångar. Det gör att man har olika
+idéer hur en app som StoryBook ska fungera. Det är nog viktigt att
+jag, när jag 'marknadsför' appen, är tydlig med att Storybook är ett
+verktyg för att skriva en berättelse. SandboxAI är en motor för att
+spela sin berättelse."
+
+Konkret illustration vi redan stött på utan att koppla ihop det:
+Mildreds karaktärskort ovan hade ett **Statistics**-block
+("Speed: 8") — precis den sortens data en rollspelare behöver och en
+författare aldrig skulle fylla i. Campfire hanterar BÅDA syftena
+(världsbygge för att spela OCH skriva); StoryBook AI gör medvetet
+bara det senare. Det är inte en lucka i StoryBook AI att fylla, det
+är ett annat syfte — vilket i sin tur är ett skäl att inte prioritera
+#28:s Campfire-adapter högt: en Campfire-användare som främst är där
+för att SPELA sin värld (stats, kartor, relationsgrafer,
+forskningsanteckningar) landar troligen naturligare i SandboxAI
+(motorn för att spela) än i StoryBook AI (verktyget för att skriva).
+
+**Obesläktad anteckning, hör hemma i Sandbox-projektet, inte här**
+(samma mönster som #31:s ComicBook AI-referens — ett cross-repo-
+pekpinne, inte ett StoryBook AI-åtagande): Mats funderar på att
+SandboxAI så småningom skulle kunna byggas om för att hantera just
+den "spel din berättelse"-nischen SillyTavern (och delvis Campfire)
+redan täcker, möjligen med någon typ av "skapa bok"-funktion. Tas i
+Sandbox-projektet vid ett senare tillfälle — inget att bygga här.
+
 ### 29. ~~Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok~~ ❌ struken
 
 **Struken (2026-10-13).** Mats: det här täcks nu av ett eget, redan
