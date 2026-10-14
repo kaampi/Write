@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.101
+Status: living document, v1.0.102
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4365,6 +4365,32 @@ Developmental analysis.
 
 v1.0.100 → v1.0.101. Återstår: Images/Publishing/Backup,
 citattecken-FAQ:n, mindre uppdateringar, översiktssektionerna.
+
+**Ändringslogg v1.0.101 → v1.0.102 (2026-10-14):** Guide-uppdatering,
+steg 4 av 7: Images, Publishing & Backup-kategorin. Två nya
+sektioner, två uppdaterade:
+- **Typography** (ny, placerad efter Images and illustrations):
+  samlar Font (13 typsnitt), Weight, Color, Drop cap och de fyra
+  dekorativa Scene break-ornamenten under en rubrik — allihop
+  funktioner som redan fanns men aldrig haft någon guide-text alls.
+- **Language versions of a manuscript** (ny, placerad före Publish):
+  språkväxlaren, länkade tomma kapitel, Translate chapter som för med
+  sig Story Bible och Röst, "Source changed"-flaggan med diff, och
+  tredje modellvalet (Translate) i Settings → AI settings.
+- **Publish** uppdaterad: nämner nu Paragraph style-valet (tom rad vs.
+  indragen klassisk bokstil).
+- **Backup** uppdaterad: förklarar "Export for other apps"/StoryCore
+  som en TREDJE sak, varken backup eller läskopia — ett ögonblicks-
+  format för syskonappar som ComicBook AI, samma synlighetsregel som
+  Draft använder.
+
+**Verifierat:** tsc rent, 1036 tester gröna, `npm run build` grön.
+Live Playwright: kategori 7 visar Typography, Language versions,
+Paragraph style-omnämnandet i Publish och Export for other apps-
+omnämnandet i Backup.
+
+v1.0.101 → v1.0.102. Återstår: citattecken-FAQ:n, mindre
+uppdateringar, översiktssektionerna sist.
 
 ---
 

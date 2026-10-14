@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.102] - 2026-10-14
+
+### Added
+- Guide: two new Images, Publishing & Backup sections, Typography and Language versions of a manuscript, plus updated Publish (Paragraph style) and Backup (Export for other apps / StoryCore) sections. Fourth batch of the ongoing Guide catch-up (see v1.0.99).
+
 ## [1.0.101] - 2026-10-14
 
 ### Added
