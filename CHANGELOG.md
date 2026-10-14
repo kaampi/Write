@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.104] - 2026-10-14
+
+### Added
+- Guide: a new Connection presets section in Getting Started, and the Scenes section now mentions "Create scene" from a text selection alongside "Split into two…". Sixth batch of the ongoing Guide catch-up (see v1.0.99).
+
 ## [1.0.103] - 2026-10-14
 
 ### Changed

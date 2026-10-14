@@ -25,6 +25,7 @@ export type HandbookCategoryId = (typeof HANDBOOK_CATEGORY_IDS)[number];
 /** Keep in sync by hand with `handbook.sections` in the locale files (same keys, `Record`-typed). */
 export const HANDBOOK_SECTION_IDS = [
   "connect-local-ai",
+  "connection-presets",
   "first-book",
   "first-chapter",
   "map-of-storybook-ai",
@@ -92,6 +93,7 @@ export type HandbookSectionId = (typeof HANDBOOK_SECTION_IDS)[number];
 
 export const HANDBOOK_SECTION_CATEGORY: Record<HandbookSectionId, HandbookCategoryId> = {
   "connect-local-ai": "getting-started",
+  "connection-presets": "getting-started",
   "first-book": "getting-started",
   "first-chapter": "getting-started",
   "map-of-storybook-ai": "how-you-work",

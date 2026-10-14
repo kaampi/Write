@@ -762,6 +762,10 @@ export const nb: Messages = {
         heading: "Koble til en lokal AI",
         body: "StoryBook AI jobber med en lokal AI-modell.\nDet betyr at AI-funksjonene bruker modellen du selv har koblet til StoryBook AI.\nFor å bruke funksjoner som utkast, omskriving, analyse og intervjuer trenger du derfor først en fungerende lokal AI-tilkobling.\n\nFølg hurtigstarten for å:\n1. Installere en lokal AI-løsning.\n2. Velge en modell.\n3. Koble den til StoryBook AI.\n\nNår tilkoblingen fungerer kan du begynne å skrive."
       },
+      "connection-presets": {
+        heading: "Tilkoblingssnarveier",
+        body: "Bytter du mellom mer enn én lokal server — Ollama for hverdagsskriving, LM Studio for en annen modell, en testmaskin på et annet nettverk? Settings → Models lar deg lagre en Engine og Server address som en navngitt rute, i stedet for å skrive inn adressen på nytt hver gang du bytter. Klikk på en rute for å bruke den igjen; hver av dem utvides for å vise og redigere sine egne innstillinger, med en Update-knapp for endringer og en slett-knapp for å fjerne den. Det som er aktivt akkurat nå, forblir alltid synlig og redigerbart, lagret som en rute eller ikke."
+      },
       "first-book": {
         heading: "Opprett din første bok",
         body: "Opprett et nytt manus og gi det et navn.\nDu trenger ikke opprette en Synopsis, Story Bible eller en detaljert plan før du begynner.\n\nDu kan gå rett til:\nKapitler → Kapittel 1 → Begynn å skrive\n\nSkriv selv i editoren akkurat som i et vanlig skriveprogram.\nVil du ha hjelp kan du bruke AI-verktøyene."
@@ -832,7 +836,7 @@ export const nb: Messages = {
       },
       scenes: {
         heading: "Scener",
-        body: "Når et kapittel blir langt eller komplisert kan det være lettere å dele det opp i Scener.\n\nKapittel 8 – Fyrtårnet\nScene 1: Nora ankommer øya.\nScene 2: Hun bryter seg inn i fyrtårnet.\nScene 3: Hun finner fotografiene.\nScene 4: Noen låser døren utenfra.\n\nTenk:\nBrief = kapittelets oppdrag\nScener = veien gjennom kapittelet\n\nDu trenger ikke bruke Scener for enkle kapitler der du allerede har oversikten."
+        body: "Når et kapittel blir langt eller komplisert kan det være lettere å dele det opp i Scener.\n\nKapittel 8 – Fyrtårnet\nScene 1: Nora ankommer øya.\nScene 2: Hun bryter seg inn i fyrtårnet.\nScene 3: Hun finner fotografiene.\nScene 4: Noen låser døren utenfra.\n\nTenk:\nBrief = kapittelets oppdrag\nScener = veien gjennom kapittelet\n\nDu trenger ikke bruke Scener for enkle kapitler der du allerede har oversikten.\n\nTo måter å dele av en på: Scener-panelets ”Split into two…” velger et avsnitt å bryte ved, eller marker nøyaktig den teksten som skal bli sin egen scene og velg ”Create scene” fra merkemenyen."
       },
       plotlines: {
         heading: "Tråder",

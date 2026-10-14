@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.103
+Status: living document, v1.0.104
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4408,6 +4408,24 @@ Live Playwright: kategori 8 (Help) visar den omskrivna texten.
 
 v1.0.102 → v1.0.103. Återstår: mindre uppdateringar
 (scenes-sektionen m.fl.) och översiktssektionerna sist.
+
+**Ändringslogg v1.0.103 → v1.0.104 (2026-10-14):** Guide-uppdatering,
+steg 6 av 7: mindre uppdateringar. Ny **Connection presets**-sektion
+i Getting Started (placerad direkt efter Connect a local AI, eftersom
+den är en förlängning av samma anslutningsflöde). **Scenes**-sektionen
+(Plan the Story) utökad med en mening om "Create scene" från en
+textmarkering som alternativ till "Split into two…".
+**most-important-principle** lämnades medvetet orörd — flaggades som
+lägst prioritet i den ursprungliga genomgången ("inget akut") och
+tillför inget konkret att uppdatera den med just nu.
+
+**Verifierat:** tsc rent, 1036 tester gröna, `npm run build` grön.
+Live Playwright: kategori 1 visar Connection presets, kategori 3
+visar Create scene-meningen i Scenes.
+
+v1.0.103 → v1.0.104. Återstår: översiktssektionerna
+(map-of-storybook-ai, which-tool-do-i-need, three-workflows) — sista
+steget, nu när allt de ska peka på faktiskt finns.
 
 ---
 

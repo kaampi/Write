@@ -96,6 +96,10 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
     heading: "Connect a local AI",
     body: "StoryBook AI works with a local AI model.\nThat means the AI features use the model you have connected to StoryBook AI yourself.\nTo use features like drafting, rewriting, analysis, and interviews, you first need a working local AI connection.\n\nFollow the quickstart to:\n1. Install a local AI solution.\n2. Choose a model.\n3. Connect it to StoryBook AI.\n\nOnce the connection works, you can start writing."
   },
+  "connection-presets": {
+    heading: "Connection presets",
+    body: "Switch between more than one local server — Ollama for everyday writing, LM Studio for a different model, a test rig on another machine? Settings → Models lets you save an Engine and Server address as a named tile, instead of retyping the address each time you switch. Click a tile to use it again; each one expands to show and edit its own settings, with an Update button for changes and a delete button to remove it. Whatever is live right now always stays visible and editable too, saved as a tile or not."
+  },
   "first-book": {
     heading: "Create your first book",
     body: "Create a new manuscript and give it a name.\nYou don't need to create a Synopsis, Story Bible, or a detailed plan before you start.\n\nYou can go straight to:\nChapters → Chapter 1 → Start writing\n\nWrite in the editor just like in an ordinary word processor.\nWant help? Use the AI tools."
@@ -166,7 +170,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   scenes: {
     heading: "Scenes",
-    body: "When a chapter gets long or complicated, it can help to split it into Scenes.\n\nChapter 8 – The Lighthouse\nScene 1: Nora arrives on the island.\nScene 2: She breaks into the lighthouse.\nScene 3: She finds the photographs.\nScene 4: Someone locks the door from outside.\n\nThink of it as:\nBrief = the chapter's job\nScenes = the path through the chapter\n\nYou don't need to use Scenes for simple chapters where you already have the overview."
+    body: "When a chapter gets long or complicated, it can help to split it into Scenes.\n\nChapter 8 – The Lighthouse\nScene 1: Nora arrives on the island.\nScene 2: She breaks into the lighthouse.\nScene 3: She finds the photographs.\nScene 4: Someone locks the door from outside.\n\nThink of it as:\nBrief = the chapter's job\nScenes = the path through the chapter\n\nYou don't need to use Scenes for simple chapters where you already have the overview.\n\nTwo ways to split one off: the Scenes panel's \"Split into two…\" picks a paragraph to break at, or mark the exact text that should become its own scene and choose \"Create scene\" from the selection menu."
   },
   plotlines: {
     heading: "Plotlines",
