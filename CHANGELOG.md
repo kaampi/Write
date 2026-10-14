@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.105] - 2026-10-14
+
+### Changed
+- Guide: updated the map of StoryBook AI, "Which tool do I need?", and "Three complete workflows" overview sections to reference every tool added across this Guide catch-up — Polish, Developmental analysis, Language versions, Attached context, Darlings, and Placeholders — now that each has its own section to point to. Final batch of the Guide catch-up started in v1.0.99.
+
 ## [1.0.104] - 2026-10-14
 
 ### Added

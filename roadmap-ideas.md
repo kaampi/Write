@@ -2251,6 +2251,61 @@ Se `project_spec.md`, Ändringslogg v1.0.97 → v1.0.98, för fullständig
 teknisk genomgång (ny fil `smartQuotes.ts`, `ProseCanvas.tsx`-
 integration, `BookStore.tsx`/`MarkerConversionCard.tsx`-utbyggnad).
 
+### 48. Guide-eftersläpning — genomgång klar, rutin för framtiden ✅ byggd (v1.0.99–v1.0.105)
+
+Mats (2026-10-14): "Vi har lyckats skapa ett riktigt kompetent verktyg
+för den som vill skriva prosa. Jag tror att vi måste uppdatera vår
+Guide alternativt skapa en riktig hjälp (Wiki?)" Följt av: "Kan vi
+lägga in så att citat omslutna med \" får riktiga citattecken?" →
+"Vi tar fram en lista på vad som saknas/behöver ändras först" → "Vi
+måste fixa allt... ta det i den ordning som du tror blir bäst."
+
+**Diagnos:** `git log -L` på `handbookSections`-blocket visade att
+Guidens faktiska innehåll inte ändrats sedan v1.0.34 (2026-10-02) —
+64 versioner och 25 nya `### Added`-funktioner i CHANGELOG helt utan
+guide-text, plus flera UI-omstruktureringar (Settings → dialog, Ask
+Manuscript → dialog, verktygsraden → File/Tools-menyer) som gjort
+befintlig text missvisande, inte bara ofullständig.
+
+**Beslutad väg:** befintlig in-app Guide, inte en separat wiki —
+håller sig till "allt lokalt"-principen, kräver ingen ny
+infrastruktur. Problemet var inte formatet utan avsaknaden av en
+rutin för att hänga med.
+
+**Genomfört i sju shippade steg** (v1.0.99 → v1.0.105, samma dag):
+1. Story Bible & World: Chapter summary, Aliases and exclusion
+   phrases, Merge Story Bible cards, Edit vs. Update a fact.
+2. Writing: Attached context, Darlings, Placeholders, Smart quotes.
+3. Revise: Polish, Developmental analysis, uppdaterad Proofread.
+4. Images/Publishing/Backup: Typography, Language versions,
+   uppdaterad Publish (Paragraph style) och Backup (Export for other
+   apps/StoryCore).
+5. Omskriven citattecken-FAQ (ledde tidigare med en manuell
+   kopiera-klistra-lösning som Smart quotes nu gjort överflödig för
+   just citattecken).
+6. Mindre tillägg: Connection presets, Scenes-sektionens
+   "Create scene"-nämning.
+7. Översiktssektionerna (kartan, "Which tool do I need?",
+   "Three complete workflows") uppdaterade sist, nu när allt de
+   pekar på faktiskt fanns.
+
+Varje steg verifierat (tsc, full testsvit, build, live
+Playwright-kontroll av den specifika kategorin) och shippat separat
+innan nästa påbörjades — se `project_spec.md`s sju ändringsloggposter
+v1.0.98→v1.0.99 genom v1.0.104→v1.0.105 för fullständiga detaljer.
+
+**Rutin framåt, för att undvika att detta händer igen:** inget nytt
+verktyg eller system infört — bara en medveten disciplin att hålla:
+när en feature med egen synlig UI (en ny menypost, ett nytt
+Settings-fält, ett nytt verktyg i Tools-menyn) shippas, hör en rad i
+rätt Guide-kategori till samma leverans, precis som version/
+changelog/project_spec redan är obligatoriska steg. Rena interna
+ändringar (buggfixar, prestanda, refaktorering) kräver förstås inget
+guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
+(`git log -L` på `handbookSections`-blocket, jämfört mot CHANGELOGs
+`### Added`-poster) det snabbaste sättet att se exakt hur mycket och
+vad som saknas.
+
 ---
 
 ## Medvetet nedprioriterat just nu (inte avvisat)

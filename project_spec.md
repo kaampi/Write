@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.104
+Status: living document, v1.0.105
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4426,6 +4426,43 @@ visar Create scene-meningen i Scenes.
 v1.0.103 → v1.0.104. Återstår: översiktssektionerna
 (map-of-storybook-ai, which-tool-do-i-need, three-workflows) — sista
 steget, nu när allt de ska peka på faktiskt finns.
+
+**Ändringslogg v1.0.104 → v1.0.105 (2026-10-14):** Guide-uppdatering,
+steg 7 av 7 (sista steget). De tre översiktssektionerna uppdaterade
+nu när allt de refererar till faktiskt finns att peka på:
+- **map-of-storybook-ai** (kartan): GRANSKA-raden fick ✨ Polish och
+  🧭 Developmental analysis, FÄRDIGSTÄLL-raden fick 🌐 Språkversioner
+  — medvetet INGA av de mindre granulära funktionerna (Attached
+  context, Darlings, Placeholders, Smart quotes, Merge cards) lades
+  till, eftersom kartan är tänkt att vara grov/kategorinivå, inte en
+  fullständig funktionslista; de hör hemma i den detaljerade guiden
+  under, inte på kartan.
+- **three-workflows**: "Analysera → Korrekturläs" utökades till
+  "Analysera → Polish → Korrekturläs" i alla tre flöden;
+  "Developmental analysis" lades bara till i det tredje, mest
+  strukturerade flödet ("Jag vill planera mycket") — ett medvetet val
+  eftersom Developmental analysis drar störst nytta av just den
+  nivån av Plotlines/Timeline-ifyllnad som det flödet redan bygger
+  upp, enligt samma grundande-princip som beskrevs vid #14:s bygge
+  (v1.0.97).
+- **which-tool-do-i-need**: sex nya rader (Attached context, Darlings,
+  Placeholders, Polish, Developmental analysis, Språkversioner)
+  insprängda på rätt plats i den befintliga problem→verktyg-listan.
+  Samtidigt uppdaterades den gamla Proofread-raden ("jag vill putsa
+  texten" → Korrekturläs), som blivit missvisande sedan Polish fick
+  sin egen identitet som DET verktyg som faktiskt skriver om prosan
+  — Proofread-raden omformulerad till att handla om en sista
+  radgranskning istället.
+
+**Verifierat:** tsc rent, 1036 tester gröna, `npm run build` grön.
+Live Playwright: kategori 2 (How You Can Work) visar alla sex nya
+termer i de uppdaterade översiktssektionerna.
+
+v1.0.104 → v1.0.105. **Hela sjustegsgenomgången klar.** Guidens
+innehåll är nu i linje med produkten igen efter att ha legat 64
+versioner (v1.0.34 → v1.0.98) efter. Nästa gång det här får hända
+igen bör vi fånga det tidigare — se separat anteckning i
+roadmap-ideas.md om rutinen framåt.
 
 ---
 
