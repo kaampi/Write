@@ -1011,6 +1011,36 @@ chapter_id`) istället för att bygga en ny länkmodell — samma princip
 som flera gånger redan: återanvänd befintlig datamodell, bygg inte en
 parallell.
 
+**Kategori-mappning Campfire → StoryBook AI, föreslagen av Mats och
+grundad i koden (2026-10-14):** Mats skickade en skärmdump av
+sidopanelen för "The dripping stone" — hela Campfire-modullistan
+synlig (Maps, Research, Timeline, Calendar, Arcs, Relationships,
+Encyclopedia, Magic, Species, Cultures, Items, Systems, Languages,
+Religions, Philosophies, plus Characters/Locations sedan tidigare) —
+och noterade: "Jag inser att det är en annan typ av app. Det finns
+mängder av Elements som vi skulle hantera som Facts med färre
+grupperingar." Bekräftat i `bibleGroups.ts`: StoryBook AI:s Story
+Bible har bara SEX fasta kategorier (`BIBLE_KINDS` =
+characters/locations/objects/groups/events/concepts, hårdkodat —
+`EntityKindSchema` kan bara omklassificera en entitet till en av dessa
+sex, aldrig lägga till en ny). Campfires ~18 moduler måste alltså
+trattas ner. Förslag:
+- Characters → `characters`. Locations + Maps → `locations`.
+  Items → `objects`. Timeline + Calendar → `events`.
+- Species, Cultures, Religions, Systems, Languages, Magic,
+  Philosophies, Encyclopedia → `concepts` (StoryBook AI:s
+  "allt-annat-världsbygge"-fack).
+- Cultures/Religions är en gränsfråga: en abstrakt tro → `concepts`,
+  en organiserad institution med medlemmar → `groups`. Ingen mekanisk
+  regel, kräver antagligen en bedömning (av extraktorn, eller
+  författaren i granskningskön) från fall till fall.
+- **Tre moduler passar inte in som fakta alls:** Arcs mappar bättre
+  mot StoryBook AI:s egen Plotlines-funktion (en namngiven tråd) än
+  mot en Story Bible-post. Relationships är en koppling MELLAN två
+  befintliga fakta/karaktärer, ingen egen entitet. Research är
+  privata anteckningar, inte canon — inget motsvarande fack finns
+  (närmast Brainstorm, men inte heller rätt plats).
+
 ### 29. ~~Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok~~ ❌ struken
 
 **Struken (2026-10-13).** Mats: det här täcks nu av ett eget, redan
