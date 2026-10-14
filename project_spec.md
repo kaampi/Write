@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.105
+Status: living document, v1.0.106
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4463,6 +4463,101 @@ innehåll är nu i linje med produkten igen efter att ha legat 64
 versioner (v1.0.34 → v1.0.98) efter. Nästa gång det här får hända
 igen bör vi fånga det tidigare — se separat anteckning i
 roadmap-ideas.md om rutinen framåt.
+
+**Ändringslogg v1.0.105 → v1.0.106 (2026-10-14):** Formatteringsfidelitet
+i Publish-export. Mats bad om en IDML-export (se roadmap-ideas.md
+#49) med ComicBook AI nämnt som referens — repot lades till i
+sessionen, genomsökt grundligt (idml/InDesign/icml: noll träffar;
+`PROJECT_SPEC.md` §11 listar bara PNG/PDF/CBZ, PNG/PDF själv ett
+ännu obockat "Fas 6"). Mats bekräftade: bygg från grunden, inget att
+återanvända.
+
+**Ett fynd innan IDML-bygget ens började:** genomgång av
+`manuscriptExport.ts` (1167 rader, alla sju exportformat) visade att
+`chapter.formatting` (fet/kursiv/understruket, satt i editorn) ALDRIG
+lästes av exporten — `ManuscriptExportChapter` hade inget
+formatting-fält alls, varje paragraf-renderare körde `xmlEscape`
+direkt på ren text. Fet/kursiv/understruket har alltså tystat
+försvunnit ur RTF/ODT/HTML/ePub/PDF hela tiden, inte bara en
+framtida brist i en ny IDML-export. Mats bekräftade: fixa detta
+delat av alla format FÖRST, innan IDML byggs ovanpå samma
+bristfälliga grund.
+
+**Lösningen krävde förvånansvärt lite ny kod** — `proseFlow.ts` hade
+redan `splitFlowParagraphsWithOffsets` (paragrafdelning med
+offset-spårning, dokumenterad som exakt "as long as text is already
+in the joined form... true for any chapter.prose that has passed
+through the canvas") och `proseFormatting.ts` hade redan
+`formattingSegments` (samma motor proseFlow.ts:s egen live HTML-
+renderare `htmlFromProse` redan använder internt). Export behövde
+bara koppla in dem, inte uppfinna dem.
+
+**Designval, avgjorda innan kodningen:**
+1. **Formatering beräknas mot RAW `chapter.prose`, inte den peelade
+   `exportProse()`-versionen.** `manuscriptFromModel` (BookStore.tsx)
+   kör redan `peelModelAsides` när en AI-text accepteras in i
+   `chapter.prose` — peeling vid export är alltså en defensiv
+   no-op i det normala fallet, inte huvudmekanismen. Ett nytt
+   `rawProse`-fält lades till `ManuscriptExportChapter` vid sidan av
+   det befintliga `prose` (som MD/TXT fortfarande använder oförändrat)
+   — sidosteg hela frågan om hur peeling skulle förskjuta
+   formateringsoffsets, istället för att försöka lösa den.
+2. **Kursiv hoppas medvetet över i PDF.** PDF ritas av appens egen
+   pdf-lib-kod (inga fonter från läsarens dator) och har bara
+   Regular+Bold inbäddat per typsnitt — ingen Italic-fil för något av
+   de 13 typsnitten. Fet (byt till redan inbäddad Bold-font) och
+   understrykning (en ritad linje) löstes fullt ut. Mats bekräftade
+   via fråga: hoppa över kursiv i PDF snarare än att skaffa
+   Italic/Bold Italic-fontfiler för alla 13 typsnitt nu — samma
+   "olika trohet per format"-mönster scenbrytare/anfang redan
+   etablerat, tydligt dokumenterat i koden.
+
+**Delad hjälpfunktion** `formattedRuns(text, offset, formatting)` i
+`manuscriptExport.ts`: slår `formattingSegments` och slicear ut
+`{text, styles}`-körningar. Varje rikt format kallar den en gång per
+paragraf (PDF: en gång per redan radbruten rad, se nedan).
+
+**Per format:**
+- **HTML/ePub** (`htmlParagraphs`, delad av båda): bytte
+  `splitFlowParagraphs`→`splitFlowParagraphsWithOffsets` (indragen
+  stil) och en ny `splitLinesWithOffsets` (spaced-stilen, som aldrig
+  kollapsat radbrytningar och därför behövde sin egen
+  offset-bevarande variant). Återanvänder `wrapStyles` från
+  proseFlow.ts (nu exporterad) för `<b>/<i>/<u>`-nästling.
+- **RTF** (`rtfBlock`): samma offset-delning, ny `rtfRun` slår in
+  varje körning i en egen `{...}`-grupp med `\b`/`\i`/`\ul` så inget
+  läcker till nästa körning.
+- **ODT** (`odtProse`): samma offset-delning, ny `odtRun` slår in
+  körningar i `<text:span text:style-name="...">`. Sju nya
+  `style:family="text"`-stilar i `odtStyles()` (Bold/Italic/
+  Underline och de fyra kombinationerna) täcker varje möjlig
+  bold/italic/underline-kombination.
+- **PDF** (`PdfWriter.prose`): den enda riktiga nykodningen. Ny
+  `wrapWithOffsets` (radbrytning som `wrap()` redan gjorde, men
+  behåller varje radas [start,end) in i källtexten) + ny
+  `drawStyledLine` som ritar en redan radbruten rad körning för
+  körning, byter till `this.bold`-fonten och ritar en manuell linje
+  under för underline. Radbrytningens bredd mäts alltid i
+  kroppsfonten (ett dokumenterat, accepterat närmevärde — en lång fet
+  körning nära marginalen kan i sällsynta fall sticka ut en aning).
+
+**Verifierat:** tsc rent, full svit 1043 tester gröna (1036 + 7 nya i
+`manuscript-export.test.ts`s nya "formatting fidelity"-block —
+HTML/ePub-nästling, RTF-gruppering, ODT-spans + stilar, indragen
+stil, PDF kraschar inte, tomt formatting oförändrat beteende). `npm
+run build` grön. Live Playwright, den riktiga vägen genom UI:t (inte
+bara enhetstester): skapade ett manus, markerade "locked" i
+"Emma locked the door." via en exakt DOM Range, Ctrl+B,
+bekräftade `<p>Emma <b>locked</b> the door.</p>` i editorn direkt;
+exporterade sedan HTML/RTF/ODT/PDF genom den riktiga Publish-dialogen
+(format-select, riktig nedladdning via Playwrights `download`-event)
+och bekräftade `<b>locked</b>` i HTML, `{\b locked}` i RTF,
+`<text:span text:style-name="Bold">locked</text:span>` + den
+matchande stildefinitionen i ODT:ns uppackade `styles.xml`, och en
+giltig PDF-fil.
+
+v1.0.105 → v1.0.106. Grunden för IDML-exporten är nu korrekt —
+nästa steg är IDML-formatet självt.
 
 ---
 

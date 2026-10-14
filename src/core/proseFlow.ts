@@ -210,7 +210,7 @@ function markupFormattedSlice(text: string, offset: number, formatting: ProseFor
   return out;
 }
 
-function wrapStyles(html: string, styles: ProseFormattingStyle[]): string {
+export function wrapStyles(html: string, styles: ProseFormattingStyle[]): string {
   let out = html;
   if (styles.includes("underline")) out = `<u>${out}</u>`;
   if (styles.includes("italic")) out = `<i>${out}</i>`;

@@ -2306,6 +2306,38 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
+### 49. IDML-export (InDesign) — delsteg 1 klart, formatet självt kvar
+
+Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
+till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
+(utan att ändra något i det projektet)"
+
+**ComicBook AI hade ingen IDML-export att utgå från.** Repot lades
+till i sessionen (read-only) och genomsöktes grundligt — noll träffar
+på "idml"/"InDesign"/"icml" i kod, `PROJECT_SPEC.md` eller README;
+`PROJECT_SPEC.md` §11 listar bara PNG/PDF/CBZ som exportformat, och
+PNG/PDF-export själv är ett obockat "Fas 6"-steg där. Mats
+bekräftade: bygg StoryBook AI:s IDML-export helt från grunden.
+
+**Delsteg 1 (klart, v1.0.106): formatteringsfidelitet i alla
+befintliga exportformat**, en förutsättning som upptäcktes under
+researchen — se Ändringslogg v1.0.105 → v1.0.106 i `project_spec.md`
+för fulla detaljer. Bold/kursiv/understruket (`chapter.formatting`)
+nådde aldrig något exportformat tidigare; nu gör de det i RTF, ODT,
+HTML, ePub och PDF (kursiv medvetet undantaget i PDF — ingen
+Italic-fontfil inbäddad för något av de 13 typsnitten, Mats
+bekräftade via fråga att hoppa över det snarare än att skaffa
+fontfiler nu).
+
+**Status: grunden klar, själva IDML-formatet återstår.** Nästa steg
+är den faktiska IDML-strukturen (designmap/Spreads/Stories/Resources,
+en ZIP-av-XML-struktur likt hur ODT/ePub redan byggs i
+`manuscriptExport.ts`), med en pragmatisk paginering för v1 (en
+generöst hög sida per kapitel snarare än äkta flerspaltspaginering —
+InDesign-författaren gör den riktiga sidlayouten själv när manuset
+väl är i InDesign), UI-knapp i Publish-dialogen, i18n på alla tre
+språk, tester, och shipping.
+
 ---
 
 ## Medvetet nedprioriterat just nu (inte avvisat)

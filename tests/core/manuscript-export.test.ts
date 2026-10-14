@@ -286,6 +286,91 @@ describe("manuscript export formats", () => {
   });
 });
 
+describe("formatting fidelity", () => {
+  // "Emma locked the door." — "locked" is chars [5, 11).
+  function bookWithBoldLocked() {
+    let book = createBook("Night Keys");
+    book = updateChapter(book, book.chapters[0]!.id, {
+      title: "The quay",
+      prose: "Emma locked the door.",
+      formatting: [{ start: 5, end: 11, style: "bold" }]
+    });
+    return book;
+  }
+
+  it("carries bold/italic/underline into HTML and ePub as real <b>/<i>/<u>", () => {
+    let book = createBook("Night Keys");
+    book = updateChapter(book, book.chapters[0]!.id, {
+      title: "The quay",
+      prose: "Emma locked the door.",
+      formatting: [
+        { start: 5, end: 11, style: "bold" },
+        { start: 16, end: 20, style: "italic" },
+        { start: 0, end: 4, style: "underline" }
+      ]
+    });
+    const doc = buildManuscriptExport(book);
+    const html = formatExportHtml(doc);
+    expect(html).toContain("<b>locked</b>");
+    expect(html).toContain("<i>door</i>");
+    expect(html).toContain("<u>Emma</u>");
+
+    const epubText = new TextDecoder().decode(packEpub(doc));
+    expect(epubText).toContain("<b>locked</b>");
+    expect(epubText).toContain("<i>door</i>");
+    expect(epubText).toContain("<u>Emma</u>");
+  });
+
+  it("nests combined styles consistently in HTML (bold outside italic outside underline)", () => {
+    let book = createBook("Night Keys");
+    book = updateChapter(book, book.chapters[0]!.id, {
+      prose: "Emma locked the door.",
+      formatting: [
+        { start: 5, end: 11, style: "bold" },
+        { start: 5, end: 11, style: "italic" }
+      ]
+    });
+    const html = formatExportHtml(buildManuscriptExport(book));
+    expect(html).toContain("<b><i>locked</i></b>");
+  });
+
+  it("carries formatting into RTF as grouped control words", () => {
+    const rtf = formatExportRtf(buildManuscriptExport(bookWithBoldLocked()));
+    expect(rtf).toContain("{\\b locked}");
+    expect(rtf).not.toContain("locked the door"); // the bold run splits "locked" out of the plain run
+  });
+
+  it("carries formatting into ODT as named text:span styles, with styles.xml defining them", () => {
+    const odt = packOdt(buildManuscriptExport(bookWithBoldLocked()));
+    const text = new TextDecoder().decode(odt);
+    expect(text).toContain('<text:span text:style-name="Bold">locked</text:span>');
+    expect(text).toContain('<style:style style:name="Bold" style:family="text">');
+  });
+
+  it("keeps formatting ranges aligned under the indented paragraph style too", () => {
+    const doc = buildManuscriptExport(bookWithBoldLocked());
+    const html = formatExportHtml(doc, undefined, "indented");
+    expect(html).toContain("<b>locked</b>");
+    const rtf = formatExportRtf(doc, undefined, "indented");
+    expect(rtf).toContain("{\\b locked}");
+  });
+
+  it("renders a PDF without crashing when formatting ranges are present, bold included", async () => {
+    const doc = buildManuscriptExport(bookWithBoldLocked());
+    const bytes = await packPdf(doc);
+    const loaded = await PDFDocument.load(bytes);
+    expect(loaded.getPageCount()).toBeGreaterThanOrEqual(2);
+  });
+
+  it("leaves plain chapters byte-identical in behavior when formatting is empty", () => {
+    let book = createBook("Night Keys");
+    book = updateChapter(book, book.chapters[0]!.id, { title: "The quay", prose: "Emma locked the door." });
+    const doc = buildManuscriptExport(book);
+    expect(formatExportHtml(doc)).toContain("<p>Emma locked the door.</p>");
+    expect(formatExportRtf(doc)).toContain("Emma locked the door.\\par");
+  });
+});
+
 describe("chapter start image", () => {
   function bookWithOneIllustratedChapter() {
     let book = createBook("Night Keys");

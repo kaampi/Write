@@ -4,7 +4,8 @@ import { groupBibleEntities } from "./bibleGroups";
 import { sortedChapters, type Book } from "./BookSchema";
 import { profileFor } from "./characterProfile";
 import { PREDICATE_LABELS } from "./predicates";
-import { HR_BLOCK, peelModelAsides, splitFlowParagraphs } from "./proseFlow";
+import { HR_BLOCK, peelModelAsides, splitFlowParagraphs, splitFlowParagraphsWithOffsets, wrapStyles } from "./proseFlow";
+import { formattingSegments, type ProseFormattingRange, type ProseFormattingStyle } from "./proseFormatting";
 import { newId } from "./ids";
 
 export type PublishFont = {
@@ -45,6 +46,20 @@ export type ManuscriptExportChapter = {
   heading: string;
   voice: string;
   prose: string;
+  /**
+   * `chapter.prose`, untouched — unlike `prose` above (which is peeled of
+   * stray model asides and trimmed, for the plain-text formats). Bold/
+   * italic/underline ranges are offsets into this exact string, so every
+   * format that renders real formatting (RTF, ODT, HTML, ePub, PDF) reads
+   * from `rawProse`/`formatting` together, never `prose`. Peeling is a
+   * defensive no-op in the ordinary case anyway — `chapter.prose` is
+   * already peeled of model asides at the point an AI result is accepted
+   * into it (`manuscriptFromModel`, BookStore.tsx) — so using the raw
+   * string here costs nothing in practice and sidesteps re-deriving how
+   * peeling would shift formatting offsets.
+   */
+  rawProse: string;
+  formatting: ProseFormattingRange[];
   /** Data URL (always JPEG) for the chapter's banner illustration, when the author uploaded one. Only HTML, ePub, and PDF embed it — RTF, ODT, and Markdown stay text-only. */
   startImageDataUrl?: string;
 };
@@ -96,6 +111,8 @@ export function buildManuscriptExport(book: Book, note = "", exportedAt = new Da
       heading: `${chapter.sequence_index + 1}. ${chapter.title.trim() || `Chapter ${chapter.sequence_index + 1}`}`,
       voice: chapter.voice?.trim() ?? "",
       prose: exportProse(chapter.prose),
+      rawProse: chapter.prose,
+      formatting: chapter.formatting ?? [],
       ...(chapter.startImage ? { startImageDataUrl: chapter.startImage.imageDataUrl } : {})
     })),
     bible
@@ -248,6 +265,45 @@ function sceneBreakSymbol(style: Book["scene_break_style"]): string {
   return style === "plain" ? "* * *" : SCENE_BREAK_ORNAMENTS[style].char;
 }
 
+export type FormattedRun = { text: string; styles: ProseFormattingStyle[] };
+
+/**
+ * Splits `text` — a slice of `rawProse` starting at `offset` within it — into
+ * runs of constant bold/italic/underline, by walking `formattingSegments`
+ * (the same engine proseFlow.ts's live HTML renderer already uses) and
+ * slicing. Every rich format (RTF, ODT, HTML, ePub, PDF) calls this once per
+ * paragraph, or per PDF text line, to know where to turn styling on and off.
+ */
+function formattedRuns(text: string, offset: number, formatting: ProseFormattingRange[]): FormattedRun[] {
+  if (!text) return [];
+  if (formatting.length === 0) return [{ text, styles: [] }];
+  return formattingSegments(formatting, offset, offset + text.length).map((segment) => ({
+    text: text.slice(segment.start - offset, segment.end - offset),
+    styles: segment.styles
+  }));
+}
+
+/**
+ * Same split as `text.split(/\r\n|\n|\r/)` — one entry per raw line, blank
+ * lines kept as empty entries — but keeps each line's start offset, the way
+ * `splitFlowParagraphsWithOffsets` does for the collapsed/trimmed paragraph
+ * split. "Spaced" paragraph style (unlike "indented") renders every typed
+ * line as its own paragraph verbatim, so this is the offset-preserving
+ * sibling that style's renderers need for formatting lookups.
+ */
+function splitLinesWithOffsets(text: string): { text: string; start: number }[] {
+  const result: { text: string; start: number }[] = [];
+  const re = /\r\n|\n|\r/g;
+  let start = 0;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(text))) {
+    result.push({ text: text.slice(start, match.index), start });
+    start = match.index + match[0].length;
+  }
+  result.push({ text: text.slice(start), start });
+  return result;
+}
+
 function base64FromBytes(bytes: Uint8Array): string {
   let binary = "";
   const chunkSize = 0x8000;
@@ -274,26 +330,38 @@ function htmlFontCss(font: PublishFont | undefined, bodyWeight: BodyWeight, body
   return `${faces}body{font-family:${stack};font-weight:${bodyWeight === "bold" ? 700 : 400}${color}}`;
 }
 
-function htmlParagraphs(text: string, paragraphStyle: ParagraphStyle, dropCap: boolean, sceneBreakStyle: Book["scene_break_style"]): string {
+function htmlRun(run: FormattedRun): string {
+  return wrapStyles(xmlEscape(run.text), run.styles);
+}
+
+function htmlParagraphs(
+  text: string,
+  formatting: ProseFormattingRange[],
+  paragraphStyle: ParagraphStyle,
+  dropCap: boolean,
+  sceneBreakStyle: Book["scene_break_style"]
+): string {
   if (paragraphStyle === "indented") {
-    return splitFlowParagraphs(text)
+    return splitFlowParagraphsWithOffsets(text)
       .map((paragraph, index) => {
-        if (HR_BLOCK.test(paragraph)) return sceneBreakHtml(sceneBreakStyle);
+        if (HR_BLOCK.test(paragraph.text)) return sceneBreakHtml(sceneBreakStyle);
         const classes = [index === 0 ? "first" : "", index === 0 && dropCap ? "drop-cap" : ""].filter(Boolean);
-        return `<p${classes.length > 0 ? ` class="${classes.join(" ")}"` : ""}>${xmlEscape(paragraph)}</p>`;
+        const body = formattedRuns(paragraph.text, paragraph.start, formatting).map(htmlRun).join("");
+        return `<p${classes.length > 0 ? ` class="${classes.join(" ")}"` : ""}>${body}</p>`;
       })
       .join("\n");
   }
-  const lines = text.split(/\r\n|\n|\r/);
+  const lines = splitLinesWithOffsets(text);
   if (lines.length === 0) return "";
   let dropCapUsed = !dropCap;
   return lines
     .map((line) => {
-      if (!line) return "<p><br/></p>";
-      if (HR_BLOCK.test(line)) return sceneBreakHtml(sceneBreakStyle);
+      if (!line.text) return "<p><br/></p>";
+      if (HR_BLOCK.test(line.text)) return sceneBreakHtml(sceneBreakStyle);
       const cls = dropCapUsed ? "" : ' class="drop-cap"';
       dropCapUsed = true;
-      return `<p${cls}>${xmlEscape(line)}</p>`;
+      const body = formattedRuns(line.text, line.start, formatting).map(htmlRun).join("");
+      return `<p${cls}>${body}</p>`;
     })
     .join("\n");
 }
@@ -318,7 +386,9 @@ export function formatExportHtml(
     body.push(`<h2 class="chapter">${xmlEscape(chapter.heading)}</h2>`);
     if (chapter.startImageDataUrl) body.push(`<img class="chapter-image" src="${chapter.startImageDataUrl}" alt=""/>`);
     if (chapter.voice) body.push(`<p class="meta">Voice: ${xmlEscape(chapter.voice)}</p>`);
-    if (chapter.prose) body.push(htmlParagraphs(chapter.prose, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
+    if (chapter.prose) {
+      body.push(htmlParagraphs(chapter.rawProse, chapter.formatting, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
+    }
   }
   if (doc.bible.length > 0) {
     body.push("<h2>Story Bible</h2>");
@@ -383,7 +453,7 @@ export function formatExportRtf(
     parts.push("\\page", `{\\fs32\\b ${rtfEscape(chapter.heading)}}\\par`);
     if (chapter.voice) parts.push(`${rtfEscape(`Voice: ${chapter.voice}`)}\\par`);
     if (chapter.prose) {
-      parts.push("\\par", rtfBlock(chapter.prose, paragraphStyle, doc.sceneBreakStyle));
+      parts.push("\\par", rtfBlock(chapter.rawProse, chapter.formatting, paragraphStyle, doc.sceneBreakStyle));
       if (paragraphStyle === "indented") parts.push("\\pard");
     }
   }
@@ -479,7 +549,9 @@ export function packEpub(
       parts.push(`<img src="../images/chapter-${index}.jpg" alt=""/>`);
     }
     if (chapter.voice) parts.push(`<p class="meta">Voice: ${xmlEscape(chapter.voice)}</p>`);
-    if (chapter.prose) parts.push(htmlParagraphs(chapter.prose, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
+    if (chapter.prose) {
+      parts.push(htmlParagraphs(chapter.rawProse, chapter.formatting, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
+    }
     const bodyClasses = [paragraphStyle === "indented" ? "indented" : "", doc.dropCapLines > 0 ? "has-drop-cap" : ""].filter(
       Boolean
     );
@@ -694,6 +766,61 @@ class PdfWriter {
     return lines;
   }
 
+  /**
+   * Same greedy word-wrap as `wrap`, but keeps each line's [start, end) back
+   * into `text` — needed so `prose()` can look up which formatting ranges
+   * fall in a given wrapped line. Measures every line in `font` regardless
+   * of what a word inside it will actually be drawn in (bold text is
+   * usually a little wider) — an accepted approximation, same spirit as
+   * this writer's other per-format fidelity trade-offs: a line with a long
+   * bold run near the margin can very occasionally run a touch wide, never
+   * badly.
+   */
+  private wrapWithOffsets(text: string, font: PDFFont, size: number, maxWidth: number): { text: string; start: number; end: number }[] {
+    const words = [...text.matchAll(/\S+/g)];
+    if (words.length === 0) return [{ text: "", start: 0, end: 0 }];
+    const lines: { text: string; start: number; end: number }[] = [];
+    let line = "";
+    let lineStart = words[0]!.index!;
+    let lineEnd = lineStart;
+    for (const match of words) {
+      const word = match[0];
+      const wordStart = match.index!;
+      const candidate = line ? `${line} ${word}` : word;
+      if (line && font.widthOfTextAtSize(candidate, size) > maxWidth) {
+        lines.push({ text: line, start: lineStart, end: lineEnd });
+        line = word;
+        lineStart = wordStart;
+        lineEnd = wordStart + word.length;
+      } else {
+        line = candidate;
+        lineEnd = wordStart + word.length;
+      }
+    }
+    lines.push({ text: line, start: lineStart, end: lineEnd });
+    return lines;
+  }
+
+  /** Draws one already-wrapped line run by run — bold switches to the embedded bold font, underline draws a manual rule under the run's measured width. Italic is intentionally not drawn differently: no italic font is embedded for any typeface, and pdf-lib can't synthesize one. */
+  private drawStyledLine(lineText: string, offset: number, formatting: ProseFormattingRange[], x: number, size: number): void {
+    let cursorX = x;
+    for (const run of formattedRuns(lineText, offset, formatting)) {
+      const font = run.styles.includes("bold") ? this.bold : this.body;
+      this.page.drawText(run.text, { x: cursorX, y: this.y, size, font, ...(this.color ? { color: this.color } : {}) });
+      const width = font.widthOfTextAtSize(run.text, size);
+      if (run.styles.includes("underline")) {
+        const underlineY = this.y - size * 0.12;
+        this.page.drawLine({
+          start: { x: cursorX, y: underlineY },
+          end: { x: cursorX + width, y: underlineY },
+          thickness: Math.max(0.5, size * 0.04),
+          color: this.color ?? rgb(0, 0, 0)
+        });
+      }
+      cursorX += width;
+    }
+  }
+
   private ensureSpace(lineHeight: number): void {
     if (this.y - lineHeight < PDF_MARGIN) {
       this.page = this.pdf.addPage([PDF_PAGE_WIDTH, PDF_PAGE_HEIGHT]);
@@ -737,21 +864,27 @@ class PdfWriter {
   }
 
   /** Chapter body text. "spaced" keeps the long-standing line-by-line behavior (a blank source line opens a small gap). "indented" sets each paragraph flush against the next, first line indented — except the chapter's opening paragraph, left flush by convention. A `---` paragraph (either style) draws sceneBreak() instead of the literal dashes it used to. */
-  prose(text: string, paragraphStyle: ParagraphStyle, sceneBreakStyle: Book["scene_break_style"], size = 11): void {
+  prose(
+    text: string,
+    formatting: ProseFormattingRange[],
+    paragraphStyle: ParagraphStyle,
+    sceneBreakStyle: Book["scene_break_style"],
+    size = 11
+  ): void {
     if (paragraphStyle === "spaced") {
       const lineHeight = size * 1.45;
-      for (const raw of text.split(/\r\n|\n|\r/)) {
-        if (!raw) {
+      for (const raw of splitLinesWithOffsets(text)) {
+        if (!raw.text) {
           this.y -= lineHeight * 0.6;
           continue;
         }
-        if (HR_BLOCK.test(raw)) {
+        if (HR_BLOCK.test(raw.text)) {
           this.sceneBreak(sceneBreakStyle);
           continue;
         }
-        for (const line of this.wrap(raw, this.body, size, this.maxWidth)) {
+        for (const line of this.wrapWithOffsets(raw.text, this.body, size, this.maxWidth)) {
           this.ensureSpace(lineHeight);
-          this.page.drawText(line, { x: PDF_MARGIN, y: this.y, size, font: this.body, ...(this.color ? { color: this.color } : {}) });
+          this.drawStyledLine(line.text, raw.start + line.start, formatting, PDF_MARGIN, size);
           this.y -= lineHeight;
         }
       }
@@ -760,15 +893,15 @@ class PdfWriter {
     const font = this.body;
     const lineHeight = size * 1.45;
     const indent = 20;
-    splitFlowParagraphs(text).forEach((paragraph, index) => {
-      if (HR_BLOCK.test(paragraph)) {
+    splitFlowParagraphsWithOffsets(text).forEach((paragraph, index) => {
+      if (HR_BLOCK.test(paragraph.text)) {
         this.sceneBreak(sceneBreakStyle);
         return;
       }
-      this.wrap(paragraph, font, size, this.maxWidth).forEach((line, lineIndex) => {
+      this.wrapWithOffsets(paragraph.text, font, size, this.maxWidth).forEach((line, lineIndex) => {
         this.ensureSpace(lineHeight);
         const x = index > 0 && lineIndex === 0 ? PDF_MARGIN + indent : PDF_MARGIN;
-        this.page.drawText(line, { x, y: this.y, size, font, ...(this.color ? { color: this.color } : {}) });
+        this.drawStyledLine(line.text, paragraph.start + line.start, formatting, x, size);
         this.y -= lineHeight;
       });
     });
@@ -881,7 +1014,7 @@ export async function packPdf(
       writer.image(image);
     }
     if (chapter.voice) writer.lines(`Voice: ${chapter.voice}`, { size: 9, meta: true });
-    if (chapter.prose) writer.prose(chapter.prose, paragraphStyle, doc.sceneBreakStyle);
+    if (chapter.prose) writer.prose(chapter.rawProse, chapter.formatting, paragraphStyle, doc.sceneBreakStyle);
   }
 
   if (doc.bible.length > 0) {
@@ -903,22 +1036,41 @@ export async function packPdf(
 /** 567 twips ≈ 0.4in, a common manuscript first-line indent. */
 const RTF_INDENT_TWIPS = 567;
 
-function rtfBlock(text: string, paragraphStyle: ParagraphStyle, sceneBreakStyle: Book["scene_break_style"]): string {
+/** Wraps a run's escaped text in its own `{...}` group with the control words its styles need — grouped so none of them leak into whatever follows. */
+function rtfRun(run: FormattedRun): string {
+  const escaped = rtfEscape(run.text);
+  if (run.styles.length === 0) return escaped;
+  const controls = [
+    run.styles.includes("bold") ? "\\b" : "",
+    run.styles.includes("italic") ? "\\i" : "",
+    run.styles.includes("underline") ? "\\ul" : ""
+  ].join("");
+  return `{${controls} ${escaped}}`;
+}
+
+function rtfBlock(
+  text: string,
+  formatting: ProseFormattingRange[],
+  paragraphStyle: ParagraphStyle,
+  sceneBreakStyle: Book["scene_break_style"]
+): string {
   // Wrapped in its own `{...}` group so `\qc` (centered) never leaks into
   // the paragraphs after it — RTF alignment otherwise persists until
   // explicitly reset, and the "spaced" branch below never resets it.
   const sceneBreak = `{\\qc ${rtfEscape(sceneBreakSymbol(sceneBreakStyle))}\\par}`;
   if (paragraphStyle === "indented") {
-    return splitFlowParagraphs(text)
+    return splitFlowParagraphsWithOffsets(text)
       .map((paragraph, index) => {
-        if (HR_BLOCK.test(paragraph)) return sceneBreak;
-        return `\\pard\\sa0\\fi${index === 0 ? 0 : RTF_INDENT_TWIPS} ${rtfEscape(paragraph)}\\par`;
+        if (HR_BLOCK.test(paragraph.text)) return sceneBreak;
+        const body = formattedRuns(paragraph.text, paragraph.start, formatting).map(rtfRun).join("");
+        return `\\pard\\sa0\\fi${index === 0 ? 0 : RTF_INDENT_TWIPS} ${body}\\par`;
       })
       .join("\n");
   }
-  return text
-    .split(/\r\n|\n|\r/)
-    .map((line) => (HR_BLOCK.test(line) ? sceneBreak : `${rtfEscape(line)}\\par`))
+  return splitLinesWithOffsets(text)
+    .map((line) =>
+      HR_BLOCK.test(line.text) ? sceneBreak : `${formattedRuns(line.text, line.start, formatting).map(rtfRun).join("")}\\par`
+    )
     .join("\n");
 }
 
@@ -976,15 +1128,46 @@ function odtParagraphs(text: string, style = "Standard", firstStyle = style, sce
     .join("");
 }
 
-function odtProse(text: string, paragraphStyle: ParagraphStyle, dropCap: boolean, sceneBreakStyle: Book["scene_break_style"]): string {
+/** "Bold", "Italic", "BoldItalicUnderline", etc. — one of the seven non-empty style combinations `odtStyles()` defines as a `style:family="text"` style. */
+function odtSpanStyleName(styles: ProseFormattingStyle[]): string {
+  return (
+    (styles.includes("bold") ? "Bold" : "") +
+    (styles.includes("italic") ? "Italic" : "") +
+    (styles.includes("underline") ? "Underline" : "")
+  );
+}
+
+function odtRun(run: FormattedRun): string {
+  const escaped = xmlEscape(run.text);
+  return run.styles.length === 0 ? escaped : `<text:span text:style-name="${odtSpanStyleName(run.styles)}">${escaped}</text:span>`;
+}
+
+function odtProse(
+  text: string,
+  formatting: ProseFormattingRange[],
+  paragraphStyle: ParagraphStyle,
+  dropCap: boolean,
+  sceneBreakStyle: Book["scene_break_style"]
+): string {
   if (paragraphStyle === "spaced") {
-    return odtParagraphs(text, "Standard", dropCap ? "StandardDropCap" : "Standard", sceneBreakStyle);
+    let firstUsed = false;
+    return splitLinesWithOffsets(text)
+      .map((line) => {
+        if (!line.text) return `<text:p text:style-name="Standard"/>`;
+        if (HR_BLOCK.test(line.text)) return `<text:p text:style-name="SceneBreak">${xmlEscape(sceneBreakSymbol(sceneBreakStyle))}</text:p>`;
+        const lineStyle = firstUsed || !dropCap ? "Standard" : "StandardDropCap";
+        firstUsed = true;
+        const body = formattedRuns(line.text, line.start, formatting).map(odtRun).join("");
+        return `<text:p text:style-name="${lineStyle}">${body}</text:p>`;
+      })
+      .join("");
   }
-  return splitFlowParagraphs(text)
+  return splitFlowParagraphsWithOffsets(text)
     .map((paragraph, index) => {
-      if (HR_BLOCK.test(paragraph)) return `<text:p text:style-name="SceneBreak">${xmlEscape(sceneBreakSymbol(sceneBreakStyle))}</text:p>`;
+      if (HR_BLOCK.test(paragraph.text)) return `<text:p text:style-name="SceneBreak">${xmlEscape(sceneBreakSymbol(sceneBreakStyle))}</text:p>`;
       const firstStyle = dropCap ? "IndentedFirstDropCap" : "IndentedFirst";
-      return `<text:p text:style-name="${index === 0 ? firstStyle : "Indented"}">${xmlEscape(paragraph)}</text:p>`;
+      const body = formattedRuns(paragraph.text, paragraph.start, formatting).map(odtRun).join("");
+      return `<text:p text:style-name="${index === 0 ? firstStyle : "Indented"}">${body}</text:p>`;
     })
     .join("");
 }
@@ -1007,7 +1190,9 @@ function odtContentXml(doc: ManuscriptExport, paragraphStyle: ParagraphStyle): s
   for (const chapter of doc.chapters) {
     body.push(odtChapterHeading(chapter.heading));
     if (chapter.voice) body.push(odtParagraphs(`Voice: ${chapter.voice}`));
-    if (chapter.prose) body.push(odtProse(chapter.prose, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
+    if (chapter.prose) {
+      body.push(odtProse(chapter.rawProse, chapter.formatting, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
+    }
   }
   if (doc.bible.length > 0) {
     body.push(odtHeading(2, "Story Bible"));
@@ -1028,6 +1213,16 @@ function odtContentXml(doc: ManuscriptExport, paragraphStyle: ParagraphStyle): s
 </office:document-content>
 `;
 }
+
+/** One `style:family="text"` style per non-empty bold/italic/underline combination — referenced by name from `odtRun`'s `<text:span>`s. */
+const ODT_SPAN_STYLES = `
+    <style:style style:name="Bold" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style>
+    <style:style style:name="Italic" style:family="text"><style:text-properties fo:font-style="italic"/></style:style>
+    <style:style style:name="Underline" style:family="text"><style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/></style:style>
+    <style:style style:name="BoldItalic" style:family="text"><style:text-properties fo:font-weight="bold" fo:font-style="italic"/></style:style>
+    <style:style style:name="BoldUnderline" style:family="text"><style:text-properties fo:font-weight="bold" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/></style:style>
+    <style:style style:name="ItalicUnderline" style:family="text"><style:text-properties fo:font-style="italic" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/></style:style>
+    <style:style style:name="BoldItalicUnderline" style:family="text"><style:text-properties fo:font-weight="bold" fo:font-style="italic" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/></style:style>`;
 
 function odtStyles(
   fontName: string,
@@ -1080,7 +1275,7 @@ function odtStyles(
     </style:style>
     <style:style style:name="IndentedFirst" style:family="paragraph" style:parent-style-name="Standard">
       <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in" fo:text-indent="0in"/>
-    </style:style>${dropCapStyles}${sceneBreakStyleXml}
+    </style:style>${dropCapStyles}${sceneBreakStyleXml}${ODT_SPAN_STYLES}
   </office:styles>
 </office:document-styles>
 `;

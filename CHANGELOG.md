@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.106] - 2026-10-14
+
+### Fixed
+- Bold, italic, and underline applied in the chapter editor were silently dropped by every Publish export format — RTF, ODT, HTML, ePub, and PDF all flattened formatted prose to plain text, with no warning. All five now carry it through: real `<b>`/`<i>`/`<u>` in HTML and ePub, RTF control words, named ODT character styles, and bold plus a drawn underline rule in PDF. Italic is the one deliberate exception in PDF specifically — the app draws its own PDF text and has no italic font file embedded for any of its 13 typefaces, so an italic run there renders in the regular weight rather than faking a slant; every other format renders italic correctly, since they leave font selection to the reading application.
+
 ## [1.0.105] - 2026-10-14
 
 ### Changed
