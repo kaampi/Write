@@ -962,6 +962,29 @@ konsekvent kallar platsen "Ribbendale") — ett konkret exempel på att
 en adapter inte kan lita blint på titelfältet, måste vara beredd på
 att det riktiga namnet bara finns i löptexten.
 
+**Fältschema för en Chapter-post, och en viktig UX-fråga besvarad
+(2026-10-14):** Mats skickade ytterligare ett kort — ett "New
+Chapter"-manuskriptkapitel (samma namngivningskvirk som Location-
+kortet: titeln aldrig bytt från Campfires standardnamn). Struktur:
+en underrubrik/scennamn ("The well"), själva prosan (ett stycke: "It
+was early morning in Ribbendale..."), och ett separat **Notes**-fält
+(tomt i det här exemplet) — author-anteckningar skilda från själva
+manustexten, samma distinktion som StoryBook AI:s eget `chapter.brief`
+redan gör.
+
+Mats frågade samtidigt: "Jag antar att man skulle behöva exportera
+varje entitet för sig och sedan ladda upp dem i Storybook?" — **ja,
+stämmer**, baserat på allt vi sett hittills: ingen av de två HAR-
+fynden ovan visade någon bulk-/helprojekt-exportfunktion, bara
+individuella RTF-kort (ett per karaktär/plats/kapitel/etc., via
+Campfires egen print/export-knapp på varje kort). Det här formar
+UX-beslutet rakt av: en Campfire-adapter bör ta emot MÅNGA RTF-filer
+samtidigt (batch-uppladdning), inte en enda strukturerad bunt.
+Matchar lyckligtvis redan `LoreImportCard`s batch-uppladdningsflöde
+(byggsteg 1, v0.99.61) nästan exakt — skillnaden är bara ett nytt
+RTF→text-extraktionssteg innan dagens Markdown-rubrik-splittring kan
+köras, inte en ny importarkitektur.
+
 ### 29. ~~Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok~~ ❌ struken
 
 **Struken (2026-10-13).** Mats: det här täcks nu av ett eget, redan
