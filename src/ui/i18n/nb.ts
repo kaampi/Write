@@ -1665,7 +1665,13 @@ export const nb: Messages = {
     resultSummary: "Konverterte {markers} i {chapters}.",
     resultNone: "Ingen markeringer funnet — ingenting å konvertere.",
     markersCount: { one: "{count} markering", other: "{count} markeringer" },
-    chaptersCount: { one: "{count} kapittel", other: "{count} kapitler" }
+    chaptersCount: { one: "{count} kapittel", other: "{count} kapitler" },
+    smartQuotesIntro:
+      "Rette anførselstegn (\") du skriver fra nå av blir automatisk ekte åpnende/avsluttende buede anførselstegn. Dette konverterer hvert rette anførselstegn som allerede finnes i manuset på samme måte, i én kjøring.",
+    smartQuotesAction: "Gjør om anførselstegn i hele manuset",
+    smartQuotesConverting: "Konverterer…",
+    smartQuotesResultSummary: "Gjorde om anførselstegn i {chapters}.",
+    smartQuotesResultNone: "Ingen rette anførselstegn funnet — ingenting å konvertere."
   },
   errors: {
     ollamaOrigins: "Den lokale serveren tok ikke imot nettleseren. Kjører du Ollama? Start den med OLLAMA_ORIGINS=http://localhost:5175. Kjører du LM Studio eller en annen server? Se etter en innstilling for hvilke nettadresser som får koble til (kalles ofte CORS eller allowed origins).",

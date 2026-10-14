@@ -2096,6 +2096,12 @@ button:disabled {
   padding: 0.4rem 0.55rem;
 }
 
+.marker-convert-quotes {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-soft);
+}
+
 .settings-engine {
   display: grid;
   gap: 0.85rem;

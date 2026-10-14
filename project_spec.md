@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.97
+Status: living document, v1.0.98
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4191,6 +4191,62 @@ verifieras live (ingen ansluten modell i den här sandlådan) — samma
 begränsning som genomgående den här sessionen.
 
 v1.0.96 → v1.0.97.
+
+**Ändringslogg v1.0.97 → v1.0.98 (2026-10-14):** Smarta citattecken.
+Mats: "Jag tänkte på det här med \". Kan vi lägga in så att citat
+omslutna med \" får riktiga citattecken?" Byggde både löpande
+konvertering (medan man skriver) och en engångs-konvertering av redan
+skrivet manus, som två separata mekanismer snarare än att försöka
+pressa in det i det befintliga `applyMarkerConversion`-systemet
+(vars egen dokumentationskommentar faktiskt nämner "smart quotes" som
+exempel) — trots ytlig likhet är operationerna olika till sin natur:
+ett rakt citattecken-byte bevarar textens längd exakt (varje annat
+offset — formattering, placeholders, darlings — förblir giltigt
+orört), medan markör-konvertering tar bort tecken och måste
+offset-förskjuta allt efteråt. Enklare att bygga separat än att böja
+den befintliga maskinen för ett fall den inte är gjord för.
+
+**Kärnlogik** (ny fil `smartQuotes.ts`, ingen DOM-koppling — ren
+TypeScript i `src/core/`): `smartQuoteFor(before)` avgör öppnande (")
+kontra stängande (") utifrån tecknet direkt innan — inget (textstart),
+whitespace, en öppnande parentes/klammer, ett bindestreck/tankstreck,
+eller ett annat öppnande citattecken (för omedelbar nästling) ger
+öppnande; allt annat ger stängande. Standardheuristiken ordbehandlare
+använder. `smartenQuotes(text)` kör samma logik tecken för tecken över
+en hel sträng — en ren ett-till-ett-substitution.
+
+**Löpande konvertering** (`ProseCanvas.tsx`): ny gren längst upp i den
+befintliga `onKeyDown`-hanteraren, fångar `"`-tangenten innan den
+befintliga Enter-hanteringen. Hittar tecknet direkt före caretten via
+`currentCaretOffset`/`proseFromElement` (redan existerande hjälpare i
+`proseDom.ts`, återanvända rakt av), infogar sedan rätt citattecken med
+`document.execCommand("insertText", ...)` — en enklare väg än
+Enter-hanteringens manuella DOM-kirurgi och syntetiska `InputEvent`,
+eftersom `execCommand` för en enkel tecken-infogning redan triggar ett
+riktigt input-event själv (den tyngre lösningen i Enter-fallet behövs
+bara för styckedelningens strukturella komplexitet, som ett enda tecken
+inte har).
+
+**Engångskonvertering** (`BookStore.tsx`): ny `smartenManuscriptQuotes`-
+action, speglar `convertMarkersToFormatting`s loop-över-kapitel-och-
+flushSave-struktur men enklare (ingen offset-förskjutning behövs). Ny
+sektion i `MarkerConversionCard.tsx` (samma kort som redan har
+markör-konvertering) med egen knapp och resultattext, kopplad in i
+`Editor.tsx`s befintliga rendering av kortet.
+
+**Verifierat:** tsc rent, full svit 1036 tester gröna (1025 + 11 nya i
+`smart-quotes.test.ts`), `npm run build` grön. Live
+Playwright-verifiering av båda vägarna: skrev `"` i kapitelredigeraren
+på tre positioner (mitt i mening, styckestart, efter mellanslag) och
+fick korrekt öppnande/stängande kurviga citattecken varje gång; satte
+sedan in råa raka citattecken programmatiskt (förbi tangent-fångsten,
+för att simulera ett befintligt/importerat manus), öppnade Tools →
+Convert markers, klickade "Smarten quotes in whole manuscript" och
+bekräftade både att redigerarens text uppdaterades till kurviga
+citattecken och att resultattexten ("Smartened quotes across 1
+chapter") visades korrekt.
+
+v1.0.97 → v1.0.98.
 
 ---
 

@@ -1675,7 +1675,13 @@ export const en = {
     resultSummary: "Converted {markers} across {chapters}.",
     resultNone: "No markers found — nothing to convert.",
     markersCount: { one: "{count} marker", other: "{count} markers" },
-    chaptersCount: { one: "{count} chapter", other: "{count} chapters" }
+    chaptersCount: { one: "{count} chapter", other: "{count} chapters" },
+    smartQuotesIntro:
+      "Straight quotes (\") typed from now on turn into real opening/closing curly quotes automatically. This converts every straight quote already in the manuscript the same way, in one pass.",
+    smartQuotesAction: "Smarten quotes in whole manuscript",
+    smartQuotesConverting: "Converting…",
+    smartQuotesResultSummary: "Smartened quotes across {chapters}.",
+    smartQuotesResultNone: "No straight quotes found — nothing to convert."
   },
   errors: {
     ollamaOrigins: "The local server did not accept the browser. Using Ollama? Start it with OLLAMA_ORIGINS=http://localhost:5175. Using LM Studio or another server? Look for a setting about which web addresses are allowed to connect (often called CORS or allowed origins).",

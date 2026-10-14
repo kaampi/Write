@@ -2226,6 +2226,31 @@ sorters mjukvara.
 ändras — hero-blocket, knappstilen, bägge, eller något annat Mats
 syftar på. Väntar på ett eget samtal.
 
+### 47. Smarta citattecken ✅ byggd (v1.0.98)
+
+Mats (2026-10-14): "Jag tänkte på det här med \". Kan vi lägga in så
+att citat omslutna med \" får riktiga citattecken?"
+
+Byggd som två separata mekanismer, medvetet skilda från det befintliga
+markör-konverteringssystemet trots ytlig likhet (vars egen
+dokumentationskommentar faktiskt nämner "smart quotes" som exempel):
+ett rakt citattecken-byte är en ren ett-till-ett-substitution som
+bevarar textens längd exakt, medan markör-konvertering tar bort tecken
+och måste offset-förskjuta allt efteråt — olika sorters operation.
+
+1. **Löpande, medan man skriver.** Ett rakt `"` i kapitelredigeraren
+   blir automatiskt ett öppnande eller stängande kurvigt citattecken,
+   avgjort av tecknet direkt före caretten (textstart/whitespace/
+   öppnande parentes/tankstreck/ett annat öppnande citattecken →
+   öppnande; allt annat → stängande).
+2. **Engångskonvertering av redan skrivet manus.** Ny knapp i
+   Tools → Convert markers: "Smarten quotes in whole manuscript",
+   kör samma logik över varje kapitels befintliga text i ett svep.
+
+Se `project_spec.md`, Ändringslogg v1.0.97 → v1.0.98, för fullständig
+teknisk genomgång (ny fil `smartQuotes.ts`, `ProseCanvas.tsx`-
+integration, `BookStore.tsx`/`MarkerConversionCard.tsx`-utbyggnad).
+
 ---
 
 ## Medvetet nedprioriterat just nu (inte avvisat)

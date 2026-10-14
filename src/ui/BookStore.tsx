@@ -14,6 +14,7 @@ import { BRAINSTORM_PASSAGE_SYSTEM, brainstormChatSystemPrompt, brainstormPassag
 import { applyAssembledBrainstorm } from "@core/brainstormNotes";
 import { applyAuthorAddition, applyAuthorDraft, applyExtractorDrafts, approveFact, keepFactSeparate, rejectFact, reviseFact } from "@core/ConsistencyGate";
 import { applyMarkerConversion, type MarkerConversionRule } from "@core/markerConversion";
+import { smartenQuotes } from "@core/smartQuotes";
 import { withRelationshipMirrorFor } from "@core/relationshipMirror";
 import { chapterScenes, mergeSceneWithNext, replaceSceneProse, sceneIdRemovedByMerge } from "@core/bookScene";
 import {
@@ -473,6 +474,22 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     },
     [flushSave]
   );
+
+  const smartenManuscriptQuotes = useCallback(async () => {
+    const current = bookRef.current;
+    if (!current) return { chaptersChanged: 0 };
+    let next = current;
+    let chaptersChanged = 0;
+    for (const chapter of current.chapters) {
+      const smartened = smartenQuotes(chapter.prose);
+      if (smartened === chapter.prose) continue;
+      chaptersChanged += 1;
+      next = recordProseRevision(next, chapter.id, "format", chapter.prose, historyLimitRef.current);
+      next = updateChapter(next, chapter.id, { prose: smartened });
+    }
+    if (chaptersChanged > 0) await flushSave(next);
+    return { chaptersChanged };
+  }, [flushSave]);
 
   const patchBook = useCallback(
     async (mutate: (current: Book) => Book) => {
@@ -3063,6 +3080,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     showGuide,
     showHandbook,
     convertMarkersToFormatting,
+    smartenManuscriptQuotes,
     dismissModelAside,
     setModel,
     setWritingPrimer,

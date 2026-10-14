@@ -99,6 +99,7 @@ export type BookStoreValue = {
   showGuide: () => void;
   showHandbook: () => void;
   convertMarkersToFormatting: (rules: MarkerConversionRule[]) => Promise<{ totalConversions: number; chaptersChanged: number }>;
+  smartenManuscriptQuotes: () => Promise<{ chaptersChanged: number }>;
   dismissModelAside: () => void;
   setModel: (name: string) => void;
   setWritingPrimer: (text: string) => void;

@@ -2151,6 +2151,7 @@ export function Editor() {
           book={book}
           onPatch={store.patchBook}
           onConvertMarkers={store.convertMarkersToFormatting}
+          onSmartenQuotes={store.smartenManuscriptQuotes}
           onClose={() => setMarkerConvertOpen(false)}
         />
       ) : null}

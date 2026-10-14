@@ -24,6 +24,7 @@ import { findRareHits, rareHitAt } from "@core/rareWords";
 import { findAiTicHits } from "@core/aiTics";
 import { findNameHitsInText } from "@core/bibleMentions";
 import { findMarksByParagraph, type FindFlags } from "@core/findReplace";
+import { smartQuoteFor } from "@core/smartQuotes";
 import {
   blockMarkupNeedsSync,
   currentCaretOffset,
@@ -705,6 +706,14 @@ export function ProseCanvas({
               if (span) toggleFormat(style, span);
               return;
             }
+          }
+          if (event.key === '"' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+            const area = areaRef.current;
+            const offset = area ? currentCaretOffset(area) : null;
+            const before = area && offset !== null && offset > 0 ? proseFromElement(area)[offset - 1] : undefined;
+            document.execCommand("insertText", false, smartQuoteFor(before));
+            return;
           }
           if (event.key !== "Enter" || event.shiftKey) return;
           event.preventDefault();

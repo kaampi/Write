@@ -1665,7 +1665,13 @@ export const sv: Messages = {
     resultSummary: "Konverterade {markers} i {chapters}.",
     resultNone: "Inga markeringar hittades — inget att konvertera.",
     markersCount: { one: "{count} markering", other: "{count} markeringar" },
-    chaptersCount: { one: "{count} kapitel", other: "{count} kapitel" }
+    chaptersCount: { one: "{count} kapitel", other: "{count} kapitel" },
+    smartQuotesIntro:
+      "Raka citattecken (\") du skriver från och med nu blir automatiskt riktiga öppnande/avslutande svängda citattecken. Det här konverterar varje rakt citattecken som redan finns i manuset på samma sätt, i en körning.",
+    smartQuotesAction: "Gör om citattecken i hela manuset",
+    smartQuotesConverting: "Konverterar…",
+    smartQuotesResultSummary: "Gjorde om citattecken i {chapters}.",
+    smartQuotesResultNone: "Inga raka citattecken hittades — inget att konvertera."
   },
   errors: {
     ollamaOrigins: "Den lokala servern tog inte emot webbläsaren. Kör du Ollama? Starta den med OLLAMA_ORIGINS=http://localhost:5175. Kör du LM Studio eller en annan server? Leta efter en inställning för vilka webbadresser som får ansluta (kallas ofta CORS eller allowed origins).",

@@ -14,11 +14,13 @@ export function MarkerConversionCard({
   book,
   onPatch,
   onConvertMarkers,
+  onSmartenQuotes,
   onClose
 }: {
   book: Book;
   onPatch: (mutate: (book: Book) => Book) => void;
   onConvertMarkers: (rules: MarkerConversionRule[]) => Promise<{ totalConversions: number; chaptersChanged: number }>;
+  onSmartenQuotes: () => Promise<{ chaptersChanged: number }>;
   onClose: () => void;
 }) {
   const { messages: m } = useLocale();
@@ -31,6 +33,8 @@ export function MarkerConversionCard({
   };
   const [converting, setConverting] = useState(false);
   const [convertResult, setConvertResult] = useState<{ totalConversions: number; chaptersChanged: number } | null>(null);
+  const [smartening, setSmartening] = useState(false);
+  const [smartenResult, setSmartenResult] = useState<{ chaptersChanged: number } | null>(null);
 
   return (
     <div
@@ -130,6 +134,35 @@ export function MarkerConversionCard({
                 })}
           </p>
         ) : null}
+
+        <div className="marker-convert-quotes">
+          <p className="quiet">{m.markerConvert.smartQuotesIntro}</p>
+          <div className="edit-actions">
+            <button
+              type="button"
+              disabled={smartening}
+              onClick={() => {
+                setSmartening(true);
+                setSmartenResult(null);
+                void onSmartenQuotes().then((result) => {
+                  setSmartenResult(result);
+                  setSmartening(false);
+                });
+              }}
+            >
+              {smartening ? m.markerConvert.smartQuotesConverting : m.markerConvert.smartQuotesAction}
+            </button>
+          </div>
+          {smartenResult ? (
+            <p className="quiet">
+              {smartenResult.chaptersChanged === 0
+                ? m.markerConvert.smartQuotesResultNone
+                : format(m.markerConvert.smartQuotesResultSummary, {
+                    chapters: count(smartenResult.chaptersChanged, m.markerConvert.chaptersCount)
+                  })}
+            </p>
+          ) : null}
+        </div>
       </div>
     </div>
   );

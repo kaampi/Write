@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.98] - 2026-10-14
+
+### Added
+- Smart quotes. Straight double quotes (`"`) typed in the chapter editor now turn into real opening/closing curly quotes (" / ") automatically, based on what comes right before — start of text, whitespace, a bracket, a dash, or another opening quote opens; anything else closes. A new "Smarten quotes in whole manuscript" action (Tools → Convert markers) converts every straight quote already in the manuscript the same way, in one pass.
+
 ## [1.0.97] - 2026-10-13
 
 ### Added
