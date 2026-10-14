@@ -985,6 +985,32 @@ Matchar lyckligtvis redan `LoreImportCard`s batch-uppladdningsflöde
 RTF→text-extraktionssteg innan dagens Markdown-rubrik-splittring kan
 köras, inte en ny importarkitektur.
 
+**Character- och Event-schema, plus en relationsgraf upptäckt
+(2026-10-14):** Två kort till från Mats.
+
+Character ("Mildred"): Full Name, Origin Country, Place of Residence
+(Ribbendale), Gender, Formal Education, Occupation — korta atomära
+fält, samma mönster som Location. Sedan Bio (löptext), Physical Traits
+som en FRI uppsättning under-fält (här bara Bodytype + Hair ifyllda —
+alltså inget fast schema, författaren lägger till de fält hen vill),
+Personality Traits (löptext), och **Statistics** — namngivna numeriska
+värden (här "Speed: 8") i rollspels-stil. Statistics mappar inte
+naturligt mot StoryBook AI:s prosafokuserade Story Bible — troligen
+något en adapter hoppar över snarare än försöker bevara.
+
+Event ("New Event", aldrig omdöpt — tredje kortet i rad med samma
+kvirk): Magnitude (5/10), Event Visibility, Event Archetype, Overview,
+Notes — men framför allt ett **Linked Elements**-fält som i det här
+exemplet pekar på både kapitlet "New Chapter" och karaktären "New
+Character" (Mildred). Det bekräftar att Campfire har en egen
+relationsgraf mellan entiteter (vilket kapitel en händelse hör till,
+vilka karaktärer är inblandade), inte bara fri text som råkar nämna
+namn. En adapter som vill bevara det skulle kunna luta sig mot
+StoryBook AI:s befintliga fakta→kapitel-provenience (`NarrativeFact.
+chapter_id`) istället för att bygga en ny länkmodell — samma princip
+som flera gånger redan: återanvänd befintlig datamodell, bygg inte en
+parallell.
+
 ### 29. ~~Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok~~ ❌ struken
 
 **Struken (2026-10-13).** Mats: det här täcks nu av ett eget, redan
