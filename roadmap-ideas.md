@@ -942,6 +942,26 @@ session i Campfires "write"-vy. Analyserad direkt i sandlådan
   HAR-filen (troligen sessionscookie som inte togs med i exporten,
   inte verifierat).
 
+**Fältschema för en riktig Location-post (2026-10-14):** Mats
+skickade även ett exporterat Location-kort som RTF-fil ("Ribbendale",
+Campfires "Location Basics"-mall i praktiken ifylld), vilket fyller
+luckan ovan. Rubrikerna/fälten i tur och ordning:
+Location Details (Location Type, Location Age, Created/Built by, Date
+Created/Built, Purpose of Construction) → Overview (löpande text) →
+Geography (löpande text) → Basic Information (Area, Ethnic Groups,
+Languages, Population, Average Temperature, Biome, Natural Resources,
+Aliases) → Government (löpande text) → History (löpande text). Matchar
+`template.json`s `"type":"location"`-post från HAR-fyndet ovan. En
+adapter skulle kunna mappa de korta fält-raderna (Location Type/Age/
+Created by osv.) mot `core.identity`-liknande atomära fakta, och de
+löpande textavsnitten (Overview/Geography/Government/History) mot
+fritext att köra genom extraktorn, samma princip som Importera lore
+redan använder. Author-fältet "namn" var dock aldrig ifyllt i
+Campfire (titeln stod kvar som "New Location" trots att brödtexten
+konsekvent kallar platsen "Ribbendale") — ett konkret exempel på att
+en adapter inte kan lita blint på titelfältet, måste vara beredd på
+att det riktiga namnet bara finns i löptexten.
+
 ### 29. ~~Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok~~ ❌ struken
 
 **Struken (2026-10-13).** Mats: det här täcks nu av ett eget, redan
