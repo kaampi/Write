@@ -136,6 +136,10 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
     heading: "Chapter briefs",
     body: "A chapter brief describes what a chapter needs to accomplish.\nIt doesn't need to be well written.\nIt's an instruction to yourself, and to the AI when you use the writing tools.\n\nExample\n\"Erik meets the woman in the dining car. She hints that she knew his father but refuses to say how. The chapter ends with her leaving a photograph on the table.\"\n\nThe brief is not the story itself.\nIt describes what the story should do.\n\nSynopsis = the whole story\nBrief = one chapter\nManuscript = what the reader gets"
   },
+  "chapter-summary": {
+    heading: "Chapter summary",
+    body: "Next to Chapter brief sits a second field, Chapter summary — a short note on what actually happens in the chapter, once it's written. Write it by hand, or click \"Summarize chapter\" to have it generated from the prose.\n\nBrief = what the chapter should do, written before\nSummary = what the chapter actually did, written after\n\nOnce a chapter has a summary, earlier chapters' summaries feed Draft, Extend, Elaborate, and Beat for later chapters — in story-time order, not just chapter order — so the model can keep track of what's already happened without needing every earlier chapter's full prose in the prompt. A chapter nobody has summarized yet is simply left out of that context; nothing is required, nothing breaks."
+  },
   "development-methods": {
     heading: "Development methods",
     body: "StoryBook AI includes several methods that can help you develop or structure the story.\nThey are entirely optional.\nYou can always choose:\nNo method — write freely"
@@ -183,6 +187,18 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   "what-is-canon": {
     heading: "What does canon mean?",
     body: "Canon is whatever you've decided should be treated as true in the story.\nNot all text needs to become canon.\n\nIf the AI writes:\n\"Nora pulled the red scarf tighter around her neck.\"\nyou don't need to save the scarf's color just because it happened to appear in the text.\n\nBut if the scarf later becomes important, the information may be worth locking.\n\nStory Bible should remember what needs to stay consistent. It doesn't need to become a database of every detail in every sentence."
+  },
+  "aliases-and-exclusions": {
+    heading: "Aliases and exclusion phrases",
+    body: "A character, place, or object doesn't always show up in the text under its card's own name. Open a Story Bible card and you can give it aliases — nicknames, titles, alter egos — so a mention under any of them still counts. A character named \"Emma\" on her card, but called \"Em\" throughout the manuscript, is recognized either way — in the Mentions tracker, and in the lore-relevance filter if you use one.\n\nThe opposite problem also happens: a name that's also an ordinary word. A character named Rose means every mention of a rose garden, a rose bush, or roses on a table looks like a sighting of her. Exclusion phrases fix that — add \"rose garden\" as an exclusion on Rose's card, and that specific phrase stops counting as a mention of her, while \"Rose smiled\" still does."
+  },
+  "merge-story-bible-cards": {
+    heading: "Merge Story Bible cards",
+    body: "Sometimes two Story Bible cards turn out to be the same thing — you created \"Kael\" early on, and much later realize \"the Captain\" who kept showing up is Kael too. \"Merge cards…\" in the Story Bible panel handles this: pick two or more cards of the same kind and merge them into one.\n\nNothing is deleted. Every fact moves onto the merged card; where the two cards disagreed, you choose which value wins; each old name becomes an alias of the merged card, so a later mention of either still resolves correctly. There's also an option to replace the old names with the new one in the manuscript text itself.\n\nThe same merging also works the other way — a pending suggestion from Extract facts can be merged straight onto an existing card from the review queue, instead of locking it as a new card first and merging afterward."
+  },
+  "edit-vs-update": {
+    heading: "Edit vs. Update a fact",
+    body: "A locked fact has two different ways to change it, and they mean different things.\n\nEdit corrects a mistake — the fact was always this way, you just wrote it down wrong. No history, no \"as of\" chapter; it simply becomes correct.\n\nUpdate records a real change in the story — the fact was true, and from some chapter onward it changes to something else. \"Nora's hair was black\" (established in chapter 1), \"Nora's hair is now gray\" (Update, anchored to chapter 14, after the events that aged her). The earlier value stays visible in History instead of being overwritten, since both were true — just at different points in the story.\n\nIdentity facts (name, species, that kind of thing) only ever get Edit — there's rarely a story reason for someone's name to change mid-book the way their hair color or where they live might."
   },
   "interview-world": {
     heading: "Interview the world",

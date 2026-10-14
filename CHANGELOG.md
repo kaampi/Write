@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.99] - 2026-10-14
+
+### Added
+- Guide: four new Story Bible & World sections documenting features that had shipped without any Guide coverage — Chapter summary, Aliases and exclusion phrases, Merge Story Bible cards, and Edit vs. Update a fact. First batch of a broader Guide catch-up; the Guide's narrative content hadn't been updated since v1.0.34, roughly 65 releases behind.
+
 ## [1.0.98] - 2026-10-14
 
 ### Added

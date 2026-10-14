@@ -802,6 +802,10 @@ export const nb: Messages = {
         heading: "Kapittelbriefer",
         body: "En kapittelbrief beskriver hva et kapittel skal oppnå.\nDen trenger ikke være velskrevet.\nDen er en instruksjon til deg selv og til AI når du bruker skrivehjelpen.\n\nEksempel\n”Erik møter kvinnen i spisevognen. Hun antyder at hun kjente faren hans, men nekter å si hvordan. Kapittelet slutter med at hun legger igjen et fotografi på bordet.”\n\nBriefen er ikke selve historien.\nDen beskriver hva historien skal gjøre.\n\nSynopsis = hele historien\nBrief = ett kapittel\nManus = det leseren får"
       },
+      "chapter-summary": {
+        heading: "Kapittelsammendrag",
+        body: "Ved siden av Kapittelbrief finnes et nytt felt, Kapittelsammendrag — en kort notis om hva som faktisk skjer i kapittelet, når det er skrevet. Skriv det for hånd, eller klikk ”Oppsummer kapittel” for å få det generert fra teksten.\n\nBrief = hva kapittelet skal gjøre, skrevet før\nSammendrag = hva kapittelet faktisk gjorde, skrevet etterpå\n\nNår et kapittel har et sammendrag, flyter tidligere kapitlers sammendrag inn i Utkast, Forleng, Utdyp og Beat for senere kapitler — i historiens tidsrekkefølge, ikke bare kapittelrekkefølge — slik at modellen kan holde styr på hva som allerede har skjedd uten å trenge hvert tidligere kapittels fulle tekst i prompten. Et kapittel ingen har sammendratt ennå, blir ganske enkelt utelatt fra den konteksten; ingenting kreves, ingenting går i stykker."
+      },
       "development-methods": {
         heading: "Fortellermetoder",
         body: "StoryBook AI inneholder flere metoder som kan hjelpe deg å utvikle eller strukturere historien.\nDe er helt frivillige.\nDu kan alltid velge:\nIngen metode – skriv fritt"
@@ -849,6 +853,18 @@ export const nb: Messages = {
       "what-is-canon": {
         heading: "Hva betyr kanon?",
         body: "Kanon er det du har bestemt skal regnes som sant i historien.\nIkke all tekst trenger å bli kanon.\n\nHvis AI skriver:\n”Nora dro det røde skjerfet tettere rundt halsen.”\ntrenger du ikke lagre fargen på skjerfet bare fordi den tilfeldigvis dukket opp i teksten.\n\nMen hvis skjerfet senere blir viktig, kan informasjonen være verdt å låse.\n\nStory Bible skal huske det som trenger å være konsekvent. Den trenger ikke bli en database over hver detalj i hver setning."
+      },
+      "aliases-and-exclusions": {
+        heading: "Alias og unntaksfraser",
+        body: "En karakter, et sted eller en gjenstand dukker ikke alltid opp i teksten under kortets eget navn. Åpne et Story Bible-kort, og du kan gi det alias — kallenavn, titler, alter egoer — slik at en omtale under noen av dem fortsatt telles. En karakter som heter ”Emma” på kortet sitt, men kalles ”Em” gjennom hele manuset, gjenkjennes uansett — i Omtaler-sporeren, og i lore-relevansfilteret hvis du bruker et.\n\nDet motsatte problemet skjer også: et navn som også er et vanlig ord. En karakter som heter Rose gjør at hver omtale av en rosehage, en rosebusk eller roser på et bord ser ut som en omtale av henne. Unntaksfraser retter opp det — legg til ”rosehage” som et unntak på Roses kort, så slutter nettopp den frasen å telle som en omtale av henne, mens ”Rose smilte” fortsatt gjør det."
+      },
+      "merge-story-bible-cards": {
+        heading: "Slå sammen Story Bible-kort",
+        body: "Noen ganger viser det seg at to Story Bible-kort er samme ting — du opprettet ”Kael” tidlig, og mye senere innser du at ”Kapteinen” som dukket opp nå og da, også er Kael. ”Slå sammen kort…” i Story Bible-panelet håndterer det: velg to eller flere kort av samme slag og slå dem sammen til ett.\n\nIngenting slettes. Hver fakta flyttes over til det sammenslåtte kortet; der de to kortene var uenige, velger du hvilken verdi som vinner; hvert gamle navn blir et alias på det sammenslåtte kortet, slik at en senere omtale av begge fortsatt løses riktig. Det finnes også et valg for å erstatte de gamle navnene med det nye direkte i manusteksten.\n\nDen samme sammenslåingen fungerer også den andre veien — et ventende forslag fra Hent ut fakta kan slås sammen direkte mot et eksisterende kort i gjennomgangskøen, i stedet for å låses som et nytt kort først og slås sammen etterpå."
+      },
+      "edit-vs-update": {
+        heading: "Rediger vs. Oppdater en fakta",
+        body: "En låst fakta kan endres på to forskjellige måter, og de betyr forskjellige ting.\n\nRediger retter en feil — fakta var alltid slik, du skrev den bare ned feil. Ingen historikk, intet ”fra og med”-kapittel; den blir ganske enkelt korrekt.\n\nOppdater registrerer en reell endring i historien — fakta var sann, og fra et visst kapittel endres den til noe annet. ”Noras hår var svart” (etablert i kapittel 1), ”Noras hår er nå grått” (Oppdater, forankret til kapittel 14, etter hendelsene som eldet henne). Den tidligere verdien forblir synlig i Historikk i stedet for å bli overskrevet, siden begge var sanne — bare på forskjellige punkter i historien.\n\nIdentitetsfakta (navn, art, den typen ting) får bare Rediger — det er sjelden en historiegrunn til at noens navn skal endres midt i boken på samme måte som hårfarge eller bosted kan gjøre."
       },
       "interview-world": {
         heading: "Intervju verdenen",

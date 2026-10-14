@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.98
+Status: living document, v1.0.99
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4247,6 +4247,68 @@ citattecken och att resultattexten ("Smartened quotes across 1
 chapter") visades korrekt.
 
 v1.0.97 → v1.0.98.
+
+**Ändringslogg v1.0.98 → v1.0.99 (2026-10-14):** Guide-uppdatering,
+steg 1 av 7. Mats: "Vi har lyckats skapa ett riktigt kompetent verktyg
+för den som vill skriva prosa. Jag tror att vi måste uppdatera vår
+Guide alternativt skapa en riktig hjälp (Wiki?)"
+
+**Diagnos innan bygget:** `git log -L` på `handbookSections`-blocket i
+`en.ts` visade att Guidens faktiska innehåll inte ändrats sedan commit
+`acd05b9` vid v1.0.34 (2026-10-02) — och den commiten var själv ett
+"hinn ikapp"-jobb. Vi är nu vid v1.0.98 (2026-10-14): 12 dagar, 64
+versioner utan en enda guide-uppdatering. En genomgång av CHANGELOG
+`### Added` sedan v1.0.34 gav 25 helt nya funktioner utan någon
+guide-text, plus flera strukturella UI-omflyttningar (Settings → stor
+dialog, Ask Manuscript → dialog, verktygsraden → File/Tools-menyer)
+som riskerar göra befintlig text missvisande, inte bara ofullständig.
+Sammanställdes till en prioriterad lista, kategori för kategori
+(samma 8 kategorier Guiden redan har), med Mats beslut: "Vi måste
+fixa allt... ta det i den ordning som du tror blir bäst." Planerad
+ordning: kategori för kategori nerifrån (Story Bible & World →
+Writing → Revise → Images/Publishing/Backup → Help), med
+översiktssektionerna (kartan, "which tool do I need", de tre
+arbetsflödena) sist, eftersom de ska peka på allt det andra och bara
+kan skrivas rätt när det finns att peka på.
+
+**Steg 1: Story Bible & World.** Fyra nya sektioner, inga tidigare
+dokumenterade (alla fyra källfunktioner skeppades EFTER v1.0.34, så
+det är inte bara eftersläpning utan rena luckor):
+- **Chapter summary** (kategori Plan the Story, inte Story Bible —
+  hör ihop med `chapter-briefs` som syskon-fält, inte med Story
+  Bible-fakta): Brief = vad kapitlet ska göra (skriven innan),
+  Summary = vad det faktiskt gjorde (skriven efter, matar senare
+  kapitels Draft/Extend/Elaborate/Beat i story-time-ordning).
+- **Aliases and exclusion phrases**: alias löser "samma karaktär,
+  olika namn i texten" (Em/Emma), exclusion phrases löser "namnet är
+  också ett vanligt ord" (Rose/rosenträdgård).
+- **Merge Story Bible cards**: två kort som visar sig vara samma sak
+  (Kael/Kaptenen) — inget raderas, konfliktvärden väljs manuellt,
+  gamla namn blir alias. Nämner också att samma sammanslagning
+  fungerar direkt från granskningskön på väntande Extract
+  facts-förslag, inte bara på redan låsta kort.
+- **Edit vs. Update a fact**: skillnaden mellan att RÄTTA ett
+  misstag (Edit, ingen historik) och att REGISTRERA en förändring i
+  berättelsen (Update, ankrad till ett kapitel, gammalt värde kvar i
+  History) — Identity-fakta får bara Edit.
+
+Nya sektions-id:n registrerade i `HANDBOOK_SECTION_IDS`/
+`HANDBOOK_SECTION_CATEGORY` (`HandbookPanel.tsx`), innehåll skrivet
+för hand på alla tre språk (inte maskinöversatt) i samma ton och
+med samma återkommande exempel-karaktärer (Nora/Erik/Elias) som
+Guidens befintliga text.
+
+**Verifierat:** tsc rent, full svit 1036 tester gröna (inga nya
+tester behövdes — i18n-innehåll, inte logik), `npm run build` grön.
+Live Playwright-verifiering: öppnade Guiden, klickade till kategori 3
+(Plan the Story) och 4 (Story Bible & World), bekräftade att alla
+fyra nya sektioner syns under rätt kategori med rätt numrering
+(4.1–4.4).
+
+v1.0.98 → v1.0.99. Återstår: Writing, Revise, Images/Publishing/
+Backup, citattecken-FAQ:n (som nu delvis är inaktuell sedan Smarta
+citattecken v1.0.98), mindre uppdateringar, och översiktssektionerna
+sist.
 
 ---
 

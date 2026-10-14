@@ -802,6 +802,10 @@ export const sv: Messages = {
         heading: "Kapitelbriefs",
         body: "En kapitelbrief beskriver vad ett kapitel ska åstadkomma.\nDen behöver inte vara välskriven.\nDen är en instruktion till dig själv och till AI när du använder skrivhjälpen.\n\nExempel\n”Erik möter kvinnan i restaurangvagnen. Hon antyder att hon kände hans far men vägrar berätta hur. Kapitlet slutar med att hon lämnar ett fotografi på bordet.”\n\nBriefen är inte själva berättelsen.\nDen beskriver vad berättelsen ska göra.\n\nSynopsis = hela berättelsen\nBrief = ett kapitel\nManus = det läsaren får"
       },
+      "chapter-summary": {
+        heading: "Kapitelsammanfattning",
+        body: "Bredvid Kapitelbrief finns ett andra fält, Kapitelsammanfattning — en kort notis om vad som faktiskt händer i kapitlet, när det väl är skrivet. Skriv den för hand, eller klicka på ”Sammanfatta kapitel” för att få den genererad från texten.\n\nBrief = vad kapitlet ska göra, skriven innan\nSammanfattning = vad kapitlet faktiskt gjorde, skriven efteråt\n\nNär ett kapitel har en sammanfattning flödar tidigare kapitels sammanfattningar in i Utkast, Förläng, Utveckla och Beat för senare kapitel — i berättelsens tidsordning, inte bara kapitelordning — så att modellen kan hålla reda på vad som redan har hänt utan att behöva varje tidigare kapitels fulla text i prompten. Ett kapitel ingen sammanfattat ännu lämnas helt enkelt utanför den kontexten; inget krävs, inget går sönder."
+      },
       "development-methods": {
         heading: "Berättelsemetoder",
         body: "StoryBook AI innehåller flera metoder som kan hjälpa dig utveckla eller strukturera berättelsen.\nDe är helt frivilliga.\nDu kan alltid välja:\nIngen metod – skriv fritt"
@@ -849,6 +853,18 @@ export const sv: Messages = {
       "what-is-canon": {
         heading: "Vad betyder kanon?",
         body: "Kanon är sådant du har bestämt ska betraktas som sant i berättelsen.\nAll text behöver inte bli kanon.\n\nOm AI skriver:\n”Nora drog den röda halsduken tätare kring halsen.”\nbehöver du inte spara färgen på halsduken bara för att den råkade förekomma i texten.\n\nMen om halsduken senare blir viktig kan informationen vara värd att låsa.\n\nStory Bible ska komma ihåg det som behöver vara konsekvent. Den behöver inte bli en databas över varje detalj i varje mening."
+      },
+      "aliases-and-exclusions": {
+        heading: "Alias och undantagsfraser",
+        body: "En karaktär, plats eller ett föremål dyker inte alltid upp i texten under kortets eget namn. Öppna ett Story Bible-kort och du kan ge det alias — smeknamn, titlar, alter egon — så att ett omnämnande under något av dem ändå räknas. En karaktär som heter ”Emma” på sitt kort men kallas ”Em” genom hela manuset känns igen ändå — i Omnämnanden-spåraren, och i lore-relevansfiltret om du använder ett sådant.\n\nDet omvända problemet förekommer också: ett namn som också är ett vanligt ord. En karaktär som heter Rosa gör att varje omnämnande av en rosenträdgård, en rosenbuske eller rosor på ett bord ser ut som ett omnämnande av henne. Undantagsfraser löser det — lägg till ”rosenträdgård” som ett undantag på Rosas kort, så slutar just den frasen räknas som ett omnämnande av henne, medan ”Rosa log” fortfarande gör det."
+      },
+      "merge-story-bible-cards": {
+        heading: "Slå ihop Story Bible-kort",
+        body: "Ibland visar det sig att två Story Bible-kort är samma sak — du skapade ”Kael” tidigt, och långt senare inser du att ”Kaptenen” som dök upp då och då faktiskt också är Kael. ”Slå ihop kort…” i Story Bible-panelen hanterar det: välj två eller fler kort av samma sort och slå ihop dem till ett.\n\nInget raderas. Varje fakta flyttas över till det sammanslagna kortet; där de två korten sa emot varandra väljer du vilket värde som vinner; varje gammalt namn blir ett alias på det sammanslagna kortet, så ett senare omnämnande av endera fortfarande löser rätt. Det finns också ett alternativ att byta ut de gamla namnen mot det nya direkt i manustexten.\n\nSamma sammanslagning fungerar även åt andra hållet — ett väntande förslag från Extrahera fakta kan slås ihop direkt mot ett befintligt kort i granskningskön, istället för att först låsas som ett nytt kort och slås ihop efteråt."
+      },
+      "edit-vs-update": {
+        heading: "Redigera vs. Uppdatera en fakta",
+        body: "En låst fakta kan ändras på två olika sätt, och de betyder olika saker.\n\nRedigera rättar ett misstag — faktan var alltid sådan, du skrev bara ner den fel. Ingen historik, inget ”från och med”-kapitel; den blir helt enkelt korrekt.\n\nUppdatera registrerar en verklig förändring i berättelsen — faktan var sann, och från ett visst kapitel ändras den till något annat. ”Noras hår var svart” (etablerat i kapitel 1), ”Noras hår är nu grått” (Uppdatera, ankrat till kapitel 14, efter händelserna som åldrade henne). Det tidigare värdet syns kvar i Historik istället för att skrivas över, eftersom båda var sanna — bara vid olika punkter i berättelsen.\n\nIdentitetsfakta (namn, art, den sortens saker) får bara Redigera — det finns sällan en berättelseanledning till att någons namn ska ändras mitt i boken på samma sätt som hårfärg eller bostadsort kan göra."
       },
       "interview-world": {
         heading: "Intervjua världen",
