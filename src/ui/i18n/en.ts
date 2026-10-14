@@ -284,6 +284,10 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
     heading: "Analyze a chapter",
     body: "Analyze reviews the text without rewriting it for you. The point is to help you notice things you might want to look into yourself.\n\nThink of the analysis as an extra reader.\nNot: \"This is how you should write.\"\nBut: \"Here's something you might want to look at.\"\n\nYou decide whether the observation is relevant."
   },
+  polish: {
+    heading: "Polish",
+    body: "Where Analyze only points things out, Polish rewrites. It runs a cleanup pass over the whole chapter — cutting exposition inserts, emotion-naming (\"she felt a pang of regret\"), vague statements, purple prose, and tightening dialogue — then shows the original and the rewrite side by side, with word-level highlighting, before anything is kept.\n\nAccept or discard. Nothing touches the chapter until you say so. If Polish's default instincts don't match your voice — maybe you want more emotion-naming kept, not less — Settings → Polish lets you edit the instructions it gives the model, per manuscript."
+  },
   continuity: {
     heading: "Continuity",
     body: "The longer a manuscript gets, the harder it is to remember everything. A person might end up with different eye colors. A place might suddenly change. A character might seem to know information they shouldn't know yet.\n\nHere, Story Bible and the story's continuity tools help you compare what you're writing against what's already established.\n\nWho knows what?\nContinuity isn't only about physical details. It's also about information. The reader might know a secret. That doesn't mean every character does.\n\nThis becomes especially important in mysteries, thrillers, multiple viewpoints, and stories where information is revealed gradually."
@@ -302,7 +306,11 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   proofread: {
     heading: "Proofread",
-    body: "Proofreading fits later in the process.\n\nEarlier, the question might have been: \"How can the scene develop?\"\nNow the question becomes: \"Is there something here that needs fixing or checking?\"\n\nIt's rarely worth polishing every sentence if you still plan to rewrite whole chapters. Work from large to small:\nThe story → Continuity → The chapters → The language → Proofreading → Your own final read\n\nAI can find things. The author decides what works."
+    body: "Proofreading fits later in the process.\n\nEarlier, the question might have been: \"How can the scene develop?\"\nNow the question becomes: \"Is there something here that needs fixing or checking?\"\n\nIt's rarely worth polishing every sentence if you still plan to rewrite whole chapters. Work from large to small:\nThe story → Continuity → The chapters → Developmental analysis → Polish → Proofreading → Your own final read\n\nProofread runs seven checks across the whole manuscript in one pass — grammar, repeated scenes, style and mood consistency between chapters, an age-appropriateness report, continuity, setups and payoffs, and a fact check against Story Bible — and warns first if an open placeholder note is still waiting, in case it's been forgotten along the way.\n\nAI can find things. The author decides what works."
+  },
+  "developmental-analysis": {
+    heading: "Developmental analysis",
+    body: "Proofread reads line by line. Developmental analysis reads the shape of the whole book instead: does tension actually rise as the story goes on, does the middle sag, which Plotlines threads get resolved and which quietly stall for ten chapters.\n\nIt works in three stages — scene by scene, then chapter by chapter, then one final report — never the whole manuscript in a single pass, so it stays manageable even for a long book. A manually started run, not something that happens automatically; it's grounded in whatever Plotlines tags and Timeline positions the manuscript already has, but works without either — just a coarser read, and it says so before starting.\n\nThe only thing you ever see is the final report: a prose summary, plus a clickable list of specific chapters worth a look. The scene-by-scene and chapter-by-chapter readings underneath stay internal working data — the same \"never raw data, always synthesized\" principle as everywhere else AI reviews your writing."
   },
   "images-illustrations": {
     heading: "Images and illustrations",

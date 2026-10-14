@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.100
+Status: living document, v1.0.101
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4337,6 +4337,33 @@ Live Playwright: öppnade Guiden, klickade kategori 5 (Writing),
 bekräftade att alla fyra nya sektioner syns.
 
 v1.0.99 → v1.0.100. Återstår: Revise, Images/Publishing/Backup,
+citattecken-FAQ:n, mindre uppdateringar, översiktssektionerna.
+
+**Ändringslogg v1.0.100 → v1.0.101 (2026-10-14):** Guide-uppdatering,
+steg 3 av 7: Revise-kategorin. Två nya sektioner plus en uppdatering:
+- **Polish**: placerad direkt efter Analyze (samma kapitel-nivå-par —
+  Analyze pekar bara ut, Polish skriver om), förklarar
+  före/efter-jämförelsen och att inget rör kapitlet förrän man
+  accepterar.
+- **Developmental analysis**: placerad direkt efter Proofread (samma
+  manus-brett-par — Proofread läser radnivå, Developmental läser
+  formen), nämner tre-stegsprocessen, att den är manuellt startad,
+  och att bara slutrapporten någonsin visas.
+- **Proofread** uppdaterad: "stort till smått"-kedjan utökad med
+  Developmental analysis och Polish, och texten namnger nu konkret de
+  sju kontrollerna (grammatik, upprepade scener, stil/stämning,
+  ålder, kontinuitet, upplägg/betalningar, faktakontroll) samt
+  platshållarvarningen — allt sådant som fanns i produkten men aldrig
+  i guide-texten.
+
+Samma mönster: nya id:n i `HANDBOOK_SECTION_IDS`/
+`HANDBOOK_SECTION_CATEGORY`, innehåll för hand på alla tre språk.
+
+**Verifierat:** tsc rent, 1036 tester gröna, `npm run build` grön.
+Live Playwright: kategori 6 (Revise) visar både Polish och
+Developmental analysis.
+
+v1.0.100 → v1.0.101. Återstår: Images/Publishing/Backup,
 citattecken-FAQ:n, mindre uppdateringar, översiktssektionerna.
 
 ---

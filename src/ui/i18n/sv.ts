@@ -950,6 +950,10 @@ export const sv: Messages = {
         heading: "Analysera ett kapitel",
         body: "Analysera granskar texten utan att skriva om den åt dig. Syftet är att hjälpa dig upptäcka sådant du själv kanske vill undersöka närmare.\n\nTänk på analysen som en extra läsare.\nInte: ”Så här ska du skriva.”\nUtan: ”Här finns något du kanske vill titta på.”\n\nDu bestämmer om synpunkten är relevant."
       },
+      polish: {
+        heading: "Polish",
+        body: "Där Analysera bara pekar ut saker, skriver Polish om. Den kör en städpassage över hela kapitlet — stryker inskjutna förklaringar, känslo-namngivning (”hon kände en stöt av ånger”), vaga påståenden, lila prosa, och stramar upp dialog — och visar sedan originalet och omskrivningen sida vid sida, med ordnivå-markering, innan något behålls.\n\nAcceptera eller förkasta. Inget rör kapitlet förrän du säger till. Om Polishs standardinstinkter inte matchar din röst — kanske du vill behålla mer känslo-namngivning, inte mindre — kan du redigera instruktionerna den ger modellen i Settings → Polish, per manus."
+      },
       continuity: {
         heading: "Kontinuitet",
         body: "Ju längre manuset blir, desto svårare blir det att minnas allt. En person kan få olika ögonfärg. En plats kan plötsligt förändras. En karaktär kan verka känna till information som hen ännu inte borde känna till.\n\nHär hjälper Story Bible och berättelsens kontinuitetsverktyg dig att jämföra det du skriver med sådant som redan etablerats.\n\nVem vet vad?\nKontinuitet handlar inte bara om fysiska detaljer. Det handlar också om information. Läsaren kanske känner till en hemlighet. Det betyder inte att alla karaktärer gör det.\n\nDet blir särskilt viktigt i mysterier, thrillers, flera perspektiv och berättelser där information avslöjas stegvis."
@@ -968,7 +972,11 @@ export const sv: Messages = {
       },
       proofread: {
         heading: "Korrekturläs",
-        body: "Korrekturläsning passar senare i processen.\n\nTidigare kanske frågan var: ”Hur kan scenen utvecklas?”\nNu blir frågan: ”Finns det något här som behöver rättas eller kontrolleras?”\n\nDet är sällan meningsfullt att finslipa varje mening om du fortfarande tänker skriva om hela kapitel. Arbeta gärna från stort till smått:\nBerättelsen → Kontinuiteten → Kapitlen → Språket → Korrekturläsningen → Din egen slutläsning\n\nAI kan hitta saker. Författaren avgör vad som fungerar."
+        body: "Korrekturläsning passar senare i processen.\n\nTidigare kanske frågan var: ”Hur kan scenen utvecklas?”\nNu blir frågan: ”Finns det något här som behöver rättas eller kontrolleras?”\n\nDet är sällan meningsfullt att finslipa varje mening om du fortfarande tänker skriva om hela kapitel. Arbeta gärna från stort till smått:\nBerättelsen → Kontinuiteten → Kapitlen → Developmental analysis → Polish → Korrekturläsningen → Din egen slutläsning\n\nKorrekturläs kör sju kontroller över hela manuset i ett svep — grammatik, upprepade scener, stil- och stämningskonsekvens mellan kapitel, en åldersrapport, kontinuitet, upplägg och betalningar, samt en faktakontroll mot Story Bible — och varnar först om det finns en öppen platshållar-notis som fortfarande väntar, ifall den glömts bort på vägen.\n\nAI kan hitta saker. Författaren avgör vad som fungerar."
+      },
+      "developmental-analysis": {
+        heading: "Developmental analysis",
+        body: "Korrekturläs läser rad för rad. Developmental analysis läser hela bokens form istället: stiger spänningen verkligen allt eftersom berättelsen går vidare, sjunker mitten ihop, vilka Trådar betalas faktiskt av och vilka tystnar i tio kapitel.\n\nDen arbetar i tre steg — scen för scen, sedan kapitel för kapitel, sedan en slutlig rapport — aldrig hela manuset i ett enda svep, så den förblir hanterbar även för en lång bok. En manuellt startad körning, inget som sker automatiskt; den grundar sig i vilka Tråd-taggar och Timeline-positioner manuset redan har, men fungerar även utan — bara en grövre läsning, och den säger det innan den startar.\n\nDet enda du någonsin ser är slutrapporten: en sammanfattning i löpande text, plus en klickbar lista över specifika kapitel värda en titt. Scen-för-scen- och kapitel-för-kapitel-läsningarna under förblir intern arbetsdata — samma ”aldrig rådata, alltid syntetiserat”-princip som överallt annars där AI granskar ditt skrivande."
       },
       "images-illustrations": {
         heading: "Bilder och illustrationer",

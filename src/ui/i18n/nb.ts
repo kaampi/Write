@@ -950,6 +950,10 @@ export const nb: Messages = {
         heading: "Analyser et kapittel",
         body: "Analyser gjennomgår teksten uten å skrive den om for deg. Hensikten er å hjelpe deg å oppdage ting du selv kanskje vil undersøke nærmere.\n\nTenk på analysen som en ekstra leser.\nIkke: ”Slik skal du skrive.”\nMen: ”Her er noe du kanskje vil se nærmere på.”\n\nDu bestemmer om innspillet er relevant."
       },
+      polish: {
+        heading: "Polish",
+        body: "Der Analyser bare peker ut ting, skriver Polish om. Den kjører en opprydningsrunde over hele kapittelet — stryker innskutte forklaringer, følelses-navngivning (”hun kjente et støt av anger”), vage påstander, lilla prosa, og strammer opp dialog — og viser deretter originalen og omskrivningen side om side, med ordnivå-markering, før noe beholdes.\n\nAksepter eller forkast. Ingenting rører kapittelet før du sier ifra. Hvis Polishs standardinstinkter ikke matcher stemmen din — kanskje du vil beholde mer følelses-navngivning, ikke mindre — kan du redigere instruksjonene den gir modellen i Settings → Polish, per manus."
+      },
       continuity: {
         heading: "Kontinuitet",
         body: "Jo lengre manuset blir, desto vanskeligere blir det å huske alt. En person kan få ulik øyenfarge. Et sted kan plutselig forandre seg. En karakter kan virke å kjenne til informasjon hen ennå ikke burde kjenne til.\n\nHer hjelper Story Bible og historiens kontinuitetsverktøy deg å sammenligne det du skriver med det som allerede er etablert.\n\nHvem vet hva?\nKontinuitet handler ikke bare om fysiske detaljer. Det handler også om informasjon. Leseren kjenner kanskje til en hemmelighet. Det betyr ikke at alle karakterene gjør det.\n\nDette blir spesielt viktig i mysterier, thrillere, flere perspektiver og historier der informasjon avsløres gradvis."
@@ -968,7 +972,11 @@ export const nb: Messages = {
       },
       proofread: {
         heading: "Korrekturles",
-        body: "Korrekturlesing passer senere i prosessen.\n\nTidligere var kanskje spørsmålet: ”Hvordan kan scenen utvikle seg?”\nNå blir spørsmålet: ”Er det noe her som trenger å rettes eller sjekkes?”\n\nDet er sjelden meningsfullt å pusse på hver setning hvis du fortsatt planlegger å skrive om hele kapitler. Jobb gjerne fra stort til smått:\nHistorien → Kontinuiteten → Kapitlene → Språket → Korrekturlesingen → Din egen sluttlesing\n\nAI kan finne ting. Forfatteren avgjør hva som fungerer."
+        body: "Korrekturlesing passer senere i prosessen.\n\nTidligere var kanskje spørsmålet: ”Hvordan kan scenen utvikle seg?”\nNå blir spørsmålet: ”Er det noe her som trenger å rettes eller sjekkes?”\n\nDet er sjelden meningsfullt å pusse på hver setning hvis du fortsatt planlegger å skrive om hele kapitler. Jobb gjerne fra stort til smått:\nHistorien → Kontinuiteten → Kapitlene → Developmental analysis → Polish → Korrekturlesingen → Din egen sluttlesing\n\nKorrekturles kjører sju sjekker over hele manuset i ett sveip — grammatikk, gjentatte scener, stil- og stemningskonsekvens mellom kapitler, en aldersrapport, kontinuitet, oppsett og betalinger, samt en faktasjekk mot Story Bible — og varsler først hvis det finnes en åpen plassholder-notis som fortsatt venter, i tilfelle den er glemt underveis.\n\nAI kan finne ting. Forfatteren avgjør hva som fungerer."
+      },
+      "developmental-analysis": {
+        heading: "Developmental analysis",
+        body: "Korrekturles leser linje for linje. Developmental analysis leser hele bokens form i stedet: stiger spenningen virkelig etter hvert som historien går videre, synker midten sammen, hvilke Tråder blir faktisk betalt av og hvilke stilner i ti kapitler.\n\nDen jobber i tre trinn — scene for scene, så kapittel for kapittel, så en avsluttende rapport — aldri hele manuset i ett sveip, slik at den forblir håndterbar selv for en lang bok. En manuelt startet kjøring, ikke noe som skjer automatisk; den grunner seg i hvilke Tråd-tagger og Timeline-posisjoner manuset allerede har, men fungerer også uten — bare en grovere lesning, og den sier det før den starter.\n\nDet eneste du noensinne ser, er sluttrapporten: et sammendrag i løpende tekst, pluss en klikkbar liste over spesifikke kapitler verdt et blikk. Scene-for-scene- og kapittel-for-kapittel-lesningene under forblir intern arbeidsdata — samme ”aldri rådata, alltid syntetisert”-prinsipp som overalt ellers der AI gjennomgår skrivingen din."
       },
       "images-illustrations": {
         heading: "Bilder og illustrasjoner",

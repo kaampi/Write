@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.101] - 2026-10-14
+
+### Added
+- Guide: two new Revise sections, Polish and Developmental analysis, plus an updated Proofread section naming its seven checks and the placeholder warning. Third batch of the ongoing Guide catch-up (see v1.0.99).
+
 ## [1.0.100] - 2026-10-14
 
 ### Added
