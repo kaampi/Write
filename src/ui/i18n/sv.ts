@@ -1008,7 +1008,7 @@ export const sv: Messages = {
       },
       "marker-conversion-no-match": {
         heading: "”Convert markers to formatting” hittar inga markeringar",
-        body: "Oftast beror det på att tecknet du skrev in i fältet inte är exakt samma tecken som finns i manuset — lätt hänt med citattecken, eftersom \" (rakt citattecken) och ” ” (smarta/typografiska citattecken, som ordbehandlare ofta byter till automatiskt) ser nästan likadana ut men är olika tecken för datorn.\n\nSäkraste lösningen: öppna kapitlet, markera ett av de riktiga tecknen i din text, kopiera det (Ctrl/Cmd+C), och klistra in det i fältet för öppnings- eller avslutningstecken istället för att skriva om det på tangentbordet. Då är det garanterat exakt rätt tecken."
+        body: "Om det här gäller citattecken specifikt: du behöver nog inte Convert markers för det alls längre. Se Smarta citattecken (Skriva) — ett rakt \" blir redan kurvigt medan du skriver, och ”Smarten quotes in whole manuscript” konverterar ett helt importerat eller inklistrat manus i ett svep, raka citattecken inkluderat.\n\nFör allt annat Convert markers hanterar — *asterisker* för kursiv, egna par du satt upp — betyder ”inget hittades” oftast att tecknet du skrev in i fältet inte är exakt samma tecken som finns i manuset. Lätt hänt med skiljetecken som finns i mer än en likadan-ut-seende form.\n\nSäkraste lösningen: öppna kapitlet, markera ett av de riktiga tecknen i din text, kopiera det (Ctrl/Cmd+C), och klistra in det i fältet för öppnings- eller avslutningstecken istället för att skriva om det på tangentbordet. Då är det garanterat exakt rätt tecken."
       }
     }
   },

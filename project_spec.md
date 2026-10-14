@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.102
+Status: living document, v1.0.103
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4391,6 +4391,23 @@ omnämnandet i Backup.
 
 v1.0.101 → v1.0.102. Återstår: citattecken-FAQ:n, mindre
 uppdateringar, översiktssektionerna sist.
+
+**Ändringslogg v1.0.102 → v1.0.103 (2026-10-14):** Guide-uppdatering,
+steg 5 av 7: skrev om `marker-conversion-no-match`-FAQ:n.
+Ursprungstexten handlade uteslutande om att citattecken i manuset
+kanske inte matchar exakt tecken i Convert markers-fälten — ett
+problem Smarta citattecken (v1.0.98) nu löser automatiskt i de
+flesta fall. Ny text leder med en pekare till Smart quotes-sektionen
+(Skriva) för just citattecken-fallet, och behåller
+kopiera-klistra-lösningen för allt annat Convert markers hanterar
+(asterisker, egna par). Ingen ny sektion, bara en omskrivning — inga
+ändringar i `HandbookPanel.tsx`.
+
+**Verifierat:** tsc rent, 1036 tester gröna, `npm run build` grön.
+Live Playwright: kategori 8 (Help) visar den omskrivna texten.
+
+v1.0.102 → v1.0.103. Återstår: mindre uppdateringar
+(scenes-sektionen m.fl.) och översiktssektionerna sist.
 
 ---
 

@@ -1008,7 +1008,7 @@ export const nb: Messages = {
       },
       "marker-conversion-no-match": {
         heading: "«Convert markers to formatting» finner ingen markeringer",
-        body: "Som regel betyr det at tegnet du skrev inn i feltet ikke er nøyaktig samme tegn som i manuskriptet — lett å oppleve med anførselstegn, siden \" (rett anførselstegn) og «smarte»/typografiske anførselstegn (som tekstbehandlere ofte bytter til automatisk) ser nesten like ut, men er ulike tegn for datamaskinen.\n\nSikreste løsning: åpne kapittelet, marker ett av de faktiske tegnene i teksten din, kopier det (Ctrl/Cmd+C), og lim det inn i feltet for åpnings- eller avslutningstegn i stedet for å skrive det på tastaturet på nytt. Da er det garantert nøyaktig riktig tegn."
+        body: "Hvis dette gjelder anførselstegn spesifikt: du trenger nok ikke Convert markers til det lenger. Se Smarte anførselstegn (Skriving) — et rett \" blir allerede kurvet mens du skriver, og «Smarten quotes in whole manuscript» konverterer et helt importert eller innlimt manus i ett sveip, rette anførselstegn inkludert.\n\nFor alt annet Convert markers håndterer — *stjerner* for kursiv, egne par du har satt opp — betyr «ingenting funnet» som regel at tegnet du skrev inn i feltet ikke er nøyaktig samme tegn som i manuskriptet. Lett å oppleve med tegnsetting som finnes i mer enn én lik-ut-seende form.\n\nSikreste løsning: åpne kapittelet, marker ett av de faktiske tegnene i teksten din, kopier det (Ctrl/Cmd+C), og lim det inn i feltet for åpnings- eller avslutningstegn i stedet for å skrive det på tastaturet på nytt. Da er det garantert nøyaktig riktig tegn."
       }
     }
   },

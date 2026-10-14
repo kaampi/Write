@@ -342,7 +342,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "marker-conversion-no-match": {
     heading: "\"Convert markers to formatting\" says nothing was found",
-    body: "This usually means the character you typed into the field isn't quite the same character as the one in your manuscript — easy to happen with quotation marks, since \" (straight) and “ ” (smart/typographic, which word processors often switch to automatically) look almost identical but are different characters to the computer.\n\nSafest fix: open the chapter, select one of the actual marker characters in your text, copy it (Ctrl/Cmd+C), and paste it into the Opening or Closing marker field instead of retyping it on the keyboard. That guarantees an exact match."
+    body: "If this is about quotation marks specifically: you probably don't need Convert markers for that at all anymore. See Smart quotes (Writing) — a straight \" already turns curly as you type, and \"Smarten quotes in whole manuscript\" converts a whole imported or pasted-in manuscript in one pass, straight quotes included.\n\nFor anything else Convert markers handles — *asterisks* for italic, custom pairs of your own — \"nothing found\" usually means the character you typed into the field isn't quite the same character as the one in your manuscript. Easy to happen with punctuation that comes in more than one look-alike form.\n\nSafest fix: open the chapter, select one of the actual marker characters in your text, copy it (Ctrl/Cmd+C), and paste it into the Opening or Closing marker field instead of retyping it on the keyboard. That guarantees an exact match."
   }
 };
 

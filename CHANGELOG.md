@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.103] - 2026-10-14
+
+### Changed
+- Guide: rewrote the "Convert markers to formatting says nothing was found" FAQ entry to lead with Smart quotes (v1.0.98) for the quote-mark case — Convert markers usually isn't needed for that anymore — and kept the copy-paste workaround for other markers (asterisks, custom pairs). Fifth batch of the ongoing Guide catch-up (see v1.0.99).
+
 ## [1.0.102] - 2026-10-14
 
 ### Added
