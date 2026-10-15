@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.108
+Status: living document, v1.0.109
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4697,6 +4697,74 @@ det avgör om problemet sitter i paketstrukturen (det här lagret) eller
 djupare i geometrin/stilarna.
 
 v1.0.107 → v1.0.108.
+
+**Ändringslogg v1.0.108 → v1.0.109 (2026-10-15):** IDML-exporten
+rättad efter Mats andra riktiga test. Paketeringen från v1.0.108
+fungerade — filerna öppnades nu i både Affinity och InDesign — men
+Mats rapporterade: "Affinity kunde öppna IDML-filen men dokumentet
+hade ingen text och siddimensionerna var konstiga. Affinity hittade
+16 sidor. Indesign kunde öppna dokumentet men hade samma konstiga
+sidformat men hittade 31 sidor. På sidan 29 fanns en pytteliten
+textyta med kapitel 13 från boken." — med en skärmdump av InDesigns
+Document Setup-dialog som visade en sidhöjd på 6639,2pt.
+
+**Grundorsaken:** varje sida (titelsida, varje kapitel, Story
+Bible-sidan) fick sin egen, individuellt uträknade `GeometricBounds`-
+höjd — precis så hög som behövdes för just den sidans innehåll, inget
+mer. Men InDesign och Affinity förväntar sig enhetlig sidgeometri
+genom hela dokumentet, och litar inte på enskilda sidors
+`GeometricBounds` när de varierar sida till sida — istället
+flödar de om hela dokumentet till en egen uträknad standardstorlek,
+vilket desynkar textramarnas placering från de faktiska sidorna. Det
+förklarar både den konstiga enhetliga sidhöjden (InDesign/Affinity
+räknade själva ut en, ignorerade mina olika per-sida-värden) och den
+nästan helt saknade texten (textramarna hamnade på fel ställe relativt
+de omflutna sidorna).
+
+**Jämförelse med ComicBook AI:s egen (också obeta/obekräftad)
+`idmlExport.ts` bekräftade riktningen**: den räknar ut sidbredd/höjd
+EN gång, utanför sin per-sida-loop, och återanvänder samma värde för
+varje sida i hela dokumentet — aldrig en egen höjd per sida.
+
+**Rättningen i `src/core/manuscriptExport.ts`:** `packIdml` byggdes
+om till två faser. Först samlas allt sidinnehåll (titel, varje
+kapitel, Story Bible) i en lista med `{label, paragraphsXml,
+neededHeight}` utan att bygga XML än. Sedan räknas EN gemensam
+`pageHeight = Math.max(IDML_MIN_CHAPTER_HEIGHT, ...alla
+neededHeight)` ut — den högsta sidan boken behöver. Först därefter
+byggs varje Spread/Story-fil, och alla använder samma `pageHeight`.
+`idmlPreferencesXml` (dokumentets `DocumentPreference
+PageHeight`-attribut, exakt det fält Mats skärmdump visade) fick också
+samma delade värde istället för den gamla hårdkodade
+titelsidekonstanten.
+
+**Accepterad avvägning:** ett kort kapitel får nu mer tomrum under
+texten på sin sida än tidigare, eftersom alla sidor delar den enda
+högsta sidans höjd. Det är en medveten konsekvens av enhetlig
+sidstorlek, inte en ny bugg — värt att nämna till Mats eftersom det är
+en synlig beteendeförändring.
+
+**Verifiering:** ny test i `tests/core/manuscript-export.test.ts`
+("gives every real page the same GeometricBounds height, matching
+Preferences.xml") som läser höjdvärdet ur varje Spread-fils
+`GeometricBounds` och bekräftar att de alla är identiska och matchar
+`Resources/Preferences.xml`s `PageHeight`. Hela testsviten (1050 test,
+79 filer), `tsc --noEmit` och `npm run build` kördes rent. Gjorde
+också en riktig export genom UI:t igen (samma Playwright-flöde som
+v1.0.108), körde `xmllint --noout` på varje XML-fil i resultatet —
+alla godkända — och läste ut `GeometricBounds`/`PageHeight` direkt ur
+den extraherade zippen: titelsidan och kapitel 1 delade exakt samma
+höjd (720pt för det korta testmanuset), vilket matchade
+Preferences.xml.
+
+**Fortfarande kvar: InDesign/Affinity-öppningstestet självt.** Samma
+begränsning som tidigare — jag kan inte själv öppna resultatet i
+InDesign eller Affinity i den här miljön. Rättningen är
+standardbaserad (bekräftad mot ComicBook AI:s mönster) och grundorsaks-
+diagnosticerad från Mats exakta symptombeskrivning, inte en gissning,
+men väntar fortfarande på ett tredje riktigt test för att bekräftas.
+
+v1.0.108 → v1.0.109.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

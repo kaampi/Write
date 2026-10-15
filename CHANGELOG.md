@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.109] - 2026-10-15
+
+### Fixed
+- IDML export opened in InDesign and Affinity (after the v1.0.108 packaging fix) but still showed inconsistent page sizes and almost no visible text. Every page's `GeometricBounds` (title page, each chapter, the Story Bible) was previously computed independently, sized just tall enough for that page's own content — but InDesign and Affinity expect uniform page geometry across a document, and distrust per-page sizes that vary, reflowing the whole document to an unrelated size and desyncing text frame placement from the actual pages. All pages in an IDML export now share one height — the tallest page the book needs — matching the pattern used by ComicBook AI's own IDML export. A short chapter now has more empty space at the bottom of its page than before; this is an accepted tradeoff of uniform sizing, not a bug.
+
 ## [1.0.108] - 2026-10-15
 
 ### Fixed

@@ -508,6 +508,25 @@ describe("IDML export", () => {
       expect(text).toContain('AppliedMaster="n"');
     }
   });
+
+  it("gives every real page the same GeometricBounds height, matching Preferences.xml", () => {
+    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const spreadTexts = Object.entries(files)
+      .filter(([name]) => name.startsWith("Spreads/"))
+      .map(([, data]) => new TextDecoder().decode(data));
+    const pageHeights = spreadTexts.map((text) => {
+      const match = text.match(/<Page [^>]*GeometricBounds="0 0 (\S+) /);
+      expect(match).not.toBeNull();
+      return match![1];
+    });
+    expect(new Set(pageHeights).size).toBe(1);
+
+    const preferences = new TextDecoder().decode(files["Resources/Preferences.xml"]!);
+    const prefsMatch = preferences.match(/PageHeight="(\S+)"/);
+    expect(prefsMatch).not.toBeNull();
+    expect(prefsMatch![1]).toBe(pageHeights[0]);
+  });
 });
 
 describe("chapter start image", () => {

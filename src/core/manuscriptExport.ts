@@ -1263,10 +1263,10 @@ function idmlFontsXml(fontName: string): string {
 `;
 }
 
-function idmlPreferencesXml(pageCount: number): string {
+function idmlPreferencesXml(pageCount: number, pageHeight: number): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Preferences xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <DocumentPreference PageWidth="${IDML_PAGE_WIDTH}" PageHeight="${IDML_TITLE_PAGE_HEIGHT}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection" Intent="PrintIntent"/>
+  <DocumentPreference PageWidth="${IDML_PAGE_WIDTH}" PageHeight="${pageHeight}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection" Intent="PrintIntent"/>
   <ViewPreference HorizontalMeasurementUnits="Points" VerticalMeasurementUnits="Points"/>
 </idPkg:Preferences>
 `;
@@ -1336,17 +1336,17 @@ export function packIdml(
   const spreadRefs: string[] = [];
   const storyRefs: string[] = [];
 
-  function addPage(label: string, height: number, paragraphsXml: string): void {
-    const spreadSelf = idmlId("uSpread");
-    const pageSelf = idmlId("uPage");
-    const frameSelf = idmlId("uFrame");
-    const storySelf = idmlId("uStory");
-    storyIds.push(storySelf);
-    otherFiles.push({ name: `Spreads/Spread_${spreadSelf}.xml`, data: utf8(idmlSpreadXml(spreadSelf, pageSelf, frameSelf, storySelf, height, label)) });
-    otherFiles.push({ name: `Stories/Story_${storySelf}.xml`, data: utf8(idmlStoryXml(storySelf, paragraphsXml)) });
-    spreadRefs.push(`  <idPkg:Spread src="Spreads/Spread_${spreadSelf}.xml"/>`);
-    storyRefs.push(`  <idPkg:Story src="Stories/Story_${storySelf}.xml"/>`);
-  }
+  // Every page in the document shares one height — real IDML documents
+  // don't vary page size page to page, and letting them vary here (an
+  // earlier version of this writer did, one custom height per chapter) is
+  // exactly what made InDesign stop trusting the per-page GeometricBounds
+  // and instead reflow the whole document to a size of its own choosing:
+  // confirmed by a real test, where every page came out the same unrelated
+  // height and all but one chapter's text went missing. One height, set in
+  // both DocumentPreference and every individual Page/TextFrame, avoids
+  // that reflow entirely — tall enough for the single longest page the
+  // book actually needs (title, any one chapter, or the Story Bible).
+  const pages: { label: string; paragraphsXml: string; neededHeight: number }[] = [];
 
   const titleParts: string[] = [idmlParagraph("Title", idmlParagraphRuns(doc.title, 0, []))];
   titleParts.push(idmlParagraph("Body", idmlParagraphRuns(doc.exportedLabel, 0, [])));
@@ -1354,7 +1354,7 @@ export function packIdml(
   if (doc.voice) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Voice: ${doc.voice}`, 0, [])));
   if (doc.viewpoint) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Viewpoint: ${doc.viewpoint}`, 0, [])));
   if (doc.readerAge !== undefined) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Reader: ${doc.readerAge}`, 0, [])));
-  addPage(doc.title, IDML_TITLE_PAGE_HEIGHT, titleParts.join(""));
+  pages.push({ label: doc.title, paragraphsXml: titleParts.join(""), neededHeight: IDML_TITLE_PAGE_HEIGHT });
 
   for (const chapter of doc.chapters) {
     const parts: string[] = [idmlParagraph("ChapterHeading", idmlParagraphRuns(chapter.heading, 0, []))];
@@ -1362,14 +1362,32 @@ export function packIdml(
     if (chapter.rawProse) {
       parts.push(idmlChapterParagraphs(chapter.rawProse, chapter.formatting, paragraphStyle, doc.dropCapLines, doc.sceneBreakStyle));
     }
-    const height = estimateChapterPageHeight(chapter.rawProse, splitLinesWithOffsets(chapter.rawProse).length);
-    addPage(chapter.heading, height, parts.join(""));
+    const neededHeight = estimateChapterPageHeight(chapter.rawProse, splitLinesWithOffsets(chapter.rawProse).length);
+    pages.push({ label: chapter.heading, paragraphsXml: parts.join(""), neededHeight });
   }
 
   if (doc.bible.length > 0) {
     const bibleText = doc.bible.flatMap((section) => section.entities.flatMap((entity) => [entity.name, ...entity.lines])).join(" ");
     const paragraphCount = doc.bible.reduce((count, section) => count + section.entities.length * 2, 1);
-    addPage("Story Bible", estimateChapterPageHeight(bibleText, paragraphCount), idmlBibleParagraphs(doc.bible));
+    const neededHeight = estimateChapterPageHeight(bibleText, paragraphCount);
+    pages.push({ label: "Story Bible", paragraphsXml: idmlBibleParagraphs(doc.bible), neededHeight });
+  }
+
+  const pageHeight = Math.max(IDML_MIN_CHAPTER_HEIGHT, ...pages.map((page) => page.neededHeight));
+
+  for (const page of pages) {
+    const spreadSelf = idmlId("uSpread");
+    const pageSelf = idmlId("uPage");
+    const frameSelf = idmlId("uFrame");
+    const storySelf = idmlId("uStory");
+    storyIds.push(storySelf);
+    otherFiles.push({
+      name: `Spreads/Spread_${spreadSelf}.xml`,
+      data: utf8(idmlSpreadXml(spreadSelf, pageSelf, frameSelf, storySelf, pageHeight, page.label))
+    });
+    otherFiles.push({ name: `Stories/Story_${storySelf}.xml`, data: utf8(idmlStoryXml(storySelf, page.paragraphsXml)) });
+    spreadRefs.push(`  <idPkg:Spread src="Spreads/Spread_${spreadSelf}.xml"/>`);
+    storyRefs.push(`  <idPkg:Story src="Stories/Story_${storySelf}.xml"/>`);
   }
 
   // No default `xmlns=` on <Document> — only the idPkg: prefix resource
@@ -1397,7 +1415,7 @@ ${storyRefs.join("\n")}
     { name: "Resources/Graphic.xml", data: utf8(idmlGraphicXml()) },
     { name: "Resources/Fonts.xml", data: utf8(idmlFontsXml(fontName)) },
     { name: "Resources/Styles.xml", data: utf8(idmlStylesXml(fontName, bodyWeight)) },
-    { name: "Resources/Preferences.xml", data: utf8(idmlPreferencesXml(otherFiles.length / 2)) },
+    { name: "Resources/Preferences.xml", data: utf8(idmlPreferencesXml(pages.length, pageHeight)) },
     { name: `MasterSpreads/MasterSpread_${masterSelf}.xml`, data: utf8(idmlMasterSpreadXml(masterSelf, masterPageSelf)) },
     ...otherFiles
   ]);

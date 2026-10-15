@@ -2306,7 +2306,7 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
-### 49. IDML-export (InDesign) — byggd, första InDesign-testet gav fel
+### 49. IDML-export (InDesign) — byggd, andra InDesign-testet gav ett nytt fel
 
 Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
 till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
@@ -2369,13 +2369,41 @@ hela paketet aldrig hittas. designmap.xml saknade InDesigns egen
 `project_spec.md`, Ändringslogg v1.0.107 → v1.0.108, för fullständig
 genomgång.
 
-**Status: rättad enligt verifierbara standarder, men fortfarande ej
-InDesign-öppningstestad av mig.** Varje XML-fil i en riktig export
-godkänns nu av `xmllint` (en riktig parser, inte bara en egen
-approximation), men jag har fortfarande ingen InDesign/Affinity i
-den här miljön. Mats bör testa igen — och om det fortfarande inte
-går, det EXAKTA felmeddelandet InDesign/Affinity visar är nästa sak
-att få, inte bara "gick inte att öppna".
+**Delsteg 4 (klart, v1.0.109): rättad efter Mats andra riktiga
+test.** Paketeringen från v1.0.108 fungerade — filerna öppnades nu i
+både Affinity och InDesign — men Mats rapporterade: "Affinity kunde
+öppna IDML-filen men dokumentet hade ingen text och siddimensionerna
+var konstiga. Affinity hittade 16 sidor. Indesign kunde öppna
+dokumentet men hade samma konstiga sidformat men hittade 31 sidor. På
+sidan 29 fanns en pytteliten textyta med kapitel 13 från boken." — med
+en skärmdump av InDesigns Document Setup-dialog som visade en sidhöjd
+på 6639,2pt genomgående.
+
+**Grundorsak:** varje sida fick sin egen, individuellt uträknade
+`GeometricBounds`-höjd (titelsidan fast, varje kapitel och Story
+Bible-sidan separat uträknad). InDesign/Affinity litar inte på
+sidvisa `GeometricBounds` som varierar sida till sida — de flödar
+istället om hela dokumentet till en egen uträknad standardstorlek,
+vilket desynkar textramarnas placering från de faktiska sidorna.
+Det förklarar både den gemensamma men "konstiga" sidhöjden och den
+nästan helt saknade texten. Jämförelse med ComicBook AI:s egen
+`idmlExport.ts` bekräftade riktningen: den räknar ut sidbredd/höjd EN
+gång, utanför sin per-sida-loop, och återanvänder samma värde
+genomgående.
+
+**Rättning:** `packIdml` räknar nu ut EN gemensam `pageHeight` — den
+högsta sidan boken behöver — och använder den för varenda sidas
+`GeometricBounds` OCH för `DocumentPreference PageHeight`. Accepterad
+avvägning: ett kort kapitel får mer tomrum under texten än tidigare,
+eftersom alla sidor delar den högsta sidans höjd — medveten
+konsekvens, inte en ny bugg. Se `project_spec.md`, Ändringslogg
+v1.0.108 → v1.0.109, för fullständig genomgång.
+
+**Status: rättad enligt verifierbara standarder (ny test + xmllint +
+riktig export genom UI:t bekräftar enhetlig sidhöjd), men fortfarande
+ej InDesign-öppningstestad av mig.** Jag har fortfarande ingen
+InDesign/Affinity i den här miljön. Mats bör testa igen — tredje
+gången.
 
 ---
 
