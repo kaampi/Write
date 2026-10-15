@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.109
+Status: living document, v1.0.110
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4765,6 +4765,126 @@ diagnosticerad från Mats exakta symptombeskrivning, inte en gissning,
 men väntar fortfarande på ett tredje riktigt test för att bekräftas.
 
 v1.0.108 → v1.0.109.
+
+**Ändringslogg v1.0.109 → v1.0.110 (2026-10-15):** Sidstorlek/marginal
+som riktig inställning, och IDML-exporten flödar nu text över flera
+sidor istället för en enda jättehög sida per kapitel.
+
+**Bakgrund.** Efter v1.0.109-fixen (enhetlig sidhöjd) frågade Mats:
+"Sidhöjd morde sättas i Settings, t ex A4 eller Letter. Även
+marginaler. Fixar vi att flöda texten till nästa sida?" — och, efter
+att jag föreslog att göra det till en delad inställning för IDML/PDF/
+ODT: "Det låter rätt. men ska sidformatet så ska det påverka
+skrivytans format? Då blir det ännu mer WYSIWYG". Jag förklarade
+skillnaden mellan en billig "skrivytans bredd följer sidans
+proportioner"-variant och en dyr "riktiga sidbrytningar i editorn"-
+variant, och Mats valde den billiga: "Kör den enkla versionen. Om man
+verkligen ska jobba med manuskriptets utformning så blir det via
+InDesign eller Affinity i vilket fall".
+
+**Ny BookSchema-inställning:** `page_size` ("a4" | "letter" | "6x9",
+default "6x9") och `page_margin` ("narrow" | "normal" | "wide",
+default "normal") — fjärde och femte biten av Typography, samma
+redigerare-plus-export-koppling som Font/Vikt/Färg/Drop cap/Scene
+break. "6x9" (pocketbok/trade-trim) vald som default istället för ett
+vanligt pappersformat, eftersom appens exporter är manus på väg mot en
+bok, inte kontorsdokument.
+
+**Delad sidgeometri i `manuscriptExport.ts`:** nya `PAGE_SIZES`
+(punkter: a4 595.28×841.89, letter 612×792, 6x9 432×648) och
+`PAGE_MARGINS` (narrow 36pt/0.5in, normal 54pt/0.75in — samma som
+IDML:s gamla fasta marginal, wide 72pt/1in) uppslagstabeller.
+`ManuscriptExport` fick nya fält `pageWidth`/`pageHeight`/`margin`,
+uträknade en gång i `buildManuscriptExport` från bokens
+`page_size`/`page_margin` — alla tre format läser från `doc`, exakt
+samma mönster som `dropCapLines`/`sceneBreakStyle` redan använder,
+så INGA nya parametrar behövdes i Editor.tsx:s anropsplatser.
+
+**PDF:** hade redan en fast sidstorlek (A4 595.28×841.89pt, 56pt
+marginal) hårdkodad direkt i koden — okänt för Mats tills han frågade
+"gäller inte sidstorlek och marginal även för ODF och PDF?". `PdfWriter`-
+klassen byggdes om från modulkonstanter (`PDF_PAGE_WIDTH` osv) till
+instansfält satta i konstruktorn, så varje export nu respekterar
+bokens egna värden istället för den gamla hårdkodningen.
+
+**ODT:** hade tidigare INGEN sidstorlek alls i filen — ärvde vad
+Word/LibreOffice råkade ha som standard (ofta A4 i Sverige, Letter i
+USA). Lade till en riktig `style:page-layout`/`style:master-page` i
+styles.xml (ODF:s egen konvention för sidgeometri), parametriserad
+från samma `pageWidth`/`pageHeight`/`margin`.
+
+**IDML: riktig flödning, inte bara enhetlig höjd.** Det här var den
+faktiska lösningen på "Fixar vi att flöda texten till nästa sida?" —
+och visade sig vara enklare än väntat. IDML-sidor behöver inte
+innehålla exakt rätt text i förväg: InDesign/Affinity räknar själva ut
+den riktiga rad-för-rad-textflödningen när filen öppnas, med sin egen
+fontmotor (som den här webbappen aldrig har tillgång till). Så istället
+för att denna kod gissar exakta radbrytningar räcker det att skapa
+TILLRÄCKLIGT MÅNGA sidor och TRÅDA IHOP dem — `PreviousTextFrame`/
+`NextTextFrame`-attribut som länkar flera `<TextFrame>` på olika sidor
+till SAMMA `<Story>`, så InDesign/Affinity flödar texten mellan dem
+automatiskt, precis som en riktig bokslayout.
+
+Konkret: `packIdml` byggdes om från "en höjd-uppskattning per kapitel"
+(`estimateChapterPageHeight`, borttagen) till en "sidantal-uppskattning
+per kapitel" (`estimateChapterPageCount`) — samma teckenräknings-
+metod och säkerhetsmarginal (1.5x) som tidigare, plus EN extra
+buffertsida ovanpå det, eftersom en underskattning tyst skulle klippa
+bort text (det enda utfallet värt att undvika; en överskattning lämnar
+bara en tom sida sist, kosmetiskt). Varje kapitel/Story Bible-sida får
+nu EN delad `<Story>`-fil (inte en per sida) och lika många
+`<TextFrame>`-sidor som uppskattningen kräver, kedjade ihop. Alla
+sidor i hela dokumentet delar nu samma FASTA storlek (den valda
+sidstorleken ovan) istället för den gamla "högsta sidan boken behöver"-
+uppskattningen från v1.0.109 — mer robust och verklighetstroget, eftersom
+riktiga InDesign-dokument faktiskt har en fast sidstorlek rakt igenom.
+
+**Skrivytans bredd (den "enkla" WYSIWYG-varianten Mats valde):**
+`ProseCanvas.tsx` skalar nu `.prose-wrap`s `max-width` proportionellt
+mot vald sidstorlek/marginal — INGEN riktig sidindelning (skrivytan
+rullar fortfarande som en enda sammanhängande kolumn), bara en
+närmare förhandsvisning än en fast bredd oavsett sidval. 504pt
+(US Letter minus två "normal"-marginaler) är fastnaglad till kolumnens
+gamla 54rem-bredd, så standardkombinationen (6x9/normal numera,
+tidigare implicit Letter-liknande) renderas likadant som innan —
+en smalare trim (6x9) eller bredare marginal krymper kolumnen
+proportionellt istället.
+
+**Bieffekt hittad och fixad under Playwright-verifieringen:** Settings-
+panelens Typography-sektion (`.settings-card .craft-fields`, flexbox
+med `min-width: 8rem` per fält) klämde ihop för många fält per rad när
+Page size/Page margin lades till — "SCENE BREAK"s två-ords etikett
+radbröts och överlappade visuellt fältet under. Höjde `min-width` till
+9.5rem, vilket ger 3 fält per rad istället för 4 vid samma panelbredd;
+bekräftat fixat med en ny skärmdump.
+
+**Verifiering:** två nya testbeskrivningar i
+`tests/core/manuscript-export.test.ts` — "page size" (default 6x9/
+normal och en explicit A4/wide-kombination, kontrollerat i alla tre
+format: PDF:s riktiga sidstorlek via pdf-lib, ODT:s
+`style:page-layout`-attribut, IDML:s `Preferences.xml`) och en ny IDML-
+tråndningstest ("threads a multi-page chapter's TextFrames together on
+one shared Story") som bygger ett långt kapitel, hittar dess Story, och
+verifierar att `PreviousTextFrame`/`NextTextFrame`-kedjan är korrekt
+länkad från "n" genom varje mellanliggande sida till "n" igen. Den
+gamla "en Spread/Story per kapitel"-testen uppdaterades till att tillåta
+fler Spreads än Stories (en kort sida kan fortfarande behöva mer än en
+sida p.g.a. buffertsidan). Hela testsviten (1053 test, 79 filer),
+`tsc --noEmit` och `npm run build` kördes rent. Gjorde också en riktig
+Playwright-körning genom UI:t — skapade ett kapitel, öppnade Settings,
+bytte Page size till A4 och Page margin till Wide, exporterade IDML,
+PDF och ODT — och verifierade direkt i de extraherade filerna att alla
+tre respekterar exakt 595.28×841.89pt med 72pt marginal, samt att
+`xmllint --noout` godkänner varje IDML-XML-fil rent.
+
+**Fortfarande kvar: InDesign/Affinity-öppningstestet självt**, som för
+varje tidigare IDML-ändring — jag kan inte själv öppna resultatet i
+InDesign eller Affinity i den här miljön. Tråndningsmekanismen
+(`PreviousTextFrame`/`NextTextFrame` på en delad Story) är InDesigns
+egen dokumenterade konvention för flödande text, inte en gissning, men
+väntar på ett riktigt test för att bekräftas.
+
+v1.0.109 → v1.0.110.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

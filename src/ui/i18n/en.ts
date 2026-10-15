@@ -513,6 +513,17 @@ export const en = {
     sceneBreakDiamond: "Minimalist diamond (❖)",
     sceneBreakFleur: "French elegance (⚜)",
     sceneBreakSparkle: "Glimmer / star (✦)",
+    pageSizeLabel: "Page size",
+    pageSizeLede:
+      "The page dimensions for every export format with a real printed page — IDML, PDF, and ODT (RTF and HTML/ePub reflow with no fixed page). Also roughly scales the editor's own writing column width to match — not true pagination, the editor still scrolls as one continuous column; real page-by-page layout happens in Publish's exports and, for IDML, ultimately in InDesign or Affinity.",
+    pageSizeA4: "A4",
+    pageSizeLetter: "US Letter",
+    pageSize6x9: "6 × 9 in (trade paperback)",
+    pageMarginLabel: "Page margin",
+    pageMarginLede: "Margin on all four sides, for the same three formats as Page size.",
+    pageMarginNarrow: "Narrow (0.5 in)",
+    pageMarginNormal: "Normal (0.75 in)",
+    pageMarginWide: "Wide (1 in)",
     bodyFontLabel: "Font",
     bodyFontLede:
       "The typeface for the manuscript's prose — in the editor itself, and carried into every Publish export, so there's one choice instead of a separate, unsaved pick each time.",

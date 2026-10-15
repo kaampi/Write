@@ -163,6 +163,17 @@ export const nb: Messages = {
     sceneBreakDiamond: "Minimalistisk diamant (❖)",
     sceneBreakFleur: "Fransk eleganse (⚜)",
     sceneBreakSparkle: "Glimmer / stjerne (✦)",
+    pageSizeLabel: "Sidestørrelse",
+    pageSizeLede:
+      "Sidemålene for hvert eksportformat med en ekte trykt side — IDML, PDF og ODT (RTF og HTML/ePub flyter fritt uten fast side). Skalerer også omtrent skriveflatens egen bredde etter samme proporsjoner — ikke ekte sideinndeling, skriveflaten ruller fortsatt som én sammenhengende kolonne; ekte side-for-side-layout skjer i Publish-eksportene og, for IDML, til slutt i InDesign eller Affinity.",
+    pageSizeA4: "A4",
+    pageSizeLetter: "US Letter",
+    pageSize6x9: "6 × 9 tommer (pocketbok/trade)",
+    pageMarginLabel: "Sidemarg",
+    pageMarginLede: "Marg på alle fire sider, for de samme tre formatene som Sidestørrelse.",
+    pageMarginNarrow: "Smal (0,5 tommer)",
+    pageMarginNormal: "Normal (0,75 tommer)",
+    pageMarginWide: "Bred (1 tomme)",
     bodyFontLabel: "Skrift",
     bodyFontLede:
       "Skrifttypen for manusets brødtekst — i selve redigeringen, og med i hver eksport fra Publish, så det blir ett valg istedenfor et separat, ulagret valg hver gang.",

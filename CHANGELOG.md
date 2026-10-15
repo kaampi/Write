@@ -9,6 +9,15 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.110] - 2026-10-15
+
+### Added
+- Page size and margin (Settings → Typography): choose A4, US Letter, or 6×9in trade paperback, plus a narrow/normal/wide margin — for IDML, PDF, and ODT, the three export formats with a real printed page (RTF and HTML/ePub reflow with no fixed page geometry). Defaults to 6×9in with a normal margin, matching IDML's previous fixed size. The editor's own writing column also scales its width to roughly match the chosen page's proportions — not true pagination, just a closer preview; the column still scrolls as one continuous piece.
+- IDML export now flows a chapter's (or the Story Bible's) text across as many same-size, threaded pages as it needs, instead of squeezing everything onto one oversized page. Every page in the document is the same fixed size (the chosen page size above), and InDesign/Affinity compute the real page-by-page text flow themselves when the file is opened, the same as a real multi-page layout.
+
+### Changed
+- PDF's page size, previously hardcoded to A4, and ODT's page layout, previously left unset (inheriting whatever the opening application's own default was), now both follow the new Page size/margin setting.
+
 ## [1.0.109] - 2026-10-15
 
 ### Fixed

@@ -357,6 +357,36 @@ export function SettingsPanel({
                     <option value="sparkle">{m.editor.sceneBreakSparkle}</option>
                   </select>
                 </label>
+                <label className="craft-field">
+                  <span className="field-label-row">
+                    {m.editor.pageSizeLabel}
+                    <HelpTip body={m.editor.pageSizeLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.pageSizeLabel })} />
+                  </span>
+                  <select
+                    value={book.page_size}
+                    onChange={(event) => onPatch((current) => ({ ...current, page_size: event.target.value as Book["page_size"] }))}
+                    aria-label={m.editor.pageSizeLabel}
+                  >
+                    <option value="6x9">{m.editor.pageSize6x9}</option>
+                    <option value="a4">{m.editor.pageSizeA4}</option>
+                    <option value="letter">{m.editor.pageSizeLetter}</option>
+                  </select>
+                </label>
+                <label className="craft-field">
+                  <span className="field-label-row">
+                    {m.editor.pageMarginLabel}
+                    <HelpTip body={m.editor.pageMarginLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.pageMarginLabel })} />
+                  </span>
+                  <select
+                    value={book.page_margin}
+                    onChange={(event) => onPatch((current) => ({ ...current, page_margin: event.target.value as Book["page_margin"] }))}
+                    aria-label={m.editor.pageMarginLabel}
+                  >
+                    <option value="narrow">{m.editor.pageMarginNarrow}</option>
+                    <option value="normal">{m.editor.pageMarginNormal}</option>
+                    <option value="wide">{m.editor.pageMarginWide}</option>
+                  </select>
+                </label>
               </div>
             </section>
 

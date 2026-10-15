@@ -354,6 +354,27 @@ export const BookSchema = z.object({
    */
   scene_break_style: z.enum(["plain", "vignette", "diamond", "fleur", "sparkle"]).default("plain"),
   /**
+   * Page size for every format with a real printed page — IDML, PDF, and
+   * ODT (RTF and HTML/ePub have no fixed page geometry to set). The
+   * fourth piece of Typography, same manuscript-wide/live-editor-plus-
+   * export wiring as the others: the live editor's writing column also
+   * scales its width to roughly match the chosen page's proportions (not
+   * true pagination — the editor still scrolls as one continuous column;
+   * real page-by-page layout is Publish's job, and ultimately InDesign/
+   * Affinity's for IDML). "6x9" (a common trade-paperback trim) is the
+   * default rather than a plain paper size, since this app's exports are
+   * manuscripts headed toward a book, not office documents. Missing on
+   * older saves — "6x9" keeps a sensible default rather than an unset page.
+   */
+  page_size: z.enum(["a4", "letter", "6x9"]).default("6x9"),
+  /**
+   * Page margin for the same three formats as page_size, one shared
+   * setting rather than per-format — a preset (not a free numeric field)
+   * to keep the control as simple as the rest of Typography. Missing on
+   * older saves — "normal" (0.75in) matches IDML's original fixed margin.
+   */
+  page_margin: z.enum(["narrow", "normal", "wide"]).default("normal"),
+  /**
    * Instructions for the Polish step — a whole-chapter cleanup pass the
    * author reviews in a diff before accepting, separate from Draft/
    * Recast. Editable per manuscript (Settings → Polish); defaults to
@@ -548,6 +569,8 @@ export function createBook(title: string): Book {
     body_color_dark: "#f3eadc",
     body_color_light: "#2a2218",
     scene_break_style: "plain",
+    page_size: "6x9",
+    page_margin: "normal",
     polish_prompt: DEFAULT_POLISH_PROMPT,
     prose_language: "",
     brainstorm: "",

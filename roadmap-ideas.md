@@ -2306,7 +2306,7 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
-### 49. IDML-export (InDesign) — byggd, andra InDesign-testet gav ett nytt fel
+### 49. IDML-export (InDesign) — byggd med riktig sidstorlek och flödning
 
 Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
 till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
@@ -2399,10 +2399,50 @@ eftersom alla sidor delar den högsta sidans höjd — medveten
 konsekvens, inte en ny bugg. Se `project_spec.md`, Ändringslogg
 v1.0.108 → v1.0.109, för fullständig genomgång.
 
-**Status: rättad enligt verifierbara standarder (ny test + xmllint +
-riktig export genom UI:t bekräftar enhetlig sidhöjd), men fortfarande
-ej InDesign-öppningstestad av mig.** Jag har fortfarande ingen
-InDesign/Affinity i den här miljön. Mats bör testa igen — tredje
+**Delsteg 5 (klart, v1.0.110): sidstorlek/marginal som riktig
+inställning, och äkta flödning över flera sidor.** Mats, direkt efter
+v1.0.109: "Sidhöjd morde sättas i Settings, t ex A4 eller Letter. Även
+marginaler. Fixar vi att flöda texten till nästa sida?" — och sedan,
+när jag föreslog en delad inställning för IDML/PDF/ODT: "ska
+sidformatet påverka skrivytans format? Då blir det ännu mer WYSIWYG".
+Jag la fram en billig variant (skrivytans bredd följer sidans
+proportioner) mot en dyr (riktiga sidbrytningar i editorn); Mats valde
+den billiga — "Om man verkligen ska jobba med manuskriptets utformning
+så blir det via InDesign eller Affinity i vilket fall".
+
+Ny BookSchema-inställning `page_size`/`page_margin` (Settings →
+Typography), delad av IDML, PDF och ODT via `ManuscriptExport`s nya
+`pageWidth`/`pageHeight`/`margin`-fält. PDF hade redan en hårdkodad A4-
+storlek Mats inte kände till; ODT hade ingen sidstorlek alls i filen
+(ärvde appens egen standard) — båda följer nu samma inställning.
+
+**Äkta flödning, inte bara en till höjduppskattning:** svaret på "Fixar
+vi att flöda texten till nästa sida?" visade sig enklare än väntat.
+IDML behöver inte innehålla färdiga radbrytningar — InDesign/Affinity
+räknar ut den riktiga textflödningen själva vid öppning, med sin egen
+fontmotor. Så varje kapitel (och Story Bible) får nu så många sidor
+som en generös uppskattning kräver, med `<TextFrame>`-element
+TRÅDADE ihop (`PreviousTextFrame`/`NextTextFrame`) till EN delad
+`<Story>` — InDesigns egen dokumenterade konvention för flödande text.
+Alla sidor i hela dokumentet delar nu samma FASTA valda storlek,
+istället för v1.0.109:s "högsta sidan boken behöver"-uppskattning.
+
+Verifierat med två nya testbeskrivningar (sidstorlek i alla tre
+format; TextFrame-kedjans integritet för ett långt kapitel), hela
+testsviten (1053 test), tsc, build, och en riktig Playwright-körning
+genom UI:t som bytte till A4/bred marginal och bekräftade exakt
+595.28×841.89pt + 72pt marginal i alla tre exporterade filer. Hittade
+och fixade på köpet en Settings-layoutbugg (etiketter som klämdes ihop
+när två fält till lades till i Typography-sektionen). Se
+`project_spec.md`, Ändringslogg v1.0.109 → v1.0.110, för fullständig
+genomgång.
+
+**Status: rättad enligt verifierbara standarder (nya tester + xmllint
++ riktig export genom UI:t bekräftar sidstorlek/marginal i alla tre
+format), men fortfarande ej InDesign-öppningstestad av mig.** Jag har
+fortfarande ingen InDesign/Affinity i den här miljön. Tråndnings-
+mekanismen är InDesigns egen dokumenterade konvention, inte en
+gissning, men väntar på ett riktigt test för att bekräftas — fjärde
 gången.
 
 ---

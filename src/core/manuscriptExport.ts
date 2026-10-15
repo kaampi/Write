@@ -28,6 +28,20 @@ export type ParagraphStyle = "spaced" | "indented";
 /** Body text weight (BookSchema's body_font_weight) — "bold" uses the font's own bold-embedded weight for everything but headings, which already render bold regardless and so don't visually separate from bold body text. Only two values because that's what's actually embedded per font (see PublishFont above). */
 export type BodyWeight = "regular" | "bold";
 
+/** Page dimensions, in points, for every format with a real printed page (IDML, PDF, ODT) — BookSchema's page_size. "6x9" is a common trade-paperback trim; the other two are the two paper sizes everything else defaults to. */
+export const PAGE_SIZES: Record<Book["page_size"], { width: number; height: number }> = {
+  a4: { width: 595.28, height: 841.89 },
+  letter: { width: 612, height: 792 },
+  "6x9": { width: 432, height: 648 }
+};
+
+/** Page margin presets, in points, shared by IDML/PDF/ODT — BookSchema's page_margin. "normal" (0.75in) matches IDML's original fixed margin from before this was configurable. */
+export const PAGE_MARGINS: Record<Book["page_margin"], number> = {
+  narrow: 36,
+  normal: 54,
+  wide: 72
+};
+
 function exportProse(text: string): string {
   return peelModelAsides(text).prose.trim();
 }
@@ -75,6 +89,11 @@ export type ManuscriptExport = {
   dropCapLines: number;
   /** Decorative scene-break ornament (BookSchema's scene_break_style) — "plain" keeps today's unadorned rule. */
   sceneBreakStyle: Book["scene_break_style"];
+  /** Page width/height in points (BookSchema's page_size, looked up via PAGE_SIZES) — used by IDML, PDF, and ODT, the three formats with a real printed page. */
+  pageWidth: number;
+  pageHeight: number;
+  /** Page margin in points (BookSchema's page_margin, looked up via PAGE_MARGINS) — same three formats as pageWidth/pageHeight. */
+  margin: number;
   chapters: ManuscriptExportChapter[];
   bible: ManuscriptExportSection[];
 };
@@ -107,6 +126,9 @@ export function buildManuscriptExport(book: Book, note = "", exportedAt = new Da
     ...(book.reader_age !== undefined ? { readerAge: book.reader_age } : {}),
     dropCapLines: book.drop_cap_lines,
     sceneBreakStyle: book.scene_break_style,
+    pageWidth: PAGE_SIZES[book.page_size].width,
+    pageHeight: PAGE_SIZES[book.page_size].height,
+    margin: PAGE_MARGINS[book.page_margin],
     chapters: sortedChapters(book).map((chapter) => ({
       heading: `${chapter.sequence_index + 1}. ${chapter.title.trim() || `Chapter ${chapter.sequence_index + 1}`}`,
       voice: chapter.voice?.trim() ?? "",
@@ -483,7 +505,18 @@ export function packOdt(
     { name: "content.xml", data: utf8(odtContentXml(doc, paragraphStyle)) },
     {
       name: "styles.xml",
-      data: utf8(odtStyles(font?.name ?? "Liberation Serif", doc.dropCapLines, bodyWeight, bodyColor, doc.sceneBreakStyle))
+      data: utf8(
+        odtStyles(
+          font?.name ?? "Liberation Serif",
+          doc.dropCapLines,
+          bodyWeight,
+          bodyColor,
+          doc.sceneBreakStyle,
+          doc.pageWidth,
+          doc.pageHeight,
+          doc.margin
+        )
+      )
     },
     { name: "META-INF/manifest.xml", data: utf8(ODT_MANIFEST) }
   ]);
@@ -658,9 +691,6 @@ ${navList}
   ]);
 }
 
-const PDF_PAGE_WIDTH = 595.28;
-const PDF_PAGE_HEIGHT = 841.89;
-const PDF_MARGIN = 56;
 const PDF_META_COLOR = rgb(0.4, 0.4, 0.4);
 
 /** Simple leaf silhouette (24x24 viewBox) — "vignette"'s PDF stand-in for ❦. */
@@ -735,17 +765,24 @@ class PdfWriter {
   private readonly body: PDFFont;
   private readonly bold: PDFFont;
   private readonly color: ReturnType<typeof rgb> | undefined;
-  private readonly maxWidth = PDF_PAGE_WIDTH - PDF_MARGIN * 2;
+  private readonly pageWidth: number;
+  private readonly pageHeight: number;
+  private readonly margin: number;
+  private readonly maxWidth: number;
   private page: PDFPage;
   private y: number;
 
-  constructor(pdf: PDFDocument, body: PDFFont, bold: PDFFont, color?: ReturnType<typeof rgb>) {
+  constructor(pdf: PDFDocument, body: PDFFont, bold: PDFFont, pageWidth: number, pageHeight: number, margin: number, color?: ReturnType<typeof rgb>) {
     this.pdf = pdf;
     this.body = body;
     this.bold = bold;
     this.color = color;
-    this.page = pdf.addPage([PDF_PAGE_WIDTH, PDF_PAGE_HEIGHT]);
-    this.y = PDF_PAGE_HEIGHT - PDF_MARGIN;
+    this.pageWidth = pageWidth;
+    this.pageHeight = pageHeight;
+    this.margin = margin;
+    this.maxWidth = pageWidth - margin * 2;
+    this.page = pdf.addPage([pageWidth, pageHeight]);
+    this.y = pageHeight - margin;
   }
 
   private wrap(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
@@ -822,9 +859,9 @@ class PdfWriter {
   }
 
   private ensureSpace(lineHeight: number): void {
-    if (this.y - lineHeight < PDF_MARGIN) {
-      this.page = this.pdf.addPage([PDF_PAGE_WIDTH, PDF_PAGE_HEIGHT]);
-      this.y = PDF_PAGE_HEIGHT - PDF_MARGIN;
+    if (this.y - lineHeight < this.margin) {
+      this.page = this.pdf.addPage([this.pageWidth, this.pageHeight]);
+      this.y = this.pageHeight - this.margin;
     }
   }
 
@@ -834,7 +871,7 @@ class PdfWriter {
     const lineHeight = size * 1.25;
     for (const line of this.wrap(text, this.bold, size, this.maxWidth)) {
       this.ensureSpace(lineHeight);
-      this.page.drawText(line, { x: PDF_MARGIN, y: this.y, size, font: this.bold, ...(this.color ? { color: this.color } : {}) });
+      this.page.drawText(line, { x: this.margin, y: this.y, size, font: this.bold, ...(this.color ? { color: this.color } : {}) });
       this.y -= lineHeight;
     }
     this.y -= size * 0.35;
@@ -852,7 +889,7 @@ class PdfWriter {
       for (const line of this.wrap(raw, font, size, this.maxWidth)) {
         this.ensureSpace(lineHeight);
         this.page.drawText(line, {
-          x: PDF_MARGIN,
+          x: this.margin,
           y: this.y,
           size,
           font,
@@ -884,7 +921,7 @@ class PdfWriter {
         }
         for (const line of this.wrapWithOffsets(raw.text, this.body, size, this.maxWidth)) {
           this.ensureSpace(lineHeight);
-          this.drawStyledLine(line.text, raw.start + line.start, formatting, PDF_MARGIN, size);
+          this.drawStyledLine(line.text, raw.start + line.start, formatting, this.margin, size);
           this.y -= lineHeight;
         }
       }
@@ -900,7 +937,7 @@ class PdfWriter {
       }
       this.wrapWithOffsets(paragraph.text, font, size, this.maxWidth).forEach((line, lineIndex) => {
         this.ensureSpace(lineHeight);
-        const x = index > 0 && lineIndex === 0 ? PDF_MARGIN + indent : PDF_MARGIN;
+        const x = index > 0 && lineIndex === 0 ? this.margin + indent : this.margin;
         this.drawStyledLine(line.text, paragraph.start + line.start, formatting, x, size);
         this.y -= lineHeight;
       });
@@ -911,7 +948,7 @@ class PdfWriter {
   sceneBreak(style: Book["scene_break_style"]): void {
     const rowHeight = 28;
     this.ensureSpace(rowHeight);
-    const centerX = PDF_MARGIN + this.maxWidth / 2;
+    const centerX = this.margin + this.maxWidth / 2;
     const lineY = this.y - rowHeight / 2;
     if (style === "plain") {
       const half = 25;
@@ -936,7 +973,7 @@ class PdfWriter {
     this.wrap(text, this.body, size, this.maxWidth - indent).forEach((line, index) => {
       this.ensureSpace(lineHeight);
       this.page.drawText(index === 0 ? `• ${line}` : `  ${line}`, {
-        x: PDF_MARGIN + indent,
+        x: this.margin + indent,
         y: this.y,
         size,
         font: this.body,
@@ -951,18 +988,18 @@ class PdfWriter {
   }
 
   image(image: PDFImage): void {
-    const availableHeight = PDF_PAGE_HEIGHT - PDF_MARGIN * 2;
+    const availableHeight = this.pageHeight - this.margin * 2;
     const scale = Math.min(1, this.maxWidth / image.width, availableHeight / image.height);
     const width = image.width * scale;
     const height = image.height * scale;
     this.ensureSpace(height);
-    this.page.drawImage(image, { x: PDF_MARGIN, y: this.y - height, width, height });
+    this.page.drawImage(image, { x: this.margin, y: this.y - height, width, height });
     this.y -= height + 14;
   }
 
   newPage(): void {
-    this.page = this.pdf.addPage([PDF_PAGE_WIDTH, PDF_PAGE_HEIGHT]);
-    this.y = PDF_PAGE_HEIGHT - PDF_MARGIN;
+    this.page = this.pdf.addPage([this.pageWidth, this.pageHeight]);
+    this.y = this.pageHeight - this.margin;
   }
 }
 
@@ -995,7 +1032,15 @@ export async function packPdf(
     body = await pdf.embedFont(StandardFonts.TimesRoman);
     bold = await pdf.embedFont(StandardFonts.TimesRomanBold);
   }
-  const writer = new PdfWriter(pdf, bodyWeight === "bold" ? bold : body, bold, bodyColor ? pdfRgb(bodyColor) : undefined);
+  const writer = new PdfWriter(
+    pdf,
+    bodyWeight === "bold" ? bold : body,
+    bold,
+    doc.pageWidth,
+    doc.pageHeight,
+    doc.margin,
+    bodyColor ? pdfRgb(bodyColor) : undefined
+  );
 
   writer.heading(doc.title, 22);
   writer.lines(doc.exportedLabel, { size: 9, meta: true });
@@ -1099,33 +1144,30 @@ function idmlId(prefix: string): string {
   return `${prefix}${idmlIdCounter}`;
 }
 
-const IDML_PAGE_WIDTH = 432; // 6in
-const IDML_MARGIN = 54; // 0.75in
-const IDML_COLUMN_WIDTH = IDML_PAGE_WIDTH - IDML_MARGIN * 2;
 const IDML_BODY_SIZE = 12;
 const IDML_LINE_HEIGHT = IDML_BODY_SIZE * 1.4;
-const IDML_TITLE_PAGE_HEIGHT = 720; // 10in, fixed — title/metadata never runs long enough to need estimating
-const IDML_MIN_CHAPTER_HEIGHT = 400;
-const IDML_MAX_CHAPTER_HEIGHT = 14000; // comfortably under InDesign's own page-size ceiling
 const IDML_PARA_END = "&#13;"; // the paragraph-end mark IDML stories expect — a literal \r byte would be silently normalized away by any XML parser per the XML 1.0 spec, so it has to be a character reference, not raw text
 
 /**
- * Every chapter gets its own single text frame, not threaded to any other
- * frame — so unlike a real book layout, there's no "add another page and
- * it keeps flowing": the frame has to be tall enough to hold the whole
- * chapter up front, or InDesign clips what doesn't fit. Estimated from
- * character count at a deliberately generous chars-per-line for a 12pt
- * body in a 324pt column, times a further 1.5 safety factor, clamped to a
- * sane range. The accepted tradeoff: a short chapter's page has a lot of
- * empty space at the bottom — cosmetic, and the first thing an author
- * reflowing into real pages in InDesign would touch anyway, unlike an
- * underestimate, which would silently cut text off.
+ * How many pages (text frames, threaded together) a chapter or the Story
+ * Bible needs at the manuscript's chosen page size — not how tall one
+ * custom page should be (that was the pre-v1.0.110 approach, and varying
+ * page height per page is exactly what made InDesign distrust GeometricBounds
+ * and reflow the whole document, see packIdml's own comment below).
+ * InDesign/Affinity compute the real line-by-line text flow themselves once
+ * the file is open — using their own font metrics, which this app has no
+ * access to — so this only has to estimate generously enough that the
+ * thread never runs out of frames; an overestimate just leaves a trailing
+ * frame empty (cosmetic), while an underestimate would silently clip text
+ * (the one outcome worth erring away from). Same character-count approach
+ * `estimateChapterPageHeight` used before this, a 1.5x safety factor, plus
+ * one whole extra page of headroom on top of that.
  */
-function estimateChapterPageHeight(text: string, paragraphCount: number): number {
-  const charsPerLine = Math.max(20, Math.floor(IDML_COLUMN_WIDTH / (IDML_BODY_SIZE * 0.5)));
-  const estimatedLines = Math.ceil(text.length / charsPerLine) + paragraphCount;
-  const estimated = IDML_MARGIN * 2 + estimatedLines * IDML_LINE_HEIGHT * 1.5 + 80;
-  return Math.min(IDML_MAX_CHAPTER_HEIGHT, Math.max(IDML_MIN_CHAPTER_HEIGHT, estimated));
+function estimateChapterPageCount(text: string, paragraphCount: number, columnWidth: number, columnHeight: number): number {
+  const charsPerLine = Math.max(20, Math.floor(columnWidth / (IDML_BODY_SIZE * 0.5)));
+  const estimatedLines = (Math.ceil(text.length / charsPerLine) + paragraphCount) * 1.5;
+  const linesPerPage = Math.max(1, Math.floor(columnHeight / IDML_LINE_HEIGHT));
+  return Math.max(1, Math.ceil(estimatedLines / linesPerPage)) + 1;
 }
 
 function idmlCharacterAttrs(styles: ProseFormattingStyle[]): string {
@@ -1212,16 +1254,36 @@ function idmlStoryXml(storyId: string, paragraphsXml: string): string {
 `;
 }
 
-function idmlSpreadXml(spreadId: string, pageId: string, frameId: string, storyId: string, pageHeight: number, label: string): string {
-  const textFrameBounds = `${IDML_MARGIN} ${IDML_MARGIN} ${pageHeight - IDML_MARGIN} ${IDML_PAGE_WIDTH - IDML_MARGIN}`;
+/**
+ * One page, with one TextFrame threaded to `previousTextFrame`/
+ * `nextTextFrame` ("n" at either end of a chain) — several of these sharing
+ * one `storyId` is what makes a chapter's text flow from page to page:
+ * InDesign computes at open time how much of the Story's text fits in each
+ * frame and carries the rest into the next one, the same as a real
+ * multi-page layout, not something this writer estimates line-by-line.
+ */
+function idmlSpreadXml(
+  spreadId: string,
+  pageId: string,
+  frameId: string,
+  storyId: string,
+  pageWidth: number,
+  pageHeight: number,
+  margin: number,
+  label: string,
+  previousTextFrame = "n",
+  nextTextFrame = "n"
+): string {
+  const columnWidth = pageWidth - margin * 2;
+  const textFrameBounds = `${margin} ${margin} ${pageHeight - margin} ${pageWidth - margin}`;
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Spread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
   <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="true" ItemTransform="1 0 0 1 0 0" ShowMasterItems="false">
-    <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${IDML_PAGE_WIDTH}" ItemTransform="1 0 0 1 0 0">
-      <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${IDML_MARGIN}" Bottom="${IDML_MARGIN}" Left="${IDML_MARGIN}" Right="${IDML_MARGIN}"/>
+    <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
+      <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
     </Page>
-    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="n" NextTextFrame="n" ContentType="TextType" ItemTransform="1 0 0 1 0 0" GeometricBounds="${textFrameBounds}">
-      <TextFramePreference TextColumnCount="1" TextColumnFixedWidth="${IDML_COLUMN_WIDTH}" UseFlexibleColumnWidth="false" FirstBaselineOffset="AscentOffset" VerticalJustification="TopAlign" InsetSpacing="0 0 0 0"/>
+    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ItemTransform="1 0 0 1 0 0" GeometricBounds="${textFrameBounds}">
+      <TextFramePreference TextColumnCount="1" TextColumnFixedWidth="${columnWidth}" UseFlexibleColumnWidth="false" FirstBaselineOffset="AscentOffset" VerticalJustification="TopAlign" InsetSpacing="0 0 0 0"/>
     </TextFrame>
   </Spread>
 </idPkg:Spread>
@@ -1263,21 +1325,21 @@ function idmlFontsXml(fontName: string): string {
 `;
 }
 
-function idmlPreferencesXml(pageCount: number, pageHeight: number): string {
+function idmlPreferencesXml(pageCount: number, pageWidth: number, pageHeight: number): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Preferences xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <DocumentPreference PageWidth="${IDML_PAGE_WIDTH}" PageHeight="${pageHeight}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection" Intent="PrintIntent"/>
+  <DocumentPreference PageWidth="${pageWidth}" PageHeight="${pageHeight}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection" Intent="PrintIntent"/>
   <ViewPreference HorizontalMeasurementUnits="Points" VerticalMeasurementUnits="Points"/>
 </idPkg:Preferences>
 `;
 }
 
 /** A single, empty master spread — required for the package to be structurally complete, but applied to none of the real pages (`AppliedMaster="n"` throughout `idmlSpreadXml`), so there's nothing on it to get wrong. */
-function idmlMasterSpreadXml(masterSelf: string, masterPageSelf: string): string {
+function idmlMasterSpreadXml(masterSelf: string, masterPageSelf: string, pageWidth: number, pageHeight: number): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:MasterSpread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
   <MasterSpread Self="${masterSelf}" Name="A" NamePrefix="A" BaseName="A" ShowMasterItems="true" PageCount="1">
-    <Page Self="${masterPageSelf}" Name="A" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${IDML_TITLE_PAGE_HEIGHT} ${IDML_PAGE_WIDTH}" ItemTransform="1 0 0 1 0 0"/>
+    <Page Self="${masterPageSelf}" Name="A" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0"/>
   </MasterSpread>
 </idPkg:MasterSpread>
 `;
@@ -1312,12 +1374,23 @@ function idmlStylesXml(fontName: string, bodyWeight: BodyWeight): string {
 }
 
 /**
- * Packs the manuscript as an IDML package — one text frame per chapter, on
- * its own generously tall page (see `estimateChapterPageHeight`), no
- * threading between them. `bodyColor` isn't carried into IDML: unlike a
- * screen-reading preference, a print-layout document's color is squarely
- * the author's own call to make once it's in InDesign, not something worth
- * guessing a swatch for here.
+ * Packs the manuscript as an IDML package at the manuscript's chosen page
+ * size (BookSchema's page_size/page_margin, carried in `doc.pageWidth`/
+ * `doc.pageHeight`/`doc.margin`) — every page in the document shares the
+ * same size, never a custom height per page. An earlier version of this
+ * writer gave each chapter its own, independently-estimated page height;
+ * that's exactly what made InDesign stop trusting the per-page
+ * GeometricBounds and instead reflow the whole document to a size of its
+ * own choosing, confirmed by a real test where every page came out the
+ * same unrelated height and all but one chapter's text went missing. A
+ * chapter (or the Story Bible) that needs more than one page gets several
+ * pages, their TextFrames threaded together on one shared Story — see
+ * `idmlSpreadXml` — so the text actually flows from page to page the way a
+ * real book layout would, rather than being squeezed onto one tall page.
+ * `bodyColor` isn't carried into IDML: unlike a screen-reading preference,
+ * a print-layout document's color is squarely the author's own call to
+ * make once it's in InDesign, not something worth guessing a swatch for
+ * here.
  */
 export function packIdml(
   doc: ManuscriptExport,
@@ -1330,23 +1403,16 @@ export function packIdml(
   const masterSelf = idmlId("uMaster");
   const masterPageSelf = idmlId("uMasterPage");
   const docSelf = idmlId("uDoc");
+  const { pageWidth, pageHeight, margin } = doc;
+  const columnWidth = pageWidth - margin * 2;
+  const columnHeight = pageHeight - margin * 2;
 
   const otherFiles: { name: string; data: Uint8Array }[] = [];
   const storyIds: string[] = [];
   const spreadRefs: string[] = [];
   const storyRefs: string[] = [];
 
-  // Every page in the document shares one height — real IDML documents
-  // don't vary page size page to page, and letting them vary here (an
-  // earlier version of this writer did, one custom height per chapter) is
-  // exactly what made InDesign stop trusting the per-page GeometricBounds
-  // and instead reflow the whole document to a size of its own choosing:
-  // confirmed by a real test, where every page came out the same unrelated
-  // height and all but one chapter's text went missing. One height, set in
-  // both DocumentPreference and every individual Page/TextFrame, avoids
-  // that reflow entirely — tall enough for the single longest page the
-  // book actually needs (title, any one chapter, or the Story Bible).
-  const pages: { label: string; paragraphsXml: string; neededHeight: number }[] = [];
+  const units: { label: string; paragraphsXml: string; pageCount: number }[] = [];
 
   const titleParts: string[] = [idmlParagraph("Title", idmlParagraphRuns(doc.title, 0, []))];
   titleParts.push(idmlParagraph("Body", idmlParagraphRuns(doc.exportedLabel, 0, [])));
@@ -1354,7 +1420,7 @@ export function packIdml(
   if (doc.voice) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Voice: ${doc.voice}`, 0, [])));
   if (doc.viewpoint) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Viewpoint: ${doc.viewpoint}`, 0, [])));
   if (doc.readerAge !== undefined) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Reader: ${doc.readerAge}`, 0, [])));
-  pages.push({ label: doc.title, paragraphsXml: titleParts.join(""), neededHeight: IDML_TITLE_PAGE_HEIGHT });
+  units.push({ label: doc.title, paragraphsXml: titleParts.join(""), pageCount: 1 });
 
   for (const chapter of doc.chapters) {
     const parts: string[] = [idmlParagraph("ChapterHeading", idmlParagraphRuns(chapter.heading, 0, []))];
@@ -1362,33 +1428,43 @@ export function packIdml(
     if (chapter.rawProse) {
       parts.push(idmlChapterParagraphs(chapter.rawProse, chapter.formatting, paragraphStyle, doc.dropCapLines, doc.sceneBreakStyle));
     }
-    const neededHeight = estimateChapterPageHeight(chapter.rawProse, splitLinesWithOffsets(chapter.rawProse).length);
-    pages.push({ label: chapter.heading, paragraphsXml: parts.join(""), neededHeight });
+    const pageCount = chapter.rawProse
+      ? estimateChapterPageCount(chapter.rawProse, splitLinesWithOffsets(chapter.rawProse).length, columnWidth, columnHeight)
+      : 1;
+    units.push({ label: chapter.heading, paragraphsXml: parts.join(""), pageCount });
   }
 
   if (doc.bible.length > 0) {
     const bibleText = doc.bible.flatMap((section) => section.entities.flatMap((entity) => [entity.name, ...entity.lines])).join(" ");
     const paragraphCount = doc.bible.reduce((count, section) => count + section.entities.length * 2, 1);
-    const neededHeight = estimateChapterPageHeight(bibleText, paragraphCount);
-    pages.push({ label: "Story Bible", paragraphsXml: idmlBibleParagraphs(doc.bible), neededHeight });
+    const pageCount = estimateChapterPageCount(bibleText, paragraphCount, columnWidth, columnHeight);
+    units.push({ label: "Story Bible", paragraphsXml: idmlBibleParagraphs(doc.bible), pageCount });
   }
 
-  const pageHeight = Math.max(IDML_MIN_CHAPTER_HEIGHT, ...pages.map((page) => page.neededHeight));
-
-  for (const page of pages) {
-    const spreadSelf = idmlId("uSpread");
-    const pageSelf = idmlId("uPage");
-    const frameSelf = idmlId("uFrame");
+  for (const unit of units) {
     const storySelf = idmlId("uStory");
     storyIds.push(storySelf);
-    otherFiles.push({
-      name: `Spreads/Spread_${spreadSelf}.xml`,
-      data: utf8(idmlSpreadXml(spreadSelf, pageSelf, frameSelf, storySelf, pageHeight, page.label))
-    });
-    otherFiles.push({ name: `Stories/Story_${storySelf}.xml`, data: utf8(idmlStoryXml(storySelf, page.paragraphsXml)) });
-    spreadRefs.push(`  <idPkg:Spread src="Spreads/Spread_${spreadSelf}.xml"/>`);
+    otherFiles.push({ name: `Stories/Story_${storySelf}.xml`, data: utf8(idmlStoryXml(storySelf, unit.paragraphsXml)) });
     storyRefs.push(`  <idPkg:Story src="Stories/Story_${storySelf}.xml"/>`);
+
+    const frameIds = Array.from({ length: unit.pageCount }, () => idmlId("uFrame"));
+    for (let index = 0; index < unit.pageCount; index += 1) {
+      const spreadSelf = idmlId("uSpread");
+      const pageSelf = idmlId("uPage");
+      const label = index === 0 ? unit.label : `${unit.label} (${index + 1})`;
+      const previousTextFrame = index > 0 ? frameIds[index - 1]! : "n";
+      const nextTextFrame = index < unit.pageCount - 1 ? frameIds[index + 1]! : "n";
+      otherFiles.push({
+        name: `Spreads/Spread_${spreadSelf}.xml`,
+        data: utf8(
+          idmlSpreadXml(spreadSelf, pageSelf, frameIds[index]!, storySelf, pageWidth, pageHeight, margin, label, previousTextFrame, nextTextFrame)
+        )
+      });
+      spreadRefs.push(`  <idPkg:Spread src="Spreads/Spread_${spreadSelf}.xml"/>`);
+    }
   }
+
+  const pageCount = units.reduce((count, unit) => count + unit.pageCount, 0);
 
   // No default `xmlns=` on <Document> — only the idPkg: prefix resource
   // references need a namespace; Document and its children (Layer, Page,
@@ -1415,8 +1491,8 @@ ${storyRefs.join("\n")}
     { name: "Resources/Graphic.xml", data: utf8(idmlGraphicXml()) },
     { name: "Resources/Fonts.xml", data: utf8(idmlFontsXml(fontName)) },
     { name: "Resources/Styles.xml", data: utf8(idmlStylesXml(fontName, bodyWeight)) },
-    { name: "Resources/Preferences.xml", data: utf8(idmlPreferencesXml(pages.length, pageHeight)) },
-    { name: `MasterSpreads/MasterSpread_${masterSelf}.xml`, data: utf8(idmlMasterSpreadXml(masterSelf, masterPageSelf)) },
+    { name: "Resources/Preferences.xml", data: utf8(idmlPreferencesXml(pageCount, pageWidth, pageHeight)) },
+    { name: `MasterSpreads/MasterSpread_${masterSelf}.xml`, data: utf8(idmlMasterSpreadXml(masterSelf, masterPageSelf, pageWidth, pageHeight)) },
     ...otherFiles
   ]);
 }
@@ -1576,7 +1652,10 @@ function odtStyles(
   dropCapLines = 0,
   bodyWeight: BodyWeight = "regular",
   bodyColor?: string,
-  sceneBreakStyle: Book["scene_break_style"] = "plain"
+  sceneBreakStyle: Book["scene_break_style"] = "plain",
+  pageWidth = PAGE_SIZES["6x9"].width,
+  pageHeight = PAGE_SIZES["6x9"].height,
+  margin = PAGE_MARGINS.normal
 ): string {
   const dropCapStyles =
     dropCapLines > 0
@@ -1624,6 +1703,14 @@ function odtStyles(
       <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in" fo:text-indent="0in"/>
     </style:style>${dropCapStyles}${sceneBreakStyleXml}${ODT_SPAN_STYLES}
   </office:styles>
+  <office:automatic-styles>
+    <style:page-layout style:name="PM1">
+      <style:page-layout-properties fo:page-width="${pageWidth}pt" fo:page-height="${pageHeight}pt" fo:margin-top="${margin}pt" fo:margin-bottom="${margin}pt" fo:margin-left="${margin}pt" fo:margin-right="${margin}pt" style:print-orientation="portrait"/>
+    </style:page-layout>
+  </office:automatic-styles>
+  <office:master-styles>
+    <style:master-page style:name="Standard" style:page-layout-name="PM1"/>
+  </office:master-styles>
 </office:document-styles>
 `;
 }

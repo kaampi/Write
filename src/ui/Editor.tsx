@@ -1671,6 +1671,8 @@ export function Editor() {
               }
               dropCapLines={book.drop_cap_lines}
               sceneBreakStyle={book.scene_break_style}
+              pageSize={book.page_size}
+              pageMargin={book.page_margin}
               bodyFontStack={publishFontById(book.body_font).stack}
               bodyFontWeight={book.body_font_weight}
               bodyColorDark={book.body_color_dark}

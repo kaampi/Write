@@ -446,18 +446,45 @@ describe("IDML export", () => {
     expect(everyXmlText).not.toContain("secret stowaway");
   });
 
-  it("gives every chapter its own Spread and Story file, referenced from designmap.xml", () => {
+  it("gives every chapter its own Story (one or more threaded Spreads), referenced from designmap.xml", () => {
     const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     const designmap = new TextDecoder().decode(files["designmap.xml"]!);
     const spreadFiles = Object.keys(files).filter((name) => name.startsWith("Spreads/"));
     const storyFiles = Object.keys(files).filter((name) => name.startsWith("Stories/"));
-    // Title page + 2 chapters = 3 of each.
-    expect(spreadFiles.length).toBe(3);
+    // Title page + 2 chapters = 3 Stories; at least that many Spreads (a short chapter can still need more than one page).
     expect(storyFiles.length).toBe(3);
+    expect(spreadFiles.length).toBeGreaterThanOrEqual(3);
     for (const path of [...spreadFiles, ...storyFiles]) {
       expect(designmap).toContain(`src="${path}"`);
     }
+  });
+
+  it("threads a multi-page chapter's TextFrames together on one shared Story", () => {
+    let book = bookWithTwoChapters();
+    const longProse = Array.from({ length: 80 }, (_, i) => `Paragraph number ${i} with enough words to take up real space on the page.`).join(
+      "\n\n"
+    );
+    book = updateChapter(book, book.chapters[0]!.id, { prose: longProse, formatting: [] });
+    const idml = packIdml(buildManuscriptExport(book));
+    const files = unzipStore(idml);
+    const storySelf = Object.entries(files)
+      .filter(([name]) => name.startsWith("Stories/"))
+      .map(([, data]) => new TextDecoder().decode(data))
+      .find((text) => text.includes("Paragraph number 0"))
+      ?.match(/Story Self="([^"]+)"/)?.[1];
+    expect(storySelf).toBeDefined();
+    const framesForStory = Object.entries(files)
+      .filter(([name]) => name.startsWith("Spreads/"))
+      .map(([, data]) => new TextDecoder().decode(data))
+      .filter((text) => text.includes(`ParentStory="${storySelf}"`));
+    expect(framesForStory.length).toBeGreaterThan(1);
+    const previousRefs = framesForStory.map((text) => text.match(/PreviousTextFrame="([^"]+)"/)?.[1]);
+    const nextRefs = framesForStory.map((text) => text.match(/NextTextFrame="([^"]+)"/)?.[1]);
+    expect(previousRefs[0]).toBe("n");
+    expect(nextRefs[nextRefs.length - 1]).toBe("n");
+    expect(previousRefs.slice(1).every((ref) => ref !== "n")).toBe(true);
+    expect(nextRefs.slice(0, -1).every((ref) => ref !== "n")).toBe(true);
   });
 
   it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", () => {
@@ -526,6 +553,54 @@ describe("IDML export", () => {
     const prefsMatch = preferences.match(/PageHeight="(\S+)"/);
     expect(prefsMatch).not.toBeNull();
     expect(prefsMatch![1]).toBe(pageHeights[0]);
+  });
+});
+
+describe("page size", () => {
+  it("defaults every real-page format (IDML, PDF, ODT) to 6x9in with a normal margin", async () => {
+    const doc = buildManuscriptExport(createBook("Night Keys"));
+    expect(doc.pageWidth).toBeCloseTo(432);
+    expect(doc.pageHeight).toBeCloseTo(648);
+    expect(doc.margin).toBeCloseTo(54);
+
+    const pdfBytes = await packPdf(doc);
+    const pdf = await PDFDocument.load(pdfBytes);
+    const { width, height } = pdf.getPage(0).getSize();
+    expect(width).toBeCloseTo(432);
+    expect(height).toBeCloseTo(648);
+
+    const odtFiles = unzipStore(packOdt(doc));
+    const odtStylesXml = new TextDecoder().decode(odtFiles["styles.xml"]!);
+    expect(odtStylesXml).toContain('fo:page-width="432pt"');
+    expect(odtStylesXml).toContain('fo:page-height="648pt"');
+    expect(odtStylesXml).toContain('fo:margin-top="54pt"');
+
+    const idmlFiles = unzipStore(packIdml(doc));
+    const preferences = new TextDecoder().decode(idmlFiles["Resources/Preferences.xml"]!);
+    expect(preferences).toContain('PageWidth="432"');
+    expect(preferences).toContain('PageHeight="648"');
+  });
+
+  it("switches all three to A4 with a wide margin when the book is set to it", async () => {
+    const book = { ...createBook("Night Keys"), page_size: "a4" as const, page_margin: "wide" as const };
+    const doc = buildManuscriptExport(book);
+    expect(doc.pageWidth).toBeCloseTo(595.28);
+    expect(doc.pageHeight).toBeCloseTo(841.89);
+    expect(doc.margin).toBeCloseTo(72);
+
+    const pdfBytes = await packPdf(doc);
+    const pdf = await PDFDocument.load(pdfBytes);
+    const { width, height } = pdf.getPage(0).getSize();
+    expect(width).toBeCloseTo(595.28);
+    expect(height).toBeCloseTo(841.89);
+
+    const odtStylesXml = new TextDecoder().decode(unzipStore(packOdt(doc))["styles.xml"]!);
+    expect(odtStylesXml).toContain('fo:page-width="595.28pt"');
+    expect(odtStylesXml).toContain('fo:margin-left="72pt"');
+
+    const preferences = new TextDecoder().decode(unzipStore(packIdml(doc))["Resources/Preferences.xml"]!);
+    expect(preferences).toContain('PageWidth="595.28"');
+    expect(preferences).toContain('PageHeight="841.89"');
   });
 });
 

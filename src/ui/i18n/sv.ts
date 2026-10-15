@@ -163,6 +163,17 @@ export const sv: Messages = {
     sceneBreakDiamond: "Minimalistisk diamant (❖)",
     sceneBreakFleur: "Fransk elegans (⚜)",
     sceneBreakSparkle: "Glimmer / stjärna (✦)",
+    pageSizeLabel: "Sidstorlek",
+    pageSizeLede:
+      "Sidmåtten för varje exportformat med en riktig tryckt sida — IDML, PDF och ODT (RTF och HTML/ePub flödar fritt utan fast sida). Skalar också ungefär skrivytans egen bredd efter samma proportioner — ingen riktig sidindelning, skrivytan rullar fortfarande som en enda sammanhängande kolumn; riktig sida-för-sida-layout sker i Publish-exporterna och, för IDML, till slut i InDesign eller Affinity.",
+    pageSizeA4: "A4",
+    pageSizeLetter: "US Letter",
+    pageSize6x9: "6 × 9 tum (pocketbok/trade)",
+    pageMarginLabel: "Sidmarginal",
+    pageMarginLede: "Marginal på alla fyra sidor, för samma tre format som Sidstorlek.",
+    pageMarginNarrow: "Smal (0,5 tum)",
+    pageMarginNormal: "Normal (0,75 tum)",
+    pageMarginWide: "Bred (1 tum)",
     bodyFontLabel: "Typsnitt",
     bodyFontLede:
       "Typsnittet för manusets brödtext — i själva redigeraren, och med i varje export från Publish, så det blir ett val istället för ett separat, osparat val varje gång.",

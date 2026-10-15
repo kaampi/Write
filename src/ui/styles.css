@@ -2248,7 +2248,7 @@ button:disabled {
 
 .settings-card .craft-fields > .craft-field {
   flex: 1 1 0;
-  min-width: 8rem;
+  min-width: 9.5rem;
 }
 
 /* Same idea for Prose language / Reader / Versions per chapter — equally

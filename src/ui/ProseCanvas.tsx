@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { Book } from "@core/BookSchema";
+import { PAGE_MARGINS, PAGE_SIZES } from "@core/manuscriptExport";
 import { applyReplace, isNonEmptySpan, selectedText, type TextSpan } from "@core/textSpan";
 import { htmlFromProse, splitFlowParagraphs } from "@core/proseFlow";
 import {
@@ -112,7 +113,9 @@ export function ProseCanvas({
   bodyFontStack,
   bodyFontWeight,
   bodyColorDark,
-  bodyColorLight
+  bodyColorLight,
+  pageSize,
+  pageMargin
 }: {
   value: string;
   onChange: (next: string) => void;
@@ -184,6 +187,10 @@ export function ProseCanvas({
   bodyColorDark?: string;
   /** Body text color for the app's light theme (Settings → Typography → Color). Omitted keeps the app's own --text color — Synopsis and Brainstorm never pass this, only chapter prose does. */
   bodyColorLight?: string;
+  /** Page size (Settings → Typography → Page size) — scales the writing column's own max-width to roughly match the chosen page's proportions. Not true pagination (the column still scrolls as one piece); real page-by-page layout happens in Publish's exports. Omitted keeps the column's default width — Synopsis and Brainstorm never pass this, only chapter prose does. */
+  pageSize?: Book["page_size"];
+  /** Page margin (Settings → Typography → Page margin) — narrower margins widen the column slightly, same proportional spirit as pageSize. Omitted keeps the "normal" proportion. */
+  pageMargin?: Book["page_margin"];
 }) {
   const { messages: m } = useLocale();
   const rewriteTitle = instructTitle ?? m.canvas.rewriteTitle;
@@ -612,10 +619,24 @@ export function ProseCanvas({
   const overlayOn = findOn || highlightRare || highlightTics || highlightFacts;
   const overlayModeClass = highlightRare ? "is-rare" : highlightTics ? "is-tics" : highlightFacts ? "is-facts" : "";
 
+  // Scales the writing column's width to roughly match the chosen page
+  // size's proportions — not true pagination (no fixed height, still one
+  // continuously scrolling column), just a closer preview than a fixed
+  // width regardless of page size. 504pt (US Letter minus two "normal"
+  // margins) is pegged to the column's own long-standing 54rem width, so
+  // the default combination renders exactly as it always has; a narrower
+  // trim size (6x9) or wider margin shrinks the column proportionally
+  // instead. Clamped so an unusual combination never gets unreadably thin.
+  const columnMaxWidth =
+    pageSize && pageMargin
+      ? `${Math.max(28, (54 * (PAGE_SIZES[pageSize].width - PAGE_MARGINS[pageMargin] * 2)) / 504).toFixed(2)}rem`
+      : undefined;
+
   return (
     <div
       ref={scrollRef}
       className={overlayOn ? ["prose-wrap", overlayModeClass, findOn ? "is-find" : ""].filter(Boolean).join(" ") : "prose-wrap"}
+      style={columnMaxWidth ? { maxWidth: columnMaxWidth } : undefined}
     >
       {aside}
       <div className="prose-body" ref={bodyRef}>
