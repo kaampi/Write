@@ -582,6 +582,19 @@ describe("IDML export", () => {
       expect(text).toMatch(/<PathPointType Anchor="0 540"/);
     }
   });
+
+  it("tells InDesign not to reshuffle standalone pages into facing-page spreads", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const preferences = new TextDecoder().decode(files["Resources/Preferences.xml"]!);
+    expect(preferences).toMatch(/<DocumentPreference[^>]*AllowPageShuffle="false"/);
+    const spreadTexts = Object.entries(files)
+      .filter(([name]) => name.startsWith("Spreads/"))
+      .map(([, data]) => new TextDecoder().decode(data));
+    for (const text of spreadTexts) {
+      expect(text).toMatch(/<Spread[^>]*AllowPageShuffle="false"/);
+    }
+  });
 });
 
 describe("page size", () => {

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.113] - 2026-10-15
+
+### Fixed
+- IDML export's pages opened correctly in Affinity (all pages, text fully visible — the previous fix worked) but InDesign still inserted a blank companion page before nearly every real page, almost doubling the page count. InDesign was reshuffling this export's standalone, one-page-per-spread layout into its own default facing-pages pairing. `AllowPageShuffle="false"` — set on every spread and now also on the document's own preferences, matching ComicBook AI's own IDML writer — tells it not to.
+
 ## [1.0.112] - 2026-10-15
 
 ### Fixed

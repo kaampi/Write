@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.112
+Status: living document, v1.0.113
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5068,6 +5068,53 @@ namnrymder/attributnamn som i v1.0.108, och inte en egen uppfunnen
 mekanism som i v1.0.110/111). Mats bör testa igen — sjätte gången.
 
 v1.0.111 → v1.0.112.
+
+**Ändringslogg v1.0.112 → v1.0.113 (2026-10-15):** Rättat InDesigns
+sidduplicering (AllowPageShuffle) — första riktigt POSITIVA testet i
+den här IDML-serien, och en liten, kirurgisk rättning.
+
+**Mats rapport:** "I Affinity får jag 63 sidor med texten fullt
+synlig. I Indesign får jag först 63 tomma sidor men sedan kommer
+sidor med texten (totalt 125 sidor, motsvarar 1 första sida och 62
+uppslag). I båda program ligger sidorna efter varandra, inte som
+uppslag." — PathGeometry-fixen i v1.0.112 fungerade: Affinity visar nu
+ALLA 63 sidor med texten korrekt synlig, exakt matchande det riktiga
+sidantalet. Kvarstod bara ett InDesign-specifikt problem: InDesign
+infogade en tom "kompanjonsida" före nästan varje riktig sida (utom
+den första), vilket nästan dubblade sidantalet (63 → 125 = 1 + 62×2).
+
+**Grundorsak, hittad på samma sätt som v1.0.112-fixen** (direkt
+jämförelse mot ComicBook AI:s `idmlExport.ts`, hämtad på nytt igen):
+deras `<Spread>` sätter `AllowPageShuffle="false"`, och deras
+`<DocumentPreference>` har SAMMA attribut satt till `false` också. Min
+kod satte `AllowPageShuffle="true"` på varje Spread och saknade
+attributet helt på DocumentPreference. `AllowPageShuffle` styr om
+InDesign får ombalansera/para ihop sidor i sin egen standard-layout
+för motstående sidor (facing pages) — med `"true"` fick InDesign
+fritt fram att göra precis det, och parade ihop varje fristående sida
+med en tom vänstersida för att få jämna uppslag (utom första sidan,
+som konventionellt står ensam). Affinity shufflar tydligen inte sidor
+på samma sätt, vilket förklarar varför bara InDesign drabbades.
+
+**Rättning:** `AllowPageShuffle="false"` på varje `<Spread>` i
+`idmlSpreadXml`, och samma attribut tillagt på `<DocumentPreference>`
+i `idmlPreferencesXml` — exakt matchande ComicBook AI:s mönster på
+båda ställena.
+
+**Verifiering:** ny test som kontrollerar att `AllowPageShuffle="false"`
+finns på `DocumentPreference` och på varenda genererad `<Spread>`.
+Hela testsviten (1055 test, 79 filer), `tsc --noEmit` och
+`npm run build` kördes rent. En riktig export genom UI:t extraherades
+och `xmllint --noout` godkände varje XML-fil; attributet bekräftades
+direkt i både Preferences.xml och alla Spread-filer.
+
+**Status: betydande framsteg bekräftat av Mats själv** — Affinity är
+nu fullt korrekt (63/63 sidor, all text synlig). InDesign-rättningen
+är kirurgisk och direkt baserad på samma fungerande referens som löste
+PathGeometry-problemet. Väntar på Mats sjunde test för att bekräfta
+att InDesign nu också visar exakt 63 sidor utan dubblering.
+
+v1.0.112 → v1.0.113.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

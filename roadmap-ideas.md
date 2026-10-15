@@ -2306,7 +2306,7 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
-### 49. IDML-export (InDesign) — PathGeometry-fel hittat genom direkt kodjämförelse
+### 49. IDML-export (InDesign) — Affinity fullt fungerande, InDesign-dubblering rättad
 
 Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
 till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
@@ -2514,6 +2514,35 @@ referensimplementations faktiska XML-struktur**, inte bara dess
 namnrymder (v1.0.108) eller en egen uppfunnen mekanism (v1.0.110/111).
 Fortfarande ingen InDesign/Affinity i den här miljön. Mats bör testa
 igen — sjätte gången.
+
+**Delsteg 8 (klart, v1.0.113): första riktigt POSITIVA testresultatet
+i hela den här IDML-serien.** Mats sjätte test: "I Affinity får jag 63
+sidor med texten fullt synlig." — PathGeometry-fixen fungerade helt
+och hållet, exakt matchande det riktiga sidantalet. Kvarstod bara ett
+InDesign-specifikt problem: "I Indesign får jag först 63 tomma sidor
+men sedan kommer sidor med texten (totalt 125 sidor, motsvarar 1
+första sida och 62 uppslag)" — InDesign infogade en tom
+"kompanjonsida" före nästan varje riktig sida.
+
+**Grundorsak**, hittad på samma sätt igen (direkt jämförelse mot
+ComicBook AI, hämtad på nytt): deras `<Spread>` OCH deras
+`<DocumentPreference>` sätter båda `AllowPageShuffle="false"`. Min
+kod satte `"true"` på Spread och saknade attributet helt på
+DocumentPreference — vilket gav InDesign fritt fram att para ihop
+varje fristående sida med en tom vänstersida för jämna uppslag (utom
+den första). Affinity shufflar tydligen inte sidor på samma sätt,
+vilket förklarar varför bara InDesign drabbades.
+
+**Rättning:** `AllowPageShuffle="false"` på varje Spread OCH på
+DocumentPreference, exakt matchande ComicBook AI på båda ställena. Se
+`project_spec.md`, Ändringslogg v1.0.112 → v1.0.113, för fullständig
+genomgång.
+
+**Status: Affinity fullt bekräftat fungerande av Mats själv (63/63
+sidor, all text synlig).** InDesign-rättningen är kirurgisk,
+verifierad strukturellt (ny test, xmllint, riktig export genom UI:t),
+och direkt baserad på samma referens som löste föregående rundas
+problem. Väntar på Mats sjunde test för att bekräfta InDesign också.
 
 ---
 

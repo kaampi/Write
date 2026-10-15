@@ -1355,6 +1355,16 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * every page item it draws and has never once used a bare GeometricBounds
  * for one — the one difference between a frame this writer always
  * generated and one a reference implementation actually produces.
+ *
+ * `AllowPageShuffle="false"` (also set document-wide on `DocumentPreference`
+ * in `idmlPreferencesXml`) tells InDesign not to reflow this writer's
+ * one-page-per-Spread layout into its own default facing-pages pairing —
+ * without it, a real test showed InDesign inserting a blank companion page
+ * before every one of this writer's standalone pages (except the first),
+ * nearly doubling the page count, while Affinity — which doesn't shuffle
+ * pages the same way — showed every page correctly. Found the same way as
+ * the PathGeometry fix above: ComicBook AI's own IDML writer sets this
+ * `false` in both places, never `true`.
  */
 function idmlSpreadXml(
   spreadId: string,
@@ -1370,7 +1380,7 @@ function idmlSpreadXml(
   const columnHeight = pageHeight - margin * 2;
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Spread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="true" ItemTransform="1 0 0 1 0 0" ShowMasterItems="false">
+  <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="false" ItemTransform="1 0 0 1 0 0" ShowMasterItems="false">
     <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
       <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
     </Page>
@@ -1421,7 +1431,7 @@ function idmlFontsXml(fontName: string): string {
 function idmlPreferencesXml(pageCount: number, pageWidth: number, pageHeight: number): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Preferences xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <DocumentPreference PageWidth="${pageWidth}" PageHeight="${pageHeight}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection" Intent="PrintIntent"/>
+  <DocumentPreference PageWidth="${pageWidth}" PageHeight="${pageHeight}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection" AllowPageShuffle="false" Intent="PrintIntent"/>
   <ViewPreference HorizontalMeasurementUnits="Points" VerticalMeasurementUnits="Points"/>
 </idPkg:Preferences>
 `;
