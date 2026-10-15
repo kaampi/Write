@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.115
+Status: living document, v1.0.116
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5233,6 +5233,65 @@ nya stilnamnen bekräftades direkt i både Styles.xml och de tillämpade
 `AppliedParagraphStyle`-referenserna i Stories-filerna.
 
 v1.0.114 → v1.0.115.
+
+**Ändringslogg v1.0.115 → v1.0.116 (2026-10-15):** Publish slutade
+spara filer helt — rättad, men ovanligt osäker rättning för den här
+sessionen eftersom jag aldrig kunde återskapa felet själv.
+
+**Mats rapport:** "Nu när jag väljer publish stannar rutan kvar ett
+tag och försvinner sedan [utan att någon] save as... ruta [visas]. Jag
+får alltså aldrig spara någon fil. Det gäller oavsett vilket
+filformat jag väljer." — Publish-dialogen stängs (koden kör klart utan
+att krascha), men operativsystemets/webbläsarens "Spara som"-dialog
+visas aldrig, för NÅGOT exportformat.
+
+**Återskapade inte felet själv** — körde samma Playwright-flöde (alla
+åtta format: md, txt, rtf, odt, html, epub, pdf, idml) både mot
+dev-servern och mot den riktiga produktionsbyggen (`npm run build` +
+statisk server), och alla åtta laddades ner felfritt, utan konsolfel,
+varje gång. Eftersom bugen inte går att återskapa i den här miljöns
+Chromium-baserade testning, är den sannolikt specifik för Mats
+faktiska körmiljö — mest troligt skrivbordsappens Windows-WebView2
+(Tauri-appen har ingen egen fs/dialog-plugin kopplad, så ALL
+nedladdning går via webbläsarens egna Blob-URL-mekanism).
+
+**Grundorsak (välgrundad hypotes, inte bekräftad genom egen
+återskapning):** `downloadBlob` i `downloadJson.ts` anropade
+`URL.revokeObjectURL(url)` DIREKT efter `link.click()`, synkront. Det
+är säkert i Chromium (som fångar blob-referensen vid själva klicket),
+men inte garanterat i alla motorer — särskilt Windows WebView2 (det
+Tauri-skrivbordsappen kör på) kan fortfarande hålla på att asynkront
+starta nedladdningen (t.ex. medan dess egen nativa "Spara som"-dialog
+är öppen) när URL:en återkallas, vilket tyst gör att nedladdningen
+försvinner utan något felmeddelande. Det här matchar Mats symptom
+exakt: dialogen stängs (koden kör klart), men "spara som"-dialogen
+visas aldrig.
+
+**Rättning:** `URL.revokeObjectURL(url)` sker nu efter en kort
+fördröjning (`setTimeout`, 30 sekunder) istället för omedelbart —
+tillräckligt för att nedladdningen hinner starta i vilken
+webbläsar-/WebView-motor som helst, oavsett hur lång tid
+operativsystemets egen Spara-dialog tar att svara på. Kostar
+ingenting märkbart (en Blob-referens hålls kvar i minnet några
+sekunder till).
+
+**Verifiering:** `tsc --noEmit`, hela testsviten (1056 test) och
+`npm run build` kördes rent. Samma Playwright-flöde (alla åtta format)
+kördes om efter rättningen — fortfarande felfritt i den här miljön,
+vilket bekräftar att ändringen inte stör något som redan fungerade,
+men INTE att den faktiskt löser Mats problem, eftersom jag aldrig
+kunde se felet uppstå själv.
+
+**Viktigt att vara ärlig om:** det här är den FÖRSTA rättningen i
+sessionen som skeppas utan att jag någonsin sett buggen inträffa —
+varje tidigare IDML-rättning byggde på direkt jämförelse mot en
+referensimplementation eller en konkret, reproducerbar skillnad i
+genererade filer. Den här gången är det en välkänd, dokumenterad
+webbplattformskompatibilitetsfälla som matchar symptomen exakt, och
+en säker, riskfri ändring (kan inte göra något sämre), men den är
+fortfarande en hypotes tills Mats bekräftar att Publish fungerar igen.
+
+v1.0.115 → v1.0.116.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

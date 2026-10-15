@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.116] - 2026-10-15
+
+### Fixed
+- Publish stopped saving any file at all, in every format — the dialog would stay open a moment and then just close, with no OS Save dialog ever appearing. `downloadBlob` was revoking its Blob's object URL immediately after triggering the download, which is safe in Chromium (it captures the blob reference at click time) but not guaranteed everywhere, notably Windows' WebView2 (what the desktop app runs on) — if the browser/WebView is still asynchronously starting the download when the URL is revoked, the download silently disappears with no error shown. The revoke now happens after a short delay instead of immediately.
+
 ## [1.0.115] - 2026-10-15
 
 ### Changed
