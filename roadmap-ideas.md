@@ -2306,7 +2306,7 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
-### 49. IDML-export (InDesign) — egen sidindelning, trådning övergiven
+### 49. IDML-export (InDesign) — PathGeometry-fel hittat genom direkt kodjämförelse
 
 Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
 till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
@@ -2479,6 +2479,41 @@ den overifierade mekanismen (trådning) är borttagen, ersatt med
 återanvänd, bevisat fungerande kod, inte justerade parametrar på samma
 gissning.** Fortfarande ingen InDesign/Affinity i den här miljön. Mats
 bör testa igen — femte gången.
+
+**Delsteg 7 (klart, v1.0.112): den faktiska strukturella bristen
+hittad, genom direkt kodjämförelse istället för spekulation.** Mats
+femte test, med skärmdump: "Affinity hittar 53 sidor, ingen text.
+Indesign hittar 125 sidor och från sidan 64 så finns pyttesmå
+textramar upp i vänstra hörnet. Om jag förstorar dessa textramar så
+ligger texten där."
+
+**Roten:** varje `<TextFrame>` i alla fem tidigare IDML-rundor
+definierade sin storlek/position ENDAST via ett naket
+`GeometricBounds`-attribut plus en identitets-`ItemTransform`. Direkt
+jämförelse mot ComicBook AI:s `idmlExport.ts` (hämtad på nytt igen)
+visade: VARJE sidobjekt de ritar bär istället ett
+`<Properties><PathGeometry>`-rektangel i objektets egna lokala
+koordinater, positionerad via `ItemTransform`s translation —
+`GeometricBounds` används aldrig som enda källa. IDML:s sidobjekt-
+modell är path-baserad; en `TextFrame` utan egen `PathGeometry` har
+ingen auktoritativ form, vilket förklarar symptomen exakt: olika
+läsare föll tillbaka olika (ibland fungerande, ibland en kollapsad
+minimal storlek med texten ändå kvar i Story-innehållet — syntes när
+Mats förstorade ramen för hand).
+
+**Rättning:** ny `idmlRectPathGeometry()` bygger en sluten 4-punkters
+rektangel-path; `<TextFrame>` tappade `GeometricBounds` helt (för att
+undvika två motsägande källor), fick `ItemTransform` som en ren
+translation till ramens sidposition, och en `PathGeometry` som första
+barn. Se `project_spec.md`, Ändringslogg v1.0.111 → v1.0.112, för
+fullständig genomgång.
+
+**Status: den starkaste grunden hittills — första gången rättningen
+byggde på en direkt, sida-vid-sida-jämförelse mot en fungerande
+referensimplementations faktiska XML-struktur**, inte bara dess
+namnrymder (v1.0.108) eller en egen uppfunnen mekanism (v1.0.110/111).
+Fortfarande ingen InDesign/Affinity i den här miljön. Mats bör testa
+igen — sjätte gången.
 
 ---
 

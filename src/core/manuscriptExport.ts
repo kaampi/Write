@@ -1317,12 +1317,44 @@ function idmlStoryXml(storyId: string, paragraphsXml: string): string {
 }
 
 /**
+ * A plain rectangle, as IDML's own path-based geometry model expects it: four
+ * corner points in the item's own LOCAL coordinates (0,0 at one corner,
+ * width/height at the opposite one), each point's Left/RightDirection equal
+ * to its own Anchor since every corner is a straight line, never a curve.
+ */
+function idmlRectPathGeometry(width: number, height: number): string {
+  const corners = [
+    [0, 0],
+    [width, 0],
+    [width, height],
+    [0, height]
+  ];
+  const points = corners
+    .map(([x, y]) => `<PathPointType Anchor="${x} ${y}" LeftDirection="${x} ${y}" RightDirection="${x} ${y}"/>`)
+    .join("");
+  return `<Properties><PathGeometry><GeometryPathType PathOpen="false"><PathPointArray>${points}</PathPointArray></GeometryPathType></PathGeometry></Properties>`;
+}
+
+/**
  * One page, with one TextFrame holding exactly the text `paginateIdmlBlocks`
  * decided belongs on it — never threaded to another frame (`Previous`/
  * `NextTextFrame` are always "n"), since each page's Story is already a
  * complete, self-contained chunk. See `paginateIdmlBlocks` for why this
  * writer paginates itself rather than relying on the reader application to
  * flow a threaded story across frames.
+ *
+ * The TextFrame's shape comes from a `<Properties><PathGeometry>` rectangle
+ * in the frame's own local coordinates, positioned on the page via
+ * `ItemTransform`'s translation — not a bare `GeometricBounds` attribute
+ * with an identity transform, which is what every earlier version of this
+ * writer used. IDML's actual page-item model is path-based (so a frame can
+ * be any shape, not just a rectangle); `GeometricBounds` is a cached summary
+ * value, and a `TextFrame` with no `PathGeometry` of its own has no
+ * authoritative shape for a reader to fall back on. Found by comparing
+ * against ComicBook AI's own IDML writer, which includes a PathGeometry on
+ * every page item it draws and has never once used a bare GeometricBounds
+ * for one — the one difference between a frame this writer always
+ * generated and one a reference implementation actually produces.
  */
 function idmlSpreadXml(
   spreadId: string,
@@ -1335,14 +1367,15 @@ function idmlSpreadXml(
   label: string
 ): string {
   const columnWidth = pageWidth - margin * 2;
-  const textFrameBounds = `${margin} ${margin} ${pageHeight - margin} ${pageWidth - margin}`;
+  const columnHeight = pageHeight - margin * 2;
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Spread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
   <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="true" ItemTransform="1 0 0 1 0 0" ShowMasterItems="false">
     <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
       <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
     </Page>
-    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="n" NextTextFrame="n" ContentType="TextType" ItemTransform="1 0 0 1 0 0" GeometricBounds="${textFrameBounds}">
+    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="n" NextTextFrame="n" ContentType="TextType" ItemTransform="1 0 0 1 ${margin} ${margin}">
+      ${idmlRectPathGeometry(columnWidth, columnHeight)}
       <TextFramePreference TextColumnCount="1" TextColumnFixedWidth="${columnWidth}" UseFlexibleColumnWidth="false" FirstBaselineOffset="AscentOffset" VerticalJustification="TopAlign" InsetSpacing="0 0 0 0"/>
     </TextFrame>
   </Spread>

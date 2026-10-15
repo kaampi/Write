@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.112] - 2026-10-15
+
+### Fixed
+- IDML export's own self-paginated pages opened with far more pages than expected and almost no visible text in InDesign or Affinity, with tiny text frames in the corner of some pages — exactly what the previous fix's own self-pagination was meant to avoid. Every `TextFrame` only ever defined its size and position through a bare `GeometricBounds` attribute with an identity transform; IDML's actual page-item model expects a `<Properties><PathGeometry>` rectangle in the frame's own local coordinates, positioned on the page through `ItemTransform`'s translation instead, with `GeometricBounds` only a cached summary value, not an authoritative one. Found by comparing against ComicBook AI's own IDML writer, which includes a `PathGeometry` on every page item it draws. Every `TextFrame` now does the same.
+
 ## [1.0.111] - 2026-10-15
 
 ### Fixed

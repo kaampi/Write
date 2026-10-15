@@ -556,6 +556,32 @@ describe("IDML export", () => {
     expect(prefsMatch).not.toBeNull();
     expect(prefsMatch![1]).toBe(pageHeights[0]);
   });
+
+  it("gives every TextFrame a rectangular PathGeometry positioned by ItemTransform, not a bare GeometricBounds", async () => {
+    const book = { ...createBook("Night Keys"), page_size: "6x9" as const, page_margin: "normal" as const };
+    const idml = await packIdml(buildManuscriptExport(book));
+    const files = unzipStore(idml);
+    const spreadTexts = Object.entries(files)
+      .filter(([name]) => name.startsWith("Spreads/"))
+      .map(([, data]) => new TextDecoder().decode(data));
+    expect(spreadTexts.length).toBeGreaterThan(0);
+    for (const text of spreadTexts) {
+      const frame = text.match(/<TextFrame [^>]*>/)?.[0];
+      expect(frame).toBeDefined();
+      // No bare GeometricBounds on the TextFrame itself — only the Page keeps one.
+      expect(frame).not.toContain("GeometricBounds");
+      // Positioned at (margin, margin) via a pure-translation ItemTransform.
+      expect(frame).toContain('ItemTransform="1 0 0 1 54 54"');
+      // A closed, 4-point rectangular path in the frame's own local coordinates (0,0 origin).
+      expect(text).toContain("<PathGeometry>");
+      expect(text).toContain('PathOpen="false"');
+      expect(text).toMatch(/<PathPointType Anchor="0 0"/);
+      // Local width/height match the column box (page width/height minus two margins).
+      expect(text).toMatch(/<PathPointType Anchor="324 0"/);
+      expect(text).toMatch(/<PathPointType Anchor="324 540"/);
+      expect(text).toMatch(/<PathPointType Anchor="0 540"/);
+    }
+  });
 });
 
 describe("page size", () => {

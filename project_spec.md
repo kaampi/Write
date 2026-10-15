@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.111
+Status: living document, v1.0.112
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4998,6 +4998,76 @@ redan bevisat fungerande kod (PDF-exportens egen fontmätning/radbrytning).
 Mats bör testa igen — femte gången.
 
 v1.0.110 → v1.0.111.
+
+**Ändringslogg v1.0.111 → v1.0.112 (2026-10-15):** Hittade den
+faktiska strukturella bristen i IDML-exportens TextFrame-geometri —
+rättad efter Mats femte riktiga test, och äntligen med ett konkret,
+jämförbart fynd istället för ännu en gissning.
+
+**Mats rapport, med skärmdump:** "Affinity hittar 53 sidor, ingen
+text. Indesign hittar 125 sidor och från sidan 64 så finns pyttesmå
+textramar upp i vänstra hörnet. Om jag förstorar dessa textramar så
+ligger texten där." Skärmdumpen visade en sida med läsbar text och en
+korrekt stor markerad textram, och nästa sida nästan tom förutom en
+mikroskopisk markeringsruta uppe i vänstra hörnet.
+
+**Den faktiska roten, hittad genom direkt jämförelse mot ComicBook
+AI:s kod** (inte spekulation den här gången): varje `<TextFrame>` jag
+någonsin genererat — i alla fem tidigare IDML-rundor — definierade sin
+storlek och position ENDAST via ett naket `GeometricBounds`-attribut
+plus en identitets-`ItemTransform` ("1 0 0 1 0 0"). Jämförde direkt
+mot `idmlExport.ts` i ComicBook AI (hämtad på nytt igen, ännu en ny
+commit sedan sist) och såg att VARJE sidobjekt de ritar — bakgrunder,
+paneler, textrutor — alltid bär ett `<Properties><PathGeometry>`
+rektangel-objekt i objektets EGNA lokala koordinater (0,0 till
+bredd,höjd), och att den FAKTISKA sidpositionen kommer från
+`ItemTransform`s translation, aldrig från ett naket `GeometricBounds`.
+
+IDML:s sidobjekt-modell är path-baserad (så att en ram kan vara
+vilken form som helst, inte bara en rektangel) — `GeometricBounds` är
+en cachead sammanfattning, inte den auktoritativa formen. En
+`TextFrame` utan egen `PathGeometry` har ingen auktoritativ form för
+en läsare att falla tillbaka på, vilket förklarar symptomen exakt:
+olika program (Affinity/InDesign) föll tillbaka olika — ibland
+fungerade det (troligen när läsaren råkade acceptera
+`GeometricBounds` som tillräckligt), ibland kollapsade ramen till en
+odefinierad minimal storlek, med texten ändå kvar i Story-innehållet
+(därför syntes den när Mats förstorade ramen för hand).
+
+**Rättning i `manuscriptExport.ts`:** ny `idmlRectPathGeometry(width,
+height)` som bygger en sluten 4-punkters rektangel-path i lokala
+koordinater (`PathOpen="false"`, varje `PathPointType`s
+Left/RightDirection satt till samma punkt som dess Anchor eftersom
+varje hörn är rakt, aldrig en kurva). `idmlSpreadXml`s `<TextFrame>`
+tappade sitt `GeometricBounds`-attribut helt (för att undvika två
+källor till sanning som kan säga emot varandra — exakt den risken
+tidigare versioner bar på), fick `ItemTransform="1 0 0 1 ${margin}
+${margin}"` (en ren translation till ramens sidposition) och en ny
+`<Properties>${idmlRectPathGeometry(columnWidth,
+columnHeight)}</Properties>` som första barn, före
+`<TextFramePreference>`.
+
+**Verifiering:** ny test ("gives every TextFrame a rectangular
+PathGeometry positioned by ItemTransform, not a bare GeometricBounds")
+som kontrollerar att varje genererad `<TextFrame>` saknar
+`GeometricBounds` helt, bär rätt `ItemTransform`, och har en sluten
+4-punkters rektangel-path med rätt lokala bredd/höjd. Hela testsviten
+(1054 test, 79 filer), `tsc --noEmit` och `npm run build` kördes rent.
+Gjorde också en riktig export genom UI:t (samma 60-styckens
+testkapitel som förra rundan), extraherade zippen, körde
+`xmllint --noout` på varenda XML-fil (alla godkända), och bekräftade
+direkt i filerna: noll `GeometricBounds` kvar på någon `<TextFrame>`,
+varje ram bär `ItemTransform="1 0 0 1 54 54"` och en korrekt
+324×540pt rektangel-path.
+
+**Fortfarande kvar: InDesign/Affinity-öppningstestet självt**, men med
+den starkaste grunden hittills — det här är första gången rättningen
+byggde på en DIREKT, sida-vid-sida-jämförelse mot en fungerande
+referensimplementations faktiska XML-struktur (inte bara dess
+namnrymder/attributnamn som i v1.0.108, och inte en egen uppfunnen
+mekanism som i v1.0.110/111). Mats bör testa igen — sjätte gången.
+
+v1.0.111 → v1.0.112.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
