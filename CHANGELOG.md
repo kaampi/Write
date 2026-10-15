@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.111] - 2026-10-15
+
+### Fixed
+- IDML export produced far too many pages (115/229 reported, for content that should have needed far fewer) with almost no visible text in either InDesign or Affinity. The previous approach threaded several `TextFrame`s per chapter together (`PreviousTextFrame`/`NextTextFrame`) and relied on the reader application to work out which text landed on which page when the file was opened — syntax that follows the IDML spec, but with no real IDML file to verify it against, it wasn't trustworthy enough to build pagination on, and evidently isn't read the way expected. IDML export now paginates itself: it measures each paragraph's real wrapped height with the manuscript's actual font (the same font-metric word-wrap PDF export already uses for its own pagination) and decides page breaks directly, so every page's content is exactly what belongs on it — nothing is left for InDesign or Affinity to compute, and nothing for them to get wrong. No `TextFrame` is threaded to another one anymore.
+
 ## [1.0.110] - 2026-10-15
 
 ### Added

@@ -2306,7 +2306,7 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
-### 49. IDML-export (InDesign) — byggd med riktig sidstorlek och flödning
+### 49. IDML-export (InDesign) — egen sidindelning, trådning övergiven
 
 Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
 till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
@@ -2437,13 +2437,48 @@ när två fält till lades till i Typography-sektionen). Se
 `project_spec.md`, Ändringslogg v1.0.109 → v1.0.110, för fullständig
 genomgång.
 
-**Status: rättad enligt verifierbara standarder (nya tester + xmllint
-+ riktig export genom UI:t bekräftar sidstorlek/marginal i alla tre
-format), men fortfarande ej InDesign-öppningstestad av mig.** Jag har
-fortfarande ingen InDesign/Affinity i den här miljön. Tråndnings-
-mekanismen är InDesigns egen dokumenterade konvention, inte en
-gissning, men väntar på ett riktigt test för att bekräftas — fjärde
-gången.
+**Delsteg 6 (klart, v1.0.111): trådningen övergiven helt, egen
+sidindelning byggd istället — det hittills allvarligaste felet.** Mats
+fjärde riktiga test: "Affinity får 115 sidor och Indesign 229 sidor.
+Ingen text vad jag kan se... Jag hittade texter i katalogen Stories" —
+texten fanns i de råa XML-filerna men syntes inte alls i någotdera
+programmet.
+
+**Egen strukturell revision först** (ingen femte gissning utan grund):
+en syntetisk 20-kapitels-bok kördes direkt genom `packIdml`, utanför
+UI:t. `PagesPerDocument` matchade exakt det verkliga antalet
+`<Page>`-element — inget dolt dubbleringsfel i min egen kod. En
+separat kontroll av en bok utan `page_size`/`page_margin` (gammalt
+sparat format) bekräftade att zod:s defaults fylls i korrekt, ingen
+`NaN`/`undefined` läcker in. Så Mats "229 ≈ 2×115"-observation satt i
+hur InDesign/Affinity TOLKAR trådningen, inte i vad som genererades.
+Hämtade ComicBook AI-repot på nytt (ny commit sedan sist) — deras
+IDML-export har FORTFARANDE ingen trådningskod alls. Det bekräftar:
+trådningsmekanismen från Delsteg 5 byggdes helt från egen kunskap om
+IDML-specen, utan någon verklig referens att jämföra mot, och gick
+aldrig att verifiera förrän Mats testade den på riktigt.
+
+**Beslut: sluta lita på att InDesign/Affinity flödar text mellan
+trådade sidor — räkna ut sidbrytningarna själv istället**, med samma
+`pdf-lib`-baserade riktiga fontmätning (`wrapTextLines`, nu delad
+mellan PDF- och IDML-exporten) som PDF-exporten redan bevisat
+använder för sin egen paginering. Varje sida får nu sin egen,
+oberoende Story — `PreviousTextFrame`/`NextTextFrame` är alltid `"n"`/
+`"n"`, ingen trådning kvar någonstans. Se `project_spec.md`,
+Ändringslogg v1.0.110 → v1.0.111, för fullständig teknisk genomgång.
+
+**Verifiering betydligt starkare än tidigare rundor:** ny test som
+bekräftar noll trådning och att varje stycke förekommer exakt en gång
+(inget duplicerat eller tappat); den syntetiska 20-kapitels-boken gav
+401 sidor (ner från 621) med samma garanti; en riktig export genom
+UI:t (60-styckens testkapitel) gav 10 sidor, godkändes av `xmllint`
+rent, och "Paragraph 0"/"Paragraph 59" förekom exakt en gång var.
+
+**Status: en fundamentalt annorlunda riskprofil än Delsteg 3–5 — hela
+den overifierade mekanismen (trådning) är borttagen, ersatt med
+återanvänd, bevisat fungerande kod, inte justerade parametrar på samma
+gissning.** Fortfarande ingen InDesign/Affinity i den här miljön. Mats
+bör testa igen — femte gången.
 
 ---
 

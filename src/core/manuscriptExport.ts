@@ -760,6 +760,59 @@ function drawOrnament(page: PDFPage, style: Exclude<Book["scene_break_style"], "
   page.drawSvgPath(path, { x: x - 12 * scale, y: y + 12 * scale, scale, color });
 }
 
+/** Greedy word-wrap using the font's real measured width — shared by PdfWriter and IDML's own pagination (packIdml), which needs the same real line-fitting math to know how much of a chapter fits on one fixed-size page before it has to start a new one. */
+function wrapTextLines(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
+  const words = text.split(/ +/).filter(Boolean);
+  if (words.length === 0) return [""];
+  const lines: string[] = [];
+  let line = "";
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (line && font.widthOfTextAtSize(candidate, size) > maxWidth) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = candidate;
+    }
+  }
+  lines.push(line);
+  return lines;
+}
+
+/**
+ * Same greedy word-wrap as `wrapTextLines`, but keeps each line's [start, end)
+ * back into `text` — needed so a caller can look up which formatting ranges
+ * fall in a given wrapped line. Measures every line in `font` regardless of
+ * what a word inside it will actually be drawn in (bold text is usually a
+ * little wider) — an accepted approximation, same spirit as this file's
+ * other per-format fidelity trade-offs: a line with a long bold run near the
+ * margin can very occasionally run a touch wide, never badly.
+ */
+function wrapTextLinesWithOffsets(text: string, font: PDFFont, size: number, maxWidth: number): { text: string; start: number; end: number }[] {
+  const words = [...text.matchAll(/\S+/g)];
+  if (words.length === 0) return [{ text: "", start: 0, end: 0 }];
+  const lines: { text: string; start: number; end: number }[] = [];
+  let line = "";
+  let lineStart = words[0]!.index!;
+  let lineEnd = lineStart;
+  for (const match of words) {
+    const word = match[0];
+    const wordStart = match.index!;
+    const candidate = line ? `${line} ${word}` : word;
+    if (line && font.widthOfTextAtSize(candidate, size) > maxWidth) {
+      lines.push({ text: line, start: lineStart, end: lineEnd });
+      line = word;
+      lineStart = wordStart;
+      lineEnd = wordStart + word.length;
+    } else {
+      line = candidate;
+      lineEnd = wordStart + word.length;
+    }
+  }
+  lines.push({ text: line, start: lineStart, end: lineEnd });
+  return lines;
+}
+
 class PdfWriter {
   private readonly pdf: PDFDocument;
   private readonly body: PDFFont;
@@ -783,59 +836,6 @@ class PdfWriter {
     this.maxWidth = pageWidth - margin * 2;
     this.page = pdf.addPage([pageWidth, pageHeight]);
     this.y = pageHeight - margin;
-  }
-
-  private wrap(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
-    const words = text.split(/ +/).filter(Boolean);
-    if (words.length === 0) return [""];
-    const lines: string[] = [];
-    let line = "";
-    for (const word of words) {
-      const candidate = line ? `${line} ${word}` : word;
-      if (line && font.widthOfTextAtSize(candidate, size) > maxWidth) {
-        lines.push(line);
-        line = word;
-      } else {
-        line = candidate;
-      }
-    }
-    lines.push(line);
-    return lines;
-  }
-
-  /**
-   * Same greedy word-wrap as `wrap`, but keeps each line's [start, end) back
-   * into `text` — needed so `prose()` can look up which formatting ranges
-   * fall in a given wrapped line. Measures every line in `font` regardless
-   * of what a word inside it will actually be drawn in (bold text is
-   * usually a little wider) — an accepted approximation, same spirit as
-   * this writer's other per-format fidelity trade-offs: a line with a long
-   * bold run near the margin can very occasionally run a touch wide, never
-   * badly.
-   */
-  private wrapWithOffsets(text: string, font: PDFFont, size: number, maxWidth: number): { text: string; start: number; end: number }[] {
-    const words = [...text.matchAll(/\S+/g)];
-    if (words.length === 0) return [{ text: "", start: 0, end: 0 }];
-    const lines: { text: string; start: number; end: number }[] = [];
-    let line = "";
-    let lineStart = words[0]!.index!;
-    let lineEnd = lineStart;
-    for (const match of words) {
-      const word = match[0];
-      const wordStart = match.index!;
-      const candidate = line ? `${line} ${word}` : word;
-      if (line && font.widthOfTextAtSize(candidate, size) > maxWidth) {
-        lines.push({ text: line, start: lineStart, end: lineEnd });
-        line = word;
-        lineStart = wordStart;
-        lineEnd = wordStart + word.length;
-      } else {
-        line = candidate;
-        lineEnd = wordStart + word.length;
-      }
-    }
-    lines.push({ text: line, start: lineStart, end: lineEnd });
-    return lines;
   }
 
   /** Draws one already-wrapped line run by run — bold switches to the embedded bold font, underline draws a manual rule under the run's measured width. Italic is intentionally not drawn differently: no italic font is embedded for any typeface, and pdf-lib can't synthesize one. */
@@ -869,7 +869,7 @@ class PdfWriter {
     if (!text) return;
     this.y -= size * 0.3;
     const lineHeight = size * 1.25;
-    for (const line of this.wrap(text, this.bold, size, this.maxWidth)) {
+    for (const line of wrapTextLines(text, this.bold, size, this.maxWidth)) {
       this.ensureSpace(lineHeight);
       this.page.drawText(line, { x: this.margin, y: this.y, size, font: this.bold, ...(this.color ? { color: this.color } : {}) });
       this.y -= lineHeight;
@@ -886,7 +886,7 @@ class PdfWriter {
         this.y -= lineHeight * 0.6;
         continue;
       }
-      for (const line of this.wrap(raw, font, size, this.maxWidth)) {
+      for (const line of wrapTextLines(raw, font, size, this.maxWidth)) {
         this.ensureSpace(lineHeight);
         this.page.drawText(line, {
           x: this.margin,
@@ -919,7 +919,7 @@ class PdfWriter {
           this.sceneBreak(sceneBreakStyle);
           continue;
         }
-        for (const line of this.wrapWithOffsets(raw.text, this.body, size, this.maxWidth)) {
+        for (const line of wrapTextLinesWithOffsets(raw.text, this.body, size, this.maxWidth)) {
           this.ensureSpace(lineHeight);
           this.drawStyledLine(line.text, raw.start + line.start, formatting, this.margin, size);
           this.y -= lineHeight;
@@ -935,7 +935,7 @@ class PdfWriter {
         this.sceneBreak(sceneBreakStyle);
         return;
       }
-      this.wrapWithOffsets(paragraph.text, font, size, this.maxWidth).forEach((line, lineIndex) => {
+      wrapTextLinesWithOffsets(paragraph.text, font, size, this.maxWidth).forEach((line, lineIndex) => {
         this.ensureSpace(lineHeight);
         const x = index > 0 && lineIndex === 0 ? this.margin + indent : this.margin;
         this.drawStyledLine(line.text, paragraph.start + line.start, formatting, x, size);
@@ -970,7 +970,7 @@ class PdfWriter {
   bullet(text: string, size = 11): void {
     const indent = 14;
     const lineHeight = size * 1.45;
-    this.wrap(text, this.body, size, this.maxWidth - indent).forEach((line, index) => {
+    wrapTextLines(text, this.body, size, this.maxWidth - indent).forEach((line, index) => {
       this.ensureSpace(lineHeight);
       this.page.drawText(index === 0 ? `• ${line}` : `  ${line}`, {
         x: this.margin + indent,
@@ -1146,28 +1146,15 @@ function idmlId(prefix: string): string {
 
 const IDML_BODY_SIZE = 12;
 const IDML_LINE_HEIGHT = IDML_BODY_SIZE * 1.4;
+const IDML_TITLE_SIZE = 28;
+const IDML_CHAPTER_HEADING_SIZE = 20;
 const IDML_PARA_END = "&#13;"; // the paragraph-end mark IDML stories expect — a literal \r byte would be silently normalized away by any XML parser per the XML 1.0 spec, so it has to be a character reference, not raw text
 
-/**
- * How many pages (text frames, threaded together) a chapter or the Story
- * Bible needs at the manuscript's chosen page size — not how tall one
- * custom page should be (that was the pre-v1.0.110 approach, and varying
- * page height per page is exactly what made InDesign distrust GeometricBounds
- * and reflow the whole document, see packIdml's own comment below).
- * InDesign/Affinity compute the real line-by-line text flow themselves once
- * the file is open — using their own font metrics, which this app has no
- * access to — so this only has to estimate generously enough that the
- * thread never runs out of frames; an overestimate just leaves a trailing
- * frame empty (cosmetic), while an underestimate would silently clip text
- * (the one outcome worth erring away from). Same character-count approach
- * `estimateChapterPageHeight` used before this, a 1.5x safety factor, plus
- * one whole extra page of headroom on top of that.
- */
-function estimateChapterPageCount(text: string, paragraphCount: number, columnWidth: number, columnHeight: number): number {
-  const charsPerLine = Math.max(20, Math.floor(columnWidth / (IDML_BODY_SIZE * 0.5)));
-  const estimatedLines = (Math.ceil(text.length / charsPerLine) + paragraphCount) * 1.5;
-  const linesPerPage = Math.max(1, Math.floor(columnHeight / IDML_LINE_HEIGHT));
-  return Math.max(1, Math.ceil(estimatedLines / linesPerPage)) + 1;
+/** Font size and line-height for a paragraph style — used to measure a block's real wrapped height (`idmlBlockHeight`) with the same numbers `idmlStylesXml` gives the style itself, so pagination's idea of how tall a Title/ChapterHeading block is matches what actually renders. */
+function idmlStyleMetrics(styleName: string): { size: number; lineHeight: number } {
+  if (styleName === "Title") return { size: IDML_TITLE_SIZE, lineHeight: IDML_TITLE_SIZE * 1.2 };
+  if (styleName === "ChapterHeading") return { size: IDML_CHAPTER_HEADING_SIZE, lineHeight: IDML_CHAPTER_HEADING_SIZE * 1.2 };
+  return { size: IDML_BODY_SIZE, lineHeight: IDML_LINE_HEIGHT };
 }
 
 function idmlCharacterAttrs(styles: ProseFormattingStyle[]): string {
@@ -1195,52 +1182,127 @@ function idmlParagraph(paragraphStyleName: string, runsXml: string, extraAttrs =
   return `<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/${paragraphStyleName}"${extraAttrs}>${runsXml}</ParagraphStyleRange>`;
 }
 
-/** Chapter body paragraphs, mirroring the same spaced/indented split and HR_BLOCK scene-break detection every other rich format uses — `splitFlowParagraphsWithOffsets`/`splitLinesWithOffsets` are exactly the offset-preserving tools this needs. */
-function idmlChapterParagraphs(
-  text: string,
-  formatting: ProseFormattingRange[],
-  paragraphStyle: ParagraphStyle,
-  dropCapLines: number,
-  sceneBreakStyle: Book["scene_break_style"]
-): string {
-  const dropCapAttr = (isFirst: boolean) => (isFirst && dropCapLines > 0 ? ` DropCapCharacters="1" DropCapLines="${dropCapLines}"` : "");
-  const sceneBreakParagraph = () =>
-    idmlParagraph("SceneBreak", idmlRun({ text: sceneBreakSymbol(sceneBreakStyle), styles: [] }, true));
+/**
+ * One paragraph-ish unit of chapter/bible content, kept separate from its
+ * eventual page and its rendered XML — `idmlBlockHeight` measures it with
+ * real font metrics before `paginateIdmlBlocks` decides which page it lands
+ * on, and only then does `idmlBlockXml` turn it into markup. `forceBold` is
+ * for Story Bible entity names, which are always bold with no formatting
+ * ranges of their own to express that (unlike chapter prose).
+ */
+type IdmlBlock =
+  | { kind: "sceneBreak" }
+  | { kind: "paragraph"; text: string; start: number; styleName: string; dropCapLines: number; forceBold?: boolean };
 
+/** Chapter body blocks, mirroring the same spaced/indented split and HR_BLOCK scene-break detection every other rich format uses — `splitFlowParagraphsWithOffsets`/`splitLinesWithOffsets` are exactly the offset-preserving tools this needs. Pagination (deciding which blocks land on which page) happens separately, in `paginateIdmlBlocks`. */
+function idmlChapterBlocks(text: string, paragraphStyle: ParagraphStyle, dropCapLines: number): IdmlBlock[] {
   if (paragraphStyle === "indented") {
     let firstUsed = false;
-    return splitFlowParagraphsWithOffsets(text)
-      .map((paragraph) => {
-        if (HR_BLOCK.test(paragraph.text)) return sceneBreakParagraph();
-        const isFirst = !firstUsed;
-        firstUsed = true;
-        const style = isFirst ? "BodyFirst" : "BodyIndented";
-        return idmlParagraph(style, idmlParagraphRuns(paragraph.text, paragraph.start, formatting), dropCapAttr(isFirst));
-      })
-      .join("");
-  }
-  let firstUsed = false;
-  return splitLinesWithOffsets(text)
-    .map((line) => {
-      if (!line.text) return idmlParagraph("Body", idmlRun({ text: "", styles: [] }, true));
-      if (HR_BLOCK.test(line.text)) return sceneBreakParagraph();
+    return splitFlowParagraphsWithOffsets(text).map((paragraph): IdmlBlock => {
+      if (HR_BLOCK.test(paragraph.text)) return { kind: "sceneBreak" };
       const isFirst = !firstUsed;
       firstUsed = true;
-      return idmlParagraph("Body", idmlParagraphRuns(line.text, line.start, formatting), dropCapAttr(isFirst));
-    })
-    .join("");
+      return {
+        kind: "paragraph",
+        text: paragraph.text,
+        start: paragraph.start,
+        styleName: isFirst ? "BodyFirst" : "BodyIndented",
+        dropCapLines: isFirst ? dropCapLines : 0
+      };
+    });
+  }
+  let firstUsed = false;
+  return splitLinesWithOffsets(text).map((line): IdmlBlock => {
+    if (!line.text) return { kind: "paragraph", text: "", start: line.start, styleName: "Body", dropCapLines: 0 };
+    if (HR_BLOCK.test(line.text)) return { kind: "sceneBreak" };
+    const isFirst = !firstUsed;
+    firstUsed = true;
+    return { kind: "paragraph", text: line.text, start: line.start, styleName: "Body", dropCapLines: isFirst ? dropCapLines : 0 };
+  });
 }
 
-function idmlBibleParagraphs(bible: ManuscriptExportSection[]): string {
-  const parts: string[] = [idmlParagraph("ChapterHeading", idmlParagraphRuns("Story Bible", 0, []))];
+function idmlBibleBlocks(bible: ManuscriptExportSection[]): IdmlBlock[] {
+  const blocks: IdmlBlock[] = [{ kind: "paragraph", text: "Story Bible", start: 0, styleName: "ChapterHeading", dropCapLines: 0 }];
   for (const section of bible) {
-    parts.push(idmlParagraph("ChapterHeading", idmlParagraphRuns(section.heading, 0, [])));
+    blocks.push({ kind: "paragraph", text: section.heading, start: 0, styleName: "ChapterHeading", dropCapLines: 0 });
     for (const entity of section.entities) {
-      parts.push(idmlParagraph("Body", idmlRun({ text: entity.name, styles: ["bold"] }, true)));
-      for (const line of entity.lines) parts.push(idmlParagraph("Body", idmlParagraphRuns(line, 0, [])));
+      blocks.push({ kind: "paragraph", text: entity.name, start: 0, styleName: "Body", dropCapLines: 0, forceBold: true });
+      for (const line of entity.lines) blocks.push({ kind: "paragraph", text: line, start: 0, styleName: "Body", dropCapLines: 0 });
     }
   }
-  return parts.join("");
+  return blocks;
+}
+
+function idmlBlockXml(block: IdmlBlock, formatting: ProseFormattingRange[], sceneBreakStyle: Book["scene_break_style"]): string {
+  if (block.kind === "sceneBreak") {
+    return idmlParagraph("SceneBreak", idmlRun({ text: sceneBreakSymbol(sceneBreakStyle), styles: [] }, true));
+  }
+  const dropCapAttr = block.dropCapLines > 0 ? ` DropCapCharacters="1" DropCapLines="${block.dropCapLines}"` : "";
+  if (!block.text) return idmlParagraph(block.styleName, idmlRun({ text: "", styles: [] }, true));
+  if (block.forceBold) return idmlParagraph(block.styleName, idmlRun({ text: block.text, styles: ["bold"] }, true));
+  return idmlParagraph(block.styleName, idmlParagraphRuns(block.text, block.start, formatting), dropCapAttr);
+}
+
+/**
+ * A block's real rendered height, in points — wrapped with the manuscript's
+ * actual embedded (or standard fallback) font, the same `wrapTextLines`
+ * pdf-lib-backed word-wrap PdfWriter uses for its own real pagination, not a
+ * character-count guess. Measured at the block's real style size
+ * (`idmlStyleMetrics` — Title/ChapterHeading are far larger than body text)
+ * and in the bold font for anything that renders bold (headings, and Story
+ * Bible entity names), since bold glyphs measure a little wider and using
+ * the regular font there would risk undercounting wrapped lines. `SpaceAfter`
+ * adds a little more space after each paragraph than the raw line count
+ * accounts for; the flat `+ size * 0.3` allowance approximates it rather
+ * than re-deriving Styles.xml's own SpaceAfter value here.
+ */
+function idmlBlockHeight(block: IdmlBlock, bodyFont: PDFFont, boldFont: PDFFont, columnWidth: number): number {
+  if (block.kind === "sceneBreak") return IDML_LINE_HEIGHT * 2;
+  if (!block.text) return IDML_LINE_HEIGHT;
+  const { size, lineHeight } = idmlStyleMetrics(block.styleName);
+  const isBold = block.forceBold || block.styleName === "Title" || block.styleName === "ChapterHeading";
+  const lineCount = wrapTextLines(block.text, isBold ? boldFont : bodyFont, size, columnWidth).length;
+  return lineCount * lineHeight + size * 0.3;
+}
+
+/**
+ * Packs blocks onto pages of real, known capacity — this (not InDesign/
+ * Affinity auto-flowing a threaded story across frames) is what decides
+ * page breaks. An earlier version of this writer created several
+ * `PreviousTextFrame`/`NextTextFrame`-threaded frames per chapter and let
+ * the reader application work out which text lands on which page; a real
+ * test showed that produced far too many pages and no visible text at all
+ * in either InDesign or Affinity — the threading syntax follows the IDML
+ * spec, but with no real reference IDML file to verify against (ComicBook
+ * AI's own exporter doesn't thread frames either), it isn't trustworthy
+ * enough to build pagination on. Measuring each block's real height with
+ * the manuscript's actual font (`idmlBlockHeight`) and deciding page breaks
+ * here instead means every page's Story contains exactly the text that
+ * belongs on it — nothing is left for the reader application to compute,
+ * so there's nothing for it to get wrong. A block taller than a whole page
+ * by itself (a very long single paragraph) is still placed alone on its own
+ * page rather than split mid-paragraph — a rare, accepted edge case, safer
+ * than the added complexity of slicing formatting ranges mid-block. The
+ * chapter heading is simply the first block of its chapter's own block
+ * list, so it's paginated the same as everything else — no separate
+ * "shorter first page" budget needed.
+ */
+function paginateIdmlBlocks(blocks: IdmlBlock[], bodyFont: PDFFont, boldFont: PDFFont, columnWidth: number, pageHeight: number): IdmlBlock[][] {
+  const pages: IdmlBlock[][] = [];
+  let current: IdmlBlock[] = [];
+  let remaining = pageHeight;
+  for (const block of blocks) {
+    const height = idmlBlockHeight(block, bodyFont, boldFont, columnWidth);
+    if (current.length > 0 && height > remaining) {
+      pages.push(current);
+      current = [];
+      remaining = pageHeight;
+    }
+    current.push(block);
+    remaining -= height;
+  }
+  pages.push(current);
+  return pages;
 }
 
 function idmlStoryXml(storyId: string, paragraphsXml: string): string {
@@ -1255,12 +1317,12 @@ function idmlStoryXml(storyId: string, paragraphsXml: string): string {
 }
 
 /**
- * One page, with one TextFrame threaded to `previousTextFrame`/
- * `nextTextFrame` ("n" at either end of a chain) — several of these sharing
- * one `storyId` is what makes a chapter's text flow from page to page:
- * InDesign computes at open time how much of the Story's text fits in each
- * frame and carries the rest into the next one, the same as a real
- * multi-page layout, not something this writer estimates line-by-line.
+ * One page, with one TextFrame holding exactly the text `paginateIdmlBlocks`
+ * decided belongs on it — never threaded to another frame (`Previous`/
+ * `NextTextFrame` are always "n"), since each page's Story is already a
+ * complete, self-contained chunk. See `paginateIdmlBlocks` for why this
+ * writer paginates itself rather than relying on the reader application to
+ * flow a threaded story across frames.
  */
 function idmlSpreadXml(
   spreadId: string,
@@ -1270,9 +1332,7 @@ function idmlSpreadXml(
   pageWidth: number,
   pageHeight: number,
   margin: number,
-  label: string,
-  previousTextFrame = "n",
-  nextTextFrame = "n"
+  label: string
 ): string {
   const columnWidth = pageWidth - margin * 2;
   const textFrameBounds = `${margin} ${margin} ${pageHeight - margin} ${pageWidth - margin}`;
@@ -1282,7 +1342,7 @@ function idmlSpreadXml(
     <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
       <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
     </Page>
-    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ItemTransform="1 0 0 1 0 0" GeometricBounds="${textFrameBounds}">
+    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="n" NextTextFrame="n" ContentType="TextType" ItemTransform="1 0 0 1 0 0" GeometricBounds="${textFrameBounds}">
       <TextFramePreference TextColumnCount="1" TextColumnFixedWidth="${columnWidth}" UseFlexibleColumnWidth="false" FirstBaselineOffset="AscentOffset" VerticalJustification="TopAlign" InsetSpacing="0 0 0 0"/>
     </TextFrame>
   </Spread>
@@ -1356,10 +1416,10 @@ function idmlStylesXml(fontName: string, bodyWeight: BodyWeight): string {
   </RootCharacterStyleGroup>
   <RootParagraphStyleGroup Self="u_pcg">
     <ParagraphStyle Self="ParagraphStyle/$ID/[No paragraph style]" Name="$ID/[No paragraph style]"/>
-    <ParagraphStyle Self="ParagraphStyle/Title" Name="Title" PointSize="28" FontStyle="Bold" Justification="LeftAlign" SpaceAfter="18">
+    <ParagraphStyle Self="ParagraphStyle/Title" Name="Title" PointSize="${IDML_TITLE_SIZE}" FontStyle="Bold" Justification="LeftAlign" SpaceAfter="18">
       <Properties><AppliedFont type="string">${escaped}</AppliedFont></Properties>
     </ParagraphStyle>
-    <ParagraphStyle Self="ParagraphStyle/ChapterHeading" Name="ChapterHeading" PointSize="20" FontStyle="Bold" Justification="LeftAlign" SpaceBefore="24" SpaceAfter="14">
+    <ParagraphStyle Self="ParagraphStyle/ChapterHeading" Name="ChapterHeading" PointSize="${IDML_CHAPTER_HEADING_SIZE}" FontStyle="Bold" Justification="LeftAlign" SpaceBefore="24" SpaceAfter="14">
       <Properties><AppliedFont type="string">${escaped}</AppliedFont></Properties>
     </ParagraphStyle>
     <ParagraphStyle Self="ParagraphStyle/Body" Name="Body" PointSize="${IDML_BODY_SIZE}" Leading="${IDML_LINE_HEIGHT}" FontStyle="${bodyFontStyle}" SpaceAfter="${IDML_BODY_SIZE}">
@@ -1384,20 +1444,25 @@ function idmlStylesXml(fontName: string, bodyWeight: BodyWeight): string {
  * own choosing, confirmed by a real test where every page came out the
  * same unrelated height and all but one chapter's text went missing. A
  * chapter (or the Story Bible) that needs more than one page gets several
- * pages, their TextFrames threaded together on one shared Story — see
- * `idmlSpreadXml` — so the text actually flows from page to page the way a
- * real book layout would, rather than being squeezed onto one tall page.
- * `bodyColor` isn't carried into IDML: unlike a screen-reading preference,
- * a print-layout document's color is squarely the author's own call to
- * make once it's in InDesign, not something worth guessing a swatch for
- * here.
+ * pages — each one carrying exactly the text `paginateIdmlBlocks` measured
+ * to fit on it, never threaded to another frame, so there's nothing left
+ * for InDesign/Affinity to compute (and nothing for them to get wrong) when
+ * the file is opened; see `paginateIdmlBlocks` for why an earlier,
+ * thread-and-let-the-reader-flow-it version of this was abandoned after a
+ * real test showed far too many pages and no visible text at all. Async
+ * now (unlike every other pack* export) because that pagination needs real
+ * font metrics — the same embedded (or standard fallback) font `packPdf`
+ * already embeds, for the same reason. `bodyColor` isn't carried into
+ * IDML: unlike a screen-reading preference, a print-layout document's
+ * color is squarely the author's own call to make once it's in InDesign,
+ * not something worth guessing a swatch for here.
  */
-export function packIdml(
+export async function packIdml(
   doc: ManuscriptExport,
   font?: PublishFont,
   paragraphStyle: ParagraphStyle = "spaced",
   bodyWeight: BodyWeight = "regular"
-): Uint8Array {
+): Promise<Uint8Array> {
   idmlIdCounter = 0;
   const fontName = font?.name ?? "Times New Roman";
   const masterSelf = idmlId("uMaster");
@@ -1407,64 +1472,70 @@ export function packIdml(
   const columnWidth = pageWidth - margin * 2;
   const columnHeight = pageHeight - margin * 2;
 
+  // Only used to measure real wrapped line counts (idmlBlockHeight) — no
+  // PDF page is ever created or kept, this PDFDocument exists purely to
+  // borrow pdf-lib's font metrics, the same ones packPdf uses for its own
+  // real pagination.
+  const metricsPdf = await PDFDocument.create();
+  let bodyMetricsFont: PDFFont;
+  let boldMetricsFont: PDFFont;
+  if (font?.embed) {
+    metricsPdf.registerFontkit(fontkit);
+    bodyMetricsFont = await metricsPdf.embedFont(font.embed.regular);
+    boldMetricsFont = await metricsPdf.embedFont(font.embed.bold);
+  } else {
+    bodyMetricsFont = await metricsPdf.embedFont(StandardFonts.TimesRoman);
+    boldMetricsFont = await metricsPdf.embedFont(StandardFonts.TimesRomanBold);
+  }
+  const measuringFont = bodyWeight === "bold" ? boldMetricsFont : bodyMetricsFont;
+
   const otherFiles: { name: string; data: Uint8Array }[] = [];
   const storyIds: string[] = [];
   const spreadRefs: string[] = [];
   const storyRefs: string[] = [];
 
-  const units: { label: string; paragraphsXml: string; pageCount: number }[] = [];
+  const units: { label: string; blocks: IdmlBlock[]; formatting: ProseFormattingRange[] }[] = [];
 
-  const titleParts: string[] = [idmlParagraph("Title", idmlParagraphRuns(doc.title, 0, []))];
-  titleParts.push(idmlParagraph("Body", idmlParagraphRuns(doc.exportedLabel, 0, [])));
-  if (doc.note) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(doc.note, 0, [])));
-  if (doc.voice) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Voice: ${doc.voice}`, 0, [])));
-  if (doc.viewpoint) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Viewpoint: ${doc.viewpoint}`, 0, [])));
-  if (doc.readerAge !== undefined) titleParts.push(idmlParagraph("Body", idmlParagraphRuns(`Reader: ${doc.readerAge}`, 0, [])));
-  units.push({ label: doc.title, paragraphsXml: titleParts.join(""), pageCount: 1 });
+  const titleBlocks: IdmlBlock[] = [{ kind: "paragraph", text: doc.title, start: 0, styleName: "Title", dropCapLines: 0 }];
+  titleBlocks.push({ kind: "paragraph", text: doc.exportedLabel, start: 0, styleName: "Body", dropCapLines: 0 });
+  if (doc.note) titleBlocks.push({ kind: "paragraph", text: doc.note, start: 0, styleName: "Body", dropCapLines: 0 });
+  if (doc.voice) titleBlocks.push({ kind: "paragraph", text: `Voice: ${doc.voice}`, start: 0, styleName: "Body", dropCapLines: 0 });
+  if (doc.viewpoint) titleBlocks.push({ kind: "paragraph", text: `Viewpoint: ${doc.viewpoint}`, start: 0, styleName: "Body", dropCapLines: 0 });
+  if (doc.readerAge !== undefined) titleBlocks.push({ kind: "paragraph", text: `Reader: ${doc.readerAge}`, start: 0, styleName: "Body", dropCapLines: 0 });
+  units.push({ label: doc.title, blocks: titleBlocks, formatting: [] });
 
   for (const chapter of doc.chapters) {
-    const parts: string[] = [idmlParagraph("ChapterHeading", idmlParagraphRuns(chapter.heading, 0, []))];
-    if (chapter.voice) parts.push(idmlParagraph("Body", idmlParagraphRuns(`Voice: ${chapter.voice}`, 0, [])));
-    if (chapter.rawProse) {
-      parts.push(idmlChapterParagraphs(chapter.rawProse, chapter.formatting, paragraphStyle, doc.dropCapLines, doc.sceneBreakStyle));
-    }
-    const pageCount = chapter.rawProse
-      ? estimateChapterPageCount(chapter.rawProse, splitLinesWithOffsets(chapter.rawProse).length, columnWidth, columnHeight)
-      : 1;
-    units.push({ label: chapter.heading, paragraphsXml: parts.join(""), pageCount });
+    const blocks: IdmlBlock[] = [{ kind: "paragraph", text: chapter.heading, start: 0, styleName: "ChapterHeading", dropCapLines: 0 }];
+    if (chapter.voice) blocks.push({ kind: "paragraph", text: `Voice: ${chapter.voice}`, start: 0, styleName: "Body", dropCapLines: 0 });
+    if (chapter.rawProse) blocks.push(...idmlChapterBlocks(chapter.rawProse, paragraphStyle, doc.dropCapLines));
+    units.push({ label: chapter.heading, blocks, formatting: chapter.formatting });
   }
 
   if (doc.bible.length > 0) {
-    const bibleText = doc.bible.flatMap((section) => section.entities.flatMap((entity) => [entity.name, ...entity.lines])).join(" ");
-    const paragraphCount = doc.bible.reduce((count, section) => count + section.entities.length * 2, 1);
-    const pageCount = estimateChapterPageCount(bibleText, paragraphCount, columnWidth, columnHeight);
-    units.push({ label: "Story Bible", paragraphsXml: idmlBibleParagraphs(doc.bible), pageCount });
+    units.push({ label: "Story Bible", blocks: idmlBibleBlocks(doc.bible), formatting: [] });
   }
 
   for (const unit of units) {
-    const storySelf = idmlId("uStory");
-    storyIds.push(storySelf);
-    otherFiles.push({ name: `Stories/Story_${storySelf}.xml`, data: utf8(idmlStoryXml(storySelf, unit.paragraphsXml)) });
-    storyRefs.push(`  <idPkg:Story src="Stories/Story_${storySelf}.xml"/>`);
-
-    const frameIds = Array.from({ length: unit.pageCount }, () => idmlId("uFrame"));
-    for (let index = 0; index < unit.pageCount; index += 1) {
+    const pages = paginateIdmlBlocks(unit.blocks, measuringFont, boldMetricsFont, columnWidth, columnHeight);
+    for (let index = 0; index < pages.length; index += 1) {
+      const storySelf = idmlId("uStory");
       const spreadSelf = idmlId("uSpread");
       const pageSelf = idmlId("uPage");
+      const frameSelf = idmlId("uFrame");
       const label = index === 0 ? unit.label : `${unit.label} (${index + 1})`;
-      const previousTextFrame = index > 0 ? frameIds[index - 1]! : "n";
-      const nextTextFrame = index < unit.pageCount - 1 ? frameIds[index + 1]! : "n";
+      const paragraphsXml = pages[index]!.map((block) => idmlBlockXml(block, unit.formatting, doc.sceneBreakStyle)).join("");
+      storyIds.push(storySelf);
+      otherFiles.push({ name: `Stories/Story_${storySelf}.xml`, data: utf8(idmlStoryXml(storySelf, paragraphsXml)) });
+      storyRefs.push(`  <idPkg:Story src="Stories/Story_${storySelf}.xml"/>`);
       otherFiles.push({
         name: `Spreads/Spread_${spreadSelf}.xml`,
-        data: utf8(
-          idmlSpreadXml(spreadSelf, pageSelf, frameIds[index]!, storySelf, pageWidth, pageHeight, margin, label, previousTextFrame, nextTextFrame)
-        )
+        data: utf8(idmlSpreadXml(spreadSelf, pageSelf, frameSelf, storySelf, pageWidth, pageHeight, margin, label))
       });
       spreadRefs.push(`  <idPkg:Spread src="Spreads/Spread_${spreadSelf}.xml"/>`);
     }
   }
 
-  const pageCount = units.reduce((count, unit) => count + unit.pageCount, 0);
+  const pageCount = spreadRefs.length;
 
   // No default `xmlns=` on <Document> — only the idPkg: prefix resource
   // references need a namespace; Document and its children (Layer, Page,

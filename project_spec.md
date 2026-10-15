@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.110
+Status: living document, v1.0.111
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4885,6 +4885,119 @@ egen dokumenterade konvention för flödande text, inte en gissning, men
 väntar på ett riktigt test för att bekräftas.
 
 v1.0.109 → v1.0.110.
+
+**Ändringslogg v1.0.110 → v1.0.111 (2026-10-15):** IDML-exportens
+trådningsmekanism (PreviousTextFrame/NextTextFrame) ersatt med egen,
+verklig sidindelning — rättad efter Mats fjärde riktiga test, det
+hittills allvarligaste felet.
+
+**Mats rapport:** "Affinity får 115 sidor och Indesign 229 sidor.
+Ingen text vad jag kan se. När jag kollar IDML filen så verkar XML
+säga 115 spreads. 229 sidor är 115 spreads om ett spread blir 1 sida...
+Vet inte om det är någon ledtråd. Jag hittade texter i katalogen
+sidor..." — dvs texten FANNS i de råa Story-XML-filerna (han fick
+gräva i den extraherade zippen för att hitta den), men syntes inte
+alls i vare sig InDesign eller Affinity när filen öppnades.
+
+**Egen strukturell revision innan någon ny rättning gissades fram**
+(lärdom från tidigare rundor: gissa inte en femte gång på måfå).
+Byggde en syntetisk 20-kapitels-bok (liknande Mats verkliga manus i
+storlek) och körde den genom `packIdml` direkt, utan UI, för att
+inspektera råa tal: `PagesPerDocument` i Preferences.xml matchade
+exakt antalet `<Page>`-element i alla Spread-filer (621 i det
+syntetiska testet — inget dolt 2x-fel i min egen räkning), alla
+`designmap.xml`-referenser pekade på filer som faktiskt fanns i
+zippen, och en separat kontroll av en bok UTAN page_size/page_margin
+(simulerar ett gammalt sparat bokobjekt) visade att zod:s defaults
+fylls i korrekt — ingen `NaN`/`undefined` läcker in i XML:en någonstans.
+Så Mats "229 ≈ 2×115"-observation förklaras inte av ett dubbleringsfel
+i min egen kod — gåtan satt i hur InDesign/Affinity faktiskt TOLKAR
+trådningen, inte i vad jag genererade.
+
+**Hämtade ComicBook AI-repot på nytt** (`git fetch`, ny commit
+`b0ecc6f` sedan förra gången) för att se om deras IDML-export någonsin
+fått trådning — svaret: nej, fortfarande oförändrad sedan `b388e4f`,
+fortfarande en sida per kapitel/panel, ingen `PreviousTextFrame`/
+`NextTextFrame`-kod alls. Det bekräftade att trådningsmekanismen jag
+byggde i v1.0.110 ALDRIG haft någon verklig referensimplementation att
+jämföras mot — jag byggde den helt från egen kunskap om IDML-
+specifikationen, och den gick inte att verifiera förrän Mats testade
+den i en riktig InDesign/Affinity-installation. Det är precis den typ
+av overifierad gissning som tidigare rundor (v1.0.108, v1.0.109) lyckades
+undvika genom att ha en konkret referens att jämföra mot.
+
+**Beslut: ge upp trådning helt, bygg egen sidindelning istället.**
+IDML behöver inte innehålla färdig radbrytning i förväg eftersom
+InDesign/Affinity normalt räknar ut textflödet själva — MEN det kräver
+tydligen en trådningsmekanism som fungerar, och jag har inget sätt att
+verifiera att min gör det. Lösningen: sluta lita på läsarprogrammets
+egen flödning helt, och räkna ut sidbrytningarna SJÄLV, med RIKTIGA
+fontmått — samma `pdf-lib`-baserade radbrytning (`wrapTextLines`/
+`wrapTextLinesWithOffsets`, nu flyttade till modulnivå och delade
+mellan PDF- och IDML-exporten) som PDF-exporten redan använder för sin
+egen, bevisat fungerande paginering.
+
+**Ny arkitektur i `manuscriptExport.ts`:**
+1. `IdmlBlock` — ett stycke/scenbrytare, separerat från sin eventuella
+   sida OCH sin renderade XML. `idmlChapterBlocks`/`idmlBibleBlocks`
+   bygger blocklistan (samma spaced/indented-uppdelning som tidigare),
+   `idmlBlockXml` renderar ETT block till XML, `idmlBlockHeight` mäter
+   ETT blocks verkliga höjd.
+2. `idmlBlockHeight(block, bodyFont, boldFont, columnWidth)` — radbryter
+   blockets text med `wrapTextLines` vid dess verkliga stilstorlek
+   (`idmlStyleMetrics`: Title 28pt, ChapterHeading 20pt, Body 12pt — nya
+   namngivna konstanter, delade med `idmlStylesXml` så de aldrig kan
+   glida isär), i fetstil-fonten för rubriker/tvingat fet text (Story
+   Bible-namn) eftersom fet text mäter bredare och skulle annars kunna
+   underskatta radantalet.
+3. `paginateIdmlBlocks(blocks, bodyFont, boldFont, columnWidth,
+   pageHeight)` — en enkel girig packningsalgoritm: lägg block på
+   aktuell sida tills nästa block inte får plats, starta då en ny sida.
+   Kapitelrubriken är numera bara FÖRSTA blocket i kapitlets egen
+   blocklista, så den paginerar som allt annat — inget separat
+   "kortare första sida"-specialfall behövs längre. Ett enda block som
+   är högre än en hel sida (ett extremt långt enda stycke) placeras
+   ensamt på sin egen sida snarare än delas mitt i — en accepterad,
+   sällsynt avvägning, säkrare än komplexiteten i att dela
+   formateringsintervall mitt i ett block.
+4. `packIdml` blev `async` (enda `pack*`-funktionen förutom `packPdf`
+   som redan var det) eftersom paginering kräver riktiga fontmått —
+   samma `embedFont`-mönster som `packPdf` redan använder, fast bara
+   för att LÅNA fontmåtten, ingen PDF-sida skapas någonsin. Varje sida
+   får nu sin EGEN, oberoende Story (aldrig delad, aldrig trådad) —
+   `PreviousTextFrame`/`NextTextFrame` är nu ALLTID `"n"`/`"n"` i
+   `idmlSpreadXml`, vars signatur tappade de båda trådningsparametrarna
+   helt.
+
+**Verifiering, betydligt starkare än tidigare rundor:**
+- Ny test ("paginates a long chapter into several pages, each a
+  separate, non-threaded Story with its own real content") som bygger
+  ett 80-styckens kapitel, bekräftar fler än en sida behövs, att INGEN
+  Spread har annat än `"n"`/`"n"`-trådning, och att första/sista
+  stycket bara förekommer EN gång var i hela exporten (inget
+  duplicerat eller tappat innehåll).
+- Den syntetiska 20-kapitels-boken kördes om genom hela den nya
+  koden: 401 sidor (ner från 621 i samma test före rättningen — mer
+  rimligt för textmängden), noll trådningsreferenser kvar, och
+  "Paragraph 0."/"Paragraph 39." (kapitel 1:s första och sista
+  textstycke) förekommer exakt 20 gånger var — en gång per kapitel,
+  aldrig duplicerat inom ett kapitel, aldrig tappat.
+- En riktig export genom UI:t (60-styckens testkapitel) gav 10 sidor,
+  `xmllint --noout` godkände varenda XML-fil, alla 10 Spreads hade
+  exakt `PreviousTextFrame="n" NextTextFrame="n"`, alla delade samma
+  432×648pt (6×9 tum) `GeometricBounds`, och "Paragraph 0 of"/
+  "Paragraph 59 of" förekom exakt en gång var i Stories-katalogen.
+- Hela testsviten (1053 test, 79 filer), `tsc --noEmit` och
+  `npm run build` kördes rent.
+
+**Fortfarande kvar: InDesign/Affinity-öppningstestet självt**, men med
+en fundamentalt annorlunda riskprofil än tidigare rundor — den här
+rättningen tar bort HELA den overifierade mekanismen (trådning) istället
+för att justera dess parametrar, och ersätter den med en som återanvänder
+redan bevisat fungerande kod (PDF-exportens egen fontmätning/radbrytning).
+Mats bör testa igen — femte gången.
+
+v1.0.110 → v1.0.111.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

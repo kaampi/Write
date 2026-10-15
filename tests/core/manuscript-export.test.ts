@@ -423,8 +423,8 @@ describe("IDML export", () => {
     return book;
   }
 
-  it("packs a well-formed zip with mimetype first and uncompressed", () => {
-    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+  it("packs a well-formed zip with mimetype first and uncompressed", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     expect(idml[0]).toBe(0x50);
     expect(idml[1]).toBe(0x4b);
     const files = unzipStore(idml);
@@ -432,8 +432,8 @@ describe("IDML export", () => {
     expect(Object.keys(files)[0]).toBe("mimetype");
   });
 
-  it("produces only well-formed XML files, and leaves brainstorm out", () => {
-    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+  it("produces only well-formed XML files, and leaves brainstorm out", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     for (const [name, data] of Object.entries(files)) {
       if (!name.endsWith(".xml")) continue;
@@ -446,49 +446,51 @@ describe("IDML export", () => {
     expect(everyXmlText).not.toContain("secret stowaway");
   });
 
-  it("gives every chapter its own Story (one or more threaded Spreads), referenced from designmap.xml", () => {
-    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+  it("gives every page its own Story and Spread, one-to-one, referenced from designmap.xml", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     const designmap = new TextDecoder().decode(files["designmap.xml"]!);
     const spreadFiles = Object.keys(files).filter((name) => name.startsWith("Spreads/"));
     const storyFiles = Object.keys(files).filter((name) => name.startsWith("Stories/"));
-    // Title page + 2 chapters = 3 Stories; at least that many Spreads (a short chapter can still need more than one page).
+    // Title page + 2 short chapters = 3 pages, each with its own Story (never threaded, never shared).
     expect(storyFiles.length).toBe(3);
-    expect(spreadFiles.length).toBeGreaterThanOrEqual(3);
+    expect(spreadFiles.length).toBe(3);
     for (const path of [...spreadFiles, ...storyFiles]) {
       expect(designmap).toContain(`src="${path}"`);
     }
   });
 
-  it("threads a multi-page chapter's TextFrames together on one shared Story", () => {
+  it("paginates a long chapter into several pages, each a separate, non-threaded Story with its own real content", async () => {
     let book = bookWithTwoChapters();
     const longProse = Array.from({ length: 80 }, (_, i) => `Paragraph number ${i} with enough words to take up real space on the page.`).join(
       "\n\n"
     );
     book = updateChapter(book, book.chapters[0]!.id, { prose: longProse, formatting: [] });
-    const idml = packIdml(buildManuscriptExport(book));
+    const idml = await packIdml(buildManuscriptExport(book));
     const files = unzipStore(idml);
-    const storySelf = Object.entries(files)
+    const storyTexts = Object.entries(files)
       .filter(([name]) => name.startsWith("Stories/"))
-      .map(([, data]) => new TextDecoder().decode(data))
-      .find((text) => text.includes("Paragraph number 0"))
-      ?.match(/Story Self="([^"]+)"/)?.[1];
-    expect(storySelf).toBeDefined();
-    const framesForStory = Object.entries(files)
+      .map(([, data]) => new TextDecoder().decode(data));
+    const chapterStories = storyTexts.filter((text) => /Paragraph number \d+/.test(text));
+    // The long chapter alone should need more than one page at 6x9in.
+    expect(chapterStories.length).toBeGreaterThan(1);
+    // No threading at all — every TextFrame stands alone.
+    const spreadTexts = Object.entries(files)
       .filter(([name]) => name.startsWith("Spreads/"))
-      .map(([, data]) => new TextDecoder().decode(data))
-      .filter((text) => text.includes(`ParentStory="${storySelf}"`));
-    expect(framesForStory.length).toBeGreaterThan(1);
-    const previousRefs = framesForStory.map((text) => text.match(/PreviousTextFrame="([^"]+)"/)?.[1]);
-    const nextRefs = framesForStory.map((text) => text.match(/NextTextFrame="([^"]+)"/)?.[1]);
-    expect(previousRefs[0]).toBe("n");
-    expect(nextRefs[nextRefs.length - 1]).toBe("n");
-    expect(previousRefs.slice(1).every((ref) => ref !== "n")).toBe(true);
-    expect(nextRefs.slice(0, -1).every((ref) => ref !== "n")).toBe(true);
+      .map(([, data]) => new TextDecoder().decode(data));
+    for (const text of spreadTexts) {
+      expect(text).toContain('PreviousTextFrame="n"');
+      expect(text).toContain('NextTextFrame="n"');
+    }
+    // Each chapter page's Story holds different text — paragraph 0 only on the first of them, not repeated on every page.
+    const storiesWithParagraphZero = chapterStories.filter((text) => text.includes(">Paragraph number 0 "));
+    expect(storiesWithParagraphZero.length).toBe(1);
+    const lastChapterStory = chapterStories[chapterStories.length - 1]!;
+    expect(lastChapterStory).toContain("Paragraph number 79");
   });
 
-  it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", () => {
-    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+  it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     const storyWithLocked = Object.entries(files)
       .filter(([name]) => name.startsWith("Stories/"))
@@ -499,7 +501,7 @@ describe("IDML export", () => {
     expect(storyWithLocked).toMatch(/<Content>locked<\/Content>/);
   });
 
-  it("adds a Story Bible page only when there are locked facts to show", () => {
+  it("adds a Story Bible page only when there are locked facts to show", async () => {
     let book = bookWithTwoChapters();
     book = {
       ...book,
@@ -517,16 +519,16 @@ describe("IDML export", () => {
         }
       ]
     };
-    const withBibleText = new TextDecoder().decode(packIdml(buildManuscriptExport(book)));
+    const withBibleText = new TextDecoder().decode(await packIdml(buildManuscriptExport(book)));
     expect(withBibleText).toContain("Story Bible");
     expect(withBibleText).toContain("Bartender at the Aurora Room");
 
-    const emptyBibleText = new TextDecoder().decode(packIdml(buildManuscriptExport(bookWithTwoChapters())));
+    const emptyBibleText = new TextDecoder().decode(await packIdml(buildManuscriptExport(bookWithTwoChapters())));
     expect(emptyBibleText).not.toContain("Story Bible");
   });
 
-  it("keeps the master spread unapplied to every real page", () => {
-    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+  it("keeps the master spread unapplied to every real page", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     const spreadTexts = Object.entries(files)
       .filter(([name]) => name.startsWith("Spreads/"))
@@ -536,8 +538,8 @@ describe("IDML export", () => {
     }
   });
 
-  it("gives every real page the same GeometricBounds height, matching Preferences.xml", () => {
-    const idml = packIdml(buildManuscriptExport(bookWithTwoChapters()));
+  it("gives every real page the same GeometricBounds height, matching Preferences.xml", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     const spreadTexts = Object.entries(files)
       .filter(([name]) => name.startsWith("Spreads/"))
@@ -575,7 +577,7 @@ describe("page size", () => {
     expect(odtStylesXml).toContain('fo:page-height="648pt"');
     expect(odtStylesXml).toContain('fo:margin-top="54pt"');
 
-    const idmlFiles = unzipStore(packIdml(doc));
+    const idmlFiles = unzipStore(await packIdml(doc));
     const preferences = new TextDecoder().decode(idmlFiles["Resources/Preferences.xml"]!);
     expect(preferences).toContain('PageWidth="432"');
     expect(preferences).toContain('PageHeight="648"');
@@ -598,7 +600,7 @@ describe("page size", () => {
     expect(odtStylesXml).toContain('fo:page-width="595.28pt"');
     expect(odtStylesXml).toContain('fo:margin-left="72pt"');
 
-    const preferences = new TextDecoder().decode(unzipStore(packIdml(doc))["Resources/Preferences.xml"]!);
+    const preferences = new TextDecoder().decode(unzipStore(await packIdml(doc))["Resources/Preferences.xml"]!);
     expect(preferences).toContain('PageWidth="595.28"');
     expect(preferences).toContain('PageHeight="841.89"');
   });

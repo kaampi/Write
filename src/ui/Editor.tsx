@@ -621,7 +621,7 @@ export function Editor() {
     } else {
       downloadBytes(
         ensureDownloadFilename(publishFilename, "idml"),
-        packIdml(doc, font, publishParagraphStyle, book.body_font_weight),
+        await packIdml(doc, font, publishParagraphStyle, book.body_font_weight),
         "application/vnd.adobe.indesign-idml-package"
       );
     }
