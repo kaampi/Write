@@ -1365,6 +1365,10 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * pages the same way — showed every page correctly. Found the same way as
  * the PathGeometry fix above: ComicBook AI's own IDML writer sets this
  * `false` in both places, never `true`.
+ *
+ * `previousTextFrame`/`nextTextFrame` ("n" at either end of a chain) thread
+ * this frame to another one sharing the same `storyId` — see `packIdml`'s
+ * own comment for why threading is back after being abandoned once already.
  */
 function idmlSpreadXml(
   spreadId: string,
@@ -1374,7 +1378,9 @@ function idmlSpreadXml(
   pageWidth: number,
   pageHeight: number,
   margin: number,
-  label: string
+  label: string,
+  previousTextFrame = "n",
+  nextTextFrame = "n"
 ): string {
   const columnWidth = pageWidth - margin * 2;
   const columnHeight = pageHeight - margin * 2;
@@ -1384,7 +1390,7 @@ function idmlSpreadXml(
     <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
       <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
     </Page>
-    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="n" NextTextFrame="n" ContentType="TextType" ItemTransform="1 0 0 1 ${margin} ${margin}">
+    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ItemTransform="1 0 0 1 ${margin} ${margin}">
       ${idmlRectPathGeometry(columnWidth, columnHeight)}
       <TextFramePreference TextColumnCount="1" TextColumnFixedWidth="${columnWidth}" UseFlexibleColumnWidth="false" FirstBaselineOffset="AscentOffset" VerticalJustification="TopAlign" InsetSpacing="0 0 0 0"/>
     </TextFrame>
@@ -1486,17 +1492,36 @@ function idmlStylesXml(fontName: string, bodyWeight: BodyWeight): string {
  * GeometricBounds and instead reflow the whole document to a size of its
  * own choosing, confirmed by a real test where every page came out the
  * same unrelated height and all but one chapter's text went missing. A
- * chapter (or the Story Bible) that needs more than one page gets several
- * pages — each one carrying exactly the text `paginateIdmlBlocks` measured
- * to fit on it, never threaded to another frame, so there's nothing left
- * for InDesign/Affinity to compute (and nothing for them to get wrong) when
- * the file is opened; see `paginateIdmlBlocks` for why an earlier,
- * thread-and-let-the-reader-flow-it version of this was abandoned after a
- * real test showed far too many pages and no visible text at all. Async
- * now (unlike every other pack* export) because that pagination needs real
- * font metrics — the same embedded (or standard fallback) font `packPdf`
- * already embeds, for the same reason. `bodyColor` isn't carried into
- * IDML: unlike a screen-reading preference, a print-layout document's
+ * chapter (or the Story Bible) gets one Story holding its whole text,
+ * threaded across as many pages as it's estimated to need
+ * (`paginateIdmlBlocks`, reused here only for its page *count* — the real
+ * per-page split is InDesign/Affinity's own job once the frames are
+ * threaded) — real, linked text frames, the way an author actually wants to
+ * open the file in InDesign and edit it: tighten a sentence and have the
+ * rest of the chapter reflow, not find every page an island.
+ *
+ * Threading was tried once before (pre-v1.0.111) and abandoned after a real
+ * test showed far too many pages and no visible text. At the time that
+ * looked like proof the threading syntax itself couldn't be trusted. In
+ * hindsight it wasn't: the two bugs that test actually hit — a `TextFrame`
+ * with no `PathGeometry` of its own (see `idmlRectPathGeometry`'s comment)
+ * and `AllowPageShuffle` left `true` (see `idmlSpreadXml`'s comment) — are
+ * both independent of threading and would have broken the single-frame-per-
+ * page version just the same; they just hadn't been found yet. Both are
+ * fixed now, each confirmed by its own real test, so threading is back on
+ * top of a foundation that's actually been verified. The page-count
+ * estimate still carries a small safety margin for a multi-page chapter
+ * (an extra frame left empty is harmless; running out of frames mid-
+ * chapter would silently clip text, the one outcome worth erring away
+ * from) — but it no longer has to be as generous as before, since this
+ * estimate is only ever a starting point for InDesign/Affinity's own real
+ * layout now, not the sole source of truth it had to be when self-
+ * pagination was the whole story.
+ *
+ * Async (unlike every other pack* export) because that page-count estimate
+ * needs real font metrics — the same embedded (or standard fallback) font
+ * `packPdf` already embeds, for the same reason. `bodyColor` isn't carried
+ * into IDML: unlike a screen-reading preference, a print-layout document's
  * color is squarely the author's own call to make once it's in InDesign,
  * not something worth guessing a swatch for here.
  */
@@ -1559,20 +1584,29 @@ export async function packIdml(
   }
 
   for (const unit of units) {
-    const pages = paginateIdmlBlocks(unit.blocks, measuringFont, boldMetricsFont, columnWidth, columnHeight);
-    for (let index = 0; index < pages.length; index += 1) {
-      const storySelf = idmlId("uStory");
+    // Reused only for its page count — the real per-page split now happens
+    // in InDesign/Affinity once the frames below are threaded together.
+    const estimatedPages = paginateIdmlBlocks(unit.blocks, measuringFont, boldMetricsFont, columnWidth, columnHeight).length;
+    const frameCount = estimatedPages > 1 ? estimatedPages + 1 : estimatedPages;
+
+    const storySelf = idmlId("uStory");
+    const paragraphsXml = unit.blocks.map((block) => idmlBlockXml(block, unit.formatting, doc.sceneBreakStyle)).join("");
+    storyIds.push(storySelf);
+    otherFiles.push({ name: `Stories/Story_${storySelf}.xml`, data: utf8(idmlStoryXml(storySelf, paragraphsXml)) });
+    storyRefs.push(`  <idPkg:Story src="Stories/Story_${storySelf}.xml"/>`);
+
+    const frameIds = Array.from({ length: frameCount }, () => idmlId("uFrame"));
+    for (let index = 0; index < frameCount; index += 1) {
       const spreadSelf = idmlId("uSpread");
       const pageSelf = idmlId("uPage");
-      const frameSelf = idmlId("uFrame");
       const label = index === 0 ? unit.label : `${unit.label} (${index + 1})`;
-      const paragraphsXml = pages[index]!.map((block) => idmlBlockXml(block, unit.formatting, doc.sceneBreakStyle)).join("");
-      storyIds.push(storySelf);
-      otherFiles.push({ name: `Stories/Story_${storySelf}.xml`, data: utf8(idmlStoryXml(storySelf, paragraphsXml)) });
-      storyRefs.push(`  <idPkg:Story src="Stories/Story_${storySelf}.xml"/>`);
+      const previousTextFrame = index > 0 ? frameIds[index - 1]! : "n";
+      const nextTextFrame = index < frameCount - 1 ? frameIds[index + 1]! : "n";
       otherFiles.push({
         name: `Spreads/Spread_${spreadSelf}.xml`,
-        data: utf8(idmlSpreadXml(spreadSelf, pageSelf, frameSelf, storySelf, pageWidth, pageHeight, margin, label))
+        data: utf8(
+          idmlSpreadXml(spreadSelf, pageSelf, frameIds[index]!, storySelf, pageWidth, pageHeight, margin, label, previousTextFrame, nextTextFrame)
+        )
       });
       spreadRefs.push(`  <idPkg:Spread src="Spreads/Spread_${spreadSelf}.xml"/>`);
     }

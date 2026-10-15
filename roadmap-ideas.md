@@ -2306,7 +2306,7 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
-### 49. IDML-export (InDesign) — Affinity fullt fungerande, InDesign-dubblering rättad
+### 49. IDML-export (InDesign) — länkade textrutor återinförda på en verifierad grund
 
 Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
 till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
@@ -2543,6 +2543,42 @@ sidor, all text synlig).** InDesign-rättningen är kirurgisk,
 verifierad strukturellt (ny test, xmllint, riktig export genom UI:t),
 och direkt baserad på samma referens som löste föregående rundas
 problem. Väntar på Mats sjunde test för att bekräfta InDesign också.
+
+**Delsteg 9 (klart, v1.0.114): länkade textrutor återinförda, nu på
+en verifierad grund.** Mats, direkt efter v1.0.113: "texten har en
+egen textram per sida, det skulle helst vara länkade textrutor. Vet
+inte om man kan fixa det?" — ett rimligt önskemål för riktigt
+redigeringsarbete i InDesign (ändra en mening och låta resten av
+kapitlet flöda om), men exakt den mekanism (trådning) som övergavs i
+v1.0.111 efter ett katastrofalt test.
+
+**Nyckelinsikt:** de TVÅ faktiska buggarna det ursprungliga trådnings-
+testet råkade ut för — saknad PathGeometry (v1.0.112) och
+`AllowPageShuffle="true"` (v1.0.113) — är båda helt OBEROENDE av
+trådning. De hade gått sönder likadant för den icke-trådade versionen
+också; de hade bara inte hittats än när trådning övergavs. Nu är båda
+rättade och var för sig bekräftade av riktiga tester. Trådning byggs
+alltså den här gången ovanpå en grund som faktiskt är verifierad, inte
+samma gissning som i v1.0.110.
+
+**Ändring:** `packIdml` bygger nu EN Story per kapitel/enhet (inte en
+per sida), trådad över så många sidor den riktiga fontmätnings-
+uppskattningen (`paginateIdmlBlocks`, återanvänd bara för sitt
+sidantal nu) säger krävs, plus en liten buffertsida för säkerhets
+skull. Se `project_spec.md`, Ändringslogg v1.0.113 → v1.0.114, för
+fullständig genomgång.
+
+**Verifiering:** omskrivna tester som bekräftar en delad Story per
+kapitel med en korrekt trådningskedja, hela testsviten (1055 test),
+tsc, build, en egen 20-kapitels syntetisk granskning, och en riktig
+export genom UI:t där `xmllint` godkänner varje fil och
+trådningskedjan är korrekt från "n" till "n".
+
+**Status: grundad i en verifierad geometri/shuffle-grund den här
+gången, inte en blind upprepning.** Fortfarande ingen InDesign/
+Affinity i den här miljön. Mats bör testa igen — åttonde gången,
+förhoppningsvis den som bekräftar länkade textrutor OCH korrekt
+sidantal samtidigt.
 
 ---
 

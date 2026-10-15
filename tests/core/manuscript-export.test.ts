@@ -446,13 +446,13 @@ describe("IDML export", () => {
     expect(everyXmlText).not.toContain("secret stowaway");
   });
 
-  it("gives every page its own Story and Spread, one-to-one, referenced from designmap.xml", async () => {
+  it("gives every chapter/title/bible unit its own Story, one Spread per page it's threaded across, referenced from designmap.xml", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     const designmap = new TextDecoder().decode(files["designmap.xml"]!);
     const spreadFiles = Object.keys(files).filter((name) => name.startsWith("Spreads/"));
     const storyFiles = Object.keys(files).filter((name) => name.startsWith("Stories/"));
-    // Title page + 2 short chapters = 3 pages, each with its own Story (never threaded, never shared).
+    // Title + 2 short chapters = 3 units, each short enough to need only 1 page/Story here.
     expect(storyFiles.length).toBe(3);
     expect(spreadFiles.length).toBe(3);
     for (const path of [...spreadFiles, ...storyFiles]) {
@@ -460,7 +460,7 @@ describe("IDML export", () => {
     }
   });
 
-  it("paginates a long chapter into several pages, each a separate, non-threaded Story with its own real content", async () => {
+  it("threads a long chapter's one Story across several pages, with the full text in that single Story", async () => {
     let book = bookWithTwoChapters();
     const longProse = Array.from({ length: 80 }, (_, i) => `Paragraph number ${i} with enough words to take up real space on the page.`).join(
       "\n\n"
@@ -472,21 +472,26 @@ describe("IDML export", () => {
       .filter(([name]) => name.startsWith("Stories/"))
       .map(([, data]) => new TextDecoder().decode(data));
     const chapterStories = storyTexts.filter((text) => /Paragraph number \d+/.test(text));
-    // The long chapter alone should need more than one page at 6x9in.
-    expect(chapterStories.length).toBeGreaterThan(1);
-    // No threading at all — every TextFrame stands alone.
-    const spreadTexts = Object.entries(files)
+    // One Story holds the whole chapter — not split across several Stories.
+    expect(chapterStories.length).toBe(1);
+    const chapterStory = chapterStories[0]!;
+    expect(chapterStory).toContain(">Paragraph number 0 ");
+    expect(chapterStory).toContain("Paragraph number 79");
+
+    const storySelf = chapterStory.match(/Story Self="([^"]+)"/)?.[1];
+    expect(storySelf).toBeDefined();
+    const framesForStory = Object.entries(files)
       .filter(([name]) => name.startsWith("Spreads/"))
-      .map(([, data]) => new TextDecoder().decode(data));
-    for (const text of spreadTexts) {
-      expect(text).toContain('PreviousTextFrame="n"');
-      expect(text).toContain('NextTextFrame="n"');
-    }
-    // Each chapter page's Story holds different text — paragraph 0 only on the first of them, not repeated on every page.
-    const storiesWithParagraphZero = chapterStories.filter((text) => text.includes(">Paragraph number 0 "));
-    expect(storiesWithParagraphZero.length).toBe(1);
-    const lastChapterStory = chapterStories[chapterStories.length - 1]!;
-    expect(lastChapterStory).toContain("Paragraph number 79");
+      .map(([, data]) => new TextDecoder().decode(data))
+      .filter((text) => text.includes(`ParentStory="${storySelf}"`));
+    // The long chapter alone should need more than one page at 6x9in.
+    expect(framesForStory.length).toBeGreaterThan(1);
+    const previousRefs = framesForStory.map((text) => text.match(/PreviousTextFrame="([^"]+)"/)?.[1]);
+    const nextRefs = framesForStory.map((text) => text.match(/NextTextFrame="([^"]+)"/)?.[1]);
+    expect(previousRefs[0]).toBe("n");
+    expect(nextRefs[nextRefs.length - 1]).toBe("n");
+    expect(previousRefs.slice(1).every((ref) => ref !== "n")).toBe(true);
+    expect(nextRefs.slice(0, -1).every((ref) => ref !== "n")).toBe(true);
   });
 
   it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", async () => {

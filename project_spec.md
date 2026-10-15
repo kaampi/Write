@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.113
+Status: living document, v1.0.114
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5115,6 +5115,74 @@ PathGeometry-problemet. Väntar på Mats sjunde test för att bekräfta
 att InDesign nu också visar exakt 63 sidor utan dubblering.
 
 v1.0.112 → v1.0.113.
+
+**Ändringslogg v1.0.113 → v1.0.114 (2026-10-15):** Länkade textrutor
+återinförda i IDML-exporten — Mats bad om det direkt efter att ha
+bekräftat att v1.0.113 fungerade i Affinity: "texten har en egen
+textram per sida, det skulle helst vara länkade textrutor. Vet inte
+om man kan fixa det?"
+
+**Bakgrund — varför det här inte bara är att göra om v1.0.110:**
+Trådning (PreviousTextFrame/NextTextFrame på en delad Story) byggdes
+först i v1.0.110 och övergavs i v1.0.111 efter att ett riktigt test
+visat alldeles för många sidor och ingen synlig text alls. Vid den
+tidpunkten tolkades det som bevis på att själva trådningssyntaxen inte
+gick att lita på. I efterhand stämmer inte det: de TVÅ faktiska
+buggarna det testet råkade ut för — en `TextFrame` utan egen
+`PathGeometry` (hittad och rättad i v1.0.112) och `AllowPageShuffle`
+kvarlämnad som `"true"` (hittad och rättad i v1.0.113) — är båda
+HELT OBEROENDE av trådning och skulle ha gått sönder lika illa för den
+icke-trådade versionen också. De hade bara inte hittats än. Nu är
+båda rättade, var och en bekräftad av ett eget riktigt test (Affinity
+visade alla 63 sidor korrekt i v1.0.113). Så trådning byggs nu ovanpå
+en grund som faktiskt är verifierad, inte samma gissning som innan.
+
+**Vad som ändrades i `manuscriptExport.ts`:** `packIdml`s sidbyggnads-
+loop byggdes om från "en Story per sida" (v1.0.111–113) till "en
+Story per kapitel/enhet, trådad över så många sidor som behövs".
+`paginateIdmlBlocks` (den riktiga fontmätnings-baserade uppskattningen
+från v1.0.111) återanvänds nu BARA för sitt sidantal — inte längre för
+att dela upp innehållet i separata bitar, eftersom InDesign/Affinity
+nu gör den riktiga uppdelningen själva när ramarna är trådade. Varje
+enhet med mer än en uppskattad sida får en extra buffertsida (en tom
+sista ram är ofarlig; att ta slut på ramar mitt i ett kapitel skulle
+tyst klippa bort text — den enda utkomsten värd att undvika), men
+behöver inte vara lika generös som v1.0.110:s gamla
+tecken-räknings-uppskattning längre, eftersom uppskattningen bara är
+en startpunkt för InDesigns egen riktiga layout nu, inte den enda
+sanningskällan.
+
+`idmlSpreadXml` fick tillbaka sina `previousTextFrame`/`nextTextFrame`-
+parametrar (borttagna i v1.0.111) — men med PathGeometry- och
+AllowPageShuffle-rättningarna från v1.0.112/113 kvar intakta.
+
+**Verifiering:** de två IDML-testerna som beskrev icke-trådat beteende
+skrevs om till att beskriva trådat beteende istället — en test
+bekräftar att varje enhet fortfarande får exakt en Story per kort
+kapitel (title + 2 korta kapitel i testboken), en annan bygger ett
+långt 80-styckens kapitel och bekräftar: EN Story för hela kapitlet
+(inte flera), med båda första och sista stycket i den, trådad över
+flera sidor med en korrekt PreviousTextFrame/NextTextFrame-kedja (från
+"n" genom varje mellansida till "n" igen). Hela testsviten (1055
+test), `tsc --noEmit` och `npm run build` kördes rent. Gjorde också en
+egen manuell granskning av en syntetisk 20-kapitels-bok: 421 sidor (20
+fler än v1.0.111–113:s 401, exakt motsvarande en buffertsida per
+flersidigt kapitel), 21 Stories (en per enhet), varje kapitels Story
+innehåller korrekt både sitt första och sista stycke. En riktig export
+genom UI:t extraherades, `xmllint --noout` godkände varje XML-fil, och
+trådningskedjan bekräftades direkt i filerna: titelsidan fristående
+("n"/"n"), kapitlets 10 sidor korrekt kedjade från "n" till "n" genom
+mellanliggande ramar, `AllowPageShuffle="false"` kvar överallt.
+
+**Fortfarande kvar: InDesign/Affinity-öppningstestet självt**, men med
+en betydligt mer välgrundad förväntan än v1.0.110:s första
+trådningsförsök — de två konkreta bristerna som (i efterhand) orsakade
+det försökets totala haveri är nu identifierade, rättade och var för
+sig bekräftade genom riktiga tester. Mats bör testa igen — sjunde
+gången, och förhoppningsvis den som äntligen ger länkade textrutor OCH
+korrekt sidantal samtidigt.
+
+v1.0.113 → v1.0.114.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.114] - 2026-10-15
+
+### Changed
+- IDML export links each chapter's pages into one real, threaded flow again (`PreviousTextFrame`/`NextTextFrame` on a single shared Story per chapter), instead of a separate, independent page for every page break. Threading was tried once, abandoned after a real test showed far too many pages and no visible text, and is back now that the actual causes of that failure — a `TextFrame` with no real shape (v1.0.112) and InDesign reshuffling standalone pages (v1.0.113) — are both fixed and independently confirmed working. A chapter opened in InDesign now reflows across its pages the way editing a real book layout should, rather than every page being its own island.
+
 ## [1.0.113] - 2026-10-15
 
 ### Fixed
