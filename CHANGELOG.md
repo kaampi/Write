@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.108] - 2026-10-15
+
+### Fixed
+- IDML export failed to open in InDesign and Affinity. `META-INF/container.xml` — the first file any IDML reader looks at to even find the rest of the package — used the wrong XML namespace and attribute names; now uses the correct OCF container convention. designmap.xml was also missing InDesign's own `<?aid ...?>` package marker, had the wrong attribute case on `ZeroPoint`, and declared a default XML namespace on `<Document>` that shouldn't be there.
+
 ## [1.0.107] - 2026-10-14
 
 ### Added

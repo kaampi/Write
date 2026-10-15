@@ -1228,17 +1228,15 @@ function idmlSpreadXml(spreadId: string, pageId: string, frameId: string, storyI
 `;
 }
 
+/**
+ * The OCF container convention IDML actually packages (same `urn:oasis:
+ * names:tc:opendocument:xmlns:container` namespace other OCF-based formats
+ * use) — the first file InDesign reads to find designmap.xml, so a wrong
+ * namespace or attribute name here breaks the whole package before
+ * anything else in it is even looked at.
+ */
 const IDML_CONTAINER_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<container xmlns="http://ns.adobe.com/AdobeInDesign/container/schema/1.0/">
-	<rootfiles>
-		<rootfile path="designmap.xml" />
-	</rootfiles>
-</container>
-`;
-
-const IDML_TAGS_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<idPkg:Tags xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-</idPkg:Tags>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="designmap.xml" media-type="text/xml"/></rootfiles></container>
 `;
 
 /** The reserved color/swatch names ("Black", "Paper", "Registration", "None") InDesign expects any IDML package to define — none of them are referenced with a custom value anywhere in this writer, but the entries themselves are part of what makes a package well-formed. */
@@ -1268,7 +1266,7 @@ function idmlFontsXml(fontName: string): string {
 function idmlPreferencesXml(pageCount: number): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Preferences xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <DocumentPreference PageWidth="${IDML_PAGE_WIDTH}" PageHeight="${IDML_TITLE_PAGE_HEIGHT}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection"/>
+  <DocumentPreference PageWidth="${IDML_PAGE_WIDTH}" PageHeight="${IDML_TITLE_PAGE_HEIGHT}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection" Intent="PrintIntent"/>
   <ViewPreference HorizontalMeasurementUnits="Points" VerticalMeasurementUnits="Points"/>
 </idPkg:Preferences>
 `;
@@ -1374,13 +1372,18 @@ export function packIdml(
     addPage("Story Bible", estimateChapterPageHeight(bibleText, paragraphCount), idmlBibleParagraphs(doc.bible));
   }
 
+  // No default `xmlns=` on <Document> — only the idPkg: prefix resource
+  // references need a namespace; Document and its children (Layer, Page,
+  // Spread/Story refs) are unprefixed. The `<?aid ...?>` processing
+  // instruction right after the XML declaration is InDesign's own package
+  // marker, found on every real IDML designmap.xml.
   const designmap = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Document xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" xmlns="http://ns.adobe.com/AdobeInDesign/4.0/" DOMVersion="8.0" Self="${docSelf}" StoryList="${storyIds.join(" ")}" zeroPoint="0 0">
+<?aid style="50" type="document" readerVersion="6.0" featureSet="257"?>
+<Document xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0" Self="${docSelf}" StoryList="${storyIds.join(" ")}" ZeroPoint="0 0">
   <idPkg:Graphic src="Resources/Graphic.xml"/>
   <idPkg:Fonts src="Resources/Fonts.xml"/>
   <idPkg:Styles src="Resources/Styles.xml"/>
   <idPkg:Preferences src="Resources/Preferences.xml"/>
-  <idPkg:Tags src="Resources/Tags.xml"/>
   <idPkg:MasterSpread src="MasterSpreads/MasterSpread_${masterSelf}.xml"/>
 ${spreadRefs.join("\n")}
 ${storyRefs.join("\n")}
@@ -1395,7 +1398,6 @@ ${storyRefs.join("\n")}
     { name: "Resources/Fonts.xml", data: utf8(idmlFontsXml(fontName)) },
     { name: "Resources/Styles.xml", data: utf8(idmlStylesXml(fontName, bodyWeight)) },
     { name: "Resources/Preferences.xml", data: utf8(idmlPreferencesXml(otherFiles.length / 2)) },
-    { name: "Resources/Tags.xml", data: utf8(IDML_TAGS_XML) },
     { name: `MasterSpreads/MasterSpread_${masterSelf}.xml`, data: utf8(idmlMasterSpreadXml(masterSelf, masterPageSelf)) },
     ...otherFiles
   ]);

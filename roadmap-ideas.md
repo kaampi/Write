@@ -2306,7 +2306,7 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
-### 49. IDML-export (InDesign) ✅ byggd (v1.0.107), ej InDesign-testad
+### 49. IDML-export (InDesign) — byggd, första InDesign-testet gav fel
 
 Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
 till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
@@ -2340,15 +2340,42 @@ Bible med samma synlighetsregel som alla andra format. Ny "IDML
 språk. Se `project_spec.md`, Ändringslogg v1.0.106 → v1.0.107, för
 fullständig teknisk genomgång.
 
-**Status: byggd, men ej InDesign-verifierad.** Till skillnad från
-varje annat exportformat i appen kunde den här inte öppnas i riktig
-InDesign för att bekräfta att den faktiskt fungerar — inte
-tillgängligt i byggmiljön. Det som är verifierat: giltig zip,
-well-formed XML, konsekventa interna korsreferenser, och att formatet
-faktiskt visar rätt innehåll (bekräftat både i tester och genom en
-riktig export genom UI:t, uppackad med systemets egen `unzip`). Mats
-bör öppna en riktig export i InDesign och rapportera tillbaka om
-något behöver rättas.
+**Delsteg 3 (klart, v1.0.108): rättad efter Mats första riktiga
+test.** Mats testade — gick inte att öppna i vare sig InDesign eller
+Affinity. Samtidigt visade han en skärmdump: ComicBook AI har faktiskt
+fått en egen IDML-export sedan den ursprungliga researchen — ett
+"IDML — InDesign / Affinity (beta)"-alternativ syns i deras
+Export-dialog. `git fetch` på det bifogade repot visade varför den
+missades: 121 nya commits sedan sessionens ursprungliga klon.
+`git log` bekräftar att funktionen (`src/idmlExport.ts`) lades till i
+commit `b388e4f`, 2026-10-08 — fem dagar EFTER att sessionens klon
+fastlåstes vid commit `288a066` (2026-10-03). Researchen var korrekt
+för ögonblicksbilden den hade; repot hann bara gå vidare under tiden.
+Viktigt: ComicBook AI:s egen export öppnades inte heller för Mats —
+den är uttryckligen märkt "(beta)" med en README full av "Current
+limitations", så det här var aldrig en bevisat fungerande referens
+att bara kopiera.
+
+Jämförelsen avslöjade ändå tre konkreta, verifierbara standardfel i
+StoryBook AI:s egen IDML-export: `META-INF/container.xml` använde en
+påhittad namnrymd och fel attributnamn istället för den faktiska
+OCF-konventionen (`urn:oasis:names:tc:opendocument:xmlns:container`,
+`full-path`/`media-type`) — den allra första filen en IDML-läsare
+öppnar för att hitta resten av paketet, så ett fel där kan göra att
+hela paketet aldrig hittas. designmap.xml saknade InDesigns egen
+`<?aid ...?>`-processinstruktion och hade fel attributnamn-casing
+(`zeroPoint` istället för `ZeroPoint`) plus en namnrymd på
+`<Document>` som inte ska finnas där. Alla tre rättade. Se
+`project_spec.md`, Ändringslogg v1.0.107 → v1.0.108, för fullständig
+genomgång.
+
+**Status: rättad enligt verifierbara standarder, men fortfarande ej
+InDesign-öppningstestad av mig.** Varje XML-fil i en riktig export
+godkänns nu av `xmllint` (en riktig parser, inte bara en egen
+approximation), men jag har fortfarande ingen InDesign/Affinity i
+den här miljön. Mats bör testa igen — och om det fortfarande inte
+går, det EXAKTA felmeddelandet InDesign/Affinity visar är nästa sak
+att få, inte bara "gick inte att öppna".
 
 ---
 

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.107
+Status: living document, v1.0.108
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -4627,6 +4627,76 @@ strukturellt rätt ut.
 
 v1.0.106 → v1.0.107. **Hela #49 klar från StoryBook AI:s sida** —
 återstår bara Mats verkliga InDesign-test.
+
+**Ändringslogg v1.0.107 → v1.0.108 (2026-10-15):** IDML-exporten
+rättad efter Mats första riktiga test. Mats: "Gick inte att öppna i
+Affinity (som har stöd för IDML) eller i InDesign. En fungerande
+funktion finns i ComicbookAI, vet inte varför du inte kunde hitta
+den" — med en skärmdump av ComicBook AI:s egen Export-dialog, som
+faktiskt visar ett "IDML — InDesign / Affinity (beta)"-alternativ.
+
+**Redde ut missförståndet först:** `git fetch` på det bifogade
+ComicBook AI-repot visade 121 nya commits sedan den ursprungliga
+klonen i den här sessionen — `git log` bekräftar att IDML-exporten
+(`src/idmlExport.ts`) lades till i commit `b388e4f`, 2026-10-08,
+MEDAN den ursprungliga sessionsklonen var fastlåst vid commit
+`288a066` från 2026-10-03, fem dagar INNAN funktionen fanns.
+Researchen tidigare i sessionen var korrekt för ögonblicksbilden den
+hade — marken flyttade sig bara under den, eftersom `add_repo`s
+grunda klon aldrig uppdaterades automatiskt när ComicBook AI-repot
+fortsatte utvecklas parallellt.
+
+**Men ComicBook AI:s egen IDML-export öppnades INTE heller för
+Mats** — den är uttryckligen märkt "(beta)" i deras egen UI, med en
+README full av "Current limitations". Så det här var aldrig ett
+fall av att kopiera en bevisat fungerande referens, utan att läsa en
+mer välinformerad (men själv obekräftad) implementation för att hitta
+konkreta, verifierbara standardfel i min egen.
+
+**Tre verkliga buggar hittade genom jämförelse, alla rättade:**
+1. **`META-INF/container.xml` hade fel namnrymd och fel
+   attributnamn.** Min version använde en påhittad
+   `http://ns.adobe.com/AdobeInDesign/container/schema/1.0/`-namnrymd
+   med `path`-attributet. ComicBook AI:s version (och den faktiska
+   OCF-konventionen IDML:s paketering bygger på, samma mönster som
+   andra OCF-baserade format) använder
+   `urn:oasis:names:tc:opendocument:xmlns:container` med
+   `full-path`/`media-type`-attribut. Det här är den FÖRSTA filen en
+   IDML-läsare öppnar för att ens hitta resten av paketet — fel här
+   kan göra att hela paketet aldrig hittas, oavsett hur korrekt allt
+   annat är.
+2. **designmap.xml saknade InDesigns egen
+   `<?aid style="50" type="document" readerVersion="6.0"
+   featureSet="257"?>`-processinstruktion**, som satt direkt efter
+   XML-deklarationen i den fungerande referensen — ett paketmärke
+   riktiga IDML-filer bär.
+3. **Fel attributnamn-casing (`zeroPoint` istället för `ZeroPoint`)
+   och en påhittad default-xmlns på `<Document>`-elementet** som
+   referensen inte hade — bara `xmlns:idPkg` ska finnas där, inga
+   av `<Document>`s egna barn (Spread/Story-referenser) ska sitta i
+   någon namnrymd alls.
+
+Lade också till `Intent="PrintIntent"` på DocumentPreference (fanns i
+referensen, saknades i min), och tog bort den oanvända
+`Resources/Tags.xml`-referensen helt — ComicBook AI:s fungerande
+mönster behöver den aldrig, en osäkerhet mindre.
+
+**Verifierat starkare än tidigare:** utöver tsc/testsvit/build körde
+jag nu `xmllint --noout` (en riktig XML-parser, inte bara min egen
+tagg-balans-approximation) på VARJE XML-fil i en riktig export genom
+UI:t — alla godkända rent. `mimetype`-filen flaggas korrekt som
+"inte XML" av xmllint (den är avsiktligt ren text, inte ett fel).
+
+**Fortfarande kvar: InDesign-öppningstestet självt.** Jag har
+fortfarande ingen InDesign/Affinity i den här miljön. De tre
+rättningarna är standardbaserade, inte gissningar, men jag kan inte
+bekräfta att paketet faktiskt öppnas förrän Mats testar igen. Om det
+fortfarande inte går: det exakta felmeddelandet InDesign/Affinity
+visar (inte bara "gick inte att öppna") är nästa sak att få, eftersom
+det avgör om problemet sitter i paketstrukturen (det här lagret) eller
+djupare i geometrin/stilarna.
+
+v1.0.107 → v1.0.108.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
