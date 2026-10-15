@@ -2580,6 +2580,18 @@ Affinity i den här miljön. Mats bör testa igen — åttonde gången,
 förhoppningsvis den som bekräftar länkade textrutor OCH korrekt
 sidantal samtidigt.
 
+**Delsteg 10 (klart, v1.0.115): namngivna paragrafstilar.** Mats
+följdfråga, en kosmetisk önskan snarare än en bugg: "Kan man sätta så
+att kapitelnamne får en style (T ex Chaptername) och prosan frå
+stilen Brödtext?" IDML-exportens interna stilnamn ("ChapterHeading",
+"Body", "BodyFirst" osv) döptes om till läsbara namn Mats faktiskt ser
+i InDesigns Paragraph Styles-panel: "Title", "Chapter Name", "Body
+Text", "Body Text First", "Body Text Indented", "Scene Break" — via
+sex namngivna konstanter istället för upprepade strängliteraler, så
+definition och användning aldrig kan glida isär. Rörde inte ODT:s
+separata, likartat namngivna stilar. Se `project_spec.md`,
+Ändringslogg v1.0.114 → v1.0.115, för fullständig genomgång.
+
 ---
 
 ## Medvetet nedprioriterat just nu (inte avvisat)

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.115] - 2026-10-15
+
+### Changed
+- IDML export's paragraph styles now have human-readable names in InDesign's own Paragraph Styles panel — "Title", "Chapter Name", "Body Text", "Body Text First", "Body Text Indented", "Scene Break" — instead of programmer-style identifiers like "ChapterHeading" or "BodyFirst".
+
 ## [1.0.114] - 2026-10-15
 
 ### Changed

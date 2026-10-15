@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.114
+Status: living document, v1.0.115
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5183,6 +5183,56 @@ gången, och förhoppningsvis den som äntligen ger länkade textrutor OCH
 korrekt sidantal samtidigt.
 
 v1.0.113 → v1.0.114.
+
+**Ändringslogg v1.0.114 → v1.0.115 (2026-10-15):** Namngivna
+paragrafstilar i IDML-exporten — en kosmetisk önskan, inte en bugg.
+
+**Mats fråga:** "Kan man sätta så att kapitelnamne får en style (T ex
+Chaptername) och prosan frå stilen Brödtext (eller vad det heter på
+engelska)?" — dvs. att stilarna som visas i InDesigns egen
+Paragraph Styles-panel ska heta något läsbart, inte de interna
+programmerar-namnen ("ChapterHeading", "Body", "BodyFirst" osv) som
+exporten hittills använt.
+
+**Ändring i `manuscriptExport.ts`:** sex nya namngivna konstanter
+(`IDML_STYLE_TITLE`, `IDML_STYLE_CHAPTER_NAME`, `IDML_STYLE_BODY_TEXT`,
+`IDML_STYLE_BODY_TEXT_FIRST`, `IDML_STYLE_BODY_TEXT_INDENTED`,
+`IDML_STYLE_SCENE_BREAK`) ersatte alla bokstavliga strängliteraler för
+stilnamn genom hela IDML-sektionen — i `idmlStylesXml`s egna
+stildefinitioner, i `idmlChapterBlocks`/`idmlBibleBlocks`/`packIdml`s
+blockbyggande kod, och i de ställen som senare jämför mot namnen
+(`idmlStyleMetrics`, `idmlBlockHeight`s fetstils-kontroll). Namngivna
+konstanter istället för upprepade strängliteraler, så definitionen och
+alla användningsställen aldrig kan glida isär vid en framtida ändring.
+
+Nya namn: "Title" (oförändrat, redan ett vanligt läsbart ord),
+"Chapter Name" (Mats egen föreslagna "Chaptername", med mellanslag),
+"Body Text" (den engelska standardtermen Mats efterfrågade, matchar
+InDesigns/Words egen "Body Text"-konvention), "Body Text First"/
+"Body Text Indented" (de två indenterade-lägets varianter), "Scene
+Break". Precis som riktiga InDesign-genererade IDML-filer rutinmässigt
+använder läsbara namn direkt som sin interna `Self="ParagraphStyle/
+<namn>"`-sökväg (t.ex. den reserverade "$ID/[No paragraph style]"),
+används samma läsbara sträng både som `Self` och som `Name`-attributet
+— inga mellanslag i XML-attributvärden är ett problem, bekräftat av
+det befintliga mönstret.
+
+**Omfattning:** bara IDML-exportens egna stilar — rörde INTE ODT:s
+separata, likartat namngivna stilar ("Title"/"ChapterHeading"/
+"SceneBreak" i `odtStyles`), som är ett helt annat kodblock för ett
+annat format och aldrig nämndes.
+
+**Verifiering:** ny test som kontrollerar att `Resources/Styles.xml`
+definierar alla sex nya namnen korrekt (`Self="ParagraphStyle/<namn>"
+Name="<namn>"`) och att en genererad Story faktiskt taggar
+kapitelrubriken med "Chapter Name" och brödtext med "Body Text" (inte
+de gamla namnen). Hela testsviten (1056 test, 79 filer),
+`tsc --noEmit` och `npm run build` kördes rent. En riktig export genom
+UI:t extraherades, `xmllint --noout` godkände varje XML-fil, och de
+nya stilnamnen bekräftades direkt i både Styles.xml och de tillämpade
+`AppliedParagraphStyle`-referenserna i Stories-filerna.
+
+v1.0.114 → v1.0.115.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

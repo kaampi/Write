@@ -1150,10 +1150,28 @@ const IDML_TITLE_SIZE = 28;
 const IDML_CHAPTER_HEADING_SIZE = 20;
 const IDML_PARA_END = "&#13;"; // the paragraph-end mark IDML stories expect — a literal \r byte would be silently normalized away by any XML parser per the XML 1.0 spec, so it has to be a character reference, not raw text
 
-/** Font size and line-height for a paragraph style — used to measure a block's real wrapped height (`idmlBlockHeight`) with the same numbers `idmlStylesXml` gives the style itself, so pagination's idea of how tall a Title/ChapterHeading block is matches what actually renders. */
+/**
+ * IDML paragraph style names — used as both the style's displayed `Name`
+ * (what Mats sees in InDesign's own Paragraph Styles panel) and its
+ * internal `Self="ParagraphStyle/<name>"` identifier, the same way real
+ * InDesign-authored IDML routinely uses a human-readable name as the path
+ * itself (e.g. the reserved "$ID/[No paragraph style]"). Named constants,
+ * not inline string literals, so the definition in `idmlStylesXml` and
+ * every place a block is tagged with one of these names (and the places
+ * that later compare against it, like `idmlStyleMetrics`) can never drift
+ * out of sync with each other.
+ */
+const IDML_STYLE_TITLE = "Title";
+const IDML_STYLE_CHAPTER_NAME = "Chapter Name";
+const IDML_STYLE_BODY_TEXT = "Body Text";
+const IDML_STYLE_BODY_TEXT_FIRST = "Body Text First";
+const IDML_STYLE_BODY_TEXT_INDENTED = "Body Text Indented";
+const IDML_STYLE_SCENE_BREAK = "Scene Break";
+
+/** Font size and line-height for a paragraph style — used to measure a block's real wrapped height (`idmlBlockHeight`) with the same numbers `idmlStylesXml` gives the style itself, so pagination's idea of how tall a Title/Chapter Name block is matches what actually renders. */
 function idmlStyleMetrics(styleName: string): { size: number; lineHeight: number } {
-  if (styleName === "Title") return { size: IDML_TITLE_SIZE, lineHeight: IDML_TITLE_SIZE * 1.2 };
-  if (styleName === "ChapterHeading") return { size: IDML_CHAPTER_HEADING_SIZE, lineHeight: IDML_CHAPTER_HEADING_SIZE * 1.2 };
+  if (styleName === IDML_STYLE_TITLE) return { size: IDML_TITLE_SIZE, lineHeight: IDML_TITLE_SIZE * 1.2 };
+  if (styleName === IDML_STYLE_CHAPTER_NAME) return { size: IDML_CHAPTER_HEADING_SIZE, lineHeight: IDML_CHAPTER_HEADING_SIZE * 1.2 };
   return { size: IDML_BODY_SIZE, lineHeight: IDML_LINE_HEIGHT };
 }
 
@@ -1206,28 +1224,28 @@ function idmlChapterBlocks(text: string, paragraphStyle: ParagraphStyle, dropCap
         kind: "paragraph",
         text: paragraph.text,
         start: paragraph.start,
-        styleName: isFirst ? "BodyFirst" : "BodyIndented",
+        styleName: isFirst ? IDML_STYLE_BODY_TEXT_FIRST : IDML_STYLE_BODY_TEXT_INDENTED,
         dropCapLines: isFirst ? dropCapLines : 0
       };
     });
   }
   let firstUsed = false;
   return splitLinesWithOffsets(text).map((line): IdmlBlock => {
-    if (!line.text) return { kind: "paragraph", text: "", start: line.start, styleName: "Body", dropCapLines: 0 };
+    if (!line.text) return { kind: "paragraph", text: "", start: line.start, styleName: IDML_STYLE_BODY_TEXT, dropCapLines: 0 };
     if (HR_BLOCK.test(line.text)) return { kind: "sceneBreak" };
     const isFirst = !firstUsed;
     firstUsed = true;
-    return { kind: "paragraph", text: line.text, start: line.start, styleName: "Body", dropCapLines: isFirst ? dropCapLines : 0 };
+    return { kind: "paragraph", text: line.text, start: line.start, styleName: IDML_STYLE_BODY_TEXT, dropCapLines: isFirst ? dropCapLines : 0 };
   });
 }
 
 function idmlBibleBlocks(bible: ManuscriptExportSection[]): IdmlBlock[] {
-  const blocks: IdmlBlock[] = [{ kind: "paragraph", text: "Story Bible", start: 0, styleName: "ChapterHeading", dropCapLines: 0 }];
+  const blocks: IdmlBlock[] = [{ kind: "paragraph", text: "Story Bible", start: 0, styleName: IDML_STYLE_CHAPTER_NAME, dropCapLines: 0 }];
   for (const section of bible) {
-    blocks.push({ kind: "paragraph", text: section.heading, start: 0, styleName: "ChapterHeading", dropCapLines: 0 });
+    blocks.push({ kind: "paragraph", text: section.heading, start: 0, styleName: IDML_STYLE_CHAPTER_NAME, dropCapLines: 0 });
     for (const entity of section.entities) {
-      blocks.push({ kind: "paragraph", text: entity.name, start: 0, styleName: "Body", dropCapLines: 0, forceBold: true });
-      for (const line of entity.lines) blocks.push({ kind: "paragraph", text: line, start: 0, styleName: "Body", dropCapLines: 0 });
+      blocks.push({ kind: "paragraph", text: entity.name, start: 0, styleName: IDML_STYLE_BODY_TEXT, dropCapLines: 0, forceBold: true });
+      for (const line of entity.lines) blocks.push({ kind: "paragraph", text: line, start: 0, styleName: IDML_STYLE_BODY_TEXT, dropCapLines: 0 });
     }
   }
   return blocks;
@@ -1235,7 +1253,7 @@ function idmlBibleBlocks(bible: ManuscriptExportSection[]): IdmlBlock[] {
 
 function idmlBlockXml(block: IdmlBlock, formatting: ProseFormattingRange[], sceneBreakStyle: Book["scene_break_style"]): string {
   if (block.kind === "sceneBreak") {
-    return idmlParagraph("SceneBreak", idmlRun({ text: sceneBreakSymbol(sceneBreakStyle), styles: [] }, true));
+    return idmlParagraph(IDML_STYLE_SCENE_BREAK, idmlRun({ text: sceneBreakSymbol(sceneBreakStyle), styles: [] }, true));
   }
   const dropCapAttr = block.dropCapLines > 0 ? ` DropCapCharacters="1" DropCapLines="${block.dropCapLines}"` : "";
   if (!block.text) return idmlParagraph(block.styleName, idmlRun({ text: "", styles: [] }, true));
@@ -1260,7 +1278,7 @@ function idmlBlockHeight(block: IdmlBlock, bodyFont: PDFFont, boldFont: PDFFont,
   if (block.kind === "sceneBreak") return IDML_LINE_HEIGHT * 2;
   if (!block.text) return IDML_LINE_HEIGHT;
   const { size, lineHeight } = idmlStyleMetrics(block.styleName);
-  const isBold = block.forceBold || block.styleName === "Title" || block.styleName === "ChapterHeading";
+  const isBold = block.forceBold || block.styleName === IDML_STYLE_TITLE || block.styleName === IDML_STYLE_CHAPTER_NAME;
   const lineCount = wrapTextLines(block.text, isBold ? boldFont : bodyFont, size, columnWidth).length;
   return lineCount * lineHeight + size * 0.3;
 }
@@ -1465,18 +1483,18 @@ function idmlStylesXml(fontName: string, bodyWeight: BodyWeight): string {
   </RootCharacterStyleGroup>
   <RootParagraphStyleGroup Self="u_pcg">
     <ParagraphStyle Self="ParagraphStyle/$ID/[No paragraph style]" Name="$ID/[No paragraph style]"/>
-    <ParagraphStyle Self="ParagraphStyle/Title" Name="Title" PointSize="${IDML_TITLE_SIZE}" FontStyle="Bold" Justification="LeftAlign" SpaceAfter="18">
+    <ParagraphStyle Self="ParagraphStyle/${IDML_STYLE_TITLE}" Name="${IDML_STYLE_TITLE}" PointSize="${IDML_TITLE_SIZE}" FontStyle="Bold" Justification="LeftAlign" SpaceAfter="18">
       <Properties><AppliedFont type="string">${escaped}</AppliedFont></Properties>
     </ParagraphStyle>
-    <ParagraphStyle Self="ParagraphStyle/ChapterHeading" Name="ChapterHeading" PointSize="${IDML_CHAPTER_HEADING_SIZE}" FontStyle="Bold" Justification="LeftAlign" SpaceBefore="24" SpaceAfter="14">
+    <ParagraphStyle Self="ParagraphStyle/${IDML_STYLE_CHAPTER_NAME}" Name="${IDML_STYLE_CHAPTER_NAME}" PointSize="${IDML_CHAPTER_HEADING_SIZE}" FontStyle="Bold" Justification="LeftAlign" SpaceBefore="24" SpaceAfter="14">
       <Properties><AppliedFont type="string">${escaped}</AppliedFont></Properties>
     </ParagraphStyle>
-    <ParagraphStyle Self="ParagraphStyle/Body" Name="Body" PointSize="${IDML_BODY_SIZE}" Leading="${IDML_LINE_HEIGHT}" FontStyle="${bodyFontStyle}" SpaceAfter="${IDML_BODY_SIZE}">
+    <ParagraphStyle Self="ParagraphStyle/${IDML_STYLE_BODY_TEXT}" Name="${IDML_STYLE_BODY_TEXT}" PointSize="${IDML_BODY_SIZE}" Leading="${IDML_LINE_HEIGHT}" FontStyle="${bodyFontStyle}" SpaceAfter="${IDML_BODY_SIZE}">
       <Properties><AppliedFont type="string">${escaped}</AppliedFont></Properties>
     </ParagraphStyle>
-    <ParagraphStyle Self="ParagraphStyle/BodyFirst" Name="BodyFirst" BasedOn="ParagraphStyle/Body" FirstLineIndent="0"/>
-    <ParagraphStyle Self="ParagraphStyle/BodyIndented" Name="BodyIndented" BasedOn="ParagraphStyle/Body" FirstLineIndent="18" SpaceAfter="0"/>
-    <ParagraphStyle Self="ParagraphStyle/SceneBreak" Name="SceneBreak" BasedOn="ParagraphStyle/Body" Justification="CenterAlign" SpaceBefore="10" SpaceAfter="10"/>
+    <ParagraphStyle Self="ParagraphStyle/${IDML_STYLE_BODY_TEXT_FIRST}" Name="${IDML_STYLE_BODY_TEXT_FIRST}" BasedOn="ParagraphStyle/${IDML_STYLE_BODY_TEXT}" FirstLineIndent="0"/>
+    <ParagraphStyle Self="ParagraphStyle/${IDML_STYLE_BODY_TEXT_INDENTED}" Name="${IDML_STYLE_BODY_TEXT_INDENTED}" BasedOn="ParagraphStyle/${IDML_STYLE_BODY_TEXT}" FirstLineIndent="18" SpaceAfter="0"/>
+    <ParagraphStyle Self="ParagraphStyle/${IDML_STYLE_SCENE_BREAK}" Name="${IDML_STYLE_SCENE_BREAK}" BasedOn="ParagraphStyle/${IDML_STYLE_BODY_TEXT}" Justification="CenterAlign" SpaceBefore="10" SpaceAfter="10"/>
   </RootParagraphStyleGroup>
 </idPkg:Styles>
 `;
@@ -1564,17 +1582,17 @@ export async function packIdml(
 
   const units: { label: string; blocks: IdmlBlock[]; formatting: ProseFormattingRange[] }[] = [];
 
-  const titleBlocks: IdmlBlock[] = [{ kind: "paragraph", text: doc.title, start: 0, styleName: "Title", dropCapLines: 0 }];
-  titleBlocks.push({ kind: "paragraph", text: doc.exportedLabel, start: 0, styleName: "Body", dropCapLines: 0 });
-  if (doc.note) titleBlocks.push({ kind: "paragraph", text: doc.note, start: 0, styleName: "Body", dropCapLines: 0 });
-  if (doc.voice) titleBlocks.push({ kind: "paragraph", text: `Voice: ${doc.voice}`, start: 0, styleName: "Body", dropCapLines: 0 });
-  if (doc.viewpoint) titleBlocks.push({ kind: "paragraph", text: `Viewpoint: ${doc.viewpoint}`, start: 0, styleName: "Body", dropCapLines: 0 });
-  if (doc.readerAge !== undefined) titleBlocks.push({ kind: "paragraph", text: `Reader: ${doc.readerAge}`, start: 0, styleName: "Body", dropCapLines: 0 });
+  const titleBlocks: IdmlBlock[] = [{ kind: "paragraph", text: doc.title, start: 0, styleName: IDML_STYLE_TITLE, dropCapLines: 0 }];
+  titleBlocks.push({ kind: "paragraph", text: doc.exportedLabel, start: 0, styleName: IDML_STYLE_BODY_TEXT, dropCapLines: 0 });
+  if (doc.note) titleBlocks.push({ kind: "paragraph", text: doc.note, start: 0, styleName: IDML_STYLE_BODY_TEXT, dropCapLines: 0 });
+  if (doc.voice) titleBlocks.push({ kind: "paragraph", text: `Voice: ${doc.voice}`, start: 0, styleName: IDML_STYLE_BODY_TEXT, dropCapLines: 0 });
+  if (doc.viewpoint) titleBlocks.push({ kind: "paragraph", text: `Viewpoint: ${doc.viewpoint}`, start: 0, styleName: IDML_STYLE_BODY_TEXT, dropCapLines: 0 });
+  if (doc.readerAge !== undefined) titleBlocks.push({ kind: "paragraph", text: `Reader: ${doc.readerAge}`, start: 0, styleName: IDML_STYLE_BODY_TEXT, dropCapLines: 0 });
   units.push({ label: doc.title, blocks: titleBlocks, formatting: [] });
 
   for (const chapter of doc.chapters) {
-    const blocks: IdmlBlock[] = [{ kind: "paragraph", text: chapter.heading, start: 0, styleName: "ChapterHeading", dropCapLines: 0 }];
-    if (chapter.voice) blocks.push({ kind: "paragraph", text: `Voice: ${chapter.voice}`, start: 0, styleName: "Body", dropCapLines: 0 });
+    const blocks: IdmlBlock[] = [{ kind: "paragraph", text: chapter.heading, start: 0, styleName: IDML_STYLE_CHAPTER_NAME, dropCapLines: 0 }];
+    if (chapter.voice) blocks.push({ kind: "paragraph", text: `Voice: ${chapter.voice}`, start: 0, styleName: IDML_STYLE_BODY_TEXT, dropCapLines: 0 });
     if (chapter.rawProse) blocks.push(...idmlChapterBlocks(chapter.rawProse, paragraphStyle, doc.dropCapLines));
     units.push({ label: chapter.heading, blocks, formatting: chapter.formatting });
   }

@@ -506,6 +506,21 @@ describe("IDML export", () => {
     expect(storyWithLocked).toMatch(/<Content>locked<\/Content>/);
   });
 
+  it("gives paragraph styles human-readable names InDesign's own Paragraph Styles panel shows, not programmer-style identifiers", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const styles = new TextDecoder().decode(files["Resources/Styles.xml"]!);
+    for (const name of ["Title", "Chapter Name", "Body Text", "Body Text First", "Body Text Indented", "Scene Break"]) {
+      expect(styles).toContain(`Self="ParagraphStyle/${name}" Name="${name}"`);
+    }
+    // The chapter heading paragraph is actually tagged with the "Chapter Name" style, not the old "ChapterHeading".
+    const storyTexts = Object.entries(files)
+      .filter(([name]) => name.startsWith("Stories/"))
+      .map(([, data]) => new TextDecoder().decode(data));
+    expect(storyTexts.some((text) => text.includes('AppliedParagraphStyle="ParagraphStyle/Chapter Name"'))).toBe(true);
+    expect(storyTexts.some((text) => text.includes('AppliedParagraphStyle="ParagraphStyle/Body Text"'))).toBe(true);
+  });
+
   it("adds a Story Bible page only when there are locked facts to show", async () => {
     let book = bookWithTwoChapters();
     book = {
