@@ -636,14 +636,20 @@ describe("IDML export", () => {
     expect(emptyBibleText).not.toContain("Story Bible");
   });
 
-  it("keeps the master spread unapplied to every real page", async () => {
+  it("applies the real master spread to every real page, matching a real InDesign export", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
+    const designmap = new TextDecoder().decode(files["designmap.xml"]!);
+    const masterId = designmap.match(/<idPkg:MasterSpread src="MasterSpreads\/MasterSpread_([^".]+)\.xml"\/>/)?.[1];
+    expect(masterId).toBeDefined();
     const spreadTexts = Object.entries(files)
       .filter(([name]) => name.startsWith("Spreads/"))
       .map(([, data]) => new TextDecoder().decode(data));
+    expect(spreadTexts.length).toBeGreaterThan(0);
     for (const text of spreadTexts) {
-      expect(text).toContain('AppliedMaster="n"');
+      expect(text).toContain(`<Page Self="`);
+      expect(text).toContain(`AppliedMaster="${masterId}"`);
+      expect(text).not.toContain('AppliedMaster="n"');
     }
   });
 
@@ -692,16 +698,16 @@ describe("IDML export", () => {
     }
   });
 
-  it("tells InDesign not to reshuffle standalone pages into facing-page spreads", async () => {
+  it("allows page shuffle, matching a real InDesign export's own Spread/DocumentPreference settings", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     const preferences = new TextDecoder().decode(files["Resources/Preferences.xml"]!);
-    expect(preferences).toMatch(/<DocumentPreference[^>]*AllowPageShuffle="false"/);
+    expect(preferences).toMatch(/<DocumentPreference[^>]*AllowPageShuffle="true"/);
     const spreadTexts = Object.entries(files)
       .filter(([name]) => name.startsWith("Spreads/"))
       .map(([, data]) => new TextDecoder().decode(data));
     for (const text of spreadTexts) {
-      expect(text).toMatch(/<Spread[^>]*AllowPageShuffle="false"/);
+      expect(text).toMatch(/<Spread[^>]*AllowPageShuffle="true"/);
     }
   });
 });

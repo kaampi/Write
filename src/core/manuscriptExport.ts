@@ -1406,15 +1406,18 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * for one — the one difference between a frame this writer always
  * generated and one a reference implementation actually produces.
  *
- * `AllowPageShuffle="false"` (also set document-wide on `DocumentPreference`
- * in `idmlPreferencesXml`) tells InDesign not to reflow this writer's
- * one-page-per-Spread layout into its own default facing-pages pairing —
- * without it, a real test showed InDesign inserting a blank companion page
- * before every one of this writer's standalone pages (except the first),
- * nearly doubling the page count, while Affinity — which doesn't shuffle
- * pages the same way — showed every page correctly. Found the same way as
- * the PathGeometry fix above: ComicBook AI's own IDML writer sets this
- * `false` in both places, never `true`.
+ * `AllowPageShuffle="true"` (also set document-wide on `DocumentPreference`
+ * in `idmlPreferencesXml`) and `AppliedMaster="${masterSelf}"` on the Page
+ * (never `"n"`) both match what a real InDesign (21.6) export Mats shared
+ * directly actually writes — an earlier version of this writer used
+ * `AllowPageShuffle="false"` (following ComicBook AI's own, never-threaded
+ * writer) and `AppliedMaster="n"` on every page, a combination no real
+ * InDesign-authored document ever produces for an ordinary content page.
+ * Changed together while investigating a real report of InDesign inserting
+ * dozens of extra, genuinely empty pages beyond what this writer's own
+ * designmap.xml lists, confirmed (via Affinity, which showed exactly the
+ * page count this writer's own file actually contains) not to be caused by
+ * anything already in the file itself.
  *
  * `spreadIndex` places this Spread at its own position on the document's
  * pasteboard (`ItemTransform`'s translation, `spreadIndex * pageWidth`
@@ -1444,6 +1447,7 @@ function idmlSpreadXml(
   pageId: string,
   frameId: string,
   storyId: string,
+  masterSelf: string,
   pageWidth: number,
   pageHeight: number,
   margin: number,
@@ -1456,8 +1460,8 @@ function idmlSpreadXml(
   const columnHeight = pageHeight - margin * 2;
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Spread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="false" ItemTransform="1 0 0 1 ${spreadIndex * pageWidth} 0" ShowMasterItems="false">
-    <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
+  <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="true" ItemTransform="1 0 0 1 ${spreadIndex * pageWidth} 0" ShowMasterItems="false">
+    <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="${masterSelf}" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
       <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
     </Page>
     <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ItemLayer="${IDML_LAYER}" ItemTransform="1 0 0 1 ${margin} ${margin}">
@@ -1507,17 +1511,25 @@ function idmlFontsXml(fontName: string): string {
 function idmlPreferencesXml(pageCount: number, pageWidth: number, pageHeight: number): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Preferences xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <DocumentPreference PageWidth="${pageWidth}" PageHeight="${pageHeight}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection" AllowPageShuffle="false" Intent="PrintIntent"/>
+  <DocumentPreference PageWidth="${pageWidth}" PageHeight="${pageHeight}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection" AllowPageShuffle="true" Intent="PrintIntent"/>
   <ViewPreference HorizontalMeasurementUnits="Points" VerticalMeasurementUnits="Points"/>
 </idPkg:Preferences>
 `;
 }
 
-/** A single, empty master spread — required for the package to be structurally complete, but applied to none of the real pages (`AppliedMaster="n"` throughout `idmlSpreadXml`), so there's nothing on it to get wrong. */
+/**
+ * A single, empty master spread, genuinely applied to every real page (see
+ * `idmlSpreadXml`'s `AppliedMaster`) — nothing on the master itself to get
+ * wrong, since it has no content items. `PrimaryTextFrame="n"` is set
+ * explicitly, matching a real InDesign (21.6) export Mats shared directly:
+ * the master's own absence of a primary text frame is stated, not just
+ * implied by leaving the attribute out, the same distinction `AppliedMaster`
+ * makes elsewhere in this file.
+ */
 function idmlMasterSpreadXml(masterSelf: string, masterPageSelf: string, pageWidth: number, pageHeight: number): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:MasterSpread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <MasterSpread Self="${masterSelf}" Name="A" NamePrefix="A" BaseName="A" ShowMasterItems="true" PageCount="1">
+  <MasterSpread Self="${masterSelf}" Name="A" NamePrefix="A" BaseName="A" ShowMasterItems="true" PageCount="1" PrimaryTextFrame="n">
     <Page Self="${masterPageSelf}" Name="A" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0"/>
   </MasterSpread>
 </idPkg:MasterSpread>
@@ -1705,6 +1717,7 @@ export async function packIdml(
             pageSelf,
             frameIds[index]!,
             storySelf,
+            masterSelf,
             pageWidth,
             pageHeight,
             margin,

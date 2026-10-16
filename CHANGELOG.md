@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.124] - 2026-10-16
+
+### Fixed
+- IDML export set `AppliedMaster="n"` (no master) on every real page and `AllowPageShuffle="false"` everywhere — a combination no real InDesign-authored document ever produces for an ordinary content page, confirmed by inspecting a real InDesign (21.6) export's own Spread and MasterSpread XML shared directly by a user. Every page now applies the document's real master spread, and `AllowPageShuffle` is `true` (matching the real export), both on `DocumentPreference` and every `Spread`. Investigated after v1.0.123's Layer fix also turned out not to resolve InDesign showing dozens of extra empty pages beyond what the file actually contains.
+
 ## [1.0.123] - 2026-10-16
 
 ### Fixed

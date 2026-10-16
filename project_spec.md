@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.123
+Status: living document, v1.0.124
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5794,6 +5794,77 @@ ItemLayer bekräftade direkt i den extraherade designmap.xml och
 Spreads-filerna) kördes rent.
 
 v1.0.122 → v1.0.123.
+
+**Ändringslogg v1.0.123 → v1.0.124 (2026-10-16):** Layer-fixen gjorde
+heller ingen skillnad — men Mats delade två filer till från sin riktiga
+InDesign-export som visade sig innehålla den hittills mest konkreta,
+substantiella skillnaden i hela sagan.
+
+**Mats:** "Tyvärr blev det inte bättre... Säg till om du vill se fler
+XML filer från IDML-filen." Bad om `Spreads/Spread_ucf.xml` (den
+första riktiga sidan) och `MasterSpreads/MasterSpread_ud6.xml` från
+samma InDesign-genererade referensfil som designmap.xml redan kommit
+från. Mats laddade upp båda filerna direkt.
+
+**Två fynd, läst rakt av ur en riktig InDesigns egen export:**
+
+1. **`AppliedMaster="ud6"` på den riktiga sidan** — INTE "n"! Vår
+   skrivare sätter uttryckligen `AppliedMaster="n"` ("ingen master")
+   på VARJE sida vi genererar. En riktig InDesign-sida har aldrig
+   "ingen master" — den tillämpar alltid en verklig mastersida
+   (`MasterPageTransform="1 0 0 1 0 0"` finns också, styr hur
+   masterns eget innehåll ärvs).
+
+2. **`AllowPageShuffle="true"` på Spread-nivå** — INTE "false"! Det
+   här är särskilt slående eftersom vi medvetet satte den till
+   `"false"` redan i v1.0.113, baserat på en tidigare, bekräftad
+   bugg (från INNAN trådning fanns i arkitekturen — en annan, mer
+   grundläggande sida-per-sida-design). En riktig InDesign-fil
+   använder uppenbarligen `"true"` som sitt normala, förväntade värde.
+
+**Resonemang kring varför det här sannolikt är den faktiska boven:**
+kombinationen "ingen master" + tvingad `AllowPageShuffle=false` är en
+sidkonfiguration INGEN riktig InDesign-fil någonsin producerar för en
+vanlig innehållssida. InDesigns egen importvalidering må reagera
+oförutsägbart på just den ovanliga kombinationen — t.ex. genom att
+"reparera" eller kompensera för en sida som saknar en riktig master,
+vilket skulle kunna trigga precis den sortens extra, tomma
+sidor (med standardmastern "A" synlig, exakt det Mats observerat
+genom hela sagan) vi jagat.
+
+**Risk övervägd innan ändring:** v1.0.113:s ursprungliga
+AllowPageShuffle-fix löste en bugg vars EGEN beskrivning var "en tom
+följeslagarsida FÖRE VARJE sida" (utspridd/interfolierad) — ett annat
+mönster än det nuvarande (ETT stort sammanhängande block). Eftersom
+de två buggarnas mönster skiljer sig åt, och den tidigare fixen
+testades i en arkitektur UTAN trådning och UTAN "ingen master",
+bedömdes risken att återinföra den gamla buggen som låg — särskilt
+eftersom "ingen master" (den troliga grundorsaken till BÅDA problemen)
+försvinner samtidigt.
+
+**Rättning:** `idmlSpreadXml` tar nu emot `masterSelf` och sätter
+`AppliedMaster="${masterSelf}"` på varje riktig sida (aldrig "n").
+`AllowPageShuffle` ändrat till `"true"` på både `<Spread>` och
+`<DocumentPreference>`. `idmlMasterSpreadXml` fick också
+`PrimaryTextFrame="n"` tillagt på `<MasterSpread>`-elementet — explicit
+angivet i Mats riktiga fil, och relevant först nu när mastern faktiskt
+tillämpas på riktiga sidor (tidigare, med "ingen master" överallt,
+konsulterades mastern aldrig alls, så den detaljen kunde aldrig spela
+någon roll förrän nu).
+
+**Testuppdatering:** de två tidigare testerna "keeps the master spread
+unapplied..." och "tells InDesign not to reshuffle..." bytte namn och
+vändes till att verifiera det MOTSATTA (master tillämpad, shuffle
+tillåten) — de gamla antagandena var, visar det sig, aldrig korrekta
+mot hur riktiga InDesign-filer faktiskt ser ut.
+
+**Verifiering:** hela testsviten (1061 test, 79 filer, två omskrivna
+tester), `tsc --noEmit`, `npm run build`, och en riktig export genom
+UI:t (`xmllint --noout` godkände varje fil; `AppliedMaster` och
+`AllowPageShuffle="true"` bekräftade direkt i varje extraherad
+Spread-fil och Preferences.xml) kördes rent.
+
+v1.0.123 → v1.0.124.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
