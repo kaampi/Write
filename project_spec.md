@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.122
+Status: living document, v1.0.123
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5729,6 +5729,71 @@ Section-elementet bekräftat korrekt i den extraherade designmap.xml)
 kördes rent.
 
 v1.0.121 → v1.0.122.
+
+**Ändringslogg v1.0.122 → v1.0.123 (2026-10-16):** Section-fixen gjorde
+"ingen förändring i något av programmen" enligt Mats — men hans nästa
+steg gav mig äntligen det jag saknat genom hela sagan: en RIKTIG,
+InDesign-genererad referensfil.
+
+**Mats skapade "Call of Cthulhu" FRÅN GRUNDEN i InDesign själv** (inte
+via vår app) genom att klistra in ren text och låta InDesign sköta
+pagineringen, exporterade som IDML, och delade hela designmap.xml
+rakt av. Första gången i hela utredningen jag hade en äkta InDesign
+21.6-export att jämföra mot, inte bara ComicBook AI:s referens (som
+aldrig trådar textrutor och därför aldrig skulle avslöja ett
+trådningsspecifikt problem).
+
+**Två viktiga, direkta fynd från att läsa den riktiga filen:**
+
+1. **Self-ID:n i en riktig InDesign-fil är INTE padda de, sekventiella
+   decimaltal** — de är korta hexadecimaler av varierande längd
+   ("ucf", "u105", "u10b", "u111"...). Om InDesign själv sorterade
+   sidor lexikografiskt som strängar skulle den visa SINA EGNA sidor i
+   fel ordning (eftersom "u105" < "ucf" som strängar, men "ucf" kommer
+   först i den riktiga, korrekta visningsordningen). Detta bekräftar
+   slutgiltigt att v1.0.121:s ID-sorteringsteori var fel från grunden
+   — inte bara overifierad, utan direkt motbevisad av InDesigns eget
+   beteende mot sin egen fil.
+
+2. **Dokumentet saknar HELT ett `<Layer>`-element i vår egen skrivare**
+   — något VARJE riktig IDML-fil har (bekräftat här i Mats riktiga
+   export: `<Layer Self="ucc" Name="Lager 1" .../>`, refererat via
+   `ActiveLayer="ucc"` på `<Document>`), och något jag missat att
+   kontrollera i ALLA tidigare jämförelser — trots att ComicBook AI:s
+   egen referensskrivare, som jag jämfört mot upprepade gånger för de
+   tidigare bekräftade fixarna (PathGeometry, AllowPageShuffle), FAKTISKT
+   redan sätter `ItemLayer` på varenda objekt den ritar och definierar
+   `<Layer>`-element i sin egen designmap.xml. Ett konkret, dubbelt
+   bekräftat (både ComicBook OCH en riktig InDesign-export) hål i vår
+   fil jag helt enkelt missat att leta efter tidigare.
+
+**Rättning:** en enda `<Layer Self="uLayer" Name="Layer 1" .../>`
+deklareras nu i designmap.xml, refererad via `ActiveLayer` på
+`<Document>`, och varje `<TextFrame>` får `ItemLayer="uLayer"` —
+matchar exakt hur både ComicBook AI:s skrivare och Mats riktiga
+InDesign-export gör det.
+
+**Ärligt om var det här lämnar oss:** detta är ANNU EN
+InDesign-jämförelse-baserad fix (samma kategori som PathGeometry/
+AllowPageShuffle, nu bekräftad mot EN RIKTIG InDesign-fil för första
+gången i den här specifika trådnings-sagan, inte bara ComicBook) —
+men INTE verifierad att den faktiskt löser sidoduplicerings-problemet.
+Sex kodfixar och två inställningstester i rad har nu föregått den här,
+så jag håller tonen försiktig. Om det INTE löser det, har vi
+åtminstone nu, tack vare Mats riktiga referensfil, en mycket bättre
+bas för att hitta ÄNNU fler konkreta skillnader (XML-taggning via
+`<idPkg:Tags>`/`<idPkg:BackingStory>`, DOMVersion-skillnader, fler
+`<Document>`-attribut) om det behövs.
+
+**Verifiering:** nytt committat test som kontrollerar att `<Layer>`
+deklareras, att `ActiveLayer` refererar den, och att VARJE TextFrame i
+en genererad fil får `ItemLayer` satt. Hela testsviten (1060 → 1061
+test), `tsc --noEmit`, `npm run build`, och en riktig export genom
+UI:t (`xmllint --noout` godkände varje fil, Layer/ActiveLayer/
+ItemLayer bekräftade direkt i den extraherade designmap.xml och
+Spreads-filerna) kördes rent.
+
+v1.0.122 → v1.0.123.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

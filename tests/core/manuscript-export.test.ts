@@ -560,6 +560,22 @@ describe("IDML export", () => {
     expect(firstSpreadXml).toContain(`<Page Self="${sectionMatch![2]}"`);
   });
 
+  it("declares a Layer and assigns every TextFrame to it", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const designmap = new TextDecoder().decode(files["designmap.xml"]!);
+    const layerMatch = designmap.match(/<Layer Self="([^"]+)"/);
+    expect(layerMatch).not.toBeNull();
+    expect(designmap).toContain(`ActiveLayer="${layerMatch![1]}"`);
+    const spreadPaths = Object.keys(files).filter((name) => name.startsWith("Spreads/"));
+    expect(spreadPaths.length).toBeGreaterThan(0);
+    for (const path of spreadPaths) {
+      const spreadXml = new TextDecoder().decode(files[path]!);
+      expect(spreadXml).toContain(`<TextFrame Self="`);
+      expect(spreadXml).toContain(`ItemLayer="${layerMatch![1]}"`);
+    }
+  });
+
   it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);

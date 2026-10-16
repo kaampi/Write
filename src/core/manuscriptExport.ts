@@ -1164,6 +1164,9 @@ function idmlId(prefix: string): string {
   return `${prefix}${String(idmlIdCounter).padStart(6, "0")}`;
 }
 
+/** The one Layer every page item belongs to — see idmlSpreadXml's comment on why this exists. */
+const IDML_LAYER = "uLayer";
+
 const IDML_BODY_SIZE = 12;
 const IDML_LINE_HEIGHT = IDML_BODY_SIZE * 1.4;
 const IDML_TITLE_SIZE = 28;
@@ -1425,6 +1428,16 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * `Page` and `TextFrame` below keep their own small, page-relative
  * transforms unchanged — only the Spread's own position on the shared
  * pasteboard moves.
+ *
+ * `TextFrame` carries `ItemLayer="${IDML_LAYER}"` — every page item in a
+ * real IDML package belongs to a Layer (ComicBook AI's own writer sets
+ * this on every item it draws, never omits it), and this writer never
+ * did, nor ever declared the Layer itself in `designmap.xml`. Found by
+ * comparing against a real InDesign (21.6) export Mats shared directly —
+ * the first real InDesign-authored reference available for this part of
+ * the format, after ComicBook AI's own writer (never threaded, so it
+ * couldn't surface everything a reader does with a multi-page threaded
+ * flow specifically).
  */
 function idmlSpreadXml(
   spreadId: string,
@@ -1447,7 +1460,7 @@ function idmlSpreadXml(
     <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
       <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
     </Page>
-    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ItemTransform="1 0 0 1 ${margin} ${margin}">
+    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ItemLayer="${IDML_LAYER}" ItemTransform="1 0 0 1 ${margin} ${margin}">
       ${idmlRectPathGeometry(columnWidth, columnHeight)}
       <TextFramePreference TextColumnCount="1" TextColumnFixedWidth="${columnWidth}" UseFlexibleColumnWidth="false" FirstBaselineOffset="AscentOffset" VerticalJustification="TopAlign" InsetSpacing="0 0 0 0"/>
     </TextFrame>
@@ -1725,21 +1738,26 @@ export async function packIdml(
   // placeable on them, the default "A" master applied — consistent with
   // pages InDesign generated itself, not ones this writer's own designmap
   // lists) that don't appear at all when the identical file is opened in
-  // Affinity, which confirmed the file itself is well-formed. Several other
-  // explanations (pasteboard position, id string-sort order, Facing Pages,
-  // Smart Text Reflow) were each directly tested and ruled out first; this
-  // is the one remaining concrete structural gap against real IDML
-  // convention that's left to close.
+  // Affinity, which confirmed the file itself is well-formed. Font
+  // substitution, id string-sort order, pasteboard position, Facing Pages
+  // and Smart Text Reflow were each directly tested and ruled out first —
+  // this (on its own) also turned out not to be the fix. The `<Layer>`
+  // element and `ActiveLayer` below, added once a real InDesign (21.6)
+  // export Mats shared directly revealed this writer had never declared
+  // one (every `TextFrame` lacked `ItemLayer` too — see idmlSpreadXml's
+  // comment), is the next concrete gap against real IDML convention closed
+  // on the same lead.
   const sectionXml = firstPageSelf
     ? `  <Section Self="${sectionSelf}" Length="${pageCount}" PageStart="${firstPageSelf}" PageNumberStart="1" ContinueNumbering="false" IncludeSectionPrefix="false" SectionPrefix="" Marker=""/>\n`
     : "";
   const designmap = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <?aid style="50" type="document" readerVersion="6.0" featureSet="257"?>
-<Document xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0" Self="${docSelf}" StoryList="${storyIds.join(" ")}" ZeroPoint="0 0">
+<Document xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0" Self="${docSelf}" StoryList="${storyIds.join(" ")}" ZeroPoint="0 0" ActiveLayer="${IDML_LAYER}">
   <idPkg:Graphic src="Resources/Graphic.xml"/>
   <idPkg:Fonts src="Resources/Fonts.xml"/>
   <idPkg:Styles src="Resources/Styles.xml"/>
   <idPkg:Preferences src="Resources/Preferences.xml"/>
+  <Layer Self="${IDML_LAYER}" Name="Layer 1" Visible="true" Locked="false" IgnoreWrap="false" ShowGuides="true" LockGuides="false" UI="true" Printable="true"/>
   <idPkg:MasterSpread src="MasterSpreads/MasterSpread_${masterSelf}.xml"/>
 ${spreadRefs.join("\n")}
 ${storyRefs.join("\n")}

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.123] - 2026-10-16
+
+### Fixed
+- IDML export never declared a `<Layer>` in designmap.xml, and no `TextFrame` ever carried an `ItemLayer` attribute — every page item in a real IDML package belongs to a layer, and this writer never assigned one. Found by comparing against a real InDesign (21.6) export shared directly by a user, after v1.0.122's Section element (also a real, confirmed gap) turned out not to resolve InDesign showing dozens of extra empty pages beyond what the file actually contains. A single Layer is now declared, referenced by the document's `ActiveLayer`, and every TextFrame is explicitly assigned to it.
+
 ## [1.0.122] - 2026-10-16
 
 ### Fixed
