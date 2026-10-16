@@ -638,6 +638,11 @@ export function Editor() {
     setIllustrateOpen(false);
     setPublishFilename(manuscriptExportBasename(book));
     setPublishOpen(true);
+    // Pre-warm the font cache now, while the user is still picking a format,
+    // so the actual Publish click later has nothing left to await before it
+    // triggers the download — some browsers only allow that if it happens
+    // right after the user's own click.
+    void loadPublishFontEmbed(book.body_font);
   }
 
   function openProgress() {

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.119] - 2026-10-16
+
+### Fixed
+- Publish could fail to save a file in Brave while working fine in Chrome, for every format. Every Publish click awaited a network fetch for the manuscript's chosen font before triggering the download; some browsers only allow a download to fire within a short window of the user's own click, and that window can be lost once a real `await` crosses it, more strictly enforced in some browsers than others. Font files are now cached after their first fetch and pre-warmed as soon as the Publish dialog opens, so by the time the user actually clicks Publish, nothing awaits a network request before the download is triggered.
+
 ## [1.0.118] - 2026-10-16
 
 ### Fixed

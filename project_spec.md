@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.118
+Status: living document, v1.0.119
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5397,6 +5397,57 @@ detta (inget tidigare test hårdkodade ett exakt sidantal som skulle
 behöva uppdateras).
 
 v1.0.117 → v1.0.118.
+
+**Ändringslogg v1.0.118 → v1.0.119 (2026-10-16):** Publish fungerade
+inte alls i Brave, bara i Chrome.
+
+**Mats:** "Just det. Publish fungerar inte i Brave men i Chrome, du
+nämnde att det var en skillnad. Kan man åtgärda det eller är Chrome
+ett krav?" — detta visade sig alltså gälla webbversionen i en
+webbläsare specifikt, inte (bara) skrivbordsappen som v1.0.116:s fix
+delvis antog.
+
+**Teori (inte reproducerad i den här miljön, samma begränsning som
+v1.0.116 — Chromium-baserad Playwright-testning kan inte skilja Brave
+från Chrome):** moderna webbläsare kan kräva att en nedladdning som
+triggas programmatiskt (ett syntetiskt `<a download>`-klick) sker
+inom, eller strax efter, en riktig användar-gest — annars blockeras
+den tyst. Det "användaraktiverings"-fönstret kan förloras när ett
+`await` korsar en riktig asynkron gräns (ett nätverksanrop), och
+integritetshårdare webbläsare som Brave (via sina Shields) är rimligen
+striktare med detta än Chrome. `saveExport` i `Editor.tsx` gjorde
+`await loadPublishFontEmbed(book.body_font)` — ett riktigt
+`fetch()`-anrop efter manuskriptets valda typsnitt — direkt innan
+nedladdningen triggades, för varje format utom md/txt.
+
+**Rättning:** `loadPublishFontEmbed` (`publishFonts.ts`) cachar nu
+resultatet per typsnitts-id (en `Map<PublishFontId, Promise<...>>`) —
+typsnittsfilerna är appens egna paketerade resurser, de ändras aldrig
+i körtid, så ett förnyat `fetch()` vid varje Publish-klick var redan
+slöseri oavsett. En misslyckad hämtning cachas INTE (ett tillfälligt
+nätverksfel ska inte permanent förgifta alla senare Publish-försök för
+det typsnittet). `openPublish()` i `Editor.tsx` anropar nu
+`loadPublishFontEmbed(book.body_font)` direkt när Publish-dialogen
+öppnas (före valet av format, "fire-and-forget") — så när användaren
+faktiskt klickar Publish, oftast flera sekunder senare, är cachen redan
+varm och anropet i `saveExport` löser sig omedelbart utan nätverksväntan.
+
+**Ärligt om räckvidden:** detta tar bort den ENDA async-väntan för
+rtf/odt/html/epub (vars enda asynkrona steg före nedladdningen var just
+typsnitts-hämtningen) — där bör fixen fullt ut lösa problemet. PDF och
+IDML har dock eget, oundvikligt asynkront arbete (riktig
+font-inbäddning i pdf-lib, `PDFDocument`-skapande) EFTER att
+typsnittet är hämtat, som den här fixen inte kan ta bort — där
+minskar fixen väntan men eliminerar den inte helt.
+
+**Verifiering:** hela testsviten (1057 test, 79 filer), `tsc --noEmit`
+och `npm run build` kördes rent. En riktig Playwright-körning mot
+dev-servern bekräftade att alla åtta format (md/txt/rtf/odt/html/
+epub/pdf/idml) fortfarande laddas ner korrekt i den här miljöns
+Chromium — men liksom v1.0.116 kan den specifika Brave-skillnaden inte
+bekräftas direkt härifrån.
+
+v1.0.118 → v1.0.119.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

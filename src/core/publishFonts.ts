@@ -110,13 +110,37 @@ export function publishFontById(id: PublishFontId): PublishFontOption {
 
 export type PublishFontEmbed = { regular: Uint8Array; bold: Uint8Array };
 
+/**
+ * Cached by font id — these are the app's own bundled font files, never
+ * change at runtime, so there's no reason to re-fetch them on every single
+ * Publish click. Beyond the obvious waste, re-fetching matters for a
+ * different reason: some browsers only allow a `<a download>` click to
+ * actually trigger a save if it happens within a short window of the
+ * user's own gesture (the Publish button click) — an `await` on a real
+ * network fetch in between can be enough to lose that window in a
+ * stricter browser even when a more lenient one still allows it, which
+ * fits a real report of Publish doing nothing in Brave while the same
+ * build worked in Chrome. Caching can't remove every async step before
+ * the download fires (packPdf/packIdml still do genuine async work
+ * embedding fonts into pdf-lib), but it removes this one, and `openPublish`
+ * additionally pre-warms the cache before the Publish button is even
+ * clicked, so by the time it is, this call resolves immediately.
+ */
+const fontEmbedCache = new Map<PublishFontId, Promise<PublishFontEmbed | undefined>>();
+
 /** Fetches the regular and bold font files for embedding. `system` has none — the formats fall back to their built-in default. */
-export async function loadPublishFontEmbed(id: PublishFontId): Promise<PublishFontEmbed | undefined> {
-  if (id === "system") return undefined;
+export function loadPublishFontEmbed(id: PublishFontId): Promise<PublishFontEmbed | undefined> {
+  if (id === "system") return Promise.resolve(undefined);
+  const cached = fontEmbedCache.get(id);
+  if (cached) return cached;
   const files = PUBLISH_FONT_FILES[id];
-  const [regular, bold] = await Promise.all([
+  const promise = Promise.all([
     fetch(files.regular).then((res) => res.arrayBuffer()),
     fetch(files.bold).then((res) => res.arrayBuffer())
-  ]);
-  return { regular: new Uint8Array(regular), bold: new Uint8Array(bold) };
+  ]).then(([regular, bold]) => ({ regular: new Uint8Array(regular), bold: new Uint8Array(bold) }));
+  // Don't cache a failed fetch — a transient network error shouldn't
+  // permanently poison every later Publish attempt for this font.
+  promise.catch(() => fontEmbedCache.delete(id));
+  fontEmbedCache.set(id, promise);
+  return promise;
 }
