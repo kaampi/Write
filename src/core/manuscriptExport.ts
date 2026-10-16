@@ -1305,26 +1305,16 @@ function idmlBlockHeight(block: IdmlBlock, bodyFont: PDFFont, boldFont: PDFFont,
 }
 
 /**
- * Packs blocks onto pages of real, known capacity — this (not InDesign/
- * Affinity auto-flowing a threaded story across frames) is what decides
- * page breaks. An earlier version of this writer created several
- * `PreviousTextFrame`/`NextTextFrame`-threaded frames per chapter and let
- * the reader application work out which text lands on which page; a real
- * test showed that produced far too many pages and no visible text at all
- * in either InDesign or Affinity — the threading syntax follows the IDML
- * spec, but with no real reference IDML file to verify against (ComicBook
- * AI's own exporter doesn't thread frames either), it isn't trustworthy
- * enough to build pagination on. Measuring each block's real height with
- * the manuscript's actual font (`idmlBlockHeight`) and deciding page breaks
- * here instead means every page's Story contains exactly the text that
- * belongs on it — nothing is left for the reader application to compute,
- * so there's nothing for it to get wrong. A block taller than a whole page
- * by itself (a very long single paragraph) is still placed alone on its own
- * page rather than split mid-paragraph — a rare, accepted edge case, safer
- * than the added complexity of slicing formatting ranges mid-block. The
- * chapter heading is simply the first block of its chapter's own block
- * list, so it's paginated the same as everything else — no separate
- * "shorter first page" budget needed.
+ * Estimates how many pages a unit's blocks will need, by the same real
+ * per-block height measurement (`idmlBlockHeight`) PDF's own pagination
+ * uses. `packIdml` only reads this estimate's `.length` — to decide how
+ * many threaded frames to pre-create for the unit — not its actual
+ * per-page grouping; the unit's full text always goes into one shared
+ * Story that InDesign/Affinity auto-flow across those frames themselves
+ * when the file opens (see `packIdml`'s own comment on why, and its
+ * history). A block taller than a whole page by itself (a very long single
+ * paragraph) is still counted as needing its own page rather than split
+ * mid-paragraph — a rare, accepted edge case.
  */
 function paginateIdmlBlocks(blocks: IdmlBlock[], bodyFont: PDFFont, boldFont: PDFFont, columnWidth: number, pageHeight: number): IdmlBlock[][] {
   const pages: IdmlBlock[][] = [];
@@ -1375,12 +1365,10 @@ function idmlRectPathGeometry(width: number, height: number): string {
 }
 
 /**
- * One page, with one TextFrame holding exactly the text `paginateIdmlBlocks`
- * decided belongs on it — never threaded to another frame (`Previous`/
- * `NextTextFrame` are always "n"), since each page's Story is already a
- * complete, self-contained chunk. See `paginateIdmlBlocks` for why this
- * writer paginates itself rather than relying on the reader application to
- * flow a threaded story across frames.
+ * One page, with one TextFrame, threaded to the next/previous frame of the
+ * same unit's Story via `previousTextFrame`/`nextTextFrame` ("n" at either
+ * end of a chain) — see `packIdml`'s own comment for why threading is back
+ * after being abandoned once already.
  *
  * The TextFrame's shape comes from a `<Properties><PathGeometry>` rectangle
  * in the frame's own local coordinates, positioned on the page via
@@ -1405,9 +1393,18 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * the PathGeometry fix above: ComicBook AI's own IDML writer sets this
  * `false` in both places, never `true`.
  *
- * `previousTextFrame`/`nextTextFrame` ("n" at either end of a chain) thread
- * this frame to another one sharing the same `storyId` — see `packIdml`'s
- * own comment for why threading is back after being abandoned once already.
+ * `spreadIndex` places this Spread at its own position on the document's
+ * pasteboard (`ItemTransform`'s translation, `spreadIndex * pageWidth`
+ * along X) instead of every Spread sitting at an identical "0 0" — a real
+ * InDesign document's pasteboard is one continuous strip with every Spread
+ * occupying its own successive segment of it, never multiple Spreads
+ * stacked on top of each other; ComicBook AI's own (never-threaded) IDML
+ * writer never surfaced this, since reading order for independent,
+ * non-threaded pages doesn't depend on pasteboard position the way a
+ * reader resolving a threaded Story's auto-flow across many Spreads might.
+ * `Page` and `TextFrame` below keep their own small, page-relative
+ * transforms unchanged — only the Spread's own position on the shared
+ * pasteboard moves.
  */
 function idmlSpreadXml(
   spreadId: string,
@@ -1418,6 +1415,7 @@ function idmlSpreadXml(
   pageHeight: number,
   margin: number,
   label: string,
+  spreadIndex: number,
   previousTextFrame = "n",
   nextTextFrame = "n"
 ): string {
@@ -1425,7 +1423,7 @@ function idmlSpreadXml(
   const columnHeight = pageHeight - margin * 2;
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Spread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="false" ItemTransform="1 0 0 1 0 0" ShowMasterItems="false">
+  <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="false" ItemTransform="1 0 0 1 ${spreadIndex * pageWidth} 0" ShowMasterItems="false">
     <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
       <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
     </Page>
@@ -1634,6 +1632,14 @@ export async function packIdml(
     units.push({ label: "Story Bible", blocks: idmlBibleBlocks(doc.bible), formatting: [] });
   }
 
+  // Every Spread's own position on the document's shared pasteboard — see
+  // idmlSpreadXml's comment on why each one needs a distinct position
+  // instead of every Spread sitting at an identical "0 0". Counted across
+  // the whole document (not reset per unit), the same way a real InDesign
+  // pasteboard has one continuous strip of spreads regardless of which
+  // story each one belongs to.
+  let globalSpreadIndex = 0;
+
   for (const unit of units) {
     // Reused only for its page count — the real per-page split now happens
     // in InDesign/Affinity once the frames below are threaded together.
@@ -1656,10 +1662,23 @@ export async function packIdml(
       otherFiles.push({
         name: `Spreads/Spread_${spreadSelf}.xml`,
         data: utf8(
-          idmlSpreadXml(spreadSelf, pageSelf, frameIds[index]!, storySelf, pageWidth, pageHeight, margin, label, previousTextFrame, nextTextFrame)
+          idmlSpreadXml(
+            spreadSelf,
+            pageSelf,
+            frameIds[index]!,
+            storySelf,
+            pageWidth,
+            pageHeight,
+            margin,
+            label,
+            globalSpreadIndex,
+            previousTextFrame,
+            nextTextFrame
+          )
         )
       });
       spreadRefs.push(`  <idPkg:Spread src="Spreads/Spread_${spreadSelf}.xml"/>`);
+      globalSpreadIndex += 1;
     }
   }
 

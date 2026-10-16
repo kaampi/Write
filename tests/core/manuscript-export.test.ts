@@ -13,6 +13,7 @@ import {
   packIdml,
   packOdt,
   packPdf,
+  PAGE_SIZES,
   type PublishFont
 } from "@core/manuscriptExport";
 
@@ -492,6 +493,28 @@ describe("IDML export", () => {
     expect(nextRefs[nextRefs.length - 1]).toBe("n");
     expect(previousRefs.slice(1).every((ref) => ref !== "n")).toBe(true);
     expect(nextRefs.slice(0, -1).every((ref) => ref !== "n")).toBe(true);
+  });
+
+  it("gives every Spread a distinct, increasing position on the document's shared pasteboard", async () => {
+    let book = bookWithTwoChapters();
+    const longProse = Array.from({ length: 80 }, (_, i) => `Paragraph number ${i} with enough words to take up real space on the page.`).join(
+      "\n\n"
+    );
+    book = updateChapter(book, book.chapters[0]!.id, { prose: longProse, formatting: [] });
+    const idml = await packIdml(buildManuscriptExport(book));
+    const files = unzipStore(idml);
+    const designmap = new TextDecoder().decode(files["designmap.xml"]!);
+    const spreadPaths = [...designmap.matchAll(/<idPkg:Spread src="(Spreads\/Spread_[^"]+\.xml)"\/>/g)].map((m) => m[1]!);
+    // Every page past v1.0.113's threading reintroduction identically sat at "0 0" on the
+    // pasteboard, unlike any real InDesign-authored IDML (a document's pasteboard is one
+    // continuous strip, each Spread its own successive segment) — each Spread now gets its
+    // own X offset, in designmap order, one page-width apart.
+    const offsets = spreadPaths.map((path) => {
+      const xml = new TextDecoder().decode(files[path]!);
+      return Number(xml.match(/<Spread [^>]*ItemTransform="1 0 0 1 (-?[\d.]+) 0"/)?.[1]);
+    });
+    expect(offsets.length).toBeGreaterThan(3);
+    for (let i = 0; i < offsets.length; i += 1) expect(offsets[i]).toBe(i * PAGE_SIZES["6x9"].width);
   });
 
   it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", async () => {

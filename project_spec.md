@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.119
+Status: living document, v1.0.120
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5448,6 +5448,100 @@ Chromium — men liksom v1.0.116 kan den specifika Brave-skillnaden inte
 bekräftas direkt härifrån.
 
 v1.0.118 → v1.0.119.
+
+**Ändringslogg v1.0.119 → v1.0.120 (2026-10-16):** Hittade en verklig
+strukturell brist i IDML-filen — alla sidor satt på exakt samma
+position på pasteboard — efter att ha uteslutit flera andra teorier
+genom direkt testning, inte gissning.
+
+**Mats skickade tre uppföljande underlag** på "InDesign hanterar filen
+fel, Affinity fixar det": (1) en skärmdump zoomad in på sidorna
+111-128 i Pages-panelen — 9 tomma sidor, sedan 8 med text, sedan tomt
+igen; (2) bekräftelse att InDesign visar en typsnittsvarning, och att
+byte till ett typsnitt han faktiskt har installerat (och senare Times
+New Roman) gav SAMMA resultat; (3) en tredje skärmdump som visade
+VARIFRÅN kapitel 1:s riktiga text faktiskt börjar — sida 90 av 177,
+med kapitlets rubrik "1. Chapter 1" och en läsbar styckestext synlig i
+InDesigns eget förhandsgranskningsfönster.
+
+**Teori 1 (typsnittssubstitution) — föreslagen, sedan utesluten av
+Mats egna tester:** om InDesign ersätter ett typsnitt den inte har
+installerat med något av helt andra mått än det vi mätte vår
+sidantals-uppskattning mot, skulle text kunna ta slut långt tidigare
+än väntat i en trådad story, och lämna resten av trådens rutor tomma.
+Mats testade med ett typsnitt han faktiskt har installerat (ingen
+varning) — samma resultat. Teorin föll.
+
+**Jämförelse mot ComicBook AI:s referensskrivare** gav ingen ledtråd —
+den trådar aldrig textrutor alls (varje serietidningssida är
+fristående), så den täcker inte den delen av formatet alls.
+
+**Genombrottet: testade vår EGEN genererade fil direkt, inte
+InDesigns tolkning av den.** Byggde fyra engångs-debugtester
+(`_debug-idml5.test.ts`, borttagen efter användning) som körde
+`packIdml` med en tom anteckning, en MYCKET lång anteckning (6000
+tecken), långa voice/viewpoint-fält, och till sist en syntetisk bok
+med 90 kapitel — och räknade hur många trådade rutor varje enhets
+(titel/kapitel) egen Story faktiskt fick. Resultat: helt rimligt i
+alla fyra fallen (titelenheten fick som mest 5 rutor även med extremt
+lång text; i 90-kapitelboken fick varje kapitel jämnt 3 rutor vardera,
+ingen enhet stack ut). Detta uteslöt definitivt att VÅR egen fil
+skulle snedfördela sidor till någon enskild enhet (t.ex. att
+titelsidan skulle svälla till ~88 sidor) — om kapitel 1 (sequence_index
+0) verkligen ligger direkt efter titelenheten i vår egen fil (vilket
+koden garanterar), kan ingenting i vår genererade struktur själv
+förklara 88+ tomma sidor före den.
+
+**Den verkliga bristen, hittad genom att läsa koden med nya ögon
+efter att ha uteslutit innehållet:** varje `<Spread>` i hela
+dokumentet skrevs med `ItemTransform="1 0 0 1 0 0"` — exakt samma
+pasteboard-position, oavsett vilken sida eller vilket kapitel. Ingen
+riktig InDesign-skapad IDML-fil är någonsin strukturerad så — ett
+InDesign-dokuments pasteboard är EN sammanhängande remsa, där varje
+Spread upptar sitt eget efterföljande segment av den, aldrig flera
+Spreads staplade exakt ovanpå varandra. ComicBook AI:s referensfil
+visar samma mönster (`ItemTransform="1 0 0 1 0 0"` på varje spread),
+men eftersom den ALDRIG trådar textrutor (varje sida fristående)
+skulle ett sådant problem aldrig synas där — sidordningen för
+oberoende sidor beror inte på pasteboard-position, men den ordning en
+läsarapplikation väljer att visa/lösa upp en TRÅDAD storys automatiska
+flöde över många Spreads skulle mycket väl kunna göra det.
+
+**Rättning:** varje Spread får nu sin egen position på dokumentets
+delade pasteboard (`spreadIndex * pageWidth` längs X), räknat löpande
+över HELA dokumentet (inte återställt per enhet/kapitel) — exakt som
+en riktig InDesign-pasteboard fungerar. `Page` och `TextFrame` behåller
+sina egna, sidrelativa transformer oförändrade; bara Spreadens egen
+plats på den delade pasteboarden flyttas.
+
+**Ärligt om verifieringsnivån:** detta är INTE bekräftat lösa Mats
+InDesign-problem — jag har fortfarande ingen InDesign att testa mot.
+Vad jag HAR verifierat direkt: (1) att vår egen fil, genom upprepad
+debugtestning, inte själv snedfördelar sidor till en enskild enhet —
+det utesluter flera andra möjliga förklaringar; (2) att varje Spread i
+en riktig export nu får en distinkt, stigande pasteboard-position i
+designmap-ordning (0, 432, 864, ... pt för en 6x9-bok), bekräftat både
+i ett nytt committat test och i en riktig export genom UI:t, där
+`xmllint --noout` godkände varje XML-fil; (3) att detta är en
+genuin, konkret skillnad mot hur en äkta InDesign-fil alltid är
+strukturerad — samma kategori fynd som PathGeometry- och
+AllowPageShuffle-bristerna som löste de två tidigare, bekräftade
+buggarna. Men till skillnad från de två tidigare fixarna kunde den HÄR
+specifika skillnaden inte bekräftas mot en tradad referensfil (ingen
+sådan finns tillgänglig), så den vilar på allmän kunskap om hur
+InDesign-dokument är uppbyggda snarare än en direkt jämförelse.
+
+**Verifiering:** hela testsviten (1058 test, 79 filer — ett nytt
+committat test lades till som kontrollerar att varje Spread får rätt,
+stigande pasteboard-position), `tsc --noEmit`, `npm run build`, och en
+riktig export genom UI:t (`xmllint --noout` godkände varje fil,
+pasteboard-positionerna bekräftade direkt i de extraherade
+Spread-filerna) kördes rent. Passade också på att städa bort två
+kvarglömda, missvisande kodkommentarer (`paginateIdmlBlocks` och
+`idmlSpreadXml`) som fortfarande beskrev förtrådnings-designen från
+innan v1.0.114 och aldrig uppdaterades när trådning återinfördes.
+
+v1.0.119 → v1.0.120.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

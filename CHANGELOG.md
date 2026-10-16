@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.120] - 2026-10-16
+
+### Fixed
+- IDML export's pages all sat at an identical pasteboard position (every `Spread`'s `ItemTransform` was "1 0 0 1 0 0"), unlike any InDesign-authored IDML file — a real document's pasteboard is one continuous strip with each Spread occupying its own successive segment, never multiple Spreads stacked on top of each other. Investigated after a user report that InDesign (unlike Affinity, which rendered the same file correctly) showed the first several dozen pages of a manuscript blank before any real chapter text appeared, even with font substitution ruled out. Each Spread now gets its own position on the pasteboard, one page-width apart, in the same order they're listed in designmap.xml.
+
 ## [1.0.119] - 2026-10-16
 
 ### Fixed
