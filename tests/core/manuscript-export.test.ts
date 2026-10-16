@@ -521,6 +521,13 @@ describe("IDML export", () => {
     expect(storyTexts.some((text) => text.includes('AppliedParagraphStyle="ParagraphStyle/Body Text"'))).toBe(true);
   });
 
+  it("gives Body Text no SpaceAfter, so the blank-line separator between spaced paragraphs isn't doubled", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const styles = new TextDecoder().decode(files["Resources/Styles.xml"]!);
+    expect(styles).toMatch(/Self="ParagraphStyle\/Body Text"[^>]*SpaceAfter="0"/);
+  });
+
   it("adds a Story Bible page only when there are locked facts to show", async () => {
     let book = bookWithTwoChapters();
     book = {

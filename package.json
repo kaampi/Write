@@ -1,6 +1,6 @@
 {
   "name": "storybook-ai",
-  "version": "1.0.116",
+  "version": "1.0.117",
   "description": "StoryBook AI — local-first prose tool. The Story Bible holds truth. The model drafts. You decide.",
   "type": "module",
   "private": true,

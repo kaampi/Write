@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.117] - 2026-10-16
+
+### Fixed
+- IDML export showed a doubled gap between paragraphs in the default "spaced" paragraph style. The Body Text paragraph style carried its own `SpaceAfter`, on top of the explicit blank-line paragraph already inserted between real paragraphs (the same empty-paragraph-as-separator convention every other export format uses) — stacking the two doubled the visible gap. Body Text no longer carries its own `SpaceAfter`.
+
 ## [1.0.116] - 2026-10-15
 
 ### Fixed

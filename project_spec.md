@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.116
+Status: living document, v1.0.117
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5292,6 +5292,41 @@ en säker, riskfri ändring (kan inte göra något sämre), men den är
 fortfarande en hypotes tills Mats bekräftar att Publish fungerar igen.
 
 v1.0.115 → v1.0.116.
+
+**Ändringslogg v1.0.116 → v1.0.117 (2026-10-16):** Dubbla radmatningar
+mellan stycken i IDML rättade — och bekräftelse att v1.0.116 faktiskt
+löste nedladdningsproblemet.
+
+**Mats:** "Perfekt! Det blev bra i Affinity. Det blir dubbla
+radmatningar mellan stycken, det är det enda." — bekräftar att både
+nedladdningsfixen (v1.0.116) och hela IDML-kedjan av rättningar
+(PathGeometry, AllowPageShuffle, trådning) nu fungerar i Affinity. Kvar
+var bara ett kosmetiskt mellanrumsproblem.
+
+**Grundorsak:** "spaced"-styckesläget (standardläget) sätter redan in
+ett explicit tomt styckesblock mellan riktiga stycken
+(`idmlChapterBlocks`) — samma "tomt-stycke-som-avskiljare"-konvention
+varje annat exportformat använder. Men "Body Text"-paragrafstilen
+hade ÄVEN ett eget `SpaceAfter="12"` (IDML_BODY_SIZE), som lades
+OVANPÅ det tomma styckets egen radhöjd — resultatet blev dubbelt så
+stort mellanrum som avsett.
+
+**Rättning:** `SpaceAfter` på "Body Text"-stilen i `idmlStylesXml`
+ändrat från `${IDML_BODY_SIZE}` till `"0"`. Scenbrytare, kapitelrubrik
+och titel har sina egna, oförändrade SpaceBefore/SpaceAfter-värden
+(påverkas inte). "Indented"-läget (som aldrig har tomma
+avskiljarstycken) blir också mer konsekvent av samma ändring:
+"Body Text First" ärvde tidigare Body Texts 12pt SpaceAfter trots att
+"Body Text Indented" redan uttryckligen hade 0 — en latent
+inkonsekvens ingen rapporterat än, nu löst på köpet.
+
+**Verifiering:** ny test som kontrollerar att "Body Text"-stilen har
+`SpaceAfter="0"`. Hela testsviten (1057 test, 79 filer),
+`tsc --noEmit` och `npm run build` kördes rent. En riktig export genom
+UI:t extraherades, `xmllint --noout` godkände varje XML-fil, och det
+nya SpaceAfter-värdet bekräftades direkt i Styles.xml.
+
+v1.0.116 → v1.0.117.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

@@ -1472,7 +1472,19 @@ function idmlMasterSpreadXml(masterSelf: string, masterPageSelf: string, pageWid
 `;
 }
 
-/** Title/ChapterHeading/Body(+First/+Indented)/SceneBreak paragraph styles, plus the two reserved "no style" entries every IDML Styles.xml defines. Character formatting (bold/italic/underline) is never a named style here — see `idmlRun`'s local FontStyle/Underline overrides instead. */
+/**
+ * Title/ChapterHeading/Body(+First/+Indented)/SceneBreak paragraph styles,
+ * plus the two reserved "no style" entries every IDML Styles.xml defines.
+ * Character formatting (bold/italic/underline) is never a named style here
+ * — see `idmlRun`'s local FontStyle/Underline overrides instead.
+ *
+ * Body's `SpaceAfter` is "0", not a real gap — "spaced" paragraph style
+ * already puts an explicit blank-line paragraph between real ones
+ * (`idmlChapterBlocks`), the same empty-paragraph-as-separator convention
+ * every other export format uses. A `SpaceAfter` on top of that blank
+ * paragraph's own line height doubled the visible gap between paragraphs,
+ * confirmed by a real test in Affinity.
+ */
 function idmlStylesXml(fontName: string, bodyWeight: BodyWeight): string {
   const escaped = xmlEscape(fontName);
   const bodyFontStyle = bodyWeight === "bold" ? "Bold" : "Regular";
@@ -1489,7 +1501,7 @@ function idmlStylesXml(fontName: string, bodyWeight: BodyWeight): string {
     <ParagraphStyle Self="ParagraphStyle/${IDML_STYLE_CHAPTER_NAME}" Name="${IDML_STYLE_CHAPTER_NAME}" PointSize="${IDML_CHAPTER_HEADING_SIZE}" FontStyle="Bold" Justification="LeftAlign" SpaceBefore="24" SpaceAfter="14">
       <Properties><AppliedFont type="string">${escaped}</AppliedFont></Properties>
     </ParagraphStyle>
-    <ParagraphStyle Self="ParagraphStyle/${IDML_STYLE_BODY_TEXT}" Name="${IDML_STYLE_BODY_TEXT}" PointSize="${IDML_BODY_SIZE}" Leading="${IDML_LINE_HEIGHT}" FontStyle="${bodyFontStyle}" SpaceAfter="${IDML_BODY_SIZE}">
+    <ParagraphStyle Self="ParagraphStyle/${IDML_STYLE_BODY_TEXT}" Name="${IDML_STYLE_BODY_TEXT}" PointSize="${IDML_BODY_SIZE}" Leading="${IDML_LINE_HEIGHT}" FontStyle="${bodyFontStyle}" SpaceAfter="0">
       <Properties><AppliedFont type="string">${escaped}</AppliedFont></Properties>
     </ParagraphStyle>
     <ParagraphStyle Self="ParagraphStyle/${IDML_STYLE_BODY_TEXT_FIRST}" Name="${IDML_STYLE_BODY_TEXT_FIRST}" BasedOn="ParagraphStyle/${IDML_STYLE_BODY_TEXT}" FirstLineIndent="0"/>

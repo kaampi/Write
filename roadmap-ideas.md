@@ -2306,7 +2306,7 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
-### 49. IDML-export (InDesign) — länkade textrutor återinförda på en verifierad grund
+### 49. IDML-export (InDesign) — bekräftat fungerande i Affinity ✅
 
 Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
 till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
@@ -2591,6 +2591,34 @@ sex namngivna konstanter istället för upprepade strängliteraler, så
 definition och användning aldrig kan glida isär. Rörde inte ODT:s
 separata, likartat namngivna stilar. Se `project_spec.md`,
 Ändringslogg v1.0.114 → v1.0.115, för fullständig genomgång.
+
+**Sidospår (v1.0.116): Publish slutade spara filer helt**, oavsett
+format — inte en IDML-bugg, utan `downloadBlob` som rev bort sin
+Blob-URL direkt efter nedladdningen utlöstes, en känd
+kompatibilitetsfälla på Windows WebView2 (skrivbordsappens motor).
+Kunde inte återskapas i den här miljön (alla åtta format laddades ner
+felfritt i både dev- och produktionsbygge), så rättningen — fördröjd
+`revokeObjectURL` — skeppades som en välgrundad men obekräftad
+hypotes. Mats bekräftade sedan att Publish fungerade igen.
+
+**Delsteg 11 (klart, v1.0.117): dubbla radmatningar mellan stycken
+rättade — och BEKRÄFTAT FUNGERANDE I AFFINITY.** Mats: "Perfekt! Det
+blev bra i Affinity. Det blir dubbla radmatningar mellan stycken, det
+är det enda." — första gången hela kedjan (PathGeometry, trådning,
+AllowPageShuffle, stilnamn, nedladdning) bekräftats fungera
+tillsammans i en riktig InDesign-kompatibel app. Grundorsak till det
+sista problemet: "Body Text"-stilen hade ett eget `SpaceAfter="12"`
+OVANPÅ det tomma styckesblock "spaced"-läget redan sätter in mellan
+stycken — dubblade mellanrummet. Ändrat till `SpaceAfter="0"`. Se
+`project_spec.md`, Ändringslogg v1.0.116 → v1.0.117, för fullständig
+genomgång.
+
+**Status: #49 i praktiken klar.** Åtta versioner (v1.0.107–v1.0.117),
+elva delsteg, en hel del om IDML-formatets faktiska krav lärda genom
+direkt jämförelse mot en referensimplementation snarare än gissning.
+Affinity bekräftat av Mats. InDesign själv (separat från Affinity,
+samma IDML-fil) väntar fortfarande på ett slutgiltigt test, men
+grunden är nu densamma som redan fungerar.
 
 ---
 
