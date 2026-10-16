@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.121] - 2026-10-16
+
+### Fixed
+- Found the actual root cause of IDML export's blank-pages-before-real-text problem: every internal id (Spread, Page, Story, TextFrame) was an unpadded incrementing number ("uSpread6", "uSpread12", ..., "uSpread108"), which sorts correctly as a number but scrambles badly as a plain string — anything starting with a higher leading digit sorts first lexicographically. InDesign's own Pages panel turned out to display this writer's threaded spreads in that scrambled string order rather than designmap.xml's actual order. Reproduced the exact reported symptom directly: a synthetic 30-chapter book's title spread (always first in designmap.xml) landed at lexicographic-sort position 108 of 121 — matching a real report of a manuscript's title text appearing on page 108 instead of page 1. Every id is now zero-padded to a fixed width, so string order always matches creation/designmap order.
+
 ## [1.0.120] - 2026-10-16
 
 ### Fixed

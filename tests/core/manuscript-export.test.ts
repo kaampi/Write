@@ -517,6 +517,34 @@ describe("IDML export", () => {
     for (let i = 0; i < offsets.length; i += 1) expect(offsets[i]).toBe(i * PAGE_SIZES["6x9"].width);
   });
 
+  it("zero-pads every internal id, so a lexicographic (string) sort never disagrees with creation/designmap order", async () => {
+    // Enough chapters, each long enough to need several threaded spreads, that
+    // the running id counter crosses from single/double into triple digits —
+    // the exact condition that broke an unpadded counter. Unpadded ids like
+    // "uSpread6" and "uSpread12" sort correctly as numbers but as plain
+    // strings "uSpread12" comes before "uSpread6" (because "1" < "6") — and a
+    // real report showed InDesign's own Pages panel displaying this writer's
+    // threaded spreads in exactly that scrambled string order instead of
+    // designmap.xml's actual order, putting the title page and early
+    // chapters' real text over a hundred pages later than where they
+    // belong. Reproduced directly: a synthetic 30-chapter book's title
+    // spread (always id "...6", always first in designmap.xml) landed at
+    // lexicographic-sort position 108 of 121 before this fix — the same
+    // page number independently reported for where a real manuscript's
+    // title text actually appeared in InDesign.
+    let book = createBook("Many Chapters");
+    for (let i = 1; i < 15; i += 1) book = addChapter(book);
+    const longProse = Array.from({ length: 10 }, (_, i) => `Paragraph ${i} has enough words to take up real space on a printed page.`).join("\n\n");
+    for (const chapter of book.chapters) book = updateChapter(book, chapter.id, { prose: longProse, formatting: [] });
+    const idml = await packIdml(buildManuscriptExport(book));
+    const files = unzipStore(idml);
+    const designmap = new TextDecoder().decode(files["designmap.xml"]!);
+    const ids = [...designmap.matchAll(/<idPkg:Spread src="Spreads\/Spread_([^".]+)\.xml"\/>/g)].map((m) => m[1]!);
+    expect(ids.length).toBeGreaterThan(20);
+    const sorted = [...ids].sort();
+    expect(ids).toEqual(sorted);
+  });
+
   it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.120
+Status: living document, v1.0.121
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5542,6 +5542,97 @@ kvarglömda, missvisande kodkommentarer (`paginateIdmlBlocks` och
 innan v1.0.114 och aldrig uppdaterades när trådning återinfördes.
 
 v1.0.119 → v1.0.120.
+
+**Ändringslogg v1.0.120 → v1.0.121 (2026-10-16):** Hittade den
+VERKLIGA grundorsaken till hela "tomma sidor"-sagan — genom att
+reproducera Mats exakta sidnummer i ett eget, kontrollerat test,
+inte genom ännu en gissning.
+
+**Mats testade v1.0.120 (pasteboard-fixen) och rapporterade två
+saker:** (1) en skärmdump av sidorna 199-215 som nu visade ett mycket
+mer normalt mönster — enstaka par av tomma sidor utspridda mellan
+kapitel med text, istället för ett stort sammanhängande block; (2)
+direkt följt av "Tyvärr..." och sedan "De första 106 sidorna är
+tomma." Pasteboard-fixen hade alltså INTE löst huvudproblemet.
+
+**Bad om två precisa detaljer** istället för att gissa vidare: vad
+som visas på sida 1, och var kapitel 1:s rubrik först dyker upp. Mats
+svar, med skärmdump: sida 1 helt tom; FÖRSTA tecknet kommer på sida
+108 ("The Weight of the Course Exported 2026-10-16." — alltså
+TITELSIDANS egen, korta text); kapitel 1:s rubrik på sida 109 direkt
+därefter.
+
+**Mats delade också en andra-hands-analys från Gemini** med två
+påståenden. Utvärderade båda mot koden och mot ComicBook AI:s
+referensskrivare innan något gjordes: (1) "108 spreads men bara 16
+stories" beskriver bara hur trådningen är TÄNKT att fungera (fler
+spreads än stories är designen, inte en bugg) — förklarar inget. (2)
+"saknat `<Section>`-element tvingar InDesign infoga tomsidor för att
+sida 1 ska bli en högersida" — den specifika mekanismen (recto-krav)
+gäller bara med `FacingPages="true"`, men vi sätter uttryckligen
+`FacingPages="false"`; och ComicBook AI:s egen, bekräftat fungerande
+IDML-skrivare saknar OCKSÅ `<Section>` helt utan att orsaka
+tomsidor där — så frånvaron kan inte ensam vara boven. Lade inte in
+ett Section-element baserat på den analysen (även om det skulle
+kunna göras som ofarlig hygien någon annan gång).
+
+**Genombrottet:** avgörande ledtråden var att titelsidans EGEN,
+mycket korta text (bara "{titel} {exportedLabel}") visades på sida
+108 — inte att någon enhet svällt till 107 sidor verkligt innehåll.
+Det är ett ORDNINGS-problem, inte ett INNEHÅLLS-problem. Och
+titelenheten är, per koden, uteslutet ALLTID den allra första
+posten i designmap.xml — så om InDesign visade den på plats 108 av
+ett dokument, måste InDesign använda NÅGOT ANNAT än designmap.xml:s
+egen referensordning för att avgöra Sidor-panelens visningsordning.
+
+Byggde ett test med en syntetisk 30-kapitelsbok (121 sidor totalt)
+och undersökte `idmlId()` — den funktion som genererar varje
+`Self`-ID i filen (`uSpread6`, `uSpread13`, `uSpread15`, ... en enda
+global, odelad, inkrementerande räknare delad mellan alla ID-typer).
+Testade hypotesen: VAD HÄNDER om man sorterar spreadarnas ID-strängar
+ALFABETISKT istället för i skapad/designmap-ordning? Resultat:
+titelsidans spread (alltid `...6`, alltid index 0 i designmap) hamnar
+då på index **108 av 121** — EXAKT samma sidnummer Mats oberoende
+rapporterade för var titeltexten faktiskt visades i InDesign. Ingen
+slump — en odelad, oblockerad `Self`-ID-sträng som "uSpread6" sorterar
+EFTER alla "uSpread1XX"/"uSpread2XX"/.../"uSpread9XX" (lexikografiskt
+jämförs tecken för tecken: "1" < "6", så "uSpread102" < "uSpread6" som
+strängar, trots att 102 > 6 som tal). InDesigns Sidor-panel visade sig
+alltså lista detta skrivarens trådade spreads i den SKRAMLADE
+strängordningen, inte i designmap.xml:s faktiska ordning.
+
+Detta förklarar RETROAKTIVT varenda observerat mönster i hela sagan:
+"123 tomma sedan 124 med text", det utspridda "9 tomt/8 text"-mönstret
+vid sidorna 111-128, "kapitel 1 börjar på sida 90", och nu "titelsidan
+på sida 108" — alla är samma underliggande strängsorterings-skrambel,
+bara med olika bokstorlekar och därmed olika exakta siffror. Det
+förklarar också varför VARKEN font-bytet, VARKEN v1.0.118:s
+uppskattningsfix, EJ HELLER v1.0.120:s pasteboard-positionsfix kunde
+lösa det — ingen av dem rör vid den faktiska mekanismen InDesign
+visade sig använda.
+
+**Rättning:** `idmlId(prefix)` nollpaddar nu sitt löpnummer till en
+fast bredd (6 siffror — plats för upp till en miljon ID:n, gott om
+marginal för vilken bok som helst) innan det sätts ihop med prefixet.
+Det gör att STRÄNGSORTERING av ID:n alltid stämmer överens med
+skapandeordning/designmap-ordning, oavsett hur stor boken är.
+
+**Verifiering, den mest konkreta i hela den här sagan:** (1) ett nytt
+committat test byggde en 15-kapitelsbok, extraherade alla Spread-ID:n
+ur en riktig genererad designmap.xml, och verifierade att de redan
+ligger i strängsorterad ordning; (2) en riktig export genom UI:t med
+10 fyllda kapitel (tillräckligt för att ID-räknaren ska korsa in i
+tresiffriga tal, exakt den skala som exponerade buggen) — `xmllint
+--noout` godkände varje XML-fil, och en oberoende sortering av de
+extraherade Spread-ID:na bekräftade att alfabetisk ordning nu exakt
+matchar designmap-ordningen; (3) hela testsviten (nu 1059 test, 79
+filer, med det nya testet), `tsc --noEmit` och `npm run build` kördes
+rent.
+Till skillnad från v1.0.120:s pasteboard-fix (som vilade på allmän
+kunskap om InDesign-dokuments uppbyggnad) är det HÄR en direkt,
+siffermässig reproduktion av det exakta felet Mats rapporterade.
+
+v1.0.120 → v1.0.121.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

@@ -1139,9 +1139,29 @@ function rtfBlock(
 // to open in InDesign and report back on.
 
 let idmlIdCounter = 0;
+/**
+ * Zero-padded to a fixed width (6 digits — room for ~a million ids, far
+ * more than any real manuscript needs) so every id's numeric creation
+ * order also matches its STRING sort order. Found by direct measurement
+ * to be the actual cause of a real, reported bug: unpadded ids like
+ * "uSpread6", "uSpread13", ..., "uSpread108" sort correctly as numbers
+ * but scramble badly as plain strings (every id starting with a higher
+ * leading digit, like "uSpread2..." through "uSpread9...", sorts before
+ * "uSpread108" lexicographically) — and InDesign's own Pages panel
+ * turned out to display this writer's threaded spreads in that scrambled
+ * string order rather than the order they're listed in designmap.xml,
+ * exactly reproducing a real report of early chapters' pages (and even
+ * the title page) appearing far later than their actual position, with
+ * unrelated spreads shown first. Confirmed by reproducing the reported
+ * page number precisely: a synthetic 30-chapter book's title spread
+ * (always first in designmap.xml and always the very first id this
+ * writer generates) lands at string-sorted index 108 of 121 spreads —
+ * the same page number independently reported for where a real
+ * manuscript's title text actually appeared.
+ */
 function idmlId(prefix: string): string {
   idmlIdCounter += 1;
-  return `${prefix}${idmlIdCounter}`;
+  return `${prefix}${String(idmlIdCounter).padStart(6, "0")}`;
 }
 
 const IDML_BODY_SIZE = 12;
