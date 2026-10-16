@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.118] - 2026-10-16
+
+### Fixed
+- IDML export's page-count estimate (how many pages to pre-allocate for a chapter's threaded flow) carried a stale `+ size * 0.3` allowance per block, left over from before v1.0.117 removed Body Text's real `SpaceAfter`. The allowance was meant to approximate that `SpaceAfter`; once the real value became 0, the allowance no longer corresponded to anything, inflating the estimate — across a whole book, a real test showed this contributing to leaving a large fraction of pages empty. It's now computed from each style's actual `SpaceAfter`/`SpaceBefore` (0 for Body Text and its variants, matching what v1.0.117 actually shipped).
+
 ## [1.0.117] - 2026-10-16
 
 ### Fixed

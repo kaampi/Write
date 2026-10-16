@@ -1262,6 +1262,22 @@ function idmlBlockXml(block: IdmlBlock, formatting: ProseFormattingRange[], scen
 }
 
 /**
+ * The real `SpaceAfter` (or, for ChapterHeading, `SpaceBefore` too — it
+ * always follows a page break so there's no previous block to absorb it)
+ * `idmlStylesXml` gives a style, in points. Body Text and its First/
+ * Indented variants are all "0" since v1.0.117 (an earlier version had
+ * Body carry a non-zero SpaceAfter, doubling the visible gap between
+ * "spaced" mode's own explicit blank-line paragraphs — see `idmlStylesXml`'s
+ * comment); only Title/Chapter Name/Scene Break still add real space.
+ */
+function idmlStyleSpaceAfter(styleName: string): number {
+  if (styleName === IDML_STYLE_TITLE) return 18;
+  if (styleName === IDML_STYLE_CHAPTER_NAME) return 24 + 14;
+  if (styleName === IDML_STYLE_SCENE_BREAK) return 10 + 10;
+  return 0;
+}
+
+/**
  * A block's real rendered height, in points — wrapped with the manuscript's
  * actual embedded (or standard fallback) font, the same `wrapTextLines`
  * pdf-lib-backed word-wrap PdfWriter uses for its own real pagination, not a
@@ -1269,10 +1285,15 @@ function idmlBlockXml(block: IdmlBlock, formatting: ProseFormattingRange[], scen
  * (`idmlStyleMetrics` — Title/ChapterHeading are far larger than body text)
  * and in the bold font for anything that renders bold (headings, and Story
  * Bible entity names), since bold glyphs measure a little wider and using
- * the regular font there would risk undercounting wrapped lines. `SpaceAfter`
- * adds a little more space after each paragraph than the raw line count
- * accounts for; the flat `+ size * 0.3` allowance approximates it rather
- * than re-deriving Styles.xml's own SpaceAfter value here.
+ * the regular font there would risk undercounting wrapped lines. Adds the
+ * style's own real `SpaceAfter`/`SpaceBefore` (`idmlStyleSpaceAfter`) rather
+ * than a flat guess — an earlier flat `+ size * 0.3` allowance, written back
+ * when Body Text still carried a real SpaceAfter, was never updated when
+ * that value changed to "0" in v1.0.117, leaving every block (the large
+ * majority of them Body Text, which no longer has any SpaceAfter at all) a
+ * little taller than it actually renders — compounded across a whole book,
+ * a real test showed this inflating the page-count estimate enough to
+ * leave roughly half the manuscript's pages sitting empty.
  */
 function idmlBlockHeight(block: IdmlBlock, bodyFont: PDFFont, boldFont: PDFFont, columnWidth: number): number {
   if (block.kind === "sceneBreak") return IDML_LINE_HEIGHT * 2;
@@ -1280,7 +1301,7 @@ function idmlBlockHeight(block: IdmlBlock, bodyFont: PDFFont, boldFont: PDFFont,
   const { size, lineHeight } = idmlStyleMetrics(block.styleName);
   const isBold = block.forceBold || block.styleName === IDML_STYLE_TITLE || block.styleName === IDML_STYLE_CHAPTER_NAME;
   const lineCount = wrapTextLines(block.text, isBold ? boldFont : bodyFont, size, columnWidth).length;
-  return lineCount * lineHeight + size * 0.3;
+  return lineCount * lineHeight + idmlStyleSpaceAfter(block.styleName);
 }
 
 /**

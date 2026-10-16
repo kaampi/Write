@@ -2306,7 +2306,7 @@ guide-tillägg. Om det ändå glider isär igen är samma diagnosmetod
 `### Added`-poster) det snabbaste sättet att se exakt hur mycket och
 vad som saknas.
 
-### 49. IDML-export (InDesign) — bekräftat fungerande i Affinity ✅
+### 49. IDML-export (InDesign) — Affinity ✅, InDesign fortfarande öppen
 
 Mats (2026-10-14): "Nästa grej är att vi ska fixa en exportfunktion
 till IDML. ComicbookAI har en fungerande sådan som du kan kolla på
@@ -2613,12 +2613,34 @@ stycken — dubblade mellanrummet. Ändrat till `SpaceAfter="0"`. Se
 `project_spec.md`, Ändringslogg v1.0.116 → v1.0.117, för fullständig
 genomgång.
 
-**Status: #49 i praktiken klar.** Åtta versioner (v1.0.107–v1.0.117),
-elva delsteg, en hel del om IDML-formatets faktiska krav lärda genom
-direkt jämförelse mot en referensimplementation snarare än gissning.
-Affinity bekräftat av Mats. InDesign själv (separat från Affinity,
-samma IDML-fil) väntar fortfarande på ett slutgiltigt test, men
-grunden är nu densamma som redan fungerar.
+**Status: Affinity klar, InDesign inte.** Åtta versioner
+(v1.0.107–v1.0.117), elva delsteg, en hel del om IDML-formatets
+faktiska krav lärda genom direkt jämförelse mot en
+referensimplementation snarare än gissning. Affinity bekräftat av
+Mats. InDesign själv (separat från Affinity, samma IDML-fil) väntar
+fortfarande på ett slutgiltigt test.
+
+**Delsteg 12 (v1.0.118, nytt InDesign-specifikt fel, ej löst):** Mats:
+"Indesign fungerar inte. Den har 123 tomma sidor och sedan 124 sidor
+med text." — ett annat mönster än tidigare fel: alla tomma sidor
+FÖRST, sedan allt med text, inte utspritt per kapitel. Egen jämförelse
+mot PDF-exportens faktiska renderade sidantal visade att
+sidantals-uppskattningen verkligen överskattar (~1,2-1,6x), och
+hittade en konkret, nu rättad bugg (ett föråldrat `+ size * 0.3`-
+tillägg i `idmlBlockHeight`, kvar sedan innan v1.0.117 nollställde
+Body Text-stilens SpaceAfter). Men den kvarstående överskattningen
+(IDML:s 12pt kroppstext vs PDF:s 11pt, IDML:s fulla radhöjd för tomma
+avskiljarstycken vs PDF:s medvetet komprimerade 0,6x) är till stor del
+LEGITIM, inte en bugg att jaga bort — och förklarar troligen inte
+ensam varför tomma och fyllda sidor hamnar i två separata block i
+InDesigns sidordning. Det mönstret pekar mer mot hur InDesign
+specifikt TOLKAR flera trådade Stories vid import. Se `project_spec.md`,
+Ändringslogg v1.0.117 → v1.0.118, för fullständig genomgång.
+
+**Nästa steg:** mer information från Mats behövs för att fastställa om
+det är ETT kapitel vars uppskattning slår fel dramatiskt, eller en
+jämnt fördelad överskattning över hela boken som InDesign av någon
+anledning grupperar om vid import.
 
 ---
 

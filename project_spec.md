@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.117
+Status: living document, v1.0.118
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5327,6 +5327,76 @@ UI:t extraherades, `xmllint --noout` godkände varje XML-fil, och det
 nya SpaceAfter-värdet bekräftades direkt i Styles.xml.
 
 v1.0.116 → v1.0.117.
+
+**Ändringslogg v1.0.117 → v1.0.118 (2026-10-16):** Hittade och rättade
+en egen, nyligen införd bugg i sidantals-uppskattningen — men inte
+säkert hela förklaringen till Mats senaste InDesign-rapport.
+
+**Mats:** "Indesign fungerar inte. Den har 123 tomma sidor och sedan
+124 sidor med text. Sparas sidorna som Spreads? Vi försöker fixa den
+utan att sabba för Affinity." — ja, varje sida sparas som ett eget
+`<Spread>`-element (med en `<Page>` och en `<TextFrame>` i), svarade
+jag direkt. 123 tomma + 124 med text = 247 sidor totalt, i den
+ordningen (alla tomma FÖRST, sedan allt med text) — ett annat mönster
+än tidigare rundors fel.
+
+**Egen undersökning innan någon ändring gjordes** (samma disciplin som
+v1.0.111): byggde tre syntetiska testkapitel (berättande långa stycken,
+dialog med många korta rader, blandat) och jämförde IDML:s egen
+sidantals-UPPSKATTNING (`paginateIdmlBlocks(...).length`) mot PDF-
+exportens FAKTISKA renderade sidantal för samma innehåll (PDF gör
+riktig radbrytning med pdf-lib:s fontmått, ett pålitligt jämförelseobjekt).
+Resultat innan rättning: PDF 9-10 sidor, IDML-uppskattning 13-16 sidor
+— en verklig, mätbar överskattning, men bara ~1,4-1,6x, inte en
+dramatisk 2x-nivå som skulle krävas för att själv förklara "ungefär
+hälften av alla sidor tomma."
+
+**En konkret, hittad bugg ändå:** `idmlBlockHeight` hade kvar ett
+`+ size * 0.3`-tillägg per block, en rest från INNAN v1.0.117 tog bort
+Body Text-stilens riktiga `SpaceAfter` (som då var `${IDML_BODY_SIZE}`,
+dvs 12). Tillägget var uttryckligen avsett att approximera just det
+SpaceAfter-värdet (se kodkommentaren som fanns redan). Men när
+v1.0.117 satte det riktiga SpaceAfter till "0" glömdes den här
+uppskattnings-kompensationen bort — den fortsatte lägga på 3,6pt extra
+höjd per BLOCK (både riktiga stycken och tomma avskiljarstycken) som
+inte längre motsvarar något i den faktiskt renderade filen. Eftersom
+MERPARTEN av ett kapitels block är Body Text-stilade, adderar den här
+överskattningen upp genom en hel bok.
+
+**Rättning:** ny `idmlStyleSpaceAfter(styleName)` som returnerar
+stilens FAKTISKA SpaceAfter/SpaceBefore-värde (0 för Body Text och dess
+varianter, 18 för Title, 24+14 för Chapter Name, 10+10 för Scene
+Break) istället för den gamla flata `size * 0.3`-gissningen. Effekt
+uppmätt i samma jämförelse: Narrative 13→12, Dialogue 16→14, Mixed
+16→14 — en verklig, om än modest (~10-15%), förbättring.
+
+**Ärligt om vad som INTE är löst:** den kvarstående skillnaden mot
+PDF:s faktiska sidantal (fortfarande ~1,2-1,4x) förklaras till stor
+del av LEGITIMA skillnader, inte buggar — IDML:s kroppstext är 12pt
+mot PDF:s 11pt (ett medvetet typografiskt val, inte en miss), och
+IDML:s tomma avskiljarstycken kostar en HEL radhöjd (korrekt — en tom
+paragraf upptar sin fulla Leading-höjd i InDesign) medan PDF:s egen
+rendering medvetet komprimerar tomrader till 0,6x för en tightare
+visuell look (PDF:s eget stilval, inte "mer korrekt"). Att kopiera
+PDF:s 0,6x till IDML skulle göra uppskattningen MINDRE korrekt, med
+risk för den värre felvarianten (text som klipps bort) — gjordes
+därför INTE.
+
+Så den här rättningen är en verifierad, riktig förbättring, men
+sannolikt INTE hela förklaringen till "123 tomma sidor sedan 124 med
+text, i den ordningen" — det GRUPPERADE mönstret (alla tomma först,
+inte utspridda per kapitel) pekar snarare mot något i hur InDesign
+specifikt TOLKAR flera trådade Stories vid import, som kräver mer
+information från Mats för att fastställas.
+
+**Verifiering:** hela testsviten (1057 test, 79 filer),
+`tsc --noEmit`, `npm run build`, och en riktig export genom UI:t
+(`xmllint --noout` godkände varje fil, trådningskedjan fortfarande
+korrekt) kördes rent. Ingen ny testassertion lades till specifikt för
+detta (inget tidigare test hårdkodade ett exakt sidantal som skulle
+behöva uppdateras).
+
+v1.0.117 → v1.0.118.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
