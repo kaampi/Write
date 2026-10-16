@@ -545,6 +545,21 @@ describe("IDML export", () => {
     expect(ids).toEqual(sorted);
   });
 
+  it("declares a Section covering the whole document, starting at the first real Page", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const designmap = new TextDecoder().decode(files["designmap.xml"]!);
+    const sectionMatch = designmap.match(
+      /<Section Self="[^"]+" Length="(\d+)" PageStart="([^"]+)" PageNumberStart="1" ContinueNumbering="false" IncludeSectionPrefix="false" SectionPrefix="" Marker=""\/>/
+    );
+    expect(sectionMatch).not.toBeNull();
+    const spreadPaths = [...designmap.matchAll(/<idPkg:Spread src="(Spreads\/Spread_[^"]+\.xml)"\/>/g)].map((m) => m[1]!);
+    // Length covers every real page, and PageStart points at the first Spread's own Page id.
+    expect(Number(sectionMatch![1])).toBe(spreadPaths.length);
+    const firstSpreadXml = new TextDecoder().decode(files[spreadPaths[0]!]!);
+    expect(firstSpreadXml).toContain(`<Page Self="${sectionMatch![2]}"`);
+  });
+
   it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.121
+Status: living document, v1.0.122
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5633,6 +5633,102 @@ kunskap om InDesign-dokuments uppbyggnad) är det HÄR en direkt,
 siffermässig reproduktion av det exakta felet Mats rapporterade.
 
 v1.0.120 → v1.0.121.
+
+**Ändringslogg v1.0.121 → v1.0.122 (2026-10-16):** v1.0.121:s ID-fix
+visade sig INTE lösa problemet — och den fortsatta utredningen
+bevisade till slut, med Affinity som vittne, att själva filen är
+korrekt och att InDesign hittar på sidor som inte finns där.
+
+**Mats testade v1.0.121** och rapporterade, med skärmdump: "Jag är
+ledsen... Samma 107 tomma sidor." Exakt samma resultat som innan
+ID-nollpaddningen — trots att den ändringen skrev om VARJE ID-sträng i
+filen. Så exakt en matchning efter en ändring som borde ha stört om
+ordningen radikalt var i sig misstänkt.
+
+**Uteslöt cache/stale-fil som förklaring:** bad Mats testa ett HELT
+ANNAT manus ("Call of Cthulhu", aldrig öppnat förut) specifikt för att
+få en IDML-fil som inte kunde vara en gammal, redan öppen version i
+InDesign. Samma mönster ändå: 57 tomma sidor innan riktigt innehåll,
+på ett totalt sidantal av 115 — samma ~50%-kvot som i alla tidigare
+tester (123/239, 90/177, 106/215), nu bekräftat oberoende av
+manusinnehåll, typsnitt OCH filcache.
+
+**Genombrott #2 — bad Mats dela designmap.xml direkt.** Räknade raderna
+för hand: filen innehöll exakt **58** `<idPkg:Spread>`-poster (3
+kapitel, bekräftat av StoryList:s 4 stories: titel + 3 kapitel). Men
+InDesign visade **115** sidor. 115 = 58 + 57 — en extra sida för varje
+riktig sida utom den första. Första gången i hela sagan en SIFFRA som
+direkt bevisade att det inte längre var en ordnings-/sorteringsfråga
+(vilket v1.0.120 och v1.0.121 antog) utan en genuin DUBBLERING: 57
+sidor existerar helt enkelt inte i vår egen fil.
+
+**Två snabba, kodfria tester för att pricka in mekanismen,** båda via
+Mats direkt i InDesign:
+1. Klicka på en av de tomma sidorna med markeringsverktyget — "inget"
+   gick att markera. Inte ens en tom textram. Bekräftar: detta är inte
+   våra egna, bara ofyllda, trådade rutor (de skulle gått att markera
+   som tomma textramar) — det är sidor InDesign skapat helt utanför
+   vår fils egen struktur.
+2. Typsnittsbyte Literata → Minion Pro (ett riktigt, installerat
+   typsnitt) — samma resultat. Typsnittssubstitution uteslutet än en
+   gång, nu även för det här specifika testet.
+
+**Två InDesign-inställningar undersökta och uteslutna, också utan ny
+kod:**
+- Dokumentinställningar → "Visa uppslag" (Facing Pages): avbockad,
+  bekräftat AV. "Antal sidor: 115" visade sig vara InDesigns egen,
+  INTERNA sidräkning — inte bara en panelvisningsordning.
+- "Smart textomformning" (Smart Text Reflow, Inställningar →
+  Typografi): redan korrekt inställd ("Begränsa till primära
+  textramar" ikryssad, vilket enligt Adobes egen dokumentation borde
+  göra att den aldrig triggar på våra icke-mastersides-textramar).
+  Stängde av funktionen helt ändå — exakt samma 57 tomma sidor.
+
+**Genombrott #3 — Affinity-korsjämförelse.** Bad Mats öppna EXAKT
+samma fil i Affinity (redan känt fungerande) och räkna sidorna där:
+**58** — matchar vår fils verkliga innehåll EXAKT. Affinity visade
+dock tomma buffertsidor i SLUTET av varje kapitels egen trådning
+(10-15, 29-39, 51-58 — totalt 25 sidor), vilket är precis det redan
+kända, ofarliga "modesta överskattnings"-mönstret (värdena matchar:
+14+24+19 trådade rutor per kapitel minus verkligt behövt innehåll).
+Detta BEVISADE slutgiltigt: vår fil är objektivt korrekt — samma fil,
+öppnad i två olika program, ger 58 sidor i det ena (med redan förstådd,
+ofarlig buffertförlust) och 115 "uppfunna" sidor i det andra. Felet är
+100% InDesign-specifikt importbeteende, triggat av något i vår fils
+struktur som bara InDesign reagerar på.
+
+**Återstående, välgrundad men ännu INTE bekräftad teori:** filen
+saknar helt ett `<Section>`-element — något en RIKTIG InDesign-
+exporterad IDML-fil alltid har (bekräftat genom att varje sida i Mats
+Sidor-panel visas med hakparenteser, InDesigns egen konvention för
+"osektionerad" numrering). Verifierade elementets faktiska XML-schema
+(`Self`, `Length`, `PageStart`, `PageNumberStart`, `ContinueNumbering`,
+`IncludeSectionPrefix`, `SectionPrefix`, `Marker`) mot en riktig,
+oberoende IDML-parsers källkod (`dimelords/idmllib`, ett Go-bibliotek)
+via webbsökning — inte en gissning den här gången, eftersom jag inte
+ville riskera att skriva ogiltig XML för ett element jag inte hade
+sett en verklig definition av. `PageStart` pekar på det allra första
+`<Page>`-elementets Self-id i hela dokumentet.
+
+**Ärligt om var det här lämnar oss:** detta är den ENDA kvarstående,
+konkreta strukturella skillnaden mot verklig IDML-konvention jag kan
+identifiera just nu — men till skillnad från PathGeometry/
+AllowPageShuffle-fixarna (bekräftade mot en riktig referensfil) och
+ID-paddningsfixen (en siffermässig reproduktion som visade sig INTE
+lösa det faktiska problemet), är det här INTE verifierat mot InDesign.
+Fyra kodfixar och två inställningstester i rad har redan slagit fel på
+den här bedriften, så jag kommunicerade tydligt till Mats att det här
+är mitt bästa återstående, välgrundade försök — inte en garanti.
+
+**Verifiering:** nytt committat test som kontrollerar att `<Section>`
+har korrekt `Length` (matchar totalt antal riktiga sidor) och att
+`PageStart` pekar på det första Spreadets egna Page-id. Hela
+testsviten (1059 → 1060 test), `tsc --noEmit`, `npm run build`, och
+en riktig export genom UI:t (`xmllint --noout` godkände varje fil,
+Section-elementet bekräftat korrekt i den extraherade designmap.xml)
+kördes rent.
+
+v1.0.121 → v1.0.122.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

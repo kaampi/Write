@@ -1659,6 +1659,10 @@ export async function packIdml(
   // pasteboard has one continuous strip of spreads regardless of which
   // story each one belongs to.
   let globalSpreadIndex = 0;
+  // The very first Page's own Self id — the document's single Section (see
+  // the designmap comment below) references it as where page numbering
+  // begins.
+  let firstPageSelf: string | undefined;
 
   for (const unit of units) {
     // Reused only for its page count — the real per-page split now happens
@@ -1676,6 +1680,7 @@ export async function packIdml(
     for (let index = 0; index < frameCount; index += 1) {
       const spreadSelf = idmlId("uSpread");
       const pageSelf = idmlId("uPage");
+      if (firstPageSelf === undefined) firstPageSelf = pageSelf;
       const label = index === 0 ? unit.label : `${unit.label} (${index + 1})`;
       const previousTextFrame = index > 0 ? frameIds[index - 1]! : "n";
       const nextTextFrame = index < frameCount - 1 ? frameIds[index + 1]! : "n";
@@ -1703,12 +1708,31 @@ export async function packIdml(
   }
 
   const pageCount = spreadRefs.length;
+  const sectionSelf = idmlId("uSection");
 
   // No default `xmlns=` on <Document> — only the idPkg: prefix resource
   // references need a namespace; Document and its children (Layer, Page,
   // Spread/Story refs) are unprefixed. The `<?aid ...?>` processing
   // instruction right after the XML declaration is InDesign's own package
   // marker, found on every real IDML designmap.xml.
+  //
+  // `<Section>` — one, covering the whole document, `PageStart` pointing at
+  // the very first Page's own Self id — was never written before. Every
+  // page this writer creates numbers as "unsectioned" (shown in InDesign's
+  // own Pages panel in square brackets) without it, which a real InDesign-
+  // authored document never is. Added while investigating a real report of
+  // InDesign inserting dozens of extra, genuinely empty pages (nothing
+  // placeable on them, the default "A" master applied — consistent with
+  // pages InDesign generated itself, not ones this writer's own designmap
+  // lists) that don't appear at all when the identical file is opened in
+  // Affinity, which confirmed the file itself is well-formed. Several other
+  // explanations (pasteboard position, id string-sort order, Facing Pages,
+  // Smart Text Reflow) were each directly tested and ruled out first; this
+  // is the one remaining concrete structural gap against real IDML
+  // convention that's left to close.
+  const sectionXml = firstPageSelf
+    ? `  <Section Self="${sectionSelf}" Length="${pageCount}" PageStart="${firstPageSelf}" PageNumberStart="1" ContinueNumbering="false" IncludeSectionPrefix="false" SectionPrefix="" Marker=""/>\n`
+    : "";
   const designmap = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <?aid style="50" type="document" readerVersion="6.0" featureSet="257"?>
 <Document xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0" Self="${docSelf}" StoryList="${storyIds.join(" ")}" ZeroPoint="0 0">
@@ -1719,7 +1743,7 @@ export async function packIdml(
   <idPkg:MasterSpread src="MasterSpreads/MasterSpread_${masterSelf}.xml"/>
 ${spreadRefs.join("\n")}
 ${storyRefs.join("\n")}
-</Document>
+${sectionXml}</Document>
 `;
 
   return zipStore([

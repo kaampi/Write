@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.122] - 2026-10-16
+
+### Fixed
+- IDML export never wrote a `<Section>` element, so every page always displayed as "unsectioned" in InDesign's own Pages panel — something no real InDesign-authored document is. Investigated further after v1.0.121's id zero-padding (a real, confirmed structural issue in its own right) turned out not to fix the reported symptom: InDesign was still showing dozens of extra, completely empty pages (nothing placeable on them, the default master applied) that don't exist anywhere in the exported file — confirmed by opening the identical file in Affinity, which showed exactly the expected page count. Facing Pages and Smart Text Reflow were each checked and ruled out directly in InDesign's own preferences too. A `<Section>` covering the whole document, with its `PageStart` pointing at the first real page, is the one remaining concrete structural gap against real IDML convention left to close — added here, though not yet confirmed to resolve the underlying InDesign-side behavior.
+
 ## [1.0.121] - 2026-10-16
 
 ### Fixed
