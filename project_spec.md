@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.129
+Status: living document, v1.0.130
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6263,6 +6263,84 @@ med varje riktig sidas `AppliedAlternateLayout` pekande på sektionen,
 mastersidan oförändrad med `"n"`.
 
 v1.0.128 → v1.0.129.
+
+**Ändringslogg v1.0.129 → v1.0.130 (2026-10-17):** Den femtonde
+justeringen — den FÖRSTA som bygger på en genuin referens med exakt
+vår egen fils form: två oberoende stories (en otrådad, en trådad över
+flera sidor) i samma dokument.
+
+**Mats testade v1.0.129:** fortfarande fel, två tomma sidor först.
+Delade även en analys från ett annat AI-verktyg ("Gemini") som pekade
+ut just `AppliedAlternateLayout` som boven och föreslog att ta bort
+det helt. Kunde motbevisa det direkt utan nytt test: den äkta native-
+referensfilen har EXAKT samma mönster (`AppliedAlternateLayout`
+pekande på Sektionen) och fungerar utan problem för Mats — om det
+vore boven borde hans egen fil visa samma symptom.
+
+**Bad Mats skapa en genuint ny testfil** med två separata textrutor
+(inte en enda flödad text) — efter två missförstådda försök (en
+omsparning av samma enstory-fil, nerbantad till 2 sidor) fick jag
+till slut exakt rätt fil: `Namnlöst-2`, med `StoryList="ue5 u108 ub1"`
+— sida 1 en otrådad story ("TEST EGEN TEXTRUTA"), sidor 2–3 en
+trådad story (placeholder-text över två rutor).
+
+**Bekräftade:** EN delad `<Section>` täcker hela dokumentet även med
+flera oberoende stories (inte en per story) — v1.0.129:s struktur var
+alltså redan korrekt där, bara inte hela boven.
+
+**Genombrottet:** bad Mats om de faktiska Spread- och Story-filerna
+också. Jämförelsen avslöjade att vår `<Page>`, `<TextFrame>` och
+`<Story>` är kraftigt avskalade mot vad en äkta export skriver — på
+BÅDA stories, trådad som otrådad, inte något specifikt för trådning:
+
+- `<Page>`: saknade `SnapshotBlendingMode`, `OptionalPage`,
+  `AppliedTrapPreset`, `MasterPageTransform`, `TabOrder`,
+  `GridStartingPoint`, `UseMasterGrid`, en `Descriptor`/`PageColor`-
+  properties-block, och en `GridDataInformation`-block (även på
+  mastersidans egen sida). `Page`s `Name` är i verkligheten sidans
+  egna sekventiella nummer ("1","2","3"...), ALDRIG en egen
+  kapitelrubrik som vi satte — det är inte en äkta IDML-konvention.
+- `<TextFrame>`: saknade `ParentInterfaceChangeCount`/
+  `TargetInterfaceChangeCount`/`LastUpdatedInterfaceChangeCount` och
+  `HorizontalLayoutConstraints`/`VerticalLayoutConstraints` — båda
+  paren flaggades redan för länge sen som oprövade kandidater, nu
+  äntligen bekräftade med riktiga värden — plus
+  `OverriddenPageItemProps`, `BeforeGroupingLayerPosition`,
+  `FlexItemWidthMode`/`FlexItemHeightMode`, sex Gradient-nollor,
+  `AppliedObjectStyle`, `Locked`, `Visible`, `Name`.
+- `<Spread>`s `BindingLocation`: `"0"` BARA på dokumentets allra
+  första Spread, `"1"` på alla andra — oavsett vilken story sidan
+  tillhör (den otrådade sidan 1 fick "0", båda den trådade storyns
+  sidor fick "1" — ett rent positionsattribut, inte
+  trådningsspecifikt).
+- `<Story>`: saknade `UserText`, `IsEndnoteStory`, en riktig
+  `StoryTitle="$ID/"` (inte tom sträng), `StoryPreference`s
+  `OpticalMarginSize`/`FrameType`, ett `InCopyExportOption`-element,
+  och InDesign 21.x:s `Ai*`-attribut (innehållsursprung-deklaration).
+
+**Rättning:** en samlad trohetsuppdatering snarare än ännu en
+enskild-attribut-gissning — alla ovanstående tillagda, matchande den
+äkta referensen exakt. Inget av dem enskilt skriker "sidduplicering",
+men vår kods element var synbart ofullständiga på BÅDA referensens
+stories, trådad som otrådad.
+
+**Verifiering:** tre nya committade tester (sidnumrering + Binding-
+Location, Page/TextFrame-attributens fulla uppsättning inklusive
+mastersidan, Story-attributens fulla uppsättning). Hela testsviten
+(1068 test, 79 filer), `tsc --noEmit`, `npm run build`, och en riktig
+export genom UI:t — `xmllint --noout` godkände varje fil, och den
+extraherade filen visade exakt `BindingLocation="0"` på första
+spreaden och `"1"` på resten, `Page Name` som sekventiella nummer
+("1","2","3","4"), och alla nya Story-attribut närvarande.
+
+**Ärligt om räckvidden:** detta är den mest omfattande enskilda
+rättningen i hela sagan, byggd på det bästa referensmaterialet vi
+någonsin haft (genuint samma form som vår egen fil). Ingen enskild
+ny attribut sticker ut som en uppenbar förklaring till den exakta
+dubbleringsformeln — det här är en bred, väl underbyggd
+trohetsuppdatering snarare än en riktad gissning.
+
+v1.0.129 → v1.0.130.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

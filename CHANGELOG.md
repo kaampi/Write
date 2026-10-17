@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.130] - 2026-10-17
+
+### Fixed
+- IDML export's `Page`, `TextFrame`, and `Story` elements were a visibly stripped-down subset of what a real InDesign (21.6) export writes — confirmed by the first genuine two-story reference available in this investigation (one untreaded single-frame story, one threaded across two more, mirroring this writer's own title+chapter shape exactly; every earlier reference was either one giant single story or this writer's own already-broken export re-saved by InDesign). `Page` now carries `SnapshotBlendingMode`, `OptionalPage`, `AppliedTrapPreset`, `MasterPageTransform`, `TabOrder`, `GridStartingPoint`, `UseMasterGrid`, a `Descriptor`/`PageColor` properties block, and a `GridDataInformation` block, matched on the master's own page too; `Page`'s `Name` is now its real sequential page number (`"1"`, `"2"`, …, matching every real page this writer has now seen) rather than a custom chapter label, which was never a real IDML convention. `TextFrame` now carries `ParentInterfaceChangeCount`/`TargetInterfaceChangeCount`/`LastUpdatedInterfaceChangeCount` and `HorizontalLayoutConstraints`/`VerticalLayoutConstraints` (both pairs flagged as untried candidates earlier in this investigation, now finally confirmed with real values), plus `OverriddenPageItemProps`, `BeforeGroupingLayerPosition`, `FlexItemWidthMode`/`FlexItemHeightMode`, six Gradient* zeros, `AppliedObjectStyle`, `Locked`, `Visible`, and `Name`. `Spread`'s `BindingLocation` is now `"0"` only on the document's very first Spread and `"1"` on every other one (not threading-specific — confirmed by position, not by which story a page belongs to). `Story` now carries `UserText`, `IsEndnoteStory`, a real `StoryTitle="$ID/"` (not an empty string), `StoryPreference`'s `OpticalMarginSize`/`FrameType`, an `InCopyExportOption` element, and the `Ai*` Content Credentials attributes InDesign 21.x states on every story. None of these individually explains "page duplication," but this writer's elements were under-specified on BOTH of the reference's stories — threaded and untreaded alike — so this is a comprehensive fidelity pass rather than another single-attribute guess.
+
 ## [1.0.129] - 2026-10-17
 
 ### Fixed

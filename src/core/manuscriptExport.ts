@@ -1167,6 +1167,13 @@ function idmlId(prefix: string): string {
 /** The one Layer every page item belongs to — see idmlSpreadXml's comment on why this exists. */
 const IDML_LAYER = "uLayer";
 
+/** Every real `Page`'s own page-grid declaration (the CJK-style grid feature, unrelated to this document's actual body font) — a real export always states one, with its own default font ("Minion Pro"), never this writer's chosen Publish font. See idmlSpreadXml's comment. */
+const IDML_GRID_DATA_INFORMATION = `<GridDataInformation FontStyle="Regular" PointSize="12" CharacterAki="0" LineAki="9" HorizontalScale="100" VerticalScale="100" LineAlignment="LeftOrTopLineJustify" GridAlignment="AlignEmCenter" CharacterAlignment="AlignEmCenter">
+        <Properties>
+          <AppliedFont type="string">Minion Pro</AppliedFont>
+        </Properties>
+      </GridDataInformation>`;
+
 const IDML_BODY_SIZE = 12;
 const IDML_LINE_HEIGHT = IDML_BODY_SIZE * 1.4;
 const IDML_TITLE_SIZE = 28;
@@ -1448,11 +1455,29 @@ function paginateIdmlBlocks(blocks: IdmlBlock[], bodyFont: PDFFont, boldFont: PD
   return pages;
 }
 
+/**
+ * `UserText="true"`, `IsEndnoteStory="false"`, `StoryTitle="$ID/"` (not an
+ * empty string), `StoryPreference`'s `OpticalMarginSize="12"
+ * FrameType="TextFrameType"`, and the `<InCopyExportOption>` element are
+ * all genuinely new — a two-story document (one untreaded frame, one
+ * threaded across two more) was never available before: every earlier
+ * reference was either a single giant story (no second, independent unit to
+ * compare against) or this writer's own already-broken export re-saved by
+ * InDesign, not an independent InDesign-authored multi-story file. This
+ * writer's own `<Story>` turned out to be missing all of the above, on
+ * BOTH of that reference's stories (the untreaded one and the threaded
+ * one alike) — not attributes tied to threading specifically, just a
+ * story element this writer had always under-specified. The `Ai*`
+ * attributes (InDesign's Content Credentials disclosure, new in 21.x) are
+ * included too for the same completeness, set to their plain "not AI
+ * generated" defaults.
+ */
 function idmlStoryXml(storyId: string, paragraphsXml: string): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <Story Self="${storyId}" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="" AppliedNamedGrid="n">
-    <StoryPreference OpticalMarginAlignment="false" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+  <Story Self="${storyId}" AiGeneratedStory="false" AiModelName="$ID/" AiDigitalSourceType="$ID/" AiFirstParty="false" AiTextContent="$ID/" AppliedTOCStyle="n" UserText="true" IsEndnoteStory="false" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+    <StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+    <InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
     ${paragraphsXml}
   </Story>
 </idPkg:Story>
@@ -1563,6 +1588,32 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * only correct on a page genuinely outside any section, which a real
  * export's master page is (see `idmlMasterSpreadXml`) but no real content
  * page ever is. Every real `Page` now references `sectionSelf`.
+ *
+ * A real two-story reference (see `idmlStoryXml`'s comment) also showed a
+ * `Page` and `TextFrame` far more fleshed out than this writer's own: a
+ * `BindingLocation` of `"0"` only on the document's very first Spread and
+ * `"1"` on every other one (not threading-specific — the untreaded first
+ * page got `"0"`, both pages of the threaded second story got `"1"`,
+ * simply by position); `Page`'s own `Name` is the page's absolute,
+ * sequential number as a string (`"1"`, `"2"`, …) in every real page this
+ * writer has now seen, never a custom label (the master's own page uses
+ * its master name, "A", the one exception, already matched); a `<Properties>`
+ * block with a `Descriptor` list whose two "long" entries repeat that same
+ * page number, a `PageColor`, `SnapshotBlendingMode`, `OptionalPage`,
+ * `AppliedTrapPreset`, `MasterPageTransform`, `TabOrder`,
+ * `GridStartingPoint`, `UseMasterGrid`, and a `GridDataInformation` block
+ * this writer never stated at all; and on `TextFrame`,
+ * `ParentInterfaceChangeCount`/`TargetInterfaceChangeCount`/
+ * `LastUpdatedInterfaceChangeCount` and `HorizontalLayoutConstraints`/
+ * `VerticalLayoutConstraints` — both pairs flagged as untried candidates
+ * earlier in this investigation, now finally seen with real values — plus
+ * `OverriddenPageItemProps`, `BeforeGroupingLayerPosition`,
+ * `FlexItemWidthMode`/`FlexItemHeightMode`, six Gradient* zeros,
+ * `AppliedObjectStyle`, `Locked`, `Visible`, and `Name`. None of these
+ * individually screams "page duplication," but this writer's own elements
+ * were a visibly stripped-down subset of a real one's on BOTH of that
+ * reference's stories (threaded and untreaded alike) — brought up to the
+ * same shape wholesale rather than guessing at one attribute again.
  */
 function idmlSpreadXml(
   spreadId: string,
@@ -1573,7 +1624,6 @@ function idmlSpreadXml(
   pageWidth: number,
   pageHeight: number,
   margin: number,
-  label: string,
   spreadIndex: number,
   sectionSelf: string,
   previousTextFrame = "n",
@@ -1581,13 +1631,28 @@ function idmlSpreadXml(
 ): string {
   const columnWidth = pageWidth - margin * 2;
   const columnHeight = pageHeight - margin * 2;
+  const pageNumber = spreadIndex + 1;
+  const bindingLocation = spreadIndex === 0 ? 0 : 1;
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Spread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="true" ItemTransform="1 0 0 1 ${spreadIndex * pageWidth} 0" ShowMasterItems="false">
-    <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="${masterSelf}" AppliedAlternateLayout="${sectionSelf}" LayoutRule="UseMaster" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
-      <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
+  <Spread Self="${spreadId}" PageCount="1" BindingLocation="${bindingLocation}" AllowPageShuffle="true" ItemTransform="1 0 0 1 ${spreadIndex * pageWidth} 0" ShowMasterItems="false">
+    <Page Self="${pageId}" Name="${pageNumber}" AppliedMaster="${masterSelf}" AppliedAlternateLayout="${sectionSelf}" LayoutRule="UseMaster" SnapshotBlendingMode="IgnoreLayoutSnapshots" OptionalPage="false" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0" AppliedTrapPreset="TrapPreset/$ID/kDefaultTrapStyleName" MasterPageTransform="1 0 0 1 0 0" TabOrder="" GridStartingPoint="TopOutside" UseMasterGrid="true">
+      <Properties>
+        <Descriptor type="list">
+          <ListItem type="string"></ListItem>
+          <ListItem type="enumeration">Arabic</ListItem>
+          <ListItem type="boolean">true</ListItem>
+          <ListItem type="boolean">false</ListItem>
+          <ListItem type="long">${pageNumber}</ListItem>
+          <ListItem type="long">${pageNumber}</ListItem>
+          <ListItem type="string"></ListItem>
+        </Descriptor>
+        <PageColor type="enumeration">UseMasterColor</PageColor>
+      </Properties>
+      <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}" ColumnDirection="Horizontal" ColumnsPositions="0 ${columnWidth}"/>
+      ${IDML_GRID_DATA_INFORMATION}
     </Page>
-    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ItemLayer="${IDML_LAYER}" ItemTransform="1 0 0 1 ${margin} ${margin}">
+    <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ParentInterfaceChangeCount="" TargetInterfaceChangeCount="" LastUpdatedInterfaceChangeCount="" OverriddenPageItemProps="" BeforeGroupingLayerPosition="-1" HorizontalLayoutConstraints="FlexibleDimension FixedDimension FlexibleDimension" VerticalLayoutConstraints="FlexibleDimension FixedDimension FlexibleDimension" FlexItemWidthMode="FlexFixed" FlexItemHeightMode="FlexFixed" GradientFillStart="0 0" GradientFillLength="0" GradientFillAngle="0" GradientStrokeStart="0 0" GradientStrokeLength="0" GradientStrokeAngle="0" ItemLayer="${IDML_LAYER}" Locked="false" LocalDisplaySetting="Default" GradientFillHiliteLength="0" GradientFillHiliteAngle="0" GradientStrokeHiliteLength="0" GradientStrokeHiliteAngle="0" AppliedObjectStyle="ObjectStyle/$ID/[Normal Text Frame]" Visible="true" Name="$ID/" ItemTransform="1 0 0 1 ${margin} ${margin}">
       ${idmlRectPathGeometry(columnWidth, columnHeight)}
       <TextFramePreference TextColumnCount="1" TextColumnFixedWidth="${columnWidth}" UseFlexibleColumnWidth="false" FirstBaselineOffset="AscentOffset" VerticalJustification="TopAlign">
         <Properties>
@@ -1661,12 +1726,30 @@ function idmlPreferencesXml(pageCount: number, pageWidth: number, pageHeight: nu
  * see `idmlSpreadXml`'s comment on why every real page gets the equivalent
  * (`LayoutRule="UseMaster"` there, since it's a page actually using this
  * master, not the master's own page).
+ *
+ * The extra `Page` attributes/elements (`SnapshotBlendingMode`,
+ * `OptionalPage`, `AppliedTrapPreset`, `MasterPageTransform`, `TabOrder`,
+ * `GridStartingPoint`, `UseMasterGrid`, `MarginPreference`,
+ * `GridDataInformation`) and `MasterSpread`'s own `OverriddenPageItemProps`
+ * match a real export's master page exactly — see idmlSpreadXml's comment
+ * on where these came from (a real export's content pages had the same
+ * gap; its master page turned out to, too).
  */
-function idmlMasterSpreadXml(masterSelf: string, masterPageSelf: string, pageWidth: number, pageHeight: number): string {
+function idmlMasterSpreadXml(masterSelf: string, masterPageSelf: string, pageWidth: number, pageHeight: number, margin: number): string {
+  const columnWidth = pageWidth - margin * 2;
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:MasterSpread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <MasterSpread Self="${masterSelf}" Name="A" NamePrefix="A" BaseName="A" ShowMasterItems="true" PageCount="1" PrimaryTextFrame="n">
-    <Page Self="${masterPageSelf}" Name="A" AppliedMaster="n" AppliedAlternateLayout="n" LayoutRule="Off" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0"/>
+  <MasterSpread Self="${masterSelf}" OverriddenPageItemProps="" Name="A" NamePrefix="A" BaseName="A" ShowMasterItems="true" PageCount="1" PrimaryTextFrame="n">
+    <Properties>
+      <PageColor type="enumeration">UseMasterColor</PageColor>
+    </Properties>
+    <Page Self="${masterPageSelf}" AppliedMaster="n" AppliedAlternateLayout="n" LayoutRule="Off" SnapshotBlendingMode="IgnoreLayoutSnapshots" OptionalPage="false" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0" Name="A" AppliedTrapPreset="TrapPreset/$ID/kDefaultTrapStyleName" MasterPageTransform="1 0 0 1 0 0" TabOrder="" GridStartingPoint="TopOutside" UseMasterGrid="true">
+      <Properties>
+        <PageColor type="enumeration">UseMasterColor</PageColor>
+      </Properties>
+      <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}" ColumnDirection="Horizontal" ColumnsPositions="0 ${columnWidth}"/>
+      ${IDML_GRID_DATA_INFORMATION}
+    </Page>
   </MasterSpread>
 </idPkg:MasterSpread>
 `;
@@ -1864,7 +1947,6 @@ export async function packIdml(
       const spreadSelf = idmlId("uSpread");
       const pageSelf = idmlId("uPage");
       if (firstPageSelf === undefined) firstPageSelf = pageSelf;
-      const label = index === 0 ? unit.label : `${unit.label} (${index + 1})`;
       const previousTextFrame = index > 0 ? frameIds[index - 1]! : "n";
       const nextTextFrame = index < frameCount - 1 ? frameIds[index + 1]! : "n";
       otherFiles.push({
@@ -1879,7 +1961,6 @@ export async function packIdml(
             pageWidth,
             pageHeight,
             margin,
-            label,
             globalSpreadIndex,
             sectionSelf,
             previousTextFrame,
@@ -1957,7 +2038,7 @@ ${sectionXml}</Document>
     { name: "Resources/Fonts.xml", data: utf8(idmlFontsXml(fontName)) },
     { name: "Resources/Styles.xml", data: utf8(idmlStylesXml(fontName, bodyWeight)) },
     { name: "Resources/Preferences.xml", data: utf8(idmlPreferencesXml(pageCount, pageWidth, pageHeight)) },
-    { name: `MasterSpreads/MasterSpread_${masterSelf}.xml`, data: utf8(idmlMasterSpreadXml(masterSelf, masterPageSelf, pageWidth, pageHeight)) },
+    { name: `MasterSpreads/MasterSpread_${masterSelf}.xml`, data: utf8(idmlMasterSpreadXml(masterSelf, masterPageSelf, pageWidth, pageHeight, margin)) },
     ...otherFiles
   ]);
 }

@@ -774,6 +774,53 @@ describe("IDML export", () => {
       expect(text).toMatch(/<Spread[^>]*AllowPageShuffle="true"/);
     }
   });
+
+  it("names every real Page its own sequential page number, and gives the document's very first Spread BindingLocation 0, every other one 1", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const designmap = new TextDecoder().decode(files["designmap.xml"]!);
+    const spreadPaths = [...designmap.matchAll(/<idPkg:Spread src="(Spreads\/Spread_[^"]+\.xml)"\/>/g)].map((m) => m[1]!);
+    expect(spreadPaths.length).toBeGreaterThan(1);
+    spreadPaths.forEach((path, index) => {
+      const spreadXml = new TextDecoder().decode(files[path]!);
+      expect(spreadXml).toContain(`<Page Self="`);
+      expect(spreadXml).toMatch(new RegExp(`<Page Self="[^"]+" Name="${index + 1}" `));
+      expect(spreadXml).toMatch(new RegExp(`<Spread [^>]*BindingLocation="${index === 0 ? 0 : 1}"`));
+    });
+  });
+
+  it("gives every real Page and TextFrame the fuller attribute set a real InDesign export uses, matching its MasterSpread page too", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const spreadPaths = Object.keys(files).filter((name) => name.startsWith("Spreads/"));
+    expect(spreadPaths.length).toBeGreaterThan(0);
+    for (const path of spreadPaths) {
+      const spreadXml = new TextDecoder().decode(files[path]!);
+      expect(spreadXml).toContain("<Descriptor type=\"list\">");
+      expect(spreadXml).toContain("<GridDataInformation ");
+      expect(spreadXml).toContain('ParentInterfaceChangeCount=""');
+      expect(spreadXml).toContain('HorizontalLayoutConstraints="FlexibleDimension FixedDimension FlexibleDimension"');
+      expect(spreadXml).toContain('AppliedObjectStyle="ObjectStyle/$ID/[Normal Text Frame]"');
+    }
+    const masterXml = new TextDecoder().decode(files[Object.keys(files).find((name) => name.startsWith("MasterSpreads/"))!]!);
+    expect(masterXml).toContain('OverriddenPageItemProps=""');
+    expect(masterXml).toContain("<MarginPreference ");
+    expect(masterXml).toContain("<GridDataInformation ");
+  });
+
+  it("gives every Story the fuller attribute set a real InDesign export uses", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const storyTexts = Object.entries(files)
+      .filter(([name]) => name.startsWith("Stories/"))
+      .map(([, data]) => new TextDecoder().decode(data));
+    expect(storyTexts.length).toBeGreaterThan(0);
+    for (const text of storyTexts) {
+      expect(text).toContain('UserText="true"');
+      expect(text).toContain('StoryTitle="$ID/"');
+      expect(text).toContain("<InCopyExportOption ");
+    }
+  });
 });
 
 describe("page size", () => {
