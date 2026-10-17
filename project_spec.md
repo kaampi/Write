@@ -6409,6 +6409,42 @@ ensamma räcker.
 
 v1.0.130 → v1.0.131.
 
+**SAGAN AVSLUTAD (2026-10-17):** Mats testade v1.0.131:s egen export
+genom appen (inte den handredigerade filen) med ett riktigt
+flerkapitel-dokument (titel + 2 kapitel, 5 sidor totalt) och
+bekräftade sida för sida: "Sida 1 - IDML-test... Sida 2 - 1. Chapter
+1 The rain poured down... Sida 3 - TOM... sida 4 - 2. Chapter 2 The
+rain poured down... Sida 5 - TOM." De två tomma sidorna oroade först,
+men Mats egen diagnostik (skrev in numrerade testrader för att se var
+text faktiskt svämmar över) visade att de är kapitel 1:s och 2:s
+andra, trådade ram — en RIKTIG, korrekt kopplad textruta, bara nästan
+tom eftersom höjduppskattningen reserverade några rader mer än
+texten faktiskt behövde. Helt annan kategori än de gamla
+spökesidorna (som aldrig hade ens en ram att klicka på) — samma
+ofarliga marginal Affinity alltid visat efter varje kapitel, aldrig
+boven i den här sagan.
+
+Mats: "Vi firar. Om jag är den grafiker som ska ta hand om dokumentet
+är det en enkel sak att ta bort sidor. Tack för allt jobb!" — bekräftat
+avstått från att strama åt uppskattningen ytterligare; en nästan-tom
+sista sida i en tråd är trivial för en grafiker att hantera manuellt.
+
+**Facit för hela sextonförsöks-sagan:** den faktiska boven var
+`DocumentPreference`s `PagesPerDocument` (InDesign förbyggde så många
+generiska tomma sidor innan den läste de riktiga Spreads, och kunde
+bara stämma av otrådat innehåll mot dem — en trådad kedja kunde inte
+återanvända sin andel, vilket lämnade exakt dess egna rutantal som
+övergivna, äkta tomma sidor) tillsammans med `DocumentPreference`s
+dokumentövergripande `AllowPageShuffle`. De tolv föregående fixarna
+(ID-padding, Section, Layer, AppliedMaster/AllowPageShuffle per
+Spread, InsetSpacing, AppliedAlternateLayout, Story XML-ParagraphStyle-
+Range/Br-omskrivning, borttagen säkerhetsruta, Page/TextFrame/Story-
+trohetspasset) var alla genuina, bekräftade rättningar mot vad äkta
+InDesign-export faktiskt skriver — men ingen av dem var roten.
+Löstes till slut genom att Mats själv hand-redigerade en exporterad
+fils XML och empiriskt testade i InDesign, inte genom ännu en
+referensfils-jämförelse.
+
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
 riktiga byggsteget, efter flera rundors arkitekturdiskussion (se
