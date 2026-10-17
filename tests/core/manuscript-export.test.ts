@@ -762,11 +762,12 @@ describe("IDML export", () => {
     }
   });
 
-  it("allows page shuffle, matching a real InDesign export's own Spread/DocumentPreference settings", async () => {
+  it("allows page shuffle on every real Spread, but not document-wide, and never states PagesPerDocument", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     const preferences = new TextDecoder().decode(files["Resources/Preferences.xml"]!);
-    expect(preferences).toMatch(/<DocumentPreference[^>]*AllowPageShuffle="true"/);
+    expect(preferences).toMatch(/<DocumentPreference[^>]*AllowPageShuffle="false"/);
+    expect(preferences).not.toContain("PagesPerDocument");
     const spreadTexts = Object.entries(files)
       .filter(([name]) => name.startsWith("Spreads/"))
       .map(([, data]) => new TextDecoder().decode(data));

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.130
+Status: living document, v1.0.131
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6341,6 +6341,73 @@ dubbleringsformeln — det här är en bred, väl underbyggd
 trohetsuppdatering snarare än en riktad gissning.
 
 v1.0.129 → v1.0.130.
+
+**Ändringslogg v1.0.130 → v1.0.131 (2026-10-17):** Den sextonde
+justeringen — och, enligt Mats egen direkta bekräftelse i InDesign,
+äntligen den FAKTISKA lösningen på hela "tomma sidor"-sagan.
+
+**Mats hand-redigerade** själv XML-filerna i en exporterad IDML och
+rapporterade: "Jag har justerat i xmlfilerna så det fungerar..."
+Tre ändringar:
+1. `<Section>` återställd till den äldre formen (`PageNumberStart="1"
+   ContinueNumbering="false"`, ingen `AlternateLayoutLength`/
+   `AlternateLayout`).
+2. `Preferences.xml`: `PagesPerDocument="5"` helt borttaget.
+3. `Preferences.xml`: `AllowPageShuffle` ändrat från `"true"` till
+   `"false"` på `DocumentPreference`.
+
+**Bedömde vilka av de tre ändringarna som faktiskt hade stöd:** för
+Section-återställningen gav Mats ingen egen motivering, och vi har
+STARK motbevisning mot att gå tillbaka dit — exakt samma fulla
+Section-form (med `AlternateLayoutLength`/`AlternateLayout`) finns
+bokstavligen i Mats egna, fungerande native-referensfiler. Behöll
+därför v1.0.129/130:s Section-struktur oförändrad. De två
+Preferences.xml-ändringarna hade däremot tydlig, självständig
+motivering och porterades rakt av.
+
+**Mekanismen (nu äntligen begriplig):** `PagesPerDocument` läses
+uppenbarligen av InDesign som en INSTRUKTION att i förväg bygga så
+många GENERISKA tomma sidor, INNAN den ens läser designmap.xml:s
+egna `<Spread>`-lista — som den sedan försöker stämma av sina
+riktiga Spreads mot. En enskild, otrådad sida kan rent ersätta en av
+de förbyggda tomma sidorna. En flerrams-tråd kan INTE det — att länka
+en kedja av ramar kräver riktigt ramarbete som en generisk
+platshållarsida aldrig var byggd för — så InDesign ger upp att stämma
+av just den enhetens andel av de förbyggda tomma sidorna och lägger
+istället till FÄRSKA sidor för tråden, medan dess egna övergivna
+andel förbyggda tomma sidor bara blir kvar oanvända.
+
+**Detta förklarar ÄNTLIGEN varje bevisbit från hela utredningen:**
+bara flerrams-enheter drabbades, aldrig enrams; de tomma sidorna
+hade ABSOLUT inget på sig (inte ens en tom ram — de var aldrig
+riktiga Spreads); storyns egen text lästes alltid EN gång i
+berättarredigeraren; och borttagningen av den gamla "+1"-
+säkerhetsrutan i v1.0.128 krympte antalet tomma sidor med exakt 1 —
+inte för att själva extrarutan var triggern, utan för att den
+krympte `PagesPerDocument` med 1 också.
+
+**Rättning:** `PagesPerDocument` helt borttaget (Mats bekräftade att
+InDesign bygger sidsekvensen rent från designmap.xml:s egna Spreads
+utan det). `DocumentPreference`s egen, dokumentövergripande
+`AllowPageShuffle` sätts nu till `"false"` — ett HELT ANNAT attribut
+än varje enskild `Spread`s egen `AllowPageShuffle` (bekräftat `"true"`
+på varje riktig Spread sedan v1.0.124, lämnad oförändrad).
+
+**Verifiering:** ett befintligt test uppdaterat för den nya
+Preferences.xml-formen. Hela testsviten (1068 test, 79 filer),
+`tsc --noEmit`, `npm run build`, och en riktig export genom UI:t —
+`xmllint --noout` godkände varje fil, extraherad Preferences.xml
+visade `PagesPerDocument` helt frånvarande och
+`AllowPageShuffle="false"` på DocumentPreference, varje Spreads egen
+`AllowPageShuffle="true"` oförändrad.
+
+**Ärligt läge:** Mats har själv sett detta fungera i riktig InDesign
+genom handredigering — den starkaste bekräftelsen hittills i hela
+sagan. Nästa steg är att Mats testar APPENS EGEN export (inte hans
+handredigerade fil) för att bekräfta att de porterade ändringarna
+ensamma räcker.
+
+v1.0.130 → v1.0.131.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

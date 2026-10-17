@@ -1705,10 +1705,46 @@ function idmlFontsXml(fontName: string): string {
 `;
 }
 
-function idmlPreferencesXml(pageCount: number, pageWidth: number, pageHeight: number): string {
+/**
+ * `PagesPerDocument` and `AllowPageShuffle` here are the real fix, found by
+ * Mats hand-editing an exported file's own XML directly and confirming in
+ * InDesign that the blank pages disappeared. `PagesPerDocument` isn't just
+ * a descriptive total this writer always kept correct (matching
+ * `spreadRefs.length` exactly) — it reads as an instruction telling
+ * InDesign to pre-build that many generic blank pages FIRST, before it
+ * even looks at designmap.xml's own `<Spread>` list, which it then tries
+ * to reconcile its real Spreads against. A single untreaded page can
+ * cleanly replace one of those pre-built blanks; a multi-frame thread
+ * can't — threading a chain of frames together needs real frame-level
+ * surgery a generic placeholder page was never built for — so InDesign
+ * gives up reconciling THAT unit's share of the pre-built blanks and
+ * appends fresh pages for the thread instead, leaving its own abandoned
+ * share of pre-built blanks sitting unused. That fits every piece of
+ * evidence gathered: only multi-frame units affected, never single-frame
+ * ones; the blank pages have nothing on them at all, not even an empty
+ * frame (they were never real Spreads to begin with); the story's own
+ * text reads once in the Story Editor (the real Spreads are read and
+ * placed correctly, just alongside the leftover pre-built blanks); and
+ * removing the old "+1" safety frame in v1.0.128 shrank the blank count by
+ * exactly 1 (not because the extra frame itself was the trigger, but
+ * because it shrank `pageCount`, and so `PagesPerDocument`, by 1 too).
+ * `PagesPerDocument` is dropped entirely rather than given a different
+ * value — Mats confirmed InDesign builds the page sequence purely from
+ * designmap.xml's own Spreads when it's absent, which is what this writer
+ * actually wants.
+ *
+ * `AllowPageShuffle="false"` here is `DocumentPreference`'s own, document-
+ * wide setting — a different attribute from each `Spread`'s own
+ * `AllowPageShuffle`, confirmed `"true"` on every real Spread this writer
+ * has seen (see idmlSpreadXml's comment) and left untouched. This one
+ * reads as "don't let page shuffling run as part of reconciling the
+ * document against its own preferences" — exactly the behavior creating
+ * the pre-built/real-Spread mismatch above.
+ */
+function idmlPreferencesXml(pageWidth: number, pageHeight: number): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Preferences xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
-  <DocumentPreference PageWidth="${pageWidth}" PageHeight="${pageHeight}" FacingPages="false" PagesPerDocument="${pageCount}" PageBindingDirection="LeftToRightDirection" AllowPageShuffle="true" Intent="PrintIntent"/>
+  <DocumentPreference PageWidth="${pageWidth}" PageHeight="${pageHeight}" FacingPages="false" PageBindingDirection="LeftToRightDirection" AllowPageShuffle="false" Intent="PrintIntent"/>
   <ViewPreference HorizontalMeasurementUnits="Points" VerticalMeasurementUnits="Points"/>
 </idPkg:Preferences>
 `;
@@ -2037,7 +2073,7 @@ ${sectionXml}</Document>
     { name: "Resources/Graphic.xml", data: utf8(idmlGraphicXml()) },
     { name: "Resources/Fonts.xml", data: utf8(idmlFontsXml(fontName)) },
     { name: "Resources/Styles.xml", data: utf8(idmlStylesXml(fontName, bodyWeight)) },
-    { name: "Resources/Preferences.xml", data: utf8(idmlPreferencesXml(pageCount, pageWidth, pageHeight)) },
+    { name: "Resources/Preferences.xml", data: utf8(idmlPreferencesXml(pageWidth, pageHeight)) },
     { name: `MasterSpreads/MasterSpread_${masterSelf}.xml`, data: utf8(idmlMasterSpreadXml(masterSelf, masterPageSelf, pageWidth, pageHeight, margin)) },
     ...otherFiles
   ]);

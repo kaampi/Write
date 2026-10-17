@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.131] - 2026-10-17
+
+### Fixed
+- IDML export's `DocumentPreference` stated `PagesPerDocument` (always the correct, real total page count) and `AllowPageShuffle="true"` document-wide — found, by Mats hand-editing an exported file's own XML and confirming in InDesign that the extra blank pages disappeared, to be the actual root cause of this investigation's entire "extra blank pages" saga. `PagesPerDocument` reads as an instruction telling InDesign to pre-build that many generic blank pages before it even looks at designmap.xml's own `<Spread>` list, which it then reconciles its real Spreads against — a single untreaded page cleanly replaces one of those pre-built blanks, but a multi-frame thread can't (linking a chain of frames together needs real frame-level work a generic placeholder page was never built for), so InDesign gives up reconciling that unit's share and appends fresh pages for the thread instead, leaving its own abandoned pre-built blanks sitting unused. That mechanism fits every piece of evidence gathered across this investigation: only multi-frame units were ever affected, never single-frame ones; the blank pages had nothing on them at all (not even an empty frame — they were never real Spreads); the story's own text always read once in the Story Editor; and removing the old "+1" safety frame in v1.0.128 shrank the blank count by exactly 1, because it shrank `PagesPerDocument` by 1 too. `PagesPerDocument` is now dropped entirely — InDesign builds the page sequence purely from designmap.xml's own Spreads without it — and `DocumentPreference`'s own `AllowPageShuffle` (a different, document-wide setting from each `Spread`'s own `AllowPageShuffle`, confirmed `"true"` on every real Spread and left unchanged) is now `"false"`.
+
 ## [1.0.130] - 2026-10-17
 
 ### Fixed
