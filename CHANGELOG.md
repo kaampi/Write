@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.128] - 2026-10-17
+
+### Fixed
+- IDML export always threaded a multi-page chapter/title/bible unit across one more frame than its real height estimate called for (`estimatedPages + 1`), a safety margin against that estimate undercounting, added when threading was reintroduced in v1.0.114. That extra frame is the one structural trait that lines up with the entire "extra blank pages" saga with no exception since: present on every multi-frame threaded unit, never on an untreaded single-frame one (like the title page, never once affected) — independent of which of the twelve earlier fixes in this investigation (ids, `<Section>`, `<Layer>`, `AppliedMaster`/`AllowPageShuffle`, `InsetSpacing`, `AppliedAlternateLayout`, the v1.0.127 Story XML paragraph/Br rewrite) was already in place. A trailing thread frame that often ends up empty is exactly the shape of thing InDesign's own text-reflow logic could plausibly mistake for overset needing its own extra pages, at a magnitude keyed to the story's existing page count. Already confirmed not to be a frame-capacity problem (no real overset on any real page, per direct inspection in InDesign) — removing the one extra frame itself, not changing how a page's worth of content is measured, is the test. Threaded units now get exactly their real height estimate's own frame count, no margin beyond it.
+
 ## [1.0.127] - 2026-10-17
 
 ### Fixed

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.127
+Status: living document, v1.0.128
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6121,6 +6121,73 @@ efter den historiken bekräftas ingenting förrän Mats testat i riktig
 InDesign igen.
 
 v1.0.126 → v1.0.127.
+
+**Ändringslogg v1.0.127 → v1.0.128 (2026-10-17):** Den TOLFTE
+justeringen — Mats testade v1.0.127 och delade Story-filerna från vår
+EGEN export: "Det här var en besvärlig nöt. Felet kvarstår." Filerna
+visade exakt den struktur jag avsett (grupperade stycken, `<Br/>`,
+inget `&#13;`) — CR/Br-rättningen var en genuin kodfelaktighet, men
+inte den som orsakar de tomma sidorna.
+
+**Mats föreslog själv** ett rimligt test: skicka texten helt utan
+stilmallar, för att utesluta att stilmallsdefinitionerna gör något
+konstigt. Utvärderade idén innan vi bad honom testa igen: titelsidan
+(ALDRIG drabbad) blandar redan två stilar (Title + Body Text, plus
+ev. Voice/Viewpoint-rader) utan problem — om stilmallar var boven
+borde titelsidan också visa symptom, eftersom den också blandar
+stilar. Det enda som skiljer en drabbad enhet från en opåverkad är
+fortfarande bara ANTAL TRÅDADE RUTOR, inte vilka eller hur många
+stilar som används. La fram det resonemanget för Mats istället för
+att be honom köra ett test jag redan kunde argumentera mot.
+
+**Kollade också Section Length** (tillagt i v1.0.122) för att utesluta
+att vi råkat deklarera fel sidantal där — men `pageCount` räknas
+direkt från antalet `<Spread>`-element vi faktiskt skriver, så det
+stämmer alltid. Uteslöt det på under en minut.
+
+**Ny, mer specifik ledtråd:** `packIdml` har, sedan trådning
+återinfördes i v1.0.114, ALLTID lagt till en extra "säkerhetsruta"
+utöver den riktiga höjduppskattningen — men ENDAST för enheter med
+fler än 1 beräknad sida:
+```
+const frameCount = estimatedPages > 1 ? estimatedPages + 1 : estimatedPages;
+```
+Det är den ENDA strukturella skillnaden mellan en drabbad och en
+opåverkad enhet som håller exakt genom HELA sagan, oavsett vilken av
+de tolv tidigare rättningarna som var på plats: varje flerrams-trådad
+enhet har garanterat en sista ruta i kedjan som ofta blir helt eller
+nästan tom (ren marginal mot att uppskattningen räknar fel) — en
+enrams-enhet (som titelsidan) har aldrig detta.
+
+**Teori:** InDesign tolkar en trådad kedja som slutar i en nästan tom
+ruta som ett tecken på att texten svämmar över, och kompenserar genom
+att infoga fler sidor — möjligen med antalet redan använda sidor som
+en extrapoleringsheuristik, vilket skulle förklara den exakta
+matchningen (N extra = enhetens eget rutantal). Redan bekräftat att
+det inte är en kapacitetsfråga i sig (ingen riktig overset-text,
+Mats egen inspektion i InDesign) — så att ta bort just säkerhetsrutan,
+utan att ändra hur en sidas innehåll mäts, är testet.
+
+**Rättning:** `frameCount` sätts nu direkt till den riktiga
+höjduppskattningen, ingen marginal utöver den. Risk: om uppskattningen
+nånstans räknar fel kan det ge synlig overset-text — ett helt annat,
+lätt att upptäcka och ofarligt problem jämfört med de mystiska tomma
+sidorna.
+
+**Verifiering:** hela testsviten (1065 test, 79 filer), `tsc --noEmit`
+och `npm run build` kördes rent (inget befintligt test låste fast
+"+1"-beteendet). Riktig export genom UI:t jämförd direkt: samma
+kapitelinnehåll som i en tidigare export gav nu 3 trådade rutor
+istället för 4 — säkerhetsrutan borttagen, bekräftat i den
+extraherade filen.
+
+**Ärligt om räckvidden:** trettonde försöket totalt, tolfte sedan
+den ursprungliga rapporten. Mer specifikt resonerat än de flesta
+tidigare (en kodrad som funnits genom HELA sagan, inte ett nytt
+metadataattribut), men fortfarande en gissning tills Mats testat i
+riktig InDesign.
+
+v1.0.127 → v1.0.128.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

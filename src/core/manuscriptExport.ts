@@ -1820,8 +1820,26 @@ export async function packIdml(
   for (const unit of units) {
     // Reused only for its page count — the real per-page split now happens
     // in InDesign/Affinity once the frames below are threaded together.
-    const estimatedPages = paginateIdmlBlocks(unit.blocks, measuringFont, boldMetricsFont, columnWidth, columnHeight).length;
-    const frameCount = estimatedPages > 1 ? estimatedPages + 1 : estimatedPages;
+    //
+    // No "+1" safety frame beyond the estimate any more (every version
+    // from v1.0.114, when threading was reintroduced, through v1.0.127
+    // added one for any unit threaded across more than one frame) — the
+    // one structural trait that lines up with the entire "extra blank
+    // pages" saga with no exception: it existed on every multi-frame
+    // threaded unit and never on an untreaded single-frame one (like the
+    // title page, never once affected), independent of which of the
+    // twelve earlier, unsuccessful fixes (ids, Section, Layer,
+    // AppliedMaster/AllowPageShuffle, InsetSpacing, AppliedAlternateLayout,
+    // the Story XML paragraph/Br rewrite) was in place. A trailing frame
+    // in a thread that often ends up empty — pure margin against this
+    // estimate undercounting — is exactly the shape of thing InDesign's
+    // own text-reflow logic could plausibly mistake for overset needing
+    // its own extra pages, at a magnitude keyed to the story's existing
+    // page count. Confirmed not to be a frame-capacity problem (no real
+    // overset on any real page, per direct user inspection in InDesign),
+    // so removing the one extra frame itself — not changing how tall a
+    // page's worth of content is measured — is the test.
+    const frameCount = paginateIdmlBlocks(unit.blocks, measuringFont, boldMetricsFont, columnWidth, columnHeight).length;
 
     const storySelf = idmlId("uStory");
     const paragraphsXml = idmlParagraphsXml(unit.blocks, unit.formatting, doc.sceneBreakStyle);
