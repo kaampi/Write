@@ -1444,18 +1444,33 @@ function idmlRectPathGeometry(width: number, height: number): string {
  *
  * `TextFramePreference`'s `InsetSpacing` is a nested
  * `<Properties><InsetSpacing type="list">` of four `<ListItem type="unit">`
- * values, not a flat `InsetSpacing="0 0 0 0"` attribute — the real export
- * above writes it the nested way, list-valued preferences apparently needing
- * it (unlike `TextColumnFixedWidth`, a single scalar, which stays a plain
- * attribute both there and here). Found after InDesign's own re-saved copy
- * of a real, reportedly-broken export confirmed its internal page count
- * (7, for a single ~380-word chapter) wasn't a display illusion — InDesign
- * genuinely composed that little text across that many pages, roughly 54
- * words each, far too sparse for a real column this size at a normal body
- * size. An attribute InDesign's strict parser doesn't recognize in this
- * flat form — Affinity's more lenient one tolerates it fine — could well be
- * discarded together with the rest of `TextFramePreference`, falling back
- * to some much smaller default usable area per frame.
+ * values, not a flat `InsetSpacing="0 0 0 0"` attribute — a real export
+ * writes it the nested way. Fixed while chasing a real report of InDesign's
+ * own re-saved copy of an export showing 7 pages, 3 genuinely blank, for a
+ * single ~380-word chapter — but confirmed NOT the (sole) explanation: the
+ * same test after this fix still showed 7 pages with 3 blank (one of them
+ * moved to the end instead of all three at the start), and Mats confirmed
+ * no overset text and full-page text frames on the real content pages — so
+ * capacity was never the issue; the blank pages are genuinely unrelated
+ * extras, not overflow compensation. Kept anyway, since it's still a real,
+ * confirmed gap against the nested form a real export actually uses.
+ *
+ * `AppliedAlternateLayout="n"` (every real `Page`, `LayoutRule="UseMaster"`)
+ * is the next lead: counting a real report's numbers precisely — a minimal
+ * 2-story (title + one chapter) export's 4 real pages became 7 in InDesign
+ * (the chapter's own 3-frame thread duplicated as 3 extra blank pages, the
+ * single-frame title left alone), and a 58-page book's 115 matched just as
+ * exactly (its three chapters' 14+24+19 threaded frames each duplicated,
+ * 57 extra, the untreaded title again left alone) — every multi-frame
+ * (threaded) unit's own frame count duplicated as blank pages, every
+ * single-frame one untouched. A real export always states
+ * `AppliedAlternateLayout` on every real page (a genuine alternate-layout
+ * reference there, since Mats' own document happens to have one; `"n"` on
+ * its master page when none applies) — this writer never stated it at all.
+ * The exact-duplication pattern, specific to multi-frame threaded flows,
+ * fits InDesign generating an implicit alternate-layout page set for
+ * content it reads as needing one, precisely where this writer leaves the
+ * question undefined rather than explicitly answering "none".
  */
 function idmlSpreadXml(
   spreadId: string,
@@ -1476,7 +1491,7 @@ function idmlSpreadXml(
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Spread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
   <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="true" ItemTransform="1 0 0 1 ${spreadIndex * pageWidth} 0" ShowMasterItems="false">
-    <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="${masterSelf}" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
+    <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="${masterSelf}" AppliedAlternateLayout="n" LayoutRule="UseMaster" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
       <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
     </Page>
     <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ItemLayer="${IDML_LAYER}" ItemTransform="1 0 0 1 ${margin} ${margin}">
@@ -1548,13 +1563,17 @@ function idmlPreferencesXml(pageCount: number, pageWidth: number, pageHeight: nu
  * explicitly, matching a real InDesign (21.6) export Mats shared directly:
  * the master's own absence of a primary text frame is stated, not just
  * implied by leaving the attribute out, the same distinction `AppliedMaster`
- * makes elsewhere in this file.
+ * makes elsewhere in this file. Its own `Page` gets `AppliedAlternateLayout="n"
+ * LayoutRule="Off"`, exactly matching that same real export's master page —
+ * see `idmlSpreadXml`'s comment on why every real page gets the equivalent
+ * (`LayoutRule="UseMaster"` there, since it's a page actually using this
+ * master, not the master's own page).
  */
 function idmlMasterSpreadXml(masterSelf: string, masterPageSelf: string, pageWidth: number, pageHeight: number): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:MasterSpread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
   <MasterSpread Self="${masterSelf}" Name="A" NamePrefix="A" BaseName="A" ShowMasterItems="true" PageCount="1" PrimaryTextFrame="n">
-    <Page Self="${masterPageSelf}" Name="A" AppliedMaster="n" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0"/>
+    <Page Self="${masterPageSelf}" Name="A" AppliedMaster="n" AppliedAlternateLayout="n" LayoutRule="Off" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0"/>
   </MasterSpread>
 </idPkg:MasterSpread>
 `;

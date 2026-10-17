@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.125
+Status: living document, v1.0.126
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5948,6 +5948,83 @@ UI:t (`xmllint --noout` godkände varje fil, den nästlade strukturen
 bekräftad direkt i den extraherade Spread-filen) kördes rent.
 
 v1.0.124 → v1.0.125.
+
+**Ändringslogg v1.0.125 → v1.0.126 (2026-10-17):** Hittade en EXAKT
+matematisk formel bakom hela "tomma sidor"-sagan genom att räkna
+siffrorna från två oberoende, riktiga rapporter precist — den mest
+konkreta ledtråden hittills.
+
+**Mats testade v1.0.125:** "Fortfarande 7 sidor med 3 tomma sidor. Nu
+var det en tom sida på slutet också..." — InsetSpacing-fixen ändrade
+INTE totalen (fortfarande 7/3), bara FLYTTADE en av de tomma sidorna
+från början till slutet. Ett genuint, mätbart beteende som ändrades,
+men inte huvudproblemet.
+
+**Avgörande uppföljningsfråga besvarad:** bad Mats markera en riktig
+textram och kolla om texten ser onormalt stor ut. Svar: "Det finns
+ingen överskjutande text. Första stycket får kapitel-formatet men
+sedan är det brödtext. Textrutorna fyller sidan." — INGEN
+överskjutande text betyder att InDesign inte alls behöver de extra
+sidorna för att få plats med texten. Slår hål på hela
+"InDesign-behöver-mer-utrymme"-teorin från v1.0.125: de tomma sidorna
+är genuint onödiga, inte en kapacitetskompensation.
+
+**Mats egen idé:** kapitelbilder — skickas något som strular till
+det även utan bild? Kollade koden direkt: `startImageDataUrl`
+refereras bara i HTML/ePub/PDF-sektionerna (rad 409, 579, 1057),
+ALDRIG i IDML-delen. Uteslöt det på under en minut utan att behöva
+fråga Mats testa något.
+
+**Genombrottet — räknade siffrorna exakt mot TVÅ oberoende rapporter:**
+- Mats minimala test (titel + 1 kapitel): vår fil = 4 riktiga sidor
+  (titel=1 ruta, kapitel=3 trådade rutor). InDesign visade 7 = 4+3.
+- "Call of Cthulhu" (titel + 3 kapitel): vår fil = 58 riktiga sidor
+  (titel=1, kapitlen 14+24+19 trådade rutor). InDesign visade 115 =
+  58+57.
+
+**3 = kapitlets EGNA 3 rutor. 57 = 14+24+19, exakt summan av alla tre
+kapitlens EGNA rutor.** Ingen slump — en EXAKT matematisk formel:
+varje enhet som är TRÅDAD ÖVER FLER ÄN EN sida (title är aldrig det,
+bara 1 ruta) får sitt EGET rutantal dubblerat som extra tomma sidor.
+Enheter med bara 1 ruta (aldrig trådade) förblir opåverkade.
+
+**Kopplade mönstret till ett attribut** jag sett i båda Mats riktiga
+referensexporter men inte agerat på: `AppliedAlternateLayout` (på
+varje `<Page>`) och `AlternateLayout`/`AlternateLayoutLength` (på
+`<Section>`). Riktiga sidor anger alltid `AppliedAlternateLayout`
+explicit (en riktig referens om Mats dokument råkar ha en alternativ
+layout konfigurerad, annars `"n"` på mastersidans egen sida) — vår
+skrivare har ALDRIG satt det attributet alls, på någon sida.
+
+**Teori:** InDesign genererar implicit en alternativ-layout-sidmängd
+för trådat, flerramsinnehåll specifikt när frågan "finns en
+alternativ layout?" lämnas obesvarad (attributet helt frånvarande)
+istället för explicit besvarad ("n", ingen) — samma mönster som
+`AppliedMaster="n"` behövde vara explicit tidigare i sagan, nu
+applicerat på ett annat attribut med en mycket mer precist matchande
+numerisk signatur den här gången.
+
+**Rättning:** `AppliedAlternateLayout="n"` och `LayoutRule="UseMaster"`
+läggs nu till på varje riktig sida; mastersidans egen sida får
+`AppliedAlternateLayout="n" LayoutRule="Off"` — exakt matchande båda
+attributvärdena från Mats riktiga referensfiler.
+
+**Ärligt om räckvidden:** detta är den TIONDE justeringen i sagan,
+men den FÖRSTA med en exakt, siffermässigt bekräftad formel bakom
+sig (inte "ungefär hälften" utan en precis matchande summa i två
+oberoende tester av olika storlek). Betydligt högre konfidens än de
+flesta tidigare försöken, men fortfarande inte bekräftad mot riktig
+InDesign.
+
+**Verifiering:** nytt committat test som kontrollerar att
+`AppliedAlternateLayout="n"` och rätt `LayoutRule` anges på varje
+riktig sida OCH på mastersidans egen sida. Hela testsviten (1063
+test, 79 filer), `tsc --noEmit`, `npm run build`, och en riktig
+export genom UI:t (`xmllint --noout` godkände varje fil, båda
+attributen bekräftade direkt i den extraherade Spread- och
+MasterSpread-filen) kördes rent.
+
+v1.0.125 → v1.0.126.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

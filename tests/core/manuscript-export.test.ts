@@ -589,6 +589,21 @@ describe("IDML export", () => {
     }
   });
 
+  it("states AppliedAlternateLayout and LayoutRule explicitly on every real page and the master's own page", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const spreadPaths = Object.keys(files).filter((name) => name.startsWith("Spreads/"));
+    expect(spreadPaths.length).toBeGreaterThan(0);
+    for (const path of spreadPaths) {
+      const spreadXml = new TextDecoder().decode(files[path]!);
+      expect(spreadXml).toMatch(/<Page [^>]*AppliedAlternateLayout="n"[^>]*LayoutRule="UseMaster"/);
+    }
+    const masterPaths = Object.keys(files).filter((name) => name.startsWith("MasterSpreads/"));
+    expect(masterPaths.length).toBe(1);
+    const masterXml = new TextDecoder().decode(files[masterPaths[0]!]!);
+    expect(masterXml).toMatch(/<Page [^>]*AppliedAlternateLayout="n"[^>]*LayoutRule="Off"/);
+  });
+
   it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);

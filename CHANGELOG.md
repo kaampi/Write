@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.126] - 2026-10-16
+
+### Fixed
+- IDML export never stated `AppliedAlternateLayout` on any `Page` — a real InDesign (21.6) export always does (`"n"` when none applies). Found an exact numerical pattern across two real reports: a 2-story (title + one chapter) export's 4 real pages became 7 in InDesign (the chapter's own 3-frame thread duplicated as 3 extra blank pages, the untreaded title left alone), and a 58-page book's 115 matched just as precisely (three chapters' 14+24+19 threaded frames each duplicated as 57 extra blank pages). Every multi-frame threaded unit's own frame count was being exactly duplicated as blank pages, every single-frame unit untouched — fitting InDesign generating an implicit alternate-layout page set for content whose alternate-layout status this writer left undefined rather than explicitly stating "none". `AppliedAlternateLayout="n"` and `LayoutRule="UseMaster"` (`"Off"` on the master's own page) are now stated on every page, matching the real export exactly.
+
 ## [1.0.125] - 2026-10-16
 
 ### Fixed
