@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.124
+Status: living document, v1.0.125
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -5865,6 +5865,89 @@ UI:t (`xmllint --noout` godkände varje fil; `AppliedMaster` och
 Spread-fil och Preferences.xml) kördes rent.
 
 v1.0.123 → v1.0.124.
+
+**Ändringslogg v1.0.124 → v1.0.125 (2026-10-16 till 2026-10-17):**
+AppliedMaster/AllowPageShuffle-fixen gjorde INTE heller någon
+skillnad — men en lysande idé från Mats (spara om i InDesign och
+jämföra DESS egen XML) vände hela utredningen i en ny riktning och
+ledde till ännu ett konkret, verifierat strukturfel.
+
+**Mats testade v1.0.124:** "Tyvärr inte bättre. Svårt att se om det
+blir samma fel men Indesign inleder med 96 tomma sidor av totalt 191.
+Affinity har tomma sidor efter kapitlen" — och senare bekräftat:
+"Affinity har 96 sidor" totalt. Samma ~50%-kvot som alla tidigare
+tester (96/191 ≈ 50%), helt oförändrad av både Layer- och
+AppliedMaster/AllowPageShuffle-fixarna.
+
+**Uteslöt "flera stories"-teorin direkt:** bad Mats testa ett absolut
+minimalt manus (bara titel + ETT kort kapitel, 380 ord — alltså bara
+2 stories i filen, inte många). Resultat: "gav 7 sidor varav de tre
+första var tomma." Buggen uppstår alltså även i det minsta möjliga
+fallet — utesluter definitivt att flera oberoende stories i samma
+fil är orsaken.
+
+**Mats egen idé, avgörande:** "Jag har öppnat ett av de större
+manuskripten och sparat om som IDML ifrån Indesign. Kan det vara
+intressant att se hur Indesign lägger upp sin XML med det felaktiga
+antalet sidor?" — alltså: öppna VÅR (trasiga) export i InDesign, och
+låt INDESIGN SJÄLV spara om filen, för att se vad InDesign internt
+ANSER att dokumentet verkligen innehåller, inte bara vad det VISAR.
+
+**Genombrott: InDesigns egen omsparade designmap.xml visade
+`Section Length="7"` och exakt 7 `<idPkg:Spread>`-poster** — för
+samma 380-ords enkapitelstest. Det här är INTE en visningsillusion
+eller panelordningsbugg — det är InDesigns egen, permanent sparade
+sanning om hur många sidor den tror innehållet behöver. 7 sidor för
+380 ord är cirka 54 ord per sida, extremt glest för en normal
+bok-layout (borde rymma flera hundra ord per sida vid 12pt text).
+
+**Egen reproduktion mot Mats RIKTIGA text** (inte syntetisk
+placeholder-text den här gången — det faktiska "Kael"/"Maja"-stycket
+från JSON-exporten han delade): vår egen kod ger bara **2-4 riktiga
+sidor** för exakt samma text, beroende på sidstorlek — långt under
+InDesigns bekräftade 7. Det här är INTE en modest, redan accepterad
+överskattning (som den ~1.2-1.6x vi sett förut) — det är InDesign som
+komponerar SAMMA text till ungefär DUBBELT så många sidor som vi
+själva byggde ramar för, med en orimligt låg textdensitet per sida.
+
+**Ny tolkning:** det handlar sannolikt inte om att InDesign "hittar
+på" extra tomma sidor i onödan, utan att varje textrams ANVÄNDBARA
+yta tolkas som mycket mindre av InDesign än vad vi avsett — vilket
+tvingar fram fler sidor för att få plats med samma text, med någon
+förskjutning i hur de nya sidorna placeras/sorteras som gör att de
+visas FÖRE det riktiga innehållet.
+
+**Konkret skillnad hittad, jämfört mot Mats riktiga referensfils
+`TextFramePreference`:** den riktiga filen skriver `InsetSpacing` som
+en NÄSTLAD `<Properties><InsetSpacing type="list">`-struktur med fyra
+separata `<ListItem type="unit">`-element. Vår skrivare skrev det som
+en PLATT attributsträng (`InsetSpacing="0 0 0 0"`) — ett format
+InDesigns striktare parser möjligen inte känner igen alls för en
+listvärderad inställning (till skillnad från `TextColumnFixedWidth`,
+ett enkelt skalärt värde, som förblir en platt attribut både i den
+riktiga filen och hos oss). Om InDesign inte känner igen den platta
+formen skulle hela `TextFramePreference`-elementet kunna kasseras och
+ersättas med betydligt mindre standardmarginaler/yta per ram.
+
+**Rättning:** `InsetSpacing` skrivs nu som en nästlad
+`<Properties><InsetSpacing type="list">` med fyra
+`<ListItem type="unit">0</ListItem>`, exakt som den riktiga filen.
+
+**Ärligt om räckvidden:** detta är den NIONDE justeringen i den här
+sagan (sex kodfixar plus två inställningstester innan denna), och
+magnituden på problemet (behöver dubbelt så många sidor, inte bara
+lite fler) gör att jag inte är säker på att InsetSpacing ensam
+förklarar HELA gapet — men det är en konkret, nyupptäckt, verifierad
+skillnad mot en riktig fil, inte en gissning.
+
+**Verifiering:** nytt committat test som kontrollerar att
+`InsetSpacing` aldrig skrivs som platt attribut och alltid som en
+nästlad lista med fyra noll-värden. Hela testsviten (1062 test, 79
+filer), `tsc --noEmit`, `npm run build`, och en riktig export genom
+UI:t (`xmllint --noout` godkände varje fil, den nästlade strukturen
+bekräftad direkt i den extraherade Spread-filen) kördes rent.
+
+v1.0.124 → v1.0.125.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

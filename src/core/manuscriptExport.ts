@@ -1441,6 +1441,21 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * the format, after ComicBook AI's own writer (never threaded, so it
  * couldn't surface everything a reader does with a multi-page threaded
  * flow specifically).
+ *
+ * `TextFramePreference`'s `InsetSpacing` is a nested
+ * `<Properties><InsetSpacing type="list">` of four `<ListItem type="unit">`
+ * values, not a flat `InsetSpacing="0 0 0 0"` attribute — the real export
+ * above writes it the nested way, list-valued preferences apparently needing
+ * it (unlike `TextColumnFixedWidth`, a single scalar, which stays a plain
+ * attribute both there and here). Found after InDesign's own re-saved copy
+ * of a real, reportedly-broken export confirmed its internal page count
+ * (7, for a single ~380-word chapter) wasn't a display illusion — InDesign
+ * genuinely composed that little text across that many pages, roughly 54
+ * words each, far too sparse for a real column this size at a normal body
+ * size. An attribute InDesign's strict parser doesn't recognize in this
+ * flat form — Affinity's more lenient one tolerates it fine — could well be
+ * discarded together with the rest of `TextFramePreference`, falling back
+ * to some much smaller default usable area per frame.
  */
 function idmlSpreadXml(
   spreadId: string,
@@ -1466,7 +1481,16 @@ function idmlSpreadXml(
     </Page>
     <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ItemLayer="${IDML_LAYER}" ItemTransform="1 0 0 1 ${margin} ${margin}">
       ${idmlRectPathGeometry(columnWidth, columnHeight)}
-      <TextFramePreference TextColumnCount="1" TextColumnFixedWidth="${columnWidth}" UseFlexibleColumnWidth="false" FirstBaselineOffset="AscentOffset" VerticalJustification="TopAlign" InsetSpacing="0 0 0 0"/>
+      <TextFramePreference TextColumnCount="1" TextColumnFixedWidth="${columnWidth}" UseFlexibleColumnWidth="false" FirstBaselineOffset="AscentOffset" VerticalJustification="TopAlign">
+        <Properties>
+          <InsetSpacing type="list">
+            <ListItem type="unit">0</ListItem>
+            <ListItem type="unit">0</ListItem>
+            <ListItem type="unit">0</ListItem>
+            <ListItem type="unit">0</ListItem>
+          </InsetSpacing>
+        </Properties>
+      </TextFramePreference>
     </TextFrame>
   </Spread>
 </idPkg:Spread>

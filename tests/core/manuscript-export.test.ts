@@ -576,6 +576,19 @@ describe("IDML export", () => {
     }
   });
 
+  it("gives InsetSpacing as a nested Properties list, not a flat attribute, matching a real InDesign export", async () => {
+    const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
+    const files = unzipStore(idml);
+    const spreadPaths = Object.keys(files).filter((name) => name.startsWith("Spreads/"));
+    expect(spreadPaths.length).toBeGreaterThan(0);
+    for (const path of spreadPaths) {
+      const spreadXml = new TextDecoder().decode(files[path]!);
+      expect(spreadXml).not.toMatch(/InsetSpacing="[^"]*"/);
+      expect(spreadXml).toContain('<InsetSpacing type="list">');
+      expect(spreadXml.match(/<ListItem type="unit">0<\/ListItem>/g)?.length).toBe(4);
+    }
+  });
+
   it("carries bold formatting into a Story's CharacterStyleRange as a local FontStyle override", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);

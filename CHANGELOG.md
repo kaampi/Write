@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.125] - 2026-10-16
+
+### Fixed
+- IDML export wrote `InsetSpacing` as a flat `TextFrame` attribute (`InsetSpacing="0 0 0 0"`); a real InDesign (21.6) export writes it as a nested `<Properties><InsetSpacing type="list">` of four `<ListItem type="unit">` values instead. Investigated after InDesign's own re-saved copy of a reportedly-broken export confirmed its internal page count (7, for a single ~380-word chapter — about 54 words per page) wasn't a display illusion, suggesting each text frame's usable area was being read as far smaller than intended, consistent with a list-valued preference InDesign's stricter parser doesn't recognize in flat-attribute form.
+
 ## [1.0.124] - 2026-10-16
 
 ### Fixed
