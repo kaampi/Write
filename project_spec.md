@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.128
+Status: living document, v1.0.129
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6188,6 +6188,81 @@ metadataattribut), men fortfarande en gissning tills Mats testat i
 riktig InDesign.
 
 v1.0.127 → v1.0.128.
+
+**Ändringslogg v1.0.128 → v1.0.129 (2026-10-17):** Den fjortonde
+justeringen, byggd på genuint nytt bevismaterial istället för en
+gissning — den mest konkreta ledtråden hittills.
+
+**Mats testade v1.0.128:** "Fortfarande fel i indesign med två tomma
+sidor först." Men avgörande: säkerhetsrutans borttagande (v1.0.128)
+krympte kapitlets rutantal från 3 till 2 — och de tomma sidorna
+krympte EXAKT lika mycket, från 3 till 2. Dubbleringen skalar alltså
+fortfarande exakt 1:1 med rutantalet, oavsett vilket antal vi ger
+den. Det bevisar att säkerhetsrutan aldrig var boven; bara symptomets
+storlek krympte proportionellt med indata.
+
+**Tre riktade diagnostiska frågor till Mats** gav, för första gången,
+information om VAR felet sitter, inte bara om det är bättre/sämre:
+1. Berättarredigeraren visar texten bara EN gång — inget
+   innehåll dupliceras internt.
+2. Inget går att markera på de tomma sidorna — inte ens en tom
+   textruta finns där.
+3. Inget rött plustecken (overset) på sista riktiga textrutan.
+
+Tillsammans utesluter detta definitivt textduplicering,
+rutkapacitet och overset-driven sidinfogning. De tomma sidorna är
+ett rent sido-/sektionsnivå-artefakt, helt frikopplat från vårt
+faktiska innehåll.
+
+**Genombrottet:** läste om `Spread_ucf.xml` (den äkta, native
+"Call of Cthulhu"-filen, skickad för flera dagar sedan) och såg för
+första gången något jag missat: den riktiga innehållssidan har
+`AppliedAlternateLayout="ud5"` — en VERKLIG referens, inte `"n"`
+som jag satte i v1.0.126! Bad Mats skicka samma fils `designmap.xml`
+igen (den gick förlorad vid en tidigare kontext-komprimering, bara
+sparad som inklistrad text). Den avslöjade vad `ud5` faktiskt är:
+```
+<Section Self="ud5" Length="14" AlternateLayoutLength="14" AlternateLayout="A4 V" ... PageStart="ud4" ContinueNumbering="true" ... />
+```
+**`ud5` är dokumentets egen `<Section>`!** `AppliedAlternateLayout`
+på en riktig innehållssida pekar på SEKTIONEN själv — inte "n", och
+inte något separat alternativlayout-objekt. 14 = exakt samma
+rutantal som detta ensamma dokuments 14 trådade sidor (hela "Call of
+Cthulhu"-texten i en enda tråd, ingen separat titelsida i just den
+filen). Sektionen har dessutom `AlternateLayoutLength="14"` (samma
+som `Length`) och en läsbar `AlternateLayout`-etikett ("A4 V" — A4
+stående, exakt dokumentets egen sidstorlek) — båda helt frånvarande
+i vår kod. Sektionen saknar också `PageNumberStart` och sätter
+`ContinueNumbering="true"`, till skillnad från vår `PageNumberStart="1"
+ContinueNumbering="false"`.
+
+**Rättning:** `sectionSelf` genereras nu före sid-loopen (inte efter)
+så varje riktig `<Page>` kan referera den via `AppliedAlternateLayout`
+istället för `"n"`. `<Section>` får `AlternateLayoutLength` (samma
+värde som `Length`) och en sidstorlek-härledd `AlternateLayout`-
+etikett (tros vara kosmetisk, exakt ordalydelse inte avgörande),
+`ContinueNumbering="true"` och ingen `PageNumberStart`, matchande
+referensfilen exakt. Mastersidans egen `AppliedAlternateLayout="n"`
+är oförändrad (bekräftat korrekt redan i v1.0.126).
+
+**Ärligt om räckvidden:** detta är den mest konkret bevisade
+rättningen i hela sagan — bokstavligen kopierade attributvärden från
+en genuin, aldrig-tidigare-sedd dokumentnivå-XML, inte en gissning
+baserad på mönsterigenkänning. Men referensfilen har bara EN story
+(ingen separat titelsida), så jag kan inte vara helt säker på att
+detta förklarar exakt varför bara FLERRAMS-enheter drabbas i vårt
+flerenhets-dokument — bara att det är en konkret, bekräftad
+skillnad mot äkta IDML som nu är rättad.
+
+**Verifiering:** hela testsviten (1065 test, 79 filer, två befintliga
+tester uppdaterade för den nya strukturen), `tsc --noEmit`, `npm run
+build`, och en riktig export genom UI:t — `xmllint --noout` godkände
+varje fil, och den extraherade designmap.xml visade exakt
+`<Section ... Length="4" AlternateLayoutLength="4" AlternateLayout="6X9 V" ... ContinueNumbering="true" .../>`
+med varje riktig sidas `AppliedAlternateLayout` pekande på sektionen,
+mastersidan oförändrad med `"n"`.
+
+v1.0.128 → v1.0.129.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

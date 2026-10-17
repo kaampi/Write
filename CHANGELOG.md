@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.129] - 2026-10-17
+
+### Fixed
+- IDML export's every real `Page` stated `AppliedAlternateLayout="n"` since v1.0.126 — confirmed wrong by a genuine InDesign (21.6) export's own full designmap.xml (not just the one Spread file this writer had been compared against before): a real content page's `AppliedAlternateLayout` holds its document's own `<Section>`'s `Self` id, never `"n"` — `"n"` is only correct on a page genuinely outside any section, which a real export's master page is but no real content page ever is. The same reference's `<Section>` also carries `AlternateLayoutLength` and a literal `AlternateLayout` name (its page size and orientation, e.g. "A4 V") that this writer never stated at all, and uses `ContinueNumbering="true"` with no `PageNumberStart` rather than this writer's `PageNumberStart="1" ContinueNumbering="false"` — even for its own single, first section. Every real `Page` now references the document's `<Section>` via `AppliedAlternateLayout`, and the `<Section>` itself states `AlternateLayoutLength`/`AlternateLayout` and matches the real export's numbering attributes. Ruled out first, with the user's own direct inspection in InDesign: the story's text reads once in the Story Editor (not duplicated), nothing is selectable on any of the extra blank pages (no frame placed there at all), and the last real frame shows no overset indicator — together ruling out content duplication, frame-level duplication, and overset-driven page insertion as the cause, narrowing this down to page/section-level metadata.
+
 ## [1.0.128] - 2026-10-17
 
 ### Fixed

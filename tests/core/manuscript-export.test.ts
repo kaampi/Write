@@ -545,19 +545,25 @@ describe("IDML export", () => {
     expect(ids).toEqual(sorted);
   });
 
-  it("declares a Section covering the whole document, starting at the first real Page", async () => {
+  it("declares a Section covering the whole document, starting at the first real Page, with a real AlternateLayout", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     const designmap = new TextDecoder().decode(files["designmap.xml"]!);
     const sectionMatch = designmap.match(
-      /<Section Self="[^"]+" Length="(\d+)" PageStart="([^"]+)" PageNumberStart="1" ContinueNumbering="false" IncludeSectionPrefix="false" SectionPrefix="" Marker=""\/>/
+      /<Section Self="([^"]+)" Length="(\d+)" AlternateLayoutLength="(\d+)" AlternateLayout="[^"]+" PageStart="([^"]+)" ContinueNumbering="true" IncludeSectionPrefix="false" SectionPrefix="" Marker=""\/>/
     );
     expect(sectionMatch).not.toBeNull();
     const spreadPaths = [...designmap.matchAll(/<idPkg:Spread src="(Spreads\/Spread_[^"]+\.xml)"\/>/g)].map((m) => m[1]!);
-    // Length covers every real page, and PageStart points at the first Spread's own Page id.
-    expect(Number(sectionMatch![1])).toBe(spreadPaths.length);
+    // Length and AlternateLayoutLength both cover every real page, and PageStart points at the first Spread's own Page id.
+    expect(Number(sectionMatch![2])).toBe(spreadPaths.length);
+    expect(Number(sectionMatch![3])).toBe(spreadPaths.length);
     const firstSpreadXml = new TextDecoder().decode(files[spreadPaths[0]!]!);
-    expect(firstSpreadXml).toContain(`<Page Self="${sectionMatch![2]}"`);
+    expect(firstSpreadXml).toContain(`<Page Self="${sectionMatch![4]}"`);
+    // Every real Page references this same Section via AppliedAlternateLayout, not "n".
+    for (const path of spreadPaths) {
+      const spreadXml = new TextDecoder().decode(files[path]!);
+      expect(spreadXml).toContain(`AppliedAlternateLayout="${sectionMatch![1]}"`);
+    }
   });
 
   it("declares a Layer and assigns every TextFrame to it", async () => {
@@ -589,14 +595,14 @@ describe("IDML export", () => {
     }
   });
 
-  it("states AppliedAlternateLayout and LayoutRule explicitly on every real page and the master's own page", async () => {
+  it("states LayoutRule explicitly on every real page and the master's own page, AppliedAlternateLayout real on real pages but \"n\" on the master's", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);
     const spreadPaths = Object.keys(files).filter((name) => name.startsWith("Spreads/"));
     expect(spreadPaths.length).toBeGreaterThan(0);
     for (const path of spreadPaths) {
       const spreadXml = new TextDecoder().decode(files[path]!);
-      expect(spreadXml).toMatch(/<Page [^>]*AppliedAlternateLayout="n"[^>]*LayoutRule="UseMaster"/);
+      expect(spreadXml).toMatch(/<Page [^>]*AppliedAlternateLayout="(?!n")[^"]+"[^>]*LayoutRule="UseMaster"/);
     }
     const masterPaths = Object.keys(files).filter((name) => name.startsWith("MasterSpreads/"));
     expect(masterPaths.length).toBe(1);

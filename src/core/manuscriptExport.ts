@@ -1385,6 +1385,12 @@ function idmlStyleSpaceAfter(styleName: string): number {
   return 0;
 }
 
+/** The document `<Section>`'s own `AlternateLayout` name — see `packIdml`'s comment on why this exists and why its exact wording isn't believed to matter. */
+function idmlAlternateLayoutLabel(pageWidth: number, pageHeight: number): string {
+  const sizeName = Object.entries(PAGE_SIZES).find(([, size]) => size.width === pageWidth && size.height === pageHeight)?.[0] ?? "Egen";
+  return `${sizeName.toUpperCase()} ${pageWidth < pageHeight ? "V" : "H"}`;
+}
+
 /**
  * A block's real rendered height, in points — wrapped with the manuscript's
  * actual embedded (or standard fallback) font, the same `wrapTextLines`
@@ -1540,22 +1546,23 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * extras, not overflow compensation. Kept anyway, since it's still a real,
  * confirmed gap against the nested form a real export actually uses.
  *
- * `AppliedAlternateLayout="n"` (every real `Page`, `LayoutRule="UseMaster"`)
- * is the next lead: counting a real report's numbers precisely — a minimal
+ * `AppliedAlternateLayout` (every real `Page`, `LayoutRule="UseMaster"`) was
+ * the next lead: counting a real report's numbers precisely — a minimal
  * 2-story (title + one chapter) export's 4 real pages became 7 in InDesign
  * (the chapter's own 3-frame thread duplicated as 3 extra blank pages, the
  * single-frame title left alone), and a 58-page book's 115 matched just as
  * exactly (its three chapters' 14+24+19 threaded frames each duplicated,
  * 57 extra, the untreaded title again left alone) — every multi-frame
  * (threaded) unit's own frame count duplicated as blank pages, every
- * single-frame one untouched. A real export always states
- * `AppliedAlternateLayout` on every real page (a genuine alternate-layout
- * reference there, since Mats' own document happens to have one; `"n"` on
- * its master page when none applies) — this writer never stated it at all.
- * The exact-duplication pattern, specific to multi-frame threaded flows,
- * fits InDesign generating an implicit alternate-layout page set for
- * content it reads as needing one, precisely where this writer leaves the
- * question undefined rather than explicitly answering "none".
+ * single-frame one untouched. v1.0.126 stated the attribute for the first
+ * time, but as `"n"` on every real page — WRONG, confirmed by a genuine
+ * native export's own designmap.xml (never seen before v1.0.128, pasted in
+ * full rather than just the one Spread file this writer had already been
+ * compared against): `AppliedAlternateLayout` on a real content `Page`
+ * holds the document's own `<Section>`'s `Self` id, not `"n"` — `"n"` is
+ * only correct on a page genuinely outside any section, which a real
+ * export's master page is (see `idmlMasterSpreadXml`) but no real content
+ * page ever is. Every real `Page` now references `sectionSelf`.
  */
 function idmlSpreadXml(
   spreadId: string,
@@ -1568,6 +1575,7 @@ function idmlSpreadXml(
   margin: number,
   label: string,
   spreadIndex: number,
+  sectionSelf: string,
   previousTextFrame = "n",
   nextTextFrame = "n"
 ): string {
@@ -1576,7 +1584,7 @@ function idmlSpreadXml(
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <idPkg:Spread xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="8.0">
   <Spread Self="${spreadId}" PageCount="1" BindingLocation="0" AllowPageShuffle="true" ItemTransform="1 0 0 1 ${spreadIndex * pageWidth} 0" ShowMasterItems="false">
-    <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="${masterSelf}" AppliedAlternateLayout="n" LayoutRule="UseMaster" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
+    <Page Self="${pageId}" Name="${xmlEscape(label)}" AppliedMaster="${masterSelf}" AppliedAlternateLayout="${sectionSelf}" LayoutRule="UseMaster" OverrideList="" GeometricBounds="0 0 ${pageHeight} ${pageWidth}" ItemTransform="1 0 0 1 0 0">
       <MarginPreference ColumnCount="1" ColumnGutter="18" Top="${margin}" Bottom="${margin}" Left="${margin}" Right="${margin}"/>
     </Page>
     <TextFrame Self="${frameId}" ParentStory="${storyId}" PreviousTextFrame="${previousTextFrame}" NextTextFrame="${nextTextFrame}" ContentType="TextType" ItemLayer="${IDML_LAYER}" ItemTransform="1 0 0 1 ${margin} ${margin}">
@@ -1816,6 +1824,10 @@ export async function packIdml(
   // the designmap comment below) references it as where page numbering
   // begins.
   let firstPageSelf: string | undefined;
+  // Generated up front (not after the loop, where it used to live) so every
+  // Page below can reference it via AppliedAlternateLayout — see
+  // idmlSpreadXml's comment on why.
+  const sectionSelf = idmlId("uSection");
 
   for (const unit of units) {
     // Reused only for its page count — the real per-page split now happens
@@ -1869,6 +1881,7 @@ export async function packIdml(
             margin,
             label,
             globalSpreadIndex,
+            sectionSelf,
             previousTextFrame,
             nextTextFrame
           )
@@ -1880,7 +1893,6 @@ export async function packIdml(
   }
 
   const pageCount = spreadRefs.length;
-  const sectionSelf = idmlId("uSection");
 
   // No default `xmlns=` on <Document> — only the idPkg: prefix resource
   // references need a namespace; Document and its children (Layer, Page,
@@ -1906,8 +1918,22 @@ export async function packIdml(
   // one (every `TextFrame` lacked `ItemLayer` too — see idmlSpreadXml's
   // comment), is the next concrete gap against real IDML convention closed
   // on the same lead.
+  // `AlternateLayoutLength`/`AlternateLayout` and every real `Page`
+  // referencing this Section (not `"n"`) via `AppliedAlternateLayout` — see
+  // idmlSpreadXml's comment — come from the same real designmap.xml, this
+  // time pasted in full rather than just its one already-seen Spread file.
+  // `ContinueNumbering="true"` with no `PageNumberStart` also matches it
+  // exactly; the real file's own single Section still numbers its pages
+  // from 1 this way, so whatever "continue" means to InDesign here, it
+  // isn't "there must be a prior section" — kept as `"true"` rather than
+  // guessed back to `"false"`. `AlternateLayout`'s own value is a literal,
+  // human-readable name ("A4 V" there, matching that document's A4-
+  // portrait page) rather than an id reference — believed cosmetic (an
+  // Alternate Layouts panel label), not load-bearing, so a page-size-
+  // derived label is used rather than trying to match InDesign's own
+  // naming exactly.
   const sectionXml = firstPageSelf
-    ? `  <Section Self="${sectionSelf}" Length="${pageCount}" PageStart="${firstPageSelf}" PageNumberStart="1" ContinueNumbering="false" IncludeSectionPrefix="false" SectionPrefix="" Marker=""/>\n`
+    ? `  <Section Self="${sectionSelf}" Length="${pageCount}" AlternateLayoutLength="${pageCount}" AlternateLayout="${idmlAlternateLayoutLabel(pageWidth, pageHeight)}" PageStart="${firstPageSelf}" ContinueNumbering="true" IncludeSectionPrefix="false" SectionPrefix="" Marker=""/>\n`
     : "";
   const designmap = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <?aid style="50" type="document" readerVersion="6.0" featureSet="257"?>
