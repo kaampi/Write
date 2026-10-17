@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.126
+Status: living document, v1.0.127
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6025,6 +6025,102 @@ attributen bekräftade direkt i den extraherade Spread- och
 MasterSpread-filen) kördes rent.
 
 v1.0.125 → v1.0.126.
+
+**Ändringslogg v1.0.126 → v1.0.127 (2026-10-17):** Den ELFTE
+justeringen i "tomma sidor"-sagan — och den första som är en genuin,
+omisskännlig kodfelaktighet snarare än ännu en skillnad mot ett
+referensattribut.
+
+**Mats testade v1.0.126:** "Tusan fortfarande fel. Affinity fick två
+tomma sidor efter, Indesign 3 tomma sidor innan." — exakt samma
+3-sidors-mönster (kapitlets egna 3 trådade rutor) som innan fixen,
+helt opåverkat av `AppliedAlternateLayout`.
+
+**Var ärlig med Mats** om läget: det ENDA konstanta genom alla elva
+försök var trådningsmekanismen själv. Lade fram två vägar: (1)
+fortsätta leta fler metadataskillnader, eller (2) återgå till
+icke-trådad arkitektur (en Story per sida, garanterat eliminerar
+triggern men offrar länkade textrutor). **Mats avvisade uttryckligen
+alternativ 2:** "Vi ger oss inte... än. Att ha enskilda textsidor är
+en mardröm för en grafiker, jag jobbar som grafiker så jag vet 😉 Jag
+skickar de xml filer som finns i stories" — och skickade
+`Story_u106.xml`/`Story_uea.xml` (Stories från InDesigns egen
+omsparning av vår trasiga export) och, i nästa tur, `Story_udf.xml`:
+den genuina, ALDRIG-genom-vår-kod "Call of Cthulhu"-storyn, där Mats
+klistrade in den riktiga Lovecraft-texten direkt i InDesign och lät
+InDesign paginera själv.
+
+**Den avgörande upptäckten:** i Mats genuina referensfil ligger
+dussintals verkliga, separata stycken (hela kapitlets brödtext) inom
+EN ENDA `<ParagraphStyleRange>`/`<CharacterStyleRange>`, åtskilda
+bara av syskon-`<Br/>`-element mellan varje styckes `<Content>` —
+INTE som separata `<ParagraphStyleRange>`-element per stycke, och
+INGENSTANS i hela filen (~270 rader) förekommer ett `&#13;`- eller
+CR-tecken. Filens sista stycke bevisar mönstret: inget efterföljande
+`<Br/>`, ingen CR — bara de stängande taggarna direkt. Det betyder
+att `<Br/>` är en SEPARATOR mellan stycken med identisk formatering,
+inte en terminator, och att själva elementgränsen (ett nytt
+`<ParagraphStyleRange>` eller `<CharacterStyleRange>` som börjar) är
+tillräcklig för att markera ett styckesslut när formateringen ändras
+— bekräftat ytterligare av `Story_u106.xml`, där en tom avslutande
+`<ParagraphStyleRange>` följer direkt efter den riktiga, grupperade
+utan någon separator alls mellan dem.
+
+**Vår kod gjorde tvärtom:** skapade ALLTID en separat
+`<ParagraphStyleRange>` per stycke/block, med ett `&#13;`-tecken
+inbakat i `<Content>`-texten på varje styckes sista textkörning
+(`IDML_PARA_END`-konstanten, satt redan vid den trådade arkitekturens
+återinförande). Till skillnad från de tio tidigare försöken (saknade
+attribut som skilde sig från en referensfil) är detta en konkret,
+otvetydig felaktighet i hur själva textinnehållet kodas — riktig
+InDesign bäddar ALDRIG in ett styrtecken i `<Content>`.
+
+**Varför just detta gav ny förhoppning:** för första gången en
+rimlig kausal mekanism som specifikt förklarar varför ENDAST trådade
+(flerrams-)enheter drabbas. Ett extra, felaktigt styrtecken som
+upprepas en gång per stycke kan bara desynka InDesigns
+omflödningsmotor där text faktiskt FLÖDAR över en rambrytning — vilket
+aldrig händer för en otrådad enrams-enhet som titelsidan. Det matchar
+exakt det ENDA konstanta mönstret genom hela sagan.
+
+**Implementation:** skrev om hela paragraf-serialiseringen i
+`manuscriptExport.ts`. Konsekutiva block med identisk
+stycke-signatur (stilnamn + drop cap + forcerad fetstil) grupperas nu
+till EN `<ParagraphStyleRange>` istället för en per block
+(`idmlParagraphsXml`/`idmlBlockGroupKey`). Inom en grupp bygger
+`idmlCharacterStyleRanges` en platt sekvens av textkörningar över
+ALLA gruppens stycken och slår ihop konsekutiva körningar med
+identisk teckenformatering (även över en styckesgräns) till SAMMA
+`<CharacterStyleRange>`, med `<Br/>` infogat exakt vid den
+styckesgränsen — annars (formatering ändras, mitt i ett stycke eller
+mellan två stycken) startar en ny `<CharacterStyleRange>` utan någon
+separator, precis som i referensfilen. `IDML_PARA_END`/`&#13;` är
+helt borttaget — inget styrtecken bäddas in någonstans längre.
+
+**Verifiering:** två nya committade tester — ett som bygger ett
+kapitel med tre konsekutiva brödtextstycken och kontrollerar att de
+hamnar i EN `<ParagraphStyleRange>` separerade av `<Br/>` (och att
+inget Story-dokument innehåller `&#13;`), ett som kontrollerar att en
+stiländring (kapitelrubrik → brödtext) startar en ny
+`<ParagraphStyleRange>` utan någon `<Br/>` emellan. Hela testsviten
+(1065 test, 79 filer), `tsc --noEmit` och `npm run build` kördes rent.
+Riktig export genom UI:t (ett kapitel med 20 stycken separerade av
+tomma rader) extraherad och kontrollerad direkt: alla XML-filer
+godkända av `xmllint --noout`, kapitlets Story-fil visade exakt EN
+`<ParagraphStyleRange>` för de 39 brödtext-blocken (20 riktiga stycken
++ 19 tomma rader) med 38 `<Br/>`-separatorer, noll `&#13;`-referenser
+någonstans, och ingen efterföljande `<Br/>` efter sista stycket —
+exakt matchande den riktiga referensfilens mönster.
+
+**Ärligt om räckvidden:** detta är den FÖRSTA upptäckten i hela
+sagan som är en omisskännlig korrekthetsbugg i textkodningen, inte
+bara ännu en skillnad mot ett referensattribut — och den ger för
+första gången en rimlig förklaring till VARFÖR bara trådning
+triggar felet. Högre tillit än vid de elva tidigare försöken, men
+efter den historiken bekräftas ingenting förrän Mats testat i riktig
+InDesign igen.
+
+v1.0.126 → v1.0.127.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

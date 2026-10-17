@@ -1171,7 +1171,6 @@ const IDML_BODY_SIZE = 12;
 const IDML_LINE_HEIGHT = IDML_BODY_SIZE * 1.4;
 const IDML_TITLE_SIZE = 28;
 const IDML_CHAPTER_HEADING_SIZE = 20;
-const IDML_PARA_END = "&#13;"; // the paragraph-end mark IDML stories expect — a literal \r byte would be silently normalized away by any XML parser per the XML 1.0 spec, so it has to be a character reference, not raw text
 
 /**
  * IDML paragraph style names — used as both the style's displayed `Name`
@@ -1206,17 +1205,75 @@ function idmlCharacterAttrs(styles: ProseFormattingStyle[]): string {
   return ` FontStyle="${fontStyle}"${underline ? ` Underline="true"` : ""}`;
 }
 
-/** One `<CharacterStyleRange>` — a local FontStyle/Underline override on the reserved "no character style", rather than named CharacterStyle resources (IDML allows either; local overrides need no Styles.xml entries to stay in sync). `paragraphEnd` appends the paragraph-end mark IDML expects on the last run of every paragraph. */
-function idmlRun(run: FormattedRun, paragraphEnd = false): string {
-  const content = `<Content>${xmlEscape(run.text)}${paragraphEnd ? IDML_PARA_END : ""}</Content>`;
-  const attrs = run.styles.length === 0 ? "" : idmlCharacterAttrs(run.styles);
-  return `<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"${attrs}>${content}</CharacterStyleRange>`;
+/**
+ * A real InDesign Story never marks a paragraph's end with a character in
+ * its own text — not even the literal CR this writer embedded through
+ * v1.0.126 (a `&#13;` character reference, since a raw \r byte is silently
+ * stripped by any XML 1.0 parser). Confirmed against a genuine, never-
+ * touched-by-this-code "Call of Cthulhu" Story XML Mats exported directly
+ * from InDesign: the mark is purely structural. Two paragraphs with
+ * identical character formatting, one after another, share ONE
+ * `<CharacterStyleRange>` with a `<Br/>` between their `<Content>` blocks
+ * — dozens of real narrative paragraphs long in that file — and whenever
+ * formatting changes, even just by starting a new `<ParagraphStyleRange>`
+ * for a paragraph that happens to share the same style, the element
+ * boundary itself is the break: no `<Br/>`, nothing appended to the text.
+ * The file's very last paragraph proves it: no trailing `<Br/>`, no CR,
+ * just the closing tags.
+ *
+ * Embedding a CR where real InDesign never does was the one unambiguous,
+ * structural difference found after eleven earlier fixes (padded ids,
+ * Section, Layer, AppliedMaster/AllowPageShuffle, InsetSpacing,
+ * AppliedAlternateLayout) all failed to explain a real report of InDesign
+ * inserting dozens of extra blank pages, in each threaded unit's own exact
+ * frame count — and a plausible mechanism for it, too: a stray control
+ * character repeated once per paragraph could only ever desync
+ * recomposition where text actually flows across a frame boundary, i.e.
+ * only in a threaded (multi-frame) Story, exactly matching the reported
+ * pattern (an untreaded, single-frame unit like the title page was never
+ * affected).
+ */
+function idmlBlockRuns(block: IdmlBlock, formatting: ProseFormattingRange[], sceneBreakStyle: Book["scene_break_style"]): FormattedRun[] {
+  if (block.kind === "sceneBreak") return [{ text: sceneBreakSymbol(sceneBreakStyle), styles: [] }];
+  if (!block.text) return [{ text: "", styles: [] }];
+  if (block.forceBold) return [{ text: block.text, styles: ["bold"] }];
+  const runs = formattedRuns(block.text, block.start, formatting);
+  return runs.length === 0 ? [{ text: "", styles: [] }] : runs;
 }
 
-function idmlParagraphRuns(text: string, offset: number, formatting: ProseFormattingRange[]): string {
-  const runs = formattedRuns(text, offset, formatting);
-  if (runs.length === 0) return idmlRun({ text: "", styles: [] }, true);
-  return runs.map((run, index) => idmlRun(run, index === runs.length - 1)).join("");
+/**
+ * One `<CharacterStyleRange>` per distinct run of character formatting
+ * across `group`'s paragraphs — a local FontStyle/Underline override on the
+ * reserved "no character style" (IDML allows either that or named
+ * CharacterStyle resources; local overrides need no Styles.xml entries to
+ * stay in sync). Consecutive paragraphs whose formatting matches right
+ * across the paragraph boundary are folded into the SAME range with a
+ * `<Br/>` between their `<Content>`, matching real InDesign's own habit
+ * (see `idmlBlockRuns`'s comment) — while any formatting change, mid-
+ * paragraph or between two of `group`'s own paragraphs, simply starts a new
+ * range with no separator at all.
+ */
+function idmlCharacterStyleRanges(group: IdmlBlock[], formatting: ProseFormattingRange[], sceneBreakStyle: Book["scene_break_style"]): string {
+  const chunks: { styles: string; parts: string[] }[] = [];
+  group.forEach((block, blockIndex) => {
+    const runs = idmlBlockRuns(block, formatting, sceneBreakStyle);
+    runs.forEach((run, runIndex) => {
+      const stylesKey = run.styles.join(",");
+      const content = `<Content>${xmlEscape(run.text)}</Content>`;
+      const previous = chunks[chunks.length - 1];
+      if (runIndex === 0 && blockIndex > 0 && previous && previous.styles === stylesKey) {
+        previous.parts.push("<Br/>", content);
+      } else {
+        chunks.push({ styles: stylesKey, parts: [content] });
+      }
+    });
+  });
+  return chunks
+    .map((chunk) => {
+      const attrs = chunk.styles === "" ? "" : idmlCharacterAttrs(chunk.styles.split(",") as ProseFormattingStyle[]);
+      return `<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"${attrs}>${chunk.parts.join("")}</CharacterStyleRange>`;
+    })
+    .join("");
 }
 
 function idmlParagraph(paragraphStyleName: string, runsXml: string, extraAttrs = ""): string {
@@ -1227,7 +1284,7 @@ function idmlParagraph(paragraphStyleName: string, runsXml: string, extraAttrs =
  * One paragraph-ish unit of chapter/bible content, kept separate from its
  * eventual page and its rendered XML — `idmlBlockHeight` measures it with
  * real font metrics before `paginateIdmlBlocks` decides which page it lands
- * on, and only then does `idmlBlockXml` turn it into markup. `forceBold` is
+ * on, and only then does `idmlParagraphsXml` turn it into markup. `forceBold` is
  * for Story Bible entity names, which are always bold with no formatting
  * ranges of their own to express that (unlike chapter prose).
  */
@@ -1274,14 +1331,42 @@ function idmlBibleBlocks(bible: ManuscriptExportSection[]): IdmlBlock[] {
   return blocks;
 }
 
-function idmlBlockXml(block: IdmlBlock, formatting: ProseFormattingRange[], sceneBreakStyle: Book["scene_break_style"]): string {
-  if (block.kind === "sceneBreak") {
-    return idmlParagraph(IDML_STYLE_SCENE_BREAK, idmlRun({ text: sceneBreakSymbol(sceneBreakStyle), styles: [] }, true));
+function idmlBlockStyleName(block: IdmlBlock): string {
+  return block.kind === "sceneBreak" ? IDML_STYLE_SCENE_BREAK : block.styleName;
+}
+
+function idmlBlockExtraAttrs(block: IdmlBlock): string {
+  return block.kind === "paragraph" && block.dropCapLines > 0 ? ` DropCapCharacters="1" DropCapLines="${block.dropCapLines}"` : "";
+}
+
+/**
+ * The signature that decides whether two adjacent blocks fold into ONE
+ * `<ParagraphStyleRange>` in `idmlParagraphsXml` — paragraph style name,
+ * plus the two attributes `idmlBlockExtraAttrs` also applies to the range
+ * itself (drop cap, forced bold), since every paragraph folded into one
+ * range has to share them.
+ */
+function idmlBlockGroupKey(block: IdmlBlock): string {
+  if (block.kind === "sceneBreak") return "scene";
+  return `${block.styleName}|${block.dropCapLines > 0 ? "drop" : ""}|${block.forceBold ? "bold" : ""}`;
+}
+
+/** Groups `blocks` into the runs of consecutive same-style paragraphs real InDesign itself collapses into one `<ParagraphStyleRange>` (see `idmlBlockRuns`'s comment), then renders each group once. */
+function idmlParagraphsXml(blocks: IdmlBlock[], formatting: ProseFormattingRange[], sceneBreakStyle: Book["scene_break_style"]): string {
+  const groups: IdmlBlock[][] = [];
+  for (const block of blocks) {
+    const previousGroup = groups[groups.length - 1];
+    if (previousGroup && idmlBlockGroupKey(previousGroup[0]!) === idmlBlockGroupKey(block)) {
+      previousGroup.push(block);
+    } else {
+      groups.push([block]);
+    }
   }
-  const dropCapAttr = block.dropCapLines > 0 ? ` DropCapCharacters="1" DropCapLines="${block.dropCapLines}"` : "";
-  if (!block.text) return idmlParagraph(block.styleName, idmlRun({ text: "", styles: [] }, true));
-  if (block.forceBold) return idmlParagraph(block.styleName, idmlRun({ text: block.text, styles: ["bold"] }, true));
-  return idmlParagraph(block.styleName, idmlParagraphRuns(block.text, block.start, formatting), dropCapAttr);
+  return groups
+    .map((group) =>
+      idmlParagraph(idmlBlockStyleName(group[0]!), idmlCharacterStyleRanges(group, formatting, sceneBreakStyle), idmlBlockExtraAttrs(group[0]!))
+    )
+    .join("");
 }
 
 /**
@@ -1739,7 +1824,7 @@ export async function packIdml(
     const frameCount = estimatedPages > 1 ? estimatedPages + 1 : estimatedPages;
 
     const storySelf = idmlId("uStory");
-    const paragraphsXml = unit.blocks.map((block) => idmlBlockXml(block, unit.formatting, doc.sceneBreakStyle)).join("");
+    const paragraphsXml = idmlParagraphsXml(unit.blocks, unit.formatting, doc.sceneBreakStyle);
     storyIds.push(storySelf);
     otherFiles.push({ name: `Stories/Story_${storySelf}.xml`, data: utf8(idmlStoryXml(storySelf, paragraphsXml)) });
     storyRefs.push(`  <idPkg:Story src="Stories/Story_${storySelf}.xml"/>`);

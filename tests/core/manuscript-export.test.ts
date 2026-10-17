@@ -616,6 +616,36 @@ describe("IDML export", () => {
     expect(storyWithLocked).toMatch(/<Content>locked<\/Content>/);
   });
 
+  it("folds consecutive same-style paragraphs into one ParagraphStyleRange, joined by Br — not a CR embedded in each paragraph's own Content", async () => {
+    let book = bookWithTwoChapters();
+    book = updateChapter(book, book.chapters[0]!.id, { prose: "Para one.\nPara two.\nPara three.", formatting: [] });
+    const idml = await packIdml(buildManuscriptExport(book));
+    const files = unzipStore(idml);
+    const storyTexts = Object.entries(files)
+      .filter(([name]) => name.startsWith("Stories/"))
+      .map(([, data]) => new TextDecoder().decode(data));
+    for (const text of storyTexts) expect(text).not.toContain("&#13;");
+    const chapterStory = storyTexts.find((text) => text.includes("Para one."));
+    expect(chapterStory).toBeDefined();
+    expect(chapterStory!.match(/<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle\/Body Text">/g)).toHaveLength(1);
+    expect(chapterStory).toContain("<Content>Para one.</Content><Br/><Content>Para two.</Content><Br/><Content>Para three.</Content>");
+  });
+
+  it("starts a new ParagraphStyleRange, with no Br, wherever the paragraph style actually changes", async () => {
+    let book = bookWithTwoChapters();
+    book = updateChapter(book, book.chapters[0]!.id, { prose: "Para one.\nPara two.", formatting: [] });
+    const idml = await packIdml(buildManuscriptExport(book));
+    const files = unzipStore(idml);
+    const chapterStory = Object.entries(files)
+      .filter(([name]) => name.startsWith("Stories/"))
+      .map(([, data]) => new TextDecoder().decode(data))
+      .find((text) => text.includes("Para one."));
+    expect(chapterStory).toBeDefined();
+    // The chapter heading (its own style) is a separate range right before the body text, with no Br between them.
+    expect(chapterStory).toContain('</ParagraphStyleRange><ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/Body Text">');
+    expect(chapterStory).not.toContain("<Br/><ParagraphStyleRange");
+  });
+
   it("gives paragraph styles human-readable names InDesign's own Paragraph Styles panel shows, not programmer-style identifiers", async () => {
     const idml = await packIdml(buildManuscriptExport(bookWithTwoChapters()));
     const files = unzipStore(idml);

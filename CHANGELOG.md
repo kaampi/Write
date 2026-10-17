@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.127] - 2026-10-17
+
+### Fixed
+- IDML export embedded a literal paragraph-end mark (a `&#13;` CR character reference) inside every paragraph's own `<Content>`, and always gave each paragraph its own `<ParagraphStyleRange>` — a real InDesign (21.6) Story XML never marks a paragraph's end with a character in the text at all; it's purely structural. Confirmed against a genuine, native "Call of Cthulhu" Story XML a user exported directly from InDesign (never touched by this writer's own code): many consecutive same-styled paragraphs share ONE `<ParagraphStyleRange>`/`<CharacterStyleRange>`, separated only by sibling `<Br/>` elements between their `<Content>` blocks, and the file's very last paragraph has no trailing `<Br/>` or CR at all — just the closing tags. This is the first difference found in this investigation that's a genuine encoding-correctness bug rather than a missing attribute, and gives a plausible mechanism tying it to the one constant across eleven earlier, unsuccessful fixes (padded ids, `<Section>`, `<Layer>`, `AppliedMaster`/`AllowPageShuffle`, `InsetSpacing`, `AppliedAlternateLayout`): a stray control character repeated once per paragraph could only ever desync InDesign's recomposition where text actually flows across a frame boundary — i.e. only in a threaded (multi-frame) Story, exactly matching the reported pattern of untreaded single-frame units (like the title page) never being affected. Consecutive same-style paragraphs are now folded into one `<ParagraphStyleRange>`, joined by `<Br/>`, with no character ever embedded to mark a paragraph's end.
+
 ## [1.0.126] - 2026-10-16
 
 ### Fixed
