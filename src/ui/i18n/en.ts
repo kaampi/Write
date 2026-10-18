@@ -352,6 +352,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
 
 export const en = {
   common: {
+    fileSaveError: "Could not save the file. Please try again.",
     cancel: "Cancel",
     close: "Close",
     stop: "Stop",

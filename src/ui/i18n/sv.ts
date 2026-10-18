@@ -2,6 +2,7 @@ import type { Messages } from "./en";
 
 export const sv: Messages = {
   common: {
+    fileSaveError: "Kunde inte spara filen. Försök igen.",
     cancel: "Avbryt",
     close: "Stäng",
     stop: "Stopp",

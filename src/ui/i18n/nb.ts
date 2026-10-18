@@ -2,6 +2,7 @@ import type { Messages } from "./en";
 
 export const nb: Messages = {
   common: {
+    fileSaveError: "Kunne ikke lagre filen. Prøv igjen.",
     cancel: "Avbryt",
     close: "Lukk",
     stop: "Stopp",

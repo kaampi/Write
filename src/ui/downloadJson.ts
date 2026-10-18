@@ -35,7 +35,17 @@ export function downloadText(filename: string, text: string, type = "text/plain"
  * Only picker cancellation is treated as cancellation. Write/close errors
  * must reach the caller rather than silently starting another download.
  */
-export async function downloadBlob(filename: string, blob: Blob): Promise<DownloadResult> {
+export function downloadBlob(filename: string, blob: Blob): Promise<DownloadResult> {
+  return downloadGeneratedBlob(filename, blob.type, () => blob);
+}
+
+/** Choose the destination before async font loading or PDF/IDML generation
+ * can consume the click's transient user activation. Cancellation skips work. */
+export async function downloadGeneratedBlob(
+  filename: string,
+  type: string,
+  createBlob: () => Blob | Promise<Blob>
+): Promise<DownloadResult> {
   const picker = (window as unknown as { showSaveFilePicker?: ShowSaveFilePicker }).showSaveFilePicker;
   if (typeof picker === "function") {
     let handle: FileSystemFileHandleLike | undefined;
@@ -43,19 +53,23 @@ export async function downloadBlob(filename: string, blob: Blob): Promise<Downlo
       // Web API methods require their Window receiver (otherwise Illegal invocation).
       handle = await picker.call(window, {
         suggestedName: filename,
-        types: [{ description: filename, accept: { [blob.type.split(";")[0] || "application/octet-stream"]: [extensionOf(filename)] } }]
+        types: [{ description: filename, accept: { [type.split(";")[0] || "application/octet-stream"]: [extensionOf(filename)] } }]
       });
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return "cancelled";
       // Not supported, blocked by the browser, or some other failure — fall through to the classic download below.
     }
     if (handle) {
+      const blob = await createBlob();
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();
       return "saved";
     }
   }
+  const generated = createBlob();
+  // Keep synchronous JSON/text downloads in the original click event.
+  const blob = generated instanceof Blob ? generated : await generated;
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;

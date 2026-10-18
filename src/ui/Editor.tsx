@@ -96,7 +96,7 @@ import { AskManuscriptPanel } from "./AskManuscript";
 import { AskAboutPassageCard } from "./AskAboutPassageCard";
 import { TimelineBoardPanel } from "./TimelineBoard";
 import { useBookStore } from "./useBookStore";
-import { downloadBytes, downloadJson, downloadText } from "./downloadJson";
+import { downloadGeneratedBlob, downloadJson } from "./downloadJson";
 import { readLastJsonBackup, recordLastJsonBackup } from "./jsonBackupStamp";
 import { BiblePanel } from "./BiblePanel";
 import { LoreImportCard } from "./LoreImportCard";
@@ -473,6 +473,8 @@ export function Editor() {
   const [backupSaving, setBackupSaving] = useState(false);
   const [backupError, setBackupError] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
+  const [publishSaving, setPublishSaving] = useState(false);
+  const [publishError, setPublishError] = useState(false);
   const [publishFilename, setPublishFilename] = useState("");
   const [publishFormat, setPublishFormat] = useState<"md" | "txt" | "rtf" | "odt" | "html" | "epub" | "pdf" | "idml">("md");
   const [publishParagraphStyle, setPublishParagraphStyle] = useState<ParagraphStyle>("spaced");
@@ -575,59 +577,42 @@ export function Editor() {
   }
 
   async function saveExport(kind: "md" | "txt" | "rtf" | "odt" | "html" | "epub" | "pdf" | "idml") {
-    if (!book) return;
-    const packed = packManuscriptBackup(book);
-    const doc = buildManuscriptExport(book, packed.note, packed.exportedAt);
-    const fontOption = publishFontById(book.body_font);
-    const plain = kind === "md" || kind === "txt";
-    const embed = plain ? undefined : await loadPublishFontEmbed(book.body_font);
-    const font = plain ? undefined : { name: fontOption.name, stack: fontOption.stack, ...(embed ? { embed } : {}) };
-    if (kind === "md") {
-      await downloadText(ensureDownloadFilename(publishFilename, "md"), formatManuscriptMarkdown(packed), "text/markdown");
-    } else if (kind === "txt") {
-      await downloadText(
-        ensureDownloadFilename(publishFilename, "txt"),
-        formatExportPlainText(doc, publishParagraphStyle),
-        "text/plain"
-      );
-    } else if (kind === "rtf") {
-      await downloadText(
-        ensureDownloadFilename(publishFilename, "rtf"),
-        formatExportRtf(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
-        "application/rtf"
-      );
-    } else if (kind === "odt") {
-      await downloadBytes(
-        ensureDownloadFilename(publishFilename, "odt"),
-        packOdt(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
-        "application/vnd.oasis.opendocument.text"
-      );
-    } else if (kind === "html") {
-      await downloadText(
-        ensureDownloadFilename(publishFilename, "html"),
-        formatExportHtml(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
-        "text/html"
-      );
-    } else if (kind === "epub") {
-      await downloadBytes(
-        ensureDownloadFilename(publishFilename, "epub"),
-        packEpub(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
-        "application/epub+zip"
-      );
-    } else if (kind === "pdf") {
-      await downloadBytes(
-        ensureDownloadFilename(publishFilename, "pdf"),
-        await packPdf(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
-        "application/pdf"
-      );
-    } else {
-      await downloadBytes(
-        ensureDownloadFilename(publishFilename, "idml"),
-        await packIdml(doc, font, publishParagraphStyle, book.body_font_weight),
-        "application/vnd.adobe.indesign-idml-package"
-      );
+    if (!book || publishSaving) return;
+    const types = {
+      md: "text/markdown", txt: "text/plain", rtf: "application/rtf",
+      odt: "application/vnd.oasis.opendocument.text", html: "text/html",
+      epub: "application/epub+zip", pdf: "application/pdf",
+      idml: "application/vnd.adobe.indesign-idml-package"
+    };
+    setPublishSaving(true);
+    setPublishError(false);
+    try {
+      const result = await downloadGeneratedBlob(ensureDownloadFilename(publishFilename, kind), types[kind], async () => {
+        const packed = packManuscriptBackup(book);
+        const doc = buildManuscriptExport(book, packed.note, packed.exportedAt);
+        const fontOption = publishFontById(book.body_font);
+        const plain = kind === "md" || kind === "txt";
+        const embed = plain ? undefined : await loadPublishFontEmbed(book.body_font);
+        const font = plain ? undefined : { name: fontOption.name, stack: fontOption.stack, ...(embed ? { embed } : {}) };
+        let data: string | Uint8Array;
+        if (kind === "md") data = formatManuscriptMarkdown(packed);
+        else if (kind === "txt") data = formatExportPlainText(doc, publishParagraphStyle);
+        else if (kind === "rtf") data = formatExportRtf(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light);
+        else if (kind === "odt") data = packOdt(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light);
+        else if (kind === "html") data = formatExportHtml(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light);
+        else if (kind === "epub") data = packEpub(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light);
+        else if (kind === "pdf") data = await packPdf(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light);
+        else data = await packIdml(doc, font, publishParagraphStyle, book.body_font_weight);
+        return typeof data === "string"
+          ? new Blob([data], { type: `${types[kind]};charset=utf-8` })
+          : new Blob([new Uint8Array(data).buffer], { type: types[kind] });
+      });
+      if (result !== "cancelled") setPublishOpen(false);
+    } catch {
+      setPublishError(true);
+    } finally {
+      setPublishSaving(false);
     }
-    setPublishOpen(false);
   }
 
   function openPublish() {
@@ -639,12 +624,10 @@ export function Editor() {
     setIllustrationLibraryOpen(false);
     setIllustrateOpen(false);
     setPublishFilename(manuscriptExportBasename(book));
+    setPublishError(false);
     setPublishOpen(true);
-    // Pre-warm the font cache now, while the user is still picking a format,
-    // so the actual Publish click later has nothing left to await before it
-    // triggers the download — some browsers only allow that if it happens
-    // right after the user's own click.
-    void loadPublishFontEmbed(book.body_font);
+    // Pre-warm for speed; the save picker no longer depends on this finishing.
+    void loadPublishFontEmbed(book.body_font).catch(() => {});
   }
 
   function openProgress() {
@@ -960,9 +943,13 @@ export function Editor() {
               role="menuitem"
               className="app-top-menu-item"
               title={m.editor.appExportTitle}
-              onClick={() => {
-                const packed = packManuscriptExport(book);
-                void downloadJson(manuscriptAppExportFilename(book, packed.exportedAt), packed);
+              onClick={async () => {
+                try {
+                  const packed = packManuscriptExport(book);
+                  await downloadJson(manuscriptAppExportFilename(book, packed.exportedAt), packed);
+                } catch {
+                  window.alert(m.common.fileSaveError);
+                }
               }}
             >
               {m.editor.appExport}
@@ -2198,6 +2185,8 @@ export function Editor() {
           >
             <h2 id="publish-title">{m.publish.title}</h2>
             <p className="quiet">{m.publish.body}</p>
+            <p className="quiet">{m.backup.downloadHint}</p>
+            {publishError ? <p role="alert">{m.common.fileSaveError}</p> : null}
             <label className="field-label" htmlFor="publish-filename">
               {m.publish.documentName}
             </label>
@@ -2248,7 +2237,7 @@ export function Editor() {
               <button type="button" className="text-button" onClick={() => setPublishOpen(false)}>
                 {m.common.cancel}
               </button>
-              <button type="submit" className="primary">
+              <button type="submit" className="primary" disabled={publishSaving}>
                 {m.publish.action}
               </button>
             </div>
