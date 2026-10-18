@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.132] - 2026-10-18
+
+### Fixed
+- Backup, Publish, the app-export, and the Story Bible card export all downloaded through a hidden `<a download>` plus a synthetic click — reported as doing nothing at all in Brave (no dialog, no file, no error) when creating a backup. All four now try a real native Save dialog first (the File System Access API's `showSaveFilePicker`, supported by every Chromium browser including Brave, plus the desktop app's own WebView2), only falling back to the old `<a download>` trick where that API doesn't exist (Firefox, Safari) or fails for a reason other than the user cancelling — cancelling the new dialog is now also respected as a real "don't save," not silently retried with the fallback.
+
 ## [1.0.131] - 2026-10-17
 
 ### Fixed

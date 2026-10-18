@@ -581,45 +581,45 @@ export function Editor() {
     const embed = plain ? undefined : await loadPublishFontEmbed(book.body_font);
     const font = plain ? undefined : { name: fontOption.name, stack: fontOption.stack, ...(embed ? { embed } : {}) };
     if (kind === "md") {
-      downloadText(ensureDownloadFilename(publishFilename, "md"), formatManuscriptMarkdown(packed), "text/markdown");
+      await downloadText(ensureDownloadFilename(publishFilename, "md"), formatManuscriptMarkdown(packed), "text/markdown");
     } else if (kind === "txt") {
-      downloadText(
+      await downloadText(
         ensureDownloadFilename(publishFilename, "txt"),
         formatExportPlainText(doc, publishParagraphStyle),
         "text/plain"
       );
     } else if (kind === "rtf") {
-      downloadText(
+      await downloadText(
         ensureDownloadFilename(publishFilename, "rtf"),
         formatExportRtf(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
         "application/rtf"
       );
     } else if (kind === "odt") {
-      downloadBytes(
+      await downloadBytes(
         ensureDownloadFilename(publishFilename, "odt"),
         packOdt(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
         "application/vnd.oasis.opendocument.text"
       );
     } else if (kind === "html") {
-      downloadText(
+      await downloadText(
         ensureDownloadFilename(publishFilename, "html"),
         formatExportHtml(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
         "text/html"
       );
     } else if (kind === "epub") {
-      downloadBytes(
+      await downloadBytes(
         ensureDownloadFilename(publishFilename, "epub"),
         packEpub(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
         "application/epub+zip"
       );
     } else if (kind === "pdf") {
-      downloadBytes(
+      await downloadBytes(
         ensureDownloadFilename(publishFilename, "pdf"),
         await packPdf(doc, font, publishParagraphStyle, book.body_font_weight, book.body_color_light),
         "application/pdf"
       );
     } else {
-      downloadBytes(
+      await downloadBytes(
         ensureDownloadFilename(publishFilename, "idml"),
         await packIdml(doc, font, publishParagraphStyle, book.body_font_weight),
         "application/vnd.adobe.indesign-idml-package"
@@ -959,7 +959,7 @@ export function Editor() {
               title={m.editor.appExportTitle}
               onClick={() => {
                 const packed = packManuscriptExport(book);
-                downloadJson(manuscriptAppExportFilename(book, packed.exportedAt), packed);
+                void downloadJson(manuscriptAppExportFilename(book, packed.exportedAt), packed);
               }}
             >
               {m.editor.appExport}
@@ -2111,7 +2111,7 @@ export function Editor() {
             onSubmit={(event) => {
               event.preventDefault();
               const packed = packManuscriptBackup(book, backupNote);
-              downloadJson(ensureDownloadFilename(backupFilename, "json"), packed);
+              void downloadJson(ensureDownloadFilename(backupFilename, "json"), packed);
               recordLastJsonBackup(book.id, packed.exportedAt);
               setLastJsonBackupAt(packed.exportedAt);
               setBackupOpen(false);

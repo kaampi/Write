@@ -313,7 +313,7 @@ export function BiblePanel({
             onClick={() => {
               const payload = exportSandboxCards(book);
               if (sandboxCardCount(payload) === 0) return;
-              downloadJson(sandboxExportFilename(book), payload);
+              void downloadJson(sandboxExportFilename(book), payload);
             }}
             disabled={!canExportCards}
             title={m.bible.exportCardsTitle}

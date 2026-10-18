@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.131
+Status: living document, v1.0.132
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6444,6 +6444,33 @@ InDesign-export faktiskt skriver — men ingen av dem var roten.
 Löstes till slut genom att Mats själv hand-redigerade en exporterad
 fils XML och empiriskt testade i InDesign, inte genom ännu en
 referensfils-jämförelse.
+
+**Ändringslogg v1.0.131 → v1.0.132 (2026-10-18):** Mats rapporterade,
+med nästan slut på sin egen användningsgräns för dagen, att "Skapa
+backup" inte gjorde något alls i Brave — ingen dialogruta, ingen fil,
+inget fel — och att han aldrig fick en "vanlig" spara-som-ruta.
+
+Backup, Publish, app-exporten och Story Bible-kortexporten laddade
+alla ner via samma gamla knep: en dold `<a download>` plus en
+syntetisk klick. Bytte ut det mot ett försök med en riktig,
+webbläsarnativ Spara-dialog först (File System Access API:ns
+`showSaveFilePicker`, stöds av alla Chromium-webbläsare inklusive
+Brave, samt skrivbordsappens egen WebView2), med det gamla
+`<a download>`-tricket kvar som fallback där API:t helt saknas
+(Firefox, Safari) eller misslyckas av annan anledning än att
+användaren själv avbröt — att avbryta den nya dialogen respekteras nu
+som ett riktigt "spara inte", inte en tyst omstart med fallback-vägen.
+
+**Verifiering:** `tsc --noEmit`, hela testsviten (1068 test, 79
+filer), `npm run build` kördes rent. Kunde inte fullt testa den
+riktiga Spara-dialogen live (den väntar på en äkta OS-dialogruta som
+en huvudlös testmiljö inte kan svara på), men bekräftade att
+fallback-vägen (när `showSaveFilePicker` saknas, simulerat genom att
+ta bort den innan sidan laddar) fungerar korrekt end-to-end genom en
+riktig nedladdning i webbläsaren. Mats får testa den riktiga
+dialogrutan i Brave själv när han är tillbaka.
+
+v1.0.131 → v1.0.132.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
