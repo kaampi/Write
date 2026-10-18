@@ -17,47 +17,59 @@ type ShowSaveFilePicker = (options: {
   types?: { description: string; accept: Record<string, string[]> }[];
 }) => Promise<FileSystemFileHandleLike>;
 
-export function downloadJson(filename: string, data: unknown): Promise<void> {
+export type DownloadResult = "saved" | "download-started" | "cancelled";
+
+export function downloadJson(filename: string, data: unknown): Promise<DownloadResult> {
   return downloadText(filename, `${JSON.stringify(data, null, 2)}\n`, "application/json");
 }
 
-export function downloadText(filename: string, text: string, type = "text/plain"): Promise<void> {
+export function downloadText(filename: string, text: string, type = "text/plain"): Promise<DownloadResult> {
   return downloadBlob(filename, new Blob([text], { type: `${type};charset=utf-8` }));
 }
 
 /**
- * Tries a real native Save As dialog first (the File System Access API's
- * `showSaveFilePicker`, available in every Chromium browser — including
- * Brave — plus the desktop app's WebView2), only falling back to the
- * classic hidden-`<a download>`-plus-synthetic-click trick where that API
- * doesn't exist at all (Firefox, Safari) or throws for a reason other than
- * the user cancelling. A report that choosing "Skapa backup" in Brave did
- * nothing — no dialog, no file, no error — traced back to this file still
- * only using the `<a download>` trick: Brave's download handling can swallow
- * that silently in some configurations, where a real save-dialog call either
- * succeeds outright or fails loudly enough to hit the fallback below.
- *
- * `AbortError` means the user themselves closed the save dialog — that's
- * them declining to save, not a failure, so it returns rather than falling
- * through to a second, unexpected download they never asked for.
+ * Open the native picker during the click/submit event when available.
+ * Brave can disable this API, so retain the regular browser download path
+ * used by ComicBook AI. That path follows the browser's download settings;
+ * it cannot force a Save As dialog or confirm that the file reached disk.
+ * Only picker cancellation is treated as cancellation. Write/close errors
+ * must reach the caller rather than silently starting another download.
  */
-export async function downloadBlob(filename: string, blob: Blob): Promise<void> {
+export function downloadBlob(filename: string, blob: Blob): Promise<DownloadResult> {
+  return downloadGeneratedBlob(filename, blob.type, () => blob);
+}
+
+/** Choose the destination before async font loading or PDF/IDML generation
+ * can consume the click's transient user activation. Cancellation skips work. */
+export async function downloadGeneratedBlob(
+  filename: string,
+  type: string,
+  createBlob: () => Blob | Promise<Blob>
+): Promise<DownloadResult> {
   const picker = (window as unknown as { showSaveFilePicker?: ShowSaveFilePicker }).showSaveFilePicker;
-  if (picker) {
+  if (typeof picker === "function") {
+    let handle: FileSystemFileHandleLike | undefined;
     try {
-      const handle = await picker({
+      // Web API methods require their Window receiver (otherwise Illegal invocation).
+      handle = await picker.call(window, {
         suggestedName: filename,
-        types: [{ description: filename, accept: { [blob.type.split(";")[0] || "application/octet-stream"]: [extensionOf(filename)] } }]
+        types: [{ description: filename, accept: { [type.split(";")[0] || "application/octet-stream"]: [extensionOf(filename)] } }]
       });
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return "cancelled";
+      // Not supported, blocked by the browser, or some other failure — fall through to the classic download below.
+    }
+    if (handle) {
+      const blob = await createBlob();
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();
-      return;
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return;
-      // Not supported, blocked by the browser, or some other failure — fall through to the classic download below.
+      return "saved";
     }
   }
+  const generated = createBlob();
+  // Keep synchronous JSON/text downloads in the original click event.
+  const blob = generated instanceof Blob ? generated : await generated;
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -74,6 +86,7 @@ export async function downloadBlob(filename: string, blob: Blob): Promise<void> 
   // delay lets the download actually start first; the extra few seconds of
   // memory held by the blob URL cost nothing a user would notice.
   setTimeout(() => URL.revokeObjectURL(url), 30000);
+  return "download-started";
 }
 
 function extensionOf(filename: string): string {
@@ -81,7 +94,7 @@ function extensionOf(filename: string): string {
   return dot === -1 ? "" : filename.slice(dot);
 }
 
-export function downloadBytes(filename: string, bytes: Uint8Array, type: string): Promise<void> {
+export function downloadBytes(filename: string, bytes: Uint8Array, type: string): Promise<DownloadResult> {
   const copy = new Uint8Array(bytes.byteLength);
   copy.set(bytes);
   return downloadBlob(filename, new Blob([copy.buffer], { type }));
