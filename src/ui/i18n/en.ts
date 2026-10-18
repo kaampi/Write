@@ -663,6 +663,8 @@ export const en = {
   backup: {
     title: "Backup",
     body: "A JSON copy this app can read back. Import backup on the shelf restores it. Anything written since that file will be lost.",
+    downloadHint: "If no Save As dialog appears, check Downloads. In Brave, enable “Ask where to save each file before downloading” in Settings → Downloads to choose a location for ordinary downloads.",
+    saveError: "Could not save the backup. Please try again.",
     whatHappened: "What happened",
     whatHappenedPlaceholder: "Optional. Recast chapter 2, new Voice on 3.",
     documentName: "Document name",

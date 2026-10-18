@@ -313,6 +313,8 @@ export const sv: Messages = {
   backup: {
     title: "Säkerhetskopia",
     body: "En JSON-kopia som appen kan läsa tillbaka. Importera backup på hyllan återställer den. Allt som skrivits sedan den filen går förlorat.",
+    downloadHint: "Om ingen spara-dialog visas, kontrollera Hämtade filer. I Brave kan du aktivera ”Fråga var varje fil ska sparas före nedladdning” under Inställningar → Nedladdningar för att välja plats vid vanliga nedladdningar.",
+    saveError: "Kunde inte spara säkerhetskopian. Försök igen.",
     whatHappened: "Historik",
     whatHappenedPlaceholder: "Valfritt. Omskriv kapitel 2, ny författarröst på 3.",
     documentName: "Dokumentnamn",

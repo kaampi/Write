@@ -313,6 +313,8 @@ export const nb: Messages = {
   backup: {
     title: "Sikkerhetskopi",
     body: "En JSON-kopi appen kan lese tilbake. Importer sikkerhetskopi på hyllen gjenoppretter den. Alt som er skrevet siden den filen går tapt.",
+    downloadHint: "Hvis ingen lagringsdialog vises, sjekk Nedlastinger. I Brave kan du aktivere «Spør hvor hver fil skal lagres før nedlasting» under Innstillinger → Nedlastinger for å velge plassering ved vanlige nedlastinger.",
+    saveError: "Kunne ikke lagre sikkerhetskopien. Prøv igjen.",
     whatHappened: "Historikk",
     whatHappenedPlaceholder: "Valgfritt. Omskriv kapittel 2, ny forfatterstemme på 3.",
     documentName: "Dokumentnavn",

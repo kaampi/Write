@@ -470,6 +470,8 @@ export function Editor() {
   const [backupOpen, setBackupOpen] = useState(false);
   const [backupNote, setBackupNote] = useState("");
   const [backupFilename, setBackupFilename] = useState("");
+  const [backupSaving, setBackupSaving] = useState(false);
+  const [backupError, setBackupError] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishFilename, setPublishFilename] = useState("");
   const [publishFormat, setPublishFormat] = useState<"md" | "txt" | "rtf" | "odt" | "html" | "epub" | "pdf" | "idml">("md");
@@ -947,6 +949,7 @@ export function Editor() {
                 setFindHighlight(null);
                 setBackupNote("");
                 setBackupFilename(manuscriptBackupBasename(book));
+                setBackupError(false);
                 setBackupOpen(true);
               }}
             >
@@ -2108,18 +2111,30 @@ export function Editor() {
             className="edit-card backup-card"
             action="#"
             onClick={(event) => event.stopPropagation()}
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
-              const packed = packManuscriptBackup(book, backupNote);
-              void downloadJson(ensureDownloadFilename(backupFilename, "json"), packed);
-              recordLastJsonBackup(book.id, packed.exportedAt);
-              setLastJsonBackupAt(packed.exportedAt);
-              setBackupOpen(false);
+              if (backupSaving) return;
+              setBackupSaving(true);
+              setBackupError(false);
+              try {
+                const packed = packManuscriptBackup(book, backupNote);
+                const result = await downloadJson(ensureDownloadFilename(backupFilename, "json"), packed);
+                if (result === "cancelled") return;
+                recordLastJsonBackup(book.id, packed.exportedAt);
+                setLastJsonBackupAt(packed.exportedAt);
+                setBackupOpen(false);
+              } catch {
+                setBackupError(true);
+              } finally {
+                setBackupSaving(false);
+              }
             }}
             aria-labelledby="backup-title"
           >
             <h2 id="backup-title">{m.backup.title}</h2>
             <p className="quiet">{m.backup.body}</p>
+            <p className="quiet">{m.backup.downloadHint}</p>
+            {backupError ? <p role="alert">{m.backup.saveError}</p> : null}
             <label className="field-label" htmlFor="backup-note">
               {m.backup.whatHappened}
             </label>
@@ -2145,7 +2160,7 @@ export function Editor() {
               <button type="button" className="text-button" onClick={() => setBackupOpen(false)}>
                 {m.common.cancel}
               </button>
-              <button type="submit" className="primary">
+              <button type="submit" className="primary" disabled={backupSaving}>
                 {m.backup.action}
               </button>
             </div>
