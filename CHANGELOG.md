@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.133] - 2026-10-20
+
+### Fixed
+- Polish requested a flat 1,800 output tokens regardless of chapter length, and the result of hitting that limit — the model's reply silently cut off mid-rewrite — was never checked at all, both confirmed on a real 4,000-word chapter's failed Polish pass. Polish's token budget now scales from the chapter's own length, with headroom for the rewrite running a little longer than the original. Both local-model adapters (Ollama, and the OpenAI-compatible one LM Studio/Strata-style servers use) now also throw a clear error whenever a non-streaming reply's own finish/done reason says it was cut off at the token limit, instead of silently handing back partial prose as if it were the whole, finished reply — a gap that affected every feature using a non-streaming call, not just Polish.
+
 ## [1.0.132] - 2026-10-18
 
 ### Fixed

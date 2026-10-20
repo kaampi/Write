@@ -128,7 +128,7 @@ import {
   parseManuscriptBackup
 } from "@core/manuscriptBackup";
 import { forgetLastJsonBackup, recordLastJsonBackup } from "./jsonBackupStamp";
-import type { PromptDebugEntry, PromptDebugMessage, PromptOperation, PromptDebugTarget } from "./promptDebug";
+import { estimateTokens, type PromptDebugEntry, type PromptDebugMessage, type PromptOperation, type PromptDebugTarget } from "./promptDebug";
 import { BookStoreContext, type BookStoreValue, type Busy, type PolishDraft } from "./useBookStore";
 import { count, format, getMessages, STORE_ERROR } from "./i18n";
 
@@ -148,6 +148,22 @@ const BASE_URL_KEY = "storybook-ai.base-url";
  * since its "facts" stage runs this same extractor.
  */
 const EXTRACTOR_MAX_TOKENS = 4000;
+
+/**
+ * Polish rewrites the whole chapter, so the reply needs room for roughly as
+ * much prose as it was given — not a flat budget regardless of chapter
+ * length, which is what this used to be (1800, always). A real ~4,000-word
+ * chapter needs well over 1800 tokens just for the rewritten prose itself,
+ * and nothing checked whether the reply actually got that far before this
+ * (see completeOllamaChat/OpenAICompatibleLocalProvider.chat's own new
+ * truncation guards, added alongside this). Scales from the chapter's own
+ * estimated token count, with headroom for the rewrite running a little
+ * longer than the original, and a floor so a short chapter still gets a
+ * reasonable budget.
+ */
+function polishMaxTokens(prose: string): number {
+  return Math.max(1800, Math.ceil(estimateTokens(prose) * 1.3) + 200);
+}
 
 function readEngine(): LlmEngine {
   return localStorage.getItem(ENGINE_KEY) === "openai-compatible" ? "openai-compatible" : "ollama";
@@ -1953,7 +1969,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       const raw = await makeProvider(model).chat({
         messages: polishMessages,
         temperature: 0.4,
-        maxTokens: 1800,
+        maxTokens: polishMaxTokens(chapter.prose),
         signal: abort.signal
       });
       recordPromptResponse(raw);

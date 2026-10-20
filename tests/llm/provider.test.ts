@@ -71,6 +71,22 @@ describe("OllamaModelProvider", () => {
     expect(capturedBody?.stream).toBe(false);
   });
 
+  it("chat() throws instead of silently returning a reply cut off at the token limit", async () => {
+    const provider = new OllamaModelProvider({
+      model: "m",
+      fetchImpl: async () => jsonResponse({ message: { content: "the rewritten chapter opens" }, done_reason: "length" })
+    });
+    await expect(provider.chat({ messages: [{ role: "user", content: "hi" }], maxTokens: 1800 })).rejects.toThrow(/cut off/i);
+  });
+
+  it("chat() also catches a truncated reply via eval_count when the server omits done_reason", async () => {
+    const provider = new OllamaModelProvider({
+      model: "m",
+      fetchImpl: async () => jsonResponse({ message: { content: "the rewritten chapter opens" }, eval_count: 1800 })
+    });
+    await expect(provider.chat({ messages: [{ role: "user", content: "hi" }], maxTokens: 1800 })).rejects.toThrow(/cut off/i);
+  });
+
   it("chat() sends contextWindow through as num_ctx", async () => {
     let capturedBody: Record<string, unknown> | undefined;
     const provider = new OllamaModelProvider({
@@ -214,6 +230,16 @@ describe("OpenAICompatibleLocalProvider", () => {
     expect(capturedUrl).toBe("http://localhost:1234/v1/chat/completions");
     expect(capturedBody?.stream).toBe(false);
     expect(capturedBody?.max_tokens).toBe(100);
+  });
+
+  it("chat() throws instead of silently returning a reply cut off at the token limit", async () => {
+    const provider = new OpenAICompatibleLocalProvider({
+      model: "local-model",
+      baseUrl: "http://localhost:1234",
+      fetchImpl: async () =>
+        jsonResponse({ choices: [{ message: { content: "the rewritten chapter opens" }, finish_reason: "length" }] })
+    });
+    await expect(provider.chat({ messages: [{ role: "user", content: "hi" }], maxTokens: 1800 })).rejects.toThrow(/cut off/i);
   });
 
   it("streamChat() parses OpenAI-style SSE deltas and stops at [DONE]", async () => {

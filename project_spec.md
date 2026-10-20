@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.132
+Status: living document, v1.0.133
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6471,6 +6471,49 @@ riktig nedladdning i webbläsaren. Mats får testa den riktiga
 dialogrutan i Brave själv när han är tillbaka.
 
 v1.0.131 → v1.0.132.
+
+**Ändringslogg v1.0.132 → v1.0.133 (2026-10-20):** Mats delade ett
+meddelande han skrivit till testaren som pekade ut ett "definitivt
+fel på StoryBook AI-sidan": Polish begär bara 1 800 output-tokens,
+vilket inte räcker för en full redigering av ett 4 000-ords kapitel,
+och svaret kontrolleras aldrig för om det faktiskt klipptes av vid
+gränsen.
+
+**Grundorsak:** `polishChapter` skickade alltid `maxTokens: 1800`,
+oavsett kapitlets längd — rimligt för kortare texter, men Polish
+skriver om HELA kapitlet (inte scen för scen som Draft/Recast), så
+svaret behöver ungefär lika mycket utrymme som originaltexten. Och
+varken `completeOllamaChat` (Ollama) eller
+`OpenAICompatibleLocalProvider.chat()` (LM Studio/Strata-liknande
+servrar) någonsin kollade om svaret faktiskt klipptes av vid
+tokengränsen — bara innehållet lästes ut och returnerades som om det
+vore ett komplett, färdigt svar. Samma brist påverkade alla
+funktioner som använder den icke-strömmande `chat()`-vägen, inte bara
+Polish — den strömmande vägen (`streamChat`) hade redan motsvarande
+koll (`finishReason: "length"`).
+
+**Rättning:** Polish:s tokenbudget skalar nu från kapitlets egen
+uppskattade tokenlängd (`estimateTokens`, redan använd för
+prompt-debug-vyn), med marginal för att omskrivningen kan bli lite
+längre än originalet, och ett golv så korta kapitel fortfarande får
+en rimlig budget. Båda lokala modell-adaptrarna kastar nu ett tydligt
+fel när ett icke-strömmande svars egna `done_reason`/`finish_reason`
+(eller, för Ollama, `eval_count >= maxTokens` när `done_reason`
+saknas) säger att det klipptes av — istället för att tyst ge tillbaka
+en ofullständig text som om den vore klar.
+
+**Om "thinking"/reasoning_effort-tipset** i samma meddelande (om
+Strata hanterar tankeläge annorlunda för externa API-klienter): det
+är inte bekräftat som ett StoryBook AI-fel, utan en fråga riktad till
+testaren att kolla på Strata-sidan — ingen kodändring gjord för det
+just nu.
+
+**Verifiering:** fyra nya committade tester (Ollama-avklippning via
+`done_reason` och via `eval_count`-fallback, OpenAI-kompatibel
+avklippning via `finish_reason`). Hela testsviten (1071 test, 79
+filer), `tsc --noEmit`, `npm run build` kördes rent.
+
+v1.0.132 → v1.0.133.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

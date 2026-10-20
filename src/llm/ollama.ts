@@ -222,6 +222,14 @@ export async function completeOllamaChat(options: {
   if (typeof content !== "string" || !content.trim()) {
     throw new Error("Ollama returned an empty reply.");
   }
+  const { done_reason, eval_count } = payload as { done_reason?: unknown; eval_count?: unknown };
+  const hitWall =
+    done_reason === "length" || (options.maxTokens !== undefined && typeof eval_count === "number" && eval_count >= options.maxTokens);
+  if (hitWall) {
+    throw new Error(
+      `Ollama's reply was cut off at the ${options.maxTokens}-token limit (maxTokens) before it finished — the model needed more room than this request allowed, not a model failure.`
+    );
+  }
   return content;
 }
 

@@ -216,10 +216,15 @@ export class OpenAICompatibleLocalProvider implements LocalModelProvider {
       throw new LocalProviderRequestError(this.name, response.status, response.statusText);
     }
     const payload: unknown = await response.json();
-    const content = (payload as { choices?: Array<{ message?: { content?: unknown } }> })?.choices?.[0]?.message
-      ?.content;
+    const choice = (payload as { choices?: Array<{ message?: { content?: unknown }; finish_reason?: unknown }> })?.choices?.[0];
+    const content = choice?.message?.content;
     if (typeof content !== "string" || !content.trim()) {
       throw new Error(`${this.name} returned an empty reply.`);
+    }
+    if (choice?.finish_reason === "length") {
+      throw new Error(
+        `${this.name}'s reply was cut off at the ${request.maxTokens ?? "?"}-token limit (maxTokens) before it finished — the model needed more room than this request allowed, not a model failure.`
+      );
     }
     return content;
   }
