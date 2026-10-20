@@ -4558,7 +4558,6 @@ button:disabled {
   border: 1px solid var(--border-soft);
 }
 
-/* Same alignment reasoning as .chapter-head-inner above. */
 .manuscript-foot-inner {
   display: flex;
   flex-wrap: wrap;
@@ -4566,8 +4565,6 @@ button:disabled {
   align-items: center;
   gap: 1rem;
   width: 100%;
-  max-width: 54rem;
-  margin: 0 auto;
 }
 
 .word-count {
@@ -5117,10 +5114,6 @@ button:disabled {
   margin-left: 0;
   margin-right: 0;
   padding: 0.7rem 1.5rem;
-}
-
-.editor.is-maximized .manuscript-board .manuscript-foot-inner {
-  max-width: none;
 }
 
 .visually-hidden {

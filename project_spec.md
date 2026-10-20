@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.149
+Status: living document, v1.0.150
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7263,6 +7263,32 @@ sömmarna (samma stil som Mats egna bilder) bekräftar inga kvarvarande
 flikar i hörnen.
 
 v1.0.148 → v1.0.149.
+
+
+**Ändringslogg v1.0.149 → v1.0.150 (2026-10-20): menyradens innehåll
+tillbaka till full bredd.** Mats: "Slutligen ta tillbaka justify-
+content: space-between så att menyn sprids på en rad över
+bottenlistens HELA bredd." Rakt besked om att v1.0.147s
+centrering av menyradens innehåll (ordräkning + knappar, till samma
+bredd som textspalten) inte var vad han ville ha trots allt — bara
+titelraden ska linjera med textspalten, inte menyraden.
+
+**Fix:** `.manuscript-foot-inner` förlorade sin `max-width: 54rem;
+margin: 0 auto;` — behåller `display:flex; justify-content:space-
+between` men sprids nu över hela `.manuscript-foot`s bredd igen, som
+innan v1.0.147. `.chapter-head`/`.chapter-head-inner` (titelraden)
+orörda — den linjerar fortfarande med textspalten. Den nu
+överflödiga `.editor.is-maximized .manuscript-board .manuscript-foot-
+inner { max-width: none; }`-regeln (fanns bara för att motverka
+basregelns `max-width:54rem`) togs bort.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Skärmdump bekräftar: ordräkningen
+sitter nu längst till vänster i menyraden och knapparna ända ute
+till höger, medan "Chapter 1"-titeln ovanför fortfarande ligger i
+linje med textspaltens vänsterkant.
+
+v1.0.149 → v1.0.150.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

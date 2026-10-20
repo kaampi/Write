@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.150] - 2026-10-20
+
+### Changed
+- The bottom toolbar's word count and action buttons spread across the full width of the bar again (word count on the far left, buttons stretched to the far right) instead of staying clustered in the prose column's width — the chapter title bar is unaffected, still aligned with the prose column.
+
 ## [1.0.149] - 2026-10-20
 
 ### Changed
