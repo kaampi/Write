@@ -385,10 +385,18 @@ export const en = {
     lede:
       "A local manuscript tool. Title the book, grow the story in Brainstorm, and lift a Synopsis when it is ready. The model drafts the chapters — you decide.",
     newManuscript: "Start a new manuscript",
+    newManuscriptCardLede: "Title it, then grow the story in Brainstorm — the model drafts the chapters, you decide.",
     titlePlaceholder: "Title",
     open: "Create",
     importBackup: "Import backup",
+    importBackupCardLede: "Restore a manuscript you've backed up from StoryBook AI before.",
+    importBackupCardAction: "Choose a backup file",
     importManuscriptButton: "Import manuscript (text file)",
+    importManuscriptCardLede: "Start from a plain text or Markdown export of another writing tool.",
+    importManuscriptCardAction: "Choose a file",
+    guideCardLede: "Not sure where to start? The Guide walks through every part of the app.",
+    guideCardAction: "Open the Guide",
+    startHeading: "Where would you like to start?",
     importManuscriptTitle: "Import a manuscript (text file)",
     importManuscriptLede:
       "Starts a brand-new manuscript from a plain text or Markdown file — an export from another writing tool, or just a .txt/.md file you already have. Splits on headings into chapters (plain text with no headings imports as a single chapter), and converts *italic*/**bold** markers into real formatting, same as Tools → Convert markers to formatting.",

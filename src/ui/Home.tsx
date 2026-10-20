@@ -117,36 +117,72 @@ export function Home({
             <br />
             {m.home.truth}
           </h1>
-          <div className="home-heading-actions">
-            <button type="button" className="home-guide-button" onClick={onOpenGuide}>
-              {m.guide.openFromHome}
-            </button>
-            <button type="button" className="home-guide-button" onClick={() => fileRef.current?.click()}>
-              {m.home.importBackup}
-            </button>
-            <button type="button" className="home-guide-button" onClick={() => setImportOpen(true)}>
-              {m.home.importManuscriptButton}
-            </button>
-            {isDesktopApp() ? (
+          {isDesktopApp() ? (
+            <div className="home-heading-actions">
               <button type="button" className="home-guide-button" onClick={runUpdateCheck} disabled={updateChecking}>
                 {updateChecking ? m.home.desktopCheckingUpdate : m.home.desktopCheckUpdate}
               </button>
-            ) : null}
-            <input
-              ref={fileRef}
-              className="setup-file"
-              type="file"
-              accept="application/json,.json"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                event.target.value = "";
-                if (file) void importManuscript(file);
-              }}
-            />
-          </div>
+            </div>
+          ) : null}
         </div>
         <p className="lede">{m.home.lede}</p>
       </header>
+
+      <section className="home-start" aria-label={m.home.startHeading}>
+        <h2 className="settings-heading home-heading-lg">{m.home.startHeading}</h2>
+        <div className="home-start-cards">
+          <div className="home-start-card">
+            <span className="home-start-card-copy">
+              <strong>{m.home.newManuscript}</strong>
+              <span>{m.home.newManuscriptCardLede}</span>
+            </span>
+            <form className="home-start-card-form" action="#" onSubmit={submitNew}>
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder={m.home.titlePlaceholder}
+                autoComplete="off"
+                aria-label={m.home.newManuscript}
+              />
+              <button type="submit" className="home-start-card-action">
+                {m.home.open} →
+              </button>
+            </form>
+          </div>
+          <button type="button" className="home-start-card" onClick={() => fileRef.current?.click()}>
+            <span className="home-start-card-copy">
+              <strong>{m.home.importBackup}</strong>
+              <span>{m.home.importBackupCardLede}</span>
+              <span className="home-start-card-action">{m.home.importBackupCardAction} →</span>
+            </span>
+          </button>
+          <button type="button" className="home-start-card" onClick={() => setImportOpen(true)}>
+            <span className="home-start-card-copy">
+              <strong>{m.home.importManuscriptButton}</strong>
+              <span>{m.home.importManuscriptCardLede}</span>
+              <span className="home-start-card-action">{m.home.importManuscriptCardAction} →</span>
+            </span>
+          </button>
+          <button type="button" className="home-start-card" onClick={onOpenGuide}>
+            <span className="home-start-card-copy">
+              <strong>{m.guide.openFromHome}</strong>
+              <span>{m.home.guideCardLede}</span>
+              <span className="home-start-card-action">{m.home.guideCardAction} →</span>
+            </span>
+          </button>
+        </div>
+        <input
+          ref={fileRef}
+          className="setup-file"
+          type="file"
+          accept="application/json,.json"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) void importManuscript(file);
+          }}
+        />
+      </section>
 
       {updateDialogOpen ? (
         <UpdateCheckDialog
@@ -252,24 +288,6 @@ export function Home({
           </>
         ) : null}
       </section>
-
-      <form className="new-book" action="#" onSubmit={submitNew}>
-        <label className="field-label home-heading-lg" htmlFor="new-title">
-          {m.home.newManuscript}
-        </label>
-        <div className="new-book-row">
-          <input
-            id="new-title"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder={m.home.titlePlaceholder}
-            autoComplete="off"
-          />
-          <button type="button" onClick={() => submitNew()}>
-            {m.home.open}
-          </button>
-        </div>
-      </form>
 
       <section className="book-shelf" aria-label={m.home.shelf}>
         <h2 className="settings-heading home-heading-lg">{m.home.shelfHeading}</h2>

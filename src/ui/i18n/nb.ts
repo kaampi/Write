@@ -35,10 +35,18 @@ export const nb: Messages = {
     lede:
       "Et lokalt manuskriptverktøy. Gi boken en tittel, vek fram fortellingen i Brainstorm, og løft en Synopsis når den er klar. Modellen tar fram utkast til kapitlene — du bestemmer.",
     newManuscript: "Start nytt manuskript",
+    newManuscriptCardLede: "Gi det en tittel, la deretter historien vokse i Brainstorm — modellen skriver utkast til kapitlene, du bestemmer.",
     titlePlaceholder: "Tittel",
     open: "Opprett",
     importBackup: "Importer sikkerhetskopi",
+    importBackupCardLede: "Gjenopprett et manuskript du tidligere har sikkerhetskopiert fra StoryBook AI.",
+    importBackupCardAction: "Velg en sikkerhetskopi-fil",
     importManuscriptButton: "Importer manuskript (tekstfil)",
+    importManuscriptCardLede: "Start fra en vanlig tekst- eller Markdown-eksport fra et annet skriveverktøy.",
+    importManuscriptCardAction: "Velg en fil",
+    guideCardLede: "Usikker på hvor du skal begynne? Guiden går gjennom hver del av appen.",
+    guideCardAction: "Åpne Guiden",
+    startHeading: "Hvor vil du begynne?",
     importManuscriptTitle: "Importer et manuskript (tekstfil)",
     importManuscriptLede:
       "Starter et helt nytt manuskript fra en vanlig tekst- eller Markdown-fil — en eksport fra et annet skriveverktøy, eller bare en .txt/.md-fil du allerede har. Deler opp på overskrifter til kapitler (tekst uten overskrifter blir ett enkelt kapittel), og gjør om *kursiv*/**fet**-markører til ekte formatering, akkurat som Verktøy → Konverter markører til formatering.",

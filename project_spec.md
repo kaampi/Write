@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.140
+Status: living document, v1.0.141
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6869,6 +6869,44 @@ filer) rent. Playwright-skärmdump bekräftar den omdöpta knappen och
 kortets nya text.
 
 v1.0.139 → v1.0.140.
+
+**Ändringslogg v1.0.140 → v1.0.141 (2026-10-20): startsidans 2×2-kort,
+äntligen.** Mats: "Då kan vi bygga startsidan med de kort vi känner
+är rimliga. Nytt manus. Importera från Storybook och Importera bok
+(TXT) samt guide" — de fyra korten som diskuterats sedan ComicBook
+AI-genomgången (`ProjectStart.tsx`) landade äntligen som riktiga
+kort hos oss, fast med våra egna fyra verkliga åtgärder istället för
+ComicBooks sidvy/manus-uppdelning.
+
+**Implementation:** ny `.home-start`-sektion (`"Var vill du
+börja?"`) med en 2×2-kortgrid (`.home-start-cards`), samma visuella
+språk som ComicBooks `.project-start-card` men med appens egna
+CSS-variabler (`--panel`/`--border-soft`/`--ink`, redan identiskt
+namngivna sen tidigare). Fyra kort:
+1. **Starta nytt manus** — enda kortet med inbäddat innehåll (ett
+   titelfält + Skapa-knapp) snarare än en ren knapp, eftersom det
+   redan fanns ett färdigt, fungerande titelformulär att återanvända
+   rakt av istället för ett extra klick-för-att-visa-steg.
+2. **Importera backup** — kortet triggar samma dolda filinput som
+   redan fanns.
+3. **Importera manus (textfil)** — öppnar det redan byggda
+   `ImportManuscriptCard`-overlayet (v1.0.139/140).
+4. **Guiden** — samma `onOpenGuide`-handler som fanns sedan innan.
+
+Tog samtidigt bort den gamla spridda `home-heading-actions`-knappraden
+(Guide/Importera backup/Importera manus låg där som smala knappar)
+och det fristående `<form className="new-book">`-blocket under den —
+inga nya åtgärder, bara samma fyra omorganiserade till kort.
+"Kolla uppdateringar" (bara i skrivbordsappen) fick ligga kvar som
+egen knapp i header-raden, hör inte ihop med "var vill du börja".
+
+**Verifiering:** `tsc --noEmit`, hela testsviten (1097 test, 81
+filer), `npm run build` rent. Playwright mot `npm run dev`:
+skärmdump av hela kortgriden, samt en fullständig funktionstest av
+kort 1 (skrev en titel, klickade Skapa, bekräftade att manuset
+skapades och öppnades korrekt).
+
+v1.0.140 → v1.0.141.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

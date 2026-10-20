@@ -650,6 +650,86 @@ button:disabled {
   opacity: 0.6;
 }
 
+.home-start {
+  margin: 1.4rem 0 2.2rem;
+}
+
+.home-start-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 0.9rem;
+}
+
+.home-start-card {
+  display: flex;
+  align-items: flex-start;
+  text-align: left;
+  padding: 1.3rem 1.4rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.home-start-card:hover,
+.home-start-card:focus-visible {
+  border-color: var(--ink);
+}
+
+.home-start-card-copy {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.home-start-card-copy > strong {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.home-start-card-copy > span:not(.home-start-card-action) {
+  color: var(--text-dim);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.home-start-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.home-start-card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.1rem;
+}
+
+.home-start-card-form input {
+  width: 100%;
+}
+
+.home-start-card-form .home-start-card-action {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .home-start-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .link-button {
   border: none;
   background: none;

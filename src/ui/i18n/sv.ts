@@ -35,10 +35,18 @@ export const sv: Messages = {
     lede:
       "Ett lokalt manusverktyg. Ge boken en titel, väx fram berättelsen i Brainstorm, och lyft en Synopsis när den är redo. Modellen tar fram utkast till kapitlen — du bestämmer.",
     newManuscript: "Starta nytt manus",
+    newManuscriptCardLede: "Ge det en titel, väx sedan historien i Brainstorm — modellen skriver utkast till kapitlen, du bestämmer.",
     titlePlaceholder: "Titel",
     open: "Skapa",
     importBackup: "Importera backup",
+    importBackupCardLede: "Återställ ett manus du tidigare säkerhetskopierat från StoryBook AI.",
+    importBackupCardAction: "Välj en backupfil",
     importManuscriptButton: "Importera manus (textfil)",
+    importManuscriptCardLede: "Starta från en vanlig text- eller Markdown-export från ett annat skrivverktyg.",
+    importManuscriptCardAction: "Välj en fil",
+    guideCardLede: "Osäker på var du ska börja? Guiden går igenom varje del av appen.",
+    guideCardAction: "Öppna Guiden",
+    startHeading: "Var vill du börja?",
     importManuscriptTitle: "Importera ett manus (textfil)",
     importManuscriptLede:
       "Startar ett helt nytt manus från en vanlig text- eller Markdown-fil — en export från ett annat skrivverktyg, eller bara en .txt/.md-fil du redan har. Delar upp på rubriker till kapitel (text utan rubriker blir ett enda kapitel), och omvandlar *kursiv*/**fet**-markörer till riktig formatering, precis som Verktyg → Konvertera markörer till formatering.",

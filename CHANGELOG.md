@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.141] - 2026-10-20
+
+### Changed
+- The home page now opens with a 2×2 "Where would you like to start?" card grid (Start a new manuscript, Import backup, Import manuscript (text file), the Guide) instead of a row of small buttons plus a separate title form — each card states what it does before you click it. Same four actions as before, reorganized rather than replaced.
+
 ## [1.0.140] - 2026-10-20
 
 ### Changed
