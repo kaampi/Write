@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.156
+Status: living document, v1.0.157
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7484,6 +7484,31 @@ tydligt starkare skugga, bredare spalt och synlig marginal mellan
 text och rutans kant, i maximerat läge.
 
 v1.0.155 → v1.0.156.
+
+
+**Ändringslogg v1.0.156 → v1.0.157 (2026-10-20): skuggan läckte in i
+topp-/bottenlisten igen — rebalanserad.** Mats: "Skuggan borde bara
+vara på sidorna av editorn inte under och över så att det blir
+skugga på topp och bottenpanelen." En regression jag själv orsakade
+i v1.0.156: ökade `blur` (20px→30px) för att göra skuggan tydligare
+men minskade samtidigt den negativa `spread` (-14px→-10px) för att
+få mer av skuggan att synas — nettoeffekten (blur minus |spread|)
+gick från ~6px läckage (osynligt, godkänt i v1.0.154) till ~20px
+läckage, tillräckligt för att synas tydligt ovanför/under textrutan
+mot de nu flush-anslutande barrna.
+
+**Fix:** Behöll den högre opaciteten från v1.0.156 (den gjorde
+verkligen skuggan tydligare utan att läcka), men balanserade om
+blur/spread så `|spread| > blur` igen — `-16px 0 22px -26px` istället
+för `-18px 0 30px -10px`. Fyra pixlars marginal (26 vs 22) som
+buffert mot blurens mjuka diffusa svans.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: inzoomad skärmdump av
+hörnet mot titelraden visar inget läckage, helbildsskärmdump
+bekräftar att skuggan fortfarande är tydligt synlig i sidled.
+
+v1.0.156 → v1.0.157.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

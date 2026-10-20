@@ -3527,14 +3527,18 @@ button:disabled {
    * lines up the same without being clipped.
    * A plain box-shadow would also bleed above/below into the flush-
    * touching chapter-head/manuscript-foot bars (see their own "no gap"
-   * change). A large negative spread shrinks the shadow's source rectangle
-   * well inside the box's top/bottom edges before the horizontal offset
-   * pushes copies of it out past the left and right edges, so only the
-   * sides actually show a shadow.
+   * change). The blur radius and the (negative) spread need to roughly
+   * cancel out — spread shrinks the shadow's source rectangle inward on
+   * every side before blur softens it back outward by about the same
+   * distance, so the vertical edges net out close to zero bleed while the
+   * horizontal offset still pushes the shadow out past the left/right
+   * edges, where there's nothing shrinking it back. Blur much bigger than
+   * |spread| (as happened here once already) bleeds into the bars above/
+   * below; keep them matched.
    */
   box-shadow:
-    -18px 0 30px -10px var(--side-shadow-color),
-    18px 0 30px -10px var(--side-shadow-color);
+    -16px 0 22px -26px var(--side-shadow-color),
+    16px 0 22px -26px var(--side-shadow-color);
 }
 
 /*

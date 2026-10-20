@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.157] - 2026-10-20
+
+### Fixed
+- The stronger side shadow from v1.0.156 bled into the chapter title bar and bottom toolbar, since it widened the blur more than the matching negative spread that keeps it off the top/bottom edges. Rebalanced so the shadow is strictly left/right again.
+
 ## [1.0.156] - 2026-10-20
 
 ### Changed
