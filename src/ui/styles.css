@@ -268,6 +268,7 @@
   --banner-text: #f0c9b0;
   --overlay: rgb(10 8 6 / 0.55);
   --shadow: 0 12px 32px rgb(0 0 0 / 0.35);
+  --side-shadow-color: rgb(0 0 0 / 0.35);
   --rare-mark: rgb(208 106 72 / 0.32);
   --find-mark: rgb(212 160 84 / 0.38);
   --find-mark-current: rgb(212 160 84 / 0.68);
@@ -316,6 +317,7 @@
   --banner-text: #7a3324;
   --overlay: rgb(42 34 24 / 0.32);
   --shadow: 0 12px 28px rgb(42 34 24 / 0.14);
+  --side-shadow-color: rgb(42 34 24 / 0.14);
   --rare-mark: rgb(194 79 48 / 0.22);
   --find-mark: rgb(163 107 28 / 0.26);
   --find-mark-current: rgb(163 107 28 / 0.48);
@@ -3577,6 +3579,17 @@ button:disabled {
   flex: 1 1 auto;
   background: var(--panel);
   border: 1px solid var(--border-soft);
+  /*
+   * Depth on the left/right edges only — a plain box-shadow would also
+   * bleed above/below into the flush-touching chapter-head/manuscript-foot
+   * bars (see their own "no gap" change). A large negative spread shrinks
+   * the shadow's source rectangle well inside the box's top/bottom edges
+   * before the horizontal offset pushes copies of it out past the left and
+   * right edges, so only the sides actually show a shadow.
+   */
+  box-shadow:
+    -14px 0 20px -14px var(--side-shadow-color),
+    14px 0 20px -14px var(--side-shadow-color);
 }
 
 .prose {

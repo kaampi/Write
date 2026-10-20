@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.153
+Status: living document, v1.0.154
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7384,6 +7384,36 @@ sömlös upprepning utan synliga kanter, bakom den ogenomskinliga
 titelraden/textrutan/menyraden.
 
 v1.0.152 → v1.0.153.
+
+
+**Ändringslogg v1.0.153 → v1.0.154 (2026-10-20): djupskugga på
+textytans sidor.** Mats: "Kan man lägga till en skuggning till höger
+och vänster om textytan/editorn?" Jag bekräftade tolkningen innan
+jag byggde (en `box-shadow` som får pappersrutan att se ut som den
+lyfter något från bakgrunden, skiljt från den redan befintliga topp/
+botten-toningen som är en scroll-hint, inte en djupeffekt) — han
+bekräftade: "Precis så. Kör på det."
+
+**Implementation:** En vanlig `box-shadow` hade läckt uppåt/nedåt in
+i de nu flush-anslutande `.chapter-head`/`.manuscript-foot`-barrna
+(se v1.0.149s "inget mellanrum"-ändring) — löst med den etablerade
+CSS-tekniken för sidledes-bara skuggor: stort negativt `spread`
+(-14px) krymper skuggans källa långt in innanför boxens egna topp-/
+bottenkanter innan den horisontella offseten (±14px) skjuter ut
+kopior av den krympta skuggan förbi vänster/höger kant — nettoeffekt:
+skugga syns bara i sidled, ingen läckage vid sömmarna upptill/
+nedtill. Färgen matchar appens befintliga `--shadow`-tema-token
+(samma RGB/opacitet som andra kort-skuggor i appen) via en ny
+`--side-shadow-color`-variabel i båda temablocken (ljust/mörkt), satt
+på `.prose-body`.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: `getComputedStyle`
+bekräftar exakt `box-shadow`-värdet (båda hållen, rätt blur/spread/
+färg), och en inzoomad skärmdump av det övre vänstra hörnet (sömmen
+mot `.chapter-head`) visar ingen skugga läcker upp i titelraden.
+
+v1.0.153 → v1.0.154.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

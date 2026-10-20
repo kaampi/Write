@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.154] - 2026-10-20
+
+### Added
+- A soft depth shadow on the left/right edges of the prose page, so it reads as lifted slightly off the background rather than just outlined.
+
 ## [1.0.153] - 2026-10-20
 
 ### Added
