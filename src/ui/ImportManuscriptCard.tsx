@@ -8,13 +8,18 @@ import {
 import { count, format, useLocale } from "./i18n";
 
 /**
- * Starts a brand-new manuscript from a Markdown export of another writing
- * tool — Novelcrafter first (roadmap-ideas.md's import-adapter family;
- * Scrivener/Sudowriter would need their own, format-specific cards since
- * neither exports plain Markdown). No two tools agree on which heading
- * level marks a chapter (an "Act" wrapper, if present, outranks it by one
- * level), so the level is an adjustable, live-previewed guess rather than a
- * hardcoded assumption — see `suggestChapterHeadingLevel`'s own reasoning.
+ * Starts a brand-new manuscript from a plain text or Markdown file —
+ * source-agnostic rather than tied to one writing tool (the idea started
+ * from Novelcrafter specifically, but plain text/Markdown isn't unique to
+ * it, and "Novelcraft" vs. "Novelcrafter" turned out to be two different,
+ * unrelated tools, surfaced only once we went looking at an actual export).
+ * A tool with a genuinely proprietary export format (Scrivener's .scrivx+RTF,
+ * Sudowriter's JSON) would need its own, format-specific card instead — see
+ * roadmap-ideas.md #28's import-adapter family. No two tools agree on which
+ * heading level marks a chapter (an "Act" wrapper, if present, outranks it
+ * by one level), so the level is an adjustable, live-previewed guess rather
+ * than a hardcoded assumption — see `suggestChapterHeadingLevel`'s own
+ * reasoning.
  */
 export function ImportManuscriptCard({
   onImport,
@@ -133,6 +138,7 @@ export function ImportManuscriptCard({
             {m.home.importManuscriptAction}
           </button>
         </div>
+        <p className="quiet">{m.home.importManuscriptContact}</p>
       </div>
     </div>
   );

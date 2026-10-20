@@ -388,10 +388,12 @@ export const en = {
     titlePlaceholder: "Title",
     open: "Create",
     importBackup: "Import backup",
-    importNovelcrafter: "Import from Novelcrafter",
-    importManuscriptTitle: "Import a manuscript (Markdown)",
+    importManuscriptButton: "Import manuscript (text file)",
+    importManuscriptTitle: "Import a manuscript (text file)",
     importManuscriptLede:
-      "Starts a brand-new manuscript from a Markdown export — Novelcrafter's novel export (choose Markdown, not Word) first; other tools' Markdown exports will likely work too. Splits on headings into chapters, and converts *italic*/**bold** markers into real formatting, same as Tools → Convert markers to formatting.",
+      "Starts a brand-new manuscript from a plain text or Markdown file — an export from another writing tool, or just a .txt/.md file you already have. Splits on headings into chapters (plain text with no headings imports as a single chapter), and converts *italic*/**bold** markers into real formatting, same as Tools → Convert markers to formatting.",
+    importManuscriptContact:
+      "Working with a tool that doesn't export plain text or Markdown? Get in touch and share an export file — we can look into adding support for it.",
     importManuscriptBookTitle: "Manuscript title",
     importManuscriptBookTitlePlaceholder: "Title",
     importManuscriptUpload: "Upload a file…",

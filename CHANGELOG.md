@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.140] - 2026-10-20
+
+### Changed
+- Renamed "Import from Novelcrafter" to "Import manuscript (text file)" — it turns out "Novelcraft" and "Novelcrafter" are two different, unrelated tools, and the import itself was never actually Novelcrafter-specific (plain text/Markdown, not any proprietary format). Added a line inviting authors using a tool that doesn't export plain text/Markdown to get in touch with a sample export file.
+
 ## [1.0.139] - 2026-10-20
 
 ### Added

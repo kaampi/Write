@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.139
+Status: living document, v1.0.140
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6839,6 +6839,36 @@ korrekt renderad som riktig formatering. `tsc --noEmit`, hela
 testsviten (1097 test, 81 filer), `npm run build` — alla rena.
 
 v1.0.138 → v1.0.139.
+
+**Ändringslogg v1.0.139 → v1.0.140 (2026-10-20): avbrandning från
+Novelcrafter.** Mats, efter att själv ha kollat vidare: "Jag har
+kollat lite och det finns novelcraft och novelcrafter. Ybå olika
+system." — "Novelcraft" och "Novelcrafter" visade sig vara TVÅ olika,
+orelaterade verktyg. Hans slutsats: hellre ett generiskt
+textfils-/Markdown-importflöde, och be användare som vill ha stöd
+för ett specifikt annat system höra av sig med en riktig exportfil
+att undersöka — exakt samma "vänta på verklig data innan en adapter
+byggs"-princip som redan gäller för Campfire/Authoric i
+roadmap-ideas.md #28.
+
+Egentligen bara en ombrandning, inte en kodändring — funktionen
+byggd i v1.0.139 (`manuscriptImport.ts`, `ImportManuscriptCard.tsx`)
+var redan källoberoende rubrik-baserad textdelning, aldrig faktiskt
+knuten till något Novelcrafter-specifikt dataformat. Döpte om
+knapp/kort från "Importera från Novelcrafter" till "Importera manus
+(textfil)" i alla tre språk, mjukade upp inledningstexten till att
+nämna "en export från ett annat skrivverktyg, eller bara en
+.txt/.md-fil du redan har" istället för att namedroppa Novelcrafter,
+och lade till en rad som bjuder in kontakt för andra format. Ingen
+etablerad kontaktkanal (ingen About-dialog, inget publikt e-post-
+/supportfält) fanns att peka texten mot — höll den kanalneutral och
+flaggade det till Mats.
+
+**Verifiering:** `tsc --noEmit`, hela testsviten (1097 test, 81
+filer) rent. Playwright-skärmdump bekräftar den omdöpta knappen och
+kortets nya text.
+
+v1.0.139 → v1.0.140.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

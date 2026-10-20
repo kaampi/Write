@@ -38,10 +38,12 @@ export const sv: Messages = {
     titlePlaceholder: "Titel",
     open: "Skapa",
     importBackup: "Importera backup",
-    importNovelcrafter: "Importera från Novelcrafter",
-    importManuscriptTitle: "Importera ett manus (Markdown)",
+    importManuscriptButton: "Importera manus (textfil)",
+    importManuscriptTitle: "Importera ett manus (textfil)",
     importManuscriptLede:
-      "Startar ett helt nytt manus från en Markdown-export — Novelcrafters egen manusexport (välj Markdown, inte Word) i första hand; andra verktygs Markdown-exporter fungerar troligen också. Delar upp på rubriker till kapitel, och omvandlar *kursiv*/**fet**-markörer till riktig formatering, precis som Verktyg → Konvertera markörer till formatering.",
+      "Startar ett helt nytt manus från en vanlig text- eller Markdown-fil — en export från ett annat skrivverktyg, eller bara en .txt/.md-fil du redan har. Delar upp på rubriker till kapitel (text utan rubriker blir ett enda kapitel), och omvandlar *kursiv*/**fet**-markörer till riktig formatering, precis som Verktyg → Konvertera markörer till formatering.",
+    importManuscriptContact:
+      "Jobbar du i ett verktyg som inte exporterar vanlig text eller Markdown? Hör av dig och dela en exportfil — vi kan undersöka om vi kan bygga stöd för den.",
     importManuscriptBookTitle: "Manusets titel",
     importManuscriptBookTitlePlaceholder: "Titel",
     importManuscriptUpload: "Ladda upp en fil…",

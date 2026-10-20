@@ -125,7 +125,7 @@ export function Home({
               {m.home.importBackup}
             </button>
             <button type="button" className="home-guide-button" onClick={() => setImportOpen(true)}>
-              {m.home.importNovelcrafter}
+              {m.home.importManuscriptButton}
             </button>
             {isDesktopApp() ? (
               <button type="button" className="home-guide-button" onClick={runUpdateCheck} disabled={updateChecking}>

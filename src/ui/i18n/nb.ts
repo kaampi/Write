@@ -38,10 +38,12 @@ export const nb: Messages = {
     titlePlaceholder: "Tittel",
     open: "Opprett",
     importBackup: "Importer sikkerhetskopi",
-    importNovelcrafter: "Importer fra Novelcrafter",
-    importManuscriptTitle: "Importer et manuskript (Markdown)",
+    importManuscriptButton: "Importer manuskript (tekstfil)",
+    importManuscriptTitle: "Importer et manuskript (tekstfil)",
     importManuscriptLede:
-      "Starter et helt nytt manuskript fra en Markdown-eksport — Novelcrafters egen manuskripteksport (velg Markdown, ikke Word) først; andre verktøys Markdown-eksporter vil nok også fungere. Deler opp på overskrifter til kapitler, og gjør om *kursiv*/**fet**-markører til ekte formatering, akkurat som Verktøy → Konverter markører til formatering.",
+      "Starter et helt nytt manuskript fra en vanlig tekst- eller Markdown-fil — en eksport fra et annet skriveverktøy, eller bare en .txt/.md-fil du allerede har. Deler opp på overskrifter til kapitler (tekst uten overskrifter blir ett enkelt kapittel), og gjør om *kursiv*/**fet**-markører til ekte formatering, akkurat som Verktøy → Konverter markører til formatering.",
+    importManuscriptContact:
+      "Jobber du i et verktøy som ikke eksporterer vanlig tekst eller Markdown? Ta kontakt og del en eksportfil — vi kan undersøke om vi kan bygge støtte for den.",
     importManuscriptBookTitle: "Manuskriptets tittel",
     importManuscriptBookTitlePlaceholder: "Tittel",
     importManuscriptUpload: "Last opp en fil…",

@@ -664,10 +664,13 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   );
 
   /**
-   * Builds a brand-new manuscript from chapters already parsed by a
-   * format-specific import adapter (Novelcrafter's Markdown export first;
-   * same `ImportedChapterCandidate` shape other adapters — Scrivener,
-   * Sudowriter — would feed later, per roadmap-ideas.md #28's layering).
+   * Builds a brand-new manuscript from chapters already parsed from a
+   * plain text/Markdown file — source-agnostic rather than tied to one
+   * writing tool's export (the idea started from Novelcrafter specifically,
+   * but the format itself has nothing Novelcrafter-specific about it). A
+   * genuinely format-specific adapter (Scrivener's .scrivx+RTF, Sudowriter's
+   * JSON) would need its own parser feeding the same `ImportedChapterCandidate`
+   * shape, per roadmap-ideas.md #28's layering.
    * Runs each chapter's prose through the same marker-conversion rules the
    * "Convert markers to formatting" tool uses (an imported manuscript's
    * `*italic*`/`**bold**` markers are exactly the kind of leftover-from-
