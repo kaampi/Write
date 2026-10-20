@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.152] - 2026-10-20
+
+### Fixed
+- The top/bottom fade over the prose also dimmed the scrollbar track and thumb, since it spans the full width of the area the scrollbar sits in. Now measures the actual scrollbar width and insets the fade from the right by that amount, so the scrollbar stays clear.
+
 ## [1.0.151] - 2026-10-20
 
 ### Fixed

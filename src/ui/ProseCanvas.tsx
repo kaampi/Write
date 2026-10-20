@@ -215,9 +215,28 @@ export function ProseCanvas({
   const [formatBar, setFormatBar] = useState<{ x: number; y: number; span: TextSpan } | null>(null);
   const [pendingSelection, setPendingSelection] = useState<TextSpan | null>(null);
   const [pendingCaretOffset, setPendingCaretOffset] = useState<number | null>(null);
+  const [scrollbarWidth, setScrollbarWidth] = useState(0);
   const formattingEnabled = Boolean(onFormatChange || onToggleFormat);
   const placeholdersEnabled = Boolean(onPlaceholdersChange);
   const darlingsEnabled = Boolean(onDarlingsChange);
+
+  // The fade overlays sit outside .prose-scroll (see the comment on .prose-wrap
+  // below) so they span its full width, scrollbar included — without this, the
+  // fade visually dims the scrollbar track/thumb along with the prose. Measure
+  // the actual rendered scrollbar width (0 for overlay/auto-hiding scrollbars)
+  // and inset the fade from the right by that amount instead.
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    function measure() {
+      if (!scroller) return;
+      setScrollbarWidth(scroller.offsetWidth - scroller.clientWidth);
+    }
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(scroller);
+    return () => observer.disconnect();
+  }, []);
 
   const highlightHits = useMemo(() => {
     if (highlightRare) {
@@ -644,8 +663,8 @@ export function ProseCanvas({
         offset, it only matters that *this* wrapper (.prose-wrap) stays put
         while .prose-scroll, one level in, is the thing that actually scrolls.
       */}
-      <div className="prose-fade prose-fade-top" aria-hidden="true" />
-      <div className="prose-fade prose-fade-bottom" aria-hidden="true" />
+      <div className="prose-fade prose-fade-top" aria-hidden="true" style={{ right: scrollbarWidth }} />
+      <div className="prose-fade prose-fade-bottom" aria-hidden="true" style={{ right: scrollbarWidth }} />
       <div className="prose-scroll" ref={scrollRef}>
       {aside}
       <div className="prose-body" ref={bodyRef}>

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.151
+Status: living document, v1.0.152
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7315,6 +7315,36 @@ första/sista textraden har tydlig luft innan toningszonen börjar —
 ingen rad ser längre blek/dold ut vid kanterna.
 
 v1.0.150 → v1.0.151.
+
+
+**Ändringslogg v1.0.151 → v1.0.152 (2026-10-20): toningen tonade
+scrollisten också.** Mats, direkt efter paddingfixen: "Slutligen ser
+jag att toningen även tonar scrollisten i topp och botten. Det vore
+snyggt om den inte gjorde det." Rimligt: `.prose-fade-top`/`-bottom`
+spänner `.prose-wrap`s hela bredd (`left:0; right:0`) för att täcka
+textspalten — men täcker därmed också den smala remsan längst till
+höger där `.prose-scroll`s scrollbar renderas, eftersom den remsan
+ligger inom samma box.
+
+**Fix:** Scrollbarens bredd går inte att läsa direkt ur CSS (den
+varierar mellan OS/webbläsare, och är 0 för auto-dolda overlay-
+scrollbars på t ex macOS) — mätt istället i JS:
+`scroller.offsetWidth - scroller.clientWidth` på `.prose-scroll`,
+via en `ResizeObserver` (samma mönster som `ChapterList`s
+`chapter-strands`-mätning i `Editor.tsx`) så den uppdateras om
+fönstret ändrar storlek. Värdet sätts som inline `style={{ right:
+scrollbarWidth }}` på båda `.prose-fade`-divarna, vilket vinner över
+CSS-regelns `right: 0`.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: mätte scrollbarens
+faktiska bredd (15px i detta Chromium-testläge) och bekräftade att
+`getComputedStyle(fadeTop).right` är exakt samma värde, och att
+`fadeTop`s `right`-kant i pixlar ligger exakt 15px innanför
+`.prose-scroll`s egen högerkant — scrollbaren ligger alltså helt
+utanför toningszonen.
+
+v1.0.151 → v1.0.152.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
