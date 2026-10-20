@@ -387,6 +387,26 @@ export function SettingsPanel({
                     <option value="wide">{m.editor.pageMarginWide}</option>
                   </select>
                 </label>
+                <label className="craft-field">
+                  <span className="field-label-row">
+                    {m.editor.editorBackgroundLabel}
+                    <HelpTip
+                      body={m.editor.editorBackgroundLede}
+                      ariaLabel={format(m.common.infoAbout, { field: m.editor.editorBackgroundLabel })}
+                    />
+                  </span>
+                  <select
+                    value={book.editor_background}
+                    onChange={(event) =>
+                      onPatch((current) => ({ ...current, editor_background: event.target.value as Book["editor_background"] }))
+                    }
+                    aria-label={m.editor.editorBackgroundLabel}
+                  >
+                    <option value="none">{m.editor.editorBackgroundNone}</option>
+                    <option value="forest">{m.editor.editorBackgroundForest}</option>
+                    <option value="milky-way">{m.editor.editorBackgroundMilkyWay}</option>
+                  </select>
+                </label>
               </div>
             </section>
 

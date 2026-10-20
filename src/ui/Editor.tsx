@@ -122,6 +122,7 @@ import { ChapterBriefCopy } from "./ChapterBriefCopy";
 import { DispositionBoard } from "./DispositionBoard";
 import { BrainstormBoard } from "./BrainstormBoard";
 import { ProseCanvas } from "./ProseCanvas";
+import { EDITOR_BACKGROUND_URLS } from "./editorBackgrounds";
 import { ProseStatsCard } from "./ProseStatsCard";
 import { FindReplaceCard, type FindHighlight, type FindLaunch } from "./FindReplaceCard";
 import { ProofreadCard } from "./ProofreadCard";
@@ -449,6 +450,21 @@ function startRailResize(
   }
   window.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
+}
+
+/**
+ * Inline style for `.manuscript`'s decorative backdrop (BookSchema's
+ * editor_background) — undefined for "none" so the element falls back to
+ * its plain CSS background instead of an explicit override.
+ */
+function manuscriptBackgroundStyle(background: Book["editor_background"]): React.CSSProperties | undefined {
+  if (background === "none") return undefined;
+  return {
+    backgroundImage: `url(${EDITOR_BACKGROUND_URLS[background]})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat"
+  };
 }
 
 export function Editor() {
@@ -1587,7 +1603,7 @@ export function Editor() {
         ) : onHandbook ? (
           <HandbookPanel />
         ) : onSynopsis ? (
-          <main className="manuscript">
+          <main className="manuscript" style={manuscriptBackgroundStyle(book.editor_background)}>
             <h1 className="chapter-title">{m.editor.synopsis}</h1>
             <p className="synopsis-lede">{m.editor.synopsisLede}</p>
             <ProseCanvas
@@ -1660,7 +1676,7 @@ export function Editor() {
             </footer>
           </main>
         ) : (
-          <main className="manuscript">
+          <main className="manuscript" style={manuscriptBackgroundStyle(book.editor_background)}>
             <div className="chapter-head">
               <ChapterSettingsSection
                 key={chapter.id}

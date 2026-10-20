@@ -2727,6 +2727,10 @@ button:disabled {
   width: 100%;
   max-width: 54rem;
   min-width: 0;
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
 }
 
 .chapter-threads {
@@ -3423,14 +3427,16 @@ button:disabled {
 .prose-body {
   position: relative;
   flex: 1 1 auto;
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
 }
 
 .prose {
   width: 100%;
   min-height: 100%;
   resize: none;
-  border: 1px solid var(--border-soft);
-  border-radius: 6px;
+  border: 0;
   background: transparent;
   font-family: var(--font-prose);
   font-size: 1.2rem;
@@ -3644,7 +3650,6 @@ button:disabled {
   font-family: var(--font-prose);
   font-size: 1.2rem;
   line-height: 1.65;
-  border: 1px solid transparent;
   padding: 1rem 1.5rem 1.25rem;
   overflow-wrap: break-word;
   word-wrap: break-word;

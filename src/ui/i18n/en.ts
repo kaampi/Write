@@ -525,6 +525,12 @@ export const en = {
     pageMarginNarrow: "Narrow (0.5 in)",
     pageMarginNormal: "Normal (0.75 in)",
     pageMarginWide: "Wide (1 in)",
+    editorBackgroundLabel: "Editor background",
+    editorBackgroundLede:
+      "A decorative backdrop behind the chapter card and the prose page in the live editor only — never affects Publish exports, which have no such canvas. The text areas themselves always stay fully opaque, so the picture never has to be checked for contrast against your writing.",
+    editorBackgroundNone: "None (plain panel)",
+    editorBackgroundForest: "Misty forest",
+    editorBackgroundMilkyWay: "Milky Way",
     bodyFontLabel: "Font",
     bodyFontLede:
       "The typeface for the manuscript's prose — in the editor itself, and carried into every Publish export, so there's one choice instead of a separate, unsaved pick each time.",

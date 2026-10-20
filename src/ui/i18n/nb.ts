@@ -175,6 +175,12 @@ export const nb: Messages = {
     pageMarginNarrow: "Smal (0,5 tommer)",
     pageMarginNormal: "Normal (0,75 tommer)",
     pageMarginWide: "Bred (1 tomme)",
+    editorBackgroundLabel: "Bakgrunn i redigeringen",
+    editorBackgroundLede:
+      "En dekorativ bakgrunn bak kapittelkortet og tekstsiden — bare i redigeringsvisningen, påvirker aldri Publish-eksporter som ikke har et slikt lerret. Selve tekstflatene forblir alltid helt solide, så bildet trenger aldri kontrollsjekkes mot teksten din.",
+    editorBackgroundNone: "Ingen (vanlig panel)",
+    editorBackgroundForest: "Tåkete skog",
+    editorBackgroundMilkyWay: "Melkeveien",
     bodyFontLabel: "Skrift",
     bodyFontLede:
       "Skrifttypen for manusets brødtekst — i selve redigeringen, og med i hver eksport fra Publish, så det blir ett valg istedenfor et separat, ulagret valg hver gang.",

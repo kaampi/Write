@@ -66,6 +66,15 @@ describe("createBook", () => {
     expect(parsed.entity_kinds).toEqual([]);
     expect(parsed.reader_age).toBeUndefined();
   });
+
+  it("defaults editor_background to none, and fills it in on older saves that never had it", () => {
+    const book = createBook("Legacy");
+    expect(book.editor_background).toBe("none");
+    const { editor_background: _background, ...without } = book;
+    void _background;
+    const parsed = parseBook(without);
+    expect(parsed.editor_background).toBe("none");
+  });
 });
 
 describe("openingSurface", () => {

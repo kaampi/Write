@@ -375,6 +375,18 @@ export const BookSchema = z.object({
    */
   page_margin: z.enum(["narrow", "normal", "wide"]).default("normal"),
   /**
+   * Decorative backdrop shown behind the chapter-head card and the prose
+   * page in the live editor — purely a writing-environment preference, not
+   * part of Typography's manuscript-wide/export-affecting settings above:
+   * Publish's exports are static documents with no "canvas" to speak of, so
+   * this never touches them. "none" keeps today's plain panel background.
+   * Both the chapter-head card and the prose page itself are opaque
+   * (--panel) regardless of this setting, so an arbitrarily busy image
+   * never has to be checked for text contrast — only the margins around
+   * those cards show it. Missing on older saves — "none" keeps today's look.
+   */
+  editor_background: z.enum(["none", "forest", "milky-way"]).default("none"),
+  /**
    * Instructions for the Polish step — a whole-chapter cleanup pass the
    * author reviews in a diff before accepting, separate from Draft/
    * Recast. Editable per manuscript (Settings → Polish); defaults to
@@ -571,6 +583,7 @@ export function createBook(title: string): Book {
     scene_break_style: "plain",
     page_size: "6x9",
     page_margin: "normal",
+    editor_background: "none",
     polish_prompt: DEFAULT_POLISH_PROMPT,
     prose_language: "",
     brainstorm: "",

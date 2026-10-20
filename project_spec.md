@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.136
+Status: living document, v1.0.137
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6680,6 +6680,66 @@ i båda lägena — fortsatt identiska. `tsc --noEmit` och hela
 testsviten (1083 test, 80 filer) rent.
 
 v1.0.135 → v1.0.136.
+
+**Ändringslogg v1.0.136 → v1.0.137 (2026-10-20):** Mats fortsatte
+tankegången från padding/kant-ändringen: "Kan man tänka sig att
+användaren kan välja bakgrund bakuom redigeringstexten?" — en
+dekorativ bakgrund bakom redigeringsytan, utanpanelerna som idag. En
+kort resonemangsrunda (inte byggd förrän han skickade riktiga bilder):
+konstaterade att de fält som redan ligger ovanför prosan (kapitel-
+rubrik, Chapter settings-toggle, scenpanel, trådchips) skulle behöva
+en egen gemensam box för att inte bli oläsliga mot en mer påtaglig
+bakgrund; Mats: "Vi kan ha en gemensam box." Följdfråga: "om man gör
+det så, kan man ha bakgrunder utan att bry sig om texter?" — ja,
+exakt poängen: om alla textbärande ytor är solida spelar bildens eget
+innehåll ingen roll för läsbarheten.
+
+Mats skickade sedan två riktiga Pexels-bilder (dimmig höstskog,
+liggande; Vintergatan, stående) och bad om att rotera rymdbilden
+("Rymdbilden kan roteras kanske") eftersom den stående bilden inte
+passar bakom en bred redigeringsyta.
+
+**Implementation:**
+- Ny BookSchema-inställning `editor_background: "none" | "forest" |
+  "milky-way"` (default `"none"`), ren redigerar-preferens — rör
+  aldrig Publish-exporter, som saknar motsvarande "duk".
+- Bilderna roterades (`convert -rotate 90` på Vintergatan-bilden,
+  1000×1500 → 1500×1000) och lades i `src/assets/backgrounds/`,
+  importerade via Vites `?url`-mönster (samma som typsnittsfilerna i
+  `publishFonts.ts`) i en ny `src/ui/editorBackgrounds.ts`.
+- `.manuscript` får bakgrundsbilden som inline-stil
+  (`manuscriptBackgroundStyle` i Editor.tsx), satt på BÅDA
+  `<main className="manuscript">`-instanserna (kapitelredigeraren och
+  synopsis-vyn) så båda ProseCanvas-ytor delar samma bakgrund.
+- `.chapter-head` fick en egen box (`background: var(--panel)`,
+  `border`, `border-radius`, padding) — den gemensamma boxen Mats
+  efterfrågade för titel/inställningar/scener/trådar tillsammans,
+  istället för separata boxar för varje fält.
+- **Viktig detalj som krävde omstrukturering**, inte bara ett tillägg:
+  v1.0.135 satte `.prose`:s egen bakgrund till opak direkt — men
+  `.prose`:s highlight-overlay-mekanism (RARE/TICS/FACTS/FIND) bygger
+  på att `.prose`:s text blir `color: transparent` medan den UNDER-
+  liggande `.prose-rare`-dubbletten (med riktiga highlight-`<mark>`)
+  lyser igenom en transparent bakgrund. En opak `.prose`-bakgrund
+  hade helt dolt den dubbletten varje gång en highlight-vy var
+  påslagen. Löst genom att flytta det opaka utseendet (bakgrund, kant,
+  rundning) EN nivå upp till `.prose-body` (den gemensamma föräldern
+  till både `.prose` och `.prose-rare`) istället — `.prose` och
+  `.prose-rare` är båda kvar transparenta/padding-matchade som innan
+  v1.0.135, och highlight-mekanismen fungerar oförändrat, samtidigt
+  som boxen alltid är solid oavsett vilket läge som är aktivt.
+
+**Verifiering:** Playwright mot `npm run dev` i båda teman — satte
+bakgrunden till Vintergatan (bekräftade `background-image` pekar på
+rätt bundlad fil) och till Skogen, slog på RARE-highlighting och
+kontrollerade att markeringarna fortfarande syns korrekt ovanpå den
+solida kapitel-/prosa-boxen i båda fallen, tog skärmdumpar av alla
+kombinationer. Ny testfall i `tests/core/book-schema.test.ts`:
+default `"none"` samt att äldre sparfiler utan fältet fylls i korrekt
+vid parsning. `tsc --noEmit`, hela testsviten (1084 test, 80 filer),
+`npm run build` — alla rena.
+
+v1.0.136 → v1.0.137.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

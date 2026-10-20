@@ -175,6 +175,12 @@ export const sv: Messages = {
     pageMarginNarrow: "Smal (0,5 tum)",
     pageMarginNormal: "Normal (0,75 tum)",
     pageMarginWide: "Bred (1 tum)",
+    editorBackgroundLabel: "Bakgrund i redigeraren",
+    editorBackgroundLede:
+      "En dekorativ bakgrund bakom kapitelkortet och textsidan — bara i redigeraren, påverkar aldrig Publish-exporter som saknar en sådan duk. Själva textytorna förblir alltid helt solida, så bilden behöver aldrig kontrollkontrasteras mot din text.",
+    editorBackgroundNone: "Ingen (vanlig panel)",
+    editorBackgroundForest: "Dimmig skog",
+    editorBackgroundMilkyWay: "Vintergatan",
     bodyFontLabel: "Typsnitt",
     bodyFontLede:
       "Typsnittet för manusets brödtext — i själva redigeraren, och med i varje export från Publish, så det blir ett val istället för ett separat, osparat val varje gång.",
