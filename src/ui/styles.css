@@ -2019,7 +2019,7 @@ button:disabled {
   background:
     radial-gradient(1200px 400px at 50% -10%, var(--wash), transparent 50%),
     var(--bg);
-  padding: 1.5rem 8% 1rem;
+  padding: 0 8%;
 }
 
 /*
@@ -5089,7 +5089,7 @@ button:disabled {
 }
 
 .editor.is-maximized .manuscript {
-  padding: 2.25rem 8% 1.25rem;
+  padding: 0 8%;
 }
 
 .editor.is-maximized .manuscript-board {
@@ -5100,22 +5100,6 @@ button:disabled {
   margin-top: 0;
 }
 
-.editor.is-maximized .chapter-head,
-.editor.is-maximized .manuscript-foot {
-  align-self: center;
-  width: 100%;
-  max-width: 54rem;
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.editor.is-maximized .chapter-head {
-  padding: 1rem 1.5rem;
-}
-
-.editor.is-maximized .manuscript-foot {
-  padding: 0.7rem 1.5rem;
-}
 
 .editor.is-maximized .manuscript-board .manuscript-foot {
   align-self: stretch;

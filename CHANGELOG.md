@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.145] - 2026-10-20
+
+### Changed
+- The chapter title bar and the bottom toolbar now sit flush against the top/bottom of the editor too (previously there was a vertical margin above/below them), in maximized view as well — previously that view kept them narrow and centered, now it matches the regular view's full-width bars.
+
 ## [1.0.144] - 2026-10-20
 
 ### Changed

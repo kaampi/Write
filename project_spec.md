@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.144
+Status: living document, v1.0.145
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7077,6 +7077,49 @@ maximerat läge: inga regressioner, maximerat läge ser ut precis som
 innan ändringen.
 
 v1.0.143 → v1.0.144.
+
+
+**Ändringslogg v1.0.144 → v1.0.145 (2026-10-20): titelrad/menyrad
+kloss mot topp och botten, även i maximerat läge.** Direkt
+uppföljning till fullbredds-ändringen, med en skärmdump av sin egen
+pågående skrivsession: "Alltså ingen marginal runt top och botten
+lister. Kloss mot vänster- och högerpaneler samt botten resp topp.
+Låt editorn ligga kloss mot top och botten. Som på mockupen."
+Skärmdumpen visade fortfarande ett synligt mellanrum (stjärnhimmel)
+ovanför titelraden och under menyraden — kvarvarande vertikal padding
+på `.manuscript` som den förra ändringen inte rörde (den tog bara
+bort det horisontella gapet).
+
+**Implementation:**
+- `.manuscript`s egen padding ändrad från `1.5rem 8% 1rem` till `0
+  8%` — tar bort den vertikala marginalen helt, behåller den
+  horisontella 8%-paddingen (som titelradens/menyradens -8%-bleed
+  fortfarande är beroende av för att räkna ut rätt).
+- Samma för `.editor.is-maximized .manuscript`: `2.25rem 8% 1.25rem`
+  → `0 8%`.
+- Mats skärmdump visade titelraden/menyraden i FULL bredd trots att
+  inga paneler (Chapters/Story Bible) syntes — dvs maximerat läge.
+  Förra ändringen (v1.0.144) hade uttryckligen återställt
+  `.chapter-head`/`.manuscript-foot` till smala, centrerade kort i
+  just det läget (för att spegla hur `.manuscript-foot` redan betedde
+  sig innan). Den återställningen stod nu i vägen för vad Mats
+  faktiskt vill ha — togs bort helt, så maximerat läge nu ärver
+  samma fullbredds-bleed som vanligt läge, ingen särbehandling kvar.
+  `.manuscript-board .manuscript-foot`s egen (mycket smalare)
+  padding-variant i maximerat läge rördes inte — oförändrad, separat
+  vy (Brainstorm/Disposition).
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: mätte
+`.manuscript-foot`s `getBoundingClientRect().bottom` mot
+`window.innerHeight` — exakt lika (flush) i både vanligt och
+maximerat läge. Skärmdumpar av båda lägena bekräftar visuellt att
+titelraden ligger direkt an mot det ovanför liggande (app-headern/
+felbannern i vanligt läge), och att menyraden ligger direkt an mot
+fönsrets nederkant — maximerat läge ser nu ut precis som Mats
+skärmdump.
+
+v1.0.144 → v1.0.145.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
