@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.155
+Status: living document, v1.0.156
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7449,6 +7449,41 @@ sidorna av textrutan, och en inzoomad skärmdump av hörnet mot
 titelraden visar fortfarande inget läckage uppåt.
 
 v1.0.154 → v1.0.155.
+
+
+**Ändringslogg v1.0.155 → v1.0.156 (2026-10-20): tydligare skugga,
+bredare textspalt, bredare inre marginal.** Mats, två punkter: "1.
+Tydligare skuggning 2. Öka bredden på textytan/editorn och lägg in
+en bredare inre marginal så att texten inte lägger så nära kanterna."
+
+**Implementation:**
+- Skugga: `--side-shadow-color`s opacitet höjd (mörkt 0.35→0.55,
+  ljust 0.14→0.3), `box-shadow`s offset/blur ökat (±14px→±18px,
+  20px→30px blur) och spreaden mindre negativ (-14px→-10px) så mer
+  av skuggan faktiskt syns innan den krymps bort.
+- Spaltbredd: `.prose-wrap`s `max-width` 54rem→60rem.
+  `.chapter-head-inner` (titelraden, se v1.0.147s linjering mot
+  textspalten) följer med till samma 60rem så titeln fortsätter ligga
+  i linje med textspaltens vänsterkant.
+- Inre marginal: `.prose`s horisontella padding 1.5rem→3rem (topp/
+  botten-paddingen från v1.0.151, som håller text ur toningszonen,
+  orörd).
+
+**Bonusfynd under arbetet:** `.prose-rare` (den osynliga overlay-
+divien som ritar rare-words/AI-tics/fakta-markeringar ovanpå den
+riktiga texten) hade sin EGEN hårdkodade kopia av den gamla
+paddingen (`1rem 1.5rem 1.25rem`) som aldrig uppdaterades när
+`.prose`s egen padding ändrades i v1.0.151 — markeringarna hade
+alltså redan då riskerat att glida isär från texten nära toppen/
+botten av rutan. Synkad till samma padding-värden som `.prose` nu
+har.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: skärmdump bekräftar
+tydligt starkare skugga, bredare spalt och synlig marginal mellan
+text och rutans kant, i maximerat läge.
+
+v1.0.155 → v1.0.156.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

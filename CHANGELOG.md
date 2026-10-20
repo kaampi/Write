@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.156] - 2026-10-20
+
+### Changed
+- The side shadow is stronger and more visible (more opacity, more blur). The prose column is wider (54rem → 60rem, chapter title bar along with it), and the text inside it has a wider inner margin (1.5rem → 3rem on each side) so it no longer sits so close to the page's edges.
+
+### Fixed
+- The rare-word/AI-tic/fact highlight overlay had its own separately hardcoded padding that hadn't been kept in sync with the prose padding bumped in v1.0.151 — highlight marks could drift from the actual text they were meant to cover near the top/bottom. Now shares the same padding values.
+
 ## [1.0.155] - 2026-10-20
 
 ### Fixed
