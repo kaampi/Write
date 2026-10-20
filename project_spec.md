@@ -6515,6 +6515,32 @@ filer), `tsc --noEmit`, `npm run build` kördes rent.
 
 v1.0.132 → v1.0.133.
 
+**Tillägg (samma dag):** medan ovanstående Polish-fix pågick fixade
+Mats själv (via en egen gren/PR, `fix/backup-save-dialog`, mergead
+rakt in i samma 1.0.133-release) den riktiga roten till
+Brave-spara-dialog-buggen min egen v1.0.132 trodde sig lösa men inte
+riktigt gjorde. Den faktiska buggen: `showSaveFilePicker` plockades
+ut löst från `window` (`const picker = window.showSaveFilePicker`)
+och anropades sen utan sin ursprungliga `this`-mottagare — något VARJE
+riktig webbläsare kastar "Illegal invocation" för, inte alls Brave-
+specifikt som jag antog. Rättat till `picker.call(window, ...)`.
+
+Lade också till det som faktiskt behövdes för att undvika att
+webbläsarens "transient activation" (tillåtelsen att öppna en
+spara-dialog, som bara gäller en kort stund efter en riktig
+användarklick) hinner ta slut: spara-dialogen öppnas nu synkront i
+klick-/submit-hanteraren, INNAN typsnittsladdning eller PDF/IDML-
+rendering (som kan ta sekunder) får chansen att äta upp den. Lade
+till synliga sparar-/felstatusar i både Backup- och Publish-
+dialogerna, samt en hjälptext om Braves egen "Fråga var varje fil ska
+sparas"-inställning för fallback-vägen.
+
+Mergeade in detta (`git merge origin/main`, inga konflikter — helt
+skilda filer från min egen Polish-fix) innan push, körde om hela
+verifieringskedjan (1083 test, 80 filer — inklusive en ny
+`tests/ui/download-json.test.ts` från Mats egen gren), `tsc --noEmit`,
+`npm run build`. Mats bekräftade direkt i Brave: "Brave är åtgärdat :)"
+
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
 riktiga byggsteget, efter flera rundors arkitekturdiskussion (se

@@ -12,6 +12,9 @@ working log).
 ## [1.0.133] - 2026-10-20
 
 ### Fixed
+- v1.0.132's new native Save dialog never actually worked: `showSaveFilePicker` was called detached from its `window` receiver (`const picker = window.showSaveFilePicker; picker(...)`), which every real browser throws for ("Illegal invocation" — Web API methods require their original receiver), not just Brave. Backup, Publish, and the app export now call it correctly (`picker.call(window, ...)`), open the picker synchronously inside the click/submit handler before any async work (font loading, PDF/IDML rendering) can consume the click's transient user activation, and show a saving state plus a clear error if the write itself fails rather than silently closing the dialog. A visible hint in both dialogs now also points out Brave's own "Ask where to save each file before downloading" setting, for the fallback path on browsers where the picker API is unavailable or disabled. Confirmed fixed by Mats directly in Brave.
+
+### Fixed
 - Polish requested a flat 1,800 output tokens regardless of chapter length, and the result of hitting that limit — the model's reply silently cut off mid-rewrite — was never checked at all, both confirmed on a real 4,000-word chapter's failed Polish pass. Polish's token budget now scales from the chapter's own length, with headroom for the rewrite running a little longer than the original. Both local-model adapters (Ollama, and the OpenAI-compatible one LM Studio/Strata-style servers use) now also throw a clear error whenever a non-streaming reply's own finish/done reason says it was cut off at the token limit, instead of silently handing back partial prose as if it were the whole, finished reply — a gap that affected every feature using a non-streaming call, not just Polish.
 
 ## [1.0.132] - 2026-10-18
