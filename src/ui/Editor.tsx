@@ -406,6 +406,51 @@ function TopMenu({ label, children }: { label: string; children: React.ReactNode
   );
 }
 
+// Matches the rails' own old fixed widths (15rem/28rem at the default 16px
+// root) as the default, with a comfortable drag range either side.
+const RAIL_LEFT_WIDTH_DEFAULT = 240;
+const RAIL_LEFT_WIDTH_MIN = 180;
+const RAIL_LEFT_WIDTH_MAX = 420;
+const RAIL_RIGHT_WIDTH_DEFAULT = 448;
+const RAIL_RIGHT_WIDTH_MIN = 280;
+const RAIL_RIGHT_WIDTH_MAX = 620;
+
+/**
+ * Drags a rail's width from a pointerdown on its own resize handle.
+ * `direction` is `1` for the left rail (dragging right makes it wider) and
+ * `-1` for the right rail (dragging right makes it narrower, since that
+ * rail is anchored to the right edge of the screen). Tracked on `window`,
+ * not the handle itself, so the drag keeps working once a fast drag moves
+ * the pointer off the handle's own thin strip.
+ */
+function startRailResize(
+  event: React.PointerEvent,
+  startWidth: number,
+  setWidth: (width: number) => void,
+  setDragging: (dragging: boolean) => void,
+  min: number,
+  max: number,
+  direction: 1 | -1
+): void {
+  event.preventDefault();
+  const startX = event.clientX;
+  const previousUserSelect = document.body.style.userSelect;
+  document.body.style.userSelect = "none";
+  setDragging(true);
+  function onMove(moveEvent: PointerEvent) {
+    const delta = (moveEvent.clientX - startX) * direction;
+    setWidth(Math.min(max, Math.max(min, Math.round(startWidth + delta))));
+  }
+  function onUp() {
+    document.body.style.userSelect = previousUserSelect;
+    setDragging(false);
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+  }
+  window.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+}
+
 export function Editor() {
   const store = useBookStore();
   const { messages: m } = useLocale();
@@ -438,6 +483,10 @@ export function Editor() {
   const [rightRailPinned, setRightRailPinned] = useState(true);
   const [leftRailHovering, setLeftRailHovering] = useState(false);
   const [rightRailHovering, setRightRailHovering] = useState(false);
+  const [leftRailWidth, setLeftRailWidth] = useState(RAIL_LEFT_WIDTH_DEFAULT);
+  const [rightRailWidth, setRightRailWidth] = useState(RAIL_RIGHT_WIDTH_DEFAULT);
+  const [leftRailResizing, setLeftRailResizing] = useState(false);
+  const [rightRailResizing, setRightRailResizing] = useState(false);
   const leftRailLeaveTimer = useRef<number | null>(null);
   const rightRailLeaveTimer = useRef<number | null>(null);
   function railHoverHandlers(leaveTimer: { current: number | null }, setHovering: (value: boolean) => void) {
@@ -1095,6 +1144,7 @@ export function Editor() {
         ]
           .filter(Boolean)
           .join(" ")}
+        style={{ "--rail-left-w": `${leftRailWidth}px`, "--rail-right-w": `${rightRailWidth}px` } as React.CSSProperties}
       >
         <aside
           className={[
@@ -1117,6 +1167,27 @@ export function Editor() {
           >
             {leftRailPinned ? "📌" : "📍"}
           </button>
+          {leftRailPinned ? (
+            <div
+              className={["rail-resize-handle", leftRailResizing ? "is-dragging" : ""]
+                .filter(Boolean)
+                .join(" ")}
+              onPointerDown={(event) =>
+                startRailResize(
+                  event,
+                  leftRailWidth,
+                  setLeftRailWidth,
+                  setLeftRailResizing,
+                  RAIL_LEFT_WIDTH_MIN,
+                  RAIL_LEFT_WIDTH_MAX,
+                  1
+                )
+              }
+              role="separator"
+              aria-orientation="vertical"
+              aria-label={m.editor.resizePanel}
+            />
+          ) : null}
           <div className="rail-head">
             <span className="rail-head-title">
               <h2>{m.editor.chapters}</h2>
@@ -1848,6 +1919,18 @@ export function Editor() {
             .filter(Boolean)
             .join(" ")}
           {...railHoverHandlers(rightRailLeaveTimer, setRightRailHovering)}
+          onResizeHandleDown={(event) =>
+            startRailResize(
+              event,
+              rightRailWidth,
+              setRightRailWidth,
+              setRightRailResizing,
+              RAIL_RIGHT_WIDTH_MIN,
+              RAIL_RIGHT_WIDTH_MAX,
+              -1
+            )
+          }
+          resizing={rightRailResizing}
         />
       </div>
       {statsOpen ? (

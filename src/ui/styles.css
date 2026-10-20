@@ -1288,18 +1288,18 @@ button:disabled {
 
 .editor-body {
   display: grid;
-  grid-template-columns: 15rem minmax(0, 1fr) 28rem;
+  grid-template-columns: var(--rail-left-w, 15rem) minmax(0, 1fr) var(--rail-right-w, 28rem);
   flex: 1;
   min-height: 0;
   position: relative;
 }
 
 .editor-body.is-left-collapsed {
-  grid-template-columns: 0.6rem minmax(0, 1fr) 28rem;
+  grid-template-columns: 0.6rem minmax(0, 1fr) var(--rail-right-w, 28rem);
 }
 
 .editor-body.is-right-collapsed {
-  grid-template-columns: 15rem minmax(0, 1fr) 0.6rem;
+  grid-template-columns: var(--rail-left-w, 15rem) minmax(0, 1fr) 0.6rem;
 }
 
 .editor-body.is-left-collapsed.is-right-collapsed {
@@ -1356,12 +1356,12 @@ button:disabled {
 
 .rail-left.is-floating {
   left: 0;
-  width: 15rem;
+  width: var(--rail-left-w, 15rem);
 }
 
 .rail-right.is-floating {
   right: 0;
-  width: 28rem;
+  width: var(--rail-right-w, 28rem);
 }
 
 .rail-pin {
@@ -1382,6 +1382,35 @@ button:disabled {
 }
 
 .rail.is-collapsed .rail-pin {
+  display: none;
+}
+
+.rail-resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 2;
+  background: transparent;
+}
+
+.rail-resize-handle:hover,
+.rail-resize-handle.is-dragging {
+  background: var(--accent, #c96a43);
+  opacity: 0.5;
+}
+
+.rail-left .rail-resize-handle {
+  right: 0;
+}
+
+.rail-right .rail-resize-handle {
+  left: 0;
+}
+
+.rail.is-collapsed .rail-resize-handle {
   display: none;
 }
 

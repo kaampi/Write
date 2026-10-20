@@ -78,7 +78,9 @@ export function BiblePanel({
   onTogglePinned,
   railClassName,
   onMouseEnter,
-  onMouseLeave
+  onMouseLeave,
+  onResizeHandleDown,
+  resizing
 }: {
   onInterview?: (entityRef: string, entityLabel: string, kind: BibleKind) => void;
   /** A fresh object each time, so opening the same entity twice in a row still re-opens the card. */
@@ -90,6 +92,9 @@ export function BiblePanel({
   railClassName: string;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  /** Starts the drag-to-resize gesture; owned by the Editor alongside the matching left rail's resize state. */
+  onResizeHandleDown: (event: React.PointerEvent) => void;
+  resizing: boolean;
 }) {
   const { book, approve, reject, keepSeparate, addFact, reviseFact, patchBook, setChapterId } = useBookStore();
   const { messages: m } = useLocale();
@@ -260,6 +265,15 @@ export function BiblePanel({
       >
         {pinned ? "📌" : "📍"}
       </button>
+      {pinned ? (
+        <div
+          className={["rail-resize-handle", resizing ? "is-dragging" : ""].filter(Boolean).join(" ")}
+          onPointerDown={onResizeHandleDown}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label={m.editor.resizePanel}
+        />
+      ) : null}
       <div className="rail-head">
         <span className="rail-head-title">
           <h2>{m.bible.title}</h2>

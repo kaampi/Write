@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.133
+Status: living document, v1.0.134
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6540,6 +6540,52 @@ skilda filer från min egen Polish-fix) innan push, körde om hela
 verifieringskedjan (1083 test, 80 filer — inklusive en ny
 `tests/ui/download-json.test.ts` från Mats egen gren), `tsc --noEmit`,
 `npm run build`. Mats bekräftade direkt i Brave: "Brave är åtgärdat :)"
+
+**Ändringslogg v1.0.133 → v1.0.134 (2026-10-20):** Mats undrade om
+man kunde justera bredden på vänster- och högerpanelen, och kanske
+trycka in dem mot kanten — och godkände att vi byggde det direkt
+("Nej bygg gärna det.").
+
+Det visade sig att "trycka in mot kanten" redan fanns: panelerna har
+sedan tidigare ett pin/hover-baserat auto-dölj-system (inspirerat av
+NEO:s "edge-reveal"-paneler) — avnålad panel krymper till en tunn
+kantremsa och viks ut vid hover. Det som faktiskt saknades var att
+kunna DRA i bredden.
+
+**Implementation:** båda panelernas bredd flyttades från hårdkodade
+CSS-värden (`15rem`/`28rem`) till React-state (`leftRailWidth`/
+`rightRailWidth`, med rimliga min/max-gränser: 180–420px vänster,
+280–620px höger), exponerat till CSS via egna variabler
+(`--rail-left-w`/`--rail-right-w`) satta som inline-style på
+`.editor-body`. Ett nytt dra-handtag (`.rail-resize-handle`,
+`role="separator"`, `onPointerDown`) renderas längs panelens inre
+kant — bara när panelen är nålad, annars är det inget att dra i.
+Själva dragningen (`startRailResize`) lyssnar på `pointermove`/
+`pointerup` på `window` snarare än på handtaget, så dragningen inte
+avbryts om muspekaren hinner före handtagets smala hit-yta.
+
+**En CSS-fiffighet som bet mig under verifieringen:** `.rail` sätter
+bara `overflow-y: auto`, men CSS-specen säger att om EN axel är
+`auto`/`scroll` och den andra är `visible`, blir den "visible" axeln
+också implicit `auto` — så `overflow-x` blev tyst `auto` också. Mitt
+första försök placerade handtaget till hälften UTANFÖR panelens
+högra/vänstra kant (`right: -3px`/`left: -3px`, för att centrera
+greppytan över kantlinjen), men den delen som stack ut klipptes bort
+av den implicita `overflow-x: auto` och tog aldrig emot några
+pekarhändelser — Playwright-testet visade att `elementFromPoint` på
+handtagets mittpunkt träffade panelen (`<aside>`), inte handtaget.
+Flyttade handtaget helt innanför panelens kant (`right: 0`/`left: 0`)
+istället, vilket löste det.
+
+**Verifiering:** `tsc --noEmit` och hela testsviten (1083 test, 80
+filer) rent, `npm run build` rent. Körde även en riktig
+drag-och-släpp-verifiering med Playwright mot `npm run dev` — skapade
+en bok, drog i båda handtagen och bekräftade att CSS-variablerna
+(och panelernas faktiska renderade bredd) ändras i rätt riktning för
+båda paneler, samt att avnålning + att flytta musen bort fortfarande
+kollapsar panelen till kantremsan som förut.
+
+v1.0.133 → v1.0.134.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

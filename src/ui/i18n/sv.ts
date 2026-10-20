@@ -268,6 +268,7 @@ export const sv: Messages = {
     restoreTitle: "Visa paneler (Esc)",
     pinPanel: "Nåla fast panelen",
     unpinPanel: "Dölj panelen automatiskt — för muspekaren mot kanten för att ta fram den igen",
+    resizePanel: "Dra för att ändra panelens bredd",
     brainstormLede:
       "Privat kladd. En lapp per idé. Dra dem fritt — det finns ingen ordning än. När en lapp är redo drar du den till kolumnen Till synopsis till höger.",
     brainstormPlaceholder: "En idé…",

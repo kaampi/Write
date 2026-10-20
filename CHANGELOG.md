@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.134] - 2026-10-20
+
+### Added
+- The left (Chapters) and right (Story Bible) panels can now be resized by dragging their inner edge, instead of being fixed at 15rem/28rem. Each panel keeps its own remembered width within sane bounds (180–420px left, 280–620px right) whether pinned open or auto-hiding at the edge.
+
 ## [1.0.133] - 2026-10-20
 
 ### Fixed
