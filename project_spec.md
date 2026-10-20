@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.146
+Status: living document, v1.0.147
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7145,6 +7145,43 @@ läge bekräftar att hörnen nu är skarpa — ingen stjärnhimmel synlig i
 hörnen längre.
 
 v1.0.145 → v1.0.146.
+
+
+**Ändringslogg v1.0.146 → v1.0.147 (2026-10-20): titelns/menyns
+INNEHÅLL i samma bredd som textspalten.** Mats skickade sin
+ursprungliga mockup sida vid sida med en skärmdump av sitt eget
+pågående manus i appen och frågade rakt av: "Ser du någon skillnad på
+min mockup och din webb?" Noggrann jämförelse (pixelpositioner i
+båda bilderna) avslöjade en verklig, konkret skillnad som tidigare
+missats: i mockupen är kapiteltiteln och menyradens ordräkning/
+knappar inte spridda över hela den fullbredda listen — de ligger
+klustrade/centrerade i samma bredd som själva textspalten under.
+I appen (efter v1.0.144-146) spreds de ut med `justify-content:
+space-between` över listens HELA bredd, vilket gav ett annat intryck
+— titeln satt långt till vänster om var texten faktiskt börjar, och
+knapparna satt utspridda ända ut i kanterna.
+
+**Fix:** Ny inre wrapper i både `.chapter-head` (`.chapter-head-inner`)
+och `.manuscript-foot` (`.manuscript-foot-inner`, behövde läggas till
+på två ställen i `Editor.tsx` — kapitel-vyn och synopsis-vyn har varsin
+`<footer className="manuscript-foot">`). De yttre elementen
+(`.chapter-head`/`.manuscript-foot`) sköter fortfarande den fullbredda
+bakgrunden (bleed via negativ margin); de nya inre wrapprarna får
+`max-width: 54rem; margin: 0 auto;` — exakt samma bredd och centrering
+som `.prose-wrap`, så titeltexten och menyradens innehåll nu linjerar
+lodrätt med textspaltens vänsterkant, precis som i mockupen.
+Board-varianten (`manuscript-board`, Brainstorm/Disposition) fick en
+egen override (`max-width: none` på sin `.manuscript-foot-inner`) så
+dess knapprad fortsätter spridas över sin egen, redan smala bredd —
+oförändrad där.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright-skärmdumpar av både
+vanligt och maximerat läge bekräftar att titeln och menyradens
+innehåll nu ligger i linje med textspaltens bredd, bakgrunden
+fortfarande fullbredd.
+
+v1.0.146 → v1.0.147.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

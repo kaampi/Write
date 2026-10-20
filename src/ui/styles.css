@@ -2811,7 +2811,20 @@ button:disabled {
   margin-right: -8%;
   background: var(--panel);
   border: 1px solid var(--border-soft);
-  padding: 1rem calc(8% + 1.5rem);
+  padding: 1rem 8%;
+}
+
+/*
+ * The bar itself (.chapter-head) bleeds edge to edge so its background
+ * shows behind the side panels. Its actual content — the title, the
+ * plotline chips — stays aligned with the prose column's own width
+ * instead of spreading out to the bar's full width, same reference
+ * mockup Mats sent (74/76.webp).
+ */
+.chapter-head-inner {
+  width: 100%;
+  max-width: 54rem;
+  margin: 0 auto;
 }
 
 .chapter-threads {
@@ -4537,16 +4550,24 @@ button:disabled {
   width: auto;
   max-width: none;
   display: flex;
+  margin-top: 1rem;
+  margin-left: -8%;
+  margin-right: -8%;
+  padding: 0.7rem 8%;
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+}
+
+/* Same alignment reasoning as .chapter-head-inner above. */
+.manuscript-foot-inner {
+  display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  margin-top: 1rem;
-  margin-left: -8%;
-  margin-right: -8%;
-  padding: 0.7rem calc(8% + 1.5rem);
-  background: var(--panel);
-  border: 1px solid var(--border-soft);
+  width: 100%;
+  max-width: 54rem;
+  margin: 0 auto;
 }
 
 .word-count {
@@ -5105,6 +5126,10 @@ button:disabled {
   margin-left: 0;
   margin-right: 0;
   padding: 0.7rem 1.5rem;
+}
+
+.editor.is-maximized .manuscript-board .manuscript-foot-inner {
+  max-width: none;
 }
 
 .visually-hidden {

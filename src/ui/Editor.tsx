@@ -1686,49 +1686,51 @@ export function Editor() {
               aside={<ModelAsideCallout asides={modelAsides} onDismiss={store.dismissModelAside} />}
             />
             <footer className="manuscript-foot">
-              <StatsTrigger
-                words={countWords(book.synopsis)}
-                highlighting={highlightRare}
-                onToggleHighlight={() => {
-                  setHighlightRare((on) => !on);
-                  setHighlightTics(false);
-                  setHighlightFacts(false);
-                }}
-                ticsHighlighting={highlightTics}
-                onToggleTics={() => {
-                  setHighlightTics((on) => !on);
-                  setHighlightRare(false);
-                  setHighlightFacts(false);
-                }}
-                factsHighlighting={highlightFacts}
-                onToggleFacts={() => {
-                  setHighlightFacts((on) => !on);
-                  setHighlightRare(false);
-                  setHighlightTics(false);
-                }}
-              />
-              <div className="actions">
-                <MaximizeButton maximized={maximized} onToggle={() => setMaximized((on) => !on)} />
-                <StatsButton onOpen={() => setStatsOpen(true)} />
-                {busy === "extend" || busy === "elaborate" || busy === "instruct" ? (
-                  <button type="button" onClick={store.stopDraft}>
-                    {m.common.stop}
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      title={m.editor.extractSynopsisFactsHint}
-                      disabled={busy !== null || !book.synopsis.trim()}
-                      onClick={() => void store.extractSynopsis()}
-                    >
-                      {busy === "extract-synopsis" ? m.editor.extracting : m.editor.extractSynopsisFacts}
+              <div className="manuscript-foot-inner">
+                <StatsTrigger
+                  words={countWords(book.synopsis)}
+                  highlighting={highlightRare}
+                  onToggleHighlight={() => {
+                    setHighlightRare((on) => !on);
+                    setHighlightTics(false);
+                    setHighlightFacts(false);
+                  }}
+                  ticsHighlighting={highlightTics}
+                  onToggleTics={() => {
+                    setHighlightTics((on) => !on);
+                    setHighlightRare(false);
+                    setHighlightFacts(false);
+                  }}
+                  factsHighlighting={highlightFacts}
+                  onToggleFacts={() => {
+                    setHighlightFacts((on) => !on);
+                    setHighlightRare(false);
+                    setHighlightTics(false);
+                  }}
+                />
+                <div className="actions">
+                  <MaximizeButton maximized={maximized} onToggle={() => setMaximized((on) => !on)} />
+                  <StatsButton onOpen={() => setStatsOpen(true)} />
+                  {busy === "extend" || busy === "elaborate" || busy === "instruct" ? (
+                    <button type="button" onClick={store.stopDraft}>
+                      {m.common.stop}
                     </button>
-                    <button type="button" className="primary" onClick={() => store.setChapterId(chapter.id)} disabled={busy !== null}>
-                      {format(m.editor.startChapter, { n: chapter.sequence_index + 1 })}
-                    </button>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        title={m.editor.extractSynopsisFactsHint}
+                        disabled={busy !== null || !book.synopsis.trim()}
+                        onClick={() => void store.extractSynopsis()}
+                      >
+                        {busy === "extract-synopsis" ? m.editor.extracting : m.editor.extractSynopsisFacts}
+                      </button>
+                      <button type="button" className="primary" onClick={() => store.setChapterId(chapter.id)} disabled={busy !== null}>
+                        {format(m.editor.startChapter, { n: chapter.sequence_index + 1 })}
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </footer>
           </main>
@@ -1736,28 +1738,30 @@ export function Editor() {
           <main className="manuscript" style={manuscriptBackgroundStyle(book.editor_background)}>
             <div className="chapter-head">
               {/* Chapter settings and Scenes now live in the ⚙️/🎬 popover rendered below, not inline here — see chapterPopover's own comment. */}
-              <input
-                className="chapter-title"
-                value={chapter.title}
-                onChange={(event) =>
-                  void store.patchBook((current) => updateChapter(current, chapter.id, { title: event.target.value }))
-                }
-                aria-label={m.editor.chapterTitle}
-              />
-              {plotlinesForChapter(book, chapter).length > 0 ? (
-                <div className="chapter-threads">
-                  <span className="chapter-threads-label">{m.plotlines.chapterThreadsLabel}</span>
-                  {plotlinesForChapter(book, chapter).map((plotline) => (
-                    <span
-                      key={plotline.id}
-                      className={`chapter-thread-chip is-${plotline.color}`}
-                      title={plotline.description || undefined}
-                    >
-                      {plotline.title}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
+              <div className="chapter-head-inner">
+                <input
+                  className="chapter-title"
+                  value={chapter.title}
+                  onChange={(event) =>
+                    void store.patchBook((current) => updateChapter(current, chapter.id, { title: event.target.value }))
+                  }
+                  aria-label={m.editor.chapterTitle}
+                />
+                {plotlinesForChapter(book, chapter).length > 0 ? (
+                  <div className="chapter-threads">
+                    <span className="chapter-threads-label">{m.plotlines.chapterThreadsLabel}</span>
+                    {plotlinesForChapter(book, chapter).map((plotline) => (
+                      <span
+                        key={plotline.id}
+                        className={`chapter-thread-chip is-${plotline.color}`}
+                        title={plotline.description || undefined}
+                      >
+                        {plotline.title}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
             </div>
             {chapterPopover && chapterPopover.chapterId === chapter.id ? (
               <div
@@ -1891,115 +1895,117 @@ export function Editor() {
               }
             />
             <footer className="manuscript-foot">
-              <StatsTrigger
-                words={countWords(chapter.prose)}
-                highlighting={highlightRare}
-                onToggleHighlight={() => {
-                  setHighlightRare((on) => !on);
-                  setHighlightTics(false);
-                  setHighlightFacts(false);
-                }}
-                ticsHighlighting={highlightTics}
-                onToggleTics={() => {
-                  setHighlightTics((on) => !on);
-                  setHighlightRare(false);
-                  setHighlightFacts(false);
-                }}
-                factsHighlighting={highlightFacts}
-                onToggleFacts={() => {
-                  setHighlightFacts((on) => !on);
-                  setHighlightRare(false);
-                  setHighlightTics(false);
-                }}
-              />
-              <div className="actions">
-                <MaximizeButton maximized={maximized} onToggle={() => setMaximized((on) => !on)} />
-                {busy === "draft" || busy === "extend" || busy === "elaborate" || busy === "instruct" || busy === "recast" ? (
-                  <button type="button" onClick={store.stopDraft}>
-                    {m.common.stop}
-                  </button>
-                ) : (
-                  <button type="button" className="primary" onClick={() => void store.draftChapter()} disabled={busy !== null}>
-                    {m.editor.draft}
-                  </button>
-                )}
-                {chapter.translated_from_chapter_id ? (
-                  busy === "translate" ? (
+              <div className="manuscript-foot-inner">
+                <StatsTrigger
+                  words={countWords(chapter.prose)}
+                  highlighting={highlightRare}
+                  onToggleHighlight={() => {
+                    setHighlightRare((on) => !on);
+                    setHighlightTics(false);
+                    setHighlightFacts(false);
+                  }}
+                  ticsHighlighting={highlightTics}
+                  onToggleTics={() => {
+                    setHighlightTics((on) => !on);
+                    setHighlightRare(false);
+                    setHighlightFacts(false);
+                  }}
+                  factsHighlighting={highlightFacts}
+                  onToggleFacts={() => {
+                    setHighlightFacts((on) => !on);
+                    setHighlightRare(false);
+                    setHighlightTics(false);
+                  }}
+                />
+                <div className="actions">
+                  <MaximizeButton maximized={maximized} onToggle={() => setMaximized((on) => !on)} />
+                  {busy === "draft" || busy === "extend" || busy === "elaborate" || busy === "instruct" || busy === "recast" ? (
                     <button type="button" onClick={store.stopDraft}>
                       {m.common.stop}
                     </button>
                   ) : (
-                    <TranslationStatus
-                      book={book}
-                      chapter={chapter}
-                      busy={busy !== null}
-                      loadBook={store.loadBook}
-                      onTranslate={() => void store.translateChapter()}
-                    />
-                  )
-                ) : null}
-                {busy === "polish" ? (
-                  <button type="button" onClick={store.stopDraft}>
-                    {m.common.stop}
+                    <button type="button" className="primary" onClick={() => void store.draftChapter()} disabled={busy !== null}>
+                      {m.editor.draft}
+                    </button>
+                  )}
+                  {chapter.translated_from_chapter_id ? (
+                    busy === "translate" ? (
+                      <button type="button" onClick={store.stopDraft}>
+                        {m.common.stop}
+                      </button>
+                    ) : (
+                      <TranslationStatus
+                        book={book}
+                        chapter={chapter}
+                        busy={busy !== null}
+                        loadBook={store.loadBook}
+                        onTranslate={() => void store.translateChapter()}
+                      />
+                    )
+                  ) : null}
+                  {busy === "polish" ? (
+                    <button type="button" onClick={store.stopDraft}>
+                      {m.common.stop}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      title={m.editor.polishTitle}
+                      onClick={() => void store.polishChapter()}
+                      disabled={busy !== null || !chapter.prose.trim()}
+                    >
+                      {m.editor.polish}
+                    </button>
+                  )}
+                  <button type="button" onClick={() => void store.extractChapter()} disabled={busy !== null}>
+                    {busy === "extract" ? m.editor.extracting : m.editor.extract}
                   </button>
-                ) : (
+                  <StatsButton onOpen={() => setStatsOpen(true)} />
+                  {busy === "analyze" ? (
+                    <button type="button" onClick={store.stopDraft}>
+                      {m.common.stop}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      title={m.notes.intro}
+                      onClick={() => {
+                        void store.analyzeChapter().then((ok) => {
+                          if (ok) setNotesOpen(true);
+                        });
+                      }}
+                      disabled={busy !== null || !chapter.prose.trim()}
+                    >
+                      {m.editor.analyze}
+                    </button>
+                  )}
+                  {busy === "ask-passage" ? (
+                    <button type="button" onClick={store.stopDraft}>
+                      {m.common.stop}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setAskPassageOpen(true)}
+                      disabled={busy !== null || !chapter.prose.trim()}
+                    >
+                      {m.editor.askPassage}
+                    </button>
+                  )}
+                  {notes ? (
+                    <button type="button" onClick={() => setNotesOpen(true)} disabled={busy !== null}>
+                      {m.editor.notes}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
-                    title={m.editor.polishTitle}
-                    onClick={() => void store.polishChapter()}
-                    disabled={busy !== null || !chapter.prose.trim()}
+                    title={m.history.intro}
+                    onClick={() => setHistoryOpen(true)}
+                    disabled={busy !== null || chapter.revisions.length === 0}
                   >
-                    {m.editor.polish}
+                    {m.editor.history}
                   </button>
-                )}
-                <button type="button" onClick={() => void store.extractChapter()} disabled={busy !== null}>
-                  {busy === "extract" ? m.editor.extracting : m.editor.extract}
-                </button>
-                <StatsButton onOpen={() => setStatsOpen(true)} />
-                {busy === "analyze" ? (
-                  <button type="button" onClick={store.stopDraft}>
-                    {m.common.stop}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    title={m.notes.intro}
-                    onClick={() => {
-                      void store.analyzeChapter().then((ok) => {
-                        if (ok) setNotesOpen(true);
-                      });
-                    }}
-                    disabled={busy !== null || !chapter.prose.trim()}
-                  >
-                    {m.editor.analyze}
-                  </button>
-                )}
-                {busy === "ask-passage" ? (
-                  <button type="button" onClick={store.stopDraft}>
-                    {m.common.stop}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setAskPassageOpen(true)}
-                    disabled={busy !== null || !chapter.prose.trim()}
-                  >
-                    {m.editor.askPassage}
-                  </button>
-                )}
-                {notes ? (
-                  <button type="button" onClick={() => setNotesOpen(true)} disabled={busy !== null}>
-                    {m.editor.notes}
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  title={m.history.intro}
-                  onClick={() => setHistoryOpen(true)}
-                  disabled={busy !== null || chapter.revisions.length === 0}
-                >
-                  {m.editor.history}
-                </button>
+                </div>
               </div>
             </footer>
           </main>

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.147] - 2026-10-20
+
+### Changed
+- The chapter title and the bottom toolbar's word count/buttons now align with the width of the prose column instead of spreading across the full bar — the bar's background still bleeds edge to edge, but its content stays in the same narrower, centered column as the manuscript text, matching the reference mockup more closely.
+
 ## [1.0.146] - 2026-10-20
 
 ### Fixed
