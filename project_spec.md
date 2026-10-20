@@ -6587,6 +6587,36 @@ kollapsar panelen till kantremsan som förut.
 
 v1.0.133 → v1.0.134.
 
+**Tillägg (samma dag, CI):** när jag kollade GitHub Actions-status för
+pushen ovan upptäckte jag att "Desktop build (Windows)" faktiskt
+misslyckats på VARJE commit sedan v1.0.127 (2026-10-17) — fem raka
+körningar, inklusive IDML-sagans avslutande commits och Mats egen
+Brave-fix, alla röda redan vid `npm ci`, långt innan den faktiska
+appbygget ens startar. Ingen av oss hade märkt det eftersom varken
+jag eller Mats följt upp CI-status mellan varje enskild commit under
+den perioden.
+
+**Grundorsak:** `package-lock.json`:s låsta post för
+`@ocedo-apps/storycore` hade en `resolved`-URL av formen
+`git+ssh://git@github.com/...` istället för `git+https://...` —
+troligen bakad in av en `npm install` körd på en maskin med en
+git-konfiguration som skriver om `https://github.com/` till
+`ssh://git@github.com/` (vanligt för den som vill ha all GitHub-
+trafik över SSH). GitHub Actions-löparen har ingen SSH-nyckel för
+GitHub, bara token-baserad HTTPS-åtkomst via `actions/checkout`, så
+`npm ci` kraschade med "Permission denied (publickey)" så fort den
+skulle läsa det beroendet.
+
+**Rättning:** ändrade den enda `resolved`-posten tillbaka till
+`git+https://`. Verifierade med en RIKTIG `npm ci` (inte `--dry-run`,
+som inte faktiskt testar nätverksklonen) i en isolerad temp-mapp —
+gick igenom rent på 12 sekunder. Körde om hela testsviten (1083 test,
+80 filer) och `tsc --noEmit` i huvudrepot efter att ha återställt
+`node_modules` dit också (en tidigare dry-run-undersökning hade av
+misstag tagit bort paketets installerade mapp lokalt).
+
+v1.0.134 (samma version, utökad commit).
+
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
 riktiga byggsteget, efter flera rundors arkitekturdiskussion (se

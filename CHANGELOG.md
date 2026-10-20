@@ -14,6 +14,9 @@ working log).
 ### Added
 - The left (Chapters) and right (Story Bible) panels can now be resized by dragging their inner edge, instead of being fixed at 15rem/28rem. Each panel keeps its own remembered width within sane bounds (180–420px left, 280–620px right) whether pinned open or auto-hiding at the edge.
 
+### Fixed
+- The Windows desktop build has been failing CI since v1.0.127 (`npm ci` dying with "Permission denied (publickey)") because `package-lock.json`'s locked `@ocedo-apps/storycore` dependency recorded a `git+ssh://` resolved URL instead of `git+https://` — likely baked in by an `npm install` run on a machine with an SSH URL rewrite for github.com. The CI runner has no SSH key for GitHub, only token-based HTTPS access, so every build since then failed before it ever reached the actual app build step. Fixed by correcting the one `resolved` entry back to `git+https://`; verified with a real `npm ci` in an isolated directory.
+
 ## [1.0.133] - 2026-10-20
 
 ### Fixed
