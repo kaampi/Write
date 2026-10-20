@@ -634,10 +634,19 @@ export function ProseCanvas({
 
   return (
     <div
-      ref={scrollRef}
       className={overlayOn ? ["prose-wrap", overlayModeClass, findOn ? "is-find" : ""].filter(Boolean).join(" ") : "prose-wrap"}
       style={columnMaxWidth ? { maxWidth: columnMaxWidth } : undefined}
     >
+      {/*
+        The fade overlays need a containing block that never scrolls, so they
+        can't live inside the scrolling element itself — position: absolute
+        doesn't exempt a descendant from its own containing block's scroll
+        offset, it only matters that *this* wrapper (.prose-wrap) stays put
+        while .prose-scroll, one level in, is the thing that actually scrolls.
+      */}
+      <div className="prose-fade prose-fade-top" aria-hidden="true" />
+      <div className="prose-fade prose-fade-bottom" aria-hidden="true" />
+      <div className="prose-scroll" ref={scrollRef}>
       {aside}
       <div className="prose-body" ref={bodyRef}>
       {overlayOn ? (
@@ -794,6 +803,7 @@ export function ProseCanvas({
           {hoverTip.text}
         </div>
       ) : null}
+      </div>
       </div>
       {formatBar && onToggleFormat ? (
         <div

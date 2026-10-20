@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.142
+Status: living document, v1.0.143
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6975,6 +6975,63 @@ både byter aktivt kapitel OCH öppnar rätt popover, samt skärmdumpar
 av båda popover-typerna innan och efter dubbleringsfixen.
 
 v1.0.141 → v1.0.142.
+
+
+**Ändringslogg v1.0.142 → v1.0.143 (2026-10-20): toning överst/underst
+på manusytan, fast mot vyn vid scroll.** Mats skickade en mockup-bild
+och skrev: "Jag skulle vilja få editorn så här. Paneler enligt bild
+notera en lätt toning överst och underst som ligger över texten." Den
+konkreta, direkt utpekade delen var toningen; resten av mockupens
+utseende (svart ram, krämfärgad titelrad) tolkades som illustrativa
+mockup-detaljer snarare än ett uttryckligt krav, och byggdes inte.
+
+**Grundorsak till varför det här var klurigare än det såg ut:** Första
+försöket lade två `.prose-fade`-divar (`position: absolute`, gradient
+från panelens bakgrundsfärg till transparent) som barn till
+`.prose-wrap` — samma element som har `overflow-y: auto` och alltså
+ÄR scrollytan. Antagandet var att "samma teknik som ett sticky-huvud
+över en scrollande lista innan `position: sticky` fanns" skulle gälla
+här också. Det visade sig fel: ett `position: absolute`-element ärver
+sin överordnade scrollbehållares scroll-offset så fort den
+överordnade SJÄLV är den som scrollar, oavsett vilket element som
+råkar vara dess "containing block". Den historiska sticky-tekniken
+kräver att overlay-elementet ligger UTANFÖR det scrollande elementet
+som syskon, inte som barn inuti det.
+
+Felet upptäcktes genom att sätta `.prose-wrap.scrollTop = 300` via
+Playwright och läsa av `.prose-fade-top`s `getBoundingClientRect()`
+— `top` blev `-9.0625` (utanför synligt område) istället för att
+stanna på `0`, vilket bevisade att toningsdiven hade följt med
+scrollningen. `document.elementFromPoint()` på toningens förväntade
+skärmposition returnerade appens egen topp-navigeringsrad, inte
+toningsdiven alls.
+
+**Fix:** Delade `.prose-wrap` i två nivåer. `.prose-wrap` behåller
+sitt namn (för att slippa röra alla befintliga CSS-selektorer som
+pekar på det, t ex `.prose-wrap .model-aside`,
+`.prose-wrap.is-find .prose`) men förlorar `overflow-y`/
+`scrollbar-gutter` — det är nu bara en icke-scrollande, positionerad
+ytterram (`position: relative`) som håller de två toningsdivarna plus
+en ny inre div. Den nya `.prose-scroll`-klassen tar över
+`overflow-y: auto`, `scrollbar-gutter: stable` och `ref={scrollRef}`,
+och omsluter både `aside` (modellens callout-ruta, som ska fortsätta
+scrolla med innehållet som förut) och `.prose-body`. `format-toolbar`,
+de olika `selection-menu`-varianterna och redigerings-overlayen
+(manuell redigering, rewrite, beat, fråga-om-stycket) ligger kvar som
+direkta barn av `.prose-wrap` utanför scrollytan — kontrollerat i
+CSS att de redan använder `position: fixed` (inte `absolute`), så de
+påverkas inte av vilken nivå de monteras i.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright mot `npm run dev`:
+skrev lång text i ett kapitel, läste av `.prose-fade-top`s
+`getBoundingClientRect().top` före och efter `.prose-scroll.scrollTop
+= 300` — oförändrat (`~291px`) i båda fallen, dvs toningen rör sig
+inte längre med scrollningen. Skärmdump efter scrollning bekräftar
+att toningen syns tydligt överst/underst i manusytan medan texten
+rullar under den.
+
+v1.0.142 → v1.0.143.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

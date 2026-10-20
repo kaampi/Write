@@ -3487,6 +3487,7 @@ button:disabled {
 }
 
 .prose-wrap {
+  position: relative;
   flex: 1 1 auto;
   align-self: center;
   width: 100%;
@@ -3495,8 +3496,57 @@ button:disabled {
   margin-top: 1.35rem;
   display: flex;
   flex-direction: column;
+}
+
+/*
+ * The part of .prose-wrap that actually scrolls. Split out from .prose-wrap
+ * so the fade overlays (direct children of .prose-wrap, positioned absolute)
+ * have a containing block that stays put — an absolutely positioned element
+ * still moves with its containing block's own scroll offset, so the overlay
+ * can't live inside the element that scrolls.
+ */
+.prose-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   scrollbar-gutter: stable;
+}
+
+/*
+ * A soft fade over the top/bottom edges of the prose, hinting that text
+ * continues past the visible edge — Mats shared a mockup with exactly this.
+ * `position: absolute` with `.prose-wrap` itself (not `.prose-body`, which
+ * scrolls as a whole, border and all — see .prose-body's own min-height
+ * comment) as the containing block: an absolutely positioned element is
+ * placed against its containing block's own padding box regardless of that
+ * block's internal scroll offset, so these two stay pinned to the visible
+ * viewport's top/bottom edge as the text scrolls underneath them, the same
+ * technique used for a sticky header over a scrolling list before
+ * `position: sticky` existed. `pointer-events: none` so they're ever only
+ * decorative — never intercept a click or text selection meant for the
+ * prose underneath.
+ */
+.prose-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2.75rem;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.prose-fade-top {
+  top: 0;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(to bottom, var(--panel) 0%, transparent 100%);
+}
+
+.prose-fade-bottom {
+  bottom: 0;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(to top, var(--panel) 0%, transparent 100%);
 }
 
 .prose-wrap .model-aside {

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.143] - 2026-10-20
+
+### Changed
+- The prose page now has a soft fade at its top and bottom edge, hinting that text continues above/below without a hard cut — it stays put over the text as you scroll rather than scrolling away with it.
+
 ## [1.0.142] - 2026-10-20
 
 ### Changed
