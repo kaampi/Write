@@ -3512,7 +3512,6 @@ button:disabled {
   width: 100%;
   min-height: 12rem;
   max-width: 54rem;
-  margin-top: 1.35rem;
   display: flex;
   flex-direction: column;
 }
@@ -3578,7 +3577,6 @@ button:disabled {
   flex: 1 1 auto;
   background: var(--panel);
   border: 1px solid var(--border-soft);
-  border-radius: 6px;
 }
 
 .prose {
@@ -4555,7 +4553,6 @@ button:disabled {
   width: 100%;
   max-width: none;
   display: flex;
-  margin-top: 1rem;
   padding: 0.7rem 1.5rem;
   background: var(--panel);
   border: 1px solid var(--border-soft);
@@ -5113,11 +5110,6 @@ button:disabled {
 .editor.is-maximized .manuscript-board {
   padding: 0.7rem 0.9rem 0.45rem;
 }
-
-.editor.is-maximized .prose-wrap {
-  margin-top: 0;
-}
-
 
 .editor.is-maximized .manuscript-board .manuscript-foot {
   align-self: stretch;

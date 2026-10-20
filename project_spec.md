@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.148
+Status: living document, v1.0.149
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7231,6 +7231,38 @@ Mats egen bild) bekräftar visuellt att bakgrunden inte längre syns
 vid någon kant.
 
 v1.0.147 → v1.0.148.
+
+
+**Ändringslogg v1.0.148 → v1.0.149 (2026-10-20): inget mellanrum
+ovanför/under själva textsidan.** Ny inzoomad beskärning från Mats,
+den här gången av sömmen mellan prosatexten och det som ligger under
+("Toward us?" med stjärnhimmel och sedan svart under) — "Då tar vi
+nästa fel. Det ska inte vara mellanrum ovanför och under editor
+fönstret." "Editor fönstret" = själva prosasidan (pappersrutan), inte
+hela appen. `.prose-wrap` hade `margin-top: 1.35rem` (mellanrum mot
+titelraden) och `.manuscript-foot` hade `margin-top: 1rem`
+(mellanrum mot prosasidan) — båda kvar sedan innan, avsiktliga små
+luftrum i det ursprungliga kortbaserade utseendet, men inte längre
+rätt nu när allt annat ligger helt kloss.
+
+**Fix:** Båda marginalerna borttagna. En redan existerande
+maximerat-läge-regel (`.editor.is-maximized .prose-wrap { margin-top:
+0; }`, från tidigare arbete) blev överflödig och togs bort — basregeln
+gäller nu lika i båda lägena. Samma rundade-hörn-fälla som i v1.0.146
+dök upp igen: `.prose-body` hade kvar `border-radius: 6px`, vilket nu
+(när den ligger kloss mot både titelraden och menyraden) lämnade små
+trekantiga stjärnhimmel-flikar i alla fyra hörn — borttagen, samma
+lösning som för `.chapter-head`/`.manuscript-foot` tidigare.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: `.prose-body`s
+`getBoundingClientRect().top` nu exakt lika med `.chapter-head`s
+`bottom`, och dess `bottom` exakt lika med `.manuscript-foot`s `top`
+— inget mellanrum numeriskt. Extremt inzoomade skärmdumpar av båda
+sömmarna (samma stil som Mats egna bilder) bekräftar inga kvarvarande
+flikar i hörnen.
+
+v1.0.148 → v1.0.149.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

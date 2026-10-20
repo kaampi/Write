@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.149] - 2026-10-20
+
+### Changed
+- Removed the gap above and below the prose page — the chapter title bar, the prose box, and the bottom toolbar now sit flush against each other with no background showing between them, instead of a small margin on each side.
+
 ## [1.0.148] - 2026-10-20
 
 ### Fixed
