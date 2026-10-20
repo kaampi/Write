@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.139] - 2026-10-20
+
+### Added
+- "Import from Novelcrafter" on the home page: starts a brand-new manuscript from a Markdown export (pick Markdown, not Word, when exporting from Novelcrafter). Upload a file or paste the text; the import splits on Markdown headings into chapters, with an adjustable heading-level picker and a live chapter-count preview — different writing tools' exports don't agree on which heading level marks a chapter, so this is a guided guess rather than a fixed assumption. `*italic*`/`**bold**` markers convert into real formatting, the same conversion already offered under Tools → Convert markers to formatting. First of a planned family of import adapters (Scrivener and Sudowriter next); a Codex/character import is deferred until a real Novelcrafter export sample is available to build and test against — Novelcrafter's own documentation doesn't publish that file's internal format.
+
 ## [1.0.138] - 2026-10-20
 
 ### Changed

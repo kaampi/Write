@@ -11,6 +11,7 @@ import type { CorePredicate } from "@core/predicates";
 import type { ProofreadStage } from "@core/proofread";
 import type { MarkerConversionRule } from "@core/markerConversion";
 import type { LoreArticleCandidate } from "@core/loreImport";
+import type { ImportedChapterCandidate } from "@core/manuscriptImport";
 import type { TextSpan } from "@core/textSpan";
 import type { PromptDebugEntry } from "./promptDebug";
 import type { LlmEngine } from "@llm/provider";
@@ -85,6 +86,7 @@ export type BookStoreValue = {
   /** Loads another manuscript by id without opening it — used by the language switcher/stale check (roadmap-ideas.md #43). */
   loadBook: (id: string) => Promise<Book>;
   importManuscript: (file: File) => Promise<void>;
+  importMarkdownManuscript: (title: string, chapters: ImportedChapterCandidate[]) => Promise<void>;
   deleteBook: (id: string) => Promise<void>;
   patchBook: (mutate: (book: Book) => Book) => Promise<void>;
   setChapterId: (id: string) => void;

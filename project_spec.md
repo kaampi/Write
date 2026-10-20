@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.138
+Status: living document, v1.0.139
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6764,6 +6764,81 @@ fotraden syns nu som en tydlig, konsekvent panel-box. `tsc --noEmit`
 och hela testsviten (1084 test, 80 filer) rent.
 
 v1.0.137 → v1.0.138.
+
+**Ändringslogg v1.0.138 → v1.0.139 (2026-10-20): "Importera från
+Novelcrafter" — första import-adaptern.** Startpunkten var startsidan
+i ComicBook AI — Mats bad mig kolla hur den var byggd (`rör ingen kod
+i ComicbookAI`). Min första klon visade sig vara 84 commits efter
+(`git fetch` + fast-forward löste det); hittade då `ProjectStart.tsx`
++ `projectStart.css` — fyra kort i 2×2 (Skapa sidor direkt / Starta
+med manus / Importera från StoryBook AI / Öppna ett projekt). Vi
+enades om att startsidans egna kort byggs SENARE; "Importera backup"
+och "Nytt manus"-korten var redan uppenbara, men fjärde/import-kortet
+krävde research.
+
+**Research innan kod:** kollade vad StoryBook AI redan hade (mer än
+väntat) — `LoreImportCard`/`splitLoreArticles` (källoberoende
+batch-import till Story Bible, skeppad sedan v0.99.61), och en redan
+nedtecknad princip i roadmap-ideas.md #28: "StoryBook AI skriver,
+SandboxAI spelar" — SillyTavern/Campfire nedprioriterade medvetet
+eftersom de är ROLLSPELS-verktyg (karaktärsstats, relationskartor),
+fel målgrupp för ett skrivverktyg. Mats föreslog istället Scrivener,
+Sudowriter, Novelcrafter — alla tre riktiga skrivverktyg, rätt
+målgrupp. Vi valde Novelcrafter först (enklast format: JSON/Markdown,
+och Mats hade redan kartlagt verktyget i en tidigare konkurrens-
+jämförelse).
+
+**Formatresearch:** Novelcrafter är INTE open source (trots Mats
+antagande) — kollad via WebSearch, inget officiellt GitHub-repo.
+Novelcrafters egen dokumentation (WebFetch mot deras hjälpsidor)
+bekräftade: manusexport = ett enda Word- ELLER Markdown-dokument (inte
+en ZIP av flera filer), med av/på-val för akt-titlar/scen-underrubriker/
+sammanfattningar. Codex-exportens interna JSON/YAML-struktur är
+UTTRYCKLIGEN inte dokumenterad ens av Novelcrafter själva. Beslut,
+efter samma princip som redan gäller för Campfire i roadmap-ideas.md
+("när det finns en verklig export-/backupfil att bygga och testa mot,
+inte förr"): bygg manus-importen nu (välbeskrivet format), vänta med
+Codex-importen (karaktärer/platser) tills Mats kan skicka en riktig
+testexport.
+
+**Implementation:**
+- `src/core/manuscriptImport.ts` — källoberoende Markdown-till-kapitel-
+  delare (parallell arkitektur till `loreImport.ts`): `headingLevelCounts`,
+  `suggestChapterHeadingLevel` (gissar rubriknivå genom att välja den
+  med flest förekomster — osäkert i grunden eftersom inga två
+  skrivverktygs Markdown-export är överens om var "Akt" slutar och
+  "Kapitel" börjar), `splitMarkdownIntoChapters(text, level)`. Text
+  före första rubriken blir ett eget namnlöst inledande kapitel (precis
+  som `splitLoreArticles`:s preamble-hantering — första implementation
+  smälte av misstag ihop den med nästa kapitel, fångat av ett eget
+  test och rättat innan leverans). En grundare rubrik än den valda
+  nivån (en Akt-rubrik mellan kapitel) vikas istället in i NÄSTA
+  kapitels text snarare än att bli ett eget spökkapitel.
+- Ny `ImportManuscriptCard.tsx` — fil-uppladdning ELLER inklistring,
+  en levande förhandsgranskning (rubriknivå-väljare + antal hittade
+  kapitel + kapitellista) innan något importeras, samma UX-princip
+  LoreImportCard redan etablerat ("visa vad som hittades, låt
+  författaren justera, aldrig en tyst gissning").
+- Ny store-action `importMarkdownManuscript` (BookStore.tsx) — kör
+  varje kapitels prosa genom `applyMarkerConversion` (samma
+  `DEFAULT_MARKER_CONVERSION_RULES` som "Convert markers to
+  formatting"-verktyget) så `*kursiv*`/`**fet**` blir riktig formatering
+  istället för bokstavliga asterisker i den importerade texten.
+- Ny knapp "Importera från Novelcrafter" på startsidan, bredvid
+  "Import backup" — det riktiga kortet kommer när startsidans fyra
+  kort byggs, men funktionen själv behövde inte vänta på det.
+
+**Verifiering:** nya enhetstester (`manuscript-import.test.ts`, 13
+test, inklusive regressionstestet som fångade preamble-buggen).
+Playwright mot `npm run dev`: laddade upp en syntetisk Novelcrafter-
+liknande fil (två Akt-rubriker, tre kapitel, `*kursiv*`/`**fet**`),
+bekräftade 3 korrekt identifierade kapitel i förhandsgranskningen,
+körde den riktiga importen, och läste av det färdiga kapitlets
+HTML — Akt-rubriken korrekt infälld som vanlig text, kursiv/fet
+korrekt renderad som riktig formatering. `tsc --noEmit`, hela
+testsviten (1097 test, 81 filer), `npm run build` — alla rena.
+
+v1.0.138 → v1.0.139.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

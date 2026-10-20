@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { flushSync } from "react-dom";
 import {
   createBook,
+  createChapter,
   openingSurface,
   sortedChapters,
   touch,
@@ -13,7 +14,7 @@ import {
 import { BRAINSTORM_PASSAGE_SYSTEM, brainstormChatSystemPrompt, brainstormPassageUserPrompt, liftFragmentToSynopsis, sendStagedNotesToSynopsis, type BrainstormChatMessage } from "@core/brainstorm";
 import { applyAssembledBrainstorm } from "@core/brainstormNotes";
 import { applyAuthorAddition, applyAuthorDraft, applyExtractorDrafts, approveFact, keepFactSeparate, rejectFact, reviseFact } from "@core/ConsistencyGate";
-import { applyMarkerConversion, type MarkerConversionRule } from "@core/markerConversion";
+import { applyMarkerConversion, DEFAULT_MARKER_CONVERSION_RULES, type MarkerConversionRule } from "@core/markerConversion";
 import { smartenQuotes } from "@core/smartQuotes";
 import { withRelationshipMirrorFor } from "@core/relationshipMirror";
 import { chapterScenes, mergeSceneWithNext, replaceSceneProse, sceneIdRemovedByMerge } from "@core/bookScene";
@@ -57,6 +58,7 @@ import {
   planningExtractorUserPrompt
 } from "@core/extractFacts";
 import type { LoreArticleCandidate } from "@core/loreImport";
+import type { ImportedChapterCandidate } from "@core/manuscriptImport";
 import { SUMMARIZE_CHAPTER_SYSTEM, summarizeChapterUserPrompt } from "@core/chapterSummary";
 import { proseChapters, startProofreadJob, touchProofread, type ProofreadStage } from "@core/proofread";
 import { runProofread } from "@core/proofreadRun";
@@ -659,6 +661,40 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       setError(null);
     },
     [persist, repo]
+  );
+
+  /**
+   * Builds a brand-new manuscript from chapters already parsed by a
+   * format-specific import adapter (Novelcrafter's Markdown export first;
+   * same `ImportedChapterCandidate` shape other adapters — Scrivener,
+   * Sudowriter — would feed later, per roadmap-ideas.md #28's layering).
+   * Runs each chapter's prose through the same marker-conversion rules the
+   * "Convert markers to formatting" tool uses (an imported manuscript's
+   * `*italic*`/`**bold**` markers are exactly the kind of leftover-from-
+   * another-tool text that tool already exists for), so bold/italic carry
+   * over as real formatting instead of literal asterisks.
+   */
+  const importMarkdownManuscript = useCallback(
+    async (title: string, chapters: ImportedChapterCandidate[]) => {
+      const created = createBook(title);
+      const mapped = (chapters.length > 0 ? chapters : [{ title: "", prose: "" }]).map((candidate, index) => {
+        const converted = applyMarkerConversion(candidate.prose, [], DEFAULT_MARKER_CONVERSION_RULES);
+        const chapter = createChapter(index, candidate.title);
+        return { ...chapter, prose: converted.prose, formatting: converted.formatting };
+      });
+      const book: Book = { ...created, chapters: mapped };
+      await repo.save(book);
+      setSummaries(await repo.list());
+      withViewTransition(() => {
+        setBook(book);
+        setChapterIdState(sortedChapters(book)[0]?.id ?? null);
+        setSurface(openingSurface(book));
+        setChapterFeedback(null);
+      });
+      localStorage.setItem(LAST_BOOK_KEY, book.id);
+      setError(null);
+    },
+    [repo]
   );
 
   const deleteBook = useCallback(
@@ -3082,6 +3118,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     newLanguageVersion,
     loadBook,
     importManuscript,
+    importMarkdownManuscript,
     deleteBook,
     patchBook,
     setChapterId,

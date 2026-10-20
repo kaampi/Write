@@ -13,6 +13,7 @@ import {
   type UpdateStatus
 } from "./desktopBridge";
 import { UpdateCheckDialog } from "./UpdateCheckDialog";
+import { ImportManuscriptCard } from "./ImportManuscriptCard";
 
 const GPU_TIER_KEY = {
   "3b": "desktopGpuTier3b",
@@ -37,6 +38,7 @@ export function Home({
     openBook,
     deleteBook,
     importManuscript,
+    importMarkdownManuscript,
     error,
     engine,
     baseUrl,
@@ -54,6 +56,7 @@ export function Home({
   const { messages: m } = useLocale();
   const [title, setTitle] = useState("");
   const [search, setSearch] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const filteredSummaries = summaries.filter((item) => item.title.toLowerCase().includes(search.trim().toLowerCase()));
 
@@ -120,6 +123,9 @@ export function Home({
             </button>
             <button type="button" className="home-guide-button" onClick={() => fileRef.current?.click()}>
               {m.home.importBackup}
+            </button>
+            <button type="button" className="home-guide-button" onClick={() => setImportOpen(true)}>
+              {m.home.importNovelcrafter}
             </button>
             {isDesktopApp() ? (
               <button type="button" className="home-guide-button" onClick={runUpdateCheck} disabled={updateChecking}>
@@ -360,6 +366,16 @@ export function Home({
             <HandbookPanel />
           </div>
         </div>
+      ) : null}
+
+      {importOpen ? (
+        <ImportManuscriptCard
+          onClose={() => setImportOpen(false)}
+          onImport={(importedTitle, chapters) => {
+            void importMarkdownManuscript(importedTitle, chapters);
+            setImportOpen(false);
+          }}
+        />
       ) : null}
     </div>
   );
