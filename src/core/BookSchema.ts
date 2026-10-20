@@ -385,7 +385,9 @@ export const BookSchema = z.object({
    * never has to be checked for text contrast — only the margins around
    * those cards show it. Missing on older saves — "none" keeps today's look.
    */
-  editor_background: z.enum(["none", "forest", "milky-way"]).default("none"),
+  editor_background: z
+    .enum(["none", "forest", "milky-way", "cork", "triangles", "fabric", "school", "pine", "leaves"])
+    .default("none"),
   /**
    * Instructions for the Polish step — a whole-chapter cleanup pass the
    * author reviews in a diff before accepting, separate from Draft/

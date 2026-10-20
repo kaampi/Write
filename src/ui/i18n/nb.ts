@@ -206,6 +206,12 @@ export const nb: Messages = {
     editorBackgroundNone: "Ingen (vanlig panel)",
     editorBackgroundForest: "Tåkete skog",
     editorBackgroundMilkyWay: "Melkeveien",
+    editorBackgroundCork: "Korktavle",
+    editorBackgroundTriangles: "Trekanter",
+    editorBackgroundFabric: "Stoff",
+    editorBackgroundSchool: "Skoledoodler",
+    editorBackgroundPine: "Graner",
+    editorBackgroundLeaves: "Blader",
     bodyFontLabel: "Skrift",
     bodyFontLede:
       "Skrifttypen for manusets brødtekst — i selve redigeringen, og med i hver eksport fra Publish, så det blir ett valg istedenfor et separat, ulagret valg hver gang.",

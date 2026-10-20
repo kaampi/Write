@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.153] - 2026-10-20
+
+### Added
+- Six new editor backgrounds: Cork board, Triangles, Fabric, School doodles, Pine trees, Leaves — seamless repeating tiles, alongside the existing Misty forest and Milky Way photos (which still scale to cover, not repeat).
+
 ## [1.0.152] - 2026-10-20
 
 ### Fixed

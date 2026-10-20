@@ -556,6 +556,12 @@ export const en = {
     editorBackgroundNone: "None (plain panel)",
     editorBackgroundForest: "Misty forest",
     editorBackgroundMilkyWay: "Milky Way",
+    editorBackgroundCork: "Cork board",
+    editorBackgroundTriangles: "Triangles",
+    editorBackgroundFabric: "Fabric",
+    editorBackgroundSchool: "School doodles",
+    editorBackgroundPine: "Pine trees",
+    editorBackgroundLeaves: "Leaves",
     bodyFontLabel: "Font",
     bodyFontLede:
       "The typeface for the manuscript's prose — in the editor itself, and carried into every Publish export, so there's one choice instead of a separate, unsaved pick each time.",

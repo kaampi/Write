@@ -206,6 +206,12 @@ export const sv: Messages = {
     editorBackgroundNone: "Ingen (vanlig panel)",
     editorBackgroundForest: "Dimmig skog",
     editorBackgroundMilkyWay: "Vintergatan",
+    editorBackgroundCork: "Korkbräda",
+    editorBackgroundTriangles: "Trianglar",
+    editorBackgroundFabric: "Tyg",
+    editorBackgroundSchool: "Skolklotter",
+    editorBackgroundPine: "Granar",
+    editorBackgroundLeaves: "Löv",
     bodyFontLabel: "Typsnitt",
     bodyFontLede:
       "Typsnittet för manusets brödtext — i själva redigeraren, och med i varje export från Publish, så det blir ett val istället för ett separat, osparat val varje gång.",

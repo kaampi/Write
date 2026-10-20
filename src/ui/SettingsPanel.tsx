@@ -405,6 +405,12 @@ export function SettingsPanel({
                     <option value="none">{m.editor.editorBackgroundNone}</option>
                     <option value="forest">{m.editor.editorBackgroundForest}</option>
                     <option value="milky-way">{m.editor.editorBackgroundMilkyWay}</option>
+                    <option value="cork">{m.editor.editorBackgroundCork}</option>
+                    <option value="triangles">{m.editor.editorBackgroundTriangles}</option>
+                    <option value="fabric">{m.editor.editorBackgroundFabric}</option>
+                    <option value="school">{m.editor.editorBackgroundSchool}</option>
+                    <option value="pine">{m.editor.editorBackgroundPine}</option>
+                    <option value="leaves">{m.editor.editorBackgroundLeaves}</option>
                   </select>
                 </label>
               </div>

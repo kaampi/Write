@@ -122,7 +122,7 @@ import { ChapterBriefCopy } from "./ChapterBriefCopy";
 import { DispositionBoard } from "./DispositionBoard";
 import { BrainstormBoard } from "./BrainstormBoard";
 import { ProseCanvas } from "./ProseCanvas";
-import { EDITOR_BACKGROUND_URLS } from "./editorBackgrounds";
+import { EDITOR_BACKGROUND_URLS, EDITOR_BACKGROUND_TILED } from "./editorBackgrounds";
 import { ProseStatsCard } from "./ProseStatsCard";
 import { FindReplaceCard, type FindHighlight, type FindLaunch } from "./FindReplaceCard";
 import { ProofreadCard } from "./ProofreadCard";
@@ -459,6 +459,12 @@ function startRailResize(
  */
 function manuscriptBackgroundStyle(background: Book["editor_background"]): React.CSSProperties | undefined {
   if (background === "none") return undefined;
+  if (EDITOR_BACKGROUND_TILED[background]) {
+    return {
+      backgroundImage: `url(${EDITOR_BACKGROUND_URLS[background]})`,
+      backgroundRepeat: "repeat"
+    };
+  }
   return {
     backgroundImage: `url(${EDITOR_BACKGROUND_URLS[background]})`,
     backgroundSize: "cover",

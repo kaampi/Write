@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.152
+Status: living document, v1.0.153
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7345,6 +7345,45 @@ faktiska bredd (15px i detta Chromium-testläge) och bekräftade att
 utanför toningszonen.
 
 v1.0.151 → v1.0.152.
+
+
+**Ändringslogg v1.0.152 → v1.0.153 (2026-10-20): sex nya
+tile-bakgrunder.** Mats frågade först principiellt: "Kan man ha
+tiles eller ska det vara stora bilder?" — svarade att CSS stödjer
+båda (`background-repeat: repeat` + naturlig storlek för sömlösa
+tiles, `cover` + `no-repeat` för scenbilder som inte är gjorda för
+att upprepas), med rekommendationen att välja teknik efter bildtyp.
+Mats skickade sedan sex färdiga sömlösa tiles (korkbräda, mörkt
+triangelmönster, grått tygmönster, beige skol-ikoner, ljusblå granar,
+ljusgrått bladmönster) och ville ha alla sex som nya val, med skog
+och Vintergatan kvar (bekräftat via fråga).
+
+**Implementation:**
+- Sex nya PNG-tiles i `src/assets/backgrounds/` (200–400px kvadrater,
+  redan sömlösa från Mats).
+- `BookSchema.ts`: `editor_background`-enumet utökat med `cork`,
+  `triangles`, `fabric`, `school`, `pine`, `leaves`.
+- `editorBackgrounds.ts`: ny `EDITOR_BACKGROUND_TILED`-record vid
+  sidan av den befintliga `EDITOR_BACKGROUND_URLS` — markerar vilka
+  bakgrunder är sömlösa tiles (alla sex nya) kontra stora foton (skog,
+  Vintergatan).
+- `Editor.tsx`s `manuscriptBackgroundStyle` grenar nu på detta:
+  tiles får `backgroundRepeat: "repeat"` utan `backgroundSize`/
+  `backgroundPosition` (visas i sin naturliga pixelstorlek, upprepad),
+  foton behåller `cover`/`center`/`no-repeat` som förut.
+- Sex nya i18n-nycklar (`editorBackgroundCork` m fl) i alla tre språk
+  (en/sv/nb), nya `<option>`-rader i Settings-dropdownen.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent (de två minsta tiles, skol-ikoner
+och löv, inlinades automatiskt som base64 av Vite eftersom de är
+under 4kB — förväntat, inte ett fel). Playwright mot `npm run dev`:
+bekräftade att alla nio alternativ finns i dropdownen, och
+skärmdumpar av flera tiles (kork, trianglar, skol-ikoner) visar
+sömlös upprepning utan synliga kanter, bakom den ogenomskinliga
+titelraden/textrutan/menyraden.
+
+v1.0.152 → v1.0.153.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
