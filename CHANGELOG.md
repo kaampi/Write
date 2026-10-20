@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.135] - 2026-10-20
+
+### Changed
+- The prose editor's text area used to span exactly as wide as its own text, with no visual boundary — hard to tell where the editing surface actually ends. It now has real padding around the text and a thin border marking its outer edge, same treatment in both themes. The rare-word highlight overlay (an invisible twin of the text used to paint highlight marks) got matching padding and a transparent border of the same width so its marks stay pixel-aligned with the real text underneath.
+
 ## [1.0.134] - 2026-10-20
 
 ### Added

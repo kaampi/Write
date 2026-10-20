@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.134
+Status: living document, v1.0.135
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6616,6 +6616,42 @@ gick igenom rent på 12 sekunder. Körde om hela testsviten (1083 test,
 misstag tagit bort paketets installerade mapp lokalt).
 
 v1.0.134 (samma version, utökad commit).
+
+**Ändringslogg v1.0.134 → v1.0.135 (2026-10-20):** Mats, direkt efter
+panel-resize-leveransen: "Själva redigeringsytan är exakt samma bredd
+som texten, den skulle må bra av att ha padding och kanske en tunn
+mörkgrålinje som visar redigeringsytans ytterkant."
+
+`.prose` (den riktiga contentEditable-ytan kapitelprosan skrivs i)
+hade `padding: 0.2rem 0 1rem` — praktiskt taget ingen horisontell
+marginal alls, och `border: 0`, så ytan smälte ihop med bakgrunden.
+Satte riktig padding (`1rem 1.5rem 1.25rem`) och en tunn
+`1px solid var(--border-soft)`-ram med lätt rundning, samma i båda
+teman (`--border-soft` är redan tema-medveten).
+
+**En detalj som krävde eftertanke:** `.prose-rare`, en osynlig
+absolutpositionerad tvilling av texten (`inset: 0` ovanpå `.prose`)
+som ritar highlight-markeringar (sällsynta ord, klichéer, etc) ovanpå
+den riktiga texten, måste matcha `.prose`:s nya padding EXAKT —
+annars hamnar markeringarna fel mot den faktiska texten. Gav
+`.prose-rare` samma padding plus en `1px solid transparent`-ram
+(osynlig, men upptar lika mycket plats som `.prose`:s riktiga
+`1px`-ram, viktigt eftersom båda är `box-sizing: border-box` och
+syskon i samma förälder). Verifierade anpassningen med Playwright:
+skrev text, slog på RARE-highlighting, och jämförde
+`getBoundingClientRect()` för båda elementen — identiska rektanglar.
+
+Övriga overlays (placeholder-markörer, markeringsmenyer,
+format-verktygsfältet) positioneras redan dynamiskt via riktiga
+`getBoundingClientRect()`-mätningar av den faktiska textgeometrin,
+inte mot antagna CSS-konstanter, så de behövde ingen ändring.
+
+**Verifiering:** `tsc --noEmit` och hela testsviten (1083 test, 80
+filer) rent. Playwright mot `npm run dev`: skrev text, tog en
+skärmdump som visar padding och ram tydligt, bekräftade pixelexakt
+justering av highlight-overlayn enligt ovan.
+
+v1.0.134 → v1.0.135.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
