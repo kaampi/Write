@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.154
+Status: living document, v1.0.155
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7414,6 +7414,41 @@ färg), och en inzoomad skärmdump av det övre vänstra hörnet (sömmen
 mot `.chapter-head`) visar ingen skugga läcker upp i titelraden.
 
 v1.0.153 → v1.0.154.
+
+
+**Ändringslogg v1.0.154 → v1.0.155 (2026-10-20): skuggan syntes inte
+alls — klipptes av sin egen scrollförälder.** Mats, med en skärmdump
+mot korkbakgrunden: "Jag ser ingen skuggning?" Rätt — skuggan
+renderades men var helt osynlig.
+
+**Grundorsak:** `box-shadow` satt på `.prose-body`, vars förälder
+`.prose-scroll` har `overflow-y: auto`. En mindre känd CSS-regel:
+när EN axel sätts till något annat än `visible` medan den andra är
+kvar på `visible`, tvingar webbläsaren den andra axeln till `auto`
+också — `.prose-scroll` klippte alltså även horisontellt, trots att
+`overflow-x` aldrig satts explicit. Skuggan, som sträcker sig utanför
+`.prose-body`s egen box, klipptes bort av sin egen förälder innan den
+ens hann synas. Samma grundmekanism (fast ett helt annat symptom) som
+den ursprungliga toningsbugg som löstes i v1.0.143 — ännu ett fall
+av att en scrollande förälders `overflow`-hantering tyst äter
+innehåll som sträcker sig utanför dess egen box.
+
+**Fix:** Flyttade `box-shadow` från `.prose-body` till `.prose-wrap`
+— ett nivå längre ut, utanför scroll-behållaren, och exakt lika brett
+som `.prose-body` (båda opaddade, fyller samma kolumn), så skuggan
+hamnar på precis samma plats visuellt utan att klippas. Kontrollerat
+att `.manuscript` (nästa förälder ut, som också har `overflow-y:
+auto` och alltså samma klipp-kvirk) inte klipper skuggan heller —
+gutter-utrymmet runt `.prose-wrap` är hundratals pixlar brett, långt
+mer än skuggans ~34px räckvidd.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright mot en ljus tile-
+bakgrund (bra kontrast): skärmdump bekräftar tydlig skugga på båda
+sidorna av textrutan, och en inzoomad skärmdump av hörnet mot
+titelraden visar fortfarande inget läckage uppåt.
+
+v1.0.154 → v1.0.155.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

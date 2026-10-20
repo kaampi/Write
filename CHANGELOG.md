@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.155] - 2026-10-20
+
+### Fixed
+- The new side shadow (v1.0.154) was invisible — it was silently clipped by its own scrolling parent (setting one overflow axis to a value other than `visible` forces the other axis to clip too, even when never set explicitly). Moved the shadow to the non-scrolling wrapper one level out, where it isn't clipped.
+
 ## [1.0.154] - 2026-10-20
 
 ### Added

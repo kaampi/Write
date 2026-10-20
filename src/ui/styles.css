@@ -3516,6 +3516,25 @@ button:disabled {
   max-width: 54rem;
   display: flex;
   flex-direction: column;
+  /*
+   * Depth on the prose page's left/right edges — put on .prose-wrap, not
+   * .prose-body itself, because .prose-scroll (the actual scrolling
+   * ancestor, one level in) sets overflow-y: auto, and per the CSS spec an
+   * element with one overflow axis non-"visible" has its other axis forced
+   * from "visible" to "auto" too — so a shadow on .prose-body would get
+   * silently clipped by its own scrolling parent. .prose-wrap sits outside
+   * that scroller and is exactly as wide as .prose-body, so the shadow
+   * lines up the same without being clipped.
+   * A plain box-shadow would also bleed above/below into the flush-
+   * touching chapter-head/manuscript-foot bars (see their own "no gap"
+   * change). A large negative spread shrinks the shadow's source rectangle
+   * well inside the box's top/bottom edges before the horizontal offset
+   * pushes copies of it out past the left and right edges, so only the
+   * sides actually show a shadow.
+   */
+  box-shadow:
+    -14px 0 20px -14px var(--side-shadow-color),
+    14px 0 20px -14px var(--side-shadow-color);
 }
 
 /*
@@ -3579,17 +3598,6 @@ button:disabled {
   flex: 1 1 auto;
   background: var(--panel);
   border: 1px solid var(--border-soft);
-  /*
-   * Depth on the left/right edges only — a plain box-shadow would also
-   * bleed above/below into the flush-touching chapter-head/manuscript-foot
-   * bars (see their own "no gap" change). A large negative spread shrinks
-   * the shadow's source rectangle well inside the box's top/bottom edges
-   * before the horizontal offset pushes copies of it out past the left and
-   * right edges, so only the sides actually show a shadow.
-   */
-  box-shadow:
-    -14px 0 20px -14px var(--side-shadow-color),
-    14px 0 20px -14px var(--side-shadow-color);
 }
 
 .prose {
