@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.148] - 2026-10-20
+
+### Fixed
+- The chapter title bar and bottom toolbar had a thin sliver of the background visible along their left/right edges — a percentage-based bleed margin doesn't exactly cancel a percentage-based padding on its parent (they resolve against different box widths), so the two never quite lined up. Rebuilt without that cancellation trick: the bars are genuinely edge to edge now, no sliver anywhere.
+
 ## [1.0.147] - 2026-10-20
 
 ### Changed

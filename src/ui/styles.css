@@ -2019,7 +2019,6 @@ button:disabled {
   background:
     radial-gradient(1200px 400px at 50% -10%, var(--wash), transparent 50%),
     var(--bg);
-  padding: 0 8%;
 }
 
 /*
@@ -2804,22 +2803,28 @@ button:disabled {
 .chapter-head {
   flex: 0 0 auto;
   align-self: stretch;
-  width: auto;
+  width: 100%;
   max-width: none;
   min-width: 0;
-  margin-left: -8%;
-  margin-right: -8%;
   background: var(--panel);
   border: 1px solid var(--border-soft);
-  padding: 1rem 8%;
+  padding: 1rem 1.5rem;
 }
 
 /*
- * The bar itself (.chapter-head) bleeds edge to edge so its background
- * shows behind the side panels. Its actual content — the title, the
- * plotline chips — stays aligned with the prose column's own width
- * instead of spreading out to the bar's full width, same reference
- * mockup Mats sent (74/76.webp).
+ * .chapter-head itself spans .manuscript's full width (which has no
+ * horizontal padding of its own — see .manuscript) so its background
+ * shows behind the side panels. .chapter-head-inner re-centers the
+ * actual content — the title, the plotline chips — to the prose
+ * column's own width, same reference mockup Mats sent (74/76.webp).
+ * Previously this bleed used a -8%/+8% margin against .manuscript's
+ * own 8% padding; percentage margin on a child resolves against the
+ * parent's *content*-box width while percentage padding on the parent
+ * resolves against the parent's *containing-block* width, so those two
+ * percentages don't actually cancel out exactly — it left a stray
+ * sliver of background along both edges. Removing the padding/margin
+ * pair entirely (centering via max-width + margin: auto instead)
+ * sidesteps the mismatch rather than trying to compensate for it.
  */
 .chapter-head-inner {
   width: 100%;
@@ -4547,13 +4552,11 @@ button:disabled {
 .manuscript-foot {
   flex: 0 0 auto;
   align-self: stretch;
-  width: auto;
+  width: 100%;
   max-width: none;
   display: flex;
   margin-top: 1rem;
-  margin-left: -8%;
-  margin-right: -8%;
-  padding: 0.7rem 8%;
+  padding: 0.7rem 1.5rem;
   background: var(--panel);
   border: 1px solid var(--border-soft);
 }
@@ -5105,10 +5108,6 @@ button:disabled {
 .editor.is-maximized .manuscript > .chapter-title,
 .editor.is-maximized .manuscript > .synopsis-lede {
   display: none;
-}
-
-.editor.is-maximized .manuscript {
-  padding: 0 8%;
 }
 
 .editor.is-maximized .manuscript-board {

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.147
+Status: living document, v1.0.148
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7182,6 +7182,55 @@ innehåll nu ligger i linje med textspaltens bredd, bakgrunden
 fortfarande fullbredd.
 
 v1.0.146 → v1.0.147.
+
+
+**Ändringslogg v1.0.147 → v1.0.148 (2026-10-20): hittade grundorsaken
+till den kvarvarande sliven — procent-baserad bleed-marginal
+kompenserar inte exakt för procent-baserad padding.** Mats skickade
+en extremt inzoomad beskärning (en tunn horisontell remsa) och
+skrev: "Jag vet inte hur jag ska kunna förklara. Ta bort mellan
+rummet mellan editor och topp/botten." Playwright-mätning av
+`.chapter-head`s `getBoundingClientRect()` avslöjade det exakta
+felet: `x: 17.9` istället för `0`, `right: 1382` istället för `1400`
+— en kvarvarande ~18px flik av bakgrunden synlig längs vänster- OCH
+högerkanten, som alla tidigare skärmdumpar råkat beskära bort eller
+inte zooma in tillräckligt för att upptäcka.
+
+**Grundorsak:** `.manuscript` hade `padding: 0 8%` och
+`.chapter-head`/`.manuscript-foot` kompenserade med `margin-left/
+-right: -8%` för att bleeda ut till kanten. Dessa två procenttal ser
+identiska ut men räknas INTE mot samma bas: ett barns procentuella
+margin räknas mot förälderns INNEHÅLLSbredd (efter förälderns egen
+padding är avdragen), medan förälderns egen procentuella padding
+räknas mot förälderns "containing block"-bredd (före dess egen
+padding). I det här fallet: `.manuscript`s padding (8% av dess
+containing block, ~1400px → 112px) och `.chapter-head`s kompenserande
+margin (8% av `.manuscript`s INNEHÅLLSbredd, 1400−224=1176px →
+94px) blev olika stora — en genuin CSS-fallgrop, inte ett
+kopieringsfel. Mellanskillnaden (~18px) var precis den kvarvarande
+sliven Mats pekade på.
+
+**Fix:** Övergav hela bleed/kompensations-tekniken. `.manuscript`s
+horisontella padding togs bort helt (ingen padding alls); gutter-
+effekten (bakgrunden synlig vid sidorna) skapas nu enbart av att
+`.prose-wrap`/`.chapter-head-inner`/`.manuscript-foot-inner` är
+centrerade (`max-width: 54rem; margin: 0 auto;`) inom en annars
+opaddad förälder — matematiskt exakt, inget procenttal att
+missuppfatta. `.chapter-head`/`.manuscript-foot` är nu helt enkelt
+`width: 100%` utan någon marginal-kompensation. Samma gamla
+`padding: 0 8%`-regel för maximerat läge (`.editor.is-maximized
+.manuscript`) var överflödig och borttagen — basreglen (ingen
+padding) gäller nu i båda lägena.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: `.chapter-head`s
+`getBoundingClientRect()` nu exakt `x: 0, right: 1400` (fönstrets
+fulla bredd) i maximerat läge — ingen kvarvarande sliv. Beskurna
+skärmdumpar av toppen och botten (samma extremt inzoomade stil som
+Mats egen bild) bekräftar visuellt att bakgrunden inte längre syns
+vid någon kant.
+
+v1.0.147 → v1.0.148.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
