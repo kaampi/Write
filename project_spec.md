@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.141
+Status: living document, v1.0.142
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6907,6 +6907,74 @@ kort 1 (skrev en titel, klickade Skapa, bekräftade att manuset
 skapades och öppnades korrekt).
 
 v1.0.140 → v1.0.141.
+
+**Ändringslogg v1.0.141 → v1.0.142 (2026-10-20): ⚙️/🎬-popovers
+istället för inline Chapter settings/Scenes.** Två funderingar från
+Mats, uttryckligen i samma anda som startsidans omorganisering —
+"ge mer utrymme åt själva dokumentet":
+
+1. "Om man ska flytta Chapter settings till ett kugghjul på själva
+   Kapitlet i vänstra panelen. När man klickar på kapitlet får man
+   en modal ruta..." Jag gillade tanken men föreslog att fundera på
+   en lättare popover istället för en tung modal. Mats förtydligade:
+   "Jag använder kanske fel term när jag säger modal ruta. Huvudsaken
+   är att det är något som lägger sig ovanpå manuskriptet och inte
+   skjuter iväg det som det är nu."
+2. "Om man ska göra samma för scener men med en liten filmklappa som
+   ikon." — samma mönster, egen ikon.
+
+Godkänt rakt av: "Vi kan köra i vind."
+
+**Grundorsak till varför det här var värt att bygga:** `Chapter
+settings` (röst/reader-override, startbild) och `ScenesPanel` låg
+båda inline i `.chapter-head`, var sitt eget hopfällbart avsnitt med
+egen `▸`/`▾`-toggle — redan dolda som standard, men när öppnade
+sköt de ner `ProseCanvas` i layouten istället för att lägga sig
+ovanpå den.
+
+**Implementation:**
+- Nytt popover-state i `Editor.tsx` (`chapterPopover: {chapterId,
+  kind: "settings"|"scenes", x, y} | null`), positionerat med
+  `position: fixed` och `left`/`top` beräknat från den klickade
+  ikonens egen `getBoundingClientRect()` — samma mönster
+  `ProseCanvas`:s `selection-menu`/`format-toolbar` redan använder.
+  Klick utanför eller Escape stänger (samma lyssnar-mönster kopierat
+  rakt av från `ProseCanvas`s befintliga `menuRef`-hantering).
+- Två nya ikonknappar (⚙️/🎬) i `.chapter-row-tools` på VARJE
+  kapitelrad i vänsterpanelen — inte bara den öppna — så man kan
+  ändra ett annat kapitels röst/reader eller kika på dess scener utan
+  att först behöva öppna det.
+- **Viktig teknisk upptäckt under implementationen:** `recastChapter`,
+  `draftScene`, `recastScene`, `analyzeScene` m.fl. i `BookStore.tsx`
+  är alla bundna till `chapterRef.current` (det GLOBALT aktiva
+  kapitlet), inte ett kapitel-id som skickas in. Att öppna en popover
+  för en ANNAN rad än den just nu öppna kapitel-vyn måste alltså
+  också byta aktivt kapitel (`store.setChapterId`/`selectChapter`)
+  INNAN popovern öppnas — annars skulle t ex "Recast" i inställnings-
+  popovern för kapitel 3 tyst recasta kapitel 1 om det vore det
+  egentligen öppna. Samma beteende som att klicka på själva
+  kapitelraden, inte en ny bieffekt, men värt att dokumentera tydligt
+  i koden eftersom det inte är uppenbart utifrån.
+- `ChapterSettingsSection` och `ScenesPanel` avskalade — båda hade
+  sin EGEN `▸`/`▾`-togglewrapper (nu överflödig eftersom popover-
+  monteringen själv är av/på-mekanismen); togglern + dess chevron-CSS
+  togs bort, komponenterna renderar nu bara sitt innehåll rakt av.
+  Död `chapterHasSettingsOverride()`-hjälpfunktion (bara använd för
+  togglens initiala `open`-state) borttagen.
+- En första version visade "1 scene" DUBBELT (en gång i popover-
+  huvudet, en gång i `ScenesPanel`s egen räkneradstext) — fångat i en
+  Playwright-skärmdump under verifieringen, fixat genom att ge
+  popover-huvudet en egen statisk rubrik ("Scenes"/"Scener") istället
+  för att återupprepa antalet.
+
+**Verifiering:** `tsc --noEmit`, hela testsviten (1097 test, 81
+filer), `npm run build` rent. Playwright mot `npm run dev`:
+bekräftade att inställningspopovern öppnas/stängs korrekt (klick
+utanför OCH Escape), att klapperbrädan på en ICKE-aktiv kapitelrad
+både byter aktivt kapitel OCH öppnar rätt popover, samt skärmdumpar
+av båda popover-typerna innan och efter dubbleringsfixen.
+
+v1.0.141 → v1.0.142.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

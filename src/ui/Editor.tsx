@@ -566,6 +566,43 @@ export function Editor() {
   const [expandedBriefs, setExpandedBriefs] = useState<string[]>(() =>
     surface === "chapter" && chapterId ? [chapterId] : []
   );
+  /**
+   * Chapter settings and Scenes (⚙️/🎬 on each row in the Chapters rail) used
+   * to live inline above the prose, pushing it down whenever opened — Mats
+   * wanted something that "lägger sig ovanpå manuskriptet" (lays on top of
+   * the manuscript) instead, so both now open as a floating popover anchored
+   * to the clicked icon's own position. The underlying Recast/Draft/Analyze
+   * actions are bound to whichever chapter is "active" in the store
+   * (chapterRef, not a parameter), so opening either popover for a row other
+   * than the one currently open also switches to it — same chapter-open
+   * behavior clicking the row itself already has, not a new side effect.
+   */
+  const [chapterPopover, setChapterPopover] = useState<{ chapterId: string; kind: "settings" | "scenes"; x: number; y: number } | null>(
+    null
+  );
+  const chapterPopoverRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!chapterPopover) return;
+    function onPointer(event: MouseEvent) {
+      if (chapterPopoverRef.current?.contains(event.target as Node)) return;
+      setChapterPopover(null);
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setChapterPopover(null);
+    }
+    window.addEventListener("mousedown", onPointer);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", onPointer);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [chapterPopover]);
+  function openChapterPopover(event: React.MouseEvent<HTMLButtonElement>, targetChapterId: string, kind: "settings" | "scenes") {
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (onBoard) store.selectChapter(targetChapterId);
+    else store.setChapterId(targetChapterId);
+    setChapterPopover({ chapterId: targetChapterId, kind, x: rect.right + 10, y: rect.top });
+  }
   const dragChapterIdRef = useRef<string | null>(null);
   const names = entityLabels(book.facts, book.entity_kinds);
   const nameLinks = entityRefsAndLabels(book.facts, book.entity_kinds);
@@ -1362,6 +1399,26 @@ export function Editor() {
                       ▾
                     </span>
                   </button>
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label={format(m.editor.chapterSettingsFor, { title: briefTitle })}
+                    aria-haspopup="dialog"
+                    aria-expanded={chapterPopover?.chapterId === item.id && chapterPopover.kind === "settings"}
+                    onClick={(event) => openChapterPopover(event, item.id, "settings")}
+                  >
+                    ⚙️
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label={format(m.editor.scenesFor, { title: briefTitle })}
+                    aria-haspopup="dialog"
+                    aria-expanded={chapterPopover?.chapterId === item.id && chapterPopover.kind === "scenes"}
+                    onClick={(event) => openChapterPopover(event, item.id, "scenes")}
+                  >
+                    🎬
+                  </button>
                   {chapters.length > 1 ? (
                     <button
                       type="button"
@@ -1678,35 +1735,7 @@ export function Editor() {
         ) : (
           <main className="manuscript" style={manuscriptBackgroundStyle(book.editor_background)}>
             <div className="chapter-head">
-              <ChapterSettingsSection
-                key={chapter.id}
-                book={book}
-                chapter={chapter}
-                chapters={chapters}
-                people={peopleLabels(book.facts, book.entity_kinds)}
-                recasting={busy === "recast"}
-                recastDisabled={busy !== null || !chapter.prose.trim()}
-                onRecast={() => void store.recastChapter()}
-                onPatch={(patch) => void store.patchBook((current) => updateChapter(current, chapter.id, patch))}
-                startImage={chapter.startImage}
-                onSetStartImage={(picture) => void store.patchBook((current) => updateChapter(current, chapter.id, { startImage: picture }))}
-                onRemoveStartImage={() => void store.patchBook((current) => updateChapter(current, chapter.id, { startImage: undefined }))}
-              />
-              <ScenesPanel
-                chapter={chapter}
-                onPatch={(scenes) => void store.patchBook((current) => updateChapter(current, chapter.id, { scenes }))}
-                onMergeWithNext={(sceneId) => store.mergeScene(sceneId)}
-                busy={busy !== null}
-                onDraftScene={(sceneId) => void store.draftScene(sceneId)}
-                onRecastScene={(sceneId) => void store.recastScene(sceneId)}
-                onAnalyzeScene={(sceneId) => {
-                  void store.analyzeScene(sceneId).then((ok) => {
-                    if (ok) setNotesOpen(true);
-                  });
-                }}
-                onExtractBrief={(sceneId) => void store.extractBrief(chapter.id, sceneId)}
-                extractingBrief={busy === "extract-brief"}
-              />
+              {/* Chapter settings and Scenes now live in the ⚙️/🎬 popover rendered below, not inline here — see chapterPopover's own comment. */}
               <input
                 className="chapter-title"
                 value={chapter.title}
@@ -1730,6 +1759,61 @@ export function Editor() {
                 </div>
               ) : null}
             </div>
+            {chapterPopover && chapterPopover.chapterId === chapter.id ? (
+              <div
+                ref={chapterPopoverRef}
+                className="chapter-popover"
+                style={{ left: chapterPopover.x, top: chapterPopover.y }}
+                role="dialog"
+                aria-modal="true"
+                aria-label={
+                  chapterPopover.kind === "settings"
+                    ? format(m.editor.chapterSettingsFor, { title: chapter.title.trim() || m.editor.untitled })
+                    : format(m.editor.scenesFor, { title: chapter.title.trim() || m.editor.untitled })
+                }
+              >
+                <div className="chapter-popover-head">
+                  <strong>{chapterPopover.kind === "settings" ? m.editor.chapterSettingsToggle : m.editor.scenesPopoverTitle}</strong>
+                  <button type="button" className="icon-button" aria-label={m.common.close} onClick={() => setChapterPopover(null)}>
+                    ×
+                  </button>
+                </div>
+                {chapterPopover.kind === "settings" ? (
+                  <ChapterSettingsSection
+                    key={chapter.id}
+                    book={book}
+                    chapter={chapter}
+                    chapters={chapters}
+                    people={peopleLabels(book.facts, book.entity_kinds)}
+                    recasting={busy === "recast"}
+                    recastDisabled={busy !== null || !chapter.prose.trim()}
+                    onRecast={() => void store.recastChapter()}
+                    onPatch={(patch) => void store.patchBook((current) => updateChapter(current, chapter.id, patch))}
+                    startImage={chapter.startImage}
+                    onSetStartImage={(picture) =>
+                      void store.patchBook((current) => updateChapter(current, chapter.id, { startImage: picture }))
+                    }
+                    onRemoveStartImage={() => void store.patchBook((current) => updateChapter(current, chapter.id, { startImage: undefined }))}
+                  />
+                ) : (
+                  <ScenesPanel
+                    chapter={chapter}
+                    onPatch={(scenes) => void store.patchBook((current) => updateChapter(current, chapter.id, { scenes }))}
+                    onMergeWithNext={(sceneId) => store.mergeScene(sceneId)}
+                    busy={busy !== null}
+                    onDraftScene={(sceneId) => void store.draftScene(sceneId)}
+                    onRecastScene={(sceneId) => void store.recastScene(sceneId)}
+                    onAnalyzeScene={(sceneId) => {
+                      void store.analyzeScene(sceneId).then((ok) => {
+                        if (ok) setNotesOpen(true);
+                      });
+                    }}
+                    onExtractBrief={(sceneId) => void store.extractBrief(chapter.id, sceneId)}
+                    extractingBrief={busy === "extract-brief"}
+                  />
+                )}
+              </div>
+            ) : null}
             <ProseCanvas
               value={chapter.prose}
               onChange={(next) => void store.patchBook((current) => updateChapter(current, chapter.id, { prose: next }))}
@@ -2378,17 +2462,6 @@ type ChapterSettingsPatch = {
   continues_from?: string | undefined;
 };
 
-function chapterHasSettingsOverride(chapter: Chapter): boolean {
-  return (
-    chapter.voice !== undefined ||
-    chapter.reader_age !== undefined ||
-    chapter.pov !== undefined ||
-    chapter.tense !== undefined ||
-    chapter.viewpoint !== undefined ||
-    chapter.continues_from !== undefined
-  );
-}
-
 function ChapterSettingsSection({
   book,
   chapter,
@@ -2415,85 +2488,69 @@ function ChapterSettingsSection({
   onRemoveStartImage: () => void;
 }) {
   const { messages: m } = useLocale();
-  const [open, setOpen] = useState(chapterHasSettingsOverride(chapter));
 
   return (
-    <div className="chapter-settings">
-      <button
-        type="button"
-        className="chapter-settings-toggle"
-        aria-expanded={open}
-        onClick={() => setOpen((on) => !on)}
-      >
-        <span className="chevron" aria-hidden="true">
-          {open ? "▾" : "▸"}
-        </span>
-        {m.editor.chapterSettingsToggle}
-      </button>
-      {open ? (
-        <div className="chapter-settings-body">
-          <ChapterStartImageBanner image={startImage} onSet={onSetStartImage} onRemove={onRemoveStartImage} />
-          <div className="chapter-head-top">
-            <div className="craft-field">
-              <span>{m.editor.voice}</span>
-              {chapter.voice !== undefined ? (
-                <button type="button" className="text-button chapter-voice-reset" onClick={() => onPatch({ voice: undefined })}>
-                  {m.editor.manuscript}
-                </button>
-              ) : null}
-              <textarea
-                value={chapter.voice ?? ""}
-                onChange={(event) => {
-                  const next = event.target.value;
-                  onPatch({ voice: next.trim() === "" ? undefined : next });
-                }}
-                placeholder={book.voice.trim() ? m.editor.chapterVoiceInherit : m.editor.voicePlaceholder}
-                rows={1}
-                aria-label={m.editor.chapterVoice}
-              />
-            </div>
-            <div className="craft-field reader-head-field">
-              <span>{m.editor.reader}</span>
-              <select
-                value={chapter.reader_age === undefined ? "inherit" : readerCategory(chapter.reader_age)}
-                title={m.editor.readerTitle}
-                aria-label={m.editor.chapterReader}
-                onChange={(event) => {
-                  const choice = event.target.value;
-                  const age = choice === "inherit" ? undefined : READER_TIER_AGE[choice as ReaderCategory];
-                  onPatch({ reader_age: age });
-                }}
-              >
-                <option value="inherit">
-                  {format(m.editor.chapterReaderInheritOption, {
-                    category: m.editor.readerCategories[readerCategory(book.reader_age)]
-                  })}
-                </option>
-                {READER_CATEGORIES.map((category) => (
-                  <option key={category} value={category}>
-                    {m.editor.readerCategories[category]}
-                  </option>
-                ))}
-              </select>
-              {readerCategory(resolveReader(book, chapter)) !== "adult" ? (
-                <p className="reader-hint">{m.editor.readerTierHint}</p>
-              ) : null}
-            </div>
-          </div>
-          <ChapterCraftFields
-            bookPov={book.pov}
-            bookTense={book.tense}
-            bookViewpoint={book.viewpoint}
-            chapter={chapter}
-            chapters={chapters}
-            people={people}
-            recasting={recasting}
-            recastDisabled={recastDisabled}
-            onRecast={onRecast}
-            onPatch={onPatch}
+    <div className="chapter-settings-body">
+      <ChapterStartImageBanner image={startImage} onSet={onSetStartImage} onRemove={onRemoveStartImage} />
+      <div className="chapter-head-top">
+        <div className="craft-field">
+          <span>{m.editor.voice}</span>
+          {chapter.voice !== undefined ? (
+            <button type="button" className="text-button chapter-voice-reset" onClick={() => onPatch({ voice: undefined })}>
+              {m.editor.manuscript}
+            </button>
+          ) : null}
+          <textarea
+            value={chapter.voice ?? ""}
+            onChange={(event) => {
+              const next = event.target.value;
+              onPatch({ voice: next.trim() === "" ? undefined : next });
+            }}
+            placeholder={book.voice.trim() ? m.editor.chapterVoiceInherit : m.editor.voicePlaceholder}
+            rows={1}
+            aria-label={m.editor.chapterVoice}
           />
         </div>
-      ) : null}
+        <div className="craft-field reader-head-field">
+          <span>{m.editor.reader}</span>
+          <select
+            value={chapter.reader_age === undefined ? "inherit" : readerCategory(chapter.reader_age)}
+            title={m.editor.readerTitle}
+            aria-label={m.editor.chapterReader}
+            onChange={(event) => {
+              const choice = event.target.value;
+              const age = choice === "inherit" ? undefined : READER_TIER_AGE[choice as ReaderCategory];
+              onPatch({ reader_age: age });
+            }}
+          >
+            <option value="inherit">
+              {format(m.editor.chapterReaderInheritOption, {
+                category: m.editor.readerCategories[readerCategory(book.reader_age)]
+              })}
+            </option>
+            {READER_CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {m.editor.readerCategories[category]}
+              </option>
+            ))}
+          </select>
+          {readerCategory(resolveReader(book, chapter)) !== "adult" ? (
+            <p className="reader-hint">{m.editor.readerTierHint}</p>
+          ) : null}
+        </div>
+      </div>
+      <ChapterCraftFields
+        bookPov={book.pov}
+        bookTense={book.tense}
+        bookViewpoint={book.viewpoint}
+        chapter={chapter}
+        chapters={chapters}
+        people={people}
+        recasting={recasting}
+        recastDisabled={recastDisabled}
+        onRecast={onRecast}
+        onPatch={onPatch}
+      />
     </div>
   );
 }

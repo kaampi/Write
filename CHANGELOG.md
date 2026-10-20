@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.142] - 2026-10-20
+
+### Changed
+- Chapter settings and Scenes used to live inline above the chapter's prose, pushing it down whenever either was opened. Both now open as a floating popover instead — a ⚙️ and a 🎬 icon on each chapter row in the Chapters rail — laid on top of the manuscript rather than shrinking it, so the writing area keeps its full height. Opening either for a chapter other than the one currently open also switches to it, same as clicking the row itself, since the underlying actions (Recast, Draft/Recast/Analyze a scene) apply to whichever chapter is open.
+
 ## [1.0.141] - 2026-10-20
 
 ### Changed

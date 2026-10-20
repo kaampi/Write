@@ -30,21 +30,14 @@ export function ScenesPanel({
 }) {
   const { messages: m } = useLocale();
   const scenes = chapterScenes(chapter);
-  const [open, setOpen] = useState(scenes.length > 1);
   const [splitOpenId, setSplitOpenId] = useState<string | null>(null);
   const showSceneActions = scenes.length > 1 || !chapter.prose.trim();
   const canAddScene = (scenes[scenes.length - 1]?.prose.trim().length ?? 0) > 0;
 
   return (
     <div className="scenes-panel">
-      <button type="button" className="scenes-panel-toggle" aria-expanded={open} onClick={() => setOpen((on) => !on)}>
-        <span className="chevron" aria-hidden="true">
-          {open ? "▾" : "▸"}
-        </span>
-        {count(scenes.length, m.scenes.toggleCount)}
-      </button>
-      {open ? (
-        <ol className="scenes-list">
+      <p className="quiet scenes-panel-count">{count(scenes.length, m.scenes.toggleCount)}</p>
+      <ol className="scenes-list">
           {scenes.map((scene, index) => {
             const paragraphs = splitFlowParagraphs(scene.prose);
             const preview = scene.prose.trim().slice(0, PREVIEW_LEN);
@@ -145,18 +138,15 @@ export function ScenesPanel({
             );
           })}
         </ol>
-      ) : null}
-      {open ? (
-        <button
-          type="button"
-          className="text-button scenes-add"
-          disabled={!canAddScene}
-          title={canAddScene ? undefined : m.scenes.addSceneDisabledHint}
-          onClick={() => onPatch(addScene(chapter))}
-        >
-          {m.scenes.addScene}
-        </button>
-      ) : null}
+      <button
+        type="button"
+        className="text-button scenes-add"
+        disabled={!canAddScene}
+        title={canAddScene ? undefined : m.scenes.addSceneDisabledHint}
+        onClick={() => onPatch(addScene(chapter))}
+      >
+        {m.scenes.addScene}
+      </button>
     </div>
   );
 }

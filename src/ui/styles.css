@@ -5028,7 +5028,7 @@ button:disabled {
   pointer-events: auto;
 }
 
-.editor.is-maximized .chapter-settings,
+.editor.is-maximized .chapter-popover,
 .editor.is-maximized .manuscript > .chapter-title,
 .editor.is-maximized .manuscript > .synopsis-lede {
   display: none;
@@ -6395,25 +6395,6 @@ button.illustration-genre-item:focus-visible {
   }
 }
 
-.chapter-settings {
-  margin: 0 0 0.6rem;
-}
-
-.chapter-settings-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.35rem;
-  color: var(--text-dim);
-  font-size: 0.88rem;
-}
-
-.chapter-settings-toggle .chevron {
-  display: inline-block;
-  width: 0.8em;
-  font-size: 0.9em;
-}
-
 .chapter-settings-body {
   margin-top: 0.4rem;
 }
@@ -6422,19 +6403,47 @@ button.illustration-genre-item:focus-visible {
   margin: 0.6rem 0 0.9rem;
 }
 
-.scenes-panel-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.35rem;
-  color: var(--text-dim);
+.scenes-panel-count {
+  margin: 0 0 0.4rem;
   font-size: 0.88rem;
 }
 
-.scenes-panel-toggle .chevron {
-  display: inline-block;
-  width: 0.8em;
-  font-size: 0.9em;
+/*
+ * The ⚙️/🎬 popover for a chapter row in the Chapters rail (Chapter settings,
+ * Scenes) — Mats asked for something that "lägger sig ovanpå manuskriptet"
+ * (lays on top of the manuscript) rather than the old inline-expanding
+ * sections that pushed the prose down. Positioned via inline style (left/top
+ * computed from the clicked icon's own bounding rect, same convention
+ * ProseCanvas's selection-menu/format-toolbar already use), not anchored in
+ * normal flow, so it floats over the manuscript instead of claiming space
+ * from it. Capped height + its own scroll since Chapter settings/Scenes can
+ * run long (many scenes, a tall start-image banner) and the popover must
+ * never grow taller than the viewport.
+ */
+.chapter-popover {
+  position: fixed;
+  z-index: 45;
+  width: 22rem;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: 1rem 1.1rem 1.2rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.chapter-popover-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
+}
+
+.chapter-popover-head strong {
+  font-size: 0.95rem;
 }
 
 .scenes-list {
