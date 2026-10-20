@@ -2811,7 +2811,6 @@ button:disabled {
   margin-right: -8%;
   background: var(--panel);
   border: 1px solid var(--border-soft);
-  border-radius: 6px;
   padding: 1rem calc(8% + 1.5rem);
 }
 
@@ -4548,7 +4547,6 @@ button:disabled {
   padding: 0.7rem calc(8% + 1.5rem);
   background: var(--panel);
   border: 1px solid var(--border-soft);
-  border-radius: 6px;
 }
 
 .word-count {

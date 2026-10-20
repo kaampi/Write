@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.146] - 2026-10-20
+
+### Fixed
+- The chapter title bar and bottom toolbar had rounded corners left over from when they were narrow, centered cards — now that they're flush with the edges on all sides, those corners left small triangular slivers of the background peeking through at the top and bottom. Squared off.
+
 ## [1.0.145] - 2026-10-20
 
 ### Changed

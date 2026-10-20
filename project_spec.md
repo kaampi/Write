@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.145
+Status: living document, v1.0.146
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7120,6 +7120,31 @@ fönsrets nederkant — maximerat läge ser nu ut precis som Mats
 skärmdump.
 
 v1.0.144 → v1.0.145.
+
+
+**Ändringslogg v1.0.145 → v1.0.146 (2026-10-20): kvadratiska hörn på
+titelrad/menyrad.** Mats: "Vi närmar oss. DÅ har vi sidorna på top
+och botten kvar samt att editorn ska sträcka helt mellan topp och
+botten." Mätningarna från v1.0.145 visade redan att titelraden och
+menyraden låg exakt kloss mot kanterna (`getBoundingClientRect()`
+matchade fönstrets kanter perfekt) — det som faktiskt syntes i
+skärmdumpen var `border-radius: 6px` kvar från när de var smala,
+centrerade kort. Nu när båda ligger kant i kant med redigeringsytan
+på alla fyra sidor lämnar den rundade hörnradien en liten triangulär
+flik av stjärnhimlen synlig i varje hörn — det var "sidorna" Mats
+pekade på, inte en kvarvarande marginal.
+
+**Fix:** `border-radius: 6px` borttagen från både `.chapter-head` och
+`.manuscript-foot` — kvadratiska hörn på alla fyra sidor, ingen
+särskild hantering per hörn behövdes eftersom båda elementen redan är
+helt flush runt om.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright-skärmdump av maximerat
+läge bekräftar att hörnen nu är skarpa — ingen stjärnhimmel synlig i
+hörnen längre.
+
+v1.0.145 → v1.0.146.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
