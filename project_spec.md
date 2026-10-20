@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.150
+Status: living document, v1.0.151
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7289,6 +7289,32 @@ till höger, medan "Chapter 1"-titeln ovanför fortfarande ligger i
 linje med textspaltens vänsterkant.
 
 v1.0.149 → v1.0.150.
+
+
+**Ändringslogg v1.0.150 → v1.0.151 (2026-10-20): padding i prosan så
+text aldrig hamnar bakom toningen.** Mats initierade med en
+begreppskontroll ("Förstår du vad jag menar med textytan/editorn?")
+innan han beskrev problemet: "Jag tror vi behöver en padding i topp
+och botten så att man skrolla så att texten inte ligger bakom
+skuggan." Efter min bekräftelse av problemet (toningszonen är 44px
+hög, men `.prose`s egen padding bara 16px topp / 20px botten — en
+skrollad rad kunde alltså hamna inuti, och se blek ut, trots att det
+är text man faktiskt skriver/läser, inte bara en hint om mer
+innehåll) gav han exakta tal: "Paddingen kan vara topp 60 och botten
+80."
+
+**Fix:** `.prose`s `padding` ändrad från `1rem 1.5rem 1.25rem` till
+`60px 1.5rem 80px` — båda större än toningens 44px, så en skrollad-
+till-kanten textrad alltid hamnar utanför toningszonen, bara den
+tomma paddingen kan ligga "bakom" toningen.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: skrev lång text,
+skrollade till toppen respektive botten, skärmdumpar bekräftar att
+första/sista textraden har tydlig luft innan toningszonen börjar —
+ingen rad ser längre blek/dold ut vid kanterna.
+
+v1.0.150 → v1.0.151.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

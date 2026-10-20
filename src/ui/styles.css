@@ -3588,7 +3588,13 @@ button:disabled {
   font-family: var(--font-prose);
   font-size: 1.2rem;
   line-height: 1.65;
-  padding: 1rem 1.5rem 1.25rem;
+  /*
+   * Top/bottom padding taller than .prose-fade's own height (2.75rem/44px)
+   * so a scrolled-to-the-edge line of real text always clears the fade
+   * zone — the fade only ever covers blank padding, never text you're
+   * actually reading or writing.
+   */
+  padding: 60px 1.5rem 80px;
   color: var(--prose-body-color-dark, var(--text));
 }
 

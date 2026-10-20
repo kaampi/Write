@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.151] - 2026-10-20
+
+### Fixed
+- The prose text had too little breathing room at the top/bottom of the editable area, so a line could end up scrolled partway into the top/bottom fade overlay and look faded even though it was ordinary text, not a hint of more content. Increased the prose's own top/bottom padding (60px / 80px) past the fade's own height, so a scrolled-to-the-edge line always clears it.
+
 ## [1.0.150] - 2026-10-20
 
 ### Changed
