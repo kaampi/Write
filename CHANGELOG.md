@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.144] - 2026-10-20
+
+### Changed
+- The chapter title bar and the bottom toolbar row now span the full width of the editor, same cream/panel background edge to edge — matching the reference mockup. The prose column itself stays centered and narrower, so any editor background image still shows on both sides of it, just not behind the title bar or the toolbar row anymore.
+
 ## [1.0.143] - 2026-10-20
 
 ### Changed

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.143
+Status: living document, v1.0.144
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7032,6 +7032,51 @@ att toningen syns tydligt överst/underst i manusytan medan texten
 rullar under den.
 
 v1.0.142 → v1.0.143.
+
+
+**Ändringslogg v1.0.143 → v1.0.144 (2026-10-20): titelrad och
+menyrad fullbredd, som i mockupen.** Direkt uppföljning till
+toningsarbetet: "Jag vill också få till titelraden och menyraden som
+på mockupen." Mockupens titelrad (kapitelrubriken) och undre
+menyrad (ordräkning + Draft/Polish/osv) går ut kant i kant med hela
+redigeringsytan, medan själva manustexten ligger kvar i en smalare,
+centrerad spalt — bakgrundsbilden (t ex Vintergatan) syns alltså
+fortfarande på sidorna om textspalten, men inte längre bakom
+titelraden/menyraden.
+
+Den svarta ytterramen och den krämfärgade exakta kulören i mockupen
+tolkades fortfarande som illustrativa mockup-detaljer, inte ett
+uttryckligt krav — byggdes inte.
+
+**Implementation:** `.chapter-head` och `.manuscript-foot` var sedan
+tidigare smala kort (`align-self: center; max-width: 54rem`), samma
+bredd som textspalten, med `.manuscript`s egna `padding: 1.5rem 8%
+1rem` som skapade "panelerna" runt dem där bakgrundsbilden syns. Löst
+med en bleed-teknik: `margin-left/-right: -8%` på båda elementen
+upphäver exakt `.manuscript`s 8%-padding (samma procentbas, samma
+överordnade box) så att kortens bakgrundsfärg sträcker sig ända ut
+till `.manuscript`s kant, medan `padding: calc(8% + 1.5rem)` på
+samma elements insida håller innehållet (rubriktext, knapparna) kvar
+på exakt samma horisontella position som innan — bara bakgrundsfärgen
+flyttas ut, inte texten. Maximerat läge (`.editor.is-maximized`) hade
+redan ett undantag som höll `.manuscript-foot` smal och centrerad
+där; samma undantag utökades till att även gälla `.chapter-head`, så
+fullskärmsläget ser ut som förut (ingen ändring där). Board-varianten
+(`.manuscript-board .manuscript-foot`, används av Brainstorm/
+Disposition-vyerna) fick motsvarande justering så den fortsätter
+ligga kant i kant med sin egen, mycket smalare padding — inte påverkad
+av den nya 8%-bleeden.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright mot `npm run dev`: med
+Vintergatan som editorbakgrund, skärmdump bekräftar att titelraden
+och menyraden nu går kant i kant med redigeringsytan medan
+textspalten ligger kvar smal och centrerad i mitten — matchar
+mockupen. Kontrollerat även utan bakgrundsbild (standardläget) och i
+maximerat läge: inga regressioner, maximerat läge ser ut precis som
+innan ändringen.
+
+v1.0.143 → v1.0.144.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

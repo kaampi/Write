@@ -2803,14 +2803,16 @@ button:disabled {
 
 .chapter-head {
   flex: 0 0 auto;
-  align-self: center;
-  width: 100%;
-  max-width: 54rem;
+  align-self: stretch;
+  width: auto;
+  max-width: none;
   min-width: 0;
+  margin-left: -8%;
+  margin-right: -8%;
   background: var(--panel);
   border: 1px solid var(--border-soft);
   border-radius: 6px;
-  padding: 1rem 1.5rem;
+  padding: 1rem calc(8% + 1.5rem);
 }
 
 .chapter-threads {
@@ -4532,16 +4534,18 @@ button:disabled {
 
 .manuscript-foot {
   flex: 0 0 auto;
-  align-self: center;
-  width: 100%;
-  max-width: 54rem;
+  align-self: stretch;
+  width: auto;
+  max-width: none;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
   margin-top: 1rem;
-  padding: 0.7rem 1.5rem;
+  margin-left: -8%;
+  margin-right: -8%;
+  padding: 0.7rem calc(8% + 1.5rem);
   background: var(--panel);
   border: 1px solid var(--border-soft);
   border-radius: 6px;
@@ -5096,15 +5100,29 @@ button:disabled {
   margin-top: 0;
 }
 
+.editor.is-maximized .chapter-head,
 .editor.is-maximized .manuscript-foot {
   align-self: center;
   width: 100%;
   max-width: 54rem;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.editor.is-maximized .chapter-head {
+  padding: 1rem 1.5rem;
+}
+
+.editor.is-maximized .manuscript-foot {
+  padding: 0.7rem 1.5rem;
 }
 
 .editor.is-maximized .manuscript-board .manuscript-foot {
   align-self: stretch;
   max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0.7rem 1.5rem;
 }
 
 .visually-hidden {
