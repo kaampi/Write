@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.158] - 2026-10-20
+
+### Changed
+- The chapter row's remove button is now a trash can icon (🗑️) instead of a plain "×" — matches the size and style of the row's other icons (⚙️ settings, 🎬 scenes).
+
 ## [1.0.157] - 2026-10-20
 
 ### Fixed

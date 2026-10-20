@@ -1447,7 +1447,7 @@ export function Editor() {
                         });
                       }}
                     >
-                      ×
+                      🗑️
                     </button>
                   ) : null}
                 </div>

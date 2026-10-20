@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.157
+Status: living document, v1.0.158
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7509,6 +7509,28 @@ hörnet mot titelraden visar inget läckage, helbildsskärmdump
 bekräftar att skuggan fortfarande är tydligt synlig i sidled.
 
 v1.0.156 → v1.0.157.
+
+
+**Ändringslogg v1.0.157 → v1.0.158 (2026-10-20): soptunne-ikon för
+att ta bort kapitel.** Mats: "För att ta bort ett kapitel skulle jag
+vilja ha en soptunna i samma storlek som de andra ikonerna (kugghjul
+och scenklappa)." Knappen för att ta bort ett kapitel (i
+`.chapter-row-tools`, bredvid ⚙️/🎬) fanns redan — den kör
+`discardChapter` (mjuk borttagning, hamnar i "Discarded chapters"-
+listan, går att återställa) — men visade ett enkelt "×"-tecken, som
+är ett tunt textglyf och därför ser mindre/olikt ut jämfört med de
+fylliga emoji-ikonerna ⚙️/🎬 även vid samma CSS `font-size`.
+
+**Fix:** Bytte "×" mot 🗑️ i den knappen. Rörde inte den separata
+"×"-knappen i den egna "Discarded chapters"-listan (permanent
+borttagning av redan kasserade kapitel) — Mats syftade uttryckligen
+på raden med kugghjul/scenklapp-ikonerna, inte den listan.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: inzoomad skärmdump av
+en kapitelrad bekräftar att 🗑️ nu matchar ⚙️/🎬 i storlek och stil.
+
+v1.0.157 → v1.0.158.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
