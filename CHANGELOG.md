@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.138] - 2026-10-20
+
+### Changed
+- The bottom bar (word count, highlight toggles, Draft/Polish/Stats/etc. buttons) used to sit directly on the manuscript background — now boxed in its own panel, same treatment as the chapter-head card and the left/right rails, so it reads cleanly against any editor background.
+
 ## [1.0.137] - 2026-10-20
 
 ### Added

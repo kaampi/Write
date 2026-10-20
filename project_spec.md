@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.137
+Status: living document, v1.0.138
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6740,6 +6740,30 @@ vid parsning. `tsc --noEmit`, hela testsviten (1084 test, 80 filer),
 `npm run build` — alla rena.
 
 v1.0.136 → v1.0.137.
+
+**Ändringslogg v1.0.137 → v1.0.138 (2026-10-20):** Mats, direkt efter
+att se bakgrundsfunktionen: "Textlänkarna och knapparna längst ner
+borde ligga på en panelbakrund likt höger och vänster." `.manuscript-
+foot` (ordräkning, highlight-togglarna, Draft/Polish/Stats/Analyze/
+History-knapparna) låg bart direkt på `.manuscript`-bakgrunden, bara
+avskilt med en tunn `border-top`-linje — samma problem som
+kapitelhuvudet hade innan förra ändringen.
+
+**Rättning:** `.manuscript-foot` fick samma boxbehandling som
+`.chapter-head` och `.prose-body` (`background: var(--panel)`,
+`border`, `border-radius`, padding runt om istället för bara
+`border-top`), plus `align-self: center; max-width: 54rem` så den
+är lika bred och centrerad som boxarna ovanför den — tidigare sträckte
+den sig hela `.manuscript`:s bredd (synligt bara på breda fönster;
+en redan existerande `.editor.is-maximized .manuscript-foot`-regel
+hade för övrigt redan satt exakt samma centrering för maximerat läge,
+vilket bekräftade att detta var rätt riktning, inte en gissning).
+
+**Verifiering:** Playwright-skärmdump mot Vintergatan-bakgrunden —
+fotraden syns nu som en tydlig, konsekvent panel-box. `tsc --noEmit`
+och hela testsviten (1084 test, 80 filer) rent.
+
+v1.0.137 → v1.0.138.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

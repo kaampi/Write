@@ -4402,12 +4402,19 @@ button:disabled {
 
 .manuscript-foot {
   flex: 0 0 auto;
+  align-self: center;
+  width: 100%;
+  max-width: 54rem;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  padding-top: 0.7rem;
-  border-top: 1px solid var(--border-soft);
+  margin-top: 1rem;
+  padding: 0.7rem 1.5rem;
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
 }
 
 .word-count {
