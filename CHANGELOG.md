@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.136] - 2026-10-20
+
+### Fixed
+- The bordered editing surface from v1.0.135 only wrapped tightly around whatever text was already there, so a short chapter looked like a small boxed input rather than a page — the border stopped right after the last line instead of reaching toward the bottom of the available space. It now fills the full visible height by default (and keeps growing — scrolling inside, as before — once the text outgrows that).
+
 ## [1.0.135] - 2026-10-20
 
 ### Changed

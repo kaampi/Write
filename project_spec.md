@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.135
+Status: living document, v1.0.136
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -6652,6 +6652,34 @@ skärmdump som visar padding och ram tydligt, bekräftade pixelexakt
 justering av highlight-overlayn enligt ovan.
 
 v1.0.134 → v1.0.135.
+
+**Ändringslogg v1.0.135 → v1.0.136 (2026-10-20):** Mats, direkt efter
+att se en skärmdump av v1.0.135: "Visst löper sidan hela vägen ner?
+På den bild du skapade såg det ut som om innehålssrutan var en input
+box... typ." Helt rätt observation — `.prose` sizar bara till sitt
+eget textinnehåll (vanligt block-element), så med kort text slutade
+ramen strax under sista textraden istället för att nå ner mot botten
+av det synliga området, precis som en liten `<textarea>` snarare än
+en sida.
+
+**Rättning:** `.prose-body` (den positionerande föräldern, redan
+`flex`-barn i `.prose-wrap`) fick `flex: 1 1 auto` så den fyller allt
+kvarvarande utrymme i den scrollande `.prose-wrap`-kolumnen; `.prose`
+fick `min-height: 100%` så ramen/paddingen alltid når ner till botten
+av det synliga området — men fortfarande bara ett golv, inte ett tak:
+växer texten förbi det scrollar `.prose-wrap` som vanligt. Overlayn
+`.prose-rare` (`inset: 0` på `.prose-body`) följer automatiskt med
+eftersom den redan fyller sin förälders hela box.
+
+**Verifiering:** Playwright mot `npm run dev` — tomt kapitel (ramen
+sträckte sig från y≈336 till y≈760 i en 900px-vy, mot tidigare att
+sluta direkt under texten), sedan 720 ord text (boxen växte till
+~2572px scrollhöjd mot 425px synlig höjd, scrollade korrekt), och en
+ny jämförelse av `.prose`/`.prose-rare`:s `getBoundingClientRect()`
+i båda lägena — fortsatt identiska. `tsc --noEmit` och hela
+testsviten (1083 test, 80 filer) rent.
+
+v1.0.135 → v1.0.136.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
