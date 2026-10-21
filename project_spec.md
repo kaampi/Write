@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.158
+Status: living document, v1.0.159
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7531,6 +7531,49 @@ filer) grön, `npm run build` rent. Playwright: inzoomad skärmdump av
 en kapitelrad bekräftar att 🗑️ nu matchar ⚙️/🎬 i storlek och stil.
 
 v1.0.157 → v1.0.158.
+
+
+**Ändringslogg v1.0.158 → v1.0.159 (2026-10-21): brief-kortet växer
+inte med lång text — två CSS-fallgropar samtidigt.** Mats klistrade
+in en lång, scen-för-scen-briefing för kapitel 1 (fyra scener +
+"Chapter purpose") på Briefs-tavlan och frågade: "Har jag skrivit
+för långt eller ska korten få bli större?" Inte hans fel — svaret
+var ett genuint buggigt kort, inte en för lång text.
+
+**Undersökning:** Skärmdump visade texten rinna rakt igenom kortets
+egen kant och ner i verktygsfältet under — trots att
+`.brief-card-copy` hade `overflow: visible` (ingen synlig
+klippning-regel). Mätning med `getBoundingClientRect()` bekräftade:
+`.brief-card`s egen renderade höjd stannade på exakt `min-height`
+(192px) medan textens `scrollHeight` behövde 816px.
+
+**Grundorsak, två separata CSS-fallgropar samtidigt:**
+1. `.brief-card-copy` hade `flex: 1` — kortformen för `flex-grow:1;
+   flex-shrink:1; flex-basis:0%`. En `flex-basis` på `0%` säger åt
+   webbläsaren att IGNORERA elementets eget innehåll vid
+   storleksberäkningen och istället fördela det utrymme som redan
+   finns i föräldern — men föräldern (`.brief-card`) har ingen egen
+   fast höjd, den ska ju själv växa EFTER barnens innehåll. Cirkulärt:
+   ingen sida vågade växa efter den andra.
+2. `.brief-board` (CSS Grid) hade `align-items` på standardvärdet
+   `stretch` — varje korts höjd låstes till radens beräknade höjd
+   innan den egna texten hunnit bidra till den beräkningen.
+
+**Fix:** `.brief-card-copy`s `flex: 1` → `flex: 1 1 auto` (basis på
+innehållets egen storlek istället för 0%), plus `align-items: start`
+tillagt på `.brief-board` (korten stretchar inte längre till en
+radhöjd som räknades ut för tidigt). Båda ändringarna krävdes
+samtidigt — vardera för sig löste inte hela problemet (kontrollerat
+under felsökningen: bara flex-basis-fixen gav fortfarande 192px).
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: klistrade in exakt
+Mats text, mätte att kortets höjd nu överstiger textens `scrollHeight`
+(873px vs 816px), och en skärmdump efter nedskrollning i tavlan
+bekräftar att kortets kant nu sluter rent runt hela texten, inklusive
+sista raden ("...assignment.").
+
+v1.0.158 → v1.0.159.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

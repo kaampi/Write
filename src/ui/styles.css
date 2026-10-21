@@ -2430,6 +2430,7 @@ button:disabled {
   grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
   gap: 0.85rem;
   align-content: start;
+  align-items: start;
   flex: 1;
   min-height: 0;
   overflow: auto;
@@ -2511,7 +2512,15 @@ button:disabled {
 }
 
 .brief-card-copy {
-  flex: 1;
+  /*
+   * flex: 1 (flex-basis: 0%) tells the browser to size this box from the
+   * flex container's available space, ignoring its own content for sizing
+   * purposes — fine when the content fits, but a long brief then just
+   * overflows invisibly below the box instead of growing the card.
+   * flex-basis: auto makes the box's own content the starting size, so a
+   * long brief grows .brief-card (and the grid row it's in) to fit.
+   */
+  flex: 1 1 auto;
   min-height: 4.5rem;
 }
 

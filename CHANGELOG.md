@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.159] - 2026-10-21
+
+### Fixed
+- Briefs board: a chapter card with a long brief grows to fit it now, instead of the text silently overflowing past the card's own border into whatever sat below it. Two flexbox/grid sizing defaults were fighting the card's natural content-based height — both fixed.
+
 ## [1.0.158] - 2026-10-20
 
 ### Changed
