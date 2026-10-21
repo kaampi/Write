@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MANUSCRIPT_EXPORT_FORMAT, MANUSCRIPT_EXPORT_KIND, parseManuscriptExport } from "@ocedo-apps/storycore";
 import { addChapter, createBook, updateChapter } from "@core/BookSchema";
-import { splitSceneAtParagraph, updateSceneMeta } from "@core/bookScene";
+import { addScene, splitSceneAtParagraph, updateSceneMeta } from "@core/bookScene";
 import { manuscriptAppExportFilename, packManuscriptExport } from "@core/manuscriptAppExport";
 import type { NarrativeFact } from "@core/NarrativeFact";
 
@@ -117,6 +117,18 @@ describe("packManuscriptExport", () => {
     expect(exported.scenes[1]?.title).toBe("The storm breaks");
     expect(exported.scenes[1]?.description).toBe("Rain hit the windows.");
     expect(exported.scenes[1]?.instructions).toBe("Must establish the leak.");
+  });
+
+  it("drops a trailing placeholder scene (added but never drafted into) from the export", () => {
+    let book = createBook("Night Keys");
+    const chapterId = book.chapters[0]!.id;
+    book = updateChapter(book, chapterId, { prose: "Emma locked the door." });
+    const chapter = book.chapters[0]!;
+    book = updateChapter(book, chapterId, { scenes: addScene(chapter) });
+
+    const exported = packManuscriptExport(book).chapters[0]!;
+    expect(exported.scenes).toHaveLength(1);
+    expect(exported.scenes[0]?.description).toBe("Emma locked the door.");
   });
 });
 

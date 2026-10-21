@@ -1,5 +1,5 @@
 import { parseBook, sortedChapters, type Book } from "./BookSchema";
-import { chapterScenes } from "./bookScene";
+import { exportableScenes } from "./bookScene";
 import { SANDBOX_LIBRARY_KIND } from "./sandboxExport";
 import { slugify } from "./ids";
 import { buildManuscriptExport, formatExportMarkdown } from "./manuscriptExport";
@@ -74,7 +74,7 @@ function buildAdaptationChapters(book: Book): ManuscriptBackupChapter[] {
     title: chapter.title,
     brief: chapter.brief,
     prose: chapter.prose,
-    scenes: chapterScenes(chapter).map((scene) => ({
+    scenes: exportableScenes(chapter).map((scene) => ({
       id: scene.id,
       sequence_index: scene.sequence_index,
       ...(scene.title ? { title: scene.title } : {}),

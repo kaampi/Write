@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createBook, createChapter, discardChapter, touch, updateChapter } from "@core/BookSchema";
-import { splitSceneAtParagraph, updateSceneMeta } from "@core/bookScene";
+import { addScene, splitSceneAtParagraph, updateSceneMeta } from "@core/bookScene";
 import {
   formatManuscriptMarkdown,
   MANUSCRIPT_BACKUP_FORMAT,
@@ -183,6 +183,18 @@ describe("manuscript backup", () => {
     expect(exported.scenes[1]?.title).toBe("The storm breaks");
     expect(exported.scenes[1]?.description).toBe("Rain hit the windows.");
     expect(exported.scenes[1]?.instructions).toBe("Must establish the leak.");
+  });
+
+  it("drops a trailing placeholder scene (added but never drafted into) from adaptationChapters", () => {
+    let book = createBook("Night Keys");
+    const chapterId = book.chapters[0]!.id;
+    book = updateChapter(book, chapterId, { prose: "Emma locked the door." });
+    const chapter = book.chapters[0]!;
+    book = updateChapter(book, chapterId, { scenes: addScene(chapter) });
+
+    const exported = packManuscriptBackup(book).adaptationChapters[0]!;
+    expect(exported.scenes).toHaveLength(1);
+    expect(exported.scenes[0]?.description).toBe("Emma locked the door.");
   });
 
   it("derives adaptationChapters fresh when reading a format-1 backup that has no such field", () => {

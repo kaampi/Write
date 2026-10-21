@@ -83,6 +83,21 @@ export function chapterScenes(chapter: Chapter): BookScene[] {
   });
 }
 
+/**
+ * `chapterScenes`, minus trailing placeholder scenes an author added with
+ * `addScene` but hasn't drafted into yet (empty prose, no title, no brief
+ * — see `addScene`'s doc comment). For an export consumed outside this
+ * app (comic adaptation, backup round-trip), an empty slot waiting for
+ * prose is noise, not a scene. Always keeps at least one scene, so a
+ * genuinely empty chapter still exports its single synthetic scene.
+ */
+export function exportableScenes(chapter: Chapter): BookScene[] {
+  const scenes = chapterScenes(chapter);
+  const real = scenes.filter((scene) => scene.prose.trim() !== "" || scene.title || scene.brief);
+  const kept = real.length > 0 ? real : scenes.slice(0, 1);
+  return kept.map((scene, index) => ({ ...scene, sequence_index: index }));
+}
+
 /** A chapter's own scenes, id -> position within it — for comparing a fact's `scene_id` against a scene-targeted Draft/Recast pass (see `ScenePosition` in `visibility.ts`). */
 export function sceneIndexById(chapter: Chapter): Map<string, number> {
   return new Map(chapterScenes(chapter).map((scene) => [scene.id, scene.sequence_index]));

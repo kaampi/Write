@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.163
+Status: living document, v1.0.164
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7815,6 +7815,57 @@ GitHub-repo, lades till i sessionen via `add_repo`):**
 ordning/titel/beskrivning/instruktioner). `npm run build` rent.
 
 v1.0.162 → v1.0.163.
+
+**Ändringslogg v1.0.164 (2026-10-21): två buggrapporter från Mats
+(vidarebefordrade från ChatGPT, som utvecklar ComicBook AI) på den
+nyss korrigerade v1.0.163-exporten:**
+
+1. "Versionsnumret. Filen anger fortfarande format: 1." — Undersökte
+   grundligt: `grep` i `node_modules/@ocedo-apps/storycore/dist/schema.js`
+   bekräftade `MANUSCRIPT_EXPORT_FORMAT = 2` i det installerade paketet;
+   en ren `npm run build` lyckades; ett försök att anropa
+   `packManuscriptExport` direkt via `npx tsx -e "..."` misslyckades med
+   ett ovidkommande verktygsfel (tsx:s Node-baserade loader kan inte
+   tolka ett `.ttf`-typsnittsimport som dras in via importkedjan — Vites
+   asset-hantering saknas i tsx). Verifierade istället via ett
+   engångstest i vitest (som redan har korrekt asset-loader-konfiguration
+   via projektets Vite-config): `packManuscriptExport(createBook(...))
+   .format` loggades till `2`, kind till `"storycore.manuscript-export"`.
+   Koden är alltså korrekt — den fil Mats/ChatGPT testade mot var med
+   stor sannolikhet en export tagen innan v1.0.163 byggdes om i
+   webbläsaren (samma mönster som brief-kort-buggen tidigare i projektet,
+   där en hård omladdning behövdes).
+2. "En tom scen i kapitel 1. Den femte scenposten saknar både text och
+   instruktion." — Detta var en riktig bugg, inte ett testmiljöproblem.
+   Rotorsak hittad i `bookScene.ts`s egen dokumentationskommentar:
+   `addScene` lägger medvetet till en PLATSHÅLLAR-scen i slutet av ett
+   kapitel (`startParagraph: paragraphs.length`, dvs noll paragrafer) —
+   en "scen som väntar på sitt eget utkast" som författaren kan skriva in
+   i senare. `normalizeSceneMetas` filtrerar INTE bort den (en split
+   exakt VID `paragraphCount` överlever avsiktligt, enligt kommentaren)
+   eftersom den är legitim i den egna Scener-panelen. Men en sådan tom
+   platshållare har inget värde i en export till en annan app — varken
+   för ComicBook AI:s beatförslag eller för backup-läsaren.
+   Fix: ny delad hjälpfunktion `exportableScenes(chapter)` i
+   `bookScene.ts`, som kör `chapterScenes(chapter)` och sedan filtrerar
+   bort scener utan prosa OCH utan titel OCH utan brief — men behåller
+   alltid minst en scen (en genuint tom kapitel-platshållare exporteras
+   fortfarande som sin enda scen, annars skulle ett helt nyskapat kapitel
+   exportera noll scener). De kvarvarande scenerna omnumreras
+   (`sequence_index`) så ordningen blir sammanhängande även om en scen
+   mitt i listan filtrerades bort. Används nu istället för
+   `chapterScenes(chapter)` direkt i både `manuscriptAppExport.ts`s
+   `packManuscriptExport` och `manuscriptBackup.ts`s
+   `buildAdaptationChapters` — samma fix på båda ställena som v1.0.162/
+   v1.0.163 redan höll synkroniserade.
+
+**Verifiering:** `tsc --noEmit` rent. 2 nya test (ett i
+`manuscript-app-export.test.ts`, ett i `manuscript-backup.test.ts`) som
+bygger ett kapitel med `addScene` och kontrollerar att platshållar-scenen
+inte finns med i exporten — hela testsviten 1111 test, 81 filer, grön.
+`npm run build` rent.
+
+v1.0.163 → v1.0.164.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

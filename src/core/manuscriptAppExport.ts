@@ -8,7 +8,7 @@ import {
   type ManuscriptExport
 } from "@ocedo-apps/storycore";
 import { groupFacts } from "./bibleGroups";
-import { chapterScenes } from "./bookScene";
+import { exportableScenes } from "./bookScene";
 import { sortedChapters, type Book } from "./BookSchema";
 import { profileFor } from "./characterProfile";
 import { picturesFor } from "./entityMedia";
@@ -69,7 +69,7 @@ export function packManuscriptExport(book: Book, exportedAt = new Date().toISOSt
       title: chapter.title,
       prose: chapter.prose,
       brief: chapter.brief,
-      scenes: chapterScenes(chapter).map(
+      scenes: exportableScenes(chapter).map(
         (scene): ExportedScene => ({
           id: scene.id,
           sequence_index: scene.sequence_index,

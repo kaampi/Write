@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.164] - 2026-10-21
+
+### Fixed
+- The cross-app export ("Export for other apps") and the manuscript backup's `adaptationChapters` could include a trailing scene with no text and no instructions — an "add scene" placeholder the author hadn't written into yet. Both now leave it out (a chapter keeps at least one real scene regardless).
+
 ## [1.0.163] - 2026-10-21
 
 ### Fixed
