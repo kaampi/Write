@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.162] - 2026-10-21
+
+### Added
+- The manuscript backup JSON (format bumped 1 → 2) now also includes `adaptationChapters`: every live chapter in reading order, each with its id, title, brief, full prose, and its scenes (id, order, title, the scene's own prose as `description`, and its writing instruction as `instructions`) — built for an external comic-adaptation tool to read directly, without having to re-derive chapter/scene order or filter out discarded chapters itself. The existing `book` field is untouched, so restoring an old or new backup into StoryBook AI behaves identically either way.
+
 ## [1.0.161] - 2026-10-21
 
 ### Added

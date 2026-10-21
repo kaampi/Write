@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createBook, updateChapter } from "@core/BookSchema";
+import { createBook, createChapter, discardChapter, touch, updateChapter } from "@core/BookSchema";
+import { splitSceneAtParagraph, updateSceneMeta } from "@core/bookScene";
 import {
   formatManuscriptMarkdown,
   MANUSCRIPT_BACKUP_FORMAT,
@@ -121,6 +122,80 @@ describe("manuscript backup", () => {
     expect(manuscriptNeedsJsonBackup("2026-09-18T21:00:00.000Z", "2026-09-17T21:00:00.000Z")).toBe(true);
     expect(manuscriptNeedsJsonBackup("2026-09-18T21:00:00.000Z", "2026-09-18T21:00:00.000Z")).toBe(false);
     expect(manuscriptNeedsJsonBackup("2026-09-18T20:00:00.000Z", "2026-09-18T21:00:00.000Z")).toBe(false);
+  });
+
+  it("exports adaptationChapters in reading order, excluding discarded chapters", () => {
+    let book = createBook("Night Keys");
+    const ch1 = book.chapters[0]!;
+    const ch2 = createChapter(1, "The crossing");
+    const ch3 = createChapter(2, "The quay");
+    // Stored out of reading order on purpose, same as a real reorder would leave it.
+    book = { ...book, chapters: [ch3, ch1, ch2] };
+    book = discardChapter(book, ch2.id);
+
+    const packed = packManuscriptBackup(book);
+    expect(packed.adaptationChapters.map((chapter) => chapter.id)).toEqual([ch1.id, ch3.id]);
+    // discardChapter reindexes the remaining live chapters to stay compact.
+    expect(packed.adaptationChapters.map((chapter) => chapter.sequence_index)).toEqual([0, 1]);
+  });
+
+  it("carries a chapter's brief verbatim, empty or not", () => {
+    let book = createBook("Night Keys");
+    const chapterId = book.chapters[0]!.id;
+    book = updateChapter(book, chapterId, { brief: "Open on the flooded quay." });
+    const withBrief = packManuscriptBackup(book).adaptationChapters[0];
+    expect(withBrief?.brief).toBe("Open on the flooded quay.");
+
+    const untouched = packManuscriptBackup(createBook("Night Keys")).adaptationChapters[0];
+    expect(untouched?.brief).toBe("");
+  });
+
+  it("gives an unsplit chapter a single scene spanning its whole prose", () => {
+    let book = createBook("Night Keys");
+    const chapterId = book.chapters[0]!.id;
+    book = updateChapter(book, chapterId, { prose: "Emma locked the door." });
+    const chapter = packManuscriptBackup(book).adaptationChapters[0]!;
+    expect(chapter.scenes).toHaveLength(1);
+    expect(chapter.scenes[0]?.description).toBe("Emma locked the door.");
+    expect(chapter.scenes[0]?.title).toBeUndefined();
+    expect(chapter.scenes[0]?.instructions).toBeUndefined();
+  });
+
+  it("carries each explicit scene's id, order, title, description, and instructions", () => {
+    let book = createBook("Night Keys");
+    const chapterId = book.chapters[0]!.id;
+    book = updateChapter(book, chapterId, { prose: "Emma locked the door.\n\nRain hit the windows." });
+    let chapter = book.chapters[0]!;
+    const scenes = splitSceneAtParagraph(chapter, 1);
+    book = updateChapter(book, chapterId, { scenes });
+    chapter = book.chapters.find((item) => item.id === chapterId)!;
+    const secondSceneId = scenes[1]!.id;
+    book = updateChapter(book, chapterId, {
+      scenes: updateSceneMeta(chapter, secondSceneId, { title: "The storm breaks", brief: "Must establish the leak." })
+    });
+
+    const exported = packManuscriptBackup(book).adaptationChapters[0]!;
+    expect(exported.scenes).toHaveLength(2);
+    expect(exported.scenes[0]?.description).toBe("Emma locked the door.");
+    expect(exported.scenes[0]?.sequence_index).toBe(0);
+    expect(exported.scenes[1]?.id).toBe(secondSceneId);
+    expect(exported.scenes[1]?.sequence_index).toBe(1);
+    expect(exported.scenes[1]?.title).toBe("The storm breaks");
+    expect(exported.scenes[1]?.description).toBe("Rain hit the windows.");
+    expect(exported.scenes[1]?.instructions).toBe("Must establish the leak.");
+  });
+
+  it("derives adaptationChapters fresh when reading a format-1 backup that has no such field", () => {
+    const book = (() => {
+      let b = createBook("Night Keys");
+      b = updateChapter(b, b.chapters[0]!.id, { prose: "Emma locked the door.", brief: "Open cold." });
+      return touch(b, {});
+    })();
+    const legacyRow = { kind: MANUSCRIPT_BACKUP_KIND, format: 1, exportedAt: "2026-09-18T21:00:00.000Z", note: "", book };
+    const parsed = parseManuscriptBackup(JSON.parse(JSON.stringify(legacyRow)));
+    expect(parsed.adaptationChapters).toHaveLength(1);
+    expect(parsed.adaptationChapters[0]?.brief).toBe("Open cold.");
+    expect(parsed.adaptationChapters[0]?.scenes[0]?.description).toBe("Emma locked the door.");
   });
 
   it("keeps a typed file name and forces the extension", () => {

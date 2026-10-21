@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.161
+Status: living document, v1.0.162
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7666,6 +7666,77 @@ fakta, klickade Remove, bekräftade dialogrutans exakta text, och att
 (inga fakta kvar).
 
 v1.0.160 → v1.0.161.
+
+
+**Ändringslogg v1.0.161 → v1.0.162 (2026-10-21): JSON-exporten utökad
+för serieadaption i ComicBook AI.** Detaljerad specifikation från
+Mats: utöka StorybookAI JSON-export med `brief` och `scenes` per
+kapitel (ID, titel, beskrivning, ev beats/instruktioner), behåll
+alla befintliga exportfält, stabila ID:n och korrekt ordning,
+konsekvent hantering av tomma briefs/scenlistor, bevara prose/Story
+Bible/bilder/illustrationsstil/metadata, och bakåtkompatibilitet
+helst via nytt format/versionnummer. Uppmanad att först kontrollera
+de faktiska fältnamnen i datamodellen innan strukturen bestämdes.
+
+**Undersökning — vilken export är "StorybookAI JSON-export"?** Tre
+kandidater fanns i kodbasen: `sandboxExport.ts` (lossy rollspels-
+kort, fel använda typ helt), `manuscriptExport.ts`s `ManuscriptExport`
+(intern struktur som bara driver PDF/EPUB/RTF/ODT/Markdown/IDML-
+formatterarna — aldrig en egen nedladdningsbar JSON-fil, och
+utelämnar bilder/galleri/illustrationsstil helt), och
+`manuscriptBackup.ts`s `ManuscriptBackup` (kind `"storybook-ai.
+manuscript"`, den faktiska "Export backup"-knappen i FILE-menyn).
+Bara den sista matchar kravet "Bevara all befintlig data: prose,
+Story Bible, bilder, illustrationsstil och övriga metadata" — den
+är redan `{kind, format, book: Book, ...}`, en rå dump av HELA den
+interna datamodellen.
+
+**Viktigt delfynd:** `Chapter` har redan `brief: string` och
+`scenes?: SceneMeta[]` som egna fält — en rå backup-fil innehåller
+alltså redan dessa data tekniskt sett. Men `book.chapters` lagras
+INTE förgarnterat i läsordning (kräver `sortedChapters()` för rätt
+ordning) och innehåller även kasserade kapitel (`discarded_at`) —
+en extern konsument som naivt itererade den råa arrayen skulle få
+fel kapitelordning OCH se bortkastade kapitel som författaren
+uttryckligen tagit bort. Dessutom beräknas en scens faktiska
+textinnehåll ALDRIG lagrat — `chapterScenes(chapter)` delar upp
+`chapter.prose` vid lagrade brytpunkter i farten; ett kapitel utan
+explicita scenbrytningar har `scenes: undefined` men
+`chapterScenes()` syntetiserar då EN scen som täcker hela kapitlet
+(aldrig en tom lista för ett kapitel med text).
+
+**Designval:** Rörde INTE `book`-fältet alls — `parseManuscriptBackup`
+(återställning/restore i StoryBook självt) läser bara `book`, så en
+gammal (format 1) och ny (format 2) backup-fil återställs identiskt;
+`MANUSCRIPT_BACKUP_FORMAT` höjdes 1→2 enbart för att signalera det
+nya fältets närvaro. La till ett nytt, SIDÅT fält
+`adaptationChapters: ManuscriptBackupChapter[]` — inte döpt
+`chapters` för att undvika förväxling med `book.chapters` i samma
+fil. Byggs via `sortedChapters(book)` (rätt ordning, kasserade
+exkluderade) + `chapterScenes(chapter)` (riktigt textinnehåll, aldrig
+tom för ett kapitel med prosa) per scen: `id`, `sequence_index`,
+`title?`, `description` (scenens egen text — "vad som faktiskt
+händer"), `instructions?` (scenens `brief` — fokusinstruktioner/
+obligatoriska händelser). Kapitel-nivå: `id`, `sequence_index`,
+`title`, `brief` (alltid närvarande, `""` om tomt — "konsekvent" per
+kravet), `prose`, `scenes`. `parseManuscriptBackup` beräknar
+`adaptationChapters` FÄRSKT från den inlästa `book` snarare än att
+lita på filens egna värde — håller det alltid i synk, fungerar även
+för en gammal format-1-fil som saknar fältet helt.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1105 test, 81
+filer) grön — sex nya tester i `manuscript-backup.test.ts`: rätt
+ordning + kasserade kapitel exkluderade (med omindexering kontrollerad
+— `discardChapter` packar om kvarvarande `sequence_index` till
+sammanhängande, testet uppdaterat för att matcha det verkliga, korrekta
+beteendet snarare än mitt första, felaktiga antagande), tomt/ifyllt
+brief, ett odelat kapitel får exakt en scen som täcker hela prosan,
+en explicit uppdelning ger rätt antal/ordning/titel/beskrivning/
+instruktioner, och ett simulerat format-1-objekt (utan
+`adaptationChapters` alls) ger ändå korrekt färskt beräknat resultat
+vid inläsning. `npm run build` rent.
+
+v1.0.161 → v1.0.162.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

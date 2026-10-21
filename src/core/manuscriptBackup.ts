@@ -1,10 +1,61 @@
-import { parseBook, type Book } from "./BookSchema";
+import { parseBook, sortedChapters, type Book } from "./BookSchema";
+import { chapterScenes } from "./bookScene";
 import { SANDBOX_LIBRARY_KIND } from "./sandboxExport";
 import { slugify } from "./ids";
 import { buildManuscriptExport, formatExportMarkdown } from "./manuscriptExport";
 
 export const MANUSCRIPT_BACKUP_KIND = "storybook-ai.manuscript";
-export const MANUSCRIPT_BACKUP_FORMAT = 1;
+/**
+ * Format 2 adds `adaptationChapters` (below) alongside the unchanged `book`
+ * field — for an external reader (e.g. a comic-adaptation tool) that wants
+ * chapters/scenes in reading order without having to know `book.chapters`
+ * isn't stored pre-sorted or pre-filtered of discarded chapters. `book`
+ * itself is untouched by the bump: restore (parseManuscriptBackup) only
+ * ever reads `book`, so a format-1 backup and a format-2 backup round-trip
+ * through this app identically — the new field is additive, read by
+ * external consumers only.
+ */
+export const MANUSCRIPT_BACKUP_FORMAT = 2;
+
+/** One scene within an `adaptationChapters` entry — see its own doc comment. */
+export type ManuscriptBackupScene = {
+  id: string;
+  sequence_index: number;
+  /** Missing when the author never titled this scene. */
+  title?: string;
+  /**
+   * The scene's own slice of the chapter's prose — the source of "what
+   * actually happens" at scene granularity. Always present, even if empty
+   * (a scene with no prose yet still exports as "", not an omitted field).
+   */
+  description: string;
+  /** The scene's own writing instruction (SceneMeta.brief) — focus notes, required beats, anything editorial for this scene only. Missing when none was written. */
+  instructions?: string;
+};
+
+/**
+ * One chapter, pre-sorted into reading order and pre-filtered of discarded
+ * chapters — unlike `book.chapters`, which stores both in insertion order
+ * and needs `sortedChapters`/`isLiveChapter` to read correctly. Built for
+ * an external reader that wants to walk chapters and scenes directly
+ * without reimplementing those two rules.
+ */
+export type ManuscriptBackupChapter = {
+  id: string;
+  sequence_index: number;
+  title: string;
+  /** chapter.brief verbatim — always present, "" when the author left it empty. */
+  brief: string;
+  /** chapter.prose verbatim. */
+  prose: string;
+  /**
+   * Always at least one entry — a chapter the author never explicitly
+   * split into scenes still gets a single scene spanning its whole prose
+   * (same convention `chapterScenes` uses everywhere else in the app), so
+   * this is never an empty array for a chapter with any prose at all.
+   */
+  scenes: ManuscriptBackupScene[];
+};
 
 export type ManuscriptBackup = {
   kind: typeof MANUSCRIPT_BACKUP_KIND;
@@ -12,7 +63,26 @@ export type ManuscriptBackup = {
   exportedAt: string;
   note: string;
   book: Book;
+  /** See ManuscriptBackupChapter's doc comment. Missing on a format-1 backup read by a format-2-aware parser — treat that the same as an empty array. */
+  adaptationChapters: ManuscriptBackupChapter[];
 };
+
+function buildAdaptationChapters(book: Book): ManuscriptBackupChapter[] {
+  return sortedChapters(book).map((chapter) => ({
+    id: chapter.id,
+    sequence_index: chapter.sequence_index,
+    title: chapter.title,
+    brief: chapter.brief,
+    prose: chapter.prose,
+    scenes: chapterScenes(chapter).map((scene) => ({
+      id: scene.id,
+      sequence_index: scene.sequence_index,
+      ...(scene.title ? { title: scene.title } : {}),
+      description: scene.prose,
+      ...(scene.brief ? { instructions: scene.brief } : {})
+    }))
+  }));
+}
 
 export type ManuscriptBackupErrorCode =
   | "not-backup"
@@ -37,7 +107,8 @@ export function packManuscriptBackup(book: Book, note = "", exportedAt = new Dat
     format: MANUSCRIPT_BACKUP_FORMAT,
     exportedAt,
     note: note.trim(),
-    book
+    book,
+    adaptationChapters: buildAdaptationChapters(book)
   };
 }
 
@@ -67,7 +138,11 @@ export function parseManuscriptBackup(input: unknown): ManuscriptBackup {
     format,
     exportedAt: typeof row.exportedAt === "string" ? row.exportedAt : new Date().toISOString(),
     note: typeof row.note === "string" ? row.note.trim() : "",
-    book
+    book,
+    // Derived fresh from `book` rather than trusted from the file — stays
+    // correct even for a format-1 backup (which has no such field at all)
+    // and can't drift from whatever `book` actually contains.
+    adaptationChapters: buildAdaptationChapters(book)
   };
 }
 
