@@ -2,10 +2,13 @@ import {
   MANUSCRIPT_EXPORT_FORMAT,
   MANUSCRIPT_EXPORT_KIND,
   type ExportedBibleSection,
+  type ExportedChapter,
   type ExportedEntity,
+  type ExportedScene,
   type ManuscriptExport
 } from "@ocedo-apps/storycore";
 import { groupFacts } from "./bibleGroups";
+import { chapterScenes } from "./bookScene";
 import { sortedChapters, type Book } from "./BookSchema";
 import { profileFor } from "./characterProfile";
 import { picturesFor } from "./entityMedia";
@@ -59,11 +62,22 @@ export function packManuscriptExport(book: Book, exportedAt = new Date().toISOSt
     sourceBookId: book.id,
     title: book.title.trim() || "Untitled manuscript",
     illustrationStyle: book.illustration_style,
-    chapters: sortedChapters(book).map((chapter) => ({
+    synopsis: book.synopsis,
+    chapters: sortedChapters(book).map((chapter): ExportedChapter => ({
       id: chapter.id,
       sequence_index: chapter.sequence_index,
       title: chapter.title,
-      prose: chapter.prose
+      prose: chapter.prose,
+      brief: chapter.brief,
+      scenes: chapterScenes(chapter).map(
+        (scene): ExportedScene => ({
+          id: scene.id,
+          sequence_index: scene.sequence_index,
+          ...(scene.title ? { title: scene.title } : {}),
+          description: scene.prose,
+          ...(scene.brief ? { instructions: scene.brief } : {})
+        })
+      )
     })),
     bible
   };

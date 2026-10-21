@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.163] - 2026-10-21
+
+### Fixed
+- The actual cross-app export ComicBook AI reads (the `@ocedo-apps/storycore` "StoryCore" format, FILE → "Export for other apps") was missing `synopsis`, `brief`, and `scenes` — the previous release (v1.0.162) had extended a different export (the manuscript backup JSON) instead. StoryCore's own format bumped 1 → 2 to add a manuscript-level `synopsis` and, per chapter, `brief` plus `scenes` (id, order, title, description, instructions) — the same shape the backup export already carries. A format-1 export (from before this release) still reads fine; the new fields fill in as empty.
+
 ## [1.0.162] - 2026-10-21
 
 ### Added

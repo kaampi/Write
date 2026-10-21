@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.162
+Status: living document, v1.0.163
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7737,6 +7737,84 @@ instruktioner, och ett simulerat format-1-objekt (utan
 vid inläsning. `npm run build` rent.
 
 v1.0.161 → v1.0.162.
+
+
+**Ändringslogg v1.0.163 (2026-10-21): rättade grundorsaken — det var
+StoryCore-exporten, inte backup-filen.** ChatGPT (som utvecklar
+ComicBook AI å Mats räkning) granskade den fil Mats skickat: "Filen
+fungerar som grund för dagens import, men den innehåller ännu inte
+den utökade export vi diskuterat. Synopsis, Briefs och scener/beats
+saknas i just den bifogade filen." Mats: "Stämmer det?"
+
+**Undersökning av den faktiska filen (inte gissning):** Mats bifogade
+`the-weight-of-the-course-storycore-2026-10-21_1.json`. Python-
+inspektion av filen visade `kind: "storycore.manuscript-export"`,
+format 1 — INTE `kind: "storybook-ai.manuscript"` (backup-formatet
+jag utökade i v1.0.162!). Två helt separata JSON-exporter existerar
+i kodbasen: `manuscriptBackup.ts` (full backup/restore, knappen
+"Backup" i FILE-menyn) och `manuscriptAppExport.ts` (knappen "Export
+for other apps", producerar `@ocedo-apps/storycore`s `ManuscriptExport`
+— ett EGET npm-paket, ett tredje repo, versionerat separat från
+StoryBook AI självt, med sin egen Zod-validator och ett uttryckligt
+"read-only, propose-only"-kontrakt i sin README: "StoryBook AI owns
+Story Bible canon. Every other app is a reader of a point-in-time
+export, never a writer back into it."). Filnamnsmönstret
+`-storycore-<datum>.json` matchar `manuscriptAppExportFilename()`
+exakt — det är den riktiga "StorybookAI JSON-export" Mats och
+ChatGPT pratar om. Mitt v1.0.162-arbete var alltså en korrekt,
+testad, men FEL export — löste inte problemet.
+
+**Varför jag missade det första gången:** Bara två `_KIND`/`_FORMAT`-
+konstanter fanns synliga vid en grep i `src/core/*.ts` förra gången
+(`manuscriptBackup.ts` och `sandboxExport.ts`) — `manuscriptAppExport.ts`
+existerade men dess kind-sträng (`storycore.manuscript-export`) kommer
+från det EXTERNA paketet, inte en lokal konstant, så den grep:en
+missade den tredje exporten helt. Lärdom: när en sökning hittar "alla"
+kandidater men svaret ändå känns fel, kolla om något kommer från ett
+externt beroende som inte syns i en lokal grep.
+
+**Fix, i rätt repo denna gång — `ocedo-apps/storycore` (separat
+GitHub-repo, lades till i sessionen via `add_repo`):**
+- `ExportedChapterSchema` fick `brief: z.string().default("")` och
+  `scenes: z.array(ExportedSceneSchema).default([])`; ny
+  `ExportedSceneSchema` (`id`, `sequence_index`, `title?`,
+  `description`, `instructions?`) — samma fältnamn och semantik som
+  `adaptationChapters` fick i v1.0.162, för konsekvens mellan de två
+  exportformaten även om de tjänar olika syften.
+- `ManuscriptExportSchema` fick `synopsis: z.string().default("")`
+  samt `format` ändrat från `z.literal(1)` till `z.union([z.literal(1),
+  z.literal(2)])` — en strikt literal hade annars gjort att PAKETETS
+  EGEN uppdatering refuserat alla befintliga format-1-filer.
+  `MANUSCRIPT_EXPORT_FORMAT` höjd 1→2, paketversion 0.1.0→0.2.0,
+  README uppdaterad. Åtta nya/ändrade tester i `tests/parse.test.ts`
+  (bakåtkompatibilitet med en format-1-fil, framåtkompatibilitet med
+  ett fullt format-2-exempel) — alla 8 test gröna, `npm run build`
+  rent, pushat till `ocedo-apps/storycore`s `main`.
+- Tillbaka i StoryBook AI: `npm install` för att hämta det nya
+  commitet (paketversion 0.2.0 bekräftad i `node_modules`).
+  `manuscriptAppExport.ts`s `packManuscriptExport` byggd om för att
+  faktiskt FYLLA de nya fälten från riktig data: `synopsis:
+  book.synopsis`, och per kapitel `brief: chapter.brief` +
+  `scenes: chapterScenes(chapter).map(...)` (samma `sortedChapters`/
+  `chapterScenes`-mönster som v1.0.162 redan etablerade).
+- En bieffekt av `npm install`: lockfilens git-URL löstes om till
+  `git+ssh://` istället för `git+https://` (en miljö-specifik
+  URL-omskrivning, inte något jag valde) — samma typ av problem som
+  CI/StoryCore-SSH-frågan som redan var uppskjuten till "tisdag"
+  tidigare i projektet. Normaliserade tillbaka `package.json`s och
+  lockfilens TOPP-nivå-beroendesträng till `git+https://...` för att
+  hålla diffen minimal; den djupare `resolved`-raden (som faktiskt
+  styr vad som hämtas) löser fortfarande om via ssh i den här miljön
+  — ett separat, redan känt problem, inte något jag försökte dölja
+  eller tysta ner.
+
+**Verifiering:** `tsc --noEmit` rent i StoryBook AI, hela testsviten
+(1109 test, 81 filer) grön — 13 test i `manuscript-app-export.test.ts`
+(upp från 9: bakåtkompatibelt tomt brief, synopsis, odelat kapitel
+→ en scen som täcker hela prosan, explicit uppdelning → rätt
+ordning/titel/beskrivning/instruktioner). `npm run build` rent.
+
+v1.0.162 → v1.0.163.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
