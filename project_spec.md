@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.159
+Status: living document, v1.0.160
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7574,6 +7574,47 @@ bekräftar att kortets kant nu sluter rent runt hela texten, inklusive
 sista raden ("...assignment.").
 
 v1.0.158 → v1.0.159.
+
+
+**Ändringslogg v1.0.159 → v1.0.160 (2026-10-21): kapitel-popovern
+kunde rinna av skärmens nederkant.** Mats, med en skärmdump av
+Scenes-popovern (5 scener) som gick rakt av vid fönstrets nederkant,
+inget sätt att skrolla fram resten: "När man har flera scener så
+försvinner de ur skärmen. Fixa scroll alternativt att..."
+(meningen avbröts, men tydligt nog för att agera på).
+
+**Grundorsak:** `.chapter-popover` hade redan `max-height: calc(100vh
+- 2rem); overflow-y: auto;` sedan den byggdes (v1.0.142) — avsedd att
+förhindra exakt detta. Men `openChapterPopover` satte popoverns `top`
+rakt av till den klickade ikonens egen `getBoundingClientRect().top`,
+utan att bry sig om hur mycket utrymme som fanns KVAR under den
+positionen. För en kapitelrad långt ner i listan (rad 7 av 7, t ex)
+kan `top` redan ligga på 600-700px — CSS:ens platta `calc(100vh -
+2rem)`-tak bryr sig inte om VARIFRÅN boxen mäts, bara dess egen
+höjd, så popovern tilläts fortfarande växa till nästan hela
+viewport-höjden även när den startade långt ner, och rann av botten
+utan att själva scroll-mekaniken någonsin aktiverades (den skulle ha
+fungerat om boxen bara fått rätt takhöjd att scrolla INOM).
+
+**Fix:** `openChapterPopover` räknar nu ut `y` OCH en matchande
+`maxHeight` tillsammans: `y` klipps så det alltid lämnar minst ~200px
+utrymme under sig (annars flyttas popovern uppåt), och `maxHeight`
+sätts explicit till precis det utrymme som finns kvar mellan `y` och
+fönstrets nederkant (minus en liten marginal) — skickas som inline
+`style.maxHeight`, vilket vinner över CSS-regelns platta
+`calc(100vh-2rem)`. Nu kan popovern aldrig hamna där den inte får
+plats att scrolla inom sig själv.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1097 test, 81
+filer) grön, `npm run build` rent. Playwright: öppnade popovern på
+den SISTA av sju kapitelrader i ett kort (700px högt) fönster,
+injicerade extra högt innehåll (900px) för att tvinga fram
+överflöde, mätte att popoverns `bottom` (684px) stannade inom
+fönstrets `innerHeight` (700px) och att `maxHeight` beräknades exakt
+rätt (291px) — popovern stannar helt på skärmen och skrollar internt
+istället för att rinna av.
+
+v1.0.159 → v1.0.160.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

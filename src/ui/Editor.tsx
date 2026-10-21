@@ -583,9 +583,9 @@ export function Editor() {
    * than the one currently open also switches to it — same chapter-open
    * behavior clicking the row itself already has, not a new side effect.
    */
-  const [chapterPopover, setChapterPopover] = useState<{ chapterId: string; kind: "settings" | "scenes"; x: number; y: number } | null>(
-    null
-  );
+  const [chapterPopover, setChapterPopover] = useState<
+    { chapterId: string; kind: "settings" | "scenes"; x: number; y: number; maxHeight: number } | null
+  >(null);
   const chapterPopoverRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!chapterPopover) return;
@@ -607,7 +607,19 @@ export function Editor() {
     const rect = event.currentTarget.getBoundingClientRect();
     if (onBoard) store.selectChapter(targetChapterId);
     else store.setChapterId(targetChapterId);
-    setChapterPopover({ chapterId: targetChapterId, kind, x: rect.right + 10, y: rect.top });
+    // Anchoring at the clicked icon's own top can place the popover close
+    // enough to the bottom of the viewport that a tall one (many scenes, a
+    // start-image banner) has nowhere to grow — CSS's own max-height cap
+    // (calc(100vh - 2rem)) doesn't know the popover's top offset, so it
+    // can't shrink to match. Pull the top up to leave a minimum of room
+    // below it, and cap the height to whatever's actually left at that
+    // top, so the popover always ends up fully on screen and scrollable
+    // within itself rather than running off the bottom edge.
+    const margin = 16;
+    const minBodyRoom = 200;
+    const y = Math.min(rect.top, Math.max(margin, window.innerHeight - minBodyRoom - margin));
+    const maxHeight = window.innerHeight - y - margin;
+    setChapterPopover({ chapterId: targetChapterId, kind, x: rect.right + 10, y, maxHeight });
   }
   const dragChapterIdRef = useRef<string | null>(null);
   const names = entityLabels(book.facts, book.entity_kinds);
@@ -1773,7 +1785,7 @@ export function Editor() {
               <div
                 ref={chapterPopoverRef}
                 className="chapter-popover"
-                style={{ left: chapterPopover.x, top: chapterPopover.y }}
+                style={{ left: chapterPopover.x, top: chapterPopover.y, maxHeight: chapterPopover.maxHeight }}
                 role="dialog"
                 aria-modal="true"
                 aria-label={

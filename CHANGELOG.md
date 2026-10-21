@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.160] - 2026-10-21
+
+### Fixed
+- The chapter ⚙️/🎬 popover could run off the bottom of the screen for a chapter row low in the list, with no way to scroll the rest into view (most noticeable with several scenes open at once). It now always stays fully on screen and scrolls internally instead.
+
 ## [1.0.159] - 2026-10-21
 
 ### Fixed
