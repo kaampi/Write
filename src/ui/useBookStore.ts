@@ -173,6 +173,7 @@ export type BookStoreValue = {
   saveInterviewPersonality: () => void;
   addFact: (draft: { label: string; predicate: CorePredicate; value: string; mode?: "replace" | "add" }) => Promise<void>;
   reviseFact: (factId: string, value: string) => Promise<void>;
+  retractFact: (factId: string) => Promise<void>;
   approve: (factId: string, value?: string) => Promise<void>;
   reject: (factId: string) => Promise<void>;
   keepSeparate: (factId: string, value?: string) => Promise<void>;

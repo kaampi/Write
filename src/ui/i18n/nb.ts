@@ -1425,6 +1425,8 @@ export const nb: Messages = {
     edit: "Rediger",
     editFact: "Rediger fakta",
     save: "Lagre",
+    remove: "Fjern",
+    removeFactConfirm: "Fjern denne faktaen — \"{value}\"? Dette kan ikke angres. Bruk dette for en påstand som rett og slett er feil, ikke en du retter med en ny verdi (bruk Rediger for det, eller Oppdater… hvis den endres herfra).",
     updateFact: "Oppdater…",
     updateFactHint: "Merk at dette endres herfra — fyller inn Legg til fakta under, koblet til kapittelet du skriver nå. I motsetning til Rediger, som retter det det alltid har vært.",
     kinds: {

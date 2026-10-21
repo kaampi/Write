@@ -13,7 +13,7 @@ import {
 } from "@core/BookSchema";
 import { BRAINSTORM_PASSAGE_SYSTEM, brainstormChatSystemPrompt, brainstormPassageUserPrompt, liftFragmentToSynopsis, sendStagedNotesToSynopsis, type BrainstormChatMessage } from "@core/brainstorm";
 import { applyAssembledBrainstorm } from "@core/brainstormNotes";
-import { applyAuthorAddition, applyAuthorDraft, applyExtractorDrafts, approveFact, keepFactSeparate, rejectFact, reviseFact } from "@core/ConsistencyGate";
+import { applyAuthorAddition, applyAuthorDraft, applyExtractorDrafts, approveFact, keepFactSeparate, rejectFact, retractFact, reviseFact } from "@core/ConsistencyGate";
 import { applyMarkerConversion, DEFAULT_MARKER_CONVERSION_RULES, type MarkerConversionRule } from "@core/markerConversion";
 import { smartenQuotes } from "@core/smartQuotes";
 import { withRelationshipMirrorFor } from "@core/relationshipMirror";
@@ -3044,6 +3044,16 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     [flushSave]
   );
 
+  const retract = useCallback(
+    async (factId: string) => {
+      const current = bookRef.current;
+      if (!current) return;
+      const facts = retractFact(current.facts, factId);
+      await flushSave(touch(current, { facts }));
+    },
+    [flushSave]
+  );
+
   const approve = useCallback(
     async (factId: string, value?: string) => {
       const current = bookRef.current;
@@ -3195,6 +3205,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     dismissDevelopSuggestion,
     addFact,
     reviseFact: revise,
+    retractFact: retract,
     approve,
     reject,
     keepSeparate

@@ -96,7 +96,7 @@ export function BiblePanel({
   onResizeHandleDown: (event: React.PointerEvent) => void;
   resizing: boolean;
 }) {
-  const { book, approve, reject, keepSeparate, addFact, reviseFact, patchBook, setChapterId } = useBookStore();
+  const { book, approve, reject, keepSeparate, addFact, reviseFact, retractFact, patchBook, setChapterId } = useBookStore();
   const { messages: m } = useLocale();
   const [kind, setKind] = useState<BibleKind>("characters");
   const [query, setQuery] = useState("");
@@ -516,6 +516,7 @@ export function BiblePanel({
             void addFact({ label: openEntity.entity_label, predicate, value, ...(mode ? { mode } : {}) })
           }
           onSave={(id, value) => void reviseFact(id, value)}
+          onRetract={(id) => void retractFact(id)}
           onToggleHidden={() =>
             void patchBook((current) =>
               touch(current, { hidden_entities: toggleHiddenEntity(current.hidden_entities, openEntity.entity_ref) })
@@ -1124,6 +1125,7 @@ function EntityOverlay({
   onJumpToChapter,
   onAdd,
   onSave,
+  onRetract,
   onToggleHidden,
   onToggleFactHidden,
   onCycleFactPositionOverride,
@@ -1155,6 +1157,7 @@ function EntityOverlay({
   onJumpToChapter: (chapterId: string) => void;
   onAdd: (predicate: CorePredicate, value: string, mode?: "replace" | "add") => void;
   onSave: (factId: string, value: string) => void;
+  onRetract: (factId: string) => void;
   onToggleHidden: () => void;
   onToggleFactHidden: (factId: string, hidden: boolean) => void;
   onCycleFactPositionOverride: (factId: string, current: "include" | "exclude" | undefined) => void;
@@ -1322,6 +1325,7 @@ function EntityOverlay({
             key={row.id}
             fact={row}
             onSave={(next) => onSave(row.id, next)}
+            onRetract={() => onRetract(row.id)}
             onToggleHidden={() => onToggleFactHidden(row.id, row.hidden_from_ai !== true)}
             onCyclePositionOverride={() => onCycleFactPositionOverride(row.id, row.position_override)}
             {...(allowedPredicates.includes(row.predicate) ? { onRequestUpdate: () => requestUpdate(row.predicate) } : {})}
@@ -2003,6 +2007,7 @@ function PendingFact({
 function LockedFact({
   fact,
   onSave,
+  onRetract,
   onToggleHidden,
   onCyclePositionOverride,
   onRequestUpdate
@@ -2015,6 +2020,7 @@ function LockedFact({
     position_override?: "include" | "exclude" | undefined;
   };
   onSave: (value: string) => void;
+  onRetract: () => void;
   onToggleHidden: () => void;
   onCyclePositionOverride: () => void;
   /** Missing when this predicate has no ongoing add-fact slot for the card's kind (e.g. Identity) — "Update" has nowhere to send the author. */
@@ -2066,6 +2072,15 @@ function LockedFact({
           </button>
           <button type="button" className="text-button fact-edit-btn" onClick={() => setEditing(true)}>
             {m.bible.edit}
+          </button>
+          <button
+            type="button"
+            className="text-button danger fact-remove-btn"
+            onClick={() => {
+              if (window.confirm(format(m.bible.removeFactConfirm, { value: fact.value }))) onRetract();
+            }}
+          >
+            {m.bible.remove}
           </button>
           {onRequestUpdate ? (
             <button type="button" className="text-button fact-update-btn" title={m.bible.updateFactHint} onClick={onRequestUpdate}>

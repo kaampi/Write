@@ -1435,6 +1435,8 @@ export const en = {
     edit: "Edit",
     editFact: "Edit fact",
     save: "Save",
+    remove: "Remove",
+    removeFactConfirm: "Remove this fact — “{value}”? This can't be undone. Use this for a claim that's simply wrong, not one you're correcting with a new value (use Edit for that, or Update… if it's changing from here on).",
     updateFact: "Update…",
     updateFactHint: "Mark this as changing from here — fills in Add fact below, anchored to the chapter you're currently writing. Unlike Edit, which corrects what this always was.",
     kinds: {

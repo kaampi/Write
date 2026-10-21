@@ -372,3 +372,19 @@ export function rejectFact(facts: NarrativeFact[], factId: string): NarrativeFac
   if (!target || target.status === "locked" || target.superseded_by) return facts;
   return facts.filter((fact) => fact.id !== factId);
 }
+
+/**
+ * Remove a locked fact outright — for a claim that was simply wrong (a
+ * near-duplicate left over from a merge, a fact attributed to the wrong
+ * entity), not one being superseded by a correct value. Unlike supersession,
+ * nothing takes this row's place. If another fact had been marked as
+ * superseding it, that fact becomes current again instead of pointing at a
+ * row that no longer exists.
+ */
+export function retractFact(facts: NarrativeFact[], factId: string): NarrativeFact[] {
+  const target = facts.find((fact) => fact.id === factId);
+  if (!target) return facts;
+  return facts
+    .filter((fact) => fact.id !== factId)
+    .map((fact) => (fact.superseded_by === factId ? { ...fact, superseded_by: undefined } : fact));
+}

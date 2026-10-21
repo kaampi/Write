@@ -1425,6 +1425,8 @@ export const sv: Messages = {
     edit: "Redigera",
     editFact: "Redigera fakta",
     save: "Spara",
+    remove: "Ta bort",
+    removeFactConfirm: "Ta bort den här faktan — \"{value}\"? Det går inte att ångra. Använd det här för ett påstående som helt enkelt är fel, inte ett du rättar med ett nytt värde (använd Redigera för det, eller Uppdatera… om det ändras härifrån).",
     updateFact: "Uppdatera…",
     updateFactHint: "Markera att det här ändras härifrån — fyller i Lägg till fakta nedan, kopplat till kapitlet du skriver just nu. Till skillnad från Redigera, som rättar vad det alltid varit.",
     kinds: {

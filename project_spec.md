@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.160
+Status: living document, v1.0.161
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7615,6 +7615,57 @@ rätt (291px) — popovern stannar helt på skärmen och skrollar internt
 istället för att rinna av.
 
 v1.0.159 → v1.0.160.
+
+
+**Ändringslogg v1.0.160 → v1.0.161 (2026-10-21): riktig borttagning
+av låsta fakta.** Uppföljning på två trådar från Mats samma kväll:
+en direkt fråga ("Hur gör man för att ta bort en trait?") som jag
+tidigare bara kunnat svara "det går inte, bara dölja/redigera" på,
+och sedan en skärmdump efter en lyckad "Merge cards…"-körning som
+visade fyra nästan identiska Identity-fakta kvar på det
+sammanslagna kortet ("Chief Operations and Drive Maintenance",
+"engineer", "Chief Engineer", "chief engineer of the Celestial
+Hope") — merge flyttar över ALLA fakta från de gamla korten utan att
+känna igen att flera säger "samma sak" med olika ord, så raderna
+hopar sig. Mats: "...samt att jag vill kunna ta bort ett låst
+fakta."
+
+**Design-avvägning:** Dokumentationskommentaren i `NarrativeFact.ts`
+säger uttryckligen "Facts are never deleted once locked; they are
+superseded" — en medveten princip för spårbarhet. Men den principen
+passar ett värde som ÄNDRAS över tid (t ex ögonfärg), inte ett
+påstående som var fel från början eller en ren dubblett efter en
+merge. Byggde ett nytt, separat spår för det senare fallet istället
+för att väga på den befintliga supersede-mekaniken.
+
+**Implementation:**
+- Ny `retractFact(facts, factId)` i `ConsistencyGate.ts` — tar bort
+  raden helt (till skillnad från `rejectFact`, som uttryckligen
+  vägrar låsta rader). Om en ANNAN fakta hade markerat den borttagna
+  som sin `superseded_by`, rensas den länken så att den äldre faktan
+  blir aktuell igen istället för att peka på en rad som inte längre
+  finns.
+- Ny store-action `retractFact` i `BookStore.tsx`/`useBookStore.ts`,
+  trädd igenom `BiblePanel.tsx` till `LockedFact`-komponenten.
+- Ny "Remove"-knapp per faktarad, bredvid Edit — `window.confirm()`
+  med faktans eget värde inbakat i bekräftelsetexten, samma mönster
+  som `onDelete` för hela kort redan använder. Texten förklarar
+  uttryckligen skillnaden mot Edit (rättar vad det alltid varit) och
+  Update… (markerar en ändring från och med nu) så författaren väljer
+  rätt verktyg.
+
+**Verifiering:** `tsc --noEmit` rent (fick lägga till `retractFact`
+i det explicita `BookStoreValue`-interfacet i `useBookStore.ts`,
+inte bara den inferred return-typen i `BookStore.tsx`). Tre nya
+enhetstester i `consistency-gate.test.ts` (tar bort en låst rad helt;
+no-op för okänt id; återställer en tidigare superseded fakta till
+aktuell) — hela testsviten 1100 test (81 filer) grön, `npm run
+build` rent. Playwright: skapade en karaktär med en enda Identity-
+fakta, klickade Remove, bekräftade dialogrutans exakta text, och att
+"1 locked" blev "0 locked" och kortet försvann ur rostret helt
+(inga fakta kvar).
+
+v1.0.160 → v1.0.161.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

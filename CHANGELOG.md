@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.161] - 2026-10-21
+
+### Added
+- A "Remove" button on each locked fact in the Story Bible, for a claim that's simply wrong (a near-duplicate left over from a merge, a fact attributed to the wrong entity) rather than one being corrected with a new value — asks for confirmation first, and can't be undone. If another fact had superseded it, that fact becomes current again instead of pointing at a row that no longer exists.
+
 ## [1.0.160] - 2026-10-21
 
 ### Fixed

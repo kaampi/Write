@@ -8,6 +8,7 @@ import {
   isPossibleEnrichment,
   keepFactSeparate,
   rejectFact,
+  retractFact,
   reviseFact
 } from "@core/ConsistencyGate";
 import type { FactDraft, NarrativeFact } from "@core/NarrativeFact";
@@ -257,6 +258,27 @@ describe("reviseFact", () => {
     const live = next.find((fact) => !fact.superseded_by);
     expect(live?.hidden_from_ai).toBe(true);
     expect(live?.value).toContain("night keys");
+  });
+});
+
+describe("retractFact", () => {
+  it("removes a locked fact outright, unlike reject which refuses locked rows", () => {
+    const next = retractFact([lockedEmma()], "locked-1");
+    expect(next).toHaveLength(0);
+  });
+
+  it("is a no-op for an id that doesn't exist", () => {
+    const facts = [lockedEmma()];
+    expect(retractFact(facts, "nope")).toEqual(facts);
+  });
+
+  it("restores the fact it superseded to current, instead of leaving it pointing at nothing", () => {
+    const superseded = reviseFact([lockedEmma()], "locked-1", "Bartender at the Aurora Room. Keeps the night keys.");
+    const newer = superseded.find((fact) => !fact.superseded_by)!;
+    const next = retractFact(superseded, newer.id);
+    expect(next).toHaveLength(1);
+    expect(next[0]?.id).toBe("locked-1");
+    expect(next[0]?.superseded_by).toBeUndefined();
   });
 });
 
