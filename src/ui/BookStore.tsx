@@ -152,6 +152,19 @@ const BASE_URL_KEY = "storybook-ai.base-url";
 const EXTRACTOR_MAX_TOKENS = 4000;
 
 /**
+ * A reasoning model "thinks out loud" before it writes a word of the
+ * actual reply, and that thinking is billed against the same maxTokens
+ * budget as the reply itself — a tester's LM Studio log showed 1131 of a
+ * 1800-token Polish budget spent on reasoning alone, leaving so little
+ * room for the rewrite that it cut off after the chapter's first scene
+ * (reported as "it only takes the very first scene out of 5"). This is
+ * on top of, not instead of, the length-based budget below: a short
+ * chapter's rewrite is cheap either way, but the reasoning pass before it
+ * isn't any shorter just because the chapter is.
+ */
+const REASONING_HEADROOM_TOKENS = 2000;
+
+/**
  * Polish rewrites the whole chapter, so the reply needs room for roughly as
  * much prose as it was given — not a flat budget regardless of chapter
  * length, which is what this used to be (1800, always). A real ~4,000-word
@@ -160,11 +173,12 @@ const EXTRACTOR_MAX_TOKENS = 4000;
  * (see completeOllamaChat/OpenAICompatibleLocalProvider.chat's own new
  * truncation guards, added alongside this). Scales from the chapter's own
  * estimated token count, with headroom for the rewrite running a little
- * longer than the original, and a floor so a short chapter still gets a
- * reasonable budget.
+ * longer than the original, a floor so a short chapter still gets a
+ * reasonable budget, and REASONING_HEADROOM_TOKENS on top for a thinking
+ * model's own planning pass.
  */
 function polishMaxTokens(prose: string): number {
-  return Math.max(1800, Math.ceil(estimateTokens(prose) * 1.3) + 200);
+  return REASONING_HEADROOM_TOKENS + Math.max(1800, Math.ceil(estimateTokens(prose) * 1.3) + 200);
 }
 
 function readEngine(): LlmEngine {

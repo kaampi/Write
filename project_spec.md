@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.174
+Status: living document, v1.0.175
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8250,6 +8250,63 @@ konstgjort fördröjd mock-Ollama-server — rutan ser nu identisk ut i
 båda fallen och matchar ComicBook AI:s skärmdump. `npm run build` rent.
 
 v1.0.173 → v1.0.174.
+
+**Ändringslogg v1.0.175 (2026-10-22): Mats testare rapporterade att
+Polish bara skrev om kapitlets första scen av fem och "slaktade" den,
+trots att LM Studios egen logg visade att modellen läst in och
+planerat HELA kapitlet.**
+
+- Testarens loggutdrag var den rykande pistolen: `"reasoning_content"`
+  innehöll en fullständig scen-för-scen-plan för alla 7 scener i
+  kapitlet, men `"finish_reason": "length"` och
+  `"completion_tokens": 1800` med `"reasoning_tokens": 1131` av dem —
+  modellen hade "tänkt högt" (skrev ut hela sin plan som
+  `reasoning_content`, en separat kanal reasoning-modeller som körs via
+  LM Studio ofta exponerar) och förbrukat 1131 av de 1800 tokens Polish
+  bad om INNAN den ens börjat skriva den faktiska omskrivningen — bara
+  669 tokens kvar räckte knappt till scen 1.
+- Rotorsak i `polishMaxTokens(prose)` i `BookStore.tsx`: formeln
+  skalade budgeten efter KAPITLETS längd (`max(1800, prose*1.3+200)`)
+  men hade noll marginal avsatt för en tänkande modells egen
+  planeringsfas — till skillnad från `summarizeChapter`, som redan hade
+  en kommentar om exakt det här fenomenet ("a tight token budget
+  starves any model that thinks/plans before answering... reasoning
+  models especially") och ett löst tilltaget 700-tal.
+- Fix: ny konstant `REASONING_HEADROOM_TOKENS = 2000`, adderad OVANPÅ
+  den befintliga längdbaserade formeln (inte istället för — ett kort
+  kapitels omskrivning är billig oavsett, men tänkandet innan den inte
+  är kortare bara för att kapitlet är det).
+- Undersökte också VARFÖR testaren inte fick ett tydligt felmeddelande
+  istället för en tyst, avkapad text — koden har redan ett skydd
+  (`OpenAICompatibleLocalProvider.chat()` i `provider.ts`, kastar ett
+  fel när `finish_reason === "length"`) som `polishChapter`s egen
+  catch-logik redan visar korrekt via `setError`. Byggde en
+  mock-OpenAI-kompatibel-server (samma kontrakt som LM Studio
+  exponerar) som replikerar exakt testarens siffror (1131
+  reasoning-tokens, trunkering vid otillräcklig budget) för att
+  bekräfta båda halvorna: med den nya budgeten (2000 + 1800 = 3800 för
+  ett kort testkapitel, uppmätt direkt i mock-serverns mottagna
+  `max_tokens`-fält) slutförs hela omskrivningen; tvingar man ändå fram
+  en trunkering (en andra mock som alltid returnerar
+  `finish_reason:"length"`) visar appen korrekt ett tydligt
+  felbanner istället för att tyst acceptera den avhuggna texten som
+  ett Polish-förslag. Skyddet fungerar alltså redan som det ska i
+  nuvarande kod — om testaren körde en äldre version av appen förklarar
+  det varför han inte såg felet.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1111 test) grön
+(`polishMaxTokens` är inte exporterad och har ingen egen testfil sedan
+tidigare — `BookStore.tsx` testas generellt inte som enhetstester i det
+här projektet, så ingen ny testfil lades till för att inte bryta
+mönstret). Två separata Playwright-körningar mot dev-servern med
+Settings omställda till `openai-compatible`/`localhost:11435` (satt
+direkt via `localStorage` för att undvika att navigera hela
+Settings-UI:t): en mot en mock som replikerar testarens exakta
+reasoning-kostnad (bekräftar att hela kapitlet nu går igenom), en mot
+en mock som alltid trunkerar (bekräftar att felbannret visas och inget
+Polish-förslag läggs fram). `npm run build` rent.
+
+v1.0.174 → v1.0.175.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

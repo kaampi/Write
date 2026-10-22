@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.175] - 2026-10-22
+
+### Fixed
+- Polish could cut off after the chapter's first scene on a reasoning model — the model's own "thinking" before it writes a word eats into the same token budget as the rewrite itself, and Polish's budget had no room set aside for that. It now reserves an extra 2000 tokens for a model's reasoning pass, on top of the existing length-based budget for the rewrite.
+
 ## [1.0.174] - 2026-10-22
 
 ### Fixed
