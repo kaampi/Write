@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.173
+Status: living document, v1.0.174
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8211,6 +8211,45 @@ avslutades med `kill -9` — inte en kodbugg, men värt att notera för
 nästa gång samma mönster uppstår. `npm run build` rent.
 
 v1.0.172 → v1.0.173.
+
+**Ändringslogg v1.0.174 (2026-10-22): "Comicbook lägger rutan med
+rundade hörn i en 'lightbox' eller liknande. Kan vi göra samma i
+Storybook?", med en skärmdump av ComicBook AI:s faktiska ruta (ljus,
+krämfärgad, tydligt avskild från den nedtonade bakgrunden).**
+
+- Testade först vår egen ruta i mörkt tema (StoryBook AI:s
+  standardtema) och såg precis vad Mats pekade på: rutan använde
+  `var(--panel)` — samma mörkbruna ton (`#1c1814`) som appens egen
+  bakgrund (`#14110e`) — så kortet smälte nästan in i den nedtonade
+  bakgrunden istället för att poppa fram. Kontrollerade ComicBook AI:s
+  egna CSS-variabler (`src/styles.css`): samma mönster, `--panel` är
+  också tema-beroende där (`#1c1814` mörkt / `#faf5ed` ljust) — Mats
+  skärmdump var alltså taget i ComicBook AI:s LJUSA tema, inte en
+  särbehandling de gör. Men önskemålet ("lightbox") är ändå rimligt
+  och tydligt: rutan ska alltid vara en ljus yta som sticker ut mot en
+  nedtonad bakgrund, oavsett vilket tema appen själv står i — annars
+  blir just den mörka temat ologiskt lite kraftlös för en ruta som ska
+  signalera "vänta, något pågår".
+- Gjorde `.busy-dialog` hårdkodad till det ljusa temats egna
+  värden (`background:#faf5ed; color:#2a2218; border:#d4c6b4`) istället
+  för `var(--panel)`/`var(--text)`/`var(--border)` — en kommentar i
+  CSS:en förklarar varför. Samma för snurran (`.busy-dialog-spinner`,
+  var `var(--text)` → fast `#2a2218`) och hjälptexten
+  (`.busy-dialog .quiet`, var `var(--text-dim)` som i mörkt tema är en
+  ljusgrå ton gjord för mörk bakgrund och skulle blivit svårläst mot
+  den nya krämfärgade ytan → fast `#6b5f52`, ljusa temats egen
+  `--text-dim`). Skuggan byttes från `var(--shadow)` (som i mörkt tema
+  är ljusare/svagare, byggd för en mörk yta) till en fast, kraftigare
+  `0 20px 60px rgb(0 0 0 / 0.45)` som ger kortet tydligare djup mot
+  vilken bakgrund som helst.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1111 test) grön
+(ren styling, ingen testfil berörd). Playwright-skärmdumpar av rutan i
+BÅDA app-teman (mörkt som standard, och ljust via temaväxlaren) mot en
+konstgjort fördröjd mock-Ollama-server — rutan ser nu identisk ut i
+båda fallen och matchar ComicBook AI:s skärmdump. `npm run build` rent.
+
+v1.0.173 → v1.0.174.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

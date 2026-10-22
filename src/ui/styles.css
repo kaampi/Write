@@ -6951,15 +6951,22 @@ button.illustration-genre-item:focus-visible {
   background: rgb(0 0 0 / 0.55);
 }
 
+/*
+ * Always the light theme's own panel/text/border colors, not `var(--panel)`
+ * etc. — in the dark theme those sit so close in tone to the dimmed
+ * backdrop behind them that the card barely read as a card at all. A
+ * "lightbox" (Mats's word for it, after ComicBook AI's own dialog) needs
+ * to pop forward regardless of which theme the rest of the app is in.
+ */
 .busy-dialog {
   width: min(100%, 27.5rem);
   padding: 2rem;
-  border: 1px solid var(--border);
+  border: 1px solid #d4c6b4;
   border-radius: 14px;
-  background: var(--panel);
-  color: var(--text);
+  background: #faf5ed;
+  color: #2a2218;
   text-align: center;
-  box-shadow: var(--shadow);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.45);
 }
 
 .busy-dialog h2 {
@@ -6968,6 +6975,10 @@ button.illustration-genre-item:focus-visible {
 
 .busy-dialog p {
   line-height: 1.6;
+}
+
+.busy-dialog .quiet {
+  color: #6b5f52;
 }
 
 .busy-dialog-status {
@@ -6983,7 +6994,7 @@ button.illustration-genre-item:focus-visible {
 .busy-dialog-spinner {
   display: block;
   margin: auto;
-  color: var(--text);
+  color: #2a2218;
   overflow: visible;
 }
 

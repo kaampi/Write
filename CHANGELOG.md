@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.174] - 2026-10-22
+
+### Fixed
+- The progress dialog nearly disappeared into the dimmed backdrop in the dark theme — its card used the app's own (dark) panel color, which sat too close in tone to the overlay behind it. It now always uses a light "lightbox" card, matching ComicBook AI's own dialog, regardless of which theme the rest of the app is in.
+
 ## [1.0.173] - 2026-10-22
 
 ### Added
