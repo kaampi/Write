@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.170] - 2026-10-22
+
+### Fixed
+- Synopsis, Development method, and Timeline/Plotlines sat flush against the panel edges, unlike Brainstorm and Briefs — a side effect of an earlier change that removed the manuscript view's own horizontal padding. All three now get the same inner margin Brainstorm and Briefs already had.
+
 ## [1.0.169] - 2026-10-22
 
 ### Fixed

@@ -42,7 +42,7 @@ export function TimelineBoardPanel({
   const editing = plotlines.find((plotline) => plotline.id === editingId) ?? null;
 
   return (
-    <main className="manuscript plotline-matrix-page">
+    <main className="manuscript manuscript-inset plotline-matrix-page">
       <h1 className="chapter-title">{m.timeline.title}</h1>
       <p className="synopsis-lede">{m.timeline.lede}</p>
       <p className="synopsis-lede">{m.plotlines.lede}</p>

@@ -36,7 +36,7 @@ export function DevelopmentMethodPanel({
     : undefined;
 
   return (
-    <main className="manuscript method-panel">
+    <main className="manuscript manuscript-inset method-panel">
       <h1 className="chapter-title">{m.method.title}</h1>
       <p className="synopsis-lede">{m.method.lede}</p>
 

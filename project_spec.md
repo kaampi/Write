@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.169
+Status: living document, v1.0.170
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8014,6 +8014,39 @@ bekräftade att även det FÖRSTA klicket på en tom sammanfattning nu visar
 förslagsrutan istället för att spara direkt. `npm run build` rent.
 
 v1.0.168 → v1.0.169.
+
+**Ändringslogg v1.0.170 (2026-10-22): "Brainstorm och Briefs har en
+marginal mellan text och panelens yta medans Synopsis - Development
+method - Timeline ligger kloss mot kanten."**
+
+- Rotorsak: `.manuscript` förlorade sin horisontella padding långt
+  tidigare (sidoskuggans CSS-arbete — se v1.0.15x-ändringarna om
+  `.prose-wrap`/`.chapter-head-inner` som centrerar sig själva via egen
+  `max-width`, så huvudkapitelredigeraren klarar sig utan
+  `.manuscript`s egen padding). Brainstorm (`BrainstormBoard.tsx`) och
+  Briefs (`DispositionBoard.tsx`) fick redan då en extra klass,
+  `.manuscript-board` (`padding-left/right: 1.5rem`), för att kompensera
+  — men Synopsis, Development method och Timeline/Plotlines (som alla
+  delar `.manuscript` rakt av, utan någon egen inre `max-width`-wrapper
+  runt sitt innehåll) fick aldrig den kompensationen, så de blev kvar
+  kloss mot kanten.
+- Fix: ny klass `.manuscript-inset` i `styles.css`, samma deklaration
+  som `.manuscript-board` (delar samma CSS-regel via kommaseparerad
+  selektor för att slippa duplicera värdena). Lades på `<main>` i tre
+  ställen: Synopsis (`Editor.tsx`), `DevelopmentMethodPanel.tsx`, och
+  `TimelineBoard.tsx`s `TimelineBoardPanel` (delas av både Timeline och
+  Plotlines, så båda får fixen). Kontrollerade `.manuscript-foot`
+  (footern i Synopsis) — den har redan sin egen oberoende padding och
+  `width:100%`, så den blir nu konsekvent insmalnad precis som
+  Brainstorms/Briefs redan fungerande footer, inget dubbelarbete.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1111 test) grön
+— ingen testfil rör ren styling. Playwright-skärmdumpar av alla tre
+sidor (Synopsis, Development method, Timeline) mot en körande
+dev-server bekräftade samma inre marginal som Brainstorm redan hade.
+`npm run build` rent.
+
+v1.0.169 → v1.0.170.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

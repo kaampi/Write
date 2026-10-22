@@ -1729,7 +1729,7 @@ export function Editor() {
         ) : onHandbook ? (
           <HandbookPanel />
         ) : onSynopsis ? (
-          <main className="manuscript" style={manuscriptBackgroundStyle(book.editor_background)}>
+          <main className="manuscript manuscript-inset" style={manuscriptBackgroundStyle(book.editor_background)}>
             <h1 className="chapter-title">{m.editor.synopsis}</h1>
             <p className="synopsis-lede">{m.editor.synopsisLede}</p>
             <ProseCanvas
