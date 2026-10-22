@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.165] - 2026-10-22
+
+### Changed
+- The chapter brief panel's "Extract facts" and "Summarize chapter" controls are now small buttons instead of text links, and the long explanatory sentence under an empty summary is gone — replaced with a short placeholder. "Summarize chapter" is now just "Summarize".
+
 ## [1.0.164] - 2026-10-21
 
 ### Fixed

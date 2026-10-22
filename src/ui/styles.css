@@ -1797,10 +1797,10 @@ button:disabled {
   color: var(--text-faint);
 }
 
-.chapter-brief-extract {
+.chapter-brief-action {
   font-size: 0.78rem;
-  margin-top: 0.25rem;
-  padding: 0;
+  margin: 0.3rem 0 0.1rem;
+  padding: 0.22rem 0.5rem;
 }
 
 .chapter-item {

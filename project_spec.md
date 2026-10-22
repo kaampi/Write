@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.164
+Status: living document, v1.0.165
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7866,6 +7866,40 @@ inte finns med i exporten — hela testsviten 1111 test, 81 filer, grön.
 `npm run build` rent.
 
 v1.0.163 → v1.0.164.
+
+**Ändringslogg v1.0.165 (2026-10-22): bekräftade att Ctrl+F5 löste
+scen-popover-rapporten (samma gamla cache-mönster, ingen kodbugg — testat
+med Playwright mot en ren dev-server utan att kunna återskapa något fel),
+och städade sedan upp kapitelbrevets "Extract facts"/"Summarize
+chapter"-kontroller på Mats begäran:**
+
+- Båda var tidigare `.text-button`-länkar (ingen synlig kant), och under
+  en tom sammanfattning stod en hel förklarande mening
+  ("What actually happens in this chapter — write it by hand, or
+  Summarize it below once there's prose."). Mats ville ha två små
+  knappar och ingen förklarande text.
+- Bytte båda knapparnas klass från `text-button chapter-brief-extract`
+  till en ny `chapter-brief-action` (vanlig `<button>` utan
+  text-button-reset, så webbläsarens/temats standardkant syns — samma
+  mönster som `.scene-actions button` redan använder på andra håll i
+  appen). "Summarize chapter" döptes om till bara "Summarize"
+  (`summarizeChapterAction`, alla tre språk). `summaryPlaceholder`
+  kortades till en enda rad utan förklaring ("What actually happens in
+  this chapter."), likadant i sv/nb.
+- Mats frågade också om Summarize skriver över eller lägger till en
+  befintlig sammanfattning — läste `summarizeChapter` i `BookStore.tsx`:
+  den ANROPAR `updateChapter(latest, chapterId, { summary })` med det nya
+  AI-genererade resultatet, dvs den ERSÄTTER hela fältet, lägger inte
+  till. Lade till den meningen i `summarizeChapterHint` (tooltip-texten
+  på knappen) på alla tre språk, så det är synligt i appen också.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1111 test, 81
+filer) grön — inga testfiler berörda av den här ändringen. Visuell
+kontroll via Playwright mot dev-servern (skärmdump av kapitelbrevblocket)
+bekräftade de två nya kantade knapparna och den kortade
+placeholder-texten.
+
+v1.0.164 → v1.0.165.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

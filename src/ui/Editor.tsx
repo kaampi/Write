@@ -1476,7 +1476,7 @@ export function Editor() {
                     />
                     <button
                       type="button"
-                      className="text-button chapter-brief-extract"
+                      className="chapter-brief-action"
                       title={m.editor.extractBriefFactsHint}
                       disabled={busy !== null || !item.brief.trim()}
                       onClick={() => void store.extractBrief(item.id)}
@@ -1494,7 +1494,7 @@ export function Editor() {
                     />
                     <button
                       type="button"
-                      className="text-button chapter-brief-extract"
+                      className="chapter-brief-action"
                       title={m.editor.summarizeChapterHint}
                       disabled={busy !== null || !item.prose.trim()}
                       onClick={() => void store.summarizeChapter(item.id)}
