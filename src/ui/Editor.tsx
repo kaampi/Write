@@ -1474,15 +1474,6 @@ export function Editor() {
                         void store.patchBook((current) => updateChapter(current, item.id, { brief }))
                       }
                     />
-                    <button
-                      type="button"
-                      className="chapter-brief-action"
-                      title={m.editor.extractBriefFactsHint}
-                      disabled={busy !== null || !item.brief.trim()}
-                      onClick={() => void store.extractBrief(item.id)}
-                    >
-                      {busy === "extract-brief" ? m.editor.extracting : m.editor.extractBriefFacts}
-                    </button>
                     <ChapterBriefCopy
                       id={`chapter-summary-${item.id}`}
                       value={item.summary}
@@ -1492,15 +1483,26 @@ export function Editor() {
                         void store.patchBook((current) => updateChapter(current, item.id, { summary }))
                       }
                     />
-                    <button
-                      type="button"
-                      className="chapter-brief-action"
-                      title={m.editor.summarizeChapterHint}
-                      disabled={busy !== null || !item.prose.trim()}
-                      onClick={() => void store.summarizeChapter(item.id)}
-                    >
-                      {busy === "summarize" ? m.editor.summarizing : m.editor.summarizeChapterAction}
-                    </button>
+                    <div className="chapter-brief-actions">
+                      <button
+                        type="button"
+                        className="chapter-brief-action"
+                        title={m.editor.extractBriefFactsHint}
+                        disabled={busy !== null || !item.brief.trim()}
+                        onClick={() => void store.extractBrief(item.id)}
+                      >
+                        {busy === "extract-brief" ? m.editor.extracting : m.editor.extractBriefFacts}
+                      </button>
+                      <button
+                        type="button"
+                        className="chapter-brief-action"
+                        title={m.editor.summarizeChapterHint}
+                        disabled={busy !== null || !item.prose.trim()}
+                        onClick={() => void store.summarizeChapter(item.id)}
+                      >
+                        {busy === "summarize" ? m.editor.summarizing : m.editor.summarizeChapterAction}
+                      </button>
+                    </div>
                   </div>
                 ) : null}
               </li>

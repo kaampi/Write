@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.167] - 2026-10-22
+
+### Changed
+- "Extract facts" and "Summarize" now sit next to each other, same width, when the chapter rail is wide enough — and stack, still same width, when it isn't.
+
 ## [1.0.166] - 2026-10-22
 
 ### Changed

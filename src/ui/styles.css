@@ -1797,9 +1797,22 @@ button:disabled {
   color: var(--text-faint);
 }
 
+.chapter-brief-text + .chapter-brief-text {
+  margin-top: 0.5rem;
+}
+
+.chapter-brief-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.4rem 0 0.1rem;
+}
+
 .chapter-brief-action {
+  flex: 1 1 0%;
+  min-width: 7rem;
+  text-align: center;
   font-size: 0.78rem;
-  margin: 0.3rem 0 0.1rem;
   padding: 0.22rem 0.5rem;
 }
 

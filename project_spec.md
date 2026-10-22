@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.166
+Status: living document, v1.0.167
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7912,6 +7912,30 @@ dev-servern. `tsc --noEmit` rent, hela testsviten (1111 test) grön —
 inga tester berörda.
 
 v1.0.165 → v1.0.166.
+
+**Ändringslogg v1.0.167 (2026-10-22): "lägg knapparna bredvid varandra
+om de ryms, annars under varandra, med samma bredd".** Flyttade "Extract
+facts"-knappen (som tidigare satt direkt efter brief-fältet) ner till
+samma rad som "Summarize", i en ny `<div className="chapter-brief-actions">`
+efter båda textfälten (brief, sedan summary). Ny CSS:
+`.chapter-brief-actions` är `display:flex; flex-wrap:wrap; gap:0.4rem`,
+och `.chapter-brief-action` fick `flex: 1 1 0%` (flex-basis 0, inte
+`auto`, så de två knapparna delar utrymmet exakt lika oavsett att
+"Extract facts" och "Summarize" har olika textlängd) plus
+`min-width: 7rem` (tvingar radbrytning till stapling när kapitelfältet
+är smalare än båda knapparna tillsammans). Lade även till
+`.chapter-brief-text + .chapter-brief-text { margin-top: 0.5rem }` så
+brief- och summary-fälten (nu direkt efter varandra utan knapp emellan)
+inte klibbar ihop visuellt.
+
+**Verifiering:** Playwright mot dev-servern, två scenarier — en smal
+kapitelrad (standardbredd, ~160px) där knapparna staplas men är lika
+breda (159.8px vardera, uppmätt), och en bredare rad (`--rail-left-w`
+satt till 400px via `page.evaluate`) där de står bredvid varandra, också
+lika breda (156.7px vardera). `tsc --noEmit` rent, hela testsviten
+(1111 test) grön.
+
+v1.0.166 → v1.0.167.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
