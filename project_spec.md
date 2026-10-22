@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.171
+Status: living document, v1.0.172
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8084,6 +8084,90 @@ fungerar precis som förut. Skärmdump av Scener-panelen öppen ovanpå
 Briefs-vyn bekräftade visuellt. `npm run build` rent.
 
 v1.0.170 → v1.0.171.
+
+**Ändringslogg v1.0.172 (2026-10-22): Mats bad oss återanvända
+Progress-rutan från ComicBook AI (`BeatAnalysisDialog.tsx` +
+`beatAnalysisDialog.css`, eget repo `ocedo-apps/ComicBook-AI`) — samma
+stil, animerade snurra, fokuslåsning, Escape/Avbryt och
+bakgrundsspärr — för StoryBook AI:s egna AI-jobb.**
+
+- La till `ocedo-apps/comicbook-ai` i sessionen och läste källan
+  direkt: en 12-punkters SVG-cirkel som roterar (6s) samtidigt som
+  varje punkt pulserar (1.2s, fasförskjuten), en `createPortal`-dialog
+  med fokusfälla (Tab tvingas tillbaka till Avbryt-knappen), Escape
+  och bakgrundsklick blockerade, alla syskon till portalen får
+  `inert`+`aria-hidden` och `document.body.style.overflow:hidden`
+  medan den är öppen, och fokus återställs till det som var fokuserat
+  innan (eller `returnFocus`) när den stängs.
+- **Avgörande fråga innan jag byggde något**: StoryBook AI har TVÅ
+  sorters AI-jobb — sådana som redan strömmar text direkt synlig i
+  editorn medan de kör (Draft, Extend/Elaborate/Instruct/Beat, Recast,
+  Translate, brainstorm-/interview-chattarna), och Proofread/
+  Developmental som redan har egna progress-barer (`ProofreadCard.tsx`,
+  `DevelopmentalCard.tsx`, med paus/återuppta). En fullskärms-ruta
+  skulle dölja eller krocka med allt det. Frågade Mats explicit
+  (AskUserQuestion) om rutan skulle gälla ALLA jobb eller bara de
+  "tysta" (inget synligt förrän klart) — han valde det rekommenderade:
+  bara de tysta.
+- Körde en fork-agent för att läsa igenom varenda `Busy`-variant i
+  `BookStore.tsx` och klassificera live/tyst utifrån om den skriver
+  till `setBook`/`patchBook` PER CHUNK i en synlig yta, eller bara
+  applicerar resultatet en gång i slutet. Resultat — **tysta** (fick
+  rutan): `extract`, `extract-interview`, `extract-brainstorm`,
+  `extract-synopsis`, `extract-brief`, `analyze`, `polish`,
+  `illustrate`, `ask-manuscript`, `ask-passage`, `develop`,
+  `import-lore`, `summarize`. **Levande** (rörs inte): `draft`,
+  `extend`/`elaborate`/`instruct`/`beat`, `recast`, `translate`,
+  `brainstorm-chat`, `interview`, `proofread`, `developmental`.
+- Ny `BusyDialog.tsx` — samma fokusfälla/inert/Escape-logik portad
+  rakt av, men `title`/`status`/`help`/`cancelLabel` som props istället
+  för ComicBook AI:s hårdkodade per-språk-funktion (StoryBook AI har
+  redan ett riktigt i18n-system). CSS i `styles.css` (projektets enda
+  stilmall, inget separat CSS-per-komponent som i ComicBook AI) som
+  `.busy-dialog*`, samma 12-punkters SVG-snurra, `z-index: 80` (högst i
+  appen — näst högst är 70, för ett bekräftelseval ovanpå ett
+  granskningskort).
+- Ny i18n-namnrymd `busy` (alla tre språk): delad `title`
+  ("Working"/"Arbetar"/"Arbeider") och `help`-text, plus
+  verb-ing-strängar för de jobb som saknade en sedan tidigare
+  (`analyzing`, `polishing`, `illustrating`, `developing`,
+  `importing` med `{current}`/`{total}`) — återanvänder redan
+  befintliga strängar där de fanns (`m.editor.extracting`,
+  `m.interview.extracting`, `m.askManuscript.asking`,
+  `m.askPassage.asking`, `m.editor.summarizing`) istället för att
+  duplicera dem.
+- `SILENT_BUSY`-set + `silentBusyCopy(busy, m, importLoreProgress)` i
+  `Editor.tsx` väljer titel/statustext per `Busy`-värde; rutan
+  monterad som syskon efter hela surface-ternaryn (samma plats som
+  v1.0.171s chapterPopover-fix), så den visas oavsett vilken sida man
+  är på. `onCancel={store.stopDraft}` — den delade
+  "avbryt-vad-som-helst-som-kör"-funktionen som redan fanns.
+- **Dolt saknat stycke upptäckt under verifieringen**: `store.stopDraft`
+  (`abortRef.current?.abort()`) fanns redan och användes av flera
+  "tysta" jobb (`analyzeChapter`, `polishChapter` m.fl.) — men
+  `extractChapter`, `extractSynopsis`, `extractBrainstormNote` och
+  `summarizeChapter` saknade HELT `AbortController`/`signal`-koppling.
+  Upptäckt genom att faktiskt testa Avbryt/Escape mot en konstgjord
+  5-sekunders-fördröjd mock-Ollama-server i Playwright — rutan visades
+  korrekt, men varken Escape eller Avbryt-knappen stängde den för
+  Extract facts. Fixade alla fyra med exakt samma mönster
+  (`abortRef.current?.abort(); const abort = new AbortController();
+  abortRef.current = abort; ... signal: abort.signal ... catch
+  AbortError → no-op ... finally abortRef.current = null`) som redan
+  var etablerat i `analyzeChapter` m.fl.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1111 test) grön.
+Playwright mot en körande dev-server med en konstgjord
+5-sekunders-fördröjd mock-Ollama (för att hinna skärmdumpa/testa innan
+svaret kommer): rutans text, fokus på Avbryt-knappen vid öppning,
+`inert`+`aria-hidden` korrekt satt på `#root` (bekräftat separat från
+ett första, felaktigt test som letade efter `inert` på fel element),
+Escape stänger rutan OCH stoppar den faktiska förfrågan, Avbryt-knappen
+likaså, och Draft (ett levande jobb) visar INTE rutan alls. Skärmdump
+av rutan bekräftade utseendet matchar ComicBook AI:s stil. `npm run
+build` rent.
+
+v1.0.171 → v1.0.172.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

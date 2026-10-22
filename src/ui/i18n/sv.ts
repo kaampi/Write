@@ -11,6 +11,15 @@ export const sv: Messages = {
     copied: "Kopierat",
     infoAbout: "Mer om {field}"
   },
+  busy: {
+    title: "Arbetar",
+    help: "Den lokala AI:n jobbar med det här. Första anropet kan ta lite längre tid medan modellen laddas.",
+    analyzing: "Analyserar…",
+    polishing: "Putsar…",
+    illustrating: "Skriver en illustrationsprompt…",
+    developing: "Utvecklar…",
+    importing: "Importerar {current} av {total}…"
+  },
   app: {
     crash: "Appen stötte på ett fel.",
     tryAgain: "Försök igen",

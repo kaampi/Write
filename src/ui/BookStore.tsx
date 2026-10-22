@@ -1881,6 +1881,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       setError(ollamaError ?? STORE_ERROR.noModel);
       return;
     }
+    abortRef.current?.abort();
+    const abort = new AbortController();
+    abortRef.current = abort;
     setBusy("extract");
     setError(null);
     try {
@@ -1898,7 +1901,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         const raw = await provider.chat({
           messages: extractMessages,
           temperature: 0.1,
-          maxTokens: EXTRACTOR_MAX_TOKENS
+          maxTokens: EXTRACTOR_MAX_TOKENS,
+          signal: abort.signal
         });
         recordPromptResponse(raw);
         // See the matching comment in extractInterview: a parse failure
@@ -1918,9 +1922,11 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       }
       if (totalDrafts === 0) setError(STORE_ERROR.extractorNone);
     } catch (err) {
+      if ((err as { name?: string }).name === "AbortError") return;
       setError(ollamaHint(err));
     } finally {
       setBusy(null);
+      abortRef.current = null;
     }
   }, [busy, flushSave, reviewModel, models.length, ollamaError]);
 
@@ -2455,6 +2461,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         setError(ollamaError ?? STORE_ERROR.noModel);
         return;
       }
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
       setBusy("extract-brainstorm");
       setError(null);
       try {
@@ -2467,7 +2476,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         const raw = await provider.chat({
           messages: extractMessages,
           temperature: 0.1,
-          maxTokens: EXTRACTOR_MAX_TOKENS
+          maxTokens: EXTRACTOR_MAX_TOKENS,
+          signal: abort.signal
         });
         recordPromptResponse(raw);
         let drafts: FactDraft[];
@@ -2484,9 +2494,11 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         const nextFacts = applyExtractorDrafts(latest.facts, drafts, latest.facts.length, undefined, undefined, "brainstorm");
         await flushSave(touch(latest, { facts: nextFacts }));
       } catch (err) {
+        if ((err as { name?: string }).name === "AbortError") return;
         setError(ollamaHint(err));
       } finally {
         setBusy(null);
+        abortRef.current = null;
       }
     },
     [busy, flushSave, models.length, ollamaError, recordPrompt, recordPromptResponse, reviewModel]
@@ -2505,6 +2517,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       setError(ollamaError ?? STORE_ERROR.noModel);
       return;
     }
+    abortRef.current?.abort();
+    const abort = new AbortController();
+    abortRef.current = abort;
     setBusy("extract-synopsis");
     setError(null);
     try {
@@ -2517,7 +2532,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       const raw = await provider.chat({
         messages: extractMessages,
         temperature: 0.1,
-        maxTokens: EXTRACTOR_MAX_TOKENS
+        maxTokens: EXTRACTOR_MAX_TOKENS,
+        signal: abort.signal
       });
       recordPromptResponse(raw);
       let drafts: FactDraft[];
@@ -2534,9 +2550,11 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       const nextFacts = applyExtractorDrafts(latest.facts, drafts, latest.facts.length, undefined, undefined, "synopsis");
       await flushSave(touch(latest, { facts: nextFacts }));
     } catch (err) {
+      if ((err as { name?: string }).name === "AbortError") return;
       setError(ollamaHint(err));
     } finally {
       setBusy(null);
+      abortRef.current = null;
     }
   }, [busy, flushSave, models.length, ollamaError, recordPrompt, recordPromptResponse, reviewModel]);
 
@@ -2562,6 +2580,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         setError(ollamaError ?? STORE_ERROR.noModel);
         return;
       }
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
       setBusy("extract-brief");
       setError(null);
       try {
@@ -2576,7 +2597,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         const raw = await provider.chat({
           messages: extractMessages,
           temperature: 0.1,
-          maxTokens: EXTRACTOR_MAX_TOKENS
+          maxTokens: EXTRACTOR_MAX_TOKENS,
+          signal: abort.signal
         });
         recordPromptResponse(raw);
         let drafts: FactDraft[];
@@ -2600,9 +2622,11 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         );
         await flushSave(touch(latest, { facts: nextFacts }));
       } catch (err) {
+        if ((err as { name?: string }).name === "AbortError") return;
         setError(ollamaHint(err));
       } finally {
         setBusy(null);
+        abortRef.current = null;
       }
     },
     [busy, flushSave, models.length, ollamaError, recordPrompt, recordPromptResponse, reviewModel]
@@ -2625,6 +2649,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         setError(ollamaError ?? STORE_ERROR.noModel);
         return undefined;
       }
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
       setBusy("summarize");
       setError(null);
       try {
@@ -2639,7 +2666,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         // models especially) — it gets cut off mid-preamble, which reads as
         // either an empty reply or the chapter's own opening echoed back.
         // 700 leaves room for that before the real summary comes out.
-        const raw = await provider.chat({ messages: summarizeMessages, temperature: 0.2, maxTokens: 700 });
+        const raw = await provider.chat({ messages: summarizeMessages, temperature: 0.2, maxTokens: 700, signal: abort.signal });
         recordPromptResponse(raw);
         const summary = manuscriptFromModel(raw, "");
         if (!summary) {
@@ -2648,10 +2675,12 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         }
         return summary;
       } catch (err) {
+        if ((err as { name?: string }).name === "AbortError") return undefined;
         setError(ollamaHint(err));
         return undefined;
       } finally {
         setBusy(null);
+        abortRef.current = null;
       }
     },
     [busy, models.length, ollamaError, recordPrompt, recordPromptResponse, reviewModel]

@@ -11,6 +11,15 @@ export const nb: Messages = {
     copied: "Kopiert",
     infoAbout: "Mer om {field}"
   },
+  busy: {
+    title: "Arbeider",
+    help: "Den lokale AI-en jobber med dette. Første forespørsel kan ta litt lengre tid mens modellen lastes.",
+    analyzing: "Analyserer…",
+    polishing: "Pusser…",
+    illustrating: "Skriver en illustrasjonsprompt…",
+    developing: "Utvikler…",
+    importing: "Importerer {current} av {total}…"
+  },
   app: {
     crash: "Appen støtte på en feil.",
     tryAgain: "Prøv på nytt",

@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.172] - 2026-10-22
+
+### Added
+- A blocking progress dialog — ported from ComicBook AI's beat-analysis dialog, same animated spinner, focus lock, Escape/Cancel, and background lockout — now shows for AI jobs that have nothing else visible to watch while they run: Extract facts (chapter, brief, synopsis, brainstorm note, interview), Analyze, Polish, Illustration prompt, Ask manuscript, Ask about this chapter, Develop, Import lore articles, and Summarize. Draft, Extend/Elaborate/Instruct/Beat, Recast, Translate, the brainstorm/interview chats, Proofread, and Developmental keep their existing live feedback — the dialog would only hide it there.
+
+### Fixed
+- Extract facts, Extract facts (synopsis), Extract facts (brainstorm note), and Summarize had no way to cancel a slow request — Cancel/Escape is now wired through all of them like it already was for Analyze and the others.
+
 ## [1.0.171] - 2026-10-22
 
 ### Fixed

@@ -6935,3 +6935,85 @@ button.illustration-genre-item:focus-visible {
 .method-suggestion p {
   margin: 0 0 0.5rem;
 }
+
+/* BusyDialog — a blocking progress indicator for an AI job with no live
+   output of its own (see BusyDialog.tsx's own comment). Sits above every
+   other overlay in the app (z-index 80 — the highest otherwise in use is
+   70, for a confirm choice stacked on a review card). */
+.busy-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgb(0 0 0 / 0.55);
+}
+
+.busy-dialog {
+  width: min(100%, 27.5rem);
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--text);
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.busy-dialog h2 {
+  margin: 1.1rem 0 0.6rem;
+}
+
+.busy-dialog p {
+  line-height: 1.6;
+}
+
+.busy-dialog-status {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.busy-dialog-cancel {
+  margin-top: 0.75rem;
+  min-width: 7.5rem;
+}
+
+.busy-dialog-spinner {
+  display: block;
+  margin: auto;
+  color: var(--text);
+  overflow: visible;
+}
+
+.busy-dialog-spinner g {
+  transform-origin: 12px 12px;
+  animation: busy-dialog-spinner-rotate 6s linear infinite;
+}
+
+.busy-dialog-spinner circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: busy-dialog-spinner-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes busy-dialog-spinner-rotate {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes busy-dialog-spinner-pulse {
+  0%,
+  50%,
+  100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(2);
+  }
+}

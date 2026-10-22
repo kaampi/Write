@@ -361,6 +361,15 @@ export const en = {
     copied: "Copied",
     infoAbout: "More about {field}"
   },
+  busy: {
+    title: "Working",
+    help: "Your local AI is working on this. The first request can take a little longer while the model loads.",
+    analyzing: "Analyzing…",
+    polishing: "Polishing…",
+    illustrating: "Writing an illustration prompt…",
+    developing: "Developing…",
+    importing: "Importing {current} of {total}…"
+  },
   app: {
     crash: "The app hit an error.",
     tryAgain: "Try again",

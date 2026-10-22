@@ -95,7 +95,7 @@ import { IllustrationStyleLibraryCard } from "./IllustrationStyleLibraryCard";
 import { AskManuscriptPanel } from "./AskManuscript";
 import { AskAboutPassageCard } from "./AskAboutPassageCard";
 import { TimelineBoardPanel } from "./TimelineBoard";
-import { useBookStore } from "./useBookStore";
+import { useBookStore, type Busy } from "./useBookStore";
 import { downloadGeneratedBlob, downloadJson } from "./downloadJson";
 import { readLastJsonBackup, recordLastJsonBackup } from "./jsonBackupStamp";
 import { BiblePanel } from "./BiblePanel";
@@ -121,6 +121,7 @@ import { DevelopmentMethodPanel } from "./DevelopmentMethodPanel";
 import { ChapterBriefCopy } from "./ChapterBriefCopy";
 import { DispositionBoard } from "./DispositionBoard";
 import { BrainstormBoard } from "./BrainstormBoard";
+import { BusyDialog } from "./BusyDialog";
 import { ProseCanvas } from "./ProseCanvas";
 import { EDITOR_BACKGROUND_URLS, EDITOR_BACKGROUND_TILED } from "./editorBackgrounds";
 import { ProseStatsCard } from "./ProseStatsCard";
@@ -473,6 +474,73 @@ function manuscriptBackgroundStyle(background: Book["editor_background"]): React
   };
 }
 
+/**
+ * Busy kinds with no visible output of their own while they run — a single
+ * non-streaming `chat()` call, or a result deliberately held back for
+ * review (Polish) rather than written live. Everything else (Draft,
+ * Extend/Elaborate/Instruct/Beat, Recast, Translate, the brainstorm/
+ * interview chats, Proofread, Developmental) either streams straight into
+ * something already on screen or has its own dedicated progress UI, so
+ * BusyDialog would only get in the way there.
+ */
+const SILENT_BUSY = new Set<Busy>([
+  "extract",
+  "extract-interview",
+  "extract-brainstorm",
+  "extract-synopsis",
+  "extract-brief",
+  "analyze",
+  "polish",
+  "illustrate",
+  "ask-manuscript",
+  "ask-passage",
+  "develop",
+  "import-lore",
+  "summarize"
+]);
+
+function silentBusyCopy(
+  busy: Busy,
+  m: Messages,
+  importLoreProgress: { current: number; total: number } | null
+): { title: string; status: string } | null {
+  if (!busy || !SILENT_BUSY.has(busy)) return null;
+  const title = m.busy.title;
+  switch (busy) {
+    case "extract":
+    case "extract-synopsis":
+    case "extract-brief":
+      return { title, status: m.editor.extracting };
+    case "extract-interview":
+      return { title, status: m.interview.extracting };
+    case "extract-brainstorm":
+      return { title, status: m.editor.extracting };
+    case "analyze":
+      return { title, status: m.busy.analyzing };
+    case "polish":
+      return { title, status: m.busy.polishing };
+    case "illustrate":
+      return { title, status: m.busy.illustrating };
+    case "ask-manuscript":
+      return { title, status: m.askManuscript.asking };
+    case "ask-passage":
+      return { title, status: m.askPassage.asking };
+    case "develop":
+      return { title, status: m.busy.developing };
+    case "import-lore":
+      return {
+        title,
+        status: importLoreProgress
+          ? format(m.busy.importing, { current: importLoreProgress.current, total: importLoreProgress.total })
+          : title
+      };
+    case "summarize":
+      return { title, status: m.editor.summarizing };
+    default:
+      return null;
+  }
+}
+
 export function Editor() {
   const store = useBookStore();
   const { messages: m } = useLocale();
@@ -485,6 +553,7 @@ export function Editor() {
   const goalPace = book.goal ? computeGoalPace(book, book.goal) : null;
   const chapter = chapters.find((item) => item.id === chapterId) ?? chapters[0];
   if (!chapter) return null;
+  const silentBusy = silentBusyCopy(busy, m, store.importLoreProgress);
   const onBrainstorm = surface === "brainstorm";
   const onSynopsis = surface === "synopsis";
   const onTimeline = surface === "timeline";
@@ -2024,6 +2093,16 @@ export function Editor() {
             </footer>
           </main>
         )}
+
+        {silentBusy ? (
+          <BusyDialog
+            title={silentBusy.title}
+            status={silentBusy.status}
+            help={m.busy.help}
+            cancelLabel={m.common.cancel}
+            onCancel={store.stopDraft}
+          />
+        ) : null}
 
         {chapterPopover && chapterPopover.chapterId === chapter.id ? (
           <div
