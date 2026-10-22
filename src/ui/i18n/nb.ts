@@ -347,7 +347,7 @@ export const nb: Messages = {
     extractBriefFacts: "Hent ut fakta",
     extractBriefFactsHint: "Finn mulige Story Bible-fakta i denne brief-en. De havner i granskingskøen som kandidater — ingenting blir kanon før du låser det.",
     chapterSummary: "Kapittelsammendrag",
-    summaryPlaceholder: "Hva som faktisk skjer i dette kapittelet.",
+    summaryPlaceholder: "",
     summarizeChapterAction: "Oppsummer",
     summarizeChapterHint: "Et kort sammendrag av hva som skjer i dette kapittelet, så senere kapitlers Skriv utkast/Fortsett/Utdyp/Beat kan se det uten å trenge hele kapittelets tekst. Erstatter det som allerede står i sammendraget.",
     summarizing: "Oppsummerer…"

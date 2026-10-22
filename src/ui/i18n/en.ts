@@ -697,7 +697,7 @@ export const en = {
     extractBriefFacts: "Extract facts",
     extractBriefFactsHint: "Find possible Story Bible facts in this brief. They land in the review queue as candidates — nothing here becomes canon until you lock it.",
     chapterSummary: "Chapter summary",
-    summaryPlaceholder: "What actually happens in this chapter.",
+    summaryPlaceholder: "",
     summarizeChapterAction: "Summarize",
     summarizeChapterHint: "A short digest of what happens in this chapter, so later chapters' Draft/Extend/Elaborate/Beat can see it without needing this chapter's full prose. Replaces whatever is in the summary now.",
     summarizing: "Summarizing…"

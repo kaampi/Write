@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.166] - 2026-10-22
+
+### Changed
+- The chapter summary field no longer shows placeholder text between the "Extract facts" and "Summarize" buttons when it's empty — just blank space to write into or leave for Summarize to fill.
+
 ## [1.0.165] - 2026-10-22
 
 ### Changed

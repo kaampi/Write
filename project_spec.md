@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.165
+Status: living document, v1.0.166
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7900,6 +7900,18 @@ bekräftade de två nya kantade knapparna och den kortade
 placeholder-texten.
 
 v1.0.164 → v1.0.165.
+
+**Ändringslogg v1.0.166 (2026-10-22): Mats ville ha hela placeholder-
+texten mellan knapparna borta, inte bara förkortad.** Satte
+`summaryPlaceholder` till en tom sträng i alla tre språk —
+`.chapter-brief-text:empty::before`s `content: attr(data-placeholder)`
+blir då bara `""`, så inget visas, medan elementet (och dess
+`min-height`) finns kvar så fältet fortfarande går att klicka i och
+skriva för hand. Verifierat visuellt via Playwright-skärmdump mot
+dev-servern. `tsc --noEmit` rent, hela testsviten (1111 test) grön —
+inga tester berörda.
+
+v1.0.165 → v1.0.166.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
