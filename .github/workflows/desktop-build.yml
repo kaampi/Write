@@ -36,6 +36,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # package-lock.json's @ocedo-apps/storycore entry pins its own
+      # "resolved" URL in SSH form (git+ssh://git@github.com/...) — that's
+      # npm's own canonical form for a GitHub git dependency, and it comes
+      # back every time the lockfile is regenerated regardless of what
+      # protocol the dependency was declared with, so it isn't something a
+      # one-off lockfile edit can fix for good. This runner has no SSH key
+      # for GitHub (only the HTTPS token actions/checkout already set up),
+      # so `npm ci` failed outright on that package with "Permission denied
+      # (publickey)" — every build since the dependency was added, right up
+      # to this fix. Rewriting the URL at the git level, same as this
+      # project's own dev sandbox already does the other direction, makes
+      # npm's git fetch go over HTTPS regardless of which form is on record.
+      - name: Fetch GitHub git dependencies over HTTPS, not SSH
+        run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
