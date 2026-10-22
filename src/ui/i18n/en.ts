@@ -364,6 +364,7 @@ export const en = {
   busy: {
     title: "Working",
     help: "Your local AI is working on this. The first request can take a little longer while the model loads.",
+    drafting: "Drafting…",
     analyzing: "Analyzing…",
     polishing: "Polishing…",
     illustrating: "Writing an illustration prompt…",

@@ -477,11 +477,13 @@ function manuscriptBackgroundStyle(background: Book["editor_background"]): React
 /**
  * Busy kinds with no visible output of their own while they run — a single
  * non-streaming `chat()` call, or a result deliberately held back for
- * review (Polish) rather than written live. Everything else (Draft,
- * Extend/Elaborate/Instruct/Beat, Recast, Translate, the brainstorm/
- * interview chats, Proofread, Developmental) either streams straight into
- * something already on screen or has its own dedicated progress UI, so
- * BusyDialog would only get in the way there.
+ * review (Polish) rather than written live. Everything else (Extend/
+ * Elaborate/Instruct/Beat, Recast, Translate, the brainstorm/interview
+ * chats, Proofread, Developmental) either streams straight into something
+ * already on screen or has its own dedicated progress UI, so BusyDialog
+ * would only get in the way there. Draft is handled separately — see
+ * `draftAwaiting`'s own comment in BookStore.tsx — it only joins this set
+ * for the dead stretch before its own first token arrives.
  */
 const SILENT_BUSY = new Set<Busy>([
   "extract",
@@ -502,8 +504,10 @@ const SILENT_BUSY = new Set<Busy>([
 function silentBusyCopy(
   busy: Busy,
   m: Messages,
-  importLoreProgress: { current: number; total: number } | null
+  importLoreProgress: { current: number; total: number } | null,
+  draftAwaiting: boolean
 ): { title: string; status: string } | null {
+  if (busy === "draft") return draftAwaiting ? { title: m.busy.title, status: m.busy.drafting } : null;
   if (!busy || !SILENT_BUSY.has(busy)) return null;
   const title = m.busy.title;
   switch (busy) {
@@ -553,7 +557,7 @@ export function Editor() {
   const goalPace = book.goal ? computeGoalPace(book, book.goal) : null;
   const chapter = chapters.find((item) => item.id === chapterId) ?? chapters[0];
   if (!chapter) return null;
-  const silentBusy = silentBusyCopy(busy, m, store.importLoreProgress);
+  const silentBusy = silentBusyCopy(busy, m, store.importLoreProgress, store.draftAwaiting);
   const onBrainstorm = surface === "brainstorm";
   const onSynopsis = surface === "synopsis";
   const onTimeline = surface === "timeline";

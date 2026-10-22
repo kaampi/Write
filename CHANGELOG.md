@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.173] - 2026-10-22
+
+### Added
+- Draft now shows the same progress dialog as Extract/Analyze/Summarize for the dead stretch between clicking the button and the model's first word arriving (worst on a cold model load) — it disappears the instant text starts streaming into the chapter, so the live generation itself is never covered.
+
 ## [1.0.172] - 2026-10-22
 
 ### Added

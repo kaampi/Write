@@ -62,6 +62,7 @@ export type BookStoreValue = {
   historyLimit: number;
   ollamaError: string | null;
   busy: Busy;
+  draftAwaiting: boolean;
   error: string | null;
   chapterFeedback: ChapterFeedback | null;
   polishDraft: PolishDraft | null;

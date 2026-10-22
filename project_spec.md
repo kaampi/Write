@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.172
+Status: living document, v1.0.173
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8168,6 +8168,49 @@ av rutan bekräftade utseendet matchar ComicBook AI:s stil. `npm run
 build` rent.
 
 v1.0.171 → v1.0.172.
+
+**Ändringslogg v1.0.173 (2026-10-22): "Draft borde också få snurran då
+det tar rätt bra med tid."**
+
+- Draft hör till de "levande" jobben (strömmar text direkt synlig i
+  editorn) som v1.0.172 uttryckligen höll BusyDialog borta från — men
+  den döda väntan INNAN första token kommer (värst vid kallstart av
+  modellen) har inget synligt alls att visa, exakt samma problem som de
+  tysta jobben. Löste det genom att bara visa rutan för just den
+  väntan, inte för själva strömningen.
+- Ny state `draftAwaiting` i `BookStore.tsx` (bredvid `busy`): sätts
+  `true` i både `draftChapter` och `draftScene` direkt efter
+  `setBusy("draft")`, sätts `false` i samma ögonblick det första
+  `text_delta`-chunket anländer (`if (raw === "") setDraftAwaiting(false)`
+  precis innan `raw` fylls på), och i `finally` som vanlig städning.
+  Exponerad via `useBookStore.ts`s `BookStoreValue`-interface.
+- `silentBusyCopy` i `Editor.tsx` fick en fjärde parameter
+  `draftAwaiting`: en tidig specialgren `if (busy === "draft") return
+  draftAwaiting ? {...} : null;` innan den vanliga `SILENT_BUSY`-set-
+  kontrollen, så Draft aldrig permanent läggs i mängden (det skulle
+  visa rutan även under själva strömningen) utan bara matchar precis så
+  länge väntan pågår. Ny status-text `m.busy.drafting` ("Drafting…"/
+  "Skriver utkast…") på alla tre språk.
+- Cancel/Escape i rutan fortsätter gå genom samma `store.stopDraft`
+  som redan avbryter `draftChapter`/`draftScene` korrekt (båda hade
+  redan fullt fungerande `AbortController`-koppling sedan tidigare,
+  inget nytt behövdes där).
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1111 test) grön.
+Byggde en andra mock-Ollama-server som FAKTISKT strömmar NDJSON-rader
+(till skillnad från v1.0.172s enkla fördröjda engångssvar) — 2,5
+sekunders tystnad, sedan sex ord med 150 ms mellanrum — och körde ett
+Playwright-test mot den: rutan syns och visar "Drafting…" under de
+första ~800 ms (den döda väntan), försvinner EXAKT när första ordet
+strömmar in, och prosan fortsätter växa fram live i editorn precis som
+innan ändringen. Stötte på ett miljöproblem under verifieringen: en
+gammal mock-server-process från föregående ändringslogg hade
+överlevt `pkill` (hängde kvar på port 11434) och gav tysta,
+missvisande testresultat tills den identifierades via `ps aux` och
+avslutades med `kill -9` — inte en kodbugg, men värt att notera för
+nästa gång samma mönster uppstår. `npm run build` rent.
+
+v1.0.172 → v1.0.173.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

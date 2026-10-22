@@ -291,6 +291,14 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const [historyLimit, setHistoryLimitState] = useState(() => readProseHistoryLimit());
   const [ollamaError, setOllamaError] = useState<string | null>(null);
   const [busy, setBusy] = useState<Busy>(null);
+  /**
+   * True only for the stretch of a Draft between clicking the button and
+   * the model's first token arriving — nothing is visible to watch yet
+   * (worse on a cold model load), so Editor.tsx shows BusyDialog for just
+   * that stretch. False again the moment text starts appearing in the
+   * prose, so the dialog never covers the live generation itself.
+   */
+  const [draftAwaiting, setDraftAwaiting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [chapterFeedback, setChapterFeedback] = useState<ChapterFeedback | null>(null);
   const [polishDraft, setPolishDraft] = useState<PolishDraft | null>(null);
@@ -884,6 +892,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     const abort = new AbortController();
     abortRef.current = abort;
     setBusy("draft");
+    setDraftAwaiting(true);
     setError(null);
     setModelAsides([]);
 
@@ -919,6 +928,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         signal: abort.signal
       })) {
         if (chunk.type === "text_delta") {
+          if (raw === "") setDraftAwaiting(false);
           raw += chunk.text;
           assembled = prefix + manuscriptFromModel(raw, "");
           setBook((prev) =>
@@ -947,6 +957,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       }
     } finally {
       setBusy(null);
+      setDraftAwaiting(false);
       abortRef.current = null;
     }
   }, [busy, flushSave, model, models.length, ollamaError, patchBook, persistProseWrite]);
@@ -1208,6 +1219,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       const abort = new AbortController();
       abortRef.current = abort;
       setBusy("draft");
+      setDraftAwaiting(true);
       setError(null);
       setModelAsides([]);
 
@@ -1239,6 +1251,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
           signal: abort.signal
         })) {
           if (chunk.type === "text_delta") {
+            if (raw === "") setDraftAwaiting(false);
             raw += chunk.text;
             const sceneAssembled = prefix + manuscriptFromModel(raw, "");
             const spliced = replaceSceneProse(chapter, sceneId, sceneAssembled);
@@ -1258,6 +1271,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         }
       } finally {
         setBusy(null);
+        setDraftAwaiting(false);
         abortRef.current = null;
       }
     },
@@ -3144,6 +3158,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     historyLimit,
     ollamaError,
     busy,
+    draftAwaiting,
     error,
     chapterFeedback,
     polishDraft,

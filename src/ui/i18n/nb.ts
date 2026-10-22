@@ -14,6 +14,7 @@ export const nb: Messages = {
   busy: {
     title: "Arbeider",
     help: "Den lokale AI-en jobber med dette. Første forespørsel kan ta litt lengre tid mens modellen lastes.",
+    drafting: "Skriver utkast…",
     analyzing: "Analyserer…",
     polishing: "Pusser…",
     illustrating: "Skriver en illustrasjonsprompt…",
