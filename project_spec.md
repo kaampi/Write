@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.170
+Status: living document, v1.0.171
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8047,6 +8047,43 @@ dev-server bekräftade samma inre marginal som Brainstorm redan hade.
 `npm run build` rent.
 
 v1.0.169 → v1.0.170.
+
+**Ändringslogg v1.0.171 (2026-10-22): "Om man är på Briefs så funkar
+inte scenklappan."**
+
+- Rotorsak: ⚙️/🎬-popovern (kapitelinställningar och Scener) var bara
+  renderad INUTI den sista grenen av den stora `onBrainstorm ? ... :
+  onTimeline/onPlotlines ? ... : onBoard ? <DispositionBoard> : (
+  kapitelredigeraren )`-kedjan i `Editor.tsx` — dvs bara när
+  kapitelredigeraren själv visades. `openChapterPopover` sätter
+  `chapterPopover`-state och (på Briefs) `store.selectChapter(...)`
+  — men `selectChapter` väljer bara vilket kapitel som är markerat
+  INOM Briefs-vyn, den navigerar inte bort från `onBoard`. Så
+  `chapterPopover`-state sattes korrekt, men ingenting i DOM:en lyssnade
+  på den eftersom `<DispositionBoard>` (och likadant Brainstorm,
+  Synopsis, Development method, Timeline) helt ersätter huvudytan utan
+  att någonsin montera den grenen där popovern låg.
+- Fix: flyttade hela popover-blocket (ref, `role="dialog"`,
+  `ChapterSettingsSection`/`ScenesPanel` — oförändrat i sig) ut ur den
+  sista ternary-grenen och placerade det som syskon direkt efter hela
+  kedjans stängande `)}`, före `<BiblePanel`. Den är redan
+  `position: fixed` med `x`/`y` beräknade från det klickade ikonens
+  egen position, så den beror inte på vilken container den sitter i —
+  ingen ändring av själva popover-logiken behövdes, bara VAR i
+  komponentträdet den monteras. `chapter`-variabeln (det aktiva
+  kapitlet, `chapterId`-baserat) är redan deklarerad på komponentens
+  toppnivå, så den var redan tillgänglig i det nya läget utan extra
+  prop-drillning.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1111 test) grön.
+Playwright mot dev-servern: testade 🎬 på alla sex ytor (Brainstorm,
+Synopsis, Development method, Timeline, Briefs, och vanliga
+kapitelredigeraren) i en enda körning — popovern öppnas korrekt på
+samtliga nu, och den vanliga kapitelredigeraren (ingen regression)
+fungerar precis som förut. Skärmdump av Scener-panelen öppen ovanpå
+Briefs-vyn bekräftade visuellt. `npm run build` rent.
+
+v1.0.170 → v1.0.171.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

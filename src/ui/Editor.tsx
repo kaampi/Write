@@ -1832,61 +1832,6 @@ export function Editor() {
                 ) : null}
               </div>
             </div>
-            {chapterPopover && chapterPopover.chapterId === chapter.id ? (
-              <div
-                ref={chapterPopoverRef}
-                className="chapter-popover"
-                style={{ left: chapterPopover.x, top: chapterPopover.y, maxHeight: chapterPopover.maxHeight }}
-                role="dialog"
-                aria-modal="true"
-                aria-label={
-                  chapterPopover.kind === "settings"
-                    ? format(m.editor.chapterSettingsFor, { title: chapter.title.trim() || m.editor.untitled })
-                    : format(m.editor.scenesFor, { title: chapter.title.trim() || m.editor.untitled })
-                }
-              >
-                <div className="chapter-popover-head">
-                  <strong>{chapterPopover.kind === "settings" ? m.editor.chapterSettingsToggle : m.editor.scenesPopoverTitle}</strong>
-                  <button type="button" className="icon-button" aria-label={m.common.close} onClick={() => setChapterPopover(null)}>
-                    ×
-                  </button>
-                </div>
-                {chapterPopover.kind === "settings" ? (
-                  <ChapterSettingsSection
-                    key={chapter.id}
-                    book={book}
-                    chapter={chapter}
-                    chapters={chapters}
-                    people={peopleLabels(book.facts, book.entity_kinds)}
-                    recasting={busy === "recast"}
-                    recastDisabled={busy !== null || !chapter.prose.trim()}
-                    onRecast={() => void store.recastChapter()}
-                    onPatch={(patch) => void store.patchBook((current) => updateChapter(current, chapter.id, patch))}
-                    startImage={chapter.startImage}
-                    onSetStartImage={(picture) =>
-                      void store.patchBook((current) => updateChapter(current, chapter.id, { startImage: picture }))
-                    }
-                    onRemoveStartImage={() => void store.patchBook((current) => updateChapter(current, chapter.id, { startImage: undefined }))}
-                  />
-                ) : (
-                  <ScenesPanel
-                    chapter={chapter}
-                    onPatch={(scenes) => void store.patchBook((current) => updateChapter(current, chapter.id, { scenes }))}
-                    onMergeWithNext={(sceneId) => store.mergeScene(sceneId)}
-                    busy={busy !== null}
-                    onDraftScene={(sceneId) => void store.draftScene(sceneId)}
-                    onRecastScene={(sceneId) => void store.recastScene(sceneId)}
-                    onAnalyzeScene={(sceneId) => {
-                      void store.analyzeScene(sceneId).then((ok) => {
-                        if (ok) setNotesOpen(true);
-                      });
-                    }}
-                    onExtractBrief={(sceneId) => void store.extractBrief(chapter.id, sceneId)}
-                    extractingBrief={busy === "extract-brief"}
-                  />
-                )}
-              </div>
-            ) : null}
             <ProseCanvas
               value={chapter.prose}
               onChange={(next) => void store.patchBook((current) => updateChapter(current, chapter.id, { prose: next }))}
@@ -2079,6 +2024,62 @@ export function Editor() {
             </footer>
           </main>
         )}
+
+        {chapterPopover && chapterPopover.chapterId === chapter.id ? (
+          <div
+            ref={chapterPopoverRef}
+            className="chapter-popover"
+            style={{ left: chapterPopover.x, top: chapterPopover.y, maxHeight: chapterPopover.maxHeight }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={
+              chapterPopover.kind === "settings"
+                ? format(m.editor.chapterSettingsFor, { title: chapter.title.trim() || m.editor.untitled })
+                : format(m.editor.scenesFor, { title: chapter.title.trim() || m.editor.untitled })
+            }
+          >
+            <div className="chapter-popover-head">
+              <strong>{chapterPopover.kind === "settings" ? m.editor.chapterSettingsToggle : m.editor.scenesPopoverTitle}</strong>
+              <button type="button" className="icon-button" aria-label={m.common.close} onClick={() => setChapterPopover(null)}>
+                ×
+              </button>
+            </div>
+            {chapterPopover.kind === "settings" ? (
+              <ChapterSettingsSection
+                key={chapter.id}
+                book={book}
+                chapter={chapter}
+                chapters={chapters}
+                people={peopleLabels(book.facts, book.entity_kinds)}
+                recasting={busy === "recast"}
+                recastDisabled={busy !== null || !chapter.prose.trim()}
+                onRecast={() => void store.recastChapter()}
+                onPatch={(patch) => void store.patchBook((current) => updateChapter(current, chapter.id, patch))}
+                startImage={chapter.startImage}
+                onSetStartImage={(picture) =>
+                  void store.patchBook((current) => updateChapter(current, chapter.id, { startImage: picture }))
+                }
+                onRemoveStartImage={() => void store.patchBook((current) => updateChapter(current, chapter.id, { startImage: undefined }))}
+              />
+            ) : (
+              <ScenesPanel
+                chapter={chapter}
+                onPatch={(scenes) => void store.patchBook((current) => updateChapter(current, chapter.id, { scenes }))}
+                onMergeWithNext={(sceneId) => store.mergeScene(sceneId)}
+                busy={busy !== null}
+                onDraftScene={(sceneId) => void store.draftScene(sceneId)}
+                onRecastScene={(sceneId) => void store.recastScene(sceneId)}
+                onAnalyzeScene={(sceneId) => {
+                  void store.analyzeScene(sceneId).then((ok) => {
+                    if (ok) setNotesOpen(true);
+                  });
+                }}
+                onExtractBrief={(sceneId) => void store.extractBrief(chapter.id, sceneId)}
+                extractingBrief={busy === "extract-brief"}
+              />
+            )}
+          </div>
+        ) : null}
 
         <BiblePanel
           onInterview={(entityRef, entityLabel, kind) => store.startInterview(entityRef, entityLabel, kind)}

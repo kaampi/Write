@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.171] - 2026-10-22
+
+### Fixed
+- The ⚙️/🎬 chapter popover (Settings and Scenes) only ever rendered inside the chapter-writing view, so clicking either icon from Brainstorm, Synopsis, Development method, Timeline, or Briefs quietly did nothing. It now renders regardless of which page you're on.
+
 ## [1.0.170] - 2026-10-22
 
 ### Fixed
