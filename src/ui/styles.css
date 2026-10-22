@@ -1816,6 +1816,30 @@ button:disabled {
   padding: 0.22rem 0.5rem;
 }
 
+.chapter-summary-suggestion {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  background: var(--paper);
+}
+
+.chapter-summary-suggestion-label {
+  margin: 0 0 0.2rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.chapter-summary-suggestion-text {
+  margin: 0;
+  font-family: var(--font-prose);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--text-dim);
+  white-space: pre-wrap;
+}
+
 .chapter-item {
   display: grid;
   grid-template-columns: 1.4rem 1fr;

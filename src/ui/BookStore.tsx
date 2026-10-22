@@ -2608,15 +2608,22 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     [busy, flushSave, models.length, ollamaError, recordPrompt, recordPromptResponse, reviewModel]
   );
 
+  /**
+   * Generates a chapter summary but never saves it — the caller decides
+   * whether to apply it outright (an empty summary has nothing to lose)
+   * or hold it for the author to accept/reject (there's handwritten or
+   * previously generated text in the field already). Returns undefined
+   * on any failure (error already set via `setError`).
+   */
   const summarizeChapter = useCallback(
-    async (chapterId: string) => {
+    async (chapterId: string): Promise<string | undefined> => {
       const current = bookRef.current;
-      if (!current || busy) return;
+      if (!current || busy) return undefined;
       const chapter = current.chapters.find((item) => item.id === chapterId);
-      if (!chapter || !chapter.prose.trim()) return;
+      if (!chapter || !chapter.prose.trim()) return undefined;
       if (models.length === 0) {
         setError(ollamaError ?? STORE_ERROR.noModel);
-        return;
+        return undefined;
       }
       setBusy("summarize");
       setError(null);
@@ -2637,17 +2644,17 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         const summary = manuscriptFromModel(raw, "");
         if (!summary) {
           setError(STORE_ERROR.summarizeNone);
-          return;
+          return undefined;
         }
-        const latest = bookRef.current ?? current;
-        await flushSave(updateChapter(latest, chapterId, { summary }));
+        return summary;
       } catch (err) {
         setError(ollamaHint(err));
+        return undefined;
       } finally {
         setBusy(null);
       }
     },
-    [busy, flushSave, models.length, ollamaError, recordPrompt, recordPromptResponse, reviewModel]
+    [busy, models.length, ollamaError, recordPrompt, recordPromptResponse, reviewModel]
   );
 
   /**

@@ -587,6 +587,13 @@ export function Editor() {
     { chapterId: string; kind: "settings" | "scenes"; x: number; y: number; maxHeight: number } | null
   >(null);
   const chapterPopoverRef = useRef<HTMLDivElement>(null);
+  /**
+   * A chapter whose summary was already written (by hand or a previous
+   * Summarize) gets its new AI summary held here instead of saved outright
+   * — Mats didn't want Summarize silently overwriting existing text. An
+   * empty summary has nothing to lose, so that case still saves directly.
+   */
+  const [pendingSummaries, setPendingSummaries] = useState<Record<string, string>>({});
   useEffect(() => {
     if (!chapterPopover) return;
     function onPointer(event: MouseEvent) {
@@ -1479,9 +1486,13 @@ export function Editor() {
                       value={item.summary}
                       placeholder={m.editor.summaryPlaceholder}
                       label={m.editor.chapterSummary}
-                      onCommit={(summary) =>
-                        void store.patchBook((current) => updateChapter(current, item.id, { summary }))
-                      }
+                      onCommit={(summary) => {
+                        void store.patchBook((current) => updateChapter(current, item.id, { summary }));
+                        setPendingSummaries((pending) => {
+                          const { [item.id]: _discard, ...rest } = pending;
+                          return rest;
+                        });
+                      }}
                     />
                     <div className="chapter-brief-actions">
                       <button
@@ -1498,11 +1509,54 @@ export function Editor() {
                         className="chapter-brief-action"
                         title={m.editor.summarizeChapterHint}
                         disabled={busy !== null || !item.prose.trim()}
-                        onClick={() => void store.summarizeChapter(item.id)}
+                        onClick={async () => {
+                          const hadSummary = item.summary.trim().length > 0;
+                          const suggestion = await store.summarizeChapter(item.id);
+                          if (suggestion === undefined) return;
+                          if (!hadSummary) {
+                            void store.patchBook((current) => updateChapter(current, item.id, { summary: suggestion }));
+                            return;
+                          }
+                          setPendingSummaries((pending) => ({ ...pending, [item.id]: suggestion }));
+                        }}
                       >
                         {busy === "summarize" ? m.editor.summarizing : m.editor.summarizeChapterAction}
                       </button>
                     </div>
+                    {pendingSummaries[item.id] !== undefined ? (
+                      <div className="chapter-summary-suggestion">
+                        <p className="quiet chapter-summary-suggestion-label">{m.editor.summarizeSuggestionLabel}</p>
+                        <p className="chapter-summary-suggestion-text">{pendingSummaries[item.id]}</p>
+                        <div className="chapter-brief-actions">
+                          <button
+                            type="button"
+                            className="chapter-brief-action"
+                            onClick={() => {
+                              const suggestion = pendingSummaries[item.id]!;
+                              void store.patchBook((current) => updateChapter(current, item.id, { summary: suggestion }));
+                              setPendingSummaries((pending) => {
+                                const { [item.id]: _discard, ...rest } = pending;
+                                return rest;
+                              });
+                            }}
+                          >
+                            {m.editor.applySummarySuggestion}
+                          </button>
+                          <button
+                            type="button"
+                            className="chapter-brief-action"
+                            onClick={() =>
+                              setPendingSummaries((pending) => {
+                                const { [item.id]: _discard, ...rest } = pending;
+                                return rest;
+                              })
+                            }
+                          >
+                            {m.editor.rejectSummarySuggestion}
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </li>

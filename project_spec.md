@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.167
+Status: living document, v1.0.168
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7936,6 +7936,51 @@ lika breda (156.7px vardera). `tsc --noEmit` rent, hela testsviten
 (1111 test) grön.
 
 v1.0.166 → v1.0.167.
+
+**Ändringslogg v1.0.168 (2026-10-22): Mats föreslog att Summarize borde
+visa AI-förslaget för godkännande/avvisning istället för att skriva över
+tyst när det redan finns text — höll med (huvudavvägning: en liten
+förslagsruta kontra risken att tappa handskriven text) och byggde det.**
+
+- `summarizeChapter` i `BookStore.tsx` sparar inte längre resultatet
+  själv — den GENERERAR bara och returnerar texten (`Promise<string |
+  undefined>`, `undefined` vid fel/avbrott). Anroparen avgör om den ska
+  sparas direkt. `flushSave` är inte längre en dependency här eftersom
+  funktionen aldrig anropar den. Typen i `useBookStore.ts`s
+  `BookStoreValue`-interface uppdaterad i takt.
+- `Editor.tsx`: knappens `onClick` läser `item.summary.trim()` FÖRE
+  anropet (det värde som redan finns i den aktuella renderingen — ingen
+  extra `book.chapters.find`-slagning behövs, `item` ÄR redan det
+  kapitlet). Tom sammanfattning → sparar direkt som förut. Icke-tom →
+  lagrar förslaget i en ny lokal `pendingSummaries`-state
+  (`Record<chapterId, string>`, ren UI-state, inte i boken) istället för
+  att spara.
+- Ny ruta `.chapter-summary-suggestion` visas när
+  `pendingSummaries[item.id]` finns: etikett "Suggested summary", själva
+  förslagstexten, och två knappar i samma rad-layout som
+  `.chapter-brief-actions` redan etablerade — "Use this" (sparar
+  förslaget, rensar `pendingSummaries`-posten) och "Discard" (rensar
+  bara posten, lämnar fältet orört). Skriver man direkt i
+  sammanfattningsfältet för hand medan ett förslag väntar rensas
+  `pendingSummaries`-posten också, så ett gammalt förslag aldrig kan
+  råka läggas in ovanpå en ny handskriven text.
+- Nya i18n-nycklar `summarizeSuggestionLabel`/`applySummarySuggestion`/
+  `rejectSummarySuggestion` på alla tre språk; `summarizeChapterHint`
+  omskriven för att beskriva det nya tvåstegsbeteendet istället för
+  "ersätter".
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1111 test, 81
+filer) grön — inga befintliga test berörda (ingen tidigare testfil
+täckte `BookStore.tsx`s hooks direkt). Byggde istället en riktig
+ände-till-ände-kontroll: en minimal mock-Ollama-server (Node `http`,
+CORS-headers, `/api/tags` + `/api/chat`) på port 11434, StoryBook AI
+mot en riktig dev-server, drivet med Playwright genom hela flödet —
+tom sammanfattning → direkt ifylld utan ruta; icke-tom → rutan dyker
+upp, fältet orört; "Use this" → fältet uppdateras, rutan stängs;
+nytt förslag → "Discard" → rutan stängs, fältet oförändrat. Inga
+sidfel i konsolen genom hela körningen. `npm run build` rent.
+
+v1.0.167 → v1.0.168.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

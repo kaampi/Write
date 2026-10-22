@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.168] - 2026-10-22
+
+### Changed
+- Summarize no longer silently overwrites a chapter summary that's already there (handwritten or from an earlier Summarize). It still fills an empty summary directly, but with existing text, it now proposes the new one in a small box below — "Use this" applies it, "Discard" drops it, the current text stays put either way until you choose.
+
 ## [1.0.167] - 2026-10-22
 
 ### Changed

@@ -349,8 +349,11 @@ export const sv: Messages = {
     chapterSummary: "Kapitelsammanfattning",
     summaryPlaceholder: "",
     summarizeChapterAction: "Sammanfatta",
-    summarizeChapterHint: "En kort sammanfattning av vad som händer i det här kapitlet, så att senare kapitels Skriv utkast/Fortsätt/Utveckla/Beat kan se det utan att behöva hela kapitlets text. Ersätter det som redan står i sammanfattningen.",
-    summarizing: "Sammanfattar…"
+    summarizeChapterHint: "En kort sammanfattning av vad som händer i det här kapitlet, så att senare kapitels Skriv utkast/Fortsätt/Utveckla/Beat kan se det utan att behöva hela kapitlets text. Är sammanfattningen tom fylls den i direkt, annars föreslås en ersättning som du godkänner eller avvisar.",
+    summarizing: "Sammanfattar…",
+    summarizeSuggestionLabel: "Föreslagen sammanfattning",
+    applySummarySuggestion: "Använd den",
+    rejectSummarySuggestion: "Avvisa"
   },
   backup: {
     title: "Säkerhetskopia",
