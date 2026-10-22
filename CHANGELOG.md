@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.169] - 2026-10-22
+
+### Fixed
+- Summarize could return what reads as new chapter prose (invented scenes and dialogue) instead of a short digest, on a weaker or less instruction-following model — the system prompt is now explicit that this isn't a continuation task. Summarize always proposes its result for you to accept or discard now, even on a first, empty summary, so a bad result like that never lands unreviewed.
+
 ## [1.0.168] - 2026-10-22
 
 ### Changed

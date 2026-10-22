@@ -1510,13 +1510,8 @@ export function Editor() {
                         title={m.editor.summarizeChapterHint}
                         disabled={busy !== null || !item.prose.trim()}
                         onClick={async () => {
-                          const hadSummary = item.summary.trim().length > 0;
                           const suggestion = await store.summarizeChapter(item.id);
                           if (suggestion === undefined) return;
-                          if (!hadSummary) {
-                            void store.patchBook((current) => updateChapter(current, item.id, { summary: suggestion }));
-                            return;
-                          }
                           setPendingSummaries((pending) => ({ ...pending, [item.id]: suggestion }));
                         }}
                       >

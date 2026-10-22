@@ -8,10 +8,11 @@ import type { Chapter } from "./BookSchema";
  * chapter's Draft/Extend/Elaborate/Beat prompt so the model can see what
  * happened here without needing this chapter's full prose in context.
  */
-export const SUMMARIZE_CHAPTER_SYSTEM = `You summarize one chapter of a novel for the author's own continuity notes.
-Write 2-4 sentences covering what actually happens: the key events, decisions, and turns, in the order they occur.
-State only what the chapter itself establishes. No speculation, no foreshadowing of what might come later, no commentary on craft or theme, no praise.
-Plain prose, third person. No heading, no "Summary:" label, no bullet points — just the sentences themselves.`;
+export const SUMMARIZE_CHAPTER_SYSTEM = `You summarize one chapter of a novel for the author's own continuity notes. You are not continuing the story and not drafting a new chapter.
+Write 2-4 sentences covering what actually happens in the chapter below: the key events, decisions, and turns, in the order they occur.
+State only what the chapter itself establishes — nothing invented, nothing from later in the book, no new scenes, no new dialogue, no events that aren't already in the prose you were given.
+No speculation, no foreshadowing of what might come later, no commentary on craft or theme, no praise.
+Plain prose, third person, 2-4 sentences only. No heading, no chapter title, no "Summary:" label, no bullet points — just the sentences themselves.`;
 
 export function summarizeChapterUserPrompt(chapter: Pick<Chapter, "title" | "prose">): string {
   const prose = peelModelAsides(chapter.prose).prose.trim();

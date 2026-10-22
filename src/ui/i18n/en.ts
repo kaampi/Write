@@ -699,7 +699,7 @@ export const en = {
     chapterSummary: "Chapter summary",
     summaryPlaceholder: "",
     summarizeChapterAction: "Summarize",
-    summarizeChapterHint: "A short digest of what happens in this chapter, so later chapters' Draft/Extend/Elaborate/Beat can see it without needing this chapter's full prose. If the summary is empty, fills it in directly; otherwise proposes a replacement for you to accept or discard.",
+    summarizeChapterHint: "A short digest of what happens in this chapter, so later chapters' Draft/Extend/Elaborate/Beat can see it without needing this chapter's full prose. Proposes it below for you to accept or discard — never saved until you choose.",
     summarizing: "Summarizing…",
     summarizeSuggestionLabel: "Suggested summary",
     applySummarySuggestion: "Use this",

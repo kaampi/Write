@@ -349,7 +349,7 @@ export const nb: Messages = {
     chapterSummary: "Kapittelsammendrag",
     summaryPlaceholder: "",
     summarizeChapterAction: "Oppsummer",
-    summarizeChapterHint: "Et kort sammendrag av hva som skjer i dette kapittelet, så senere kapitlers Skriv utkast/Fortsett/Utdyp/Beat kan se det uten å trenge hele kapittelets tekst. Er sammendraget tomt fylles det inn direkte, ellers foreslås en erstatning du godkjenner eller avviser.",
+    summarizeChapterHint: "Et kort sammendrag av hva som skjer i dette kapittelet, så senere kapitlers Skriv utkast/Fortsett/Utdyp/Beat kan se det uten å trenge hele kapittelets tekst. Foreslås under for at du skal godkjenne eller avvise — lagres aldri før du velger.",
     summarizing: "Oppsummerer…",
     summarizeSuggestionLabel: "Foreslått sammendrag",
     applySummarySuggestion: "Bruk denne",

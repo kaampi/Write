@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.168
+Status: living document, v1.0.169
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -7981,6 +7981,39 @@ nytt förslag → "Discard" → rutan stängs, fältet oförändrat. Inga
 sidfel i konsolen genom hela körningen. `npm run build` rent.
 
 v1.0.167 → v1.0.168.
+
+**Ändringslogg v1.0.169 (2026-10-22): Mats fick en hel ny "kapitel"-text
+från Summarize (titel, dialog, nya scener) — modellen tolkade uppgiften
+som att FORTSÄTTA boken, inte sammanfatta kapitlet.**
+
+- Detta hände på den direkta spara-vägen från v1.0.168 (tom
+  sammanfattning → sparas direkt utan förhandsgranskning), så den dåliga
+  texten hann landa osedd i hans bok. Bestämde att den vägen inte längre
+  ska finnas — Summarize visar nu ALLTID förslagsrutan (Use this/
+  Discard) innan något sparas, oavsett om fältet var tomt eller inte.
+  `onClick` i `Editor.tsx` förenklad till att alltid lägga resultatet i
+  `pendingSummaries`; `hadSummary`-grenen borttagen.
+- `SUMMARIZE_CHAPTER_SYSTEM` i `chapterSummary.ts` skärpt: ny första
+  rad "You are not continuing the story and not drafting a new
+  chapter.", och uttryckligt "nothing invented, nothing from later in
+  the book, no new scenes, no new dialogue, no events that aren't
+  already in the prose you were given" samt "no chapter title" i
+  formatkraven — tidigare löd det bara "state only what the chapter
+  itself establishes", vilket tydligen inte räckte för att hindra en
+  svagare/mindre instruktionslydig modell från att fortsätta berättelsen
+  istället.
+- `summarizeChapterHint` (tooltip på knappen) omskriven igen för att
+  spegla det nya enhetliga beteendet: "Proposes it below... never saved
+  until you choose."
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1111 test) grön
+— `chapter-summary.test.ts`s enda påstående om `SUMMARIZE_CHAPTER_SYSTEM`
+("innehåller '2-4 sentences', innehåller inte 'JSON'") håller fortfarande.
+Playwright mot dev-servern med samma mock-Ollama-server som v1.0.168:
+bekräftade att även det FÖRSTA klicket på en tom sammanfattning nu visar
+förslagsrutan istället för att spara direkt. `npm run build` rent.
+
+v1.0.168 → v1.0.169.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
