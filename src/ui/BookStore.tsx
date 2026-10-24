@@ -106,7 +106,7 @@ import { BREAK_SYSTEM, breakUserPrompt, parseParagraphBreak } from "@core/paragr
 import { SPLIT_SYSTEM, parseSplitSuggestion, splitUserPrompt } from "@core/sentenceSplit";
 import { nowIso, slugify } from "@core/ids";
 import type { CorePredicate } from "@core/predicates";
-import type { FactDraft } from "@core/NarrativeFact";
+import type { FactDraft, FactOrigin } from "@core/NarrativeFact";
 import {
   DEFAULT_OLLAMA_MODEL,
   DEFAULT_REVIEW_MODEL,
@@ -2746,7 +2746,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
    */
   const importLoreArticles = useCallback(
     async (
-      articles: LoreArticleCandidate[]
+      articles: LoreArticleCandidate[],
+      origin: FactOrigin = "lore"
     ): Promise<{ articlesProcessed: number; articlesWithFacts: number; totalFacts: number }> => {
       const trimmed = articles
         .map((article) => ({ title: article.title.trim(), text: article.text.trim() }))
@@ -2758,6 +2759,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         setError(ollamaError ?? STORE_ERROR.noModel);
         return empty;
       }
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
       setBusy("import-lore");
       setError(null);
       let articlesWithFacts = 0;
@@ -2776,27 +2780,55 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
             const raw = await provider.chat({
               messages: extractMessages,
               temperature: 0.1,
-              maxTokens: EXTRACTOR_MAX_TOKENS
+              maxTokens: EXTRACTOR_MAX_TOKENS,
+              signal: abort.signal
             });
             const drafts = parseExtractorPayload(raw);
             if (drafts.length === 0) continue;
             const latest = bookRef.current ?? current;
-            const nextFacts = applyExtractorDrafts(latest.facts, drafts, latest.facts.length, undefined, undefined, "lore");
+            const nextFacts = applyExtractorDrafts(latest.facts, drafts, latest.facts.length, undefined, undefined, origin);
             await flushSave(touch(latest, { facts: nextFacts }));
             articlesWithFacts += 1;
             totalFacts += drafts.length;
           } catch (err) {
+            if ((err as { name?: string }).name === "AbortError") throw err;
             setError(ollamaHint(err));
           }
         }
         if (articlesWithFacts === 0) setError(STORE_ERROR.importLoreNone);
         return { articlesProcessed: trimmed.length, articlesWithFacts, totalFacts };
+      } catch (err) {
+        if ((err as { name?: string }).name === "AbortError") return { articlesProcessed: trimmed.length, articlesWithFacts, totalFacts };
+        throw err;
       } finally {
         setBusy(null);
         setImportLoreProgress(null);
+        abortRef.current = null;
       }
     },
     [busy, flushSave, models.length, ollamaError, recordPrompt, reviewModel]
+  );
+
+  /**
+   * The other half of "bring the series forward" —
+   * facts read straight from a previous book's own export file
+   * (seriesImport.ts), not run through the extractor at all: the values
+   * are already known, not guessed from prose. Still lands as ordinary
+   * `ai_proposed` review-queue candidates (origin "series") rather than
+   * locked outright — a fact that held in the last book isn't
+   * automatically still true in this one, and `applyExtractorDrafts`
+   * already flags it instead of duplicating if this book disagrees.
+   */
+  const importSeriesFacts = useCallback(
+    async (drafts: FactDraft[]): Promise<{ imported: number }> => {
+      const current = bookRef.current;
+      if (!current || busy || drafts.length === 0) return { imported: 0 };
+      const nextFacts = applyExtractorDrafts(current.facts, drafts, current.facts.length, undefined, undefined, "series");
+      const imported = nextFacts.length - current.facts.length;
+      if (imported > 0) await flushSave(touch(current, { facts: nextFacts }));
+      return { imported };
+    },
+    [busy, flushSave]
   );
 
   const setDevelopmentMethod = useCallback(
@@ -3276,6 +3308,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     extractSynopsis,
     extractBrief,
     importLoreArticles,
+    importSeriesFacts,
     closeInterview,
     setInterviewPersonalityDraft,
     saveInterviewPersonality,

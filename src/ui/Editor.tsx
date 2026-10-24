@@ -100,6 +100,7 @@ import { downloadGeneratedBlob, downloadJson } from "./downloadJson";
 import { readLastJsonBackup, recordLastJsonBackup } from "./jsonBackupStamp";
 import { BiblePanel } from "./BiblePanel";
 import { LoreImportCard } from "./LoreImportCard";
+import { SeriesImportCard } from "./SeriesImportCard";
 import { MarkerConversionCard } from "./MarkerConversionCard";
 import { CharacterInterviewCard } from "./CharacterInterviewCard";
 import { BrainstormChatCard } from "./BrainstormChatCard";
@@ -624,6 +625,7 @@ export function Editor() {
   const [publishParagraphStyle, setPublishParagraphStyle] = useState<ParagraphStyle>("spaced");
   const [findOpen, setFindOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [seriesImportOpen, setSeriesImportOpen] = useState(false);
   const [markerConvertOpen, setMarkerConvertOpen] = useState(false);
   const [proofreadOpen, setProofreadOpen] = useState(false);
   const [proofreadSetupOpen, setProofreadSetupOpen] = useState(false);
@@ -1011,7 +1013,7 @@ export function Editor() {
   }, [book.id]);
 
   useEffect(() => {
-    if (!backupOpen && !publishOpen && !findOpen && !illustrateOpen && !importOpen && !markerConvertOpen) return;
+    if (!backupOpen && !publishOpen && !findOpen && !illustrateOpen && !importOpen && !seriesImportOpen && !markerConvertOpen) return;
     function onKey(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
       setBackupOpen(false);
@@ -1020,11 +1022,12 @@ export function Editor() {
       setFindHighlight(null);
       setIllustrateOpen(false);
       setImportOpen(false);
+      setSeriesImportOpen(false);
       setMarkerConvertOpen(false);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [backupOpen, publishOpen, findOpen, illustrateOpen, importOpen, markerConvertOpen]);
+  }, [backupOpen, publishOpen, findOpen, illustrateOpen, importOpen, seriesImportOpen, markerConvertOpen]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -1166,6 +1169,19 @@ export function Editor() {
               }}
             >
               {m.bible.importLoreNav}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className="app-top-menu-item"
+              onClick={() => {
+                setPublishOpen(false);
+                setFindOpen(false);
+                setFindHighlight(null);
+                setSeriesImportOpen(true);
+              }}
+            >
+              {m.bible.importSeriesNav}
             </button>
             <div className="app-top-menu-divider" />
             <button
@@ -2502,6 +2518,15 @@ export function Editor() {
           progress={store.importLoreProgress}
           onImport={(articles) => void store.importLoreArticles(articles)}
           onClose={() => setImportOpen(false)}
+        />
+      ) : null}
+      {seriesImportOpen ? (
+        <SeriesImportCard
+          busy={busy === "import-lore"}
+          progress={store.importLoreProgress}
+          onImportFacts={store.importSeriesFacts}
+          onImportText={(text) => store.importLoreArticles([{ title: "", text }], "series")}
+          onClose={() => setSeriesImportOpen(false)}
         />
       ) : null}
       {markerConvertOpen ? (

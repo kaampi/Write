@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.177] - 2026-10-24
+
+### Added
+- Bring a series forward: a new "Import previous book" entry (FILE menu) lets you load the previous book's own "Export for other apps" file and pick which characters, places, and other entities to carry into this one. Their locked facts land in the review queue as ordinary candidates — nothing locks in automatically, since what held in the last book isn't guaranteed to still hold in this one — each one clearly marked "Source: Previous book". A free-text field on the same card covers anything from the previous book that was never captured as a structured fact; an AI reads it and proposes facts the same way importing a lore article does, carrying the same "Previous book" source label.
+
 ## [1.0.176] - 2026-10-23
 
 ### Added

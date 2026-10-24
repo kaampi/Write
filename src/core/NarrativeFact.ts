@@ -16,7 +16,7 @@ export type FactSource = z.infer<typeof FactSourceSchema>;
  * and `status` as before. Missing on facts from before this field existed,
  * and on any author-typed fact — both render with no source line.
  */
-export const FactOriginSchema = z.enum(["chapter", "interview", "lore", "brainstorm", "synopsis", "brief"]);
+export const FactOriginSchema = z.enum(["chapter", "interview", "lore", "brainstorm", "synopsis", "brief", "series"]);
 export type FactOrigin = z.infer<typeof FactOriginSchema>;
 
 /**

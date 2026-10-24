@@ -6,7 +6,7 @@ import type { InterviewMessage } from "@core/characterInterview";
 import type { BrainstormChatMessage } from "@core/brainstorm";
 import type { DevelopmentStep } from "@core/developmentMethod";
 import type { ChapterFeedback } from "@core/chapterFeedback";
-import type { FactDraft } from "@core/NarrativeFact";
+import type { FactDraft, FactOrigin } from "@core/NarrativeFact";
 import type { CorePredicate } from "@core/predicates";
 import type { ProofreadStage } from "@core/proofread";
 import type { MarkerConversionRule } from "@core/markerConversion";
@@ -167,8 +167,10 @@ export type BookStoreValue = {
   extractSynopsis: () => Promise<void>;
   extractBrief: (chapterId: string, sceneId?: string) => Promise<void>;
   importLoreArticles: (
-    articles: LoreArticleCandidate[]
+    articles: LoreArticleCandidate[],
+    origin?: FactOrigin
   ) => Promise<{ articlesProcessed: number; articlesWithFacts: number; totalFacts: number }>;
+  importSeriesFacts: (drafts: FactDraft[]) => Promise<{ imported: number }>;
   closeInterview: () => void;
   setInterviewPersonalityDraft: (text: string) => void;
   saveInterviewPersonality: () => void;

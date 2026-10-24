@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.176
+Status: living document, v1.0.177
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8373,6 +8373,78 @@ med rätt platshållare (`http://localhost:11434`), fyllde i
 Inställningar bekräftade utseendet. `npm run build` rent.
 
 v1.0.175 → v1.0.176.
+
+**Ändringslogg v1.0.177 (2026-10-24): Mats funderade på hur bokserier
+ska hanteras — "Ska fakta och historia följa med till nästa bok i
+serien?" Efter ett par rundor landade scopet: "Om vi börjar med att man
+kan importera filen med fakta som man sedan får låsa in i nästa bok,
+plus att man får skriva in om det är nåt ytterligare som ska tas med"
+— och "Ja, märk dem så" för att bekräfta att de importerade förslagen
+ska märkas med en egen källa i granskningskön.**
+
+- Research innan kod: `ManuscriptExport.bible` i `@ocedo-apps/storycore`
+  innehåller redan precis rätt delmängd — bara låsta, synliga fakta,
+  samma regel som `Draft` själv använder — så den befintliga "Export för
+  andra appar"-filen från bok 1 kunde återanvändas rakt av som källa för
+  seriekontinuitet, utan nytt exportformat. `applyExtractorDrafts`
+  (`ConsistencyGate.ts`) var redan den generella mekanismen för att landa
+  `FactDraft[]` som granskningskandidater (aldrig låsta direkt, med
+  inbyggd konflikt-/dubblettdetektering) — återanvänds rakt av.
+- Nytt: `src/core/seriesImport.ts` — `parseSeriesImport` (tunn wrapper
+  runt `parseManuscriptExport`), `seriesImportEntities` (plattar ut
+  `bible`-sektionerna till en rad per entitet, för en väljarlista) och
+  `seriesFactDrafts` (de valda entiteternas fakta som `FactDraft[]`,
+  hoppar över ett predikat som inte är ett giltigt `CorePredicate` —
+  ska aldrig hända eftersom exporten bara någonsin kom från den här
+  appen, men exportkontraktet lovar bara att det är *någon*
+  predikatsträng).
+- `FactOriginSchema` (`NarrativeFact.ts`) fick ett nytt värde `"series"`,
+  och `importLoreArticles` i `BookStore.tsx` tar nu ett valfritt
+  `origin`-argument (default `"lore"` som förut) istället för att vara
+  hårdkodad — gör att fritextdelen av seriefunktionen kan återanvända
+  hela extraktions-UI:t rakt av, bara med `origin: "series"`. Ny
+  `importSeriesFacts`-funktion i `BookStore.tsx`: ingen AI-anrop alls
+  — de strukturerade fakta från filen är redan kända, inte gissade från
+  prosa — landar direkt via `applyExtractorDrafts(..., "series")`.
+  Samtidigt: `importLoreArticles` saknade helt `AbortController`/
+  `signal`-koppling (Cancel/Escape i dess BusyDialog gjorde ingenting),
+  trots att `import-lore` finns i `SILENT_BUSY`-mängden — fixat med
+  samma mönster som resten av de "tysta" operationerna använder, eftersom
+  funktionen ändå redigerades för `origin`-parametern.
+- Ny UI: `SeriesImportCard.tsx` — filuppladdning av föregående boks
+  exportfil (`.json`), tydligt felmeddelande per `ManuscriptExportError`-
+  kod (fel fil / fel sorts fil / nyare format / trasig fil), en lista
+  över hittade entiteter grupperade på sin Bible-typ med kryssrutor
+  (alla förvalda), en "Ta med N fakta"-knapp som visar hur många som
+  faktiskt landade, samt ett fritextfält under en egen rubrik
+  ("Något annat att ta med vidare?") som återanvänder extraktorn precis
+  som `LoreImportCard`. Ny menypost "Importera föregående bok" i
+  FILE-menyn, bredvid den befintliga "Importera lore"-posten.
+- Granskningskön (`BiblePanel.tsx`) behövde ingen kodändring — den slår
+  redan generiskt upp `m.bible.sources[fact.origin]` — bara en ny
+  i18n-nyckel `series: "Föregående bok"` (alla tre språk) för att
+  typchecka och visa rätt text.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1120 test, upp
+från 1112 — 8 nya tester i `tests/core/series-import.test.ts` för
+`parseSeriesImport`/`seriesImportEntities`/`seriesFactDrafts`, byggda på
+riktiga `packManuscriptExport`-fixturer istället för handrullad JSON).
+`npm run build` rent. Playwright mot dev-servern med en mock-Ollama-
+server (port 11555, både streamande `/api/chat` för draft/polish-vägen
+och icke-streamande `stream:false`-svar för extraktorns `chat()`-anrop):
+skapade en bok, öppnade "Importera föregående bok", bekräftade att en
+trasig fil gav rätt felmeddelande ("Den filen är inte en manusexport."),
+laddade upp en riktig (schemavaliderad) exportfixtur från en fiktiv
+"bok 1" — bekräftade att entitetslistan visade båda entiteterna med
+rätt Bible-typ, att en avmarkerad entitet minskade räknaren från "Ta med
+2 fakta" till "Ta med 1 faktum", och att importen gav "La till 1 faktum
+i granskningskön." Testade sedan fritextfältet mot mocken och bekräftade
+att även den landade fakta märkta "Source: Previous book"/"Källa:
+Föregående bok" i granskningskön — skärmdump bekräftade utseendet
+(båda korten, "Captain Reyes" och "Lighthouse Keeper", med texten
+"Source: Previous book" under varje).
+
+v1.0.176 → v1.0.177.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
