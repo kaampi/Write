@@ -3,7 +3,8 @@ import { parseBook, summarizeBook, type Book, type BookSummary } from "@core/Boo
 const DB_NAME = "storybook-ai";
 const STORE = "books";
 export const ILLUSTRATION_STYLE_STORE = "illustration_styles";
-const DB_VERSION = 2;
+export const SERIES_STORE = "series";
+const DB_VERSION = 3;
 
 export class BookNotFoundError extends Error {
   constructor(id: string) {
@@ -29,6 +30,9 @@ function openDb(factory: IDBFactory): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(ILLUSTRATION_STYLE_STORE)) {
         db.createObjectStore(ILLUSTRATION_STYLE_STORE, { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains(SERIES_STORE)) {
+        db.createObjectStore(SERIES_STORE, { keyPath: "id" });
       }
     };
     request.onsuccess = () => resolve(request.result);

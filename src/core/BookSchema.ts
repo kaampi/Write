@@ -421,6 +421,13 @@ export const BookSchema = z.object({
    */
   translated_from_book_id: z.string().min(1).optional(),
   /**
+   * The Series this book belongs to, if any — lets it inherit the
+   * series' own locked facts (SeriesSchema.ts) as a base Story Bible,
+   * on top of which this book's own facts can still override a given
+   * entity/predicate. Missing on a standalone book, same as today.
+   */
+  series_id: z.string().min(1).optional(),
+  /**
    * Intended reader age. Writing instruction, not a world fact.
    * Missing on older saves — empty keeps the adult Dale–Chall baseline.
    */
@@ -542,7 +549,8 @@ export const BookSummarySchema = z.object({
   updated_at: z.string().min(1),
   prose_language: z.string().optional(),
   translation_group_id: z.string().optional(),
-  translated_from_book_id: z.string().optional()
+  translated_from_book_id: z.string().optional(),
+  series_id: z.string().optional()
 });
 export type BookSummary = z.infer<typeof BookSummarySchema>;
 
@@ -556,7 +564,8 @@ export function summarizeBook(book: Book): BookSummary {
     updated_at: book.updated_at,
     ...(book.prose_language.trim() ? { prose_language: book.prose_language } : {}),
     ...(book.translation_group_id ? { translation_group_id: book.translation_group_id } : {}),
-    ...(book.translated_from_book_id ? { translated_from_book_id: book.translated_from_book_id } : {})
+    ...(book.translated_from_book_id ? { translated_from_book_id: book.translated_from_book_id } : {}),
+    ...(book.series_id ? { series_id: book.series_id } : {})
   };
 }
 

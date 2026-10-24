@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.177
+Status: living document, v1.0.178
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8445,6 +8445,54 @@ Föregående bok" i granskningskön — skärmdump bekräftade utseendet
 "Source: Previous book" under varje).
 
 v1.0.176 → v1.0.177.
+
+**Ändringslogg v1.0.178 (2026-10-24): Mats — "Vad händer med den
+fungerande versionen av StorybookAI medans vi bygger [Series-nivån]?"
+Enades om: bygg stegvis direkt på main, men håll varje steg additivt och
+dolt tills det faktiskt fungerar end-to-end — ingen synlig startpunkt
+förrän klart. Det här är steg 1 av 5 i den planen (schema +
+persistence), inget UI, ingen koppling till befintlig kod.**
+
+- Nytt: `src/core/SeriesSchema.ts` — `Series`-typen: `id`, `title`,
+  samma `brainstorm`/`brainstorm_notes`/`synopsis`/`facts`-form som
+  `Book` redan har (Mats: "Det vore bra om man har brainstorm och
+  synopsis på serien också. Så att man kan starta att bygga sin
+  värld/lore och generera grunden.") — samma flöde (brainstorma →
+  lyft till synopsis → extrahera till låsta fakta) återanvänds rakt av
+  på serienivå, bara en nivå ovanför böckerna. Avsiktligt INGA
+  chapters/scenes — bara Book skriver prosa. `ensureBrainstormNotes`
+  (redan generisk över `{id, brainstorm, brainstorm_notes}`) fungerar
+  oförändrad för `Series` också. `createSeries`, `parseSeries`,
+  `touchSeries`, `summarizeSeries` — samma mönster som motsvarande
+  Book-funktioner. `SeriesSummary.bookCount` räknas INTE ut inifrån
+  `Series` själv (en serie pekar inte på sina böcker, det är böckerna
+  som pekar på sin serie) — anropraren skickar in antalet, från vilken
+  boklista den redan har.
+- `BookSchema.ts`: nytt valfritt fält `series_id` på `Book` (samma
+  mönster som det redan befintliga `translation_group_id` för
+  språkversioner) — en fristående bok är helt opåverkad, fältet saknas
+  precis som idag. Tillagt i `BookSummarySchema`/`summarizeBook` också,
+  för framtida hylla-gruppering (steg 2).
+- Nytt: `src/persistence/SeriesRepository.ts` — samma CRUD-mönster som
+  `BookRepository`, egen IndexedDB-store (`series`), DB-version
+  uppgraderad 2 → 3 (`Repository.ts`s `openDb` skapar den nya storen i
+  `onupgradeneeded`, rör inte befintliga `books`/`illustration_styles`-
+  storer — en uppgradering en befintlig användare aldrig märker).
+  `SeriesRepository.list` tar emot en `Map<seriesId, bookCount>` som
+  anroparen bygger, istället för att fråga `BookRepository` själv — de
+  två repositoryna förblir oberoende av varandra.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1131 test, upp
+från 1120 — 11 nya: 6 för `SeriesSchema` i
+`tests/core/series-schema.test.ts`, 5 för `SeriesRepository` i
+`tests/persistence/series-repository.test.ts`, inklusive ett test som
+sparar en `Series` och en `Book` i samma `fake-indexeddb`-databas och
+bekräftar att de två storerna inte krockar). `npm run build` rent.
+Ingen Playwright-körning den här gången — inget UI finns ännu att
+klicka igenom, bara schema och persistence, exakt som planerat för
+steg 1.
+
+v1.0.177 → v1.0.178.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
