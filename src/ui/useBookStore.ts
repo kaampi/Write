@@ -6,7 +6,7 @@ import type { InterviewMessage } from "@core/characterInterview";
 import type { BrainstormChatMessage } from "@core/brainstorm";
 import type { DevelopmentStep } from "@core/developmentMethod";
 import type { ChapterFeedback } from "@core/chapterFeedback";
-import type { FactDraft, FactOrigin } from "@core/NarrativeFact";
+import type { FactDraft, FactOrigin, NarrativeFact } from "@core/NarrativeFact";
 import type { CorePredicate } from "@core/predicates";
 import type { ProofreadStage } from "@core/proofread";
 import type { MarkerConversionRule } from "@core/markerConversion";
@@ -79,6 +79,8 @@ export type BookStoreValue = {
   setInterviewExtractPosition: (chapterId: string, sceneId: string | null) => void;
   developSuggestion: string | null;
   importLoreProgress: { current: number; total: number } | null;
+  /** The open book's series' own locked facts, if it belongs to one — empty for a standalone book. Same data Draft/Recast/export merge in; read-only, never the book's own `facts`. */
+  seriesFacts: NarrativeFact[];
   refresh: () => Promise<void>;
   openBook: (id: string) => Promise<void>;
   closeBook: () => void;

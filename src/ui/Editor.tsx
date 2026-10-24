@@ -1148,7 +1148,7 @@ export function Editor() {
               title={m.editor.appExportTitle}
               onClick={async () => {
                 try {
-                  const packed = packManuscriptExport(book);
+                  const packed = packManuscriptExport(book, undefined, store.seriesFacts);
                   await downloadJson(manuscriptAppExportFilename(book, packed.exportedAt), packed);
                 } catch {
                   window.alert(m.common.fileSaveError);

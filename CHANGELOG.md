@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.182] - 2026-10-24
+
+### Added
+- "Export for other apps" on a book that belongs to a Series now bakes that series' own locked facts into the export too, alongside the book's own — the same canon Draft itself writes with. A sibling app reading the export sees a self-contained Story Bible, not just this one book's slice of it. No change for a standalone book.
+
 ## [1.0.181] - 2026-10-24
 
 ### Added

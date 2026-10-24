@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.181
+Status: living document, v1.0.182
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8731,6 +8731,65 @@ samtidigt visade "0 locked" — den ärvda faktan syns i prompten men
 skrivs aldrig in i bokens egna, sparade fakta.
 
 v1.0.180 → v1.0.181.
+
+**Ändringslogg v1.0.182 (2026-10-24): Steg 5 av 5 i Series-planen —
+export. Det sista steget i den ursprungliga planen (schema+persistence
+→ organisation på hyllan → Brainstorm/Synopsis/Story Bible på
+serienivå → faktaupplösning i Draft/Recast → det här: samma kanon
+bakas in i filen en syskonapp faktiskt läser).**
+
+- `manuscriptAppExport.ts`s `packManuscriptExport(book, exportedAt?,
+  seriesFacts?)` — nytt tredje, valfritt argument (`NarrativeFact[]`,
+  default `[]`). Använder samma `mergeInheritedFacts` som steg 4 redan
+  byggde, nu som grund för `visibleLockedFacts` istället för
+  `book.facts` direkt — exporten blir alltså precis den kanon Draft
+  själv skriver med, inte bara bokens egen delmängd av den. En
+  syskonapp som läser exporten har ingen möjlighet att hämta serien
+  separat, så filen måste vara självbärande. En fristående bok (inget
+  tredje argument, eller tomt) exporterar exakt som innan — ren
+  bakåtkompatibilitet, inget beteende ändras för någon befintlig
+  export-kod som anropar funktionen med två argument.
+  `groupFacts`/`classifyEntity` hanterar redan en entitet utan post i
+  bokens `entity_kinds` (klassificerar från predikatet istället) —
+  ingen ändring behövdes där för att en ärvd entitet (som aldrig
+  funnits i just den här boken) ska hamna i rätt Bible-sektion.
+- `BookStore.tsx`: `seriesFactsRef` (satt i steg 4) fick en syskon-
+  state, `seriesFacts`, så UI-lager som `Editor.tsx` kan läsa den
+  reaktivt istället för att gå via en ref. `Editor.tsx`s "Export för
+  andra appar"-knapp skickar nu `store.seriesFacts` som tredje
+  argument.
+- Medvetet UTANFÖR det här steget: Publish-exporten (människoläsbar,
+  `buildManuscriptExport`) och backup-formatet rör vid den här ändringen
+  INTE — Publish har redan sin egen, annorlunda visningslogik, och ett
+  backup-snapshot ska vara exakt boken som den är, inte uppblandad med
+  data som i praktiken lever någon annanstans.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1144 test, upp
+från 1141 — 3 nya för `packManuscriptExport`s nya argument, i
+`tests/core/manuscript-app-export.test.ts`, 17 totalt i filen).
+`npm run build` rent. Playwright mot dev-servern (ingen AI-mock
+behövdes — exporten är helt deterministisk): skapade en serie, låste
+ett faktum för hand utan att skapa någon bok, skapade sedan en bok i
+serien med noll egna fakta, körde FILE → "Export for other apps",
+fångade den riktiga nedladdningen (`window.showSaveFilePicker`
+avstängd i testet, annars hänger den riktiga filväljar-dialogen
+Playwright inte kan styra) och läste den faktiska JSON-filen från
+disk — bekräftade att `bible` innehöll "Dun Sorrow · Place: A
+fog-bound harbor town" trots att boken aldrig haft det faktumet
+själv.
+
+v1.0.181 → v1.0.182.
+
+Med det är alla fem steg i Series-planen levererade: schema+
+persistence, organisation på hyllan, Brainstorm/Synopsis/Story Bible
+på serienivå med "Skicka till serien", faktaupplösning i Draft/Recast/
+Interview/Illustration, och nu export. Dokumenterade, medvetna gränser
+kvar för framtida uppföljning: Proofread/Developmental/continuity-
+leak-varningen ser fortfarande bara bokens egna fakta, inte seriens;
+`ConsistencyGate`s konflikt-jämförelse för en NY bok-fakta jämför
+fortfarande bara mot bokens egna, inte seriens; rika entitetssidor med
+bild och löpande historia på serienivå (det Mats efterfrågade i
+förhandsvisnings-diskussionen) är inte byggt.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

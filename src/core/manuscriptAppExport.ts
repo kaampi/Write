@@ -12,6 +12,7 @@ import { exportableScenes } from "./bookScene";
 import { sortedChapters, type Book } from "./BookSchema";
 import { profileFor } from "./characterProfile";
 import { picturesFor } from "./entityMedia";
+import { mergeInheritedFacts, type NarrativeFact } from "./NarrativeFact";
 import { PREDICATE_LABELS } from "./predicates";
 import { visibleLockedFacts } from "./visibility";
 
@@ -26,9 +27,21 @@ import { visibleLockedFacts } from "./visibility";
  * Produces StoryCore's `ManuscriptExport` shape (roadmap-ideas.md #31) —
  * StoryBook AI is the only writer of this file; see @ocedo-apps/storycore's
  * own README for the read-only, propose-only contract this exists to keep.
+ *
+ * `seriesFacts`, when this book belongs to a Series, are baked straight
+ * into `bible` alongside the book's own — a sibling app reading this
+ * export has no way to also fetch the series separately, so the export
+ * must already be self-contained with the same canon Draft itself sees
+ * (`mergeInheritedFacts`: the series' locked facts, with this book's own
+ * winning on anything it's established differently). A standalone book
+ * (no series, or no `seriesFacts` given) is completely unaffected.
  */
-export function packManuscriptExport(book: Book, exportedAt = new Date().toISOString()): ManuscriptExport {
-  const visible = visibleLockedFacts(book.facts, book.hidden_entities);
+export function packManuscriptExport(
+  book: Book,
+  exportedAt = new Date().toISOString(),
+  seriesFacts: NarrativeFact[] = []
+): ManuscriptExport {
+  const visible = visibleLockedFacts(mergeInheritedFacts(book.facts, seriesFacts), book.hidden_entities);
   const sections = groupFacts(visible, book.entity_kinds);
 
   const bible: ExportedBibleSection[] = sections.map((section) => ({

@@ -366,6 +366,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
    * with no series.
    */
   const seriesFactsRef = useRef<NarrativeFact[]>([]);
+  /** Same data as `seriesFactsRef`, mirrored into state so Editor.tsx can read it reactively (export, "Send to series" chapter-title lookups elsewhere already use the book itself). */
+  const [seriesFacts, setSeriesFacts] = useState<NarrativeFact[]>([]);
   const chapterRef = useRef<string | null>(null);
   const surfaceRef = useRef<EditorSurface>("brainstorm");
   const abortRef = useRef<AbortController | null>(null);
@@ -410,15 +412,22 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     const seriesId = book?.series_id;
     if (!seriesId) {
       seriesFactsRef.current = [];
+      setSeriesFacts([]);
       return;
     }
     let cancelled = false;
     void seriesRepo.get(seriesId).then(
       (series) => {
-        if (!cancelled) seriesFactsRef.current = series.facts;
+        if (!cancelled) {
+          seriesFactsRef.current = series.facts;
+          setSeriesFacts(series.facts);
+        }
       },
       () => {
-        if (!cancelled) seriesFactsRef.current = [];
+        if (!cancelled) {
+          seriesFactsRef.current = [];
+          setSeriesFacts([]);
+        }
       }
     );
     return () => {
@@ -3300,6 +3309,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     setInterviewExtractPosition,
     developSuggestion,
     importLoreProgress,
+    seriesFacts,
     refresh,
     openBook,
     closeBook,

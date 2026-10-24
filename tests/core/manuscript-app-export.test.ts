@@ -55,6 +55,30 @@ describe("packManuscriptExport", () => {
     expect(packManuscriptExport(book).bible).toEqual([]);
   });
 
+  it("bakes a series' own locked facts into the bible alongside the book's own", () => {
+    const seriesFact: NarrativeFact = { ...baseFact, id: "s1", entity_ref: "dun-sorrow", entity_label: "Dun Sorrow", predicate: "core.place", value: "A fog-bound harbor town" };
+    const book = createBook("Night Keys");
+    const packed = packManuscriptExport(book, undefined, [seriesFact]);
+    const locations = packed.bible.find((section) => section.kind === "locations");
+    expect(locations?.entities).toEqual([
+      expect.objectContaining({ entity_ref: "dun-sorrow", name: "Dun Sorrow", facts: [{ predicate: "core.place", label: "Place", value: "A fog-bound harbor town" }] })
+    ]);
+  });
+
+  it("lets the book's own locked fact for the same entity+predicate win over the series' value", () => {
+    const seriesFact: NarrativeFact = { ...baseFact, id: "s1", value: "A traveling merchant" };
+    const book = { ...createBook("Night Keys"), facts: [baseFact] };
+    const packed = packManuscriptExport(book, undefined, [seriesFact]);
+    const characters = packed.bible.find((section) => section.kind === "characters");
+    expect(characters?.entities).toEqual([expect.objectContaining({ entity_ref: "emma", facts: [{ predicate: "core.identity", label: "Identity", value: "Bartender" }] })]);
+  });
+
+  it("is unaffected by seriesFacts when none are given — a standalone book exports exactly as before", () => {
+    const book = { ...createBook("Night Keys"), facts: [baseFact] };
+    const at = "2026-10-02T00:00:00.000Z";
+    expect(packManuscriptExport(book, at)).toEqual(packManuscriptExport(book, at, []));
+  });
+
   it("includes every Bible kind, not just characters and locations", () => {
     const objectFact: NarrativeFact = { ...baseFact, id: "2", entity_ref: "lantern", entity_label: "The Lantern", predicate: "core.object", value: "Brass, dented" };
     const conceptFact: NarrativeFact = { ...baseFact, id: "3", entity_ref: "the-old-law", entity_label: "The Old Law", predicate: "core.concept", value: "No fire after dusk" };
