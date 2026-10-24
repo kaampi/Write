@@ -3,6 +3,21 @@ import { newId, nowIso } from "./ids";
 import { NarrativeFactSchema } from "./NarrativeFact";
 import { BrainstormNoteSchema } from "./BookSchema";
 import { ensureBrainstormNotes } from "./brainstormNotes";
+import { EntityMediaSchema } from "./entityMedia";
+
+/**
+ * A series entity's own wiki-style page — long-form prose, written as
+ * freely as a Wookieepedia entry, never fed to Draft directly (that's what
+ * `facts` is for: the structured claims an "Extract facts" pass pulls out
+ * of this text). Reference images live separately, on `Series.media`, the
+ * same generic `EntityMedia`/`EntityPicture` shape and helpers a book's
+ * own entity pictures already use — never fed to Draft either.
+ */
+export const SeriesEntityNoteSchema = z.object({
+  entity_ref: z.string().min(1),
+  history: z.string().default("")
+});
+export type SeriesEntityNote = z.infer<typeof SeriesEntityNoteSchema>;
 
 /**
  * The level above a Book — a series' own world/lore, written once and
@@ -26,6 +41,10 @@ export const SeriesSchema = z.object({
   synopsis: z.string().default(""),
   /** The series' own locked/proposed facts — canon every book in the series inherits. */
   facts: z.array(NarrativeFactSchema).default([]),
+  /** Long-form, per-entity history/description pages — for the author and the extractor, never Draft directly. */
+  entity_notes: z.array(SeriesEntityNoteSchema).default([]),
+  /** Reference images per entity — same shape and rules as a book's own `media`: visual only, never fed to Draft. */
+  media: z.array(EntityMediaSchema).default([]),
   created_at: z.string().min(1),
   updated_at: z.string().min(1)
 });
@@ -54,6 +73,8 @@ export function createSeries(title: string): Series {
     brainstorm_notes: [],
     synopsis: "",
     facts: [],
+    entity_notes: [],
+    media: [],
     created_at: timestamp,
     updated_at: timestamp
   };
@@ -61,6 +82,19 @@ export function createSeries(title: string): Series {
 
 export function touchSeries(series: Series, patch: Partial<Series>): Series {
   return { ...series, ...patch, updated_at: nowIso() };
+}
+
+export function entityNoteFor(notes: SeriesEntityNote[], entity_ref: string): SeriesEntityNote {
+  return notes.find((note) => note.entity_ref === entity_ref) ?? { entity_ref, history: "" };
+}
+
+export function setEntityNoteHistory(notes: SeriesEntityNote[], entity_ref: string, history: string): SeriesEntityNote[] {
+  const existing = notes.find((note) => note.entity_ref === entity_ref);
+  if (!existing) {
+    if (!history.trim()) return notes;
+    return [...notes, { entity_ref, history }];
+  }
+  return notes.map((note) => (note.entity_ref === entity_ref ? { ...note, history } : note));
 }
 
 /** `bookCount` isn't on `Series` itself (books point at it, not the reverse) — the caller supplies it from whatever book list it already has on hand. */

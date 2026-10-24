@@ -5,7 +5,7 @@ import type { CorePredicate } from "@core/predicates";
 import type { ConsistencyIssue } from "@core/seriesConsistency";
 import type { Series, SeriesSummary } from "@core/SeriesSchema";
 
-export type SeriesBusy = "extract-synopsis" | null;
+export type SeriesBusy = "extract-synopsis" | "extract-entity-note" | null;
 
 export type SeriesStoreValue = {
   summaries: SeriesSummary[];
@@ -25,6 +25,12 @@ export type SeriesStoreValue = {
   liftBrainstormToSynopsis: () => void;
   setSynopsis: (text: string) => void;
   extractSynopsis: () => Promise<void>;
+  /** The entity's history page for the entity detail view — debounced save, same pattern as `setSynopsis`. */
+  setEntityHistory: (entity_ref: string, history: string) => void;
+  addEntityPicture: (entity_ref: string, file: File) => Promise<void>;
+  removeEntityPicture: (entity_ref: string, index: number) => Promise<void>;
+  /** Runs the entity's history page through the extractor, same mechanism as `extractSynopsis`. */
+  extractEntityNote: (entity_ref: string, entity_label: string) => Promise<void>;
   addFact: (draft: { label: string; predicate: CorePredicate; value: string }) => Promise<void>;
   reviseFact: (factId: string, value: string) => Promise<void>;
   retractFact: (factId: string) => Promise<void>;

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createSeries as createSeriesRecord, touchSeries, type Series } from "@core/SeriesSchema";
+import { createSeries as createSeriesRecord, entityNoteFor, setEntityNoteHistory, touchSeries, type Series } from "@core/SeriesSchema";
 import {
   applyAuthorAddition,
   applyExtractorDrafts,
@@ -11,13 +11,21 @@ import {
   reviseFact as reviseFactRow
 } from "@core/ConsistencyGate";
 import { liftFragmentToSynopsis } from "@core/brainstorm";
-import { parseExtractorPayload, PLANNING_EXTRACTOR_SYSTEM, planningExtractorUserPrompt } from "@core/extractFacts";
+import {
+  EXTRACTOR_SYSTEM,
+  extractorUserPrompt,
+  parseExtractorPayload,
+  PLANNING_EXTRACTOR_SYSTEM,
+  planningExtractorUserPrompt
+} from "@core/extractFacts";
+import { addEntityPicture as addEntityPictureRow, removeEntityPicture as removeEntityPictureRow } from "@core/entityMedia";
 import { slugify } from "@core/ids";
 import type { FactDraft } from "@core/NarrativeFact";
 import type { CorePredicate } from "@core/predicates";
 import { crossBookConsistencyIssues, type BookFactSet, type ConsistencyIssue } from "@core/seriesConsistency";
 import { SeriesNotFoundError, SeriesRepository } from "@persistence/SeriesRepository";
 import { BookRepository } from "@persistence/Repository";
+import { picturesFromFile } from "./entityImage";
 import {
   DEFAULT_OPENAI_COMPATIBLE_BASE_URL,
   LocalProviderConfigError,
@@ -263,6 +271,98 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
     }
   }, [busy, models.length, ollamaError, reviewModel, persist, engine, baseUrl, contextWindow]);
 
+  const setEntityHistory = useCallback(
+    (entity_ref: string, history: string) =>
+      patchSeries((current) => ({ ...current, entity_notes: setEntityNoteHistory(current.entity_notes, entity_ref, history) })),
+    [patchSeries]
+  );
+
+  const addEntityPicture = useCallback(
+    async (entity_ref: string, file: File) => {
+      const current = seriesRef.current;
+      if (!current) return;
+      const picture = await picturesFromFile(file);
+      const next = touchSeries(current, { media: addEntityPictureRow(current.media, entity_ref, picture) });
+      await persist(next);
+      seriesRef.current = next;
+      setSeries(next);
+    },
+    [persist]
+  );
+
+  const removeEntityPicture = useCallback(
+    async (entity_ref: string, index: number) => {
+      const current = seriesRef.current;
+      if (!current) return;
+      const next = touchSeries(current, { media: removeEntityPictureRow(current.media, entity_ref, index) });
+      await persist(next);
+      seriesRef.current = next;
+      setSeries(next);
+    },
+    [persist]
+  );
+
+  /**
+   * "Extrahera fakta ur texten" on an entity's own history page — same
+   * extractor a lore import uses (EXTRACTOR_SYSTEM: "established narrative
+   * facts from accepted prose"), not the planning one Synopsis uses, since
+   * a history page reads as settled lore, not a loose plan. Lands as
+   * `ai_proposed` under origin "lore" — the same label a book's own lore
+   * import already shows in its review queue, extended one level up.
+   */
+  const extractEntityNote = useCallback(
+    async (entity_ref: string, entity_label: string) => {
+      const current = seriesRef.current;
+      if (!current || busy) return;
+      const history = entityNoteFor(current.entity_notes, entity_ref).history;
+      if (!history.trim()) return;
+      if (models.length === 0) {
+        setError(ollamaError ?? STORE_ERROR.noModel);
+        return;
+      }
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
+      setBusy("extract-entity-note");
+      setError(null);
+      try {
+        const provider = makeProvider(reviewModel);
+        const raw = await provider.chat({
+          messages: [
+            { role: "system", content: EXTRACTOR_SYSTEM },
+            { role: "user", content: extractorUserPrompt(history, entity_label) }
+          ],
+          temperature: 0.1,
+          maxTokens: EXTRACTOR_MAX_TOKENS,
+          signal: abort.signal
+        });
+        let drafts: FactDraft[];
+        try {
+          drafts = parseExtractorPayload(raw);
+        } catch {
+          drafts = [];
+        }
+        if (drafts.length === 0) {
+          setError(STORE_ERROR.extractorNone);
+          return;
+        }
+        const latest = seriesRef.current ?? current;
+        const nextFacts = applyExtractorDrafts(latest.facts, drafts, latest.facts.length, undefined, undefined, "lore");
+        const next = touchSeries(latest, { facts: nextFacts });
+        await persist(next);
+        seriesRef.current = next;
+        setSeries(next);
+      } catch (err) {
+        if ((err as { name?: string }).name === "AbortError") return;
+        setError(err instanceof LocalProviderConfigError ? err.message : ollamaHint(err));
+      } finally {
+        setBusy(null);
+        abortRef.current = null;
+      }
+    },
+    [busy, models.length, ollamaError, reviewModel, persist, engine, baseUrl, contextWindow]
+  );
+
   const addFact = useCallback(
     async (draft: { label: string; predicate: CorePredicate; value: string }) => {
       const current = seriesRef.current;
@@ -335,6 +435,10 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
     liftBrainstormToSynopsis,
     setSynopsis,
     extractSynopsis,
+    setEntityHistory,
+    addEntityPicture,
+    removeEntityPicture,
+    extractEntityNote,
     addFact,
     reviseFact,
     retractFact,

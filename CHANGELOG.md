@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.185] - 2026-10-24
+
+### Added
+- Series entity pages: click a locked entity's name in a series' Story Bible to open its own page — a portrait (up to 4 reference images, visual only, never sent to Draft), and a free-form "History & description" field for writing its lore as a wiki article, not a fact list. Nothing in that text reaches Draft directly; an "Extract facts from this text" button runs it through the same extractor a lore import uses, landing proposed facts in the review queue, source-labeled "Lore". The entity's already-locked facts show alongside it, labeled "what Draft sees" — the structured claims that actually reach the model, kept visibly separate from the free-written history.
+
 ## [1.0.184] - 2026-10-24
 
 ### Added

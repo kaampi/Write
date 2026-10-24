@@ -954,7 +954,7 @@ function MergeReplaceNamesCard({
   );
 }
 
-function OverlayCard({
+export function OverlayCard({
   titleId,
   title,
   onClose,

@@ -495,7 +495,13 @@ export const en = {
     consistencyCheck: "Check consistency",
     consistencyChecking: "Checking…",
     consistencyLede: "Compares every locked fact across the series and all its books, looking for claims nobody reconciled — not just what you were already warned about while writing.",
-    consistencyNone: "No contradictions found."
+    consistencyNone: "No contradictions found.",
+    historyHeading: "History & description",
+    historyPlaceholder: "Write this entity's history as freely as a wiki article — not a list of facts, the story of who or what they are…",
+    historyHint: "For you — never sent to Draft as-is. Only what you extract from it below becomes canon.",
+    extractFromHistory: "Extract facts from this text",
+    whatDraftSees: "what Draft sees",
+    imagesNote: "Images are visual reference only — never sent to Draft as text context."
   },
   editor: {
     manuscriptTitle: "Manuscript title",

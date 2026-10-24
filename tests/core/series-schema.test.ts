@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createSeries, parseSeries, summarizeSeries, touchSeries } from "@core/SeriesSchema";
+import { createSeries, entityNoteFor, parseSeries, setEntityNoteHistory, summarizeSeries, touchSeries } from "@core/SeriesSchema";
 import type { NarrativeFact } from "@core/NarrativeFact";
 
 const lockedFact: NarrativeFact = {
@@ -22,6 +22,8 @@ describe("createSeries", () => {
     expect(series.brainstorm_notes).toEqual([]);
     expect(series.synopsis).toBe("");
     expect(series.facts).toEqual([]);
+    expect(series.entity_notes).toEqual([]);
+    expect(series.media).toEqual([]);
     expect(series.id).toBeTruthy();
   });
 
@@ -47,6 +49,40 @@ describe("touchSeries", () => {
     const patched = touchSeries(series, { synopsis: "A port city built on lies." });
     expect(patched.synopsis).toBe("A port city built on lies.");
     expect(patched.updated_at >= series.updated_at).toBe(true);
+  });
+});
+
+describe("entityNoteFor / setEntityNoteHistory", () => {
+  it("returns an empty note for an entity with none yet", () => {
+    expect(entityNoteFor([], "elara")).toEqual({ entity_ref: "elara", history: "" });
+  });
+
+  it("creates a new note on first write", () => {
+    const notes = setEntityNoteHistory([], "elara", "Born during the Long Silence.");
+    expect(notes).toEqual([{ entity_ref: "elara", history: "Born during the Long Silence." }]);
+    expect(entityNoteFor(notes, "elara").history).toBe("Born during the Long Silence.");
+  });
+
+  it("updates an existing note in place, leaving others untouched", () => {
+    const notes = setEntityNoteHistory(
+      [
+        { entity_ref: "elara", history: "Draft one." },
+        { entity_ref: "dun-sorrow", history: "A harbor town." }
+      ],
+      "elara",
+      "Rewritten history."
+    );
+    expect(entityNoteFor(notes, "elara").history).toBe("Rewritten history.");
+    expect(entityNoteFor(notes, "dun-sorrow").history).toBe("A harbor town.");
+  });
+
+  it("writing an empty history for an entity with no note yet is a no-op", () => {
+    expect(setEntityNoteHistory([], "elara", "")).toEqual([]);
+  });
+
+  it("clearing an existing note's history keeps the (now empty) row rather than deleting it", () => {
+    const notes = setEntityNoteHistory([{ entity_ref: "elara", history: "Something." }], "elara", "");
+    expect(notes).toEqual([{ entity_ref: "elara", history: "" }]);
   });
 });
 

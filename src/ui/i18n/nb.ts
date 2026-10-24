@@ -145,7 +145,13 @@ export const nb: Messages = {
     consistencyCheck: "Sjekk konsistens",
     consistencyChecking: "Sjekker…",
     consistencyLede: "Sammenligner hvert låste faktum i hele serien og alle bøkene i den, ser etter påstander ingen har avstemt mot hverandre — ikke bare det du allerede fikk en advarsel om mens du skrev.",
-    consistencyNone: "Ingen motsigelser funnet."
+    consistencyNone: "Ingen motsigelser funnet.",
+    historyHeading: "Historie & beskrivelse",
+    historyPlaceholder: "Skriv denne entitetens historie like fritt som en wiki-artikkel — ikke en liste med fakta, historien om hvem eller hva de er…",
+    historyHint: "For deg — sendes aldri til Draft som den er. Bare det du henter ut fra den nedenfor blir kanon.",
+    extractFromHistory: "Hent ut fakta fra denne teksten",
+    whatDraftSees: "det Draft ser",
+    imagesNote: "Bilder er bare visuell referanse — sendes aldri til Draft som tekstkontekst."
   },
   editor: {
     manuscriptTitle: "Manuskripttittel",

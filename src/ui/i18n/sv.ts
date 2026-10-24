@@ -145,7 +145,13 @@ export const sv: Messages = {
     consistencyCheck: "Kontrollera konsistens",
     consistencyChecking: "Kontrollerar…",
     consistencyLede: "Jämför varje låst faktum i hela serien och alla dess böcker, letar efter påståenden ingen stämt av mot varandra — inte bara det du redan fått en varning om medan du skrev.",
-    consistencyNone: "Inga motsägelser hittades."
+    consistencyNone: "Inga motsägelser hittades.",
+    historyHeading: "Historia & beskrivning",
+    historyPlaceholder: "Skriv den här entitetens historia lika fritt som en wiki-artikel — inte en lista med fakta, berättelsen om vem eller vad de är…",
+    historyHint: "För dig — skickas aldrig till Draft som den är. Bara det du extraherar ur den nedan blir kanon.",
+    extractFromHistory: "Extrahera fakta ur den här texten",
+    whatDraftSees: "det här ser Draft",
+    imagesNote: "Bilder är bara visuell referens — skickas aldrig till Draft som textkontext."
   },
   editor: {
     manuscriptTitle: "Manustitel",

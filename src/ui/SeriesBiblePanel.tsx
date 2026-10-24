@@ -4,6 +4,7 @@ import { CORE_PREDICATES, type CorePredicate } from "@core/predicates";
 import { format, useLocale } from "./i18n";
 import { useSeriesStore } from "./useSeriesStore";
 import { PendingFact } from "./BiblePanel";
+import { SeriesEntityDetailOverlay } from "./SeriesEntityDetailOverlay";
 
 type EntityGroup = { entity_ref: string; entity_label: string; facts: NarrativeFact[] };
 
@@ -41,6 +42,7 @@ export function SeriesBiblePanel() {
   const [label, setLabel] = useState("");
   const [predicate, setPredicate] = useState<CorePredicate>("core.identity");
   const [value, setValue] = useState("");
+  const [openEntity, setOpenEntity] = useState<{ entity_ref: string; entity_label: string } | null>(null);
 
   const facts = series?.facts ?? [];
   const locked = useMemo(() => groupByEntity(lockedFacts(facts)), [facts]);
@@ -76,7 +78,13 @@ export function SeriesBiblePanel() {
         <div className="series-entity-grid">
           {locked.map((entity) => (
             <div key={entity.entity_ref} className="series-entity-card">
-              <strong>{entity.entity_label}</strong>
+              <button
+                type="button"
+                className="series-entity-name"
+                onClick={() => setOpenEntity({ entity_ref: entity.entity_ref, entity_label: entity.entity_label })}
+              >
+                <strong>{entity.entity_label}</strong>
+              </button>
               {entity.facts.map((fact) => (
                 <div key={fact.id} className="series-entity-fact">
                   <div className="series-entity-fact-row">
@@ -178,6 +186,14 @@ export function SeriesBiblePanel() {
           </button>
         </form>
       </section>
+
+      {openEntity ? (
+        <SeriesEntityDetailOverlay
+          entityRef={openEntity.entity_ref}
+          entityLabel={openEntity.entity_label}
+          onClose={() => setOpenEntity(null)}
+        />
+      ) : null}
     </div>
   );
 }

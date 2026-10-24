@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.184
+Status: living document, v1.0.185
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8907,6 +8907,81 @@ varnar fortfarande inte vid LÅSNING (#1 täcker bara "Add fact" och
 redigering av ett redan låst faktum) — men själva konsistenskontrollen
 (#2) hittar det ändå i efterhand, så inget faktiskt hål finns kvar i
 TÄCKNING, bara i NÄR man får syn på det.
+
+**Ändringslogg v1.0.185 (2026-10-24): Entitetssidor på serienivå —
+den sista, tidigare medvetet avgränsade luckan från förhandsvisnings-
+diskussionen ("en lista med korta faktatexter vore inte speciellt
+intressant"). Mats: "Entitetsidorna vore bra att utveckla." Bygger
+rakt på den uppdelning vi redan var överens om: rik text/bild = för
+författaren och extraktorn, fakta = det Draft faktiskt ser.**
+
+- `SeriesSchema.ts`: ny `SeriesEntityNoteSchema` (`entity_ref`,
+  `history` — fri löptext) och ett nytt `entity_notes`-fält på
+  `Series`. Återanvänder `entityMedia.ts`s redan helt generiska
+  `EntityMediaSchema`/`EntityPicture` (bara `entity_ref` + bilder,
+  ingen Book-koppling alls) rakt av för ett nytt `media`-fält på
+  `Series` — ingen ny bildmodell behövde byggas. Nya hjälpfunktioner
+  `entityNoteFor`/`setEntityNoteHistory` (samma mönster som fakta-
+  hjälparna). 5 nya tester i `tests/core/series-schema.test.ts` (16
+  totalt, upp från 11).
+- `SeriesStore.tsx`: `setEntityHistory` (debounced, samma mönster som
+  `setSynopsis`), `addEntityPicture`/`removeEntityPicture`
+  (återanvänder `src/ui/entityImage.ts`s `picturesFromFile` — redan en
+  helt generisk, Book-agnostisk fil→dataURL-konvertering — och
+  `entityMedia.ts`s `addEntityPicture`/`removeEntityPicture`-rad-
+  funktioner), och `extractEntityNote` — AI-anrop, samma mönster som
+  `extractSynopsis` MEN med `EXTRACTOR_SYSTEM` (samma som en bok-lore-
+  import använder: "established narrative facts from accepted prose")
+  istället för `PLANNING_EXTRACTOR_SYSTEM` — en historiksida läser som
+  fastslaget lore, inte en lös plan. Landar som `ai_proposed` under
+  origin `"lore"` — samma etikett en boks egen lore-import redan
+  visar i sin granskningskö, återanvänd en nivå upp istället för en
+  ny origin-variant.
+- Nytt: `src/ui/SeriesEntityDetailOverlay.tsx` — portätt/bilder
+  (samma uppladdnings-UI som bokens `EntityOverlay` redan har, samma
+  CSS-klasser, `MAX_ENTITY_PICTURES`), ett fritt "Historia &
+  beskrivning"-fält med tydlig text om att det aldrig går till Draft
+  som det är, "Extract facts from this text"-knapp, och en panel till
+  höger märkt "what Draft sees" som visar entitetens redan låsta
+  fakta (med proveniens, "Etablerad i: ...", när det finns) — samma
+  tvådelade layout som förhandsvisnings-skissen (steg 4 i den
+  tidigare Artifact-mockupen) redan lade fast.
+- `BiblePanel.tsx`: `OverlayCard` exporterad (var redan en helt
+  självständig presentationskomponent) för återanvändning i den nya
+  overlayn.
+- `SeriesBiblePanel.tsx`: varje entitetskorts namn är nu en klickbar
+  knapp som öppnar den nya detaljsidan.
+- i18n: `m.series.historyHeading`/`historyPlaceholder`/`historyHint`/
+  `extractFromHistory`/`whatDraftSees`/`imagesNote`, alla tre språk.
+  Återanvänder befintliga `m.bible.pictures`/`removePicture`/
+  `addImage`/`addingImage`/`m.errors.image*`-nycklar rakt av — inga
+  nya bildrelaterade strängar behövdes.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1159 test, upp
+från 1154 — 5 nya) grön. `npm run build` rent. Playwright mot
+dev-servern med mock-Ollama: låste ett faktum för "Elara Vane",
+öppnade hennes entitetssida, bekräftade att "what Draft sees"-panelen
+visade exakt det låsta faktumet (och inget annat), laddade upp en
+bild och bekräftade en miniatyr (`.bible-picture-list img`, antal 1),
+skrev en historik-text, klickade "Extract facts from this text",
+stängde sidan och bekräftade att seriens granskningskö nu visade det
+extraherade förslaget märkt "Source: Lore" — separat från det redan
+låsta "Elara Vane"-kortet under "SERIES CANON". Skärmdump bekräftade
+layouten (portätt, historik, "what Draft sees"-panelen) matchar
+förhandsvisnings-skissen.
+
+v1.0.184 → v1.0.185.
+
+Med det är den sista medvetna luckan från Series-arbetet stängd:
+schema+persistence, hylla, Brainstorm/Synopsis/Story Bible på
+serienivå, "Skicka till serien", faktaupplösning i Draft/Recast/
+Interview/Illustration, export, lås-tidig varning,
+cross-bok-konsistenskontroll, och nu rika entitetssidor. Kvarvarande,
+fortfarande medvetet avgränsat: Proofread/Developmental/continuity-
+leak-varningen ser fortfarande bara bokens egna fakta; en AI-
+extraherad bok-fakta jämförs fortfarande bara mot bokens egna vid
+förslagstillfället, inte seriens; backup/restore rör fortfarande inte
+vid Series-data alls.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
