@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { slugify, normalizeValue } from "@core/ids";
-import { NarrativeFactSchema, lockedFactsFromChapter, type NarrativeFact } from "@core/NarrativeFact";
+import { NarrativeFactSchema, lockedFactsFromChapter, mergeInheritedFacts, type NarrativeFact } from "@core/NarrativeFact";
 
 describe("slugify", () => {
   it("turns a display name into a stable ref", () => {
@@ -140,5 +140,60 @@ describe("lockedFactsFromChapter", () => {
 
   it("returns an empty list when nothing locked traces back to that chapter", () => {
     expect(lockedFactsFromChapter([fact({ chapter_id: "ch2" })], "ch1")).toEqual([]);
+  });
+});
+
+describe("mergeInheritedFacts", () => {
+  function fact(overrides: Partial<NarrativeFact> = {}): NarrativeFact {
+    return {
+      id: overrides.id ?? "f1",
+      entity_ref: "elara",
+      entity_label: "Elara",
+      predicate: "core.identity",
+      value: "Something",
+      sequence_index: 0,
+      status: "locked",
+      source: "author",
+      created_at: "2026-09-26T00:00:00.000Z",
+      ...overrides
+    };
+  }
+
+  it("returns the book's own facts unchanged when the series has none", () => {
+    const bookFacts = [fact({ id: "b1" })];
+    expect(mergeInheritedFacts(bookFacts, [])).toBe(bookFacts);
+  });
+
+  it("appends a series fact the book doesn't already cover", () => {
+    const seriesFact = fact({ id: "s1", value: "Guardian of Dun Sorrow" });
+    const merged = mergeInheritedFacts([], [seriesFact]);
+    expect(merged).toEqual([seriesFact]);
+  });
+
+  it("lets a locked book fact win over the series' value for the same entity+predicate", () => {
+    const bookFact = fact({ id: "b1", value: "Harbor master now" });
+    const seriesFact = fact({ id: "s1", value: "Guardian of Dun Sorrow" });
+    const merged = mergeInheritedFacts([bookFact], [seriesFact]);
+    expect(merged).toEqual([bookFact]);
+  });
+
+  it("still inherits other predicates on the same entity the book hasn't touched", () => {
+    const bookFact = fact({ id: "b1", predicate: "core.trait", value: "Short-tempered" });
+    const seriesFact = fact({ id: "s1", value: "Guardian of Dun Sorrow" });
+    const merged = mergeInheritedFacts([bookFact], [seriesFact]);
+    expect(merged.map((f) => f.id).sort()).toEqual(["b1", "s1"]);
+  });
+
+  it("a merely flagged book fact doesn't block inheritance — only a locked one does", () => {
+    const flagged = fact({ id: "b1", status: "flagged", value: "Maybe a spy" });
+    const seriesFact = fact({ id: "s1", value: "Guardian of Dun Sorrow" });
+    const merged = mergeInheritedFacts([flagged], [seriesFact]);
+    expect(merged.map((f) => f.id).sort()).toEqual(["b1", "s1"]);
+  });
+
+  it("ignores a series fact that is only ai_proposed or superseded", () => {
+    const proposed = fact({ id: "s1", status: "ai_proposed" });
+    const superseded = fact({ id: "s2", superseded_by: "s3" });
+    expect(mergeInheritedFacts([], [proposed, superseded])).toEqual([]);
   });
 });

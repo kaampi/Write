@@ -113,3 +113,24 @@ export function lockedFacts(facts: NarrativeFact[]): NarrativeFact[] {
 export function lockedFactsFromChapter(facts: NarrativeFact[], chapterId: string): NarrativeFact[] {
   return lockedFacts(facts).filter((fact) => fact.chapter_id === chapterId);
 }
+
+/**
+ * A book that belongs to a Series reads the series' own locked facts as a
+ * base layer, on top of which this book's own locked facts for the same
+ * entity+predicate win — "what held in the series isn't automatically
+ * still true in this book" the same way a later chapter can supersede an
+ * earlier one. Only LOCKED book facts override (a merely flagged or
+ * proposed book-level claim hasn't been decided yet, so the series' word
+ * still stands until the author resolves it). Returns the book's own
+ * facts unchanged, with any non-overridden series facts appended — the
+ * result is meant for read-only consumption (prompt-building, display),
+ * never written back as a book's own `facts`, since that would duplicate
+ * series canon into every book that inherits it.
+ */
+export function mergeInheritedFacts(bookFacts: NarrativeFact[], seriesFacts: NarrativeFact[]): NarrativeFact[] {
+  if (seriesFacts.length === 0) return bookFacts;
+  const overridden = new Set(lockedFacts(bookFacts).map((fact) => `${fact.entity_ref}\u0000${fact.predicate}`));
+  const inherited = lockedFacts(seriesFacts).filter((fact) => !overridden.has(`${fact.entity_ref}\u0000${fact.predicate}`));
+  if (inherited.length === 0) return bookFacts;
+  return [...bookFacts, ...inherited];
+}

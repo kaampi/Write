@@ -106,7 +106,7 @@ import { BREAK_SYSTEM, breakUserPrompt, parseParagraphBreak } from "@core/paragr
 import { SPLIT_SYSTEM, parseSplitSuggestion, splitUserPrompt } from "@core/sentenceSplit";
 import { nowIso, slugify } from "@core/ids";
 import type { CorePredicate } from "@core/predicates";
-import type { FactDraft, FactOrigin } from "@core/NarrativeFact";
+import { mergeInheritedFacts, type FactDraft, type FactOrigin, type NarrativeFact } from "@core/NarrativeFact";
 import {
   DEFAULT_OLLAMA_MODEL,
   DEFAULT_REVIEW_MODEL,
@@ -125,6 +125,7 @@ import {
 } from "@llm/provider";
 import { readContextWindow, writeContextWindow } from "@llm/contextWindow";
 import { BookNotFoundError, BookRepository } from "@persistence/Repository";
+import { SeriesRepository } from "@persistence/SeriesRepository";
 import {
   ManuscriptBackupError,
   parseManuscriptBackup
@@ -285,6 +286,7 @@ function activeReader(book: Book, surface: EditorSurface, chapterId: string | nu
 
 export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const repo = useMemo(() => new BookRepository(), []);
+  const seriesRepo = useMemo(() => new SeriesRepository(), []);
   const [summaries, setSummaries] = useState<BookSummary[]>([]);
   const [book, setBook] = useState<Book | null>(null);
   const [chapterId, setChapterIdState] = useState<string | null>(null);
@@ -355,6 +357,15 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const [developSuggestion, setDevelopSuggestion] = useState<string | null>(null);
   const [importLoreProgress, setImportLoreProgress] = useState<{ current: number; total: number } | null>(null);
   const bookRef = useRef<Book | null>(null);
+  /**
+   * The open book's series' own locked facts, if it belongs to one — kept
+   * only for `withInheritedFacts` to merge into prompts (never written
+   * back as part of the book's own `facts`). Refetched whenever the open
+   * book's `series_id` changes; a prompt built in the brief window before
+   * that fetch resolves just sees the book's own facts, same as a book
+   * with no series.
+   */
+  const seriesFactsRef = useRef<NarrativeFact[]>([]);
   const chapterRef = useRef<string | null>(null);
   const surfaceRef = useRef<EditorSurface>("brainstorm");
   const abortRef = useRef<AbortController | null>(null);
@@ -393,6 +404,41 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       ...(ollamaBaseUrl ? { baseUrl: ollamaBaseUrl } : {}),
       ...(name ? { name } : {})
     });
+  }
+
+  useEffect(() => {
+    const seriesId = book?.series_id;
+    if (!seriesId) {
+      seriesFactsRef.current = [];
+      return;
+    }
+    let cancelled = false;
+    void seriesRepo.get(seriesId).then(
+      (series) => {
+        if (!cancelled) seriesFactsRef.current = series.facts;
+      },
+      () => {
+        if (!cancelled) seriesFactsRef.current = [];
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [book?.series_id, seriesRepo]);
+
+  /**
+   * Draft/Recast/Interview/Illustration prompts read `book.facts` directly
+   * — rather than touch every one of those (generateProse.ts,
+   * characterInterview.ts, illustrationPrompt.ts), call sites here pass
+   * this book-shaped view instead of the raw one wherever a prompt gets
+   * built, so the merge (NarrativeFact.ts's `mergeInheritedFacts`) is the
+   * only place inheritance logic lives. Never used for a write — `patchBook`
+   * and friends keep mutating the real `book`/`bookRef`, so an inherited
+   * series fact is never saved back into the book's own `facts`.
+   */
+  function withInheritedFacts(b: Book): Book {
+    if (!b.series_id || seriesFactsRef.current.length === 0) return b;
+    return { ...b, facts: mergeInheritedFacts(b.facts, seriesFactsRef.current) };
   }
 
   const persist = useCallback(
@@ -965,7 +1011,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       await patchBook((book) => updateChapter(book, id, { prose: assembled }));
       const draftMessages: PromptDebugMessage[] = [
         { role: "system", content: writingSystem(DRAFT_SYSTEM) },
-        { role: "user", content: draftUserPrompt(current, chapter) }
+        { role: "user", content: draftUserPrompt(withInheritedFacts(current), chapter) }
       ];
       recordPrompt("draft", model, draftMessages);
       for await (const chunk of provider.streamChat({
@@ -1049,7 +1095,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       const provider = makeProvider(model);
       const recastMessages: PromptDebugMessage[] = [
         { role: "system", content: writingSystem(RECAST_SYSTEM) },
-        { role: "user", content: recastUserPrompt(current, chapter) }
+        { role: "user", content: recastUserPrompt(withInheritedFacts(current), chapter) }
       ];
       recordPrompt("recast", model, recastMessages);
       for await (const chunk of provider.streamChat({
@@ -1288,7 +1334,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       try {
         const draftMessages: PromptDebugMessage[] = [
           { role: "system", content: writingSystem(DRAFT_SYSTEM) },
-          { role: "user", content: draftSceneUserPrompt(current, chapter, sceneId) }
+          { role: "user", content: draftSceneUserPrompt(withInheritedFacts(current), chapter, sceneId) }
         ];
         recordPrompt("draft", model, draftMessages);
         for await (const chunk of provider.streamChat({
@@ -1376,7 +1422,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         const provider = makeProvider(model);
         const recastMessages: PromptDebugMessage[] = [
           { role: "system", content: writingSystem(RECAST_SYSTEM) },
-          { role: "user", content: recastSceneUserPrompt(current, chapter, sceneId) }
+          { role: "user", content: recastSceneUserPrompt(withInheritedFacts(current), chapter, sceneId) }
         ];
         recordPrompt("recast", model, recastMessages);
         let assembled = "";
@@ -1621,7 +1667,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
               ...(args.instruction ? { instruction: args.instruction } : {})
             })
           : passageUserPrompt({
-              book: current,
+              book: withInheritedFacts(current),
               chapter: args.target === "prose" ? chapter ?? null : null,
               mode: args.mode,
               before: around.before,
@@ -2069,7 +2115,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     try {
       const polishMessages: PromptDebugMessage[] = [
         { role: "system", content: writingSystem(current.polish_prompt) },
-        { role: "user", content: polishUserPrompt(current, chapter) }
+        { role: "user", content: polishUserPrompt(withInheritedFacts(current), chapter) }
       ];
       recordPrompt("polish", model, polishMessages);
       const raw = await makeProvider(model).chat({
@@ -2134,7 +2180,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       setBusy("illustrate");
       setError(null);
       try {
-        const entities = relevantEntitiesForPassage(passage, current);
+        const entities = relevantEntitiesForPassage(passage, withInheritedFacts(current));
         const illustrateMessages = illustrationPromptMessages(passage, entities, current.illustration_style);
         recordPrompt("illustrate", reviewModel, illustrateMessages);
         const raw = await makeProvider(reviewModel).chat({
@@ -2359,7 +2405,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
           {
             role: "system",
             content: characterInterviewSystem(
-              current,
+              withInheritedFacts(current),
               target.ref,
               target.label,
               target.kind,

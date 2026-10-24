@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.181] - 2026-10-24
+
+### Added
+- A book that belongs to a Series now actually writes with that series' locked canon in mind — Draft, Recast, scene-level Draft/Recast, Polish, passage rewrites, illustration-prompt entity detection, and Character Interview all now see the series' own locked facts as a base layer, with this book's own locked facts winning on anything it's established differently. Purely additive to what the model sees; a book's own Story Bible is untouched, and a standalone book (no series) behaves exactly as before.
+
 ## [1.0.180] - 2026-10-24
 
 ### Added

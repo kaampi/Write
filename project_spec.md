@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.180
+Status: living document, v1.0.181
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8671,6 +8671,66 @@ där, märkt "Established in: Book One, Chapter 1". Skärmdump bekräftade
 utseendet — två entitetskort under "SERIES CANON", exakt som avsett.
 
 v1.0.179 → v1.0.180.
+
+**Ändringslogg v1.0.181 (2026-10-24): Steg 4 av 5 i Series-planen —
+faktaupplösning. Det tidigare byggda var fortfarande overksamt: en
+serie kunde hålla fakta, men en bok i serien märkte ingenting av det
+när den faktiskt skrevs. Det här steget är det som gör föregående
+steg verkligt — Draft/Recast m.fl. ser nu seriens låsta fakta.**
+
+- Nytt i `NarrativeFact.ts`: `mergeInheritedFacts(bookFacts,
+  seriesFacts)` — en ren funktion. Seriens LÅSTA fakta läggs på som en
+  basnivå; ett bok-eget LÅST faktum för samma entitet+predikat vinner
+  (ett bara flaggat eller föreslaget bok-faktum blockerar INTE
+  ärvning — det är inte avgjort än, så seriens ord gäller tills
+  författaren tar ställning). Returnerar bokens egna fakta oförändrade
+  plus eventuella icke-överskridna seriefakta på slutet — resultatet
+  är tänkt för läsning (prompt-byggande, visning), ALDRIG för att
+  skrivas tillbaka som bokens egna `facts` (skulle duplicera
+  seriekanon in i varje bok som ärver den). 6 nya tester i
+  `tests/core/narrative-fact.test.ts` (14 totalt, upp från 8).
+- `BookStore.tsx`: ny `SeriesRepository`-instans, en `seriesFactsRef`
+  som hämtas om varje gång den öppna bokens `series_id` ändras (tom
+  array för en fristående bok — ingen ändring i beteende alls för de).
+  Ny `withInheritedFacts(book)`-hjälpfunktion: bygger en bok-formad
+  vy med `mergeInheritedFacts` applicerad, ENDAST använd för
+  prompt-byggande, aldrig för skrivningar (`patchBook` och liknande
+  muterar fortfarande den riktiga `book`/`bookRef` rakt av). Istället
+  för att röra generateProse.ts/characterInterview.ts/
+  illustrationPrompt.ts internt (som alla läser `book.facts` själva),
+  byts bara anropsplatserna i `BookStore.tsx` ut — `draftUserPrompt`,
+  `recastUserPrompt`, `draftSceneUserPrompt`, `recastSceneUserPrompt`,
+  `polishUserPrompt`, `passageUserPrompt` (extend/elaborate/instruct/
+  beat), `relevantEntitiesForPassage` (illustrationsprompt-kontext)
+  och `characterInterviewSystem` tar nu `withInheritedFacts(current)`
+  istället för `current` rakt av — resten av koden i de modulerna är
+  OFÖRÄNDRAD.
+- Avsiktligt UTANFÖR det här steget (dokumenterad gräns, inte
+  bortglömt): Proofread/Developmental-jobben och
+  continuity-leak-varningen (`knowledgeLeaksForChapter`, Editor.tsx)
+  rör vid `book.facts` på många ställen var och är egna, större
+  bakgrundsjobb — risken att destabilisera dem uppvägde inte vinsten
+  för det här steget. `applyExtractorDrafts`/`evaluateCandidate`s
+  konflikt-jämförelse (när en NY bok-fakta föreslås) jämför fortfarande
+  bara mot bokens egna fakta, inte seriens — en bok skulle alltså
+  kunna föreslå något som redan motsägs av seriekanon utan att
+  ConsistencyGate flaggar det. Kan tas som ett eget, mindre
+  uppföljningssteg om det visar sig behövas i praktiken.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1141 test, upp
+från 1135 — 6 nya för `mergeInheritedFacts`) grön. `npm run build`
+rent. Playwright mot dev-servern med en mock-Ollama: skapade en serie,
+låste ett faktum för hand ("Dun Sorrow" · Plats · "A fog-bound harbor
+town") utan att skapa någon bok än, skapade sedan en bok i serien (noll
+egna fakta), gick till Kapitel 1 och körde Draft, öppnade "View AI
+context" (Tools-menyn) och bekräftade att prompten som faktiskt
+skickades till modellen innehöll raden "Story Bible:\n- Dun Sorrow ·
+Place: A fog-bound harbor town" — trots att boken själv aldrig haft
+det faktumet. Skärmdump bekräftade att bokens egen Story Bible-panel
+samtidigt visade "0 locked" — den ärvda faktan syns i prompten men
+skrivs aldrig in i bokens egna, sparade fakta.
+
+v1.0.180 → v1.0.181.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
