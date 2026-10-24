@@ -490,7 +490,12 @@ export const en = {
     sendToSeries: "Send to series",
     conflictTitle: "Differs from the series",
     conflictBody: 'The series says {predicate}: "{seriesValue}" — this book would now say something else. Nothing else changes; the series keeps its own value until you send this one up too.',
-    conflictLockAnyway: "Lock anyway"
+    conflictLockAnyway: "Lock anyway",
+    consistencyHeading: "Consistency check",
+    consistencyCheck: "Check consistency",
+    consistencyChecking: "Checking…",
+    consistencyLede: "Compares every locked fact across the series and all its books, looking for claims nobody reconciled — not just what you were already warned about while writing.",
+    consistencyNone: "No contradictions found."
   },
   editor: {
     manuscriptTitle: "Manuscript title",

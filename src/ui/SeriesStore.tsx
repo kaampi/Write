@@ -15,7 +15,9 @@ import { parseExtractorPayload, PLANNING_EXTRACTOR_SYSTEM, planningExtractorUser
 import { slugify } from "@core/ids";
 import type { FactDraft } from "@core/NarrativeFact";
 import type { CorePredicate } from "@core/predicates";
+import { crossBookConsistencyIssues, type BookFactSet, type ConsistencyIssue } from "@core/seriesConsistency";
 import { SeriesNotFoundError, SeriesRepository } from "@persistence/SeriesRepository";
+import { BookRepository } from "@persistence/Repository";
 import {
   DEFAULT_OPENAI_COMPATIBLE_BASE_URL,
   LocalProviderConfigError,
@@ -43,11 +45,14 @@ const EXTRACTOR_MAX_TOKENS = 4000;
 export function SeriesStoreProvider({ children }: { children: React.ReactNode }) {
   const { summaries: bookSummaries, engine, baseUrl, reviewModel, models, ollamaError, contextWindow } = useBookStore();
   const repo = useMemo(() => new SeriesRepository(), []);
+  const bookRepo = useMemo(() => new BookRepository(), []);
   const [summaries, setSummaries] = useState<SeriesStoreValue["summaries"]>([]);
   const [seriesId, setSeriesId] = useState<string | null>(null);
   const [series, setSeries] = useState<Series | null>(null);
   const [busy, setBusy] = useState<SeriesBusy>(null);
   const [error, setError] = useState<string | null>(null);
+  const [consistencyIssues, setConsistencyIssues] = useState<ConsistencyIssue[] | null>(null);
+  const [consistencyChecking, setConsistencyChecking] = useState(false);
   const seriesRef = useRef<Series | null>(null);
   const saveTimer = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -86,6 +91,7 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
       setSeries(created);
       setSeriesId(created.id);
       setError(null);
+      setConsistencyIssues(null);
       return created;
     },
     [repo, bookCountBySeriesId]
@@ -99,6 +105,7 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
         setSeries(loaded);
         setSeriesId(id);
         setError(null);
+        setConsistencyIssues(null);
       } catch (err) {
         setError(err instanceof SeriesNotFoundError ? "series-not-found" : "series-unreadable");
       }
@@ -119,6 +126,7 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
     seriesRef.current = null;
     setSeries(null);
     setSeriesId(null);
+    setConsistencyIssues(null);
   }, [persist]);
 
   const renameSeries = useCallback(
@@ -151,6 +159,28 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
   );
 
   const booksInSeries = useCallback((id: string) => bookSummaries.filter((book) => book.series_id === id), [bookSummaries]);
+
+  const checkConsistency = useCallback(async () => {
+    const current = seriesRef.current;
+    if (!current) return;
+    setConsistencyChecking(true);
+    try {
+      const summaries = bookSummaries.filter((book) => book.series_id === current.id);
+      const bookFactSets: BookFactSet[] = await Promise.all(
+        summaries.map(async (summary) => {
+          try {
+            const full = await bookRepo.get(summary.id);
+            return { bookTitle: full.title, facts: full.facts };
+          } catch {
+            return { bookTitle: summary.title, facts: [] };
+          }
+        })
+      );
+      setConsistencyIssues(crossBookConsistencyIssues(current.facts, current.title, bookFactSets));
+    } finally {
+      setConsistencyChecking(false);
+    }
+  }, [bookSummaries, bookRepo]);
 
   /** Same debounced-patch shape as BookStore's `patchBook` — mutate in place, save shortly after. */
   const patchSeries = useCallback(
@@ -311,7 +341,10 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
     approve,
     reject,
     keepSeparate,
-    promoteBookFact
+    promoteBookFact,
+    consistencyIssues,
+    consistencyChecking,
+    checkConsistency
   };
 
   return <SeriesStoreContext.Provider value={value}>{children}</SeriesStoreContext.Provider>;

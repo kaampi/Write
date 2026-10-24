@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.184] - 2026-10-24
+
+### Added
+- A "Check consistency" button on a series' own Story Bible compares every locked fact across the series and all its books, flagging any entity+predicate where two sources disagree — including claims two sibling books independently locked without ever seeing each other's version. Instant and deterministic, no AI call involved; shows "No contradictions found" when there's nothing to flag.
+
 ## [1.0.183] - 2026-10-24
 
 ### Added

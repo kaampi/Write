@@ -2,6 +2,7 @@ import { createContext, useContext } from "react";
 import type { BookSummary } from "@core/BookSchema";
 import type { FactDraft } from "@core/NarrativeFact";
 import type { CorePredicate } from "@core/predicates";
+import type { ConsistencyIssue } from "@core/seriesConsistency";
 import type { Series, SeriesSummary } from "@core/SeriesSchema";
 
 export type SeriesBusy = "extract-synopsis" | null;
@@ -35,6 +36,10 @@ export type SeriesStoreValue = {
     draft: FactDraft,
     source: { book_id: string; book_title: string; chapter_title?: string }
   ) => Promise<void>;
+  /** On-demand audit across the series' own facts and every book in it — `null` before the first run, or after `openSeries`/`closeSeries` clears it. */
+  consistencyIssues: ConsistencyIssue[] | null;
+  consistencyChecking: boolean;
+  checkConsistency: () => Promise<void>;
 };
 
 export const SeriesStoreContext = createContext<SeriesStoreValue | null>(null);

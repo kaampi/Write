@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.183
+Status: living document, v1.0.184
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8846,6 +8846,67 @@ låstes in i boken. Skärmdump bekräftade utseendet — matchar
 `addChoice`-dialogens stil exakt.
 
 v1.0.182 → v1.0.183.
+
+**Ändringslogg v1.0.184 (2026-10-24): Uppföljning #2 av 2 på
+Series-planen — "Blir #2 en kontroll man startar och sedan får den
+snurra på?" Svar (bekräftat av Mats): nej, ren deterministisk
+jämförelse av redan sparade låsta fakta, ingen AI inblandad, så ingen
+bakgrundssnurra eller progressbar behövs — en knapp, ett omedelbart
+resultat.**
+
+- Nytt: `src/core/seriesConsistency.ts` —
+  `crossBookConsistencyIssues(seriesFacts, seriesLabel, books)`. Andra
+  halvan av det Mats efterfrågade ("skapar motstridiga fakta"), skild
+  från det låsnings-tidiga varningen i v1.0.183
+  (`seriesCanonConflict`): två syskonböcker ser ALDRIG varandras fakta
+  alls, bara seriens — så ingenting hindrar dem från att oberoende låsa
+  olika påståenden för samma entitet+predikat, utan att någon av dem
+  medvetet skrev över den andra. Den här funktionen hittar det i
+  efterhand: grupperar alla LÅSTA fakta (seriens egna + varje boks
+  egna) per entitet+predikat, flaggar varje grupp med fler än ett
+  distinkt (normaliserat) värde. Ren och synkron — `lockedFacts`-
+  filtrering, samma `normalizeValue`-jämförelse som resten av
+  ConsistencyGate redan använder. 6 nya tester i
+  `tests/core/series-consistency.test.ts`.
+- `SeriesStore.tsx`/`useSeriesStore.ts`: ny `BookRepository`-instans
+  (läser varje bok i serien för dess fulla `facts`, inte bara
+  `BookSummary`), `consistencyIssues`/`consistencyChecking`-state,
+  `checkConsistency()` — body av funktionen är bara ett par `await`
+  (hämta böcker, kör den rena funktionen), ingen job/progress-
+  infrastruktur som Proofread/Developmental har. Nollställs vid
+  `openSeries`/`closeSeries`/`createSeries` (ett resultat från en annan
+  serie ska aldrig visas kvar).
+- Nytt i `SeriesBiblePanel.tsx`: en "Konsistenskontroll"-sektion med
+  en knapp och resultatlistan — varje flaggad post visar entitet +
+  predikat, och en rad per källa (seriens eget namn, eller en
+  bok-titel) med dess värde. "Inga motsägelser hittades." när allt
+  stämmer.
+- i18n: `m.series.consistencyHeading`/`consistencyCheck`/
+  `consistencyChecking`/`consistencyLede`/`consistencyNone`, alla tre
+  språk.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1154 test, upp
+från 1148 — 6 nya) grön. `npm run build` rent. Playwright mot
+dev-servern: skapade en serie, en bok ("Book Two") med en karaktär
+("Elara Vane" · Identity · "A traveling merchant"), körde
+konsistenskontrollen — bekräftade "No contradictions found." (bara en
+källa, inget att jämföra mot). Skapade sedan en andra bok ("Book
+Three") med SAMMA karaktärsnamn men ett AVVIKANDE värde ("A retired
+soldier") utan att någonsin ha sett den första bokens version. Körde
+kontrollen igen — bekräftade att den nu flaggade "Elara Vane ·
+Identity" med båda böckernas värden listade under respektive
+boktitel. Skärmdump bekräftade utseendet.
+
+v1.0.183 → v1.0.184.
+
+Med det är båda uppföljningsstegen på Series-planen levererade:
+lås-tidig varning (#1) och en konsistenskontroll över hela serien
+(#2). Kvarvarande, medvetna och dokumenterade luckor: `NewEntityOverlay`
+(skapa en helt ny entitet vars namn kolliderar med en befintlig)
+varnar fortfarande inte vid LÅSNING (#1 täcker bara "Add fact" och
+redigering av ett redan låst faktum) — men själva konsistenskontrollen
+(#2) hittar det ändå i efterhand, så inget faktiskt hål finns kvar i
+TÄCKNING, bara i NÄR man får syn på det.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

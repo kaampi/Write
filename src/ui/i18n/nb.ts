@@ -140,7 +140,12 @@ export const nb: Messages = {
     sendToSeries: "Send til serien",
     conflictTitle: "Avviker fra serien",
     conflictBody: 'Serien sier {predicate}: «{seriesValue}» — denne boken ville nå si noe annet. Ingenting annet endres; serien beholder sin egen verdi til du sender opp denne også.',
-    conflictLockAnyway: "Lås likevel"
+    conflictLockAnyway: "Lås likevel",
+    consistencyHeading: "Konsistenssjekk",
+    consistencyCheck: "Sjekk konsistens",
+    consistencyChecking: "Sjekker…",
+    consistencyLede: "Sammenligner hvert låste faktum i hele serien og alle bøkene i den, ser etter påstander ingen har avstemt mot hverandre — ikke bare det du allerede fikk en advarsel om mens du skrev.",
+    consistencyNone: "Ingen motsigelser funnet."
   },
   editor: {
     manuscriptTitle: "Manuskripttittel",

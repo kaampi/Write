@@ -25,7 +25,18 @@ function groupByEntity(facts: NarrativeFact[]): EntityGroup[] {
  * its own. Those stay book-only; a series fact is just entity + claims.
  */
 export function SeriesBiblePanel() {
-  const { series, addFact, reviseFact, retractFact, approve, reject, keepSeparate } = useSeriesStore();
+  const {
+    series,
+    addFact,
+    reviseFact,
+    retractFact,
+    approve,
+    reject,
+    keepSeparate,
+    consistencyIssues,
+    consistencyChecking,
+    checkConsistency
+  } = useSeriesStore();
   const { messages: m } = useLocale();
   const [label, setLabel] = useState("");
   const [predicate, setPredicate] = useState<CorePredicate>("core.identity");
@@ -102,6 +113,35 @@ export function SeriesBiblePanel() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="series-bible-consistency">
+        <div className="series-consistency-head">
+          <h3 className="settings-heading home-heading-lg">{m.series.consistencyHeading}</h3>
+          <button type="button" className="text-button" disabled={consistencyChecking} onClick={() => void checkConsistency()}>
+            {consistencyChecking ? m.series.consistencyChecking : m.series.consistencyCheck}
+          </button>
+        </div>
+        {consistencyIssues === null ? (
+          <p className="quiet">{m.series.consistencyLede}</p>
+        ) : consistencyIssues.length === 0 ? (
+          <p className="quiet">{m.series.consistencyNone}</p>
+        ) : (
+          <ul className="series-consistency-list">
+            {consistencyIssues.map((issue) => (
+              <li key={`${issue.entity_ref}:${issue.predicate}`} className="series-consistency-issue">
+                <strong>{issue.entity_label}</strong> <span className="quiet">{m.bible.predicates[issue.predicate]}</span>
+                <ul>
+                  {issue.sources.map((source, index) => (
+                    <li key={index}>
+                      <span className="series-consistency-source">{source.label}:</span> {source.value}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="series-bible-add">
