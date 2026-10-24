@@ -1,9 +1,12 @@
 import React, { Component, Fragment, useState, type ErrorInfo, type ReactNode } from "react";
 import { BookStoreProvider } from "./BookStore";
 import { useBookStore } from "./useBookStore";
+import { SeriesStoreProvider } from "./SeriesStore";
+import { useSeriesStore } from "./useSeriesStore";
 import { AppTopBar } from "./AppTopBar";
 import { Editor } from "./Editor";
 import { Home } from "./Home";
+import { SeriesWorkspace } from "./SeriesWorkspace";
 import { LocaleProvider, getMessages } from "./i18n";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { message: string | null; retry: number }> {
@@ -36,12 +39,15 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { message: string
 
 function Shell() {
   const { book } = useBookStore();
+  const { seriesId } = useSeriesStore();
   const [homeGuideOpen, setHomeGuideOpen] = useState(false);
   return (
     <div className="app-shell">
       <AppTopBar onOpenHomeGuide={() => setHomeGuideOpen(true)} />
       {book ? (
         <Editor />
+      ) : seriesId ? (
+        <SeriesWorkspace />
       ) : (
         <Home
           guideOpen={homeGuideOpen}
@@ -58,7 +64,9 @@ export default function App() {
     <LocaleProvider>
       <ErrorBoundary>
         <BookStoreProvider>
-          <Shell />
+          <SeriesStoreProvider>
+            <Shell />
+          </SeriesStoreProvider>
         </BookStoreProvider>
       </ErrorBoundary>
     </LocaleProvider>

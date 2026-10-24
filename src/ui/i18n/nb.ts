@@ -102,6 +102,28 @@ export const nb: Messages = {
     desktopUpToDate: "Du har den nyeste versjonen ({current}).",
     desktopUpdateCheckFailed: "Kunne ikke se etter oppdateringer: {error}"
   },
+  series: {
+    heading: "Serier",
+    newSeries: "+ Ny serie",
+    newSeriesTitlePlaceholder: "Seriens tittel",
+    create: "Opprett",
+    open: "Åpne serien →",
+    books: { one: "{count} bok", other: "{count} bøker" },
+    facts: { one: "{count} låst faktum", other: "{count} låste fakta" },
+    newBookInSeries: "+ Ny bok i denne serien",
+    standaloneHeading: "Frittstående manus",
+    assignLabel: "Serie",
+    assignNone: "— Frittstående —",
+    backToShelf: "← Til hyllen",
+    titleLabel: "Seriens tittel",
+    booksHeading: "Bøker i denne serien",
+    noBooksYet: "Ingen bøker i denne serien ennå.",
+    deleteSeries: "Slett serien",
+    deleteConfirm: 'Slette serien "{title}"? Bøkene i den blir værende — de slutter bare å tilhøre en serie.',
+    deleteBlocked: "Flytt ut bøkene først (eller slett dem) for å kunne slette denne serien.",
+    notFound: "Den serien finnes ikke lenger.",
+    unreadable: "Den serien kunne ikke leses."
+  },
   editor: {
     manuscriptTitle: "Manuskripttittel",
     writing: "Skriving",

@@ -565,6 +565,25 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     [persist]
   );
 
+  /**
+   * Assigns (or clears, with `seriesId` undefined) which Series a book
+   * belongs to — works on any book, not just the open one, since this is
+   * called from the Home shelf where nothing is open yet. Routes through
+   * `patchBook` when the target happens to be the currently open book, so
+   * its in-memory state and debounced save stay the single code path.
+   */
+  const setBookSeries = useCallback(
+    async (bookId: string, seriesId: string | undefined) => {
+      if (bookRef.current?.id === bookId) {
+        await patchBook((current) => ({ ...current, series_id: seriesId }));
+        return;
+      }
+      const loaded = await repo.get(bookId);
+      await persist(touch(loaded, { series_id: seriesId }));
+    },
+    [patchBook, persist, repo]
+  );
+
   const openBook = useCallback(
     async (id: string) => {
       const loaded = await repo.get(id);
@@ -602,8 +621,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   }, [persist, refresh]);
 
   const newBook = useCallback(
-    async (title: string) => {
-      const created = createBook(title);
+    async (title: string, seriesId?: string) => {
+      const created = { ...createBook(title), ...(seriesId ? { series_id: seriesId } : {}) };
       await repo.save(created);
       setSummaries(await repo.list());
       withViewTransition(() => {
@@ -3245,6 +3264,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     importMarkdownManuscript,
     deleteBook,
     patchBook,
+    setBookSeries,
     setChapterId,
     selectChapter,
     showSettings,

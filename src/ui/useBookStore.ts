@@ -82,11 +82,13 @@ export type BookStoreValue = {
   refresh: () => Promise<void>;
   openBook: (id: string) => Promise<void>;
   closeBook: () => void;
-  newBook: (title: string) => Promise<void>;
+  newBook: (title: string, seriesId?: string) => Promise<void>;
   newLanguageVersion: (targetLanguage: string) => Promise<void>;
   /** Loads another manuscript by id without opening it — used by the language switcher/stale check (roadmap-ideas.md #43). */
   loadBook: (id: string) => Promise<Book>;
   importManuscript: (file: File) => Promise<void>;
+  /** Assigns, or (with `undefined`) clears, which Series a book belongs to — works on any book, not just the open one. */
+  setBookSeries: (bookId: string, seriesId: string | undefined) => Promise<void>;
   importMarkdownManuscript: (title: string, chapters: ImportedChapterCandidate[]) => Promise<void>;
   deleteBook: (id: string) => Promise<void>;
   patchBook: (mutate: (book: Book) => Book) => Promise<void>;

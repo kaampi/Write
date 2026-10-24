@@ -102,6 +102,28 @@ export const sv: Messages = {
     desktopUpToDate: "Du har den senaste versionen ({current}).",
     desktopUpdateCheckFailed: "Kunde inte kolla efter uppdateringar: {error}"
   },
+  series: {
+    heading: "Serier",
+    newSeries: "+ Ny serie",
+    newSeriesTitlePlaceholder: "Seriens titel",
+    create: "Skapa",
+    open: "Öppna serien →",
+    books: { one: "{count} bok", other: "{count} böcker" },
+    facts: { one: "{count} låst faktum", other: "{count} låsta fakta" },
+    newBookInSeries: "+ Ny bok i den här serien",
+    standaloneHeading: "Fristående manus",
+    assignLabel: "Serie",
+    assignNone: "— Fristående —",
+    backToShelf: "← Till hyllan",
+    titleLabel: "Seriens titel",
+    booksHeading: "Böcker i den här serien",
+    noBooksYet: "Inga böcker i den här serien än.",
+    deleteSeries: "Ta bort serien",
+    deleteConfirm: 'Ta bort serien "{title}"? Böckerna i den finns kvar — de slutar bara tillhöra en serie.',
+    deleteBlocked: "Flytta ut böckerna först (eller ta bort dem) för att kunna ta bort den här serien.",
+    notFound: "Den serien finns inte längre.",
+    unreadable: "Den serien gick inte att läsa."
+  },
   editor: {
     manuscriptTitle: "Manustitel",
     writing: "Skrivande",

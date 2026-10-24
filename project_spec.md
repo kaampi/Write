@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.178
+Status: living document, v1.0.179
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8493,6 +8493,92 @@ klicka igenom, bara schema och persistence, exakt som planerat för
 steg 1.
 
 v1.0.177 → v1.0.178.
+
+**Ändringslogg v1.0.179 (2026-10-24): Steg 2 av 5 i Series-planen —
+organisera böcker i en serie, navigera mellan dem. Föregicks av en
+förhandsvisning (Artifact-skiss, "Design"-typen, inte kod) som vi
+diskuterade och justerade innan kodningen: Mats fråga om var
+karaktärer "bor" (serie vs. bok — svar: samma `entity_ref` på båda
+nivåerna, bokens egna fakta vinner vid krock), "Skicka till
+serien"-mekaniken med automatiskt satt ursprung (`source_book_id`/
+`source_chapter_id`, aldrig inskrivet för hand), och beslutet att rik
+löptext/bilder per entitet är för författaren och extraktorn — inte
+rådata rakt in i Draft-prompten. Det här steget bygger ännu inget av
+det — bara själva organisationslagret: skapa/öppna en serie, se och
+hantera dess böcker.**
+
+- Nytt: `src/ui/SeriesStore.tsx` + `useSeriesStore.ts` — en egen,
+  mycket mindre React-context än `BookStore.tsx`, som bara äger
+  själva `Series`-posten (titel/brainstorm/synopsis/fakta senare) och
+  dess CRUD. Läser `BookStore`s `summaries` för att räkna böcker per
+  serie och lista en series böcker (`booksInSeries`) — måste därför
+  monteras INNANFÖR `BookStoreProvider`. En bok skriver fortfarande
+  bara via `BookStore` (enda ägaren av Book-persistence); series-sidan
+  ber `BookStore` göra det via en ny funktion, `setBookSeries`, den
+  äger inte skrivningen själv.
+- `BookStore.tsx`: ny `setBookSeries(bookId, seriesId)` — fungerar på
+  VILKEN bok som helst, inte bara den öppna (anropas från hyllan där
+  inget är öppet än); routar genom befintlig `patchBook` när målet
+  råkar vara den öppna boken, annars `repo.get` + `touch` + spara
+  direkt, så det finns bara en kodväg för fältet oavsett. `newBook`
+  tar nu ett valfritt andra argument, `seriesId`, som sätter
+  `series_id` direkt vid skapandet (används av "+ Ny bok i den här
+  serien").
+- `App.tsx`: `SeriesStoreProvider` monterad innanför
+  `BookStoreProvider`, runt `Shell`. `Shell`s routing utökad från
+  `book ? Editor : Home` till `book ? Editor : seriesId ? SeriesWorkspace
+  : Home` — stänger man en bok som öppnades inifrån en serie (Series-
+  state fortfarande satt) hamnar man tillbaka i serien, inte på hela
+  hyllan; stänger man en fristående bok (seriesId aldrig satt) hamnar
+  man på hyllan precis som idag. Ingen ändring i hur en fristående bok
+  beter sig.
+- Nytt: `src/ui/SeriesWorkspace.tsx` — minimal serie-yta för det här
+  steget: tillbaka-till-hyllan, redigerbar titel (samma debounce-
+  mönster som bokens egen titel), lista över böcker i serien (klick
+  öppnar boken), formulär för att skapa en ny bok direkt i serien,
+  och en "Ta bort serien"-knapp — avstängd (med förklarande `title`)
+  så länge serien har böcker kvar, för att aldrig lämna en bok
+  pekandes på ett borttaget `series_id` i tysthet. Själva Brainstorm/
+  Synopsis/Story Bible för serien — skissens egentliga poäng — är
+  fortfarande nästa steg.
+- `Home.tsx`: ny "Serier"-sektion ovanför den befintliga hyllan —
+  skapa en serie (titel + Skapa-knapp, samma mönster som "Starta ett
+  nytt manus"), varje serie som ett kort med bok-/fakta-antal och en
+  "Öppna serien"-knapp. Den befintliga hyllan filtrerar nu bort böcker
+  som redan tillhör en serie (de visas i sitt serie-kort istället) och
+  byter rubrik till "Fristående manus" så fort minst en serie finns
+  (annars oförändrad "Dina manus", för att inte introducera ett nytt
+  begrepp för någon som aldrig rört vid serier). Varje kvarvarande
+  fristående bok-rad fick en ny "Serie"-väljare bredvid
+  Ta bort-knappen (bara synlig när minst en serie finns) för att
+  flytta en redan existerande bok in i en serie i efterhand — den
+  retroaktiva vägen in för manus skrivna innan den här funktionen
+  fanns.
+- i18n: ny `series`-namespace i alla tre språk (en/sv/nb) — rubriker,
+  knapptexter, bekräftelsetexter, plural-former för "X böcker"/"X
+  låsta fakta".
+- CSS: `.series-shelf`/`.series-card`/`.series-workspace`/
+  `.book-shelf-row-actions` m.fl., återanvänder befintliga design-
+  tokens (`--panel`, `--border-soft`, `--font-prose` osv.) rakt av —
+  ingen ny färgpalett.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1131 test,
+oförändrat antal — ren UI/store-kod, inget nytt att enhetstesta utöver
+det schema/persistence redan fick i steg 1) grön. `npm run build`
+rent. Full Playwright-genomgång mot dev-servern (inget AI-anrop
+inblandat i det här steget, så ingen mockserver behövdes): skapade en
+serie, döpte om den inline, skapade en bok i den, stängde boken och
+bekräftade att man hamnade tillbaka i serie-ytan (inte hyllan), gick
+"Till hyllan" och bekräftade serie-kortet ("1 bok"), skapade en
+fristående bok och bekräftade att hyllans rubrik bytt till "Standalone
+manuscripts", flyttade den fristående boken in i serien via den nya
+väljaren och bekräftade att den försvann från den fristående listan
+och att serie-kortet nu visade "2 books", och bekräftade att
+"Delete series"-knappen var avstängd så länge serien hade böcker.
+Skärmdumpar av både serie-ytan och hyllan bekräftade utseendet —
+matchar appens befintliga mörka tema utan avvikelser.
+
+v1.0.178 → v1.0.179.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

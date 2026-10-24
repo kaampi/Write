@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.179] - 2026-10-24
+
+### Added
+- Series: a new "Series" section on the shelf lets you group books that share a world — create a series, open it to see and manage its books, start a new book inside it, or move an existing standalone manuscript into one from its shelf row. Closing a book you opened from inside a series takes you back to that series, not the whole shelf. This is the first step of a larger series feature; building the series' own world/lore (so it can be written once and carried into every book in it) is still to come.
+
 ## [1.0.177] - 2026-10-24
 
 ### Added

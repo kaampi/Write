@@ -3,6 +3,7 @@ import { groupManuscripts } from "@core/translation";
 import { DEFAULT_OPENAI_COMPATIBLE_BASE_URL } from "@llm/provider";
 import { DEFAULT_OLLAMA_BASE_URL } from "@llm/ollama";
 import { useBookStore } from "./useBookStore";
+import { useSeriesStore } from "./useSeriesStore";
 import { HandbookPanel } from "./HandbookPanel";
 import { ModelSelect } from "./SettingsPanel";
 import { count, format, translateError, useLocale } from "./i18n";
@@ -39,6 +40,7 @@ export function Home({
     newBook,
     openBook,
     deleteBook,
+    setBookSeries,
     importManuscript,
     importMarkdownManuscript,
     error,
@@ -55,12 +57,21 @@ export function Home({
     setReviewModel,
     setTranslateModel
   } = useBookStore();
+  const { summaries: seriesSummaries, createSeries, openSeries } = useSeriesStore();
   const { messages: m } = useLocale();
   const [title, setTitle] = useState("");
+  const [newSeriesTitle, setNewSeriesTitle] = useState("");
   const [search, setSearch] = useState("");
   const [importOpen, setImportOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const filteredSummaries = summaries.filter((item) => item.title.toLowerCase().includes(search.trim().toLowerCase()));
+  const standaloneSummaries = summaries.filter((item) => !item.series_id);
+  const filteredSummaries = standaloneSummaries.filter((item) => item.title.toLowerCase().includes(search.trim().toLowerCase()));
+
+  function submitNewSeries(event: React.SyntheticEvent) {
+    event.preventDefault();
+    const trimmed = newSeriesTitle;
+    void createSeries(trimmed).then(() => setNewSeriesTitle(""));
+  }
 
   // Engine/model rarely changes once it works — no reason for the controls
   // to sit open and take up space every visit. null means "no explicit
@@ -289,11 +300,53 @@ export function Home({
         ) : null}
       </section>
 
-      <section className="book-shelf" aria-label={m.home.shelf}>
-        <h2 className="settings-heading home-heading-lg">{m.home.shelfHeading}</h2>
+      <section className="series-shelf" aria-label={m.series.heading}>
+        <div className="home-start-card-copy series-shelf-head">
+          <h2 className="settings-heading home-heading-lg">{m.series.heading}</h2>
+          <form className="home-start-card-form series-new-form" onSubmit={submitNewSeries}>
+            <input
+              value={newSeriesTitle}
+              onChange={(event) => setNewSeriesTitle(event.target.value)}
+              placeholder={m.series.newSeriesTitlePlaceholder}
+              autoComplete="off"
+              aria-label={m.series.newSeries}
+            />
+            <button type="submit" className="home-start-card-action">
+              {m.series.create}
+            </button>
+          </form>
+        </div>
 
-        {summaries.length === 0 ? (
-          <p className="empty-shelf">{m.home.emptyShelf}</p>
+        {seriesSummaries.length > 0 ? (
+          <ul className="series-list">
+            {seriesSummaries.map((seriesSummary) => (
+              <li key={seriesSummary.id} className="series-card">
+                <div className="series-card-head">
+                  <div>
+                    <strong>{seriesSummary.title}</strong>
+                    <span className="quiet">
+                      {count(seriesSummary.bookCount, m.series.books)}
+                      <span className="dot">·</span>
+                      {count(seriesSummary.factCount, m.series.facts)}
+                    </span>
+                  </div>
+                  <button type="button" className="home-start-card-action" onClick={() => void openSeries(seriesSummary.id)}>
+                    {m.series.open}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
+
+      <section className="book-shelf" aria-label={m.home.shelf}>
+        <h2 className="settings-heading home-heading-lg">
+          {seriesSummaries.length > 0 ? m.series.standaloneHeading : m.home.shelfHeading}
+        </h2>
+
+        {standaloneSummaries.length === 0 ? (
+          seriesSummaries.length === 0 ? <p className="empty-shelf">{m.home.emptyShelf}</p> : null
         ) : (
           <>
             <input
@@ -325,17 +378,37 @@ export function Home({
                         {count(primary.factCount, m.home.facts)}
                       </span>
                     </button>
-                    <button
-                      type="button"
-                      className="text-button danger"
-                      onClick={() => {
-                        if (window.confirm(format(m.home.deleteConfirm, { title: primary.title }))) {
-                          void deleteBook(primary.id);
-                        }
-                      }}
-                    >
-                      {m.home.delete}
-                    </button>
+                    <div className="book-shelf-row-actions">
+                      {seriesSummaries.length > 0 ? (
+                        <select
+                          className="book-shelf-series-assign"
+                          aria-label={m.series.assignLabel}
+                          value=""
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            if (value) void setBookSeries(primary.id, value);
+                          }}
+                        >
+                          <option value="">{m.series.assignNone}</option>
+                          {seriesSummaries.map((seriesSummary) => (
+                            <option key={seriesSummary.id} value={seriesSummary.id}>
+                              {seriesSummary.title}
+                            </option>
+                          ))}
+                        </select>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="text-button danger"
+                        onClick={() => {
+                          if (window.confirm(format(m.home.deleteConfirm, { title: primary.title }))) {
+                            void deleteBook(primary.id);
+                          }
+                        }}
+                      >
+                        {m.home.delete}
+                      </button>
+                    </div>
                   </div>
                   {siblings.length > 0 ? (
                     <ul className="book-shelf-siblings">

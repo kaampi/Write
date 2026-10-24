@@ -452,6 +452,28 @@ export const en = {
     desktopUpToDate: "You have the latest version ({current}).",
     desktopUpdateCheckFailed: "Couldn't check for updates: {error}"
   },
+  series: {
+    heading: "Series",
+    newSeries: "+ New series",
+    newSeriesTitlePlaceholder: "Series title",
+    create: "Create",
+    open: "Open series →",
+    books: { one: "{count} book", other: "{count} books" },
+    facts: { one: "{count} locked fact", other: "{count} locked facts" },
+    newBookInSeries: "+ New book in this series",
+    standaloneHeading: "Standalone manuscripts",
+    assignLabel: "Series",
+    assignNone: "— Standalone —",
+    backToShelf: "← To the shelf",
+    titleLabel: "Series title",
+    booksHeading: "Books in this series",
+    noBooksYet: "No books in this series yet.",
+    deleteSeries: "Delete series",
+    deleteConfirm: 'Delete the series "{title}"? Its books stay — they just won\'t belong to a series anymore.',
+    deleteBlocked: "Move its books out first (or delete them) to delete this series.",
+    notFound: "That series doesn't exist anymore.",
+    unreadable: "That series couldn't be read."
+  },
   editor: {
     manuscriptTitle: "Manuscript title",
     writing: "Writing",
