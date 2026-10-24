@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { groupManuscripts } from "@core/translation";
+import { DEFAULT_OPENAI_COMPATIBLE_BASE_URL } from "@llm/provider";
+import { DEFAULT_OLLAMA_BASE_URL } from "@llm/ollama";
 import { useBookStore } from "./useBookStore";
 import { HandbookPanel } from "./HandbookPanel";
 import { ModelSelect } from "./SettingsPanel";
@@ -252,18 +254,16 @@ export function Home({
                   <option value="openai-compatible">{m.editor.engineOpenAiCompatible}</option>
                 </select>
               </label>
-              {engine === "openai-compatible" ? (
-                <label className="voice-field">
-                  <span>{m.editor.baseUrlLabel}</span>
-                  <input
-                    value={baseUrl}
-                    onChange={(event) => setBaseUrl(event.target.value)}
-                    placeholder={m.editor.baseUrlPlaceholder}
-                    title={m.editor.baseUrlLede}
-                    aria-label={m.editor.baseUrlLabel}
-                  />
-                </label>
-              ) : null}
+              <label className="voice-field">
+                <span>{m.editor.baseUrlLabel}</span>
+                <input
+                  value={baseUrl}
+                  onChange={(event) => setBaseUrl(event.target.value)}
+                  placeholder={engine === "ollama" ? DEFAULT_OLLAMA_BASE_URL : DEFAULT_OPENAI_COMPATIBLE_BASE_URL}
+                  title={m.editor.baseUrlLede}
+                  aria-label={m.editor.baseUrlLabel}
+                />
+              </label>
             </div>
             {models.length > 0 ? (
               <div className="settings-models">

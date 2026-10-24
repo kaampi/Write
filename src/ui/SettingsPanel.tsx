@@ -14,7 +14,8 @@ import { READER_CATEGORIES, READER_TIER_AGE, applyReaderAge, readerCategory, typ
 import { findStyleByPromptText, ILLUSTRATION_ORIENTATIONS, type IllustrationStyle } from "@core/illustrationStyle";
 import { PUBLISH_FONTS } from "@core/publishFonts";
 import { DEFAULT_POLISH_PROMPT, type Book } from "@core/BookSchema";
-import type { LlmEngine } from "@llm/provider";
+import { DEFAULT_OPENAI_COMPATIBLE_BASE_URL, type LlmEngine } from "@llm/provider";
+import { DEFAULT_OLLAMA_BASE_URL } from "@llm/ollama";
 import { MIN_CONTEXT_WINDOW, MAX_CONTEXT_WINDOW } from "@llm/contextWindow";
 import {
   loadConnectionPresets,
@@ -670,7 +671,7 @@ function ConnectionPresetList({
     }
     setExpandedId(preset.id);
     onEngine(preset.engine);
-    if (preset.engine === "openai-compatible") onBaseUrl(preset.baseUrl);
+    onBaseUrl(preset.baseUrl);
   };
 
   const hasActivePreset = presets.some((preset) => matchesPreset(preset, engine, baseUrl));
@@ -692,7 +693,7 @@ function ConnectionPresetList({
     </label>
   );
 
-  const baseUrlField = engine === "openai-compatible" ? (
+  const baseUrlField = (
     <label className="voice-field">
       <span className="field-label-row">
         {m.editor.baseUrlLabel}
@@ -701,11 +702,11 @@ function ConnectionPresetList({
       <input
         value={baseUrl}
         onChange={(event) => onBaseUrl(event.target.value)}
-        placeholder={m.editor.baseUrlPlaceholder}
+        placeholder={engine === "ollama" ? DEFAULT_OLLAMA_BASE_URL : DEFAULT_OPENAI_COMPATIBLE_BASE_URL}
         aria-label={m.editor.baseUrlLabel}
       />
     </label>
-  ) : null;
+  );
 
   return (
     <div className="connection-presets">

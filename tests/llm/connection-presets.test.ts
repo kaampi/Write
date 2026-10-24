@@ -63,11 +63,19 @@ describe("loadConnectionPresets", () => {
 });
 
 describe("matchesPreset", () => {
-  it("matches an Ollama preset on engine alone — there's no address to compare", () => {
+  it("matches an Ollama preset with no address on engine and an empty (this computer's default) address", () => {
     const preset: ConnectionPreset = { id: "a", name: "Ollama", engine: "ollama", baseUrl: "" };
     expect(matchesPreset(preset, "ollama", "")).toBe(true);
-    expect(matchesPreset(preset, "ollama", "http://doesnt-matter")).toBe(true);
+    expect(matchesPreset(preset, "ollama", "http://192.168.1.50:11434")).toBe(false);
     expect(matchesPreset(preset, "openai-compatible", "")).toBe(false);
+  });
+
+  it("matches an Ollama preset pointed at another machine on engine and trimmed address", () => {
+    const preset: ConnectionPreset = { id: "a", name: "Living room PC", engine: "ollama", baseUrl: "http://192.168.1.50:11434" };
+    expect(matchesPreset(preset, "ollama", "http://192.168.1.50:11434")).toBe(true);
+    expect(matchesPreset(preset, "ollama", "  http://192.168.1.50:11434  ")).toBe(true);
+    expect(matchesPreset(preset, "ollama", "")).toBe(false);
+    expect(matchesPreset(preset, "ollama", "http://192.168.1.51:11434")).toBe(false);
   });
 
   it("matches an OpenAI-compatible preset on engine and trimmed address", () => {

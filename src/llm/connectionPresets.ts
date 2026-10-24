@@ -29,10 +29,15 @@ export function newConnectionPreset(engine: LlmEngine, baseUrl: string, existing
   return { id: crypto.randomUUID(), name: uniqueDefaultName(existingNames), engine, baseUrl };
 }
 
-/** A saved preset is "active" when the live engine/address is exactly what it holds — Ollama has no address to compare, so the engine match alone is enough. */
+/**
+ * A saved preset is "active" when the live engine/address is exactly what
+ * it holds. Both engines compare on address now — Ollama used to be
+ * locked to localhost (engine match alone was enough), but it can point
+ * at another machine on the network too, so its address matters just as
+ * much as the OpenAI-compatible engine's.
+ */
 export function matchesPreset(preset: ConnectionPreset, engine: LlmEngine, baseUrl: string): boolean {
   if (preset.engine !== engine) return false;
-  if (engine === "ollama") return true;
   return preset.baseUrl.trim() === baseUrl.trim();
 }
 

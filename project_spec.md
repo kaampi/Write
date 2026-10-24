@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.175
+Status: living document, v1.0.176
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8307,6 +8307,72 @@ en mock som alltid trunkerar (bekräftar att felbannret visas och inget
 Polish-förslag läggs fram). `npm run build` rent.
 
 v1.0.174 → v1.0.175.
+
+**Ändringslogg v1.0.176 (2026-10-23): Mats funderade på om man ska kunna
+peka mot en lokal AI som inte ligger på datorn, utan någon annanstans på
+det lokala nätverket — "Vi skapar den möjligheten och uppdaterar guide
+och texter."**
+
+- Research innan kod: `assertLocalOnlyBaseUrl` i `provider.ts` är en
+  BLOCKLISTA mot kända molntjänster (openai.com, anthropic.com,
+  googleapis.com m.fl.), inte en vitlista som kräver `localhost` — en
+  LAN-adress som `http://192.168.1.50:11434` godkändes alltså redan av
+  valideringen. Problemet var att Settings bara visade "Server
+  address"-fältet för `openai-compatible`-motorn; Ollama-motorn
+  konstruerades alltid UTAN `baseUrl` i `makeProvider`/`listEngineModels`,
+  så den föll alltid tillbaka på `DEFAULT_OLLAMA_BASE_URL`
+  (`localhost:11434`) oavsett vad som stod i den delade `baseUrl`-staten.
+  Guiden sa till och med rakt ut: "The Ollama engine always points at
+  your own computer (localhost) and can't be redirected from the
+  interface."
+- Kod: `makeProvider`s Ollama-gren och `listEngineModels`s Ollama-gren
+  i `BookStore.tsx` skickar nu `baseUrl` (trimmad, tom sträng → `undefined`
+  → `OllamaModelProvider`s egen default) precis som `openai-compatible`-
+  grenen redan gjorde. `listEngineModels` konstruerar nu en
+  `OllamaModelProvider`-instans istället för att anropa `listOllamaModels()`
+  direkt, så Ollama får samma `assertLocalOnlyBaseUrl`-skydd som
+  OpenAI-kompatibel redan hade.
+- `connectionPresets.ts`s `matchesPreset`: tog bort specialfallet "Ollama
+  saknar adress att jämföra, motor-match räcker" — båda motorerna
+  jämför nu på adress. Uppdaterade testerna i
+  `connection-presets.test.ts` i linje med det (nytt test: en sparad
+  Ollama-preset mot en annan dator matchar bara den exakta adressen).
+- UI: `SettingsPanel.tsx`s `baseUrlField` (i `ConnectionPresetList`)
+  och `Home.tsx`s motsvarande fält i startskärmens anslutningsruta
+  visas nu för BÅDA motorerna, med platshållartext som växlar mellan
+  `DEFAULT_OLLAMA_BASE_URL` ("http://localhost:11434") och
+  `DEFAULT_OPENAI_COMPATIBLE_BASE_URL` ("http://localhost:1234")
+  beroende på vald motor, istället för en fast LM Studio-platshållare.
+  `selectPreset` sätter nu `onBaseUrl(preset.baseUrl)` ovillkorligt
+  (tidigare bara för `openai-compatible`).
+- Texter (alla tre språk): `baseUrlLede` omskriven generiskt ("lämna
+  tomt för den här datorns standard, eller ange en annan maskins
+  nätverksadress"); den gamla LM Studio-specifika `baseUrlPlaceholder`-
+  strängen borttagen helt (platshållaren är nu kod, inte i18n, se
+  ovan). `ollamaOrigins`-felmeddelandet (visas vid CORS-avslag)
+  omskrivet för att inte bara föreslå `OLLAMA_ORIGINS=http://localhost:5175`
+  (fel råd när Ollama körs på en annan maskin) utan även nämna
+  `OLLAMA_ORIGINS=*` som en enkel universallösning. Guide-sektionen
+  "network-ai-server" ("En AI-server på en annan dator i nätverket")
+  skriven om: stycket "Motorn måste vara LM Studio / annan lokal
+  server... Ollama-motorn pekar alltid mot din egen dator" ersatt med
+  "Välj motorn som matchar det som körs där... båda har nu ett fält för
+  serveradress". FAQ-posten "Can I run the app on another computer...”
+  redan var konsekvent med fixet (antog redan att man kunde peka om
+  modellinställningen) — ingen ändring behövdes där.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1112 test, upp
+från 1111 — ett nytt `matchesPreset`-test) grön. Playwright mot
+dev-servern: en mock-"LAN-Ollama"-server på port 11435 (en annan port
+än standard-11434, för att bevisa att appen faktiskt frågar den
+KONFIGURERADE adressen och inte bara localhost av misstag) — valde
+Ollama-motorn (standard), bekräftade att serveradressfältet nu syns
+med rätt platshållare (`http://localhost:11434`), fyllde i
+`http://localhost:11435`, och bekräftade att appen hämtade
+`lan-model:latest` från just den porten. Skärmdump av
+Inställningar bekräftade utseendet. `npm run build` rent.
+
+v1.0.175 → v1.0.176.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

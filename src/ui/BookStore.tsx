@@ -253,14 +253,22 @@ function withRequestTimeout(abort: AbortController): { timedOut: () => boolean; 
   return { timedOut: () => timedOut, clear: () => window.clearTimeout(id) };
 }
 
-/** Lists models from whichever engine is configured — Ollama's own API, or the OpenAI-compatible one LM Studio and llama.cpp-server share. */
+/**
+ * Lists models from whichever engine is configured — Ollama's own API, or
+ * the OpenAI-compatible one LM Studio and llama.cpp-server share. Both
+ * engines now take the same configured address: empty means "this
+ * computer's default port," anything else (e.g. another machine's address
+ * on the local network) is used as given. Routed through the Provider
+ * classes rather than calling listOllamaModels directly so Ollama gets the
+ * same assertLocalOnlyBaseUrl guard OpenAI-compatible already had.
+ */
 function listEngineModels(engine: LlmEngine, baseUrl: string): Promise<string[]> {
+  const trimmed = baseUrl.trim();
   if (engine === "openai-compatible") {
-    const trimmed = baseUrl.trim();
     if (!trimmed) return Promise.reject(new LocalProviderConfigError(STORE_ERROR.serverUrlMissing));
     return new OpenAICompatibleLocalProvider({ model: "", baseUrl: trimmed }).listModels();
   }
-  return listOllamaModels();
+  return new OllamaModelProvider({ model: "", ...(trimmed ? { baseUrl: trimmed } : {}) }).listModels();
 }
 
 function activeVoice(book: Book, surface: EditorSurface, chapterId: string | null): string {
@@ -378,7 +386,13 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         ...(name ? { name } : {})
       });
     }
-    return new OllamaModelProvider({ model: modelName, contextWindow: contextWindowRef.current, ...(name ? { name } : {}) });
+    const ollamaBaseUrl = baseUrlRef.current.trim();
+    return new OllamaModelProvider({
+      model: modelName,
+      contextWindow: contextWindowRef.current,
+      ...(ollamaBaseUrl ? { baseUrl: ollamaBaseUrl } : {}),
+      ...(name ? { name } : {})
+    });
   }
 
   const persist = useCallback(
