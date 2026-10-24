@@ -1193,6 +1193,126 @@ button:disabled {
   margin-top: 3rem;
 }
 
+.series-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 1.5rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.series-tab {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 0.6rem 0.2rem;
+  margin-right: 1.2rem;
+  color: var(--text-dim);
+  font-family: var(--font-prose);
+  font-size: 0.95rem;
+}
+
+.series-tab.is-active {
+  color: var(--text);
+  border-bottom-color: var(--ink);
+  font-weight: 500;
+}
+
+.series-tab-panel {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-width: 760px;
+}
+
+.series-brainstorm-area,
+.series-synopsis-area {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.8rem;
+  width: 100%;
+  font-family: var(--font-prose);
+  line-height: 1.5;
+}
+
+.series-bible {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.series-entity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.series-entity-card {
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.series-entity-card strong {
+  font-family: var(--font-prose);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.series-entity-fact {
+  border-top: 1px solid var(--border-soft);
+  padding-top: 0.5rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.series-entity-fact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.series-entity-fact-predicate {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.series-entity-fact-value {
+  background: var(--paper);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  padding: 0.4rem 0.5rem;
+  width: 100%;
+  font-family: var(--font-prose);
+}
+
+.series-fact-provenance {
+  font-size: 0.78rem;
+}
+
+.series-add-fact-form {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 480px;
+  margin-top: 0.6rem;
+}
+
+.series-add-fact-form input,
+.series-add-fact-form select,
+.series-add-fact-form textarea {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.55rem 0.7rem;
+  width: 100%;
+}
+
 .book-shelf-search {
   margin-bottom: 1rem;
 }

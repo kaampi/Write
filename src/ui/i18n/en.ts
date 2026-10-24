@@ -472,7 +472,22 @@ export const en = {
     deleteConfirm: 'Delete the series "{title}"? Its books stay — they just won\'t belong to a series anymore.',
     deleteBlocked: "Move its books out first (or delete them) to delete this series.",
     notFound: "That series doesn't exist anymore.",
-    unreadable: "That series couldn't be read."
+    unreadable: "That series couldn't be read.",
+    tabs: { brainstorm: "Brainstorm", synopsis: "Synopsis", bible: "Story Bible", books: "Books" },
+    brainstormLede: "Private scratch for the series' own world — not shared with any book's own Brainstorm, and Draft never reads this directly. Lift what holds up to Synopsis when you're ready.",
+    brainstormPlaceholder: "Sketch the world here — history, factions, how magic works, whatever the series needs before any book starts…",
+    liftToSynopsis: "Lift to Synopsis →",
+    synopsisLede: "A short-form pitch for the series' world — a writing map for its own facts, not locked canon itself. Extract facts from it when it's ready; nothing locks in directly, everything lands in the review queue below.",
+    synopsisPlaceholder: "Summarize the series' world in a few paragraphs…",
+    extractFacts: "Extract facts",
+    extracting: "Extracting…",
+    lockedFactsHeading: "Series canon",
+    noFactsYet: "No locked facts yet — write a synopsis and extract from it, or add one by hand below.",
+    addFact: "Add a fact by hand",
+    entityNamePlaceholder: "Entity name (e.g. \"Luke Skywalker\")",
+    establishedIn: "Established in: {book}",
+    establishedInChapter: "Established in: {book}, {chapter}",
+    sendToSeries: "Send to series"
   },
   editor: {
     manuscriptTitle: "Manuscript title",

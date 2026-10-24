@@ -66,6 +66,19 @@ export const NarrativeFactSchema = z.object({
    * Missing on older saves and on genuine conflicts.
    */
   is_merge_suggestion: z.boolean().optional(),
+  /**
+   * Where a series-level fact was promoted from — set only by the author's
+   * explicit "Send to series" action on an already-locked book fact, never
+   * by the extractor. `source_book_title` (and `source_chapter_title`,
+   * when the fact was attached to a chapter) are denormalized at
+   * promotion time, same reasoning as `entity_label`: the series fact
+   * must still read sensibly ("Established in: X, chapter Y") if that
+   * book is later renamed or deleted, without a live cross-repository
+   * lookup every time the series Story Bible renders.
+   */
+  source_book_id: z.string().min(1).optional(),
+  source_book_title: z.string().min(1).optional(),
+  source_chapter_title: z.string().min(1).optional(),
   created_at: z.string().min(1)
 });
 export type NarrativeFact = z.infer<typeof NarrativeFactSchema>;

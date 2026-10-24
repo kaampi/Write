@@ -122,7 +122,22 @@ export const nb: Messages = {
     deleteConfirm: 'Slette serien "{title}"? Bøkene i den blir værende — de slutter bare å tilhøre en serie.',
     deleteBlocked: "Flytt ut bøkene først (eller slett dem) for å kunne slette denne serien.",
     notFound: "Den serien finnes ikke lenger.",
-    unreadable: "Den serien kunne ikke leses."
+    unreadable: "Den serien kunne ikke leses.",
+    tabs: { brainstorm: "Idémyldring", synopsis: "Synopsis", bible: "Story Bible", books: "Bøker" },
+    brainstormLede: "Privat skisseflate for seriens egen verden — deles ikke med noen boks egen idémyldring, og Draft leser aldri dette direkte. Løft det som holder mål til Synopsis når du er klar.",
+    brainstormPlaceholder: "Skisser verdenen her — historie, fraksjoner, hvordan magi fungerer, hva enn serien trenger før noen bok begynner…",
+    liftToSynopsis: "Løft til Synopsis →",
+    synopsisLede: "En kortfattet presentasjon av seriens verden — et skrivekart for dens egne fakta, ikke låst sannhet i seg selv. Hent ut fakta fra den når den er klar; ingenting låses rett inn, alt havner i gjennomgangskøen nedenfor.",
+    synopsisPlaceholder: "Oppsummer seriens verden i noen avsnitt…",
+    extractFacts: "Hent ut fakta",
+    extracting: "Henter ut…",
+    lockedFactsHeading: "Seriens kanon",
+    noFactsYet: "Ingen låste fakta ennå — skriv en synopsis og hent ut fra den, eller legg til ett for hånd nedenfor.",
+    addFact: "Legg til et faktum for hånd",
+    entityNamePlaceholder: "Entitetens navn (f.eks. «Luke Skywalker»)",
+    establishedIn: "Etablert i: {book}",
+    establishedInChapter: "Etablert i: {book}, {chapter}",
+    sendToSeries: "Send til serien"
   },
   editor: {
     manuscriptTitle: "Manuskripttittel",

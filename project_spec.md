@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.179
+Status: living document, v1.0.180
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8579,6 +8579,98 @@ Skärmdumpar av både serie-ytan och hyllan bekräftade utseendet —
 matchar appens befintliga mörka tema utan avvikelser.
 
 v1.0.178 → v1.0.179.
+
+**Ändringslogg v1.0.180 (2026-10-24): Steg 3 av 5 i Series-planen —
+den faktiska utdelningen: Brainstorm/Synopsis/Story Bible på
+serienivå, plus "Skicka till serien". Föregicks av tre rundor
+diskussion (ingen kod): var "bor" en karaktär — serie vs. bok (svar:
+samma `entity_ref` på båda nivåerna, bokens egna fakta vinner vid
+krock, en helt ny biroll behöver inget på serienivå alls förrän/om den
+blir återkommande); "Skicka till serien"-mekaniken, med automatiskt
+satt ursprung (aldrig inskrivet för hand); och att rik löptext/bilder
+per entitet är för författaren och extraktorn — inte rådata rakt in i
+Draft-prompten (den delen, rika entitetssidor med bild och historia,
+är INTE byggd i det här steget — bara fakta-lagret, som planerat).**
+
+- `NarrativeFact.ts`: tre nya valfria fält — `source_book_id`,
+  `source_book_title`, `source_chapter_title`. Sätts ENDAST av
+  författarens explicita "Skicka till serien"-knapp på ett redan låst
+  bok-faktum, aldrig av extraktorn. Bok-titel och kapitel-titel
+  denormaliseras vid promoveringstillfället (samma resonemang som
+  `entity_label`) — serie-faktumet ska fortfarande gå att läsa
+  ("Etablerad i: Bokens Titel, Kapitel N") även om boken senare döps
+  om eller tas bort, utan en levande cross-repository-slagning varje
+  gång serie-biblar renderas.
+- `ConsistencyGate.ts`: `factFromDraft`s `args`-typ utökad med de tre
+  nya fälten. Ny `applyPromotedFact` — samma beslutslogik som
+  `applyAuthorDraft` (en författares eget påstående vinner alltid: en
+  exakt dubblett no-opar, en genuin ändring överskrider seriens
+  tidigare värde för den entiteten+predikatet) men taggar den nya
+  raden med varifrån den kom. Fyra nya tester i
+  `tests/core/consistency-gate.test.ts` (41 totalt i filen, upp från
+  37).
+- `SeriesStore.tsx`/`useSeriesStore.ts` utökade kraftigt: `setBrainstorm`/
+  `setSynopsis` (samma debounce-mönster som bokens `patchBook`),
+  `liftBrainstormToSynopsis` (återanvänder `liftFragmentToSynopsis`
+  från `brainstorm.ts` rakt av — en ren strängfunktion utan Book-
+  koppling), `extractSynopsis` (AI-anrop, bygger sin egen
+  `LocalModelProvider` från `BookStore`s redan globala `engine`/
+  `baseUrl`/`reviewModel`/`contextWindow` — motorinställningarna är
+  delade mellan bok och serie, inte separata), `addFact`/`reviseFact`/
+  `retractFact`/`approve`/`reject`/`keepSeparate` (alla tunna wrappers
+  runt `ConsistencyGate`s redan existerande, helt Book-agnostiska
+  funktioner — `evaluateCandidate`/`applyExtractorDrafts`/`approveFact`
+  m.fl. opererar bara på `NarrativeFact[]`, ingen omskrivning behövdes
+  för att återanvända dem på `Series.facts`), och `promoteBookFact`
+  (anropar `applyPromotedFact`). `ollamaHint` exporterad från
+  `BookStore.tsx` (var redan en ren funktion utan closure-state) för
+  att återanvändas här istället för att dupliceras.
+- Nytt: `src/ui/SeriesBiblePanel.tsx` — seriens egen Story Bible.
+  Medvetet plattare än bokens `BiblePanel`: inga "kind"-sektioner,
+  profiler, bilder eller kapitel-mentions, eftersom en serie inte har
+  egna kapitel. Granskningskön återanvänder `PendingFact` — exporterad
+  från `BiblePanel.tsx` (var redan en helt självständig, presentations-
+  komponent utan Book-koppling) — rakt av, med `mergeOptions={[]}` för
+  att dölja "slå ihop med"-väljaren (kräver bok-specifik `kind`-
+  gruppering som inte finns på serienivå). Låsta fakta grupperas per
+  entitet som kort, med "Etablerad i: ..."-raden synlig när
+  `source_book_title` finns. Formulär för att lägga till ett faktum
+  för hand (samma `applyAuthorAddition` som boken redan använder).
+- `BiblePanel.tsx`: ny `onPromote`-prop trädd igenom `EntityOverlay`
+  → `LockedFact`, bara given när `book.series_id` är satt — en ny
+  "Skicka till serien"-knapp bredvid Redigera/Ta bort på varje låst
+  faktum. Klick slår upp kapitlets titel (om faktumet är kopplat till
+  ett) och anropar `promoteBookFact` med bok-id/titel + kapitel-titel.
+- `SeriesWorkspace.tsx`: ombyggd med flikar (Brainstorm/Synopsis/
+  Story Bible/Böcker) istället för en enda vy — Böcker-fliken är
+  oförändrad från steg 2, bara flyttad in under en flik. Brainstorm
+  är MEDVETET bara fritext (ingen post-it-tavla som bokens egen,
+  ingen tray/send-mekanik) — ett enklare första steg; kan byggas ut
+  senare om det visar sig behövas.
+- i18n: `m.series.tabs`, lede-texter för Brainstorm/Synopsis,
+  `extractFacts`/`extracting`, `lockedFactsHeading`/`noFactsYet`/
+  `addFact`/`entityNamePlaceholder`, `establishedIn`/
+  `establishedInChapter`, `sendToSeries` — alla tre språk.
+- CSS: `.series-tabs`/`.series-tab`/`.series-tab-panel`/
+  `.series-bible`/`.series-entity-grid`/`.series-entity-card` m.fl. —
+  återanvänder samma design-tokens som tidigare steg.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1135 test, upp
+från 1131 — 4 nya för `applyPromotedFact`) grön. `npm run build` rent.
+Full Playwright-genomgång mot dev-servern med en mock-Ollama (port
+11555, både streamande och icke-streamande `/api/chat`-svar, samma
+mock som steg-3-feedbacken om fritextfältet i serie-importen tidigare
+använde): skapade en serie, skrev i Brainstorm, lyfte till Synopsis,
+extraherade fakta — bekräftade att det hamnade i granskningskön märkt
+"Source: Synopsis", godkände det, bekräftade att det sedan visades
+under "Series canon" grupperat på entitet. Skapade en bok i serien,
+skapade en karaktär (Captain Reyes) med ett låst faktum i bokens egen
+Story Bible, klickade "Send to series", stängde boken, gick tillbaka
+till seriens Story Bible-flik och bekräftade att faktumet nu fanns
+där, märkt "Established in: Book One, Chapter 1". Skärmdump bekräftade
+utseendet — två entitetskort under "SERIES CANON", exakt som avsett.
+
+v1.0.179 → v1.0.180.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

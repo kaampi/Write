@@ -54,6 +54,7 @@ import { count, format, useLocale } from "./i18n";
 import { picturesFromFile, EntityImageError } from "./entityImage";
 import { downloadJson } from "./downloadJson";
 import { useBookStore } from "./useBookStore";
+import { useSeriesStore } from "./useSeriesStore";
 import { exportSandboxCards, sandboxCardCount, sandboxExportFilename } from "@core/sandboxExport";
 import { GuideHelpButton } from "./GuidePanel";
 
@@ -97,6 +98,7 @@ export function BiblePanel({
   resizing: boolean;
 }) {
   const { book, approve, reject, keepSeparate, addFact, reviseFact, retractFact, patchBook, setChapterId } = useBookStore();
+  const { promoteBookFact } = useSeriesStore();
   const { messages: m } = useLocale();
   const [kind, setKind] = useState<BibleKind>("characters");
   const [query, setQuery] = useState("");
@@ -517,6 +519,19 @@ export function BiblePanel({
           }
           onSave={(id, value) => void reviseFact(id, value)}
           onRetract={(id) => void retractFact(id)}
+          {...(book.series_id
+            ? {
+                onPromote: (id: string) => {
+                  const fact = openEntity.facts.find((row) => row.id === id);
+                  if (!fact) return;
+                  const chapterTitle = fact.chapter_id ? book.chapters.find((chapter) => chapter.id === fact.chapter_id)?.title : undefined;
+                  void promoteBookFact(
+                    { entity_ref: fact.entity_ref, entity_label: fact.entity_label, predicate: fact.predicate, value: fact.value },
+                    { book_id: book.id, book_title: book.title, ...(chapterTitle ? { chapter_title: chapterTitle } : {}) }
+                  );
+                }
+              }
+            : {})}
           onToggleHidden={() =>
             void patchBook((current) =>
               touch(current, { hidden_entities: toggleHiddenEntity(current.hidden_entities, openEntity.entity_ref) })
@@ -1144,7 +1159,8 @@ function EntityOverlay({
   onReplaceTexts,
   onInterview,
   onDelete,
-  onClose
+  onClose,
+  onPromote
 }: {
   entity: BibleEntityGroup;
   kind: BibleKind;
@@ -1177,6 +1193,8 @@ function EntityOverlay({
   onInterview?: () => void;
   onDelete: () => void;
   onClose: () => void;
+  /** Only passed when this book belongs to a Series — "Send to series" on a locked fact. */
+  onPromote?: (factId: string) => void;
 }) {
   const allowedPredicates = BIBLE_KIND_ADD_PREDICATES[kind];
   const [predicateChoice, setPredicate] = useState<CorePredicate>(allowedPredicates[0]!);
@@ -1329,6 +1347,7 @@ function EntityOverlay({
             onToggleHidden={() => onToggleFactHidden(row.id, row.hidden_from_ai !== true)}
             onCyclePositionOverride={() => onCycleFactPositionOverride(row.id, row.position_override)}
             {...(allowedPredicates.includes(row.predicate) ? { onRequestUpdate: () => requestUpdate(row.predicate) } : {})}
+            {...(onPromote ? { onPromote: () => onPromote(row.id) } : {})}
           />
         ))}
       </ul>
@@ -1921,7 +1940,7 @@ function NewEntityOverlay({
   );
 }
 
-function PendingFact({
+export function PendingFact({
   fact,
   against,
   mergeOptions,
@@ -2010,7 +2029,8 @@ function LockedFact({
   onRetract,
   onToggleHidden,
   onCyclePositionOverride,
-  onRequestUpdate
+  onRequestUpdate,
+  onPromote
 }: {
   fact: {
     id: string;
@@ -2025,6 +2045,8 @@ function LockedFact({
   onCyclePositionOverride: () => void;
   /** Missing when this predicate has no ongoing add-fact slot for the card's kind (e.g. Identity) — "Update" has nowhere to send the author. */
   onRequestUpdate?: () => void;
+  /** Only present when this book belongs to a Series. */
+  onPromote?: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(fact.value);
@@ -2073,6 +2095,11 @@ function LockedFact({
           <button type="button" className="text-button fact-edit-btn" onClick={() => setEditing(true)}>
             {m.bible.edit}
           </button>
+          {onPromote ? (
+            <button type="button" className="text-button" onClick={onPromote}>
+              {m.series.sendToSeries}
+            </button>
+          ) : null}
           <button
             type="button"
             className="text-button danger fact-remove-btn"

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.180] - 2026-10-24
+
+### Added
+- Series world-building: each series now has its own Brainstorm, Synopsis, and Story Bible, separate from any book in it — build a series' world before any book exists, the same way you'd build one book's. Extract facts from the series synopsis the same way a book's synopsis works; nothing locks in automatically, everything lands in a review queue first. A book's own locked Story Bible facts can be sent up to the series with a new "Send to series" button, tagged with which book (and chapter, if any) it came from — shown as "Established in: Book Title, Chapter N" in the series' own Story Bible.
+
 ## [1.0.179] - 2026-10-24
 
 ### Added

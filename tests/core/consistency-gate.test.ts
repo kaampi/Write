@@ -3,6 +3,7 @@ import {
   applyAuthorAddition,
   applyAuthorDraft,
   applyExtractorDrafts,
+  applyPromotedFact,
   approveFact,
   evaluateCandidate,
   isPossibleEnrichment,
@@ -68,6 +69,40 @@ describe("applyAuthorDraft", () => {
     const live = changed.filter((fact) => !fact.superseded_by);
     expect(live).toHaveLength(1);
     expect(live[0]?.value).toBe("Keeps the night keys");
+    expect(changed.some((fact) => fact.superseded_by === live[0]?.id)).toBe(true);
+  });
+});
+
+describe("applyPromotedFact", () => {
+  const source = { book_id: "book-1", book_title: "Skuggvakten", chapter_title: "Chapter 12" };
+
+  it("locks a new series fact tagged with where it was promoted from", () => {
+    const promoted = applyPromotedFact([], emmaIdentity, 0, source);
+    expect(promoted).toHaveLength(1);
+    expect(promoted[0]?.status).toBe("locked");
+    expect(promoted[0]?.source_book_id).toBe("book-1");
+    expect(promoted[0]?.source_book_title).toBe("Skuggvakten");
+    expect(promoted[0]?.source_chapter_title).toBe("Chapter 12");
+  });
+
+  it("omits source_chapter_title when the book fact wasn't attached to a chapter", () => {
+    const promoted = applyPromotedFact([], emmaIdentity, 0, { book_id: "book-1", book_title: "Skuggvakten" });
+    expect(promoted[0]?.source_chapter_title).toBeUndefined();
+  });
+
+  it("no-ops on an exact duplicate of what the series already has locked", () => {
+    const first = applyPromotedFact([], emmaIdentity, 0, source);
+    const again = applyPromotedFact(first, emmaIdentity, 1, source);
+    expect(again).toBe(first);
+  });
+
+  it("supersedes the series' previous value for that entity+predicate on a genuine change", () => {
+    const first = applyPromotedFact([], emmaIdentity, 0, source);
+    const changed = applyPromotedFact(first, { ...emmaIdentity, value: "Harbor master now, not a bartender" }, 1, source);
+    const live = changed.filter((fact) => !fact.superseded_by);
+    expect(live).toHaveLength(1);
+    expect(live[0]?.value).toBe("Harbor master now, not a bartender");
+    expect(live[0]?.source_book_title).toBe("Skuggvakten");
     expect(changed.some((fact) => fact.superseded_by === live[0]?.id)).toBe(true);
   });
 });

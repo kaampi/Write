@@ -117,6 +117,9 @@ export function factFromDraft(
     origin?: FactOrigin;
     conflict_with?: string;
     is_merge_suggestion?: boolean;
+    source_book_id?: string;
+    source_book_title?: string;
+    source_chapter_title?: string;
   }
 ): NarrativeFact {
   const fact: NarrativeFact = {
@@ -135,6 +138,9 @@ export function factFromDraft(
   if (args.origin) fact.origin = args.origin;
   if (args.conflict_with) fact.conflict_with = args.conflict_with;
   if (args.is_merge_suggestion) fact.is_merge_suggestion = true;
+  if (args.source_book_id) fact.source_book_id = args.source_book_id;
+  if (args.source_book_title) fact.source_book_title = args.source_book_title;
+  if (args.source_chapter_title) fact.source_chapter_title = args.source_chapter_title;
   return fact;
 }
 
@@ -157,6 +163,50 @@ export function applyAuthorDraft(
   } = { status: "locked", source: "author", sequence_index };
   if (chapter_id) args.chapter_id = chapter_id;
   if (scene_id) args.scene_id = scene_id;
+
+  if (decision.kind === "valid_change") {
+    const next = factFromDraft(draft, args);
+    const previous = facts.find((fact) => fact.id === decision.supersedesId);
+    if (previous?.hidden_from_ai === true) next.hidden_from_ai = true;
+    return facts.map((fact) => (fact.id === decision.supersedesId ? { ...fact, superseded_by: next.id } : fact)).concat(next);
+  }
+
+  return facts.concat(factFromDraft(draft, args));
+}
+
+/**
+ * "Send to series" — an author explicitly promoting one of this book's own
+ * already-locked facts up to the series it belongs to. Same decision logic
+ * as `applyAuthorDraft` (an author asserting a fact always wins: an exact
+ * duplicate no-ops, a genuine change supersedes the series' previous value
+ * for that entity+predicate) but tags the new row with where it came from,
+ * so the series Story Bible can show "Established in: Book Title, chapter
+ * N" instead of presenting it as unsourced canon.
+ */
+export function applyPromotedFact(
+  facts: NarrativeFact[],
+  draft: FactDraft,
+  sequence_index: number,
+  source: { book_id: string; book_title: string; chapter_title?: string }
+): NarrativeFact[] {
+  const decision = evaluateCandidate(draft, facts, "author");
+  if (decision.kind === "auto_approve") return facts;
+
+  const args: {
+    status: "locked";
+    source: "author";
+    sequence_index: number;
+    source_book_id: string;
+    source_book_title: string;
+    source_chapter_title?: string;
+  } = {
+    status: "locked",
+    source: "author",
+    sequence_index,
+    source_book_id: source.book_id,
+    source_book_title: source.book_title
+  };
+  if (source.chapter_title) args.source_chapter_title = source.chapter_title;
 
   if (decision.kind === "valid_change") {
     const next = factFromDraft(draft, args);

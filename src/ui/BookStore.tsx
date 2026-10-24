@@ -220,7 +220,7 @@ function withViewTransition(update: () => void, durationMs = 320): void {
   }
 }
 
-function ollamaHint(error: unknown): string {
+export function ollamaHint(error: unknown): string {
   if (error instanceof LocalProviderConfigError && error.message === STORE_ERROR.serverUrlMissing) {
     return STORE_ERROR.serverUrlMissing;
   }

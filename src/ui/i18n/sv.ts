@@ -122,7 +122,22 @@ export const sv: Messages = {
     deleteConfirm: 'Ta bort serien "{title}"? Böckerna i den finns kvar — de slutar bara tillhöra en serie.',
     deleteBlocked: "Flytta ut böckerna först (eller ta bort dem) för att kunna ta bort den här serien.",
     notFound: "Den serien finns inte längre.",
-    unreadable: "Den serien gick inte att läsa."
+    unreadable: "Den serien gick inte att läsa.",
+    tabs: { brainstorm: "Brainstorm", synopsis: "Synopsis", bible: "Story Bible", books: "Böcker" },
+    brainstormLede: "Privat skissyta för seriens egen värld — delas inte med någon boks egen Brainstorm, och Draft läser aldrig det här direkt. Lyft det som håller till Synopsis när du är redo.",
+    brainstormPlaceholder: "Skissa världen här — historia, fraktioner, hur magi fungerar, vad serien än behöver innan någon bok börjar…",
+    liftToSynopsis: "Lyft till Synopsis →",
+    synopsisLede: "En kortfattad presentation av seriens värld — en skrivkarta för dess egna fakta, inte låst sanning i sig. Extrahera fakta ur den när den är redo; inget låses in direkt, allt hamnar i granskningskön nedan.",
+    synopsisPlaceholder: "Sammanfatta seriens värld i några stycken…",
+    extractFacts: "Extrahera fakta",
+    extracting: "Extraherar…",
+    lockedFactsHeading: "Seriens kanon",
+    noFactsYet: "Inga låsta fakta än — skriv en synopsis och extrahera ur den, eller lägg till ett för hand nedan.",
+    addFact: "Lägg till ett faktum för hand",
+    entityNamePlaceholder: "Entitetens namn (t.ex. \"Luke Skywalker\")",
+    establishedIn: "Etablerad i: {book}",
+    establishedInChapter: "Etablerad i: {book}, {chapter}",
+    sendToSeries: "Skicka till serien"
   },
   editor: {
     manuscriptTitle: "Manustitel",
