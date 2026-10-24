@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.183] - 2026-10-24
+
+### Added
+- A book that belongs to a Series now warns before silently diverging from that series' canon: locking a new or edited fact whose value differs from what the series already says for that entity — "Differs from the series: Identity: 'Guardian of Dun Sorrow' — this book would now say something else" — asks for confirmation ("Lock anyway") instead of overriding it without a word. The series keeps its own value either way unless you also send the book's new one up to it; a standalone book, or a value that matches series canon, sees nothing new.
+
 ## [1.0.182] - 2026-10-24
 
 ### Added

@@ -137,7 +137,10 @@ export const sv: Messages = {
     entityNamePlaceholder: "Entitetens namn (t.ex. \"Luke Skywalker\")",
     establishedIn: "Etablerad i: {book}",
     establishedInChapter: "Etablerad i: {book}, {chapter}",
-    sendToSeries: "Skicka till serien"
+    sendToSeries: "Skicka till serien",
+    conflictTitle: "Skiljer sig från serien",
+    conflictBody: 'Serien säger {predicate}: "{seriesValue}" — den här boken skulle nu säga något annat. Inget annat ändras; serien behåller sitt eget värde tills du skickar upp det här också.',
+    conflictLockAnyway: "Lås ändå"
   },
   editor: {
     manuscriptTitle: "Manustitel",

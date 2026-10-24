@@ -11,7 +11,7 @@ import {
   type BibleEntityGroup,
   type BibleKind
 } from "@core/bibleGroups";
-import { activeFacts, type FactDraft, type FactOrigin, type NarrativeFact } from "@core/NarrativeFact";
+import { activeFacts, seriesCanonConflict, type FactDraft, type FactOrigin, type NarrativeFact } from "@core/NarrativeFact";
 import { applyAuthorAddition, applyAuthorDraft, rejectFact } from "@core/ConsistencyGate";
 import { withRelationshipMirrorFor } from "@core/relationshipMirror";
 import { chainsWithHistory, factHistoryForEntity, factsAsOfSequence, type FactHistoryChain } from "@core/bibleHistory";
@@ -97,7 +97,7 @@ export function BiblePanel({
   onResizeHandleDown: (event: React.PointerEvent) => void;
   resizing: boolean;
 }) {
-  const { book, approve, reject, keepSeparate, addFact, reviseFact, retractFact, patchBook, setChapterId } = useBookStore();
+  const { book, approve, reject, keepSeparate, addFact, reviseFact, retractFact, patchBook, setChapterId, seriesFacts } = useBookStore();
   const { promoteBookFact } = useSeriesStore();
   const { messages: m } = useLocale();
   const [kind, setKind] = useState<BibleKind>("characters");
@@ -510,6 +510,7 @@ export function BiblePanel({
           history={chainsWithHistory(factHistoryForEntity(book.facts, openEntity.entity_ref))}
           mentions={mentionsForEntity(book, openEntity.entity_ref, openEntity.entity_label)}
           chapters={book.chapters}
+          seriesFacts={seriesFacts}
           onJumpToChapter={(chapterId) => {
             setChapterId(chapterId);
             setOverlay(null);
@@ -1137,6 +1138,7 @@ function EntityOverlay({
   history,
   mentions,
   chapters,
+  seriesFacts,
   onJumpToChapter,
   onAdd,
   onSave,
@@ -1170,6 +1172,8 @@ function EntityOverlay({
   history: FactHistoryChain[];
   mentions: MentionHit[];
   chapters: Chapter[];
+  /** This book's series' own locked facts, if it belongs to one — empty for a standalone book. For warning when a new value would diverge from series canon, same data `withInheritedFacts` merges for prompts. */
+  seriesFacts: NarrativeFact[];
   onJumpToChapter: (chapterId: string) => void;
   onAdd: (predicate: CorePredicate, value: string, mode?: "replace" | "add") => void;
   onSave: (factId: string, value: string) => void;
@@ -1214,6 +1218,13 @@ function EntityOverlay({
   const [imageBusy, setImageBusy] = useState(false);
   const [nameOffer, setNameOffer] = useState<{ from: string; to: string; hits: number } | null>(null);
   const [addChoice, setAddChoice] = useState<{ predicate: CorePredicate; value: string; existingValue: string } | null>(null);
+  /** A new value for this predicate would diverge from what the series already says — confirm before locking it in this book. `factId` set only when revising an already-locked row (the "edit" path); absent for a brand-new add. */
+  const [seriesConflict, setSeriesConflict] = useState<{
+    predicate: CorePredicate;
+    value: string;
+    seriesValue: string;
+    factId?: string;
+  } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { messages: m } = useLocale();
 
@@ -1342,7 +1353,14 @@ function EntityOverlay({
           <LockedFact
             key={row.id}
             fact={row}
-            onSave={(next) => onSave(row.id, next)}
+            onSave={(next) => {
+              const seriesValue = seriesCanonConflict(entity.entity_ref, row.predicate, next, seriesFacts);
+              if (seriesValue) {
+                setSeriesConflict({ predicate: row.predicate, value: next, seriesValue, factId: row.id });
+                return;
+              }
+              onSave(row.id, next);
+            }}
             onRetract={() => onRetract(row.id)}
             onToggleHidden={() => onToggleFactHidden(row.id, row.hidden_from_ai !== true)}
             onCyclePositionOverride={() => onCycleFactPositionOverride(row.id, row.position_override)}
@@ -1411,6 +1429,11 @@ function EntityOverlay({
           );
           if (existing) {
             setAddChoice({ predicate, value: next, existingValue: existing.value });
+            return;
+          }
+          const seriesValue = seriesCanonConflict(entity.entity_ref, predicate, next, seriesFacts);
+          if (seriesValue) {
+            setSeriesConflict({ predicate, value: next, seriesValue });
             return;
           }
           onAdd(predicate, next);
@@ -1515,6 +1538,42 @@ function EntityOverlay({
               }}
             >
               {m.bible.addChoiceReplace}
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null}
+    {seriesConflict ? (
+      <div
+        className="edit-overlay"
+        role="presentation"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setSeriesConflict(null);
+        }}
+      >
+        <div className="edit-card" role="dialog" aria-modal="true" aria-labelledby="series-conflict-title">
+          <h2 id="series-conflict-title">{m.series.conflictTitle}</h2>
+          <p className="quiet">
+            {format(m.series.conflictBody, {
+              predicate: m.bible.predicates[seriesConflict.predicate],
+              seriesValue: seriesConflict.seriesValue
+            })}
+          </p>
+          <div className="edit-actions">
+            <button type="button" className="text-button" onClick={() => setSeriesConflict(null)}>
+              {m.common.cancel}
+            </button>
+            <button
+              type="button"
+              className="primary"
+              onClick={() => {
+                if (seriesConflict.factId) onSave(seriesConflict.factId, seriesConflict.value);
+                else onAdd(seriesConflict.predicate, seriesConflict.value);
+                setSeriesConflict(null);
+                setValue("");
+              }}
+            >
+              {m.series.conflictLockAnyway}
             </button>
           </div>
         </div>

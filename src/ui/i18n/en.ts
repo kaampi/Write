@@ -487,7 +487,10 @@ export const en = {
     entityNamePlaceholder: "Entity name (e.g. \"Luke Skywalker\")",
     establishedIn: "Established in: {book}",
     establishedInChapter: "Established in: {book}, {chapter}",
-    sendToSeries: "Send to series"
+    sendToSeries: "Send to series",
+    conflictTitle: "Differs from the series",
+    conflictBody: 'The series says {predicate}: "{seriesValue}" — this book would now say something else. Nothing else changes; the series keeps its own value until you send this one up too.',
+    conflictLockAnyway: "Lock anyway"
   },
   editor: {
     manuscriptTitle: "Manuscript title",

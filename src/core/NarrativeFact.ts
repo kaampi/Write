@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizeValue } from "./ids";
 import { CORE_PREDICATES, type CorePredicate } from "./predicates";
 
 export const FactStatusSchema = z.enum(["locked", "ai_proposed", "flagged"]);
@@ -127,6 +128,27 @@ export function lockedFactsFromChapter(facts: NarrativeFact[], chapterId: string
  * never written back as a book's own `facts`, since that would duplicate
  * series canon into every book that inherits it.
  */
+/**
+ * Whether locking `value` for `entity_ref`+`predicate` in a book would
+ * silently diverge from what the series already says — the book's own
+ * fact still wins either way (same as `mergeInheritedFacts`), this is
+ * only for surfacing that divergence to the author before it happens
+ * rather than after, so "bok 3 ändrar en fakta som kom från bok 1" is a
+ * choice, not a surprise. Returns the series' current value when it
+ * conflicts, `undefined` when there's nothing to warn about (no series
+ * fact for this entity+predicate, or the value matches).
+ */
+export function seriesCanonConflict(
+  entity_ref: string,
+  predicate: CorePredicate,
+  value: string,
+  seriesFacts: NarrativeFact[]
+): string | undefined {
+  const match = lockedFacts(seriesFacts).find((fact) => fact.entity_ref === entity_ref && fact.predicate === predicate);
+  if (!match || normalizeValue(match.value) === normalizeValue(value)) return undefined;
+  return match.value;
+}
+
 export function mergeInheritedFacts(bookFacts: NarrativeFact[], seriesFacts: NarrativeFact[]): NarrativeFact[] {
   if (seriesFacts.length === 0) return bookFacts;
   const overridden = new Set(lockedFacts(bookFacts).map((fact) => `${fact.entity_ref}\u0000${fact.predicate}`));

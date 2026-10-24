@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { slugify, normalizeValue } from "@core/ids";
-import { NarrativeFactSchema, lockedFactsFromChapter, mergeInheritedFacts, type NarrativeFact } from "@core/NarrativeFact";
+import { NarrativeFactSchema, lockedFactsFromChapter, mergeInheritedFacts, seriesCanonConflict, type NarrativeFact } from "@core/NarrativeFact";
 
 describe("slugify", () => {
   it("turns a display name into a stable ref", () => {
@@ -195,5 +195,44 @@ describe("mergeInheritedFacts", () => {
     const proposed = fact({ id: "s1", status: "ai_proposed" });
     const superseded = fact({ id: "s2", superseded_by: "s3" });
     expect(mergeInheritedFacts([], [proposed, superseded])).toEqual([]);
+  });
+});
+
+describe("seriesCanonConflict", () => {
+  function fact(overrides: Partial<NarrativeFact> = {}): NarrativeFact {
+    return {
+      id: overrides.id ?? "s1",
+      entity_ref: "elara",
+      entity_label: "Elara",
+      predicate: "core.identity",
+      value: "Guardian of Dun Sorrow",
+      sequence_index: 0,
+      status: "locked",
+      source: "author",
+      created_at: "2026-09-26T00:00:00.000Z",
+      ...overrides
+    };
+  }
+
+  it("returns the series' value when a new value would diverge from it", () => {
+    expect(seriesCanonConflict("elara", "core.identity", "Harbor master now", [fact()])).toBe("Guardian of Dun Sorrow");
+  });
+
+  it("returns undefined when the value matches the series (allowing for spacing/case)", () => {
+    expect(seriesCanonConflict("elara", "core.identity", "  guardian of dun sorrow ", [fact()])).toBeUndefined();
+  });
+
+  it("returns undefined when the series has nothing for that entity+predicate", () => {
+    expect(seriesCanonConflict("elara", "core.trait", "Short-tempered", [fact()])).toBeUndefined();
+    expect(seriesCanonConflict("someone-else", "core.identity", "A cook", [fact()])).toBeUndefined();
+  });
+
+  it("ignores a series fact that is only ai_proposed, flagged, or superseded", () => {
+    const proposed = fact({ status: "ai_proposed" });
+    const flagged = fact({ status: "flagged" });
+    const superseded = fact({ superseded_by: "s2" });
+    expect(seriesCanonConflict("elara", "core.identity", "Harbor master now", [proposed])).toBeUndefined();
+    expect(seriesCanonConflict("elara", "core.identity", "Harbor master now", [flagged])).toBeUndefined();
+    expect(seriesCanonConflict("elara", "core.identity", "Harbor master now", [superseded])).toBeUndefined();
   });
 });

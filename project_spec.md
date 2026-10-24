@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.182
+Status: living document, v1.0.183
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8790,6 +8790,62 @@ leak-varningen ser fortfarande bara bokens egna fakta, inte seriens;
 fortfarande bara mot bokens egna, inte seriens; rika entitetssidor med
 bild och löpande historia på serienivå (det Mats efterfrågade i
 förhandsvisnings-diskussionen) är inte byggt.
+
+**Ändringslogg v1.0.183 (2026-10-24): Uppföljning #1 av 2 på
+Series-planen (Mats: "Om bok 1 har en fakta som lagts till serienivå
+och användaren ändrar den faktan i bok 3 ska man då få någon slags
+varning?"). Landade på två separata problem i samtalet: (1) tyst
+överskridning vid LÅSNING — det här steget; (2) genuina krockar MELLAN
+böcker utan att någon medvetet skrev över den andra — eget uppföljande
+steg, inte byggt än.**
+
+- `NarrativeFact.ts`: ny `seriesCanonConflict(entity_ref, predicate,
+  value, seriesFacts)` — ren funktion, samma `lockedFacts`-filtrering
+  som `mergeInheritedFacts` redan använder (bara LÅSTA, aktiva
+  seriefakta räknas). Returnerar seriens nuvarande värde om det
+  föreslagna värdet skiljer sig från det, annars `undefined`. 4 nya
+  tester i `tests/core/narrative-fact.test.ts` (18 totalt, upp från
+  14).
+- `BiblePanel.tsx`: `EntityOverlay` fick en ny `seriesFacts`-prop
+  (samma data `BookStore.tsx`s `seriesFacts`-state från export-steget
+  redan exponerar) och ett nytt `seriesConflict`-state, samma mönster
+  som den befintliga `addChoice`-bekräftelsen (en bok-egen krock under
+  samma predikat). Två inkopplingspunkter, båda de vanligaste sätten
+  en författare faktiskt låser ett nytt värde på: (a) "Add fact"-
+  formuläret i en entitets kort — kollas EFTER den befintliga
+  bok-egna krock-kollen (en redan pågående avvikelse i den här boken
+  har företräde, inget poäng i att återupprepa seriens varning för
+  något boken redan medvetet valt bort), (b) ett redan låst bok-faktum
+  som redigeras via "Edit"/"Save" (`LockedFact`s inline-redigering) —
+  den exakta scenen Mats beskrev ("bok 3 ändrar en fakta"). Vid krock:
+  en bekräftelsedialog ("DIFFERS FROM THE SERIES" / "SKILJER SIG FRÅN
+  SERIEN"), samma visuella mönster som `addChoice`-dialogen, med
+  Avbryt/"Lås ändå". Bekräftat läses värdet in precis som vanligt — den
+  här funktionen blockerar aldrig, bara gör avvikelsen synlig istället
+  för tyst, exakt som Mats bad om.
+- Medvetet UTANFÖR: `NewEntityOverlay` (att skapa en helt NY entitet
+  vars namn råkar kollidera med en befintlig series-entitet) går
+  fortfarande rakt igenom utan varning — mindre vanligt scenario,
+  sparas som en känd, dokumenterad lucka snarare än att få samma
+  behandling just nu.
+- i18n: `m.series.conflictTitle`/`conflictBody`/`conflictLockAnyway`,
+  alla tre språk.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1148 test, upp
+från 1144 — 4 nya) grön. `npm run build` rent. Playwright mot
+dev-servern (inget AI-anrop behövs, ren deterministisk UI-logik):
+skapade en serie med ett låst faktum ("Elara Vane" · Identity ·
+"Guardian of Dun Sorrow"), skapade sedan en bok i serien med en ny
+karaktär av SAMMA namn och EXAKT samma värde — bekräftade att INGEN
+varningsdialog visades (matchande värden ska vara tysta). Redigerade
+sedan det bok-egna faktumet till ett annat värde via Edit/Save —
+bekräftade att varningsdialogen nu visades, med rätt text ("The
+series says Identity: ... this book would now say something else").
+Klickade "Lock anyway" och bekräftade att det nya värdet faktiskt
+låstes in i boken. Skärmdump bekräftade utseendet — matchar
+`addChoice`-dialogens stil exakt.
+
+v1.0.182 → v1.0.183.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

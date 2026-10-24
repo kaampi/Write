@@ -137,7 +137,10 @@ export const nb: Messages = {
     entityNamePlaceholder: "Entitetens navn (f.eks. «Luke Skywalker»)",
     establishedIn: "Etablert i: {book}",
     establishedInChapter: "Etablert i: {book}, {chapter}",
-    sendToSeries: "Send til serien"
+    sendToSeries: "Send til serien",
+    conflictTitle: "Avviker fra serien",
+    conflictBody: 'Serien sier {predicate}: «{seriesValue}» — denne boken ville nå si noe annet. Ingenting annet endres; serien beholder sin egen verdi til du sender opp denne også.',
+    conflictLockAnyway: "Lås likevel"
   },
   editor: {
     manuscriptTitle: "Manuskripttittel",
