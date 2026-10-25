@@ -34,11 +34,9 @@ import {
   type LocalModelProvider
 } from "@llm/provider";
 import { STORE_ERROR } from "./i18n";
-import { ollamaHint } from "./BookStore";
+import { EXTRACTOR_MAX_TOKENS, ollamaHint } from "./BookStore";
 import { useBookStore } from "./useBookStore";
 import { SeriesStoreContext, type SeriesBusy, type SeriesStoreValue } from "./useSeriesStore";
-
-const EXTRACTOR_MAX_TOKENS = 4000;
 
 /**
  * A separate, much smaller context than BookStore — Series only owns the

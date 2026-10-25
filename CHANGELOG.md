@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.186] - 2026-10-25
+
+### Fixed
+- A reasoning model (local, via Ollama or LM Studio/an OpenAI-compatible server) that spends its whole reply budget on hidden "thinking" before writing anything visible used to surface as a plain "returned an empty reply" or a bare "cut off" message with no clue why — now both providers check the cutoff/reasoning-exhaustion condition first, and when the server reports `reasoning_tokens` (LM Studio does), the error names the count and suggests turning off the model's "thinking" toggle or raising the reply budget. Also extended the fixed-plus-reasoning-headroom budget (already applied to Polish) to Analyze and to fact extraction, the two operations a tester hit this on directly — a 1800-of-1800-token reasoning burn on Analyze, and a cutoff at the shared 4000-token extraction budget.
+
 ## [1.0.185] - 2026-10-24
 
 ### Added

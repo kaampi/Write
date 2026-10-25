@@ -218,13 +218,27 @@ export class OpenAICompatibleLocalProvider implements LocalModelProvider {
     const payload: unknown = await response.json();
     const choice = (payload as { choices?: Array<{ message?: { content?: unknown }; finish_reason?: unknown }> })?.choices?.[0];
     const content = choice?.message?.content;
+    const reasoningTokens = (
+      payload as { usage?: { completion_tokens_details?: { reasoning_tokens?: unknown } } }
+    )?.usage?.completion_tokens_details?.reasoning_tokens;
+    const reasoningAteTheBudget =
+      typeof reasoningTokens === "number" && typeof request.maxTokens === "number" && reasoningTokens >= request.maxTokens * 0.9;
+    // Checked before the empty-reply case below: a reasoning model that burns
+    // its budget on hidden "thinking" can finish with no visible content at
+    // all, which used to surface as the far less useful "empty reply" — a
+    // tester's LM Studio log showed this exact shape (1797 of a 1800-token
+    // budget spent on reasoning, finish_reason not even "length").
+    if (choice?.finish_reason === "length" || reasoningAteTheBudget) {
+      const reasoningNote =
+        typeof reasoningTokens === "number" && reasoningTokens > 0
+          ? ` ${reasoningTokens} of those tokens went to the model's own hidden reasoning before it could start answering — if it has a "thinking"/reasoning toggle, try turning it off, or give it a larger reply budget.`
+          : "";
+      throw new Error(
+        `${this.name}'s reply was cut off at the ${request.maxTokens ?? "?"}-token limit (maxTokens) before it finished — the model needed more room than this request allowed, not a model failure.${reasoningNote}`
+      );
+    }
     if (typeof content !== "string" || !content.trim()) {
       throw new Error(`${this.name} returned an empty reply.`);
-    }
-    if (choice?.finish_reason === "length") {
-      throw new Error(
-        `${this.name}'s reply was cut off at the ${request.maxTokens ?? "?"}-token limit (maxTokens) before it finished — the model needed more room than this request allowed, not a model failure.`
-      );
     }
     return content;
   }

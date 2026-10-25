@@ -87,6 +87,17 @@ describe("OllamaModelProvider", () => {
     await expect(provider.chat({ messages: [{ role: "user", content: "hi" }], maxTokens: 1800 })).rejects.toThrow(/cut off/i);
   });
 
+  it("chat() reports the cut-off, not a generic empty reply, when a reasoning model leaves content empty", async () => {
+    // A tester's report: a reasoning model spent its whole budget on hidden
+    // "thinking" and finished with no visible content at all — the cutoff
+    // message is far more useful here than "Ollama returned an empty reply."
+    const provider = new OllamaModelProvider({
+      model: "m",
+      fetchImpl: async () => jsonResponse({ message: { content: "" }, done_reason: "length", eval_count: 1800 })
+    });
+    await expect(provider.chat({ messages: [{ role: "user", content: "hi" }], maxTokens: 1800 })).rejects.toThrow(/cut off/i);
+  });
+
   it("chat() sends contextWindow through as num_ctx", async () => {
     let capturedBody: Record<string, unknown> | undefined;
     const provider = new OllamaModelProvider({
@@ -240,6 +251,28 @@ describe("OpenAICompatibleLocalProvider", () => {
         jsonResponse({ choices: [{ message: { content: "the rewritten chapter opens" }, finish_reason: "length" }] })
     });
     await expect(provider.chat({ messages: [{ role: "user", content: "hi" }], maxTokens: 1800 })).rejects.toThrow(/cut off/i);
+  });
+
+  it("chat() reports the cut-off, not a generic empty reply, when a reasoning model leaves content empty", async () => {
+    // The tester's own LM Studio report, verbatim: completion_tokens: 1800,
+    // reasoning_tokens: 1797, finish_reason not even "length" — the model
+    // spent nearly its whole budget on hidden reasoning and the API never
+    // flagged it as truncated, so the fix has to notice this shape too.
+    const provider = new OpenAICompatibleLocalProvider({
+      model: "local-model",
+      baseUrl: "http://localhost:1234",
+      fetchImpl: async () =>
+        jsonResponse({
+          choices: [{ message: { content: "" } }],
+          usage: { completion_tokens: 1800, completion_tokens_details: { reasoning_tokens: 1797 } }
+        })
+    });
+    const error = await provider
+      .chat({ messages: [{ role: "user", content: "hi" }], maxTokens: 1800 })
+      .catch((e: unknown) => e as Error);
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toMatch(/cut off/i);
+    expect((error as Error).message).toContain("1797");
   });
 
   it("streamChat() parses OpenAI-style SSE deltas and stops at [DONE]", async () => {

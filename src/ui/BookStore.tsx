@@ -124,6 +124,7 @@ import {
   type LocalModelProvider
 } from "@llm/provider";
 import { readContextWindow, writeContextWindow } from "@llm/contextWindow";
+import { withReasoningHeadroom } from "@llm/tokenBudget";
 import { BookNotFoundError, BookRepository } from "@persistence/Repository";
 import { SeriesRepository } from "@persistence/SeriesRepository";
 import {
@@ -148,22 +149,14 @@ const BASE_URL_KEY = "storybook-ai.base-url";
  * to parse at all. `parseExtractorPayload` now salvages a truncated
  * response's complete facts regardless, but a roomier budget means it
  * rarely needs to. Also used as Proofread's shared per-stage token budget,
- * since its "facts" stage runs this same extractor.
+ * since its "facts" stage runs this same extractor — and Series'
+ * extraction calls (SeriesStore.tsx), which import this same constant
+ * rather than keeping their own copy. `withReasoningHeadroom` on top: a
+ * tester hit this exact 4000-token ceiling on a reasoning model whose
+ * hidden "thinking" pass ate most of the budget before any fact JSON
+ * came out.
  */
-const EXTRACTOR_MAX_TOKENS = 4000;
-
-/**
- * A reasoning model "thinks out loud" before it writes a word of the
- * actual reply, and that thinking is billed against the same maxTokens
- * budget as the reply itself — a tester's LM Studio log showed 1131 of a
- * 1800-token Polish budget spent on reasoning alone, leaving so little
- * room for the rewrite that it cut off after the chapter's first scene
- * (reported as "it only takes the very first scene out of 5"). This is
- * on top of, not instead of, the length-based budget below: a short
- * chapter's rewrite is cheap either way, but the reasoning pass before it
- * isn't any shorter just because the chapter is.
- */
-const REASONING_HEADROOM_TOKENS = 2000;
+export const EXTRACTOR_MAX_TOKENS = withReasoningHeadroom(4000);
 
 /**
  * Polish rewrites the whole chapter, so the reply needs room for roughly as
@@ -171,16 +164,27 @@ const REASONING_HEADROOM_TOKENS = 2000;
  * length, which is what this used to be (1800, always). A real ~4,000-word
  * chapter needs well over 1800 tokens just for the rewritten prose itself,
  * and nothing checked whether the reply actually got that far before this
- * (see completeOllamaChat/OpenAICompatibleLocalProvider.chat's own new
- * truncation guards, added alongside this). Scales from the chapter's own
- * estimated token count, with headroom for the rewrite running a little
- * longer than the original, a floor so a short chapter still gets a
- * reasonable budget, and REASONING_HEADROOM_TOKENS on top for a thinking
- * model's own planning pass.
+ * (see completeOllamaChat/OpenAICompatibleLocalProvider.chat's own
+ * truncation guards). Scales from the chapter's own estimated token
+ * count, with headroom for the rewrite running a little longer than the
+ * original, a floor so a short chapter still gets a reasonable budget,
+ * and `withReasoningHeadroom` on top for a thinking model's own planning
+ * pass.
  */
 function polishMaxTokens(prose: string): number {
-  return REASONING_HEADROOM_TOKENS + Math.max(1800, Math.ceil(estimateTokens(prose) * 1.3) + 200);
+  return withReasoningHeadroom(Math.max(1800, Math.ceil(estimateTokens(prose) * 1.3) + 200));
 }
+
+/**
+ * Analyze's reply is a short structured report (strengths/issues), not
+ * prose the length of the chapter — a flat budget is the right shape here,
+ * unlike Polish's chapter-scaled one. A tester's reasoning model (no
+ * "thinking" toggle visible in LM Studio's own UI, so nothing suggested it
+ * needed one) burned 1797 of this budget's 1800 tokens on hidden reasoning
+ * and returned an empty reply — `withReasoningHeadroom` covers that pass
+ * on top of the report itself.
+ */
+const ANALYZE_MAX_TOKENS = withReasoningHeadroom(1800);
 
 function readEngine(): LlmEngine {
   return localStorage.getItem(ENGINE_KEY) === "openai-compatible" ? "openai-compatible" : "ollama";
@@ -1514,7 +1518,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         const raw = await makeProvider(reviewModel).chat({
           messages: analyzeMessages,
           temperature: 0.25,
-          maxTokens: 1800,
+          maxTokens: ANALYZE_MAX_TOKENS,
           signal: abort.signal
         });
         const items = parseChapterFeedback(raw, scene.prose, {
@@ -2074,7 +2078,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       const raw = await makeProvider(reviewModel).chat({
         messages: analyzeMessages,
         temperature: 0.25,
-        maxTokens: 1800,
+        maxTokens: ANALYZE_MAX_TOKENS,
         signal: abort.signal
       });
       recordPromptResponse(raw);

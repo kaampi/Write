@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.185
+Status: living document, v1.0.186
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -8982,6 +8982,66 @@ leak-varningen ser fortfarande bara bokens egna fakta; en AI-
 extraherad bok-fakta jämförs fortfarande bara mot bokens egna vid
 förslagstillfället, inte seriens; backup/restore rör fortfarande inte
 vid Series-data alls.
+
+**Ändringslogg v1.0.186 (2026-10-25): Två färska testarrapporter,
+samma grundorsak — resonerande modeller äter upp sin egen svarsbudget
+på dold "tänkande" innan de skriver ett enda synligt ord.**
+
+Mats klistrade in två testarrapporter rakt av innan vi gick vidare
+med "Spara"-frågan:
+
+- Analyze mot en modell utan synlig "thinking"-toggle i LM Studios
+  eget UI gav ett helt tomt svar — loggen visade
+  `completion_tokens: 1800`, `reasoning_tokens: 1797` av samma
+  1800-budget.
+- Extract gav "cut off at the 4000-token limit (maxTokens) before it
+  finished" på en annan lokal modell.
+
+Samma buggklass som redan fixats för Polish i en tidigare session
+(en resonerande modell fakturerar sitt dolda "tänkande" mot samma
+`maxTokens`-budget som själva svaret), men den fixen satt bara på
+Polish och var aldrig generaliserad.
+
+- Nytt: `src/llm/tokenBudget.ts` — `REASONING_HEADROOM_TOKENS = 2000`
+  och `withReasoningHeadroom(baseMaxTokens)`, en delad modul istället
+  för att varje anropsställe skulle hitta på sin egen konstant. 2 nya
+  tester i `tests/llm/tokenBudget.test.ts`.
+- `BookStore.tsx`: `EXTRACTOR_MAX_TOKENS` (nu `withReasoningHeadroom(4000)`,
+  exporterad) och `polishMaxTokens` skrivna om mot den delade hjälparen.
+  Ny `ANALYZE_MAX_TOKENS = withReasoningHeadroom(1800)`, satt på
+  Analyze-anropets båda ställen (scen-nivå och kapitel-nivå) — tidigare
+  hårdkodat `maxTokens: 1800` utan något reserverat utrymme för
+  resonemang alls.
+- `SeriesStore.tsx`: tog bort sin egen dubblett-konstant, importerar
+  nu `EXTRACTOR_MAX_TOKENS` från `BookStore.tsx` istället — samma
+  budget-ökning når automatiskt seriens två extraktionsanrop
+  (`extractSynopsis`, `extractEntityNote`).
+- `src/llm/provider.ts` (`OpenAICompatibleLocalProvider.chat()`,
+  LM Studio m.fl.) och `src/llm/ollama.ts` (`completeOllamaChat()`):
+  båda körde sin "tomt svar"-kontroll FÖRE sin "avkapad vid gränsen"-
+  kontroll, så en resonerande modell som tömde hela budgeten på
+  tänkande utan att lämna någon synlig text alls fick det generiska
+  "returned an empty reply" istället för den mycket mer användbara
+  avkapningsförklaringen — exakt det första testarfallet (LM Studio
+  rapporterade varken tomt innehåll som fel eller `finish_reason:
+  "length"`). Vänd ordning på båda ställena. `OpenAICompatibleLocalProvider`
+  läser nu även `usage.completion_tokens_details.reasoning_tokens` ur
+  svaret (fanns i testarens egen LM Studio-logg, lästes aldrig förut)
+  och räknar ≥90 % av budgeten åtgången på resonemang som samma fall
+  som `finish_reason: "length"`, även om servern aldrig flaggade det
+  explicit — felmeddelandet namnger då antalet resonemangstoken och
+  föreslår att stänga av modellens "thinking"-läge eller höja
+  svarsbudgeten. Ollamas native API saknar en motsvarande siffra, så
+  den fixen är bara ordningsbytet.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1163 test, upp
+från 1159 — 4 nya: 2 i `tokenBudget.test.ts`, 2 nya regressionstester
+i `provider.test.ts` som återskapar båda testarrapporternas exakta
+JSON-form) grön. `npm run build` rent. Ingen UI-förändring i denna
+fix (ren fel-/budgethantering i LLM-lagret), så ingen ny Playwright-
+körning utöver de befintliga som redan täcker samma anropskedjor.
+
+v1.0.185 → v1.0.186.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
