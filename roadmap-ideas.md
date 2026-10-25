@@ -50,6 +50,7 @@ inte en ensidig lista.
 | 32 | Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text | ⬜ ej påbörjad — se nedan |
 | 33 | Timeline som gantschema, ihopslaget med Plotlines | ✅ byggd som punktbaserad vy (v0.99.62) — se nedan |
 | 34 | Startskript för Mac och Linux (som `starta.bat`) | ✅ byggd (v0.99.71) — se nedan |
+| 35 | Flera distinkta "kritiker-personas" i en och samma granskningsvy | ⬜ ej påbörjad — se nedan |
 
 Plus det egna designspåret ("Det enda stora arkitekturbeslutet" nedan,
 Scene/BookScene/NarrativeFact-gränsen) — ett öppet samtal, inte en
@@ -2641,6 +2642,36 @@ specifikt TOLKAR flera trådade Stories vid import. Se `project_spec.md`,
 det är ETT kapitel vars uppskattning slår fel dramatiskt, eller en
 jämnt fördelad överskattning över hela boken som InDesign av någon
 anledning grupperar om vid import.
+
+---
+
+## Idéer från konkurrensjämförelse (OnixWrite, 2026-10-25)
+
+Mats delade ett Reddit-inlägg där OnixWrite (en molnbaserad AI-
+skrivapp) lanserades. Stort överlapp i kärnproblemet ("AI glömmer
+ögonfärgen i kapitel 3") och i grundfunktionerna — Story Bible,
+AI-skrivpartner med draft/rewrite/expand/shorten, kontinuitetskontroll,
+flerspråkigt, export. Den stora skillnaden är arkitekturen: de är en
+molntjänst med inloggning/credits, StoryBook AI är lokal-first (ingen
+text lämnar din dator, inga credits). Series-stödet vi redan har
+(v1.0.180–v1.0.185) går djupare än vad de nämner — deras kontinuitet
+verkar stanna vid en bok, inget om gemensam canon över en serie. En
+idé värd att spara:
+
+### 35. Flera distinkta "kritiker-personas" i en och samma granskningsvy
+OnixWrite erbjuder fem fasta kritiker-röster på samma kapitel
+("Professional Critic", "Impatient Reader", "Pacing Critic", "Line
+Editor", "Confused Reader") istället för en enda sammanslagen
+bedömning. Vi har redan motsvarande djup spritt över flera separata
+steg (Analyze, Developmental, Proofread, stil-/känsloläget i
+Korrekturläsning) — men inte samlat som flera parallella röster på
+SAMMA text i en enda vy, vilket kan göra det lättare att se att "en
+otålig läsare" och "en pacing-kritiker" faktiskt är oense om samma
+scen. Inte en teknisk nyhet (samma `ANALYZE_SYSTEM`-mönster, bara
+flera systemprompter/personas körda parallellt eller i sekvens på
+samma kapitel) — mer en UI-/produktfråga om värdet är tillräckligt
+stort för att motivera flera AI-anrop per granskning. Inte påbörjad,
+sparad som idé.
 
 ---
 
