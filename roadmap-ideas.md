@@ -53,6 +53,7 @@ inte en ensidig lista.
 | 35 | Flera distinkta "kritiker-personas" i en och samma granskningsvy | ⬜ ej påbörjad — se nedan |
 | 36 | Valfritt moln-provider-stöd (BYO API-key) som tillval, lokal kvar som default | ⬜ ej påbörjad, medvetet inte nu — se nedan |
 | 37 | Developmental: bedöm öppningsscenens krok (obesvarad fråga/out-of-whack-händelse) specifikt | ⬜ ej påbörjad — se nedan |
+| 38 | Guiden: ny "Skrivtips"-kategori med skrivråd, inte verktygsdokumentation | ⬜ ej påbörjad — se nedan |
 
 Plus det egna designspåret ("Det enda stora arkitekturbeslutet" nedan,
 Scene/BookScene/NarrativeFact-gränsen) — ett öppet samtal, inte en
@@ -2741,6 +2742,43 @@ kapitel 1 — ett kapitel-1-specifikt kriterium hör inte hemma i Analyze,
 som kör identiskt på varje kapitel. Flagga specifikt: saknas en
 obesvarad fråga/out-of-whack-händelse, finns en backstory-dump, eller
 avslöjas för mycket för tidigt. Inte påbörjad.
+
+**Varför just kapitel 1 (Mats tillägg):** från kapitel 2 och framåt
+kan en del av kroken redan komma från föregående kapitels slut (en
+cliffhanger, en fråga som redan är igång) — kapitel 1 har inget sånt
+att luta sig mot, dess öppning måste bära hela kroken själv på en
+gång. Det är skälet till att kapitel 1 förtjänar ett eget, strängare
+kriterium istället för att bedömas med samma måttstock som alla andra
+kapitelöppningar.
+
+### 38. Guiden: ny "Skrivtips"-kategori
+Mats (2026-10-25): "Kanske vi ska planera för en tips och tankar
+kring skrivande? En del av Guiden kanske." Guiden idag är uteslutande
+"hur använder du appen" (`GUIDE_CATEGORY_IDS` i `GuidePanel.tsx`) —
+ingen av de nio befintliga kategorierna ger genre-generella skrivråd.
+En ny kategori, t.ex. "Skrivtips", skulle vara första gången Guiden
+gör det — medvetet hållen som just TIPS, inte regler eller krav appen
+tolkar av (appen förblir strukturellt agnostisk om HUR man skriver,
+bara `core.*`-fakta och pluggbara metoder är "regler").
+
+Källmaterial redan i huset, båda delade av Mats:
+- **Hallie Ephrons artikel om öppningsscener** (se avsnittet ovan) —
+  obesvarad fråga/out-of-whack-händelse, ingen backstory-dump, visa-
+  inte-berätta på karaktärsintroduktion, avslöja inte för mycket,
+  undvik klyschiga krok-avslutningar.
+- **StoryScope-studien** (punkt 45, Univ. of Maryland/Google DeepMind,
+  arxiv.org/html/2604.03136v6) — konkreta, empiriskt belagda AI-
+  skrivmönster som skiljer AI-prosa från mänsklig: överförklarar tema
+  rakt ut via berättarrösten, tightare/mer linjär orsakskedja med
+  färre subplots, känslor nästan uteslutande visade kroppsligt
+  (sällan namngivna rakt av), färre tidshopp/icke-linjär struktur,
+  färre brutna fjärde väggar. Ett naturligt "känner du igen det här i
+  din egen prosa"-avsnitt, separat från de tekniska åtgärdsförslagen
+  som redan ligger under punkt 45 (skärpta Polish/Draft-promptar
+  respektive en ny struktur-flagga).
+
+Inte påbörjad — börja smalt (en handfull korta avsnitt från det här
+materialet) snarare än att bygga ut en hel skrivkurs på en gång.
 
 ---
 
