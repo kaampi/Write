@@ -14126,6 +14126,18 @@ pre-filtrering (ConsistencyGate steg 1–2) minskar antalet LLM-anrop per
 kapitel. Steg 3 (LLM-resonemang) är inte kopplat i v1 av skrivappen —
 motsägelser är samma entity + predikat + annat värde.
 
+**Varför lokal-first, utöver privat data:** fritt modellval löser ett
+problem som ständigt dyker upp bland molntjänster (t.ex. återkommande
+Reddit-diskussioner om "vilken moln-AI är minst censurerad") —
+skönlitterärt skrivande behöver ofta kunna hantera mörka teman, våld
+eller andra kontroversiella ämnen utan att bli nekat eller urvattnat
+mitt i ett kapitel. Med lokal AI väljer författaren själv modell,
+alltså själv hur strikt eller tillåtande den modellen är tränad/
+finjusterad att vara — "är den här modellen för strikt för min bok"
+blir en modellvalsfråga författaren styr över, inte en begränsning
+appen eller en molnleverantör sätter. Medvetet argument för
+lokal-first-principen, inte en funktion att bygga.
+
 ---
 
 ## 7. Pipelines

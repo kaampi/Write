@@ -2678,8 +2678,10 @@ sparad som idé.
 Uppstod ur samma samtal: lokal-first (ingen text lämnar datorn, inga
 credits, inget konto) är appens tydligaste differentiering mot
 molntjänster som OnixWrite, och Mats vill inte släppa på den
-principen. Men den är samtidigt ett hinder för den som inte orkar
-sätta upp Ollama/LM Studio innan de ens hunnit prova appen.
+principen — se även `project_spec.md` §6 ("Varför lokal-first, utöver
+privat data") för censur-/modellvalsargumentet som väger in i samma
+beslut. Men lokal-first är samtidigt ett hinder för den som inte
+orkar sätta upp Ollama/LM Studio innan de ens hunnit prova appen.
 
 Tänkt mellanväg, INTE ett beslut att bygga: ett rent tillval där
 användaren klistrar in sin egen API-nyckel mot en molnleverantör
