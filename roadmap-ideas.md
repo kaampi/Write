@@ -52,6 +52,7 @@ inte en ensidig lista.
 | 34 | Startskript för Mac och Linux (som `starta.bat`) | ✅ byggd (v0.99.71) — se nedan |
 | 35 | Flera distinkta "kritiker-personas" i en och samma granskningsvy | ⬜ ej påbörjad — se nedan |
 | 36 | Valfritt moln-provider-stöd (BYO API-key) som tillval, lokal kvar som default | ⬜ ej påbörjad, medvetet inte nu — se nedan |
+| 37 | Developmental: bedöm öppningsscenens krok (obesvarad fråga/out-of-whack-händelse) specifikt | ⬜ ej påbörjad — se nedan |
 
 Plus det egna designspåret ("Det enda stora arkitekturbeslutet" nedan,
 Scene/BookScene/NarrativeFact-gränsen) — ett öppet samtal, inte en
@@ -2695,6 +2696,51 @@ prova innan de investerar i en lokal uppsättning. Inte påbörjad —
 kräver åtminstone ett beslut om var nyckeln lagras (den får inte
 hamna i en molnbackup av appens data) och om det är värt att bryta
 "all data stannar lokalt"-löftet ens som ett tillval.
+
+---
+
+## Insikter om öppningsscener (Hallie Ephron, Writer's Digest, delad 2026-10-25)
+
+Mats delade en artikel ("The Importance of a Strong Opening Scene" av
+Hallie Ephron, adapterad från *Writing & Selling Your Mystery Novel*)
+och frågade om den borde påverka hur vi analyserar eller vårt
+AI-prompt. Insikterna, destillerade för framtida bruk:
+
+- En öppningsscen måste etablera en **"out-of-whack"-händelse** —
+  något utanför det normala — som läsaren omedvetet omvandlar till en
+  **obesvarad fråga** ("vem övergav barnet, och varför?"). Den frågan
+  är kroken som drar läsaren vidare, inte stämning eller språk i sig.
+- **Ingen backstory-dump.** Ett tydligt tecken på en ovan författare:
+  mycket bakgrundsinformation om hur karaktären hamnade här, redan i
+  öppningskapitlet. Läsaren behöver bara en skymt av det som faktiskt
+  är relevant just nu.
+- **Visa, berätta inte** — samma princip Analyze redan bedömer
+  (`show_vs_tell`), men artikelns exempel visar den specifikt applicerad
+  på karaktärsintroduktion: att chefen kallas "Chief" och parkerar på en
+  polis-parkering visar att han är polischef, istället för att säga det.
+- **Avslöja inte för mycket.** En öppning som avslöjar den stora
+  hemligheten för tidigt (eller en prolog som "flash-forwardar" till
+  mordet, följt av ett kapitel 1 som börjar tidigare) försvagar
+  avslöjandet i slutet snarare än att stärka öppningen.
+- **Undvik klyschiga krok-avslutningar** — "Had I but known..." eller
+  ett generiskt "jag blev förvånad och skräckslagen av vad som hände
+  härnäst" fungerar på vilken bok som helst och känns därför som
+  ingenting alls.
+
+### 37. Developmental: bedöm öppningsscenens krok specifikt
+Idén som uppstod ur diskussionen: inget i Analyze eller Developmental
+bedömer idag specifikt OM kapitel 1:s första scen faktiskt etablerar
+en obesvarad fråga som driver läsaren framåt — `show_vs_tell` (Analyze)
+täcker generellt "visa inte berätta" på varje kapitel, och
+`developmentMethod.ts`s `"opening-image"`-beat (0%-positionen i de
+pluggbara strukturmetoderna) är bara en strukturell checkpoint, inte
+en bedömning av om öppningen faktiskt kroker. Tänkt plats: Developmental
+(samma scen-för-scen-läsning som redan finns via `SCENE_READ_SYSTEM`/
+`sceneReadUserPrompt` i `developmental.ts`), körd bara på scen 1 av
+kapitel 1 — ett kapitel-1-specifikt kriterium hör inte hemma i Analyze,
+som kör identiskt på varje kapitel. Flagga specifikt: saknas en
+obesvarad fråga/out-of-whack-händelse, finns en backstory-dump, eller
+avslöjas för mycket för tidigt. Inte påbörjad.
 
 ---
 
