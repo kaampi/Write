@@ -2776,6 +2776,42 @@ Källmaterial redan i huset, båda delade av Mats:
   din egen prosa"-avsnitt, separat från de tekniska åtgärdsförslagen
   som redan ligger under punkt 45 (skärpta Polish/Draft-promptar
   respektive en ny struktur-flagga).
+- **Fem evidensbaserade skrivvanor** (Mats, 2026-10-25) — till
+  skillnad från Ephron/StoryScope ovan, som handlar om PROSAN, handlar
+  dessa om SKRIVARBETET självt: forskning om vanor, planering och
+  kreativitetspsykologi, inte hantverk på sidan.
+  1. **Undvik "binge-skrivande"** — korta, regelbundna skrivpass slår
+     sällsynta maraton-pass, både i mängd text och i upplevd
+     skrivkramp/ångest. (Boice, R. (1990). *Procrastination, busyness
+     and bingeing.* Behaviour Research and Therapy, 27(6), 605-611.)
+  2. **Separera utkast från redigering** — att generera, strukturera
+     OCH utvärdera samtidigt överbelastar arbetsminnet; att skriva
+     första utkastet och redigera det som två separata faser skyddar
+     den kognitiva kapaciteten. (Kellogg, R. T. (1996). *A model of
+     working memory in writing.* Memory & Cognition, 24(3), 318-329.)
+  3. **Konkreta "om-så-planer" (implementation intentions)** —
+     "jag ska skriva mer" fungerar sämre än att knyta beteendet till
+     en specifik tid/plats/trigger ("när jag hällt upp kaffet på
+     lördag, skriver jag 45 minuter vid köksbordet"). (Gollwitzer,
+     P. M. (1999). *Implementation intentions: Strong effects of
+     simple plans.* American Psychologist, 54(7), 493-503.)
+  4. **Pausa för att lösa plot-holes (inkubationseffekten)** — att
+     lägga ett komplext problem åt sidan för en orelaterad, kravlös
+     syssla (promenad, dusch, disk) ger hjärnan chans att bearbeta det
+     i bakgrunden och ökar chansen för en plötslig lösning. (Sio, U. N.,
+     & Ormerod, T. C. (2009). *Does incubation enhance problem solving?
+     A meta-analytic review.* Psychological Bulletin, 135(1), 94-120.)
+  5. **Läs mycket — implicit inlärning slår grammatikträning** —
+     omfattande, frivillig läsning är den starkaste enskilda faktorn
+     för att undermedvetet tillgodogöra sig strukturkänsla, stilistik
+     och ordförråd; formell grammatik-/teoristudier har marginell
+     effekt i jämförelse. (Krashen, S. (2004). *The Power of Reading:
+     Insights from the Research* (2nd ed.). Libraries Unlimited.)
+
+  Naturligt en egen underrubrik i "Skrivtips" (t.ex. "Skrivvanor" eller
+  "Kom igång och håll ut"), skild från hantverksråden om själva prosan
+  — en läsare som vill skriva mer regelbundet har en annan fråga än en
+  som vill skriva bättre meningar.
 
 Inte påbörjad — börja smalt (en handfull korta avsnitt från det här
 materialet) snarare än att bygga ut en hel skrivkurs på en gång.
