@@ -51,6 +51,7 @@ inte en ensidig lista.
 | 33 | Timeline som gantschema, ihopslaget med Plotlines | ✅ byggd som punktbaserad vy (v0.99.62) — se nedan |
 | 34 | Startskript för Mac och Linux (som `starta.bat`) | ✅ byggd (v0.99.71) — se nedan |
 | 35 | Flera distinkta "kritiker-personas" i en och samma granskningsvy | ⬜ ej påbörjad — se nedan |
+| 36 | Valfritt moln-provider-stöd (BYO API-key) som tillval, lokal kvar som default | ⬜ ej påbörjad, medvetet inte nu — se nedan |
 
 Plus det egna designspåret ("Det enda stora arkitekturbeslutet" nedan,
 Scene/BookScene/NarrativeFact-gränsen) — ett öppet samtal, inte en
@@ -2672,6 +2673,26 @@ flera systemprompter/personas körda parallellt eller i sekvens på
 samma kapitel) — mer en UI-/produktfråga om värdet är tillräckligt
 stort för att motivera flera AI-anrop per granskning. Inte påbörjad,
 sparad som idé.
+
+### 36. Valfritt moln-provider-stöd (BYO API-key) — medvetet inte nu
+Uppstod ur samma samtal: lokal-first (ingen text lämnar datorn, inga
+credits, inget konto) är appens tydligaste differentiering mot
+molntjänster som OnixWrite, och Mats vill inte släppa på den
+principen. Men den är samtidigt ett hinder för den som inte orkar
+sätta upp Ollama/LM Studio innan de ens hunnit prova appen.
+
+Tänkt mellanväg, INTE ett beslut att bygga: ett rent tillval där
+användaren klistrar in sin egen API-nyckel mot en molnleverantör
+(t.ex. OpenAI eller Anthropic) istället för att peka mot en lokal
+server — samma `ModelProvider`-abstraktion (punkt 4) skulle bära det
+rakt av, det är bara en ny provider-implementation bredvid
+`OllamaModelProvider`/`OpenAICompatibleLocalProvider`, ingen ny
+arkitektur. Lokal förblir default och det app:en i grunden säljer sig
+på; ett moln-tillval sänker bara tröskeln för en ny användare att
+prova innan de investerar i en lokal uppsättning. Inte påbörjad —
+kräver åtminstone ett beslut om var nyckeln lagras (den får inte
+hamna i en molnbackup av appens data) och om det är värt att bryta
+"all data stannar lokalt"-löftet ens som ett tillval.
 
 ---
 
