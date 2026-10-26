@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.192] - 2026-10-26
+
+### Fixed
+- The chapter row's remove-chapter trash emoji (🗑️) got the same line-art SVG treatment as the settings/scenes icons in the previous release — same blurry/tinted-color-emoji issue, just missed the first pass.
+
 ## [1.0.191] - 2026-10-26
 
 ### Fixed

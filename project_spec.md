@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.191
+Status: living document, v1.0.192
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9338,6 +9338,29 @@ nuvarande — "LIGHT" syns när appen redan är mörk) bekräftade att
 ikonerna renderar skarpt och grått i båda, aldrig lila.
 
 v1.0.190 → v1.0.191.
+
+**Ändringslogg v1.0.192 (2026-10-26): Missade soptunnan.**
+
+Mats, direkt efter förra releasen: "Är det inte en soptunna också?"
+Rätt — `discardChapter`-knappen i samma kapitelradsverktyg hade kvar
+🗑️. Sökte igenom hela `src/ui/*.tsx` med ett litet Node-skript
+(ripgrep klarade inte de breda unicode-intervallen) efter alla
+färgemoji för att inte missa fler i just den här raden — bara 🗑️ låg
+kvar där, resten av träffarna (←→↑↓✓✎📌📍) är antingen vanliga
+textglyfer (följer redan temat korrekt) eller 📌/📍 i en annan
+kontext helt (vänsterpanelens/Story Bible-panelens fäst-knapp, inte
+kapitelraden) — flaggat för Mats som en möjlig uppföljare, inte åtgärdat
+här utan att fråga.
+
+- `Editor.tsx`: nytt `TRASH_ICON`, samma line-art-stil som
+  `SETTINGS_ICON`/`SCENES_ICON`.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1182 test,
+oförändrat) grön. `npm run build` rent. Playwright-skärmdump med två
+kapitel (soptunnan visas bara när fler än ett kapitel finns) bekräftade
+skarp, grå rendering.
+
+v1.0.191 → v1.0.192.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
