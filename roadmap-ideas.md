@@ -12,6 +12,8 @@ inte en ensidig lista.
 
 ## Läge just nu (uppdateras allteftersom)
 
+**Nästa i tur (Mats, 2026-10-26): 35 → 37 → 26.**
+
 | # | Punkt | Läge |
 |---|-------|------|
 | 1 | AI Context Inspector | ✅ byggd (v0.69) |
@@ -42,7 +44,7 @@ inte en ensidig lista.
 | 24 | Positionsmedvetna Story Bible-fakta (story-tid, inte lässordning) | ✅ byggd (v0.99.26) |
 | 25 | Textformatering (fet/kursiv/understruken) i kapiteltexten | ✅ byggd (v0.99.43) |
 | 26 | Dölj snabbstartskorten på förstasidan när en lokal AI redan är ansluten | ⬜ ej påbörjad — avvaktar, se nedan |
-| 27 | Riktig mobilanpassning av redigeringsytan | ⬜ ej påbörjad — avvaktar, se nedan |
+| 27 | Riktig mobilanpassning av redigeringsytan | ❌ struken (2026-10-26) — lokal-first gör mobilen irrelevant tills ev. moln-stöd (#36), se nedan |
 | 28 | Import från andra skrivverktyg — adapterarkitektur | ⬜ ej påbörjad — se nedan |
 | 29 | Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok | ❌ struken — se nedan |
 | 30 | Extract facts känner inte igen namn-varianter av samma person | ✅ väg 2 byggd (v1.0.89), granskningsköns genväg byggd (v1.0.90) — väg 1 kvar, se nedan |
@@ -829,11 +831,19 @@ kolumn under 960px bredd (`.editor-body` i `styles.css`).
   ingen tryck-och-håll-motsvarighet finns byggd, och det är helt otestat
   på riktig pekskärm.
 
-**Status: avvaktar.** Författaren vill inte prioritera det nu — mobilen
-är inte förstahandsvalet för att skriva text, appen är i grunden tänkt
-för dator. Skulle kräva en egen mobilnavigering (flikväxling istället
-för stapling) plus en tryck-och-håll-öppnad meny som ersättning för
-högerklicket för att bli en riktig lösning, inte en snabb CSS-fix.
+**Status: struken (2026-10-26).** Mats: "Vi stryker 27 eftersom det
+är lokal AI, ser inte varför man skulle sitta hemma med mobilen.
+Om/när vi öppnar för API kan mobilanpassning bli aktuellt...
+kanske." Så länge appen är lokal-first (se §6 i project_spec.md och
+punkt 36 ovan) sitter man vid samma dator som kör modellen — mobilen
+har inget naturligt sammanhang att skriva i. Skulle kunna bli
+aktuellt igen OM punkt 36 (valfritt moln-provider-stöd) någonsin
+byggs, eftersom det är först då "skriva från telefonen var som helst"
+blir en verklig användarsituation — men inget beslut att bygga det
+heller, bara en förutsättning som då skulle finnas. Tidigare
+avvaktande bedömning (flikväxling istället för stapling, tryck-och-
+håll-meny istället för högerklick) kvar här som referens om frågan
+återkommer.
 
 ### 28. Import från andra skrivverktyg — adapterarkitektur
 Uppstod ur en idé författaren fick från ChatGPT om att bygga vidare på
