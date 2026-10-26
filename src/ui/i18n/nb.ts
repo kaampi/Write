@@ -873,6 +873,7 @@ export const nb: Messages = {
       writing: "Skrive",
       revise: "Bearbeide manuset",
       "images-publish-backup": "Bilder, publisering & sikkerhetskopi",
+      "writing-tips": "Skrivetips",
       help: "Hjelp & feilsøking"
     },
     sections: {
@@ -1131,6 +1132,62 @@ export const nb: Messages = {
       "marker-conversion-no-match": {
         heading: "«Convert markers to formatting» finner ingen markeringer",
         body: "Hvis dette gjelder anførselstegn spesifikt: du trenger nok ikke Convert markers til det lenger. Se Smarte anførselstegn (Skriving) — et rett \" blir allerede kurvet mens du skriver, og «Smarten quotes in whole manuscript» konverterer et helt importert eller innlimt manus i ett sveip, rette anførselstegn inkludert.\n\nFor alt annet Convert markers håndterer — *stjerner* for kursiv, egne par du har satt opp — betyr «ingenting funnet» som regel at tegnet du skrev inn i feltet ikke er nøyaktig samme tegn som i manuskriptet. Lett å oppleve med tegnsetting som finnes i mer enn én lik-ut-seende form.\n\nSikreste løsning: åpne kapittelet, marker ett av de faktiske tegnene i teksten din, kopier det (Ctrl/Cmd+C), og lim det inn i feltet for åpnings- eller avslutningstegn i stedet for å skrive det på tastaturet på nytt. Da er det garantert nøyaktig riktig tegn."
+      },
+      "routine-short-often": {
+        heading: "Skriv litt, men ofte",
+        body: "Det vanskeligste med å skrive er noen ganger å komme i gang. Her er fem tips som hjelper deg å skape gode vaner, finne fokus og komme videre når du kjører deg fast.\n\nDu trenger ikke flere ledige timer for å få skrevet noe. Korte, regelmessige skriveøkter kan være mer effektive enn å vente på det perfekte tidspunktet.\n\nPrøv selv: Sett av 15–30 minutter noen dager i uken. Fokuser på å skrive, ikke på hvor mye du rekker å produsere."
+      },
+      "routine-draft-then-edit": {
+        heading: "Skriv først, rediger senere",
+        body: "Det er vanskelig å være kreativ og kritisk samtidig. Stopper du stadig for å rette formuleringer, risikerer du å miste både fokus og historiens retning.\n\nLa derfor det første utkastet være nettopp et utkast. Du kan forbedre språket senere.\n\nPrøv selv: Skriv en scene uten å gå tilbake og endre. Les gjennom og rediger først når scenen er ferdig."
+      },
+      "routine-set-time-place": {
+        heading: "Bestem når og hvor du skal skrive",
+        body: "Det er lett å utsette noe som ikke har et bestemt tidspunkt. En konkret plan gjør det enklere å faktisk sette seg ned og skrive.\n\nBytt ut «Jeg skal prøve å skrive mer» med «Lørdag etter frokost skriver jeg i 30 minutter».\n\nPrøv selv: Velg et tidspunkt og et sted som passer i hverdagen din. Koble gjerne skrivingen til noe du allerede gjør regelmessig."
+      },
+      "routine-pause-when-stuck": {
+        heading: "Ta en pause når du kjører deg fast",
+        body: "Noen ganger hjelper det ikke å stirre lenger på samme setning eller scene. Å gjøre noe annet en stund kan gi deg et nytt perspektiv.\n\nTa en spasertur, vask opp, eller gjør noe som ikke krever all oppmerksomheten din. Når du kommer tilbake, kan problemet føles lettere å løse.\n\nPrøv selv: Skriv ned hva du har kjørt deg fast på før du tar pausen. Da blir det enklere å fortsette når du kommer tilbake."
+      },
+      "routine-read-widely": {
+        heading: "Les for å utvikle skrivingen din",
+        body: "Ved å lese ulike forfattere og sjangre får du en bedre følelse for språk, dialog, tempo og fortellerstruktur.\n\nDu trenger ikke analysere hver bok. Men noen ganger kan det være verdifullt å tenke over hvorfor en scene fungerer spesielt godt.\n\nPrøv selv: Neste gang en bok fanger deg, stopp opp og spør deg selv: Hva gjorde forfatteren for å vekke interessen min?"
+      },
+      "opening-raise-a-question": {
+        heading: "Vekk et spørsmål hos leseren",
+        body: "De første sidene hjelper leseren å avgjøre om historien er verdt å fortsette med. Her er fire måter å skape en åpning som vekker nysgjerrighet.\n\nEn god åpning trenger ikke begynne med dramatikk. Men noe bør vekke leserens interesse.\n\nDet kan være en uventet hendelse, en merkelig oppførsel eller noe som ikke virker å stemme.\n\nNår leseren begynner å lure på hva som har skjedd, hvorfor det skjer, eller hva som kommer til å skje, er det en grunn til å lese videre.\n\nSpør deg selv: Hvilket spørsmål vil jeg at leseren skal bære med seg etter første side?"
+      },
+      "opening-wait-on-backstory": {
+        heading: "Vent med bakgrunnshistorien",
+        body: "Du trenger ikke fortelle alt om hovedpersonen eller verdenen med en gang.\n\nFor mye bakgrunnsinformasjon i starten kan bremse historien før leseren har blitt engasjert.\n\nVis i stedet det som trengs for å forstå situasjonen. La resten av informasjonen komme når den blir relevant.\n\nSpør deg selv: Trenger leseren virkelig å vite dette allerede?"
+      },
+      "opening-let-details-show": {
+        heading: "La detaljene fortelle",
+        body: "Du trenger ikke alltid beskrive en persons egenskaper rett ut. Ofte blir karakteren mer levende gjennom hva personen gjør, sier eller legger merke til.\n\nI stedet for å skrive at en person er kontrollerende, kan du for eksempel vise hvordan personen retter på gjenstandene på et bord før en vanskelig samtale.\n\nEn godt valgt detalj kan si mer enn en lang forklaring.\n\nSpør deg selv: Kan jeg vise denne egenskapen gjennom en handling eller detalj?"
+      },
+      "opening-save-the-surprises": {
+        heading: "Spar på overraskelsene",
+        body: "Det kan være fristende å åpne med historiens mest dramatiske hendelse for å fange leseren.\n\nMen avslører du for mye for tidlig, risikerer senere vendepunkter å miste effekten sin.\n\nEn prolog eller et tilbakeblikk kan fungere utmerket, så lenge det tilfører noe mer enn en forhåndsvisning av det som skal skje.\n\nSpør deg selv: Vekker åpningen min nysgjerrighet, eller avslører den noe som hadde vært mer spennende å oppdage senere?"
+      },
+      "voice-overexplaining": {
+        heading: "Gi teksten din en personlig stemme",
+        body: "AI-verktøy kan hjelpe deg å skrive og bearbeide tekst. Men resultatet må fortsatt føles som din historie.\n\nNår du bruker Draft, Recast eller Polish, kan det være lurt å se over noen tilbakevendende mønstre.\n\nForklarer teksten for mye?\nNoen ganger sier fortelleren rett ut hva en hendelse betyr eller hva leseren skal føle.\n\nLa gjerne handlingen, dialogen og karakterenes valg tale for seg selv. Leseren trenger ikke få alt forklart."
+      },
+      "voice-too-predictable": {
+        heading: "Er historien for forutsigbar?",
+        body: "Hvis hver hendelse leder rett til den neste, kan historien begynne å føles vel tilrettelagt.\n\nVurder om karakterene har egne mål, om det finnes konflikter ved siden av hovedhandlingen, og om noe kan utvikle seg på en uventet, men troverdig måte."
+      },
+      "voice-varied-emotion": {
+        heading: "Beskrives følelser på samme måte?",
+        body: "En klump i magen, et hjerte som raser eller hender som skjelver kan fungere bra. Men beskrives hver følelse gjennom en kroppslig reaksjon, blir språket lett ensformig.\n\nVarier mellom handlinger, tanker, dialog, kroppslige reaksjoner og direkte følelsesord."
+      },
+      "voice-straight-timeline": {
+        heading: "Følger alt en rett tidslinje?",
+        body: "En historie må ikke alltid følge hendelsene i akkurat den rekkefølgen de skjer.\n\nTilbakeblikk, tidshopp og endringer i perspektiv kan noen ganger skape spenning eller gi en hendelse ny betydning.\n\nMen bruk dem når de styrker historien, ikke bare for variasjonens skyld.\n\nHusk: Dette er ingen regler for hvordan en historie må skrives. Se dem som spørsmål å stille når du bearbeider teksten din. Det viktigste er at språket, strukturen og fortellerstilen passer akkurat din historie."
+      },
+      "writing-tips-sources": {
+        heading: "Kilder og videre lesning",
+        body: "Tipsene bygger på følgende forskning og litteratur om skrivevaner, kreativitet, språkutvikling og fortellerteknikk.\n\nSkrivevaner og kreativitet\nBoice, R. (1990). Procrastination, busyness and bingeing. Behaviour Research and Therapy, 27(6), 605–611.\nKellogg, R. T. (1996). A model of working memory in writing. Memory & Cognition, 24(3), 318–329.\nGollwitzer, P. M. (1999). Implementation intentions: Strong effects of simple plans. American Psychologist, 54(7), 493–503.\nSio, U. N. & Ormerod, T. C. (2009). Does incubation enhance problem solving? Psychological Bulletin, 135(1), 94–120.\nKrashen, S. (2004). The Power of Reading: Insights from the Research. Libraries Unlimited.\n\nFortellerteknikk og AI-generert tekst\nEphron, H. The Importance of a Strong Opening Scene. Writer's Digest.\nStoryScope. Forskning fra University of Maryland og Google DeepMind om tilbakevendende mønstre i AI-generert tekst (arxiv.org/html/2604.03136v6).\n\nTipsene er praktiske anbefalinger, ikke absolutte regler. Tilpass dem til din egen skriving."
       }
     }
   },

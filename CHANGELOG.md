@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.187] - 2026-10-26
+
+### Added
+- A new "Writing Tips" tab in the Guide (Handbook) — 14 sections of practical craft and habit advice, not app documentation: finding a writing routine (short/regular sessions, draft-then-edit, a concrete time/place plan, stepping away when stuck, reading widely), writing an opening that hooks a reader (raise a question, hold off on backstory, show traits through detail, save the surprises), a self-check pass for AI-assisted prose (over-explaining, predictability, repetitive emotional beats, straight timelines), and a sources section citing the underlying research and craft writing. All three shipped locales (English, Swedish, Norwegian).
+
 ## [1.0.186] - 2026-10-25
 
 ### Fixed

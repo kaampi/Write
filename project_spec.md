@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.186
+Status: living document, v1.0.187
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9042,6 +9042,58 @@ fix (ren fel-/budgethantering i LLM-lagret), så ingen ny Playwright-
 körning utöver de befintliga som redan täcker samma anropskedjor.
 
 v1.0.185 → v1.0.186.
+
+**Ändringslogg v1.0.187 (2026-10-26): "Skrivtips" i Guiden — från
+mockup till riktig funktion.**
+
+Mats: "Lägg in i Guiden. Både svensk och engelsk." Direkt uppföljning
+av artefakt-mockupen från föregående samtal (roadmap-ideas.md #38),
+byggd på de skrivvanor- och hantverksinsikter vi redan samlat in och
+Mats egen slutgiltiga text.
+
+**Fel ställe, hittat och rättat innan commit:** byggde det först i
+`GuidePanel.tsx` (den ankar-styrda referens-guiden, bara nåbar via
+enstaka "?"-tooltips i editorn) eftersom min artefakt-mockup råkade
+efterlikna just dess flik-stil. Playwright-verifieringen avslöjade
+att appens faktiska "Guide"-knapp i topnaven (`m.guide.nav`, kopplad
+till `store.showHandbook()` i `AppTopBar.tsx`) öppnar `HandbookPanel.tsx`
+— den sekventiella, numrerade genomgången — inte `GuidePanel.tsx`
+alls. En ny kategori i `GuidePanel.tsx` hade aldrig synts för en
+vanlig användare. Rev manuellt tillbaka de fyra filerna (ingen
+`git checkout`, bara motsvarande Edit-block i omvänd ordning — rent
+diff bekräftat med `git diff --stat` innan ombyggnad) och byggde om
+samma innehåll i rätt panel.
+
+- `HandbookPanel.tsx`: ny kategori `"writing-tips"` i
+  `HANDBOOK_CATEGORY_IDS` (före `"help"`, sist annars), 14 nya
+  `HANDBOOK_SECTION_IDS` mappade dit i `HANDBOOK_SECTION_CATEGORY` —
+  fem om skrivrutin, fyra om öppningsscener, fyra om en AI-assisterad
+  texts egen röst, en källista.
+- Innehållet återanvänder `handbook-body`s redan etablerade
+  `\n`/`\n\n`-konvention (CSS `white-space: pre-line`, samma mönster
+  som `connect-local-ai`/`map-of-storybook-ai` m.fl. redan använder)
+  — bevarar Mats egna flerstyckestext med "Prova själv"/"Fråga
+  dig"-rader intakt, till skillnad från `GuidePanel.tsx`s strikt
+  en-paragraf-stil som hade tvingat en sammanpressning.
+- Svensk text är Mats egen, oförändrad. Engelsk text är en översättning
+  som bevarar samma struktur och ton. Norsk (`nb.ts`) tillkom för att
+  TypeScript's delade `Record<HandbookSectionId, ...>`-typ kräver alla
+  tre språkfilerna komplett — inte efterfrågat av Mats, men ett
+  strukturellt krav för att bygget skulle vara typkorrekt; översatt
+  separat, inte en direktöversättning av den svenska eller engelska
+  texten.
+
+**Verifiering:** `tsc --noEmit` rent genom hela processen (fångade
+nb.ts-gapet direkt). Hela testsviten (1163 test, oförändrat — ingen
+ny logik, bara i18n-data) grön. `npm run build` rent. Playwright mot
+dev-servern bekräftade läget i båda riktningarna: engelsk vy via
+"Open the Guide"-knappen visade alla 14 rubriker i rätt ordning under
+flik "8. WRITING TIPS"; svensk vy (språkväxlaren satt till `sv`)
+visade samma 14 under "8. SKRIVTIPS", rubrikerna exakt Mats egen
+formulering. Skärmdumpar bekräftade styckesbrytningarna renderar
+korrekt och att panelen matchar appens befintliga färgtema.
+
+v1.0.186 → v1.0.187.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

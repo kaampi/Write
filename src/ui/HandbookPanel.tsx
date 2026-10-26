@@ -18,6 +18,7 @@ export const HANDBOOK_CATEGORY_IDS = [
   "writing",
   "revise",
   "images-publish-backup",
+  "writing-tips",
   "help"
 ] as const;
 export type HandbookCategoryId = (typeof HANDBOOK_CATEGORY_IDS)[number];
@@ -87,7 +88,21 @@ export const HANDBOOK_SECTION_IDS = [
   "backup",
   "network-ai-server",
   "ai-writing-wrong-things",
-  "marker-conversion-no-match"
+  "marker-conversion-no-match",
+  "routine-short-often",
+  "routine-draft-then-edit",
+  "routine-set-time-place",
+  "routine-pause-when-stuck",
+  "routine-read-widely",
+  "opening-raise-a-question",
+  "opening-wait-on-backstory",
+  "opening-let-details-show",
+  "opening-save-the-surprises",
+  "voice-overexplaining",
+  "voice-too-predictable",
+  "voice-varied-emotion",
+  "voice-straight-timeline",
+  "writing-tips-sources"
 ] as const;
 export type HandbookSectionId = (typeof HANDBOOK_SECTION_IDS)[number];
 
@@ -155,7 +170,21 @@ export const HANDBOOK_SECTION_CATEGORY: Record<HandbookSectionId, HandbookCatego
   backup: "images-publish-backup",
   "network-ai-server": "help",
   "ai-writing-wrong-things": "help",
-  "marker-conversion-no-match": "help"
+  "marker-conversion-no-match": "help",
+  "routine-short-often": "writing-tips",
+  "routine-draft-then-edit": "writing-tips",
+  "routine-set-time-place": "writing-tips",
+  "routine-pause-when-stuck": "writing-tips",
+  "routine-read-widely": "writing-tips",
+  "opening-raise-a-question": "writing-tips",
+  "opening-wait-on-backstory": "writing-tips",
+  "opening-let-details-show": "writing-tips",
+  "opening-save-the-surprises": "writing-tips",
+  "voice-overexplaining": "writing-tips",
+  "voice-too-predictable": "writing-tips",
+  "voice-varied-emotion": "writing-tips",
+  "voice-straight-timeline": "writing-tips",
+  "writing-tips-sources": "writing-tips"
 };
 
 export function HandbookPanel() {

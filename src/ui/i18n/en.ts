@@ -88,6 +88,7 @@ const handbookCategories: Record<HandbookCategoryId, string> = {
   writing: "Writing",
   revise: "Revise the Manuscript",
   "images-publish-backup": "Images, Publishing & Backup",
+  "writing-tips": "Writing Tips",
   help: "Help & Troubleshooting"
 };
 
@@ -347,6 +348,62 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   "marker-conversion-no-match": {
     heading: "\"Convert markers to formatting\" says nothing was found",
     body: "If this is about quotation marks specifically: you probably don't need Convert markers for that at all anymore. See Smart quotes (Writing) — a straight \" already turns curly as you type, and \"Smarten quotes in whole manuscript\" converts a whole imported or pasted-in manuscript in one pass, straight quotes included.\n\nFor anything else Convert markers handles — *asterisks* for italic, custom pairs of your own — \"nothing found\" usually means the character you typed into the field isn't quite the same character as the one in your manuscript. Easy to happen with punctuation that comes in more than one look-alike form.\n\nSafest fix: open the chapter, select one of the actual marker characters in your text, copy it (Ctrl/Cmd+C), and paste it into the Opening or Closing marker field instead of retyping it on the keyboard. That guarantees an exact match."
+  },
+  "routine-short-often": {
+    heading: "Write little, but often",
+    body: "Finding time to write can be the hardest part. Small changes to your routine can make a big difference — here are five tips to help you build good habits, find focus, and keep going when you get stuck.\n\nYou don't need several free hours to get something written. Short, regular writing sessions can be more effective than waiting for the perfect moment.\n\nTry it: set aside 15–30 minutes a few days a week. Focus on writing, not on how much you manage to produce."
+  },
+  "routine-draft-then-edit": {
+    heading: "Write first, edit later",
+    body: "It's hard to be creative and critical at the same time. If you keep stopping to fix wording, you risk losing both focus and the story's direction.\n\nSo let the first draft be just that — a draft. You can improve the language later.\n\nTry it: write a scene without going back to change anything. Read it through and edit only once the scene is done."
+  },
+  "routine-set-time-place": {
+    heading: "Decide when and where you'll write",
+    body: "It's easy to put off something that has no set time. A concrete plan makes it easier to actually sit down and write.\n\nSwap \"I'll try to write more\" for \"Saturday after breakfast, I write for 30 minutes.\"\n\nTry it: pick a time and place that fits your everyday life. Ideally, tie the writing to something you already do regularly."
+  },
+  "routine-pause-when-stuck": {
+    heading: "Take a break when you get stuck",
+    body: "Sometimes staring longer at the same sentence or scene doesn't help. Doing something else for a while can give you a new perspective.\n\nGo for a walk, do the dishes, or do something that doesn't demand all your attention. When you come back, the problem can feel easier to solve.\n\nTry it: write down what you're stuck on before you take the break. That makes it easier to pick back up when you return."
+  },
+  "routine-read-widely": {
+    heading: "Read to grow your writing",
+    body: "Reading different authors and genres gives you a better feel for language, dialogue, pacing, and story structure.\n\nYou don't need to analyze every book. But sometimes it's worth thinking about why a scene works especially well.\n\nTry it: next time a book grips you, stop and ask yourself — what did the author do to catch my interest?"
+  },
+  "opening-raise-a-question": {
+    heading: "Raise a question in the reader's mind",
+    body: "The first few pages help a reader decide whether the story is worth continuing with. Here are four ways to write an opening that sparks curiosity.\n\nA strong opening doesn't have to start with drama. But something should catch the reader's interest.\n\nIt could be an unexpected event, strange behavior, or something that doesn't quite add up.\n\nOnce the reader starts wondering what happened, why it happened, or what's coming next, there's a reason to keep reading.\n\nAsk yourself: what question do I want the reader carrying with them after page one?"
+  },
+  "opening-wait-on-backstory": {
+    heading: "Hold off on the backstory",
+    body: "You don't need to explain everything about the protagonist or the world right away.\n\nToo much background information up front can slow the story down before the reader has had a chance to get invested.\n\nShow only what's needed to understand the situation, and let the rest of the information arrive when it becomes relevant.\n\nAsk yourself: does the reader really need to know this already?"
+  },
+  "opening-let-details-show": {
+    heading: "Let the details do the telling",
+    body: "You don't always have to state a person's traits outright. A character often comes across as more alive through what they do, say, or notice.\n\nInstead of writing that someone is controlling, you could, for example, show them straightening the objects on a table before a difficult conversation.\n\nA well-chosen detail can say more than a long explanation.\n\nAsk yourself: can I show this trait through an action or a detail?"
+  },
+  "opening-save-the-surprises": {
+    heading: "Save the surprises",
+    body: "It can be tempting to open with the story's most dramatic event to hook the reader right away.\n\nBut if you reveal too much too early, later twists risk losing their impact.\n\nA prologue or a flashback can work very well, as long as it offers more than just a preview of what's about to happen.\n\nAsk yourself: does my opening spark curiosity, or does it reveal something that would have been more exciting to discover later?"
+  },
+  "voice-overexplaining": {
+    heading: "Give your text a voice of its own",
+    body: "AI tools can help you write and revise text. But the result still needs to feel like your story.\n\nWhen you use Draft, Recast, or Polish, it can help to look out for a few recurring patterns.\n\nIs the text over-explaining?\nSometimes the narrator states outright what an event means, or what the reader should feel.\n\nLet the action, the dialogue, and the characters' choices speak for themselves. The reader doesn't need everything spelled out."
+  },
+  "voice-too-predictable": {
+    heading: "Is the story too predictable?",
+    body: "If every event leads straight into the next, a story can start to feel too neatly arranged.\n\nConsider whether the characters have goals of their own, whether conflicts exist alongside the main plot, and whether something could develop in an unexpected but believable way."
+  },
+  "voice-varied-emotion": {
+    heading: "Are emotions described the same way every time?",
+    body: "A knot in the stomach, a racing heart, or shaking hands can all work well. But describe every emotion through a bodily reaction, and the language quickly starts to feel repetitive.\n\nVary between actions, thoughts, dialogue, physical reactions, and naming the feeling directly."
+  },
+  "voice-straight-timeline": {
+    heading: "Does everything follow a straight timeline?",
+    body: "A story doesn't always have to follow events in the exact order they happened.\n\nFlashbacks, time jumps, and shifts in perspective can sometimes build tension or give an event new meaning.\n\nBut use them when they strengthen the story — not just for the sake of variety.\n\nKeep in mind: none of this is a rule for how a story must be written. Treat it as questions to ask yourself while revising. What matters most is that the language, structure, and narrative voice fit your own story."
+  },
+  "writing-tips-sources": {
+    heading: "Sources and further reading",
+    body: "These tips draw on the following research and writing on habits, creativity, language development, and craft.\n\nWriting habits and creativity\nBoice, R. (1990). Procrastination, busyness and bingeing. Behaviour Research and Therapy, 27(6), 605–611.\nKellogg, R. T. (1996). A model of working memory in writing. Memory & Cognition, 24(3), 318–329.\nGollwitzer, P. M. (1999). Implementation intentions: Strong effects of simple plans. American Psychologist, 54(7), 493–503.\nSio, U. N. & Ormerod, T. C. (2009). Does incubation enhance problem solving? Psychological Bulletin, 135(1), 94–120.\nKrashen, S. (2004). The Power of Reading: Insights from the Research. Libraries Unlimited.\n\nCraft and AI-generated text\nEphron, H. The Importance of a Strong Opening Scene. Writer's Digest.\nStoryScope. Research from the University of Maryland and Google DeepMind on recurring patterns in AI-generated text (arxiv.org/html/2604.03136v6).\n\nThese are practical suggestions, not hard rules. Adapt them to your own writing."
   }
 };
 
