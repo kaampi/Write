@@ -106,6 +106,8 @@ import { CharacterInterviewCard } from "./CharacterInterviewCard";
 import { BrainstormChatCard } from "./BrainstormChatCard";
 import { SettingsPanel } from "./SettingsPanel";
 import { ChapterFeedbackCard } from "./ChapterFeedbackCard";
+import { CriticsSetupCard } from "./CriticsSetupCard";
+import { CriticFeedbackCard } from "./CriticFeedbackCard";
 import { ChapterHistoryCard } from "./ChapterHistoryCard";
 import { PolishReviewCard } from "./PolishReviewCard";
 import { ChapterStartImageBanner } from "./ChapterStartImage";
@@ -549,7 +551,8 @@ function silentBusyCopy(
 export function Editor() {
   const store = useBookStore();
   const { messages: m } = useLocale();
-  const { book, chapterId, surface, busy, error, models, model, writingPrimer, reviewModel, translateModel, ollamaError, chapterFeedback, modelAsides } = store;
+  const { book, chapterId, surface, busy, error, models, model, writingPrimer, reviewModel, translateModel, ollamaError, chapterFeedback, criticFeedback, modelAsides } =
+    store;
   if (!book) return null;
 
   const chapters = sortedChapters(book);
@@ -603,6 +606,8 @@ export function Editor() {
   const rightRailExpanded = rightRailPinned || rightRailHovering;
   const [statsOpen, setStatsOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [criticsSetupOpen, setCriticsSetupOpen] = useState(false);
+  const [criticNotesOpen, setCriticNotesOpen] = useState(false);
   const [askPassageOpen, setAskPassageOpen] = useState(false);
   const [activePlaceholderId, setActivePlaceholderId] = useState<string | undefined>(undefined);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -741,6 +746,7 @@ export function Editor() {
           ? book.synopsis
           : chapter.prose;
   const notes = chapterFeedback?.chapterId === chapter.id ? chapterFeedback : null;
+  const criticNotes = criticFeedback?.chapterId === chapter.id ? criticFeedback : null;
   const activeReaderAge =
     onBrainstorm || onSynopsis || onTimeline || onPlotlines || onMethod
       ? book.reader_age
@@ -2082,6 +2088,20 @@ export function Editor() {
                       {m.editor.analyze}
                     </button>
                   )}
+                  {busy === "critics" ? (
+                    <button type="button" onClick={store.stopDraft}>
+                      {m.common.stop}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      title={m.critics.setupLede}
+                      onClick={() => setCriticsSetupOpen(true)}
+                      disabled={busy !== null || !chapter.prose.trim()}
+                    >
+                      {m.editor.critics}
+                    </button>
+                  )}
                   {busy === "ask-passage" ? (
                     <button type="button" onClick={store.stopDraft}>
                       {m.common.stop}
@@ -2318,6 +2338,26 @@ export function Editor() {
           items={notes.items}
           {...(activeReaderAge !== undefined ? { readerAge: activeReaderAge } : {})}
           onClose={() => setNotesOpen(false)}
+        />
+      ) : null}
+      {criticsSetupOpen ? (
+        <CriticsSetupCard
+          onStart={(personas) => {
+            setCriticsSetupOpen(false);
+            void store.runCritics(personas).then((ok) => {
+              if (ok) setCriticNotesOpen(true);
+            });
+          }}
+          onClose={() => setCriticsSetupOpen(false)}
+        />
+      ) : null}
+      {criticNotesOpen && criticNotes ? (
+        <CriticFeedbackCard
+          items={criticNotes.items}
+          onClose={() => {
+            setCriticNotesOpen(false);
+            store.dismissCriticFeedback();
+          }}
         />
       ) : null}
       {askPassageOpen ? (

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.190] - 2026-10-26
+
+### Added
+- Critics: three distinct reader personas — Impatient reader, Pacing critic, Confused reader — each give their own quote-and-note read on the open chapter, separate from Analyze's existing categories. Opt-in per run (pick one or more in a setup card before running; each checked persona is its own AI call) and grouped by persona in the results, so a disagreement between two critics on the same passage is easy to spot.
+
 ## [1.0.189] - 2026-10-26
 
 ### Fixed

@@ -350,6 +350,7 @@ export const sv: Messages = {
     extract: "Extrahera fakta",
     extracting: "Extraherar…",
     analyze: "Analysera",
+    critics: "Kritiker",
     askPassage: "Fråga om kapitlet…",
     proofread: "Korrekturläsning",
     notes: "Anteckningar",
@@ -499,6 +500,7 @@ export const sv: Messages = {
       "paragraph-break": "Styckebrytning",
       extract: "Extrahera fakta",
       analyze: "Analysera",
+      critics: "Kritiker",
       illustrate: "Illustrationsprompt",
       proofread: "Korrekturläsning",
       "ask-manuscript": "Fråga manuset",
@@ -1851,6 +1853,37 @@ export const sv: Messages = {
       lecture: {
         label: "Pekpinne",
         blurb: "En moral som sägs av en vuxen, inte tjänas av protagonistens val."
+      }
+    }
+  },
+  critics: {
+    action: "Kritiker",
+    setupTitle: "Vem ska läsa det här kapitlet?",
+    setupLede: "Varje röst nedan läser kapitlet på egen hand — välj en eller flera. Varje kryssad röst är ett eget anrop, så valet är också kostnaden.",
+    setupPersonasLabel: "Kritiker att köra",
+    setupStart: "Kör kritiker",
+    setupNothingSelected: "Välj minst en kritiker att köra.",
+    review: "Kritiker",
+    title: "Kritiker-anteckningar",
+    emptyTitle: "Inget att flagga",
+    intro: "Tre distinkta läsare, var och en på jakt efter något de andra inte letar efter — ingen omskrivning, bara vad de lade märke till.",
+    paragraph: "Stycke {n}",
+    note: "Anteckning",
+    clickHint: "Klicka på en anteckning för att läsa citatet.",
+    nothingSolid: "Ingen av kritikerna hittade något hållbart i den här vändan.",
+    foot: "Anteckningar flaggar ett ställe, i den kritikerns egen röst. De skriver inte om kapitlet och rör inte Story Bible.",
+    personas: {
+      "impatient-reader": {
+        label: "Otålig läsare",
+        blurb: "Flaggar där tempot segar sig förbi den punkt det faktiskt tjänar något på."
+      },
+      "pacing-critic": {
+        label: "Pacing-kritiker",
+        blurb: "Läser kapitlets rytm — var spänningen byggs, håller i sig, eller tappas när den inte borde."
+      },
+      "confused-reader": {
+        label: "Förvirrad läsare",
+        blurb: "Flaggar ett ställe som av misstag blivit svårt att följa, inte ett mysterium du planterat med flit."
       }
     }
   },

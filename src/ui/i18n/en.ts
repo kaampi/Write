@@ -757,6 +757,7 @@ export const en = {
     extract: "Extract facts",
     extracting: "Extracting…",
     analyze: "Analyze",
+    critics: "Critics",
     askPassage: "Ask about chapter…",
     proofread: "Proofread",
     notes: "Notes",
@@ -906,6 +907,7 @@ export const en = {
       "paragraph-break": "Paragraph break",
       extract: "Extract facts",
       analyze: "Analyze",
+      critics: "Critics",
       illustrate: "Illustration prompt",
       proofread: "Proofread",
       "ask-manuscript": "Ask Manuscript",
@@ -1861,6 +1863,37 @@ export const en = {
       lecture: {
         label: "Lecture",
         blurb: "A moral stated by an adult, not earned by the protagonist’s choice."
+      }
+    }
+  },
+  critics: {
+    action: "Critics",
+    setupTitle: "Who should read this chapter?",
+    setupLede: "Each voice below reads the chapter on its own — pick one or more. Every one checked is its own pass, so the choice is also the cost.",
+    setupPersonasLabel: "Critics to run",
+    setupStart: "Run critics",
+    setupNothingSelected: "Pick at least one critic to run.",
+    review: "Critics",
+    title: "Critic notes",
+    emptyTitle: "Nothing to flag",
+    intro: "Three distinct readers, each looking for something the others don't — not a rewrite, just what they noticed.",
+    paragraph: "Paragraph {n}",
+    note: "Note",
+    clickHint: "Click a note to read the quote.",
+    nothingSolid: "None of the critics found anything solid this pass.",
+    foot: "Notes flag a spot, in that critic's own voice. They do not rewrite the chapter or touch the Story Bible.",
+    personas: {
+      "impatient-reader": {
+        label: "Impatient reader",
+        blurb: "Flags where the pace drags past the point it's earning its place."
+      },
+      "pacing-critic": {
+        label: "Pacing critic",
+        blurb: "Reads the chapter's rhythm — where tension builds, holds, or slackens when it shouldn't."
+      },
+      "confused-reader": {
+        label: "Confused reader",
+        blurb: "Flags a passage that's accidentally hard to follow, not a mystery you planted on purpose."
       }
     }
   },

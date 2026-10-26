@@ -12,7 +12,7 @@ inte en ensidig lista.
 
 ## Läge just nu (uppdateras allteftersom)
 
-**Nästa i tur (Mats, 2026-10-26): 50 → 52 → 26.**
+**Nästa i tur (Mats, 2026-10-26): 50 → 52 → 26.** 50 klar (v1.0.190) — 52 näst på tur.
 
 | # | Punkt | Läge |
 |---|-------|------|
@@ -52,7 +52,7 @@ inte en ensidig lista.
 | 32 | Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text | ⬜ ej påbörjad — se nedan |
 | 33 | Timeline som gantschema, ihopslaget med Plotlines | ✅ byggd som punktbaserad vy (v0.99.62) — se nedan |
 | 34 | Startskript för Mac och Linux (som `starta.bat`) | ✅ byggd (v0.99.71) — se nedan |
-| 50 | Flera distinkta "kritiker-personas" i en och samma granskningsvy | ⬜ ej påbörjad — se nedan |
+| 50 | Flera distinkta "kritiker-personas" i en och samma granskningsvy | ✅ byggd (v1.0.190) — se nedan |
 | 51 | Valfritt moln-provider-stöd (BYO API-key) som tillval, lokal kvar som default | ⬜ ej påbörjad, medvetet inte nu — se nedan |
 | 52 | Developmental: bedöm öppningsscenens krok (obesvarad fråga/out-of-whack-händelse) specifikt | ⬜ ej påbörjad — se nedan |
 | 53 | Guiden: ny "Skrivtips"-kategori med skrivråd, inte verktygsdokumentation | ✅ byggd (v1.0.187) — se nedan |
@@ -2684,7 +2684,7 @@ text lämnar din dator, inga credits). Series-stödet vi redan har
 verkar stanna vid en bok, inget om gemensam canon över en serie. En
 idé värd att spara:
 
-### 50. Flera distinkta "kritiker-personas" i en och samma granskningsvy
+### 50. Flera distinkta "kritiker-personas" i en och samma granskningsvy ✅ byggd (v1.0.190)
 OnixWrite erbjuder fem fasta kritiker-röster på samma kapitel
 ("Professional Critic", "Impatient Reader", "Pacing Critic", "Line
 Editor", "Confused Reader") istället för en enda sammanslagen
@@ -2696,8 +2696,14 @@ otålig läsare" och "en pacing-kritiker" faktiskt är oense om samma
 scen. Inte en teknisk nyhet (samma `ANALYZE_SYSTEM`-mönster, bara
 flera systemprompter/personas körda parallellt eller i sekvens på
 samma kapitel) — mer en UI-/produktfråga om värdet är tillräckligt
-stort för att motivera flera AI-anrop per granskning. Inte påbörjad,
-sparad som idé.
+stort för att motivera flera AI-anrop per granskning.
+
+**Status: byggd (v1.0.190).** Tre personas, inte fem — Otålig läsare,
+Pacing-kritiker, Förvirrad läsare; "Professionell kritiker" och
+"Radredaktör" uteslöts medvetet (mest överlapp med Analyze/Proofreads
+stil-steg). Egen flik bredvid Analyze, opt-in per körning (kryssrutor,
+inget förvalt). Se project_spec.md v1.0.189 → v1.0.190 för hela
+bygget.
 
 ### 51. Valfritt moln-provider-stöd (BYO API-key) — medvetet inte nu
 Uppstod ur samma samtal: lokal-first (ingen text lämnar datorn, inga

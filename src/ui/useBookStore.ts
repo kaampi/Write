@@ -6,6 +6,7 @@ import type { InterviewMessage } from "@core/characterInterview";
 import type { BrainstormChatMessage } from "@core/brainstorm";
 import type { DevelopmentStep } from "@core/developmentMethod";
 import type { ChapterFeedback } from "@core/chapterFeedback";
+import type { CriticItem, CriticPersonaId } from "@core/critics";
 import type { FactDraft, FactOrigin, NarrativeFact } from "@core/NarrativeFact";
 import type { CorePredicate } from "@core/predicates";
 import type { ProofreadStage } from "@core/proofread";
@@ -29,6 +30,7 @@ export type Busy =
   | "recast"
   | "polish"
   | "analyze"
+  | "critics"
   | "proofread"
   | "illustrate"
   | "interview"
@@ -65,6 +67,9 @@ export type BookStoreValue = {
   draftAwaiting: boolean;
   error: string | null;
   chapterFeedback: ChapterFeedback | null;
+  criticFeedback: { chapterId: string; items: CriticItem[] } | null;
+  runCritics: (personas: CriticPersonaId[]) => Promise<boolean>;
+  dismissCriticFeedback: () => void;
   polishDraft: PolishDraft | null;
   modelAsides: string[];
   lastPrompt: PromptDebugEntry | null;

@@ -350,6 +350,7 @@ export const nb: Messages = {
     extract: "Hent ut fakta",
     extracting: "Henter ut…",
     analyze: "Analyser",
+    critics: "Kritikere",
     askPassage: "Spør om kapittelet…",
     proofread: "Korrektur",
     notes: "Notater",
@@ -499,6 +500,7 @@ export const nb: Messages = {
       "paragraph-break": "Avsnittsdeling",
       extract: "Hent fakta",
       analyze: "Analyser",
+      critics: "Kritikere",
       illustrate: "Illustrasjonsprompt",
       proofread: "Korrekturlesing",
       "ask-manuscript": "Spør manuset",
@@ -1851,6 +1853,37 @@ export const nb: Messages = {
       lecture: {
         label: "Pekepinn",
         blurb: "En moral som sies av en voksen, ikke tjenes av protagonistens valg."
+      }
+    }
+  },
+  critics: {
+    action: "Kritikere",
+    setupTitle: "Hvem skal lese dette kapittelet?",
+    setupLede: "Hver stemme under leser kapittelet på egen hånd — velg en eller flere. Hver avkrysset stemme er sitt eget kall, så valget er også kostnaden.",
+    setupPersonasLabel: "Kritikere å kjøre",
+    setupStart: "Kjør kritikere",
+    setupNothingSelected: "Velg minst én kritiker å kjøre.",
+    review: "Kritikere",
+    title: "Kritikernotater",
+    emptyTitle: "Ingenting å flagge",
+    intro: "Tre distinkte lesere, hver på jakt etter noe de andre ikke ser etter — ingen omskriving, bare det de la merke til.",
+    paragraph: "Avsnitt {n}",
+    note: "Notat",
+    clickHint: "Klikk på et notat for å lese sitatet.",
+    nothingSolid: "Ingen av kritikerne fant noe solid i denne runden.",
+    foot: "Notater flagger et sted, i den kritikerens egen stemme. De skriver ikke om kapitlet og rører ikke Story Bible.",
+    personas: {
+      "impatient-reader": {
+        label: "Utålmodig leser",
+        blurb: "Flagger der tempoet seiger seg forbi punktet det faktisk tjener noe på."
+      },
+      "pacing-critic": {
+        label: "Pacing-kritiker",
+        blurb: "Leser kapittelets rytme — der spenningen bygges, holder seg, eller slakker når den ikke burde."
+      },
+      "confused-reader": {
+        label: "Forvirret leser",
+        blurb: "Flagger et sted som ved et uhell er blitt vanskelig å følge, ikke et mysterium du plantet med vilje."
       }
     }
   },

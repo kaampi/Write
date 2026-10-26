@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.189
+Status: living document, v1.0.190
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9223,6 +9223,90 @@ skulle inte testa modellens faktiska språkliga omdöme; mekanismen
 live i v1.0.188.
 
 v1.0.188 → v1.0.189.
+
+**Ändringslogg v1.0.190 (2026-10-26): Critics — tre kritiker-personas
+i en egen granskningsvy (roadmap-ideas.md #50, först av den
+prioriterade ordningen 50 → 52 → 26).**
+
+Direkt uppföljning av OnixWrite-jämförelsen (roadmap-ideas.md,
+"Idéer från konkurrensjämförelse") — deras fem fasta kritiker-röster
+på samma kapitel. Beslut tagna via tre riktade frågor innan bygget:
+(1) egen flik bredvid Analyze, inte inbyggt i Analyze självt, (2) tre
+personas — Otålig läsare, Pacing-kritiker, Förvirrad läsare — de två
+med minst överlapp mot det Analyze/Proofread redan täcker (en
+"Professionell kritiker" och en "Radredaktör" hade mest liknat
+befintliga kategorier, medvetet uteslutna), (3) opt-in per körning
+(kryssrutor, inget körs per automatik) för att hålla nere antalet
+AI-anrop.
+
+- Nytt: `src/core/critics.ts` — `CRITIC_PERSONA_IDS`, en egen
+  systemprompt per persona (`CRITIC_SYSTEM_PROMPTS`, samma
+  `{"items":[{"quote","observation"}]}`-kontrakt som `ANALYZE_SYSTEM`
+  men i respektive personas röst), `criticUserPrompt` (manus + Reader,
+  aldrig brainstorm eller Story Bible — en kritiker läser prosan, inte
+  kanon), `parseCriticFeedback` (återanvänder `locateQuote` från
+  `chapterFeedback.ts` för klickbar stycke-lokalisering). 9 nya tester
+  i `tests/core/critics.test.ts`.
+- `BookStore.tsx`: ny `runCritics(personas)` — ett AI-anrop per vald
+  persona, körda parallellt (`Promise.all`), separat
+  `criticFeedback`-state (`{chapterId, items}`, samma mönster som
+  `chapterFeedback`) återställt vid varje boklast/stängning (alla sju
+  befintliga `setChapterFeedback(null)`-rader fick en syskonrad).
+  `CRITIC_MAX_TOKENS = withReasoningHeadroom(1800)` — samma
+  reasoning-headroom-mönster som v1.0.186/188.
+- Nytt: `CriticsSetupCard.tsx` (kryssrutor, inget ikryssat som
+  startläge — till skillnad från `ProofreadSetupCard` där allt är
+  ikryssat från start, eftersom varje kryssad persona här är ett eget
+  AI-anrop författaren ska välja, inte en gratis delmängd av en redan
+  beslutad körning) och `CriticFeedbackCard.tsx` (samma
+  gruppera-och-klicka-för-detalj-mönster som `ChapterFeedbackCard.tsx`,
+  grupperat per persona istället för kategori).
+- `Editor.tsx`: ny knapp "Critics" bredvid "Analyze" i kapitelverktygs-
+  raden, samma stopp/kör-mönster (`busy === "critics"`).
+  `PromptOperation` (`promptDebug.ts`) fick ett nytt `"critics"`-värde
+  (en första idé om att spåra per-persona i AI Context Inspector —
+  `critic-${persona}` — visade sig inte vara en giltig typ; en delad
+  `"critics"`-operation räcker, personan syns ändå i själva
+  prompttexten).
+- i18n: nytt `m.critics`-objekt (setup, resultat, tre personas med
+  label+blurb) i alla tre språk, plus `m.editor.critics` och
+  `m.aiContext.operations.critics`.
+
+**Fel ställe, hittat och rättat INNAN commit den här gången** (lärdom
+från v1.0.187): kollade `roadmap-ideas.md` för numrerings-krockar
+INNAN jag började koda, inte efter — #50/51/52/53 var redan rättade
+från den tidigare krocken (se föregående commit), så inget nytt
+krockproblem uppstod den här gången.
+
+**Containerbyte upptäckt och åtgärdat mitt i sessionen:** innan det
+här bygget påbörjades visade `git log`/`git status` att den lokala
+arbetskopian halkat efter origin (troligen en container-omstart under
+den långa sessionen) — senaste lokala commit var `2c0b462` (långt
+före sessionens start), medan origin/main redan låg på `d1aff17` med
+alla tidigare commits denna session intakta. Inget förlorat: `git
+fetch` + `git pull --ff-only` synkade rent (49 filer, strikt
+fast-forward, inga konflikter), och `npm ci` fick köras om eftersom
+`node_modules` inte fanns i den nya containern. Samma mönster upprepade
+sig en gång till under Critics-bygget (`vitest`/`vite` saknade sina
+egna `node_modules`-beroenden mitt i en testkörning) — samma fix,
+`npm ci`.
+
+**Verifiering:** `tsc --noEmit` rent (fångade en första version där
+`baseUrl`-deprecation-varningen i `tsconfig.json` fick hela checken
+att se "ren" ut trots oupptäckta typfel längre ner — `npm ci` och en
+ren omkörning avslöjade det riktiga felet, en `PromptOperation`-typ
+som inte tålde `critic-${persona}`). Hela testsviten (1182 test, upp
+från 1173) grön. `npm run build` rent. Playwright mot dev-servern med
+en mock-server som svarar olika beroende på vilken personas
+systemprompt-text den ser: skapade ett kapitel med tre meningar, körde
+alla tre personas i ett svep — bekräftade att UI-kortet gruppstyckade
+resultatet per persona (Otålig läsare/Pacing-kritiker/Förvirrad
+läsare, var sin unika observation), och att klick på ett citat öppnar
+detaljvyn med stycke-nummer, citat och anteckning. Kört en gång till
+med bara en persona vald, för att bekräfta att en-av-tre fungerar lika
+bra som alla-tre.
+
+v1.0.189 → v1.0.190.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

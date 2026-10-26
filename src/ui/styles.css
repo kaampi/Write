@@ -4691,6 +4691,26 @@ button:disabled {
   gap: 0.5rem;
 }
 
+.critics-setup-persona {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+}
+
+.critics-setup-persona input[type="checkbox"] {
+  margin-top: 0.2rem;
+}
+
+.critics-setup-persona-label {
+  display: block;
+  font-weight: 600;
+}
+
+.critics-setup-persona-blurb {
+  display: block;
+}
+
 .proofread-bar {
   height: 0.55rem;
   background: var(--raised);

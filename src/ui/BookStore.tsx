@@ -47,6 +47,7 @@ import {
   parseChapterFeedback,
   type ChapterFeedback
 } from "@core/chapterFeedback";
+import { CRITIC_PERSONA_IDS, CRITIC_SYSTEM_PROMPTS, criticUserPrompt, parseCriticFeedback, type CriticItem, type CriticPersonaId } from "@core/critics";
 import { applyOrientationHint, enforceNoTextConstraint, illustrationPromptMessages, relevantEntitiesForPassage } from "@core/illustrationPrompt";
 import {
   EXTRACTOR_SYSTEM,
@@ -185,6 +186,9 @@ function polishMaxTokens(prose: string): number {
  * on top of the report itself.
  */
 const ANALYZE_MAX_TOKENS = withReasoningHeadroom(1800);
+
+/** Same shape as Analyze's own budget — a critic persona's reply is a short structured list, not prose. */
+const CRITIC_MAX_TOKENS = withReasoningHeadroom(1800);
 
 /**
  * The relationship-mirror rewrite (see `relationshipMirror.ts`) is a single
@@ -337,6 +341,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const [draftAwaiting, setDraftAwaiting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [chapterFeedback, setChapterFeedback] = useState<ChapterFeedback | null>(null);
+  const [criticFeedback, setCriticFeedback] = useState<{ chapterId: string; items: CriticItem[] } | null>(null);
   const [polishDraft, setPolishDraft] = useState<PolishDraft | null>(null);
   const [modelAsides, setModelAsides] = useState<string[]>([]);
   const [lastPrompt, setLastPrompt] = useState<PromptDebugEntry | null>(null);
@@ -660,6 +665,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         setChapterIdState(remembered?.chapterId ?? sortedChapters(loaded)[0]?.id ?? null);
         setSurface(remembered?.surface ?? openingSurface(loaded));
         setChapterFeedback(null);
+        setCriticFeedback(null);
       });
       localStorage.setItem(LAST_BOOK_KEY, id);
       setError(null);
@@ -682,6 +688,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       setChapterIdState(null);
       setSurface("brainstorm");
       setChapterFeedback(null);
+      setCriticFeedback(null);
     });
     localStorage.removeItem(LAST_BOOK_KEY);
     void refresh();
@@ -697,6 +704,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         setChapterIdState(sortedChapters(created)[0]?.id ?? null);
         setSurface(openingSurface(created));
         setChapterFeedback(null);
+        setCriticFeedback(null);
       });
       localStorage.setItem(LAST_BOOK_KEY, created.id);
       setError(null);
@@ -722,6 +730,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         setChapterIdState(sortedChapters(created)[0]?.id ?? null);
         setSurface(openingSurface(created));
         setChapterFeedback(null);
+        setCriticFeedback(null);
       });
       localStorage.setItem(LAST_BOOK_KEY, created.id);
       setError(null);
@@ -777,6 +786,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         setChapterIdState(remembered?.chapterId ?? sortedChapters(backup.book)[0]?.id ?? null);
         setSurface(remembered?.surface ?? openingSurface(backup.book));
         setChapterFeedback(null);
+        setCriticFeedback(null);
       });
       localStorage.setItem(LAST_BOOK_KEY, backup.book.id);
       recordLastJsonBackup(backup.book.id, new Date().toISOString());
@@ -815,6 +825,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         setChapterIdState(sortedChapters(book)[0]?.id ?? null);
         setSurface(openingSurface(book));
         setChapterFeedback(null);
+        setCriticFeedback(null);
       });
       localStorage.setItem(LAST_BOOK_KEY, book.id);
       setError(null);
@@ -833,6 +844,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
           setChapterIdState(null);
           setSurface("brainstorm");
           setChapterFeedback(null);
+          setCriticFeedback(null);
         });
       }
       await refresh();
@@ -2107,6 +2119,70 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   }, [busy, reviewModel, models.length, ollamaError]);
 
   /**
+   * One AI call per selected persona (roadmap-ideas.md #50), run in
+   * parallel — each reads the same chapter prose with its own voice and
+   * its own, separate quote-and-observation list. The author picks which
+   * personas run each time (checkbox setup card), so the cost is theirs to
+   * choose; an empty selection never reaches here (the setup card disables
+   * the run button). If any one persona's call fails, the whole run
+   * surfaces that error rather than silently dropping a voice.
+   */
+  const runCritics = useCallback(
+    async (personas: CriticPersonaId[]) => {
+      const current = bookRef.current;
+      const id = chapterRef.current;
+      if (!current || !id || busy || personas.length === 0) return false;
+      const chapter = current.chapters.find((item) => item.id === id);
+      if (!chapter?.prose.trim()) {
+        setError(STORE_ERROR.analyzeEmpty);
+        return false;
+      }
+      if (models.length === 0) {
+        setError(ollamaError ?? STORE_ERROR.noModel);
+        return false;
+      }
+
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
+      setBusy("critics");
+      setError(null);
+      try {
+        const userPrompt = criticUserPrompt(current, chapter);
+        const results = await Promise.all(
+          personas.map(async (persona) => {
+            const messages: PromptDebugMessage[] = [
+              { role: "system", content: CRITIC_SYSTEM_PROMPTS[persona] },
+              { role: "user", content: userPrompt }
+            ];
+            recordPrompt("critics", reviewModel, messages);
+            const raw = await makeProvider(reviewModel).chat({
+              messages,
+              temperature: 0.3,
+              maxTokens: CRITIC_MAX_TOKENS,
+              signal: abort.signal
+            });
+            recordPromptResponse(raw);
+            return parseCriticFeedback(raw, chapter.prose, persona);
+          })
+        );
+        setCriticFeedback({ chapterId: id, items: results.flat() });
+        return true;
+      } catch (err) {
+        if ((err as { name?: string }).name === "AbortError") return false;
+        setError(ollamaHint(err));
+        return false;
+      } finally {
+        setBusy(null);
+        abortRef.current = null;
+      }
+    },
+    [busy, reviewModel, models.length, ollamaError]
+  );
+
+  const dismissCriticFeedback = useCallback(() => setCriticFeedback(null), []);
+
+  /**
    * Generates a Polish candidate but does not write it anywhere — unlike
    * Draft/Recast, which stream straight into the live chapter, Polish is
    * an aggressive cut-and-rewrite pass the author needs to see before it
@@ -3323,6 +3399,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     draftAwaiting,
     error,
     chapterFeedback,
+    criticFeedback,
     polishDraft,
     modelAsides,
     lastPrompt,
@@ -3400,6 +3477,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     stopDraft,
     extractChapter,
     analyzeChapter,
+    runCritics,
+    dismissCriticFeedback,
     startProofread,
     startDevelopmentalAnalysis,
     generateIllustrationPrompt,

@@ -22,6 +22,7 @@ export type PromptOperation =
   | "paragraph-break"
   | "extract"
   | "analyze"
+  | "critics"
   | "illustrate"
   | "proofread"
   | "translate"
