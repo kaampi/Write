@@ -1076,6 +1076,19 @@ den "spel din berättelse"-nischen SillyTavern (och delvis Campfire)
 redan täcker, möjligen med någon typ av "skapa bok"-funktion. Tas i
 Sandbox-projektet vid ett senare tillfälle — inget att bygga här.
 
+**Tillägg (2026-10-26): Aventuras hör hit, inte i StoryBook AI:s egen
+konkurrensbevakning.** En testare rapporterade om Aventuras
+(github.com/AventurasTeam/Aventuras — Tauri/SvelteKit, AGPL-3.0),
+imponerad av dess lorebook-agent och "peka på vad som helst, beskriv
+ändringen, godkänn ett utkast"-verktyg (The Vault). Vid granskning
+visar sig Aventuras vara turn-baserad interaktiv fiktion/textäventyr
+med SillyTavern-import, flera moln-leverantörer (inte lokal-first),
+och lorebook-poster som stödjer spel-data (t.ex. "Statistics: Speed
+8") — samma "spela sin värld"-nisch som ovan, inte StoryBook AI:s
+"skriva en berättelse"-nisch. Hör hemma som referens i Sandbox-
+projektet när SandboxAI:s egen konkurrensbild tas upp där, inte som
+en StoryBook AI-konkurrent.
+
 ### 29. ~~Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok~~ ❌ struken
 
 **Struken (2026-10-13).** Mats: det här täcks nu av ett eget, redan
