@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.190
+Status: living document, v1.0.191
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9307,6 +9307,37 @@ med bara en persona vald, för att bekräfta att en-av-tre fungerar lika
 bra som alla-tre.
 
 v1.0.189 → v1.0.190.
+
+**Ändringslogg v1.0.191 (2026-10-26): Kapitelradens ⚙️/🎬-emoji blev
+egna SVG-ikoner.**
+
+Mats: "Jag tänker på de ikoner som är bakom kapitlen.. Visst är de
+typ lila?" Kollade koden: kugghjuls- och klappbräde-ikonerna i
+Kapitel-listans radverktyg (`chapter-row-tools` i `Editor.tsx`) var
+rena färgemoji (⚙️/🎬), vars färg kommer helt från OS:ets/webbläsarens
+eget emoji-typsnitt — aldrig något appens egen `color: var(--text-dim)`
+faktiskt styr. Chevronen (▾) är däremot en vanlig textglyf som redan
+följer temat korrekt, lämnad orörd. Mats bekräftade efteråt att
+ikonerna även var suddiga på hans skärm — ett annat symptom av samma
+sak (färgemoji skalar sämre vid liten storlek än ett enkelt SVG-streck).
+
+- `Editor.tsx`: två nya line-art-SVG:er (`SETTINGS_ICON`/`SCENES_ICON`),
+  samma `viewBox="0 0 24 24" fill="none" stroke="currentColor"
+  strokeWidth="1.5"`-stil som `QUICKSTART_ICONS` i `QuickstartCards.tsx`
+  redan etablerat — ett kugghjul och en enkel klappbräde-approximation
+  (filmruta med hack upptill). Två stale kodkommentarer som nämnde
+  emojin uppdaterade till att beskriva knapparna istället.
+- `styles.css`: `.icon-button svg { width: 0.95rem; height: 0.95rem;
+  display: block; }` — storlek matchande den tidigare emoji-renderingen.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1182 test,
+oförändrat — ren UI-ändring, ingen ny logik) grön. `npm run build`
+rent. Playwright-skärmdumpar i båda temalägena (upptäckte på vägen
+att temaknappens etikett namnger läget man BYTER TILL, inte det
+nuvarande — "LIGHT" syns när appen redan är mörk) bekräftade att
+ikonerna renderar skarpt och grått i båda, aldrig lila.
+
+v1.0.190 → v1.0.191.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

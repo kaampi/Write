@@ -528,6 +528,12 @@ textarea:focus-visible,
   padding: 0.25rem 0.4rem;
 }
 
+.icon-button svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+}
+
 .text-button:hover,
 .icon-button:hover {
   color: var(--text);

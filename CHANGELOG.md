@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.191] - 2026-10-26
+
+### Fixed
+- Replaced the chapter row's settings (⚙️) and scenes (🎬) color-emoji icons with the app's own line-art SVGs — the emoji rendered blurry and could pick up an unintended color tint from the OS/browser's own emoji font, neither of which the app's theme ever controlled.
+
 ## [1.0.190] - 2026-10-26
 
 ### Added

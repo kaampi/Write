@@ -138,6 +138,28 @@ import { PromptInspectorCard } from "./PromptInspector";
 import type { FindOccurrence } from "@core/findReplace";
 import { count, format, STORE_ERROR, translateError, type Messages, useLocale } from "./i18n";
 
+/**
+ * Line-art replacements for the chapter row's settings/scenes emoji — same
+ * sketched-single-stroke style as QUICKSTART_ICONS (QuickstartCards.tsx).
+ * Mats: the emoji rendered blurry and an unintended purple on his screen —
+ * both are font/OS rendering quirks of color emoji, not something the app's
+ * own theme controls, so a plain `currentColor` stroke icon sidesteps both.
+ */
+const SETTINGS_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+);
+
+const SCENES_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3 8.5l1.3-3.3a1 1 0 0 1 .93-.63H19a1 1 0 0 1 1 1V8.5" />
+    <path d="M3 8.5h18V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8.5z" />
+    <path d="M7 4.9L8.6 8.5M12 4.6l1.6 3.9M16.8 4.6l1.7 3.9" />
+  </svg>
+);
+
 function craftCue(book: CraftFields, chapter: ChapterCraft, m: Messages): string {
   if (!hasCraftOverride(chapter)) return "";
   const resolved = resolveCraft(book, chapter);
@@ -653,7 +675,7 @@ export function Editor() {
     surface === "chapter" && chapterId ? [chapterId] : []
   );
   /**
-   * Chapter settings and Scenes (⚙️/🎬 on each row in the Chapters rail) used
+   * Chapter settings and Scenes (the settings/scenes icon buttons on each row in the Chapters rail) used
    * to live inline above the prose, pushing it down whenever opened — Mats
    * wanted something that "lägger sig ovanpå manuskriptet" (lays on top of
    * the manuscript) instead, so both now open as a floating popover anchored
@@ -1527,7 +1549,7 @@ export function Editor() {
                     aria-expanded={chapterPopover?.chapterId === item.id && chapterPopover.kind === "settings"}
                     onClick={(event) => openChapterPopover(event, item.id, "settings")}
                   >
-                    ⚙️
+                    {SETTINGS_ICON}
                   </button>
                   <button
                     type="button"
@@ -1537,7 +1559,7 @@ export function Editor() {
                     aria-expanded={chapterPopover?.chapterId === item.id && chapterPopover.kind === "scenes"}
                     onClick={(event) => openChapterPopover(event, item.id, "scenes")}
                   >
-                    🎬
+                    {SCENES_ICON}
                   </button>
                   {chapters.length > 1 ? (
                     <button
@@ -1901,7 +1923,7 @@ export function Editor() {
         ) : (
           <main className="manuscript" style={manuscriptBackgroundStyle(book.editor_background)}>
             <div className="chapter-head">
-              {/* Chapter settings and Scenes now live in the ⚙️/🎬 popover rendered below, not inline here — see chapterPopover's own comment. */}
+              {/* Chapter settings and Scenes now live in the settings/scenes popover rendered below, not inline here — see chapterPopover's own comment. */}
               <div className="chapter-head-inner">
                 <input
                   className="chapter-title"
