@@ -1,5 +1,12 @@
-import { describe, expect, it } from "vitest";
-import { relationshipMirrorDraft, withRelationshipMirror, withRelationshipMirrorFor } from "@core/relationshipMirror";
+import { describe, expect, it, vi } from "vitest";
+import {
+  relationshipMirrorDraft,
+  relationshipMirrorDraftAI,
+  withRelationshipMirror,
+  withRelationshipMirrorAI,
+  withRelationshipMirrorFor,
+  withRelationshipMirrorForAI
+} from "@core/relationshipMirror";
 import type { NarrativeFact } from "@core/NarrativeFact";
 import type { EntityKind } from "@core/bibleGroups";
 
@@ -112,5 +119,91 @@ describe("withRelationshipMirrorFor", () => {
       kinds
     );
     expect(next.some((row) => row.entity_ref === "erik" && row.status === "ai_proposed")).toBe(true);
+  });
+});
+
+describe("relationshipMirrorDraftAI", () => {
+  it("uses the model's inverted phrasing instead of the mechanical name-swap", async () => {
+    // The tester's own report: Amber's "reluctant mentor to Wick" was mirroring onto
+    // Wick's card as "reluctant mentor to Amber" — same role, wrong person, because the
+    // mechanical version only swaps the name and never flips a directional role.
+    const facts = [lockedIdentity("amber", "Amber"), lockedIdentity("wick", "Wick")];
+    const fact = lockedRelationship("amber", "Amber", "reluctant mentor to Wick");
+    const chat = vi.fn().mockResolvedValue("reluctant student of Amber");
+    const draft = await relationshipMirrorDraftAI(fact, [...facts, fact], kinds, chat);
+    expect(draft).toEqual({
+      entity_ref: "wick",
+      entity_label: "Wick",
+      predicate: "core.relationship",
+      value: "reluctant student of Amber"
+    });
+    expect(chat).toHaveBeenCalledTimes(1);
+  });
+
+  it("falls back to the mechanical substitution when the model call throws", async () => {
+    const facts = [lockedIdentity("rose", "Rose"), lockedIdentity("amber", "Amber")];
+    const fact = lockedRelationship("rose", "Rose", "Amber's mother");
+    const chat = vi.fn().mockRejectedValue(new Error("model unreachable"));
+    const draft = await relationshipMirrorDraftAI(fact, [...facts, fact], kinds, chat);
+    expect(draft).toEqual({
+      entity_ref: "amber",
+      entity_label: "Amber",
+      predicate: "core.relationship",
+      value: "Rose's mother"
+    });
+  });
+
+  it("falls back to the mechanical substitution when the model returns nothing usable", async () => {
+    const facts = [lockedIdentity("anna", "Anna"), lockedIdentity("erik", "Erik")];
+    const fact = lockedRelationship("anna", "Anna", "Met Erik at the docks ten years ago");
+    const chat = vi.fn().mockResolvedValue("   ");
+    const draft = await relationshipMirrorDraftAI(fact, [...facts, fact], kinds, chat);
+    expect(draft?.value).toBe("Met Anna at the docks ten years ago");
+  });
+
+  it("strips surrounding quotes the model adds around its answer", async () => {
+    const facts = [lockedIdentity("amber", "Amber"), lockedIdentity("wick", "Wick")];
+    const fact = lockedRelationship("amber", "Amber", "reluctant mentor to Wick");
+    const chat = vi.fn().mockResolvedValue('"reluctant student of Amber"');
+    const draft = await relationshipMirrorDraftAI(fact, [...facts, fact], kinds, chat);
+    expect(draft?.value).toBe("reluctant student of Amber");
+  });
+
+  it("does nothing for a non-relationship predicate, same as the mechanical version", async () => {
+    const facts = [lockedIdentity("anna", "Anna"), lockedIdentity("erik", "Erik")];
+    const fact = { ...lockedRelationship("anna", "Anna", "Met Erik at the docks"), predicate: "core.identity" as const };
+    const chat = vi.fn();
+    expect(await relationshipMirrorDraftAI(fact, [...facts, fact], kinds, chat)).toBeUndefined();
+    expect(chat).not.toHaveBeenCalled();
+  });
+});
+
+describe("withRelationshipMirrorAI / withRelationshipMirrorForAI", () => {
+  it("queues the AI-inverted claim as a pending proposal, never locked directly", async () => {
+    const facts = [lockedIdentity("amber", "Amber"), lockedIdentity("wick", "Wick")];
+    const fact = lockedRelationship("amber", "Amber", "reluctant mentor to Wick");
+    const chat = vi.fn().mockResolvedValue("reluctant student of Amber");
+    const next = await withRelationshipMirrorAI([...facts, fact], fact, kinds, chat);
+    const mirrored = next.find((row) => row.entity_ref === "wick" && row.predicate === "core.relationship");
+    expect(mirrored?.status).toBe("ai_proposed");
+    expect(mirrored?.value).toBe("reluctant student of Amber");
+  });
+
+  it("finds the freshly-locked fact by its claim and mirrors it with the AI rewrite", async () => {
+    const facts = [lockedIdentity("rose", "Rose"), lockedIdentity("amber", "Amber")];
+    const fact = lockedRelationship("rose", "Rose", "Amber's mother");
+    const applied = [...facts, fact];
+    const chat = vi.fn().mockResolvedValue("daughter of Rose");
+    const next = await withRelationshipMirrorForAI(applied, { entity_ref: "rose", predicate: "core.relationship", value: "Amber's mother" }, kinds, chat);
+    const mirrored = next.find((row) => row.entity_ref === "amber" && row.predicate === "core.relationship");
+    expect(mirrored?.value).toBe("daughter of Rose");
+  });
+
+  it("no-ops without calling the model when the matching claim never landed as locked truth", async () => {
+    const facts = [lockedIdentity("anna", "Anna"), lockedIdentity("erik", "Erik")];
+    const chat = vi.fn();
+    const next = await withRelationshipMirrorForAI(facts, { entity_ref: "anna", predicate: "core.relationship", value: "Never established" }, kinds, chat);
+    expect(next).toBe(facts);
+    expect(chat).not.toHaveBeenCalled();
   });
 });

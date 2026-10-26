@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.188] - 2026-10-26
+
+### Fixed
+- Locking a relationship fact that names another character (e.g. "reluctant mentor to Wick" on Amber's card) used to suggest the exact same wording on the other character's card with just the name swapped — "reluctant mentor to Amber" on Wick's, same role, backwards. A directional relationship (mentor/mentee, parent/child) needs its role inverted, not just its name swapped; a symmetric one ("met at the docks") didn't have this problem. The mirrored suggestion is now drafted by the Review model so it reads correctly from the other character's point of view, with the old mechanical name-swap kept as the fallback if that call fails or returns nothing usable — the suggestion still lands in the review queue either way, never locked automatically.
+
 ## [1.0.187] - 2026-10-26
 
 ### Added

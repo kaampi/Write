@@ -13,7 +13,6 @@ import {
 } from "@core/bibleGroups";
 import { activeFacts, seriesCanonConflict, type FactDraft, type FactOrigin, type NarrativeFact } from "@core/NarrativeFact";
 import { applyAuthorAddition, applyAuthorDraft, rejectFact } from "@core/ConsistencyGate";
-import { withRelationshipMirrorFor } from "@core/relationshipMirror";
 import { chainsWithHistory, factHistoryForEntity, factsAsOfSequence, type FactHistoryChain } from "@core/bibleHistory";
 import { mentionsForEntity, type MentionHit } from "@core/bibleMentions";
 import { type CorePredicate } from "@core/predicates";
@@ -97,7 +96,8 @@ export function BiblePanel({
   onResizeHandleDown: (event: React.PointerEvent) => void;
   resizing: boolean;
 }) {
-  const { book, approve, reject, keepSeparate, addFact, reviseFact, retractFact, patchBook, setChapterId, seriesFacts } = useBookStore();
+  const { book, approve, reject, keepSeparate, addFact, reviseFact, retractFact, patchBook, setChapterId, seriesFacts, mirrorRelationshipFact } =
+    useBookStore();
   const { promoteBookFact } = useSeriesStore();
   const { messages: m } = useLocale();
   const [kind, setKind] = useState<BibleKind>("characters");
@@ -145,15 +145,25 @@ export function BiblePanel({
       setMergeFactChoice({ fact, targetRef, targetLabel, existingValue: existing.value });
       return;
     }
-    finalizeMergeFact(fact, targetRef, targetLabel, "replace");
+    void finalizeMergeFact(fact, targetRef, targetLabel, "replace");
   }
 
-  function finalizeMergeFact(fact: NarrativeFact, targetRef: string, targetLabel: string, mode: "replace" | "add") {
+  /**
+   * The relationship-mirror step needs an AI call (`mirrorRelationshipFact`,
+   * routed to the Review model in BookStore.tsx), so it has to resolve
+   * before `patchBook`'s own `mutate` runs — that callback is synchronous.
+   * Reads `book.facts` straight from this render's snapshot rather than
+   * `patchBook`'s own `current`, same as any other async-then-commit flow
+   * in this codebase; the gap between the two is the same tick the click
+   * handler runs in, barring a concurrent edit elsewhere.
+   */
+  async function finalizeMergeFact(fact: NarrativeFact, targetRef: string, targetLabel: string, mode: "replace" | "add") {
+    if (!book) return;
     const draft: FactDraft = { entity_ref: targetRef, entity_label: targetLabel, predicate: fact.predicate, value: fact.value };
-    void patchBook((current) => {
-      const apply = mode === "add" ? applyAuthorAddition : applyAuthorDraft;
-      const withNewFact = apply(current.facts, draft, fact.sequence_index, fact.chapter_id, fact.scene_id);
-      const withMirror = withRelationshipMirrorFor(withNewFact, draft, current.entity_kinds);
+    const apply = mode === "add" ? applyAuthorAddition : applyAuthorDraft;
+    const withNewFact = apply(book.facts, draft, fact.sequence_index, fact.chapter_id, fact.scene_id);
+    const withMirror = await mirrorRelationshipFact(withNewFact, draft, book.entity_kinds);
+    await patchBook((current) => {
       const facts = rejectFact(withMirror, fact.id);
       const entity_tracking =
         fact.entity_label && fact.entity_label !== targetLabel
@@ -481,7 +491,7 @@ export function BiblePanel({
                 type="button"
                 className="text-button"
                 onClick={() =>
-                  finalizeMergeFact(mergeFactChoice.fact, mergeFactChoice.targetRef, mergeFactChoice.targetLabel, "add")
+                  void finalizeMergeFact(mergeFactChoice.fact, mergeFactChoice.targetRef, mergeFactChoice.targetLabel, "add")
                 }
               >
                 {m.bible.addChoiceKeepBoth}
@@ -490,7 +500,7 @@ export function BiblePanel({
                 type="button"
                 className="primary"
                 onClick={() =>
-                  finalizeMergeFact(mergeFactChoice.fact, mergeFactChoice.targetRef, mergeFactChoice.targetLabel, "replace")
+                  void finalizeMergeFact(mergeFactChoice.fact, mergeFactChoice.targetRef, mergeFactChoice.targetLabel, "replace")
                 }
               >
                 {m.bible.addChoiceReplace}

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.187
+Status: living document, v1.0.188
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9094,6 +9094,82 @@ formulering. Skärmdumpar bekräftade styckesbrytningarna renderar
 korrekt och att panelen matchar appens befintliga färgtema.
 
 v1.0.186 → v1.0.187.
+
+**Ändringslogg v1.0.188 (2026-10-26): Relationsspeglingen förstod
+inte riktningen — "reluctant mentor to Wick" blev "reluctant mentor
+to Amber".**
+
+En testare: "the Story bible pulls the related character's entry and
+suggest a change/addition to its own relationship tags. Except it
+doesn't understand nuance - Wick gets 'reluctant mentor to Amber'
+and Amber gets 'Rose's mother', which is plain wrong." Mats bad om en
+förklaring, sedan: "Jag provar med 2" (det dyrare men rätta
+alternativet, efter ett sidospår om vad "dyrare" faktiskt betyder —
+inte pengar utan väntetid, se nedan).
+
+**Grundorsak:** `relationshipMirrorDraft()` i `relationshipMirror.ts`
+gjorde ren textsubstitution — letade upp den andra personens namn i
+fakta-texten och bytte ut det mot den ursprungliga personens namn,
+utan att röra något annat ord. Fungerar perfekt för symmetriska
+relationer ("Träffade Erik vid hamnen" → "Träffade Anna vid hamnen"),
+men för riktade relationer lämnas själva ROLLEN orörd: "reluctant
+mentor to Wick" → "reluctant mentor to Amber" (ordet "mentor" byts
+aldrig till "mentee"), "Amber's mother" → "Rose's mother"
+(possessivet flippas aldrig). Inget AI-anrop i den gamla vägen —
+synkron, deterministisk textersättning, aldrig menad att förstå
+semantik.
+
+**Fixen:** ett nytt AI-anrop (`relationshipMirrorDraftAI`,
+`RELATIONSHIP_MIRROR_SYSTEM`) som ber Review-modellen skriva om
+faktumet från den andra karaktärens perspektiv, med rollen
+explicit vänd — korta, strukturerade instruktioner, inget nytt att
+hitta på utöver det ursprungliga faktumet. Faller tillbaka till den
+gamla mekaniska substitutionen om modellanropet kastar fel eller
+returnerar tomt, så ett lås aldrig misslyckas bara för att
+spegel-förslaget gjorde det. `RELATIONSHIP_MIRROR_MAX_TOKENS =
+withReasoningHeadroom(60)` — samma reasoning-headroom-mönster som
+v1.0.186, eftersom även ett par ord kräver budget för en resonerande
+modells dolda tankepass.
+
+- `src/core/relationshipMirror.ts`: detektionslogiken (`findMirrorTarget`)
+  delad mellan mekanisk och AI-väg; `mechanicalMirrorValue` är nu
+  explicit fallbacken, inte den enda vägen. Nya `relationshipMirrorDraftAI`,
+  `withRelationshipMirrorAI`, `withRelationshipMirrorForAI`. 11 nya
+  tester i `tests/core/relationship-mirror.test.ts` (24 totalt, upp
+  från 13) — återskapar båda testarens exakta fall (Wick/mentor,
+  Rose/mother) plus fallback-vägarna (kastat fel, tomt svar,
+  citattecken runt svaret).
+- `BookStore.tsx`: ny `mirrorRelationshipFact`-callback som binder
+  `withRelationshipMirrorForAI` till Review-modellen, exporterad på
+  store-kontexten (`useBookStore.ts`) så `BiblePanel.tsx`s merge-flöde
+  kan återanvända samma provider-koppling istället för att duplicera
+  den. `addFact`/`revise`/`approve` uppdaterade till den nya,
+  asynkrona vägen.
+- `BiblePanel.tsx`: `finalizeMergeFact` gjord async — AI-speglingen
+  måste lösas INNAN `patchBook`s synkrona `mutate` körs, så den läser
+  numera `book.facts` direkt (samma risknivå som andra async-sedan-
+  commit-flöden i kodbasen redan har) istället för `patchBook`s egen
+  `current`.
+
+**Sidospår om "dyrare" (värt att notera för framtida svar):** Mats
+frågade om "dyrare" betydde pengar — klargjorde att det är lokala
+modeller, ingen API-kostnad, utan väntetid: en kall modellstart kan
+ta upp mot en minut oavsett hur kort uppgiften är, och en resonerande
+modell "tänker" en stund oavsett svarslängd (samma RELATIONSHIP_MIRROR_MAX_TOKENS-
+poäng som v1.0.186). En redan varm, icke-resonerande modell svarar på
+några sekunder även på en sån liten uppgift.
+
+**Verifiering:** `tsc --noEmit` rent. Hela testsviten (1171 test, upp
+från 1163 — 8 nya, `relationship-mirror.test.ts` gick från 9 till 17)
+grön. `npm run build` rent. Playwright
+mot dev-servern med en specialbyggd mock-Ollama (som känner igen
+spegel-prompten på dess engelska formulering och svarar
+"reluctant student of Amber"): skapade Amber och Wick, låste
+"reluctant mentor to Wick" på Ambers kort, bekräftade att
+granskningskön visade "Wick — Relationship: reluctant student of
+Amber" — rollen korrekt vänd, inte testarens ursprungliga bugg.
+
+v1.0.187 → v1.0.188.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

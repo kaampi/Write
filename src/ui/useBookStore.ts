@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import type { Book, BookSummary, EditorSurface } from "@core/BookSchema";
-import type { BibleKind } from "@core/bibleGroups";
+import type { BibleKind, EntityKind } from "@core/bibleGroups";
 import type { AskManuscriptAnswer } from "@core/askManuscript";
 import type { InterviewMessage } from "@core/characterInterview";
 import type { BrainstormChatMessage } from "@core/brainstorm";
@@ -184,6 +184,11 @@ export type BookStoreValue = {
   approve: (factId: string, value?: string) => Promise<void>;
   reject: (factId: string) => Promise<void>;
   keepSeparate: (factId: string, value?: string) => Promise<void>;
+  mirrorRelationshipFact: (
+    facts: NarrativeFact[],
+    match: { entity_ref: string; predicate: CorePredicate; value: string },
+    kinds: EntityKind[]
+  ) => Promise<NarrativeFact[]>;
 };
 
 export const BookStoreContext = createContext<BookStoreValue | null>(null);

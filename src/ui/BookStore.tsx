@@ -16,7 +16,7 @@ import { applyAssembledBrainstorm } from "@core/brainstormNotes";
 import { applyAuthorAddition, applyAuthorDraft, applyExtractorDrafts, approveFact, keepFactSeparate, rejectFact, retractFact, reviseFact } from "@core/ConsistencyGate";
 import { applyMarkerConversion, DEFAULT_MARKER_CONVERSION_RULES, type MarkerConversionRule } from "@core/markerConversion";
 import { smartenQuotes } from "@core/smartQuotes";
-import { withRelationshipMirrorFor } from "@core/relationshipMirror";
+import { withRelationshipMirrorForAI } from "@core/relationshipMirror";
 import { chapterScenes, mergeSceneWithNext, replaceSceneProse, sceneIdRemovedByMerge } from "@core/bookScene";
 import {
   ASK_MANUSCRIPT_SYSTEM,
@@ -29,7 +29,7 @@ import {
 } from "@core/askManuscript";
 import { ASK_ABOUT_PASSAGE_SYSTEM, askAboutChapterUserPrompt, askAboutSelectionUserPrompt } from "@core/askAboutPassage";
 import { characterInterviewSystem, type InterviewMessage } from "@core/characterInterview";
-import type { BibleKind } from "@core/bibleGroups";
+import type { BibleKind, EntityKind } from "@core/bibleGroups";
 import { profileFor, upsertCharacterProfile } from "@core/characterProfile";
 import {
   beatPlotlines,
@@ -185,6 +185,14 @@ function polishMaxTokens(prose: string): number {
  * on top of the report itself.
  */
 const ANALYZE_MAX_TOKENS = withReasoningHeadroom(1800);
+
+/**
+ * The relationship-mirror rewrite (see `relationshipMirror.ts`) is a single
+ * short phrase, not a report — but a reasoning model still spends its own
+ * tokens thinking before it writes those few words, same as everywhere else
+ * `withReasoningHeadroom` is used.
+ */
+const RELATIONSHIP_MIRROR_MAX_TOKENS = withReasoningHeadroom(60);
 
 function readEngine(): LlmEngine {
   return localStorage.getItem(ENGINE_KEY) === "openai-compatible" ? "openai-compatible" : "ollama";
@@ -3194,6 +3202,22 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     void startDevelopmentalAnalysis();
   }, [book?.id, book?.developmental?.status, busy, models.length, startDevelopmentalAnalysis]);
 
+  /**
+   * Shared by every call site that needs the relationship-mirror suggestion
+   * — wires `withRelationshipMirrorForAI` to the Review model so the mirror
+   * is written from the other character's point of view, not just the
+   * names swapped (see `relationshipMirror.ts`). Exposed on the store so
+   * BiblePanel's merge flow can use the same provider wiring as the
+   * in-store callbacks below, instead of duplicating it.
+   */
+  const mirrorRelationshipFact = useCallback(
+    async (facts: NarrativeFact[], match: { entity_ref: string; predicate: CorePredicate; value: string }, kinds: EntityKind[]) =>
+      withRelationshipMirrorForAI(facts, match, kinds, (messages) =>
+        makeProvider(reviewModel).chat({ messages, temperature: 0.2, maxTokens: RELATIONSHIP_MIRROR_MAX_TOKENS })
+      ),
+    [reviewModel]
+  );
+
   const addFact = useCallback(
     async (input: { label: string; predicate: CorePredicate; value: string; mode?: "replace" | "add" }) => {
       const current = bookRef.current;
@@ -3212,10 +3236,10 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         input.mode === "add"
           ? applyAuthorAddition(current.facts, draft, chapter?.sequence_index ?? 0, chapter?.id, sceneId)
           : applyAuthorDraft(current.facts, draft, chapter?.sequence_index ?? 0, chapter?.id, sceneId);
-      const facts = withRelationshipMirrorFor(applied, draft, current.entity_kinds);
+      const facts = await mirrorRelationshipFact(applied, draft, current.entity_kinds);
       await flushSave(touch(current, { facts }));
     },
-    [flushSave]
+    [flushSave, mirrorRelationshipFact]
   );
 
   const revise = useCallback(
@@ -3225,11 +3249,11 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       const target = current.facts.find((fact) => fact.id === factId);
       const revised = reviseFact(current.facts, factId, value);
       const facts = target
-        ? withRelationshipMirrorFor(revised, { entity_ref: target.entity_ref, predicate: target.predicate, value }, current.entity_kinds)
+        ? await mirrorRelationshipFact(revised, { entity_ref: target.entity_ref, predicate: target.predicate, value }, current.entity_kinds)
         : revised;
       await flushSave(touch(current, { facts }));
     },
-    [flushSave]
+    [flushSave, mirrorRelationshipFact]
   );
 
   const retract = useCallback(
@@ -3250,7 +3274,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       const approved = approveFact(next, factId);
       const target = approved.find((fact) => fact.id === factId);
       const facts = target
-        ? withRelationshipMirrorFor(
+        ? await mirrorRelationshipFact(
             approved,
             { entity_ref: target.entity_ref, predicate: target.predicate, value: target.value },
             current.entity_kinds
@@ -3258,7 +3282,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         : approved;
       await flushSave(touch(current, { facts }));
     },
-    [flushSave]
+    [flushSave, mirrorRelationshipFact]
   );
 
   const reject = useCallback(
@@ -3400,7 +3424,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     retractFact: retract,
     approve,
     reject,
-    keepSeparate
+    keepSeparate,
+    mirrorRelationshipFact
   };
 
   return <BookStoreContext.Provider value={value}>{children}</BookStoreContext.Provider>;
