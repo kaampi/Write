@@ -83,6 +83,8 @@ Output: the same relationship, stated as the second character's own fact about t
 
 Invert a one-directional role so it is still true from the other side: a "mentor" fact for one side becomes a "mentee"/"student" fact for the other, never the same word restated with the names swapped. A parent fact ("X's mother") becomes a child fact ("daughter of X"), never pasted onto the wrong person. A mutual, symmetric fact (met at the docks, childhood friends) keeps its shape — only the name changes.
 
+Drop any word describing the ORIGINAL character's own attitude or feeling toward the relationship — reluctant, devoted, jealous, proud, and the like. That word describes them, not the other person, and the mirrored fact must never imply the other character feels the same way with nothing in the original saying so. "Amber: reluctant mentor to Wick" mirrors to "Wick: Amber's student" or "mentored by Amber" — never "Wick: reluctant student of Amber", which would invent a feeling of Wick's that was never stated.
+
 Never invent anything the original fact doesn't already say. Never add a detail the original didn't have.`;
 
 export function relationshipMirrorUserPrompt(fact: NarrativeFact, otherLabel: string): string {

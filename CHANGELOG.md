@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.189] - 2026-10-26
+
+### Fixed
+- The relationship-mirror rewrite from the previous release could still invent a feeling: "reluctant mentor to Wick" on Amber's card risked mirroring to "reluctant student of Amber" on Wick's — inverting the role correctly but implying Wick shares an attitude the original fact never stated (the reluctance was Amber's). The mirror prompt now explicitly drops a describing word about the original character's own attitude or feeling rather than carrying it onto the other side.
+
 ## [1.0.188] - 2026-10-26
 
 ### Fixed

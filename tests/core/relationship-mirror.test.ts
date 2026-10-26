@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  RELATIONSHIP_MIRROR_SYSTEM,
   relationshipMirrorDraft,
   relationshipMirrorDraftAI,
   withRelationshipMirror,
@@ -175,6 +176,26 @@ describe("relationshipMirrorDraftAI", () => {
     const chat = vi.fn();
     expect(await relationshipMirrorDraftAI(fact, [...facts, fact], kinds, chat)).toBeUndefined();
     expect(chat).not.toHaveBeenCalled();
+  });
+});
+
+describe("RELATIONSHIP_MIRROR_SYSTEM", () => {
+  it("warns against carrying the original character's own attitude onto the other side", () => {
+    // Mats's follow-up catch: "reluctant mentor to Wick" mirroring to "reluctant student of
+    // Amber" invents a feeling of Wick's the original fact never stated — the reluctance was
+    // Amber's. Only a prompt-level guard is possible here (no code path can judge this), so
+    // this just pins the instruction's presence, same pattern as INTERVIEW_EXTRACTOR_SYSTEM's
+    // own content assertions.
+    expect(RELATIONSHIP_MIRROR_SYSTEM).toContain("own attitude or feeling");
+    expect(RELATIONSHIP_MIRROR_SYSTEM).toContain("reluctant");
+  });
+
+  it("passes an attitude-free mirrored value through unchanged", async () => {
+    const facts = [lockedIdentity("amber", "Amber"), lockedIdentity("wick", "Wick")];
+    const fact = lockedRelationship("amber", "Amber", "reluctant mentor to Wick");
+    const chat = vi.fn().mockResolvedValue("Amber's student");
+    const draft = await relationshipMirrorDraftAI(fact, [...facts, fact], kinds, chat);
+    expect(draft?.value).toBe("Amber's student");
   });
 });
 

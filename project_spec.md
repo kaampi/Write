@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.188
+Status: living document, v1.0.189
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9170,6 +9170,57 @@ granskningskön visade "Wick — Relationship: reluctant student of
 Amber" — rollen korrekt vänd, inte testarens ursprungliga bugg.
 
 v1.0.187 → v1.0.188.
+
+**Ändringslogg v1.0.189 (2026-10-26): Uppföljning på v1.0.188 —
+rollen vändes rätt, men attityden följde ändå med.**
+
+Mats granskade resultatet och satte fingret på nästa lager av samma
+bugg: "En sak att fundera på är om Reluctant verkligen kan speglas.
+Att Wick är reluctant betyder inte att Amber är det?" — fast
+omvänt, som han syftade på: att Amber är motvillig säger inget om
+att Wick skulle vara det. Just det exempel min egen Playwright-
+verifiering i v1.0.188 körde ("reluctant student of Amber") hade
+redan detta fel inbyggt utan att jag såg det.
+
+**Grundorsak:** `RELATIONSHIP_MIRROR_SYSTEM` instruerade modellen
+att vända ROLLEN (mentor → mentee) men sa inget om att en känslo-/
+attitydbeskrivande kvalificerare ("reluctant", "devoted", "jealous")
+hör till ägaren av ursprungsfaktumet — inte till relationen i sig.
+Utan den varningen smög attityden med vid rollvändningen, exakt
+samma mekanism som gjorde v1.0.186/188 nödvändiga men ett steg
+djupare: inte längre "fel roll", utan "en påhittad känsla hos fel
+person".
+
+**Fixen (Mats: "Kör på 2" — släpp attitydordet som default, hellre
+än att försöka tillskriva det explicit):** ett nytt stycke i
+`RELATIONSHIP_MIRROR_SYSTEM` som uttryckligen säger åt modellen att
+droppa ett attityds-/känsloord om ORIGINALKARAKTÄRENS egen hållning
+— "Amber: reluctant mentor to Wick" ska spegla till "Wick: Amber's
+student" eller "mentored by Amber", aldrig "reluctant student of
+Amber". Ren promptändring, ingen ny kodväg — detta går inte att
+avgöra mekaniskt, bara styra via instruktionen.
+
+- `src/core/relationshipMirror.ts`: nytt stycke i
+  `RELATIONSHIP_MIRROR_SYSTEM`.
+- 2 nya tester i `tests/core/relationship-mirror.test.ts` (19
+  totalt, upp från 17) — samma mönster som
+  `INTERVIEW_EXTRACTOR_SYSTEM`s egna innehålls-tester redan
+  använder (`toContain` på instruktionstexten), plus ett test som
+  bekräftar att pipen inte rör en redan attityds-fri modellsträng.
+
+**Sidospår om "dyrare" fortsatte här:** ingen ny fråga den här
+gången, bara en bekräftelse att "Kör på 2" syftade på alternativ 2
+(släpp ordet) från den föregående diskussionen, inte en ny
+kostnadsfråga.
+
+**Verifiering:** `tsc --noEmit` rent. Hela testsviten (1173 test,
+upp från 1171) grön. `npm run build` rent. Ingen ny Playwright-
+körning — en mock kan bara eka vad jag själv hårdkodar i den, så den
+skulle inte testa modellens faktiska språkliga omdöme; mekanismen
+(spegelförslaget hamnar rätt i granskningskön) verifierades redan
+live i v1.0.188.
+
+v1.0.188 → v1.0.189.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
