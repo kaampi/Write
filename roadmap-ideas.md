@@ -56,6 +56,7 @@ inte en ensidig lista.
 | 51 | Valfritt moln-provider-stöd (BYO API-key) som tillval, lokal kvar som default | ⬜ ej påbörjad, medvetet inte nu — se nedan |
 | 52 | Developmental: bedöm öppningsscenens krok (obesvarad fråga/out-of-whack-händelse) specifikt | ⬜ ej påbörjad — se nedan |
 | 53 | Guiden: ny "Skrivtips"-kategori med skrivråd, inte verktygsdokumentation | ✅ byggd (v1.0.187) — se nedan |
+| 54 | Git-baserad fillagring/versionskontroll (StelaWare-jämförelse) | ⬜ arkitekturlucka, inte en idé att bygga — se nedan |
 
 Plus det egna designspåret ("Det enda stora arkitekturbeslutet" nedan,
 Scene/BookScene/NarrativeFact-gränsen) — ett öppet samtal, inte en
@@ -2726,6 +2727,58 @@ prova innan de investerar i en lokal uppsättning. Inte påbörjad —
 kräver åtminstone ett beslut om var nyckeln lagras (den får inte
 hamna i en molnbackup av appens data) och om det är värt att bryta
 "all data stannar lokalt"-löftet ens som ett tillval.
+
+---
+
+## Idéer från konkurrensjämförelse (StelaWare, 2026-10-26)
+
+Mats bad om en analys av stelaware.com (hämtad och sammanfattad, inte
+manuellt granskad källkod — det är ett skrivbordsverktyg utan öppen
+källkod tillgänglig att klona, till skillnad från Aventuras). Ett
+skrivbordsverktyg (Windows/Mac, gratis, inget konto) för långforms-
+skrivande, riktat främst mot romanförfattare men även journalister,
+manusförfattare och memoarförfattare.
+
+**Störst överlapp:** Memory (deras Story Bible-motsvarighet — en
+faktabas av personer/platser/fakta med låsbara namn så AI inte
+stavar om dem under Continue/Rewrite) och en egen Timeline-canvas.
+Båda begreppsmässigt mycket lika våra egna, fast deras Memory är
+enklare strukturerad (fria Markdown-sidor per karaktär, inte
+predikat/entity kinds som vårt `core.*`-system).
+
+**Störst arkitekturskillnad: rena Markdown-filer i ett git-repo,
+inte en databas.** "Characters are pages in the Characters folder,
+not a database." Det ger dem, i princip gratis via git: riktig
+versionshistorik per sida, grenar för alternativa utkast, och
+flerdators-synk (öppna samma projekt på en annan dator, välj vilken
+sida som vinner vid en konflikt). Vi löser motsvarande med en egen
+Backup/Restore-export och en egen History-funktion per kapitel —
+fungerar, men är inte samma sak som riktig versionskontroll eller
+multi-device-synk.
+
+**AI-hanteringen bekräftar en modell vi redan diskuterat men inte
+byggt:** lokal AI (Ollama) ingår i deras gratisnivå och kallas
+"fully private"; en kommande betalnivå lägger till molnmodeller
+(Claude/GPT/Gemini via egen API-nyckel) plus mobil-synk. Det är
+alltså precis punkt 51 (valfritt moln-provider-stöd) — fast som
+StelaWares HUVUDMODELL snarare än ett sidotillval, och med
+betalnivån byggd runt just moln-tillägget. Bekräftar att upplägget
+"lokal AI som grundnivå, moln som betald bekvämlighet" fungerar för
+någon annan, men ändrar inget i det beslut Mats redan tagit om punkt
+51 (medvetet inte nu).
+
+Övrigt: import från Scrivener/Word/Markdown, export via bundlad
+Pandoc till fler format än vår Publish-funktion (DOCX/EPUB/PDF/HTML/
+RTF/TXT), ett Screenplay-läge (annan medietyp, inte relevant att
+kopiera), ingen Linux-version nämnd (en lucka vi inte har).
+
+### 54. Git-baserad fillagring/versionskontroll — arkitekturlucka, inte en idé att bygga
+Noterad lucka från StelaWare-jämförelsen: riktig versionshistorik,
+grenar och flerdators-synk "på köpet" via git, istället för vår egna
+Backup/Restore + per-kapitel History. Inget beslut att bygga — skulle
+vara ett helt annat arkitekturval (fil-baserat, inte IndexedDB-baserat)
+och en mycket större omläggning än något annat i den här listan. Sparad
+som referens, inte en punkt med en tänkt lösning.
 
 ---
 
