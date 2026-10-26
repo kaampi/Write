@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.192
+Status: living document, v1.0.193
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9361,6 +9361,40 @@ kapitel (soptunnan visas bara när fler än ett kapitel finns) bekräftade
 skarp, grå rendering.
 
 v1.0.191 → v1.0.192.
+
+**Ändringslogg v1.0.193 (2026-10-26): Guide/Handbook-sidan saknade
+sidmarginaler helt.**
+
+Mats skickade en skärmdump: "Kan du fixa marginalerna på Guidesidan."
+Fliken "6. REVISE THE MANUSCRIPT" såg ut att kapas vid högerkanten.
+Reproducerade först i fel vy (Home-sidans modal, fungerade fint) och
+fick sedan leta efter rätt återskapning — editorns inbyggda
+Guide/Handbook-yta, nådd via "Guide" i topnaven när en bok är öppen
+(`store.showHandbook()`), ett annat UI-spår än modalen.
+
+**Grundorsak, bekräftad med `getComputedStyle` i en levande sida:**
+`<main className="manuscript guide-page">` i både `GuidePanel.tsx`
+och `HandbookPanel.tsx` hade `padding: 0px` — helt utan sidmarginal,
+till skillnad från varje annan läsvy i appen (Synopsis, Timeline,
+Development method), som alla också är `.manuscript` men dessutom
+bär `manuscript-inset`-klassen (`padding-left/right: 1.5rem` i
+`styles.css`). Guide/Handbook-sidorna fick aldrig den klassen när de
+byggdes — texten och flik-raden låg alltså bokstavligen klistrade mot
+både vänster- och högerrailens kant, inte bara "lite trångt".
+
+- `GuidePanel.tsx`/`HandbookPanel.tsx`: `className="manuscript
+  manuscript-inset guide-page"` — samma klass, ingen ny CSS behövdes.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1182 test,
+oförändrat) grön. `npm run build` rent. Playwright bekräftade med
+`getComputedStyle` att `.manuscript.guide-page` gick från `padding:
+0px` till `padding: 0px 24px` (1,5rem), och en skärmdump vid samma
+727px-bredd som Mats skickade visade flikraden med fullt andrum på
+båda sidor. Dubbelkollade även att Home-sidans modal (som redan hade
+egen kortpadding) inte fick dubbel marginal som ser fel ut — bara
+lite mer luft, ingen regression.
+
+v1.0.192 → v1.0.193.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

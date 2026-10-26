@@ -205,7 +205,7 @@ export function HandbookPanel() {
   const sectionsInCategory = HANDBOOK_SECTION_IDS.filter((id) => HANDBOOK_SECTION_CATEGORY[id] === category);
 
   return (
-    <main className="manuscript guide-page">
+    <main className="manuscript manuscript-inset guide-page">
       <h1 className="chapter-title">{m.handbook.title}</h1>
       <p className="synopsis-lede handbook-body">{m.handbook.intro}</p>
 

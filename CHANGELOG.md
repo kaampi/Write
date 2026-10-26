@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.193] - 2026-10-26
+
+### Fixed
+- The Guide/Handbook page had no side padding at all — text and the category tabs sat flush against both the left and right rail borders, unlike every other reading page (Synopsis, Timeline, Development method) which already gets breathing room on both sides. Added the same padding.
+
 ## [1.0.192] - 2026-10-26
 
 ### Fixed
