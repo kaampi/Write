@@ -9047,9 +9047,11 @@ v1.0.185 → v1.0.186.
 mockup till riktig funktion.**
 
 Mats: "Lägg in i Guiden. Både svensk och engelsk." Direkt uppföljning
-av artefakt-mockupen från föregående samtal (roadmap-ideas.md #38),
-byggd på de skrivvanor- och hantverksinsikter vi redan samlat in och
-Mats egen slutgiltiga text.
+av artefakt-mockupen från föregående samtal (roadmap-ideas.md #53 —
+numrerad om från #38 2026-10-26 när numret visade sig redan upptaget
+av den äldre lore-relevans-punkten, se den ändringsloggens egen
+notis), byggd på de skrivvanor- och hantverksinsikter vi redan
+samlat in och Mats egen slutgiltiga text.
 
 **Fel ställe, hittat och rättat innan commit:** byggde det först i
 `GuidePanel.tsx` (den ankar-styrda referens-guiden, bara nåbar via

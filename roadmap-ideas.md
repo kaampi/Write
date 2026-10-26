@@ -12,7 +12,7 @@ inte en ensidig lista.
 
 ## Läge just nu (uppdateras allteftersom)
 
-**Nästa i tur (Mats, 2026-10-26): 35 → 37 → 26.**
+**Nästa i tur (Mats, 2026-10-26): 50 → 52 → 26.**
 
 | # | Punkt | Läge |
 |---|-------|------|
@@ -52,10 +52,10 @@ inte en ensidig lista.
 | 32 | Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text | ⬜ ej påbörjad — se nedan |
 | 33 | Timeline som gantschema, ihopslaget med Plotlines | ✅ byggd som punktbaserad vy (v0.99.62) — se nedan |
 | 34 | Startskript för Mac och Linux (som `starta.bat`) | ✅ byggd (v0.99.71) — se nedan |
-| 35 | Flera distinkta "kritiker-personas" i en och samma granskningsvy | ⬜ ej påbörjad — se nedan |
-| 36 | Valfritt moln-provider-stöd (BYO API-key) som tillval, lokal kvar som default | ⬜ ej påbörjad, medvetet inte nu — se nedan |
-| 37 | Developmental: bedöm öppningsscenens krok (obesvarad fråga/out-of-whack-händelse) specifikt | ⬜ ej påbörjad — se nedan |
-| 38 | Guiden: ny "Skrivtips"-kategori med skrivråd, inte verktygsdokumentation | ⬜ ej påbörjad — se nedan |
+| 50 | Flera distinkta "kritiker-personas" i en och samma granskningsvy | ⬜ ej påbörjad — se nedan |
+| 51 | Valfritt moln-provider-stöd (BYO API-key) som tillval, lokal kvar som default | ⬜ ej påbörjad, medvetet inte nu — se nedan |
+| 52 | Developmental: bedöm öppningsscenens krok (obesvarad fråga/out-of-whack-händelse) specifikt | ⬜ ej påbörjad — se nedan |
+| 53 | Guiden: ny "Skrivtips"-kategori med skrivråd, inte verktygsdokumentation | ✅ byggd (v1.0.187) — se nedan |
 
 Plus det egna designspåret ("Det enda stora arkitekturbeslutet" nedan,
 Scene/BookScene/NarrativeFact-gränsen) — ett öppet samtal, inte en
@@ -835,9 +835,9 @@ kolumn under 960px bredd (`.editor-body` i `styles.css`).
 är lokal AI, ser inte varför man skulle sitta hemma med mobilen.
 Om/när vi öppnar för API kan mobilanpassning bli aktuellt...
 kanske." Så länge appen är lokal-first (se §6 i project_spec.md och
-punkt 36 ovan) sitter man vid samma dator som kör modellen — mobilen
+punkt 51 nedan) sitter man vid samma dator som kör modellen — mobilen
 har inget naturligt sammanhang att skriva i. Skulle kunna bli
-aktuellt igen OM punkt 36 (valfritt moln-provider-stöd) någonsin
+aktuellt igen OM punkt 51 (valfritt moln-provider-stöd) någonsin
 byggs, eftersom det är först då "skriva från telefonen var som helst"
 blir en verklig användarsituation — men inget beslut att bygga det
 heller, bara en förutsättning som då skulle finnas. Tidigare
@@ -2684,7 +2684,7 @@ text lämnar din dator, inga credits). Series-stödet vi redan har
 verkar stanna vid en bok, inget om gemensam canon över en serie. En
 idé värd att spara:
 
-### 35. Flera distinkta "kritiker-personas" i en och samma granskningsvy
+### 50. Flera distinkta "kritiker-personas" i en och samma granskningsvy
 OnixWrite erbjuder fem fasta kritiker-röster på samma kapitel
 ("Professional Critic", "Impatient Reader", "Pacing Critic", "Line
 Editor", "Confused Reader") istället för en enda sammanslagen
@@ -2699,7 +2699,7 @@ samma kapitel) — mer en UI-/produktfråga om värdet är tillräckligt
 stort för att motivera flera AI-anrop per granskning. Inte påbörjad,
 sparad som idé.
 
-### 36. Valfritt moln-provider-stöd (BYO API-key) — medvetet inte nu
+### 51. Valfritt moln-provider-stöd (BYO API-key) — medvetet inte nu
 Uppstod ur samma samtal: lokal-first (ingen text lämnar datorn, inga
 credits, inget konto) är appens tydligaste differentiering mot
 molntjänster som OnixWrite, och Mats vill inte släppa på den
@@ -2751,7 +2751,7 @@ AI-prompt. Insikterna, destillerade för framtida bruk:
   härnäst" fungerar på vilken bok som helst och känns därför som
   ingenting alls.
 
-### 37. Developmental: bedöm öppningsscenens krok specifikt
+### 52. Developmental: bedöm öppningsscenens krok specifikt
 Idén som uppstod ur diskussionen: inget i Analyze eller Developmental
 bedömer idag specifikt OM kapitel 1:s första scen faktiskt etablerar
 en obesvarad fråga som driver läsaren framåt — `show_vs_tell` (Analyze)
@@ -2774,7 +2774,7 @@ gång. Det är skälet till att kapitel 1 förtjänar ett eget, strängare
 kriterium istället för att bedömas med samma måttstock som alla andra
 kapitelöppningar.
 
-### 38. Guiden: ny "Skrivtips"-kategori
+### 53. Guiden: ny "Skrivtips"-kategori ✅ byggd (v1.0.187)
 Mats (2026-10-25): "Kanske vi ska planera för en tips och tankar
 kring skrivande? En del av Guiden kanske." Guiden idag är uteslutande
 "hur använder du appen" (`GUIDE_CATEGORY_IDS` i `GuidePanel.tsx`) —
