@@ -83,10 +83,17 @@ A record can reference `entityId` and `sourceRevision`; references never imply o
 CORE_DB_PATH=./core.db node packages/core-service/server.mjs provision storybook
 CORE_DB_PATH=./core.db node packages/core-service/server.mjs provision sandbox
 CORE_DB_PATH=./core.db node packages/core-service/server.mjs provision comic
+CORE_DB_PATH=./core.db node packages/core-service/server.mjs provision-admin
 CORE_DB_PATH=./core.db node packages/core-service/server.mjs
 ```
 
 Capture each generated token once and supply it as `Authorization: Bearer <token>` to that app. Provisioning is an administrator action performed outside the HTTP API. Store the tokens in an OS credential store, keep the SQLite file and token storage private to the local account, and never embed any token in frontend JavaScript. A same-user process with direct filesystem access to the DB remains outside this API's isolation boundary. Token rotation, OS-mediated app attestation, encrypted storage and multi-user installation are future integration work.
+
+### Separate local Core management
+
+The service now serves a small administration page at `http://127.0.0.1:43127/admin` (adjust the port if `CORE_PORT` differs). `provision-admin` creates an administrator credential in a separate SQLite table; app credentials cannot call `/admin/api/*`, and the administrator credential cannot act as Storybook, Sandbox or Comic at `/v1/*`. The page asks for the admin key and retains it only in the current JavaScript tab memory; closing or locking the tab clears it. The page itself contains no private data until authenticated. Admin paths reject foreign Host/Origin headers and use a restrictive Content Security Policy.
+
+The page persists a backup directory, backup encryption choice and count of unpinned archives to retain in Core's SQLite database. It can create a backup immediately, show files in that directory and verify a selected archive by restoring it into a disposable temporary directory and checking its manifest and SQLite integrity. It never overwrites the live database during verification. A recovery phrase for an encrypted backup is sent to the loopback service for that one action, never saved in settings or the browser; enter it again for later verification or restore. A mounted external drive or a folder synchronized by Nextcloud/Drive/OneDrive can be the destination. Direct provider sign-in and uploads are not implemented. The page has no scheduler yet; the existing `backup-schedule` CLI remains the scheduled option and uses its own environment settings and startup-provided phrase, separately from the page settings. A service restart retains the page settings but not a phrase. Restoring a service remains an offline CLI operation with a new destination directory.
 
 ### Data model and routes
 

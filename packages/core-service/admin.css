@@ -1,0 +1,29 @@
+:root { font-family: system-ui, sans-serif; color: #e9eceb; background: #101a1b; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 80% 0%, #1b3b37, transparent 38rem), #101a1b; }
+main { width: min(880px, calc(100% - 2rem)); margin: 3rem auto 5rem; }
+header { margin-bottom: 2rem; }
+.eyebrow { color: #a7ddbb; text-transform: uppercase; letter-spacing: .15em; font-size: .8rem; }
+h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); margin: .3rem 0; }
+h2 { margin: 0 0 1rem; font-size: 1.4rem; }
+h3 { margin: 0; }
+p { line-height: 1.55; color: #c9d5d0; }
+.card { background: #1c2a29; border: 1px solid #38534b; border-radius: 14px; padding: clamp(1rem, 3vw, 2rem); margin: 1rem 0; box-shadow: 0 12px 40px #0003; }
+form { display: grid; gap: 1rem; }
+label { display: grid; gap: .45rem; font-weight: 600; margin: .7rem 0; }
+input, select { width: 100%; border: 1px solid #6d8b80; background: #11201e; color: #fff; border-radius: 7px; padding: .7rem .8rem; font: inherit; }
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid #8ddab2; outline-offset: 2px; }
+button { background: #a7ddbb; color: #10211c; border: 0; border-radius: 7px; padding: .7rem 1rem; font: inherit; font-weight: 700; cursor: pointer; justify-self: start; }
+button:disabled { opacity: .55; cursor: wait; }
+button.secondary { background: transparent; border: 1px solid #719b85; color: #d7f1dd; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+.heading:first-child { margin-top: 0; }
+.hint { font-size: .9rem; margin: .2rem 0 1rem; }
+code { overflow-wrap: anywhere; color: #c7ead2; }
+#backups { list-style: none; padding: 0; margin: .7rem 0; max-height: 22rem; overflow: auto; }
+#backups li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 0; border-top: 1px solid #38534b; }
+#backups li span { overflow-wrap: anywhere; }
+#status { min-height: 1.5rem; }
+#status.error { color: #ffb6a4; }
+@media (max-width: 600px) { .two { grid-template-columns: 1fr; } #backups li { align-items: start; flex-direction: column; } }

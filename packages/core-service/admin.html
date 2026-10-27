@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Storybook Core · Hantering</title>
+  <link rel="stylesheet" href="/admin.css">
+  <script src="/admin.js" defer></script>
+</head>
+<body>
+  <main>
+    <header><span class="eyebrow">Lokal tjänst</span><h1>Storybook Core</h1><p>Backup för hela Core-databasen och dess media. Storybook, Sandbox och Comic behåller sina egna data och behörigheter.</p></header>
+    <section class="card" id="login-card">
+      <h2>Administratörsåtkomst</h2>
+      <p>Skapa en separat adminnyckel med <code>node packages/core-service/server.mjs provision-admin</code> och ange den här. Nyckeln sparas inte i webbläsaren.</p>
+      <form id="login-form"><label>Adminnyckel<input id="admin-token" type="password" autocomplete="off" required></label><button type="submit">Öppna Core-hantering</button></form>
+    </section>
+    <div id="controls" hidden>
+      <section class="card">
+        <div class="heading"><h2>Backupinställningar</h2><button id="lock" type="button" class="secondary">Lås</button></div>
+        <form id="settings-form">
+          <label>Backupmapp på den här datorn eller en monterad extern lagring<input id="backup-dir" type="text" required placeholder="Absolut sökväg till backupmappen"></label>
+          <div class="two">
+            <label>Kryptering<select id="encrypted"><option value="on">Kryptera backup</option><option value="off">Kryptera inte backup</option></select></label>
+            <label>Behåll senaste antal backuper<input id="keep" type="number" min="1" max="1000" value="10" required></label>
+          </div>
+          <p class="hint">Krypteringen gäller backupfilen, inte den levande SQLite-databasen. En okrypterad backup kan läsas av den som kommer åt filen. Filer du markerar med en <code>.keep</code>-fil bredvid sparas utöver gränsen.</p>
+          <button type="submit">Spara inställningar</button>
+        </form>
+      </section>
+      <section class="card">
+        <h2>Skapa och kontrollera</h2>
+        <p>En backup innehåller en konsekvent SQLite-kopia och Core-media. Den verifieras innan den publiceras i backupmappen. En synkmapp, till exempel Nextcloud, kan användas som destination om den är monterad lokalt.</p>
+        <label>Återställningsfras vid kryptering<input id="passphrase" type="password" autocomplete="new-password" placeholder="Minst 12 tecken"></label>
+        <p class="hint">Frasen skickas bara till den lokala Core-tjänsten för den här åtgärden och sparas inte i inställningarna. Förvara en kopia separat från backupmappen.</p>
+        <button id="backup-now" type="button">Skapa backup nu</button>
+        <div class="heading"><h3>Backupfiler</h3><button id="refresh" type="button" class="secondary">Uppdatera</button></div>
+        <ul id="backups"></ul>
+      </section>
+    </div>
+    <p id="status" role="status" aria-live="polite"></p>
+  </main>
+</body>
+</html>

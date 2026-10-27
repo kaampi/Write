@@ -3,6 +3,7 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypt
 import { createServer } from 'node:http';
 import { mkdir, open, readFile, rename, rm } from 'node:fs/promises';
 import { join } from 'node:path';
+import { isAbsolute } from 'node:path';
 import { MANUSCRIPT_EXPORT_FORMAT, parseManuscriptExport } from '@ocedo-apps/storycore';
 
 const apps = new Set(['storybook', 'sandbox', 'comic']);
@@ -28,6 +29,8 @@ export function openCore(path) {
     CREATE TABLE IF NOT EXISTS proposals (id TEXT PRIMARY KEY, source_workspace_id TEXT NOT NULL REFERENCES workspaces(id), target_workspace_id TEXT NOT NULL REFERENCES workspaces(id), source_revision TEXT NOT NULL REFERENCES revisions(id), entity_id TEXT NOT NULL, change_body TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', created_at TEXT NOT NULL, reviewed_at TEXT);
     CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY, app TEXT NOT NULL, action TEXT NOT NULL, resource_id TEXT NOT NULL, at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS media (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL REFERENCES workspaces(id), sha256 TEXT NOT NULL, size INTEGER NOT NULL, content_type TEXT NOT NULL, created_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS admin_keys (key_hash TEXT PRIMARY KEY);
+    CREATE TABLE IF NOT EXISTS backup_settings (id INTEGER PRIMARY KEY CHECK(id=1), backup_dir TEXT NOT NULL, encrypted INTEGER NOT NULL, keep INTEGER NOT NULL);
   `);
   if (!db.prepare('PRAGMA table_info(workspaces)').all().some(column => column.name === 'project_id')) {
     db.exec('ALTER TABLE workspaces ADD COLUMN project_id TEXT');
@@ -90,6 +93,32 @@ export function openCore(path) {
       run('INSERT INTO app_keys(key_hash,app) VALUES(?,?)', digest(token).toString('hex'), app);
       return token;
     },
+    provisionAdmin() {
+      const token = randomBytes(32).toString('hex');
+      run('INSERT INTO admin_keys(key_hash) VALUES(?)', digest(token).toString('hex'));
+      return token;
+    },
+    authenticateAdmin(token) {
+      if (typeof token !== 'string' || !/^[0-9a-f]{64}$/.test(token)) fail(401, 'Unauthorized');
+      const hash = digest(token);
+      const row = get('SELECT key_hash FROM admin_keys WHERE key_hash=?', hash.toString('hex'));
+      if (!row || !timingSafeEqual(hash, Buffer.from(row.key_hash, 'hex'))) fail(401, 'Unauthorized');
+    },
+    backupSettings() {
+      const row = get('SELECT backup_dir,encrypted,keep FROM backup_settings WHERE id=1');
+      return row ? { backupDir: row.backup_dir, encrypted: !!row.encrypted, keep: row.keep } : null;
+    },
+    setBackupSettings(input) {
+      if (!input || typeof input.backupDir !== 'string' || !isAbsolute(input.backupDir) || input.backupDir.length > 2048 || !input.backupDir.trim() ||
+          typeof input.encrypted !== 'boolean' || !Number.isSafeInteger(input.keep) || input.keep < 1 || input.keep > 1000) fail(400, 'Invalid backup settings');
+      const backupDir = input.backupDir.trim();
+      transaction(() => {
+        run('INSERT INTO backup_settings(id,backup_dir,encrypted,keep) VALUES(1,?,?,?) ON CONFLICT(id) DO UPDATE SET backup_dir=excluded.backup_dir,encrypted=excluded.encrypted,keep=excluded.keep', backupDir, input.encrypted ? 1 : 0, input.keep);
+        audit('core-admin', 'backup.settings', 'core');
+      });
+      return this.backupSettings();
+    },
+    recordAdminAction(action, id) { audit('core-admin', action, id); },
     authenticate(token) {
       if (typeof token !== 'string' || !/^[0-9a-f]{64}$/.test(token)) fail(401, 'Unauthorized');
       const hash = digest(token);
@@ -328,12 +357,50 @@ export function openCore(path) {
   };
 }
 
-export function createCoreServer(core, { mediaDir } = {}) {
+export function createCoreServer(core, { mediaDir, adminBackup } = {}) {
   return createServer(async (req, res) => {
     const send = (status, value) => { res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); res.end(JSON.stringify(value)); };
     try {
-      const app = core.authenticate(/^Bearer ([0-9a-f]{64})$/.exec(req.headers.authorization ?? '')?.[1]);
       const url = new URL(req.url ?? '/', 'http://localhost');
+      if (url.pathname === '/admin' || url.pathname === '/admin.js' || url.pathname === '/admin.css' || url.pathname.startsWith('/admin/api/')) {
+        const host = req.headers.host ?? '';
+        if (!/^(127\.0\.0\.1|localhost):[0-9]{1,5}$/.test(host) ||
+            (req.headers.origin && req.headers.origin !== `http://${host}`)) fail(403, 'Invalid admin origin');
+      }
+      if (req.method === 'GET' && (url.pathname === '/admin' || url.pathname === '/admin.js' || url.pathname === '/admin.css')) {
+        const asset = url.pathname === '/admin' ? 'admin.html' : url.pathname.slice(1);
+        const bytes = await readFile(new URL(`./${asset}`, import.meta.url));
+        res.writeHead(200, {
+          'content-type': url.pathname === '/admin' ? 'text/html; charset=utf-8' : url.pathname === '/admin.css' ? 'text/css; charset=utf-8' : 'text/javascript; charset=utf-8',
+          'cache-control': 'no-store', 'x-content-type-options': 'nosniff',
+          'content-security-policy': "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'"
+        });
+        res.end(bytes); return;
+      }
+      if (url.pathname.startsWith('/admin/api/')) {
+        core.authenticateAdmin(/^Bearer ([0-9a-f]{64})$/.exec(req.headers.authorization ?? '')?.[1]);
+        const adminBody = async () => {
+          const chunks = []; let size = 0;
+          for await (const chunk of req) { size += chunk.length; if (size > 16_384) fail(413, 'Admin request too large'); chunks.push(chunk); }
+          try {
+            const parsed = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) fail(400, 'Invalid JSON object');
+            return parsed;
+          } catch (error) { if (error.status) throw error; fail(400, 'Invalid JSON'); }
+        };
+        let result;
+        if (url.pathname === '/admin/api/settings' && req.method === 'GET') result = core.backupSettings();
+        else if (url.pathname === '/admin/api/settings' && req.method === 'PUT') result = core.setBackupSettings(await adminBody());
+        else if (url.pathname === '/admin/api/backups' && req.method === 'GET') result = adminBackup ? await adminBackup.list() : fail(503, 'Backup service unavailable');
+        else if (url.pathname === '/admin/api/backups' && req.method === 'POST') result = adminBackup ? await adminBackup.backup((await adminBody()).passphrase) : fail(503, 'Backup service unavailable');
+        else if (url.pathname === '/admin/api/backups/verify' && req.method === 'POST') {
+          if (!adminBackup) fail(503, 'Backup service unavailable');
+          const input = await adminBody();
+          result = await adminBackup.verify(input.name, input.passphrase);
+        } else fail(404, 'Not found');
+        send(200, result); return;
+      }
+      const app = core.authenticate(/^Bearer ([0-9a-f]{64})$/.exec(req.headers.authorization ?? '')?.[1]);
       const parts = url.pathname.split('/').filter(Boolean).map(decodeURIComponent);
       if (parts[0] !== 'v1') fail(404, 'Not found');
       const body = async () => {
