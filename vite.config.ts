@@ -2,6 +2,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
+import { configDefaults } from "vitest/config";
 
 export default defineConfig({
   plugins: [react()],
@@ -19,6 +20,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    globals: true
+    globals: true,
+    exclude: [...configDefaults.exclude, "packages/core-service/**/*.test.mjs"]
   }
 });
