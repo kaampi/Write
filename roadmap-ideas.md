@@ -1332,6 +1332,27 @@ exporten använder. Ny knapp "Exportera för andra appar".
 **Kvarstår:** ComicBook AI:s sida — byta ut dess egen gissande
 importkod mot StoryCore. Inte gjort än.
 
+**Core-tjänstens delningsgräns (2026-10-27, arbete i separat branch):**
+Storybooks IndexedDB fortsätter vara primär lagring. En möjlig fullständig
+`Book`-kopia för återställning ligger i en ägarprivat `private-snapshot`-
+workspace; Core ska neka läsdelning av sådana workspaces. Reglaget för
+Sandbox/Comic ska i stället publicera en separat projektion genom befintliga
+`packManuscriptExport(book, exportedAt, seriesFacts)`. Hela prosan från alla
+kapitel och synopsis **ska** ingå. Fakta får bara vara godkända och synliga
+enligt `visibleLockedFacts` (inklusive bok/serie-arv); Brainstorm, privata
+anteckningar, `ai_proposed`, `flagged`, `hidden_from_ai` och dolda entiteter
+**får inte** delas. Återanvänd samma exportkod så att två filter inte glider
+isär. Delning är avstängd som standard och andra appar har bara läsrätt.
+
+Versionsdialogen visar framtida helboksversioner i Core; Storybook har i dag
+bara prosa-historik per kapitel. Beslut för första implementationen: skapa
+helboksversioner av bekräftade synksnapshots i Core, men lova inte en version
+per lokal redigering eftersom synkkön slår ihop ändringar under offlineperioder.
+”Skapa nytt manuskript” kan utgå från befintlig importväg, men en fullständig
+Book-återställning med ursprungsreferens kräver egen validerad import. Exemplen
+på versionssammanfattningar är prototyptext; visa faktiska diffar eller
+frivilliga författaranteckningar när funktionen byggs, inte påhittade texter.
+
 ---
 
 ### 32. Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text ✅ byggd (v1.0.33)
