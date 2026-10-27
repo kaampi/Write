@@ -1413,20 +1413,35 @@ delningen meningslös):**
   fakta-filtreringen föregående anteckning syftade på, inte prosan.
 
 **Övriga observationer från samma prototyp-genomgång:**
-- **Manuskript-nivå-versionering är ett nytt begrepp.** StoryBook AI
-  har idag bara per-kapitel `history` (en kapitels prosa), ingen
-  "hela boken som en version"-modell. Kräver antingen att StoryBook AI
-  börjar skapa egna hel-bok-snapshots vid varje synk, eller att Core
-  bygger snapshotten själv av det som synkas in.
-- **"Skapa nytt manuskript" (gren från en äldre version) finns inte
-  idag.** Billigast att bygga genom att återanvända den befintliga
-  Import-manuscript-vägen (en ny bok från en Core-snapshot är
-  strukturellt samma sak som att importera ett manus), inte en ny
-  gren-mekanism från grunden.
+- **Manuskript-nivå-versionering: Core äger den, bekräftat (Mats,
+  2026-10-27).** StoryBook AI behöver inte bygga någon egen hel-bok-
+  snapshot-motor — Core hanterar backuper-med-versioner helt själv.
+  Dagens per-kapitel `history` i StoryBook AI förblir oförändrad och
+  är inte samma sak; de löser olika problem (en kapitels redigerings-
+  historik vs en hel bok/projekts återställningspunkter).
+- **"Byt ut befintligt" vs "skapa nytt manuskript" — redan löst,
+  mekaniken finns i StoryBook AI idag.** Mats fråga: fungerar det att
+  Core antingen ersätter det befintliga manuskriptet eller skapar ett
+  helt nytt utifrån en backup? Svar: ja, rakt av, via samma kodväg som
+  redan driver "Import backup" på Hem-sidan (`importManuscript` i
+  `BookStore.tsx`, `parseManuscriptBackup` i
+  `src/core/manuscriptBackup.ts`). Mekaniken: en backup bär alltid ett
+  `book.id`. Finns redan ett lokalt manus med det ID:t → bekräftelse-
+  dialog, sedan skriv över på plats. Finns det inte → sparas som ett
+  helt nytt manus på hyllan, ingen särskild kodväg behövs. Så
+  "ersätt" vs "nytt manuskript" avgörs helt av vilket ID Core
+  stämplar på den återställda backupen — StoryBook AI behöver bara en
+  ny ingångspunkt som matar in Core:s data genom samma
+  parse-och-spara-flöde filimporten redan använder, ingen ny logik.
+  Kvarstående designfråga: StoryBook AI visar redan en egen
+  webbläsar-bekräftelse innan överskrivning — om Core:s eget UI redan
+  låter användaren välja ersätt/nytt innan filen skickas blir vår
+  dialog en extra bekräftelse ovanpå Core:s (ofarligt, men dubbelt;
+  avgörs den dag det byggs).
 - **Varifrån kommer versionssammanfattningarna** ("Scen 7
   redigerades")? Antingen ny diff-till-text-logik (automatisk) eller
   manuellt skrivna commit-meddelanden (enklare, men kräver att
-  användaren orkar skriva dem) — inte bestämt.
+  användaren orkar skriva dem) — inte bestämt, enda öppna frågan kvar.
 - Redan bra i prototypen, ingen anmärkning: avstängt som standard,
   read-only för andra appar, tydlig varningstext vid avstängd
   delning, ägarskaps-badge, Core-backup uttryckligen separat från
