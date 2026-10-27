@@ -70,19 +70,25 @@ export class CoreSyncOutbox implements CoreSyncSink {
 
   /** Retries on reconnect. A failed send retains its change; a newer local edit is never discarded. */
   flush(transport: CoreTransport): Promise<void> {
-    if (this.draining) return this.draining;
+    // A caller requiring a confirmed checkpoint must also drain work queued
+    // while another send was already in flight.
+    if (this.draining) return this.draining.then(() => this.flush(transport));
     const drain = async () => {
-      for (const change of await this.pending()) {
-        await transport(change);
-        const db = await this.db();
-        try {
-          const tx = db.transaction(STORE, "readwrite");
-          const done = transactionDone(tx);
-          const store = tx.objectStore(STORE);
-          const current = await request(store.get(change.id)) as CoreChange | undefined;
-          if (current?.token === change.token) store.delete(change.id);
-          await done;
-        } finally { db.close(); }
+      while (true) {
+        const changes = await this.pending();
+        if (!changes.length) return;
+        for (const change of changes) {
+          await transport(change);
+          const db = await this.db();
+          try {
+            const tx = db.transaction(STORE, "readwrite");
+            const done = transactionDone(tx);
+            const store = tx.objectStore(STORE);
+            const current = await request(store.get(change.id)) as CoreChange | undefined;
+            if (current?.token === change.token) store.delete(change.id);
+            await done;
+          } finally { db.close(); }
+        }
       }
     };
     const running = drain().finally(() => { if (this.draining === running) this.draining = null; });

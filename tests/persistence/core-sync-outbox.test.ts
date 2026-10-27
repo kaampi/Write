@@ -35,14 +35,17 @@ describe("opt-in Core sync queue", () => {
     const repo = new BookRepository(indexedDB, outbox);
     let book = createBook("Changing draft");
     await repo.save(book);
-    await outbox.flush(async () => {
-      book = updateChapter(book, book.chapters[0]!.id, { prose: "Newer local edit" });
-      await repo.save(book);
+    const sent: string[] = [];
+    await outbox.flush(async change => {
+      if (change.kind !== "save") return;
+      sent.push(change.book.chapters[0]!.prose);
+      if (sent.length === 1) {
+        book = updateChapter(book, book.chapters[0]!.id, { prose: "Newer local edit" });
+        await repo.save(book);
+      }
     });
-    const pending = await outbox.pending();
-    expect(pending).toHaveLength(1);
-    expect(pending[0]?.kind).toBe("save");
-    if (pending[0]?.kind === "save") expect(pending[0].book.chapters[0]?.prose).toBe("Newer local edit");
+    expect(sent).toEqual(["", "Newer local edit"]);
+    expect(await outbox.pending()).toEqual([]);
   });
 
   it("queues a deletion and never fails the local write on a queue error", async () => {
@@ -63,5 +66,29 @@ describe("opt-in Core sync queue", () => {
     await connected.save(book);
     await connected.delete(book.id);
     expect(await outbox.pending()).toMatchObject([{ id: book.id, scope: "private-snapshot", kind: "delete" }]);
+  });
+
+  it("a second flush waits for a checkpoint queued during an in-flight send", async () => {
+    const outbox = new CoreSyncOutbox(indexedDB);
+    const book = createBook("Concurrent checkpoint");
+    await outbox.enqueueSave(book);
+    let release!: () => void;
+    let entered!: () => void;
+    const sending = new Promise<void>(resolve => { release = resolve; });
+    const started = new Promise<void>(resolve => { entered = resolve; });
+    const sent: string[] = [];
+    const transport = async (change: { kind: string; book?: typeof book }) => {
+      if (change.kind !== "save" || !change.book) return;
+      sent.push(change.book.chapters[0]!.prose);
+      if (sent.length === 1) { entered(); await sending; }
+    };
+    const first = outbox.flush(transport);
+    await started;
+    await outbox.enqueueSave(updateChapter(book, book.chapters[0]!.id, { prose: "Must be acknowledged" }));
+    const requiredCheckpoint = outbox.flush(transport);
+    release();
+    await Promise.all([first, requiredCheckpoint]);
+    expect(sent).toContain("Must be acknowledged");
+    expect(await outbox.pending()).toEqual([]);
   });
 });
