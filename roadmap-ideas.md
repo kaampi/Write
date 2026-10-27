@@ -1365,6 +1365,14 @@ kan lova att mellanliggande historik finns kvar. Exemplen på versions-
 sammanfattningar är prototyptext; visa faktiska diffar eller frivilliga
 författaranteckningar när funktionen byggs, inte påhittade texter.
 
+En ren förberedelsefunktion (`prepareCoreBookRestore`) validerar nu en
+Storybook-ägd privat helboksversion och lägger den i samma backupformat
+som filimporten redan läser. `same-book` behåller ID:t, medan `new-book`
+ger nytt ID, lösgör översättningsreferenser och behåller serie-kopplingen
+bara om serien finns lokalt. Funktionen sparar ingenting; bekräftelse,
+kontroll mot ID-kollision, checkpoint av aktuellt lokalt manuskript,
+Core-proveniens och faktisk UI-återställning återstår före aktivering.
+
 **Nästa byggsteg (se separat PR):** Core tar emot den validerade
 `ManuscriptExport`-projektionen i en `shared-manuscript`-workspace via en
 Storybook-autentiserad PUT. Den uppdaterar projektion och läsrättigheter
