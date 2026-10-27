@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Storybook — Core-koppling (dialogförslag)</title>
+  <style>
+    :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; color: #27352e; background: #e8e9e1; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; }
+    button { font: inherit; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 230px 1fr; filter: blur(2px); pointer-events: none; }
+    .app aside { background: #243b32; color: #e9efe7; padding: 30px 22px; }
+    .app aside strong { font-family: Georgia, serif; font-size: 25px; }
+    .app aside p { color: #c5d2c5; font-size: 13px; margin-top: 36px; }
+    .app main { padding: 44px clamp(24px, 7vw, 100px); background: #f9f7f0; }
+    .app h1 { font-family: Georgia, serif; font-size: 38px; margin: 0 0 8px; }
+    .app small { color: #7d887c; }
+    .paper { margin-top: 35px; width: min(650px, 100%); height: 410px; border: 1px solid #e5e2d9; background: white; border-radius: 4px; padding: 36px; box-shadow: 0 12px 30px #2c3a2d14; }
+    .line { height: 9px; margin-bottom: 16px; border-radius: 10px; background: #e8e7e0; width: 88%; }
+    .line.short { width: 56%; }
+    .veil { position: fixed; inset: 0; background: #14241bb0; display: grid; place-items: center; padding: 22px; }
+    .dialog { width: min(590px, 100%); background: #fffefa; border-radius: 18px; box-shadow: 0 30px 90px #071a1057; overflow: hidden; }
+    header { display: flex; justify-content: space-between; gap: 20px; padding: 28px 32px 23px; border-bottom: 1px solid #e9ece4; }
+    .eyebrow { text-transform: uppercase; letter-spacing: .13em; color: #56785d; font-size: 11px; font-weight: 800; }
+    h2 { font-family: Georgia, serif; font-size: 29px; letter-spacing: -.035em; margin: 7px 0 7px; }
+    p { margin: 0; color: #6a796f; line-height: 1.48; font-size: 14px; }
+    .close { align-self: start; border: 0; background: #f1f3ec; border-radius: 50%; color: #697b6d; width: 32px; height: 32px; font-size: 18px; cursor: default; }
+    .body { padding: 23px 32px 27px; }
+    .manuscript { display: flex; gap: 13px; align-items: center; background: #f4f5ed; border: 1px solid #e4e9db; border-radius: 11px; padding: 12px 14px; }
+    .book { width: 37px; height: 45px; border-radius: 3px 6px 6px 3px; background: #ba816a; box-shadow: inset 4px 0 #965f4e; flex: none; }
+    .manuscript strong, .sync strong { display: block; font-size: 14px; }
+    .manuscript span { color: #78857b; font-size: 12px; }
+    .sync { display: flex; align-items: center; gap: 12px; padding: 18px 2px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #4b9662; box-shadow: 0 0 0 4px #e0f1df; margin: 0 5px; flex: none; }
+    .sync p { font-size: 12px; }
+    .status { margin-left: auto; font-size: 11px; font-weight: 750; color: #397d4c; background: #e8f4e5; padding: 6px 9px; border-radius: 20px; white-space: nowrap; }
+    h3 { font-size: 15px; margin: 14px 0 5px; }
+    .intro { font-size: 13px; margin-bottom: 13px; }
+    .share { display: flex; align-items: center; gap: 14px; border: 1px solid #e1e7dc; border-radius: 11px; padding: 15px; margin-top: 9px; }
+    .appmark { display: grid; place-items: center; width: 35px; height: 35px; background: #e8ede5; color: #48644f; border-radius: 9px; font-weight: 800; flex: none; }
+    .share .description { flex: 1; }
+    .share strong { display: block; font-size: 14px; margin-bottom: 2px; }
+    .share p { font-size: 12px; }
+    .switch { width: 43px; height: 25px; border-radius: 20px; background: #d7ddd3; position: relative; flex: none; }
+    .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%; background: white; box-shadow: 0 1px 3px #0003; }
+    .switch.on { background: #357b50; }
+    .switch.on::after { left: 21px; }
+    .detail { margin-top: 17px; padding: 12px 14px; border-left: 3px solid #a8bd9b; background: #f5f7f0; color: #617165; font-size: 12px; line-height: 1.45; }
+    footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; border-top: 1px solid #e9ece4; padding: 17px 32px; }
+    footer small { color: #879087; line-height: 1.4; }
+    footer button { border: 0; color: white; background: #286642; padding: 10px 20px; border-radius: 9px; font-weight: 700; cursor: default; }
+    .prototype { position: fixed; left: 14px; bottom: 14px; color: #44584b; background: #fffefa; border-radius: 8px; padding: 8px 11px; font-size: 11px; box-shadow: 0 4px 20px #10241b2b; }
+    @media (max-width: 600px) { .app { display: block; } .app aside { display: none; } .app main { padding: 26px; } .veil { padding: 10px; align-items: start; overflow: auto; } .dialog { margin: 10px 0; } header, .body { padding-left: 20px; padding-right: 20px; } footer { padding: 16px 20px; } .status { display: none; } .prototype { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="app" aria-hidden="true">
+    <aside><strong>Storybook AI</strong><p>Manuskript<br>Persongalleri<br>Värld & platser<br>Inställningar</p></aside>
+    <main><small>MINA MANUSKRIPT / DEN LJUSA STADEN</small><h1>Den ljusa staden</h1><small>Senast ändrad i dag · Utkast</small><div class="paper"><div class="line short"></div><div class="line"></div><div class="line"></div><div class="line short"></div><div class="line"></div><div class="line"></div></div></main>
+  </div>
+  <div class="veil">
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-desc">
+      <header>
+        <div><div class="eyebrow">Storybook · Core-koppling</div><h2 id="dialog-title">Dela manuskript</h2><p id="dialog-desc">Välj vilka andra appar som får se det här manuskriptet.</p></div>
+        <button class="close" disabled aria-label="Stäng">×</button>
+      </header>
+      <div class="body">
+        <div class="manuscript"><span class="book" aria-hidden="true"></span><div><strong>Den ljusa staden</strong><span>Det här manuskriptet · ägs alltid av Storybook</span></div></div>
+        <div class="sync"><span class="dot" aria-hidden="true"></span><div><strong>Synkroniserat med Core</strong><p>Senaste ändringen är tillgänglig för appar du väljer nedan.</p></div><span class="status">Uppdaterat nyss</span></div>
+        <h3>Visa manuskriptet i</h3><p class="intro">Avstängt som standard. Andra appar får läsa, men kan inte ändra manuskriptet.</p>
+        <div class="share"><span class="appmark">S</span><div class="description"><strong>Sandbox</strong><p>Välj manuskriptet när du startar en spelomgång.</p></div><span class="switch on" role="img" aria-label="Exempel: synligt i Sandbox"></span></div>
+        <div class="share"><span class="appmark">C</span><div class="description"><strong>Comic</strong><p>Välj manuskriptet som underlag för ett serieprojekt.</p></div><span class="switch" role="img" aria-label="Exempel: inte synligt i Comic"></span></div>
+        <div class="detail">Delning gäller bara det här manuskriptet. Om du stänger av delningen försvinner det ur appens Core-lista. Material som redan importerats till ett eget projekt kan finnas kvar där.</div>
+      </div>
+      <footer><small>Exempelvy · reglagen är inte inkopplade ännu.</small><button disabled>Klart</button></footer>
+    </section>
+  </div>
+  <div class="prototype">Statisk prototyp — inga uppgifter ändras</div>
+</body>
+</html>
