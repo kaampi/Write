@@ -13,7 +13,13 @@ Core is a neutral local service for Storybook, Sandbox and Comic. Every applicat
 7. Each accepted proposal creates a new revision with provenance; previous revisions remain retrievable.
 8. Denied operations must be atomic and leave data unchanged.
 9. Core is equally restrictive toward all three apps.
-10. Offline apps may keep local caches, but synchronization never bypasses these checks.
+10. Storybook's existing IndexedDB repositories remain its primary, working persistence. Core is optional; an unavailable Core must never block or alter local save, load, or delete. Synchronization never bypasses Core's access checks.
+
+## Additive integration contract
+
+The current Storybook IndexedDB stores (`books`, `series`, `illustration_styles`) are not being replaced or migrated by this Core slice. Core starts as an opt-in copy of explicitly selected Storybook-owned data, with separate Core revision IDs. The existing repository APIs and local behavior remain unchanged.
+
+Future synchronization must be a separate adapter outside the IndexedDB write transaction: complete the local save first, queue a retryable outbound change, then send it when Core is available. A Core failure must leave the local write successful and visibly mark the copy as pending. Import from Core into Storybook must require an explicit user choice and must not silently overwrite IndexedDB data. Core backups cover only successfully synchronized data; local app export remains necessary for pending changes. Any later decision to change the primary store requires its own migration plan, tests and explicit product decision.
 
 ## Initial resources
 
@@ -67,7 +73,7 @@ Run `npm run test:core-service` for HTTP/SQLite isolation tests and `npm test --
 
 ## Encrypted Core backups (first slice)
 
-The operator can select any writable directory through `CORE_BACKUP_DIR`, including a mounted external disk or a folder synchronized by another program. Core writes an authenticated AES-256-GCM encrypted `.sbcore` archive there. The archive contains a consistent SQLite snapshot made with `VACUUM INTO`, the contents of `CORE_MEDIA_DIR` (default: `CORE_DB_PATH.media`), and an encrypted manifest with checksums. The archive is decrypted and checked before its temporary name is published. Files with invalid media types such as symlinks are rejected. This first slice has a manual CLI; automatic scheduling and direct cloud uploads have not been implemented.
+The operator can select any writable directory through `CORE_BACKUP_DIR`, including a mounted external disk or a folder synchronized by another program. Core writes an authenticated AES-256-GCM encrypted `.sbcore` archive there. The archive contains a consistent SQLite snapshot made with `VACUUM INTO`, the contents of `CORE_MEDIA_DIR` (default: `CORE_DB_PATH.media`), and an encrypted manifest with checksums. The archive is decrypted and checked before its temporary name is published. Files with invalid media types such as symlinks are rejected. The CLI supports one-shot and scheduled runs; direct cloud uploads are not implemented.
 
 ```sh
 # Supply the recovery phrase on standard input using a secure prompt or secret store.
