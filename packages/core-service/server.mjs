@@ -70,9 +70,10 @@ if (command === 'provision') {
   const port = Number(process.env.CORE_PORT ?? 43127);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid CORE_PORT');
   const mediaDir = process.env.CORE_MEDIA_DIR ?? file + '.media';
-  const server = createCoreServer(core, { mediaDir, adminBackup: createAdminBackup(core, mediaDir) });
+  const adminBackup = createAdminBackup(core, mediaDir);
+  const server = createCoreServer(core, { mediaDir, adminBackup });
   server.listen(port, '127.0.0.1', () => process.stdout.write(`Core listening on 127.0.0.1:${port}\n`));
-  const shutdown = () => server.close(() => { core.close(); process.exit(0); });
+  const shutdown = () => server.close(async () => { await adminBackup.stop(); core.close(); process.exit(0); });
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 } else {
