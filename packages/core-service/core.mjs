@@ -3,8 +3,11 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypt
 import { createServer } from 'node:http';
 import { mkdir, open, readFile, rename, rm } from 'node:fs/promises';
 import { join } from 'node:path';
+import { MANUSCRIPT_EXPORT_FORMAT, parseManuscriptExport } from '@ocedo-apps/storycore';
 
 const apps = new Set(['storybook', 'sandbox', 'comic']);
+const shareReaders = new Set(['sandbox', 'comic']);
+const MAX_SHARED_MANUSCRIPT_BYTES = 20_000_000;
 const digest = token => createHash('sha256').update(token).digest();
 const fail = (status, message) => { throw Object.assign(new Error(message), { status }); };
 const required = (value, name) => {
@@ -61,7 +64,8 @@ export function openCore(path) {
     authorizeWorkspace: authorize,
     registerMedia(app, workspaceId, input) {
       return transaction(() => {
-        authorize(app, workspaceId, 'write');
+        const ws = authorize(app, workspaceId, 'write');
+        if (ws.kind === 'shared-manuscript') fail(403, 'Shared manuscripts use the validated export only');
         const id = randomUUID();
         run('INSERT INTO media VALUES(?,?,?,?,?,?)', id, workspaceId, input.sha256, input.size, input.contentType, new Date().toISOString());
         audit(app, 'media.create', id);
@@ -91,6 +95,7 @@ export function openCore(path) {
     createWorkspace(app, input) {
       const kind = required(input.kind, 'kind');
       const projectId = input.projectId == null ? null : required(input.projectId, 'projectId');
+      if (kind === 'shared-manuscript') fail(403, 'Use the manuscript publication route');
       const id = randomUUID(), now = new Date().toISOString();
       transaction(() => { run('INSERT INTO workspaces(id,owner_app,kind,created_at,project_id) VALUES(?,?,?,?,?)', id, app, kind, now, projectId); audit(app, 'workspace.create', id); });
       return workspace(id);
@@ -121,9 +126,52 @@ export function openCore(path) {
       return all('SELECT * FROM records WHERE workspace_id=? AND deleted=0 ORDER BY created_at', id).map(publicRecord);
     },
     getRecord(app, id) { const rec = record(id); authorize(app, rec.workspace_id, 'read'); return publicRecord(rec); },
+    publishSharedManuscript(app, projectId, input) {
+      if (app !== 'storybook') fail(403, 'Only Storybook can publish a manuscript');
+      required(projectId, 'projectId');
+      if (!Array.isArray(input.readers) || new Set(input.readers).size !== input.readers.length ||
+          input.readers.some(reader => !shareReaders.has(reader))) fail(400, 'Invalid readers');
+      let manuscript;
+      try { manuscript = parseManuscriptExport(input.manuscript); }
+      catch { fail(400, 'Invalid manuscript export'); }
+      if (manuscript.format !== MANUSCRIPT_EXPORT_FORMAT) fail(400, 'Current manuscript export format required');
+      if (manuscript.sourceBookId !== projectId) fail(400, 'Manuscript ID mismatch');
+      // Store the parsed contract, never unrecognized fields from a full Book.
+      const body = JSON.stringify(manuscript);
+      if (Buffer.byteLength(body) > MAX_SHARED_MANUSCRIPT_BYTES) fail(413, 'Manuscript too large');
+      return transaction(() => {
+        let ws = get('SELECT * FROM workspaces WHERE owner_app=? AND kind=? AND project_id=?', app, 'shared-manuscript', projectId);
+        const now = new Date().toISOString();
+        if (!ws) {
+          const id = randomUUID();
+          run('INSERT INTO workspaces(id,owner_app,kind,created_at,project_id) VALUES(?,?,?,?,?)', id, app, 'shared-manuscript', now, projectId);
+          ws = workspace(id);
+          audit(app, 'workspace.create', id);
+        }
+        const old = get('SELECT * FROM records WHERE workspace_id=?', ws.id);
+        let recordId;
+        if (old) {
+          recordId = old.id;
+          run('UPDATE records SET revision=?, body=?, deleted=0, updated_at=? WHERE id=?', old.revision + 1, body, now, recordId);
+          audit(app, 'record.update', recordId);
+        } else {
+          recordId = randomUUID();
+          run('INSERT INTO records VALUES(?,?,?,?,?,?,?,?,?)', recordId, ws.id, null, null, 1, body, 0, now, now);
+          audit(app, 'record.create', recordId);
+        }
+        revision(record(recordId), now);
+        for (const reader of shareReaders) {
+          if (input.readers.includes(reader)) run('INSERT OR IGNORE INTO grants VALUES(?,?)', ws.id, reader);
+          else run('DELETE FROM grants WHERE workspace_id=? AND reader_app=?', ws.id, reader);
+        }
+        audit(app, 'manuscript.publish', ws.id);
+        return { workspace: ws, record: publicRecord(record(recordId)), readers: input.readers };
+      });
+    },
     writeRecord(app, id, input) {
       return transaction(() => {
-        authorize(app, id, 'write');
+        const ws = authorize(app, id, 'write');
+        if (ws.kind === 'shared-manuscript') fail(403, 'Use the manuscript publication route');
         if (input.body === undefined) fail(400, 'Missing body');
         const body = JSON.stringify(input.body);
         if (!body || body.length > 1_000_000) fail(400, 'Invalid body');
@@ -137,7 +185,8 @@ export function openCore(path) {
     },
     updateRecord(app, id, input, deleting = false) {
       return transaction(() => {
-        const old = record(id); authorize(app, old.workspace_id, deleting ? 'delete' : 'write');
+        const old = record(id); const ws = authorize(app, old.workspace_id, deleting ? 'delete' : 'write');
+        if (ws.kind === 'shared-manuscript') fail(403, 'Use the manuscript publication route');
         if (old.deleted) fail(404, 'Record not found');
         if (!Number.isSafeInteger(input.expectedRevision) || input.expectedRevision !== old.revision) fail(409, 'Revision conflict');
         if (!deleting && input.body === undefined) fail(400, 'Missing body');
@@ -181,6 +230,7 @@ export function openCore(path) {
         if (status === 'accepted') {
           const target = record(required(targetRecordId, 'targetRecordId'));
           if (target.workspace_id !== proposal.target_workspace_id) fail(403, 'Forbidden');
+          if (workspace(target.workspace_id).kind === 'shared-manuscript') fail(403, 'Shared manuscripts cannot accept direct record changes');
           if (target.deleted || !Number.isSafeInteger(expectedRevision) || expectedRevision !== target.revision) fail(409, 'Revision conflict');
           run('UPDATE records SET revision=?,body=?,source_revision=?,updated_at=? WHERE id=?',
             target.revision + 1, proposal.change_body, proposal.source_revision, now, target.id);
@@ -206,9 +256,9 @@ export function createCoreServer(core, { mediaDir } = {}) {
       const parts = url.pathname.split('/').filter(Boolean).map(decodeURIComponent);
       if (parts[0] !== 'v1') fail(404, 'Not found');
       const body = async () => {
-        let data = '';
-        for await (const chunk of req) { data += chunk; if (data.length > 1_100_000) fail(413, 'Body too large'); }
-        try { const parsed = JSON.parse(data); if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) fail(400, 'Invalid JSON object'); return parsed; }
+        const chunks = []; let size = 0;
+        for await (const chunk of req) { size += chunk.length; if (size > MAX_SHARED_MANUSCRIPT_BYTES + 1_000_000) fail(413, 'Body too large'); chunks.push(chunk); }
+        try { const parsed = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) fail(400, 'Invalid JSON object'); return parsed; }
         catch (error) { if (error.status) throw error; fail(400, 'Invalid JSON'); }
       };
       const method = req.method;
@@ -242,6 +292,7 @@ export function createCoreServer(core, { mediaDir } = {}) {
         res.writeHead(200, { 'content-type': media.contentType, 'content-length': bytes.length, 'cache-control': 'no-store' }); res.end(bytes); return;
       }
       if (parts.length === 2 && parts[1] === 'workspaces' && method === 'GET') result = core.listWorkspaces(app);
+      else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'PUT') result = core.publishSharedManuscript(app, parts[2], await body());
       else if (parts.length === 2 && parts[1] === 'workspaces' && method === 'POST') result = core.createWorkspace(app, await body());
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'POST') result = core.grant(app, parts[2], (await body()).readerApp);
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'GET') result = core.listGrants(app, parts[2]);
