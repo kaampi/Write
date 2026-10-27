@@ -1,6 +1,7 @@
 import { openCore, createCoreServer } from './core.mjs';
 import { backupEncryption, createBackup, restoreBackup } from './backup.mjs';
 import { createAdminBackup } from './admin.mjs';
+import { drillBackup } from './drill.mjs';
 import { createInterface } from 'node:readline/promises';
 
 const recoveryPhrase = async () => {
@@ -13,7 +14,12 @@ const recoveryPhrase = async () => {
 };
 
 const command = process.argv[2];
-if (command === 'restore') {
+if (command === 'drill') {
+  const archive = process.argv[3];
+  if (!archive) throw new Error('Usage: drill <archive>');
+  const mode = await backupEncryption(archive);
+  process.stdout.write(JSON.stringify(await drillBackup(archive, mode === 'encrypted' ? await recoveryPhrase() : undefined)) + '\n');
+} else if (command === 'restore') {
   const [archive, destination] = process.argv.slice(3);
   if (!archive || !destination) throw new Error('Usage: restore <archive> <new-directory>');
   const mode = await backupEncryption(archive);
@@ -78,6 +84,6 @@ if (command === 'provision') {
   process.on('SIGINT', shutdown);
 } else {
   core.close();
-  throw new Error('Usage: node server.mjs [provision <app>|provision-admin|backup|backup-schedule|restore <archive> <new-directory>]');
+  throw new Error('Usage: node server.mjs [provision <app>|provision-admin|backup|backup-schedule|drill <archive>|restore <archive> <new-directory>]');
 }
 }

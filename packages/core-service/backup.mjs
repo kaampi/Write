@@ -5,6 +5,7 @@ import { dirname, join, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { once } from 'node:events';
 import { openCore } from './core.mjs';
+import { inspectRestoredCore } from './inspect.mjs';
 
 const MAGIC = Buffer.from('SBCORE01');
 const PLAIN_MAGIC = Buffer.from('SBPLAIN1');
@@ -119,9 +120,10 @@ export async function restoreBackup(archive, destination, passphrase) {
       // A malformed database must never be installed as a restored Core.
       if (db.integrityCheck() !== 'ok') throw new Error('SQLite integrity check failed');
     } finally { db.close(); }
+    const counts = await inspectRestoredCore(stage);
     await rm(plain);
     await rename(stage, destination);
-    return { destination, verified: true, encryption: mode };
+    return { destination, verified: true, encryption: mode, counts };
   } catch (error) { await rm(stage, { recursive: true, force: true }); throw error; }
 }
 

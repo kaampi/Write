@@ -53,7 +53,9 @@ test('Core management uses a separate administrator identity and verifies backup
     assert.equal(plain.data.encryption, 'plain');
     assert.equal((await call(adminToken, 'POST', '/admin/api/backups/verify', { name: '../core.db' })).status, 404);
     const plainName = basename(plain.data.path);
-    assert.equal((await call(adminToken, 'POST', '/admin/api/backups/verify', { name: plainName })).data.verified, true);
+    const plainDrill = await call(adminToken, 'POST', '/admin/api/backups/verify', { name: plainName });
+    assert.equal(plainDrill.data.verified, true);
+    assert.equal(plainDrill.data.counts.app_keys, 1);
     await call(adminToken, 'PUT', '/admin/api/settings', { backupDir, encrypted: true, keep: 1, intervalHours: 0 });
     assert.equal((await call(adminToken, 'POST', '/admin/api/backups', { passphrase: 'short' })).status, 400);
     const encrypted = await call(adminToken, 'POST', '/admin/api/backups', { passphrase: 'recovery-phrase-long-enough' });
