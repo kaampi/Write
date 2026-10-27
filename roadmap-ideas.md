@@ -57,6 +57,7 @@ inte en ensidig lista.
 | 52 | Developmental: bedöm öppningsscenens krok (obesvarad fråga/out-of-whack-händelse) specifikt | ⬜ ej påbörjad — se nedan |
 | 53 | Guiden: ny "Skrivtips"-kategori med skrivråd, inte verktygsdokumentation | ✅ byggd (v1.0.187) — se nedan |
 | 54 | Git-baserad fillagring/versionskontroll (StelaWare-jämförelse) | ⬜ arkitekturlucka, inte en idé att bygga — se nedan |
+| 55 | Begär `navigator.storage.persist()` vid start, så webbläsaren inte rensar IndexedDB-data under diskutrymmesbrist | ⬜ ej påbörjad, billig defensiv åtgärd — se nedan |
 
 Plus det egna designspåret ("Det enda stora arkitekturbeslutet" nedan,
 Scene/BookScene/NarrativeFact-gränsen) — ett öppet samtal, inte en
@@ -2908,6 +2909,20 @@ Backup/Restore + per-kapitel History. Inget beslut att bygga — skulle
 vara ett helt annat arkitekturval (fil-baserat, inte IndexedDB-baserat)
 och en mycket större omläggning än något annat i den här listan. Sparad
 som referens, inte en punkt med en tänkt lösning.
+
+---
+
+### 55. Begär `navigator.storage.persist()` vid start — billig defensiv åtgärd
+Uppstod i ett sidospår om hur stor IndexedDB kan bli (svar: i praktiken
+styrt av ledigt diskutrymme, inte en liten fast gräns — gott om
+utrymme för textbaserade manus). Appen anropar idag aldrig
+`navigator.storage.persist()`, vilket betyder att webbläsaren i teorin
+kan rensa IndexedDB-data under extrem diskutrymmesbrist eftersom
+lagringen räknas som "evictable" (ej garanterat beständig) tills den
+uttryckligen begärs som persistent. Osannolikt i praktiken för en
+vanlig användare, men billigt att åtgärda: ett anrop vid appstart
+(t.ex. i `App.tsx` eller `BookStoreProvider`), inget UI, ingen
+beroendekedja. Inte brådskande, inte byggd än.
 
 ---
 
