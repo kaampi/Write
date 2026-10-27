@@ -47,6 +47,21 @@
     .switch.on { background: #357b50; }
     .switch.on::after { left: 21px; }
     .detail { margin-top: 17px; padding: 12px 14px; border-left: 3px solid #a8bd9b; background: #f5f7f0; color: #617165; font-size: 12px; line-height: 1.45; }
+    [hidden] { display: none !important; }
+    .tabs { display: flex; gap: 20px; border-bottom: 1px solid #e5e9e1; margin: 0 0 19px; }
+    .tab { border: 0; border-bottom: 2px solid transparent; background: none; color: #728075; padding: 11px 3px; font-weight: 700; cursor: pointer; }
+    .tab[aria-selected="true"] { border-bottom-color: #31754a; color: #245b3b; }
+    .history-lead { font-size: 13px; margin-bottom: 16px; }
+    .version { display: flex; gap: 13px; padding: 15px 0; border-top: 1px solid #e8ece5; }
+    .timeline-dot { width: 10px; height: 10px; background: #b0bdb0; border-radius: 50%; margin: 5px 3px 0; flex: none; }
+    .version.current .timeline-dot { background: #3d8b56; }
+    .version-content { flex: 1; }
+    .version strong { display: block; font-size: 14px; }
+    .version span { display: block; color: #7a887d; font-size: 12px; margin: 3px 0; }
+    .version p { font-size: 12px; }
+    .version em { color: #347749; font-size: 11px; font-weight: 750; font-style: normal; }
+    .version button { align-self: center; border: 1px solid #d8e0d7; background: #f9faf6; color: #577160; border-radius: 8px; padding: 7px 10px; font-size: 12px; }
+    .version button:disabled { opacity: .7; cursor: not-allowed; }
     footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; border-top: 1px solid #e9ece4; padding: 17px 32px; }
     footer small { color: #879087; line-height: 1.4; }
     footer button { border: 0; color: white; background: #286642; padding: 10px 20px; border-radius: 9px; font-weight: 700; cursor: default; }
@@ -62,20 +77,43 @@
   <div class="veil">
     <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-desc">
       <header>
-        <div><div class="eyebrow">Storybook · Core-koppling</div><h2 id="dialog-title">Dela manuskript</h2><p id="dialog-desc">Välj vilka andra appar som får se det här manuskriptet.</p></div>
+        <div><div class="eyebrow">Storybook · Core-koppling</div><h2 id="dialog-title">Manuskript och Core</h2><p id="dialog-desc">Delning och versioner för det här manuskriptet.</p></div>
         <button class="close" disabled aria-label="Stäng">×</button>
       </header>
       <div class="body">
         <div class="manuscript"><span class="book" aria-hidden="true"></span><div><strong>Den ljusa staden</strong><span>Det här manuskriptet · ägs alltid av Storybook</span></div></div>
-        <div class="sync"><span class="dot" aria-hidden="true"></span><div><strong>Synkroniserat med Core</strong><p>Senaste ändringen är tillgänglig för appar du väljer nedan.</p></div><span class="status">Uppdaterat nyss</span></div>
-        <h3>Visa manuskriptet i</h3><p class="intro">Avstängt som standard. Andra appar får läsa, men kan inte ändra manuskriptet.</p>
-        <div class="share"><span class="appmark">S</span><div class="description"><strong>Sandbox</strong><p>Välj manuskriptet när du startar en spelomgång.</p></div><span class="switch on" role="img" aria-label="Exempel: synligt i Sandbox"></span></div>
-        <div class="share"><span class="appmark">C</span><div class="description"><strong>Comic</strong><p>Välj manuskriptet som underlag för ett serieprojekt.</p></div><span class="switch" role="img" aria-label="Exempel: inte synligt i Comic"></span></div>
-        <div class="detail">Delning gäller bara det här manuskriptet. Om du stänger av delningen försvinner det ur appens Core-lista. Material som redan importerats till ett eget projekt kan finnas kvar där.</div>
+        <div class="sync"><span class="dot" aria-hidden="true"></span><div><strong>Synkroniserat med Core</strong><p>Den senaste manuskriptversionen är bekräftad i Core.</p></div><span class="status">Uppdaterat nyss</span></div>
+        <div class="tabs" role="tablist" aria-label="Manuskript och Core">
+          <button class="tab" id="sharing-tab" role="tab" aria-controls="sharing-panel" aria-selected="true" type="button">Delning</button>
+          <button class="tab" id="history-tab" role="tab" aria-controls="history-panel" aria-selected="false" type="button">Versioner</button>
+        </div>
+        <div id="sharing-panel" role="tabpanel" aria-labelledby="sharing-tab">
+          <h3>Visa manuskriptet i</h3><p class="intro">Avstängt som standard. Andra appar får läsa, men kan inte ändra manuskriptet.</p>
+          <div class="share"><span class="appmark">S</span><div class="description"><strong>Sandbox</strong><p>Välj manuskriptet när du startar en spelomgång.</p></div><span class="switch on" role="img" aria-label="Exempel: synligt i Sandbox"></span></div>
+          <div class="share"><span class="appmark">C</span><div class="description"><strong>Comic</strong><p>Välj manuskriptet som underlag för ett serieprojekt.</p></div><span class="switch" role="img" aria-label="Exempel: inte synligt i Comic"></span></div>
+          <div class="detail">Delning gäller bara det här manuskriptet. Om du stänger av delningen försvinner det ur appens Core-lista. Material som redan importerats till ett eget projekt kan finnas kvar där.</div>
+        </div>
+        <div id="history-panel" role="tabpanel" aria-labelledby="history-tab" hidden>
+          <h3>Manuskriptets versioner</h3><p class="history-lead">Tidigare versioner finns kvar. En återställning skulle sparas som en ny version.</p>
+          <div class="version current"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 12 <em>· Nuvarande</em></strong><span>I dag 09:42 · Synkroniserad med Core</span><p>Scen 7 redigerades</p></div><button disabled>Visa</button></div>
+          <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 11</strong><span>I går 18:10 · Synkroniserad med Core</span><p>Dialog och karaktärsanteckningar uppdaterades</p></div><button disabled>Jämför</button></div>
+          <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 10</strong><span>22 okt 14:20 · Synkroniserad med Core</span><p>Första utkastet av kapitel 3</p></div><button disabled>Jämför</button></div>
+          <div class="detail">Jämförelse och ”Återställ som ny version” är planerade åtgärder. Backup av hela Core hanteras separat.</div>
+        </div>
       </div>
       <footer><small>Exempelvy · reglagen är inte inkopplade ännu.</small><button disabled>Klart</button></footer>
     </section>
   </div>
   <div class="prototype">Statisk prototyp — inga uppgifter ändras</div>
+  <script>
+    const tabs = [document.getElementById('sharing-tab'), document.getElementById('history-tab')];
+    for (const tab of tabs) tab.addEventListener('click', () => {
+      for (const item of tabs) {
+        const active = item === tab;
+        item.setAttribute('aria-selected', String(active));
+        document.getElementById(item.getAttribute('aria-controls')).hidden = !active;
+      }
+    });
+  </script>
 </body>
 </html>
