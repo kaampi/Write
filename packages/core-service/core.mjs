@@ -165,6 +165,17 @@ export function openCore(path) {
       authorize(app, id, 'read');
       return all('SELECT * FROM records WHERE workspace_id=? AND deleted=0 ORDER BY created_at', id).map(publicRecord);
     },
+    listSharedManuscripts(app) {
+      return all(`SELECT w.id AS workspace_id,w.project_id,w.translation_group_id,w.language,r.id AS record_id,r.revision,r.body,r.updated_at
+        FROM workspaces w JOIN records r ON r.workspace_id=w.id AND r.deleted=0
+        WHERE w.owner_app='storybook' AND w.kind='shared-manuscript'
+          AND (w.owner_app=? OR EXISTS (SELECT 1 FROM grants g WHERE g.workspace_id=w.id AND g.reader_app=?))
+        ORDER BY r.updated_at DESC,w.id`, app, app).map(row => ({
+          workspaceId: row.workspace_id, projectId: row.project_id, translationGroupId: row.translation_group_id,
+          language: row.language, recordId: row.record_id, revision: row.revision,
+          title: JSON.parse(row.body).title, updatedAt: row.updated_at
+        }));
+    },
     getRecord(app, id) { const rec = record(id); authorize(app, rec.workspace_id, 'read'); return publicRecord(rec); },
     publishSharedManuscript(app, projectId, input) {
       if (app !== 'storybook') fail(403, 'Only Storybook can publish a manuscript');
@@ -450,6 +461,7 @@ export function createCoreServer(core, { mediaDir, adminBackup } = {}) {
         res.writeHead(200, { 'content-type': media.contentType, 'content-length': bytes.length, 'cache-control': 'no-store' }); res.end(bytes); return;
       }
       if (parts.length === 2 && parts[1] === 'identity' && method === 'GET') result = { app };
+      else if (parts.length === 2 && parts[1] === 'shared-manuscripts' && method === 'GET') result = core.listSharedManuscripts(app);
       else if (parts.length === 2 && parts[1] === 'workspaces' && method === 'GET') result = core.listWorkspaces(app);
       else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'PUT') result = core.publishSharedManuscript(app, parts[2], await body());
       else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'DELETE') result = core.revokeSharedManuscript(app, parts[2]);

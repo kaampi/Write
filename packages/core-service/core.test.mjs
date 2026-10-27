@@ -113,6 +113,7 @@ test('each project is private by default and its owner can share and revoke sepa
     const comic = (await call('comic', 'POST', '/v1/workspaces', { kind: 'comic-project', projectId: 'comic-one' })).body;
     assert.equal(first.project_id, 'book-one');
     assert.equal((await call('sandbox', 'GET', '/v1/workspaces')).body.length, 0);
+    assert.deepEqual((await call('sandbox', 'GET', '/v1/shared-manuscripts')).body, []);
     assert.equal((await call('storybook', 'GET', `/v1/workspaces/${first.id}/grants`)).body.length, 0);
     assert.equal((await call('sandbox', 'PUT', `/v1/workspaces/${first.id}/grants/comic`, { visible: true })).status, 403);
     assert.equal((await call('storybook', 'PUT', `/v1/workspaces/${first.id}/grants/sandbox`, { visible: true })).status, 200);
@@ -262,6 +263,11 @@ test('shared manuscript publishing stores only a validated projection and atomic
     assert.deepEqual(record.body.chapters.map(chapter => chapter.prose), ['Entire chapter one.', 'Entire chapter two.']);
     assert.equal(JSON.stringify(record.body).includes('Secret'), false);
     assert.deepEqual((await call('sandbox', 'GET', '/v1/workspaces')).body.map(ws => ws.id), [workspace.id]);
+    const catalog = (await call('sandbox', 'GET', '/v1/shared-manuscripts')).body;
+    assert.deepEqual(catalog.map(item => ({ workspaceId: item.workspaceId, projectId: item.projectId, title: item.title })),
+      [{ workspaceId: workspace.id, projectId, title: 'Night Keys' }]);
+    assert.equal(JSON.stringify(catalog).includes('Secret'), false);
+    assert.equal((await call('comic', 'GET', '/v1/shared-manuscripts')).body.length, 0);
     assert.equal((await call('comic', 'GET', '/v1/workspaces')).body.length, 0);
     assert.equal((await call('sandbox', 'GET', `/v1/records/${record.id}`)).status, 200);
     assert.equal((await call('sandbox', 'GET', `/v1/workspaces/${privateWs.id}/records`)).status, 403);
@@ -283,11 +289,14 @@ test('shared manuscript publishing stores only a validated projection and atomic
     assert.equal(changed.body.workspace.id, workspace.id);
     assert.equal(changed.body.record.revision, 2);
     assert.equal((await call('sandbox', 'GET', `/v1/records/${record.id}`)).status, 403);
+    assert.deepEqual((await call('sandbox', 'GET', '/v1/shared-manuscripts')).body, []);
+    assert.equal((await call('comic', 'GET', '/v1/shared-manuscripts')).body[0].revision, 2);
     assert.equal((await call('sandbox', 'GET', `/v1/revisions/${record.revisionId}`)).status, 403);
     assert.equal((await call('comic', 'GET', `/v1/records/${record.id}`)).body.body.synopsis, 'Second synopsis.');
     assert.equal((await call('comic', 'GET', `/v1/revisions/${record.revisionId}`)).body.body.synopsis, 'The full synopsis.');
     assert.equal((await call('sandbox', 'DELETE', route)).status, 403);
     assert.equal((await call('storybook', 'DELETE', route)).status, 200);
+    assert.deepEqual((await call('comic', 'GET', '/v1/shared-manuscripts')).body, []);
     assert.deepEqual((await call('storybook', 'GET', access)).body, { projectId, exists: true, readers: [] });
     assert.equal((await call('comic', 'GET', `/v1/records/${record.id}`)).status, 403);
     assert.equal((await call('comic', 'GET', `/v1/revisions/${record.revisionId}`)).status, 403);
