@@ -23,6 +23,8 @@ Future automatic synchronization must be a separate adapter outside the IndexedD
 
 Each manuscript, Sandbox session or Comic project gets its own workspace, optionally linked to the local app's project ID through `projectId`. A new workspace is private. The owning app may grant read access to `storybook`, `sandbox`, or `comic` individually, and may revoke it at any time. Revocation immediately removes access to workspace discovery, current records, revisions and media through the Core API. Neither a shared entity ID nor a grant gives another app write access. A client UI should show per-project switches for the other apps, default off; the Core setting is the enforced authority for shared reads.
 
+From an older project revision, its owning app should offer two distinct actions: restore into the same project as a new revision (preserving the intervening history), or create a new project from that snapshot. The latter receives its own workspace, revision timeline and private-by-default grants, with a provenance reference to the source revision. Neither action rewrites the original historical revision or another app's project.
+
 Each app should expose a small Core panel for its own projects: connection and pending-sync state, plus the per-project sharing switches. Service-wide administration belongs to a separate local Core management surface: backup destination and schedule, recovery, storage health and credential provisioning. The management surface must not grant one creative app permission to change another app's project data.
 
 ## Initial resources

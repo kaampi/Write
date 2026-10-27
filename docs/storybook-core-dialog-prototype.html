@@ -64,6 +64,14 @@
     .version em { color: #347749; font-size: 11px; font-weight: 750; font-style: normal; }
     .version button { align-self: center; border: 1px solid #d8e0d7; background: #f9faf6; color: #577160; border-radius: 8px; padding: 7px 10px; font-size: 12px; }
     .version button:disabled { opacity: .7; cursor: not-allowed; }
+    .version.selected { background: #f5f9f1; margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: 8px; }
+    .version.selected .timeline-dot { background: #3d8b56; }
+    .version-actions { border: 1px solid #dce8d8; background: #f6faf3; border-radius: 11px; padding: 14px; margin-top: 14px; }
+    .version-actions strong { display: block; font-size: 13px; }
+    .version-actions p { font-size: 12px; margin: 4px 0 12px; }
+    .action-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .action-buttons button { border: 1px solid #b8cfb9; background: white; color: #2e6540; border-radius: 8px; padding: 9px 11px; font-size: 12px; font-weight: 700; }
+    .action-buttons button:disabled { opacity: .72; cursor: not-allowed; }
     footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; border-top: 1px solid #e9ece4; padding: 17px 32px; }
     footer small { color: #879087; line-height: 1.4; }
     footer button { border: 0; color: white; background: #286642; padding: 10px 20px; border-radius: 9px; font-weight: 700; cursor: default; }
@@ -99,12 +107,17 @@
           <h3>Manuskriptets versioner</h3><p class="history-lead">Tidigare versioner finns kvar. En återställning skulle sparas som en ny version.</p>
           <div class="version-list" role="region" aria-label="Versionslista" tabindex="0">
             <div class="version current"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 12 <em>· Nuvarande</em></strong><span>I dag 09:42 · Synkroniserad med Core</span><p>Scen 7 redigerades</p></div><button disabled>Visa</button></div>
-            <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 11</strong><span>I går 18:10 · Synkroniserad med Core</span><p>Dialog och karaktärsanteckningar uppdaterades</p></div><button disabled>Jämför</button></div>
+            <div class="version selected"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 11 <em>· Vald</em></strong><span>I går 18:10 · Synkroniserad med Core</span><p>Dialog och karaktärsanteckningar uppdaterades</p></div><button disabled>Jämför</button></div>
             <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 10</strong><span>22 okt 14:20 · Synkroniserad med Core</span><p>Första utkastet av kapitel 3</p></div><button disabled>Jämför</button></div>
             <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 9</strong><span>20 okt 11:05 · Synkroniserad med Core</span><p>Miljöbeskrivningen omarbetades</p></div><button disabled>Jämför</button></div>
             <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 8</strong><span>18 okt 16:30 · Synkroniserad med Core</span><p>Kapitelordningen ändrades</p></div><button disabled>Jämför</button></div>
           </div>
-          <div class="detail">Jämförelse och ”Återställ som ny version” är planerade åtgärder. Backup av hela Core hanteras separat.</div>
+          <div class="version-actions">
+            <strong>Utgå från version 11</strong>
+            <p>Välj om den äldre texten ska bli en ny revision här, eller ett separat manuskript.</p>
+            <div class="action-buttons"><button disabled>Återställ som ny version</button><button disabled>Skapa nytt manuskript</button></div>
+          </div>
+          <div class="detail">Ett nytt manuskript får egen historik och är privat tills du väljer att dela det. Ursprungsversionen sparas som referens. Backup av hela Core hanteras separat.</div>
         </div>
       </div>
       <footer><small>Exempelvy · reglagen är inte inkopplade ännu.</small><button disabled>Klart</button></footer>
