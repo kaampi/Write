@@ -164,3 +164,73 @@ test('private full-book snapshots cannot be granted to another app', async () =>
     assert.equal((await call('storybook', 'GET', `/v1/records/${rec.id}`)).body.body.brainstorm, 'private notes');
   } finally { server.close(); await once(server, 'close'); core.close(); rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('shared manuscript publishing stores only a validated projection and atomically changes readers', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'core-shared-manuscript-'));
+  const core = openCore(join(dir, 'core.db'));
+  const tokens = Object.fromEntries(['storybook', 'sandbox', 'comic'].map(app => [app, core.provision(app)]));
+  const server = createCoreServer(core);
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const call = async (app, method, path, body) => {
+    const response = await fetch(base + path, {
+      method, headers: { authorization: `Bearer ${tokens[app]}`, ...(body ? { 'content-type': 'application/json' } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {})
+    });
+    return { status: response.status, body: await response.json() };
+  };
+  const projectId = 'book-one';
+  const route = `/v1/shared-manuscripts/${projectId}`;
+  const manuscript = {
+    kind: 'storycore.manuscript-export', format: 2, exportedAt: '2026-10-27T00:00:00.000Z',
+    sourceApp: 'storybook-ai', sourceBookId: projectId, title: 'Night Keys', illustrationStyle: '',
+    synopsis: 'The full synopsis.',
+    chapters: [
+      { id: 'one', sequence_index: 0, title: 'One', prose: 'Entire chapter one.', brief: '', scenes: [] },
+      { id: 'two', sequence_index: 1, title: 'Two', prose: 'Entire chapter two.', brief: '', scenes: [] }
+    ],
+    bible: [{ kind: 'characters', label: 'Characters', entities: [{ entity_ref: 'emma', name: 'Emma', facts: [{ predicate: 'core.identity', label: 'Identity', value: 'Bartender' }], referenceImages: [] }] }]
+  };
+  try {
+    const privateWs = core.createWorkspace('storybook', { kind: 'private-snapshot', projectId });
+    core.writeRecord('storybook', privateWs.id, { body: { brainstorm: 'Never shared', facts: [{ status: 'ai_proposed' }] } });
+    assert.equal((await call('sandbox', 'PUT', route, { manuscript, readers: ['sandbox'] })).status, 403);
+    assert.equal((await call('storybook', 'PUT', route, { manuscript: { title: 'Raw Book', brainstorm: 'Secret' }, readers: ['sandbox'] })).status, 400);
+    assert.equal((await call('storybook', 'PUT', route, { manuscript: { ...manuscript, format: 1 }, readers: ['sandbox'] })).status, 400);
+    assert.equal((await call('sandbox', 'GET', '/v1/workspaces')).body.length, 0);
+
+    const published = await call('storybook', 'PUT', route, {
+      manuscript: { ...manuscript, brainstorm: 'Secret root field', chapters: manuscript.chapters.map(chapter => ({ ...chapter, privateNotes: 'Secret chapter field' })) },
+      readers: ['sandbox']
+    });
+    assert.equal(published.status, 200);
+    const { workspace, record } = published.body;
+    assert.equal(workspace.kind, 'shared-manuscript');
+    assert.notEqual(workspace.id, privateWs.id);
+    assert.equal(record.revision, 1);
+    assert.equal(record.body.synopsis, 'The full synopsis.');
+    assert.deepEqual(record.body.chapters.map(chapter => chapter.prose), ['Entire chapter one.', 'Entire chapter two.']);
+    assert.equal(JSON.stringify(record.body).includes('Secret'), false);
+    assert.deepEqual((await call('sandbox', 'GET', '/v1/workspaces')).body.map(ws => ws.id), [workspace.id]);
+    assert.equal((await call('comic', 'GET', '/v1/workspaces')).body.length, 0);
+    assert.equal((await call('sandbox', 'GET', `/v1/records/${record.id}`)).status, 200);
+    assert.equal((await call('sandbox', 'GET', `/v1/workspaces/${privateWs.id}/records`)).status, 403);
+    assert.equal((await call('sandbox', 'POST', `/v1/workspaces/${workspace.id}/records`, { body: manuscript })).status, 403);
+    assert.equal((await call('storybook', 'POST', `/v1/workspaces/${workspace.id}/records`, { body: { brainstorm: 'Secret' } })).status, 403);
+    assert.equal((await call('storybook', 'PUT', `/v1/records/${record.id}`, { expectedRevision: 1, body: { brainstorm: 'Secret' } })).status, 403);
+
+    const invalid = await call('storybook', 'PUT', route, { manuscript: { ...manuscript, sourceBookId: 'other' }, readers: ['comic'] });
+    assert.equal(invalid.status, 400);
+    assert.deepEqual((await call('sandbox', 'GET', '/v1/workspaces')).body.map(ws => ws.id), [workspace.id]);
+    assert.equal((await call('comic', 'GET', '/v1/workspaces')).body.length, 0);
+
+    const changed = await call('storybook', 'PUT', route, { manuscript: { ...manuscript, synopsis: 'Second synopsis.' }, readers: ['comic'] });
+    assert.equal(changed.status, 200);
+    assert.equal(changed.body.workspace.id, workspace.id);
+    assert.equal(changed.body.record.revision, 2);
+    assert.equal((await call('sandbox', 'GET', `/v1/records/${record.id}`)).status, 403);
+    assert.equal((await call('sandbox', 'GET', `/v1/revisions/${record.revisionId}`)).status, 403);
+    assert.equal((await call('comic', 'GET', `/v1/records/${record.id}`)).body.body.synopsis, 'Second synopsis.');
+    assert.equal((await call('comic', 'GET', `/v1/revisions/${record.revisionId}`)).body.body.synopsis, 'The full synopsis.');
+  } finally { server.close(); await once(server, 'close'); core.close(); rmSync(dir, { recursive: true, force: true }); }
+});

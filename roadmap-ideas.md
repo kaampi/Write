@@ -1353,6 +1353,15 @@ Book-återställning med ursprungsreferens kräver egen validerad import. Exempl
 på versionssammanfattningar är prototyptext; visa faktiska diffar eller
 frivilliga författaranteckningar när funktionen byggs, inte påhittade texter.
 
+**Nästa byggsteg (se separat PR):** Core tar emot den validerade
+`ManuscriptExport`-projektionen i en `shared-manuscript`-workspace via en
+Storybook-autentiserad PUT. Den uppdaterar projektion och läsrättigheter
+atomärt; en rå `Book` kan inte matas in via den vanliga record-vägen.
+Storybooks lilla adapter återanvänder `packManuscriptExport()` inklusive
+serie-fakta. Fortfarande kvar: betrodd desktop-transport med OS-skyddad
+credential, per-manuskriptval i den riktiga dialogen och automatisk
+ompublicering vid relevanta ändringar. Prototypreglagen är inte aktiva.
+
 ---
 
 ### 32. Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text ✅ byggd (v1.0.33)
