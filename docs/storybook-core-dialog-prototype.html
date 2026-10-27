@@ -20,13 +20,13 @@
     .line { height: 9px; margin-bottom: 16px; border-radius: 10px; background: #e8e7e0; width: 88%; }
     .line.short { width: 56%; }
     .veil { position: fixed; inset: 0; background: #14241bb0; display: grid; place-items: center; padding: 22px; }
-    .dialog { width: min(590px, 100%); background: #fffefa; border-radius: 18px; box-shadow: 0 30px 90px #071a1057; overflow: hidden; }
+    .dialog { width: min(590px, 100%); max-height: calc(100dvh - 44px); display: flex; flex-direction: column; background: #fffefa; border-radius: 18px; box-shadow: 0 30px 90px #071a1057; overflow: hidden; }
     header { display: flex; justify-content: space-between; gap: 20px; padding: 28px 32px 23px; border-bottom: 1px solid #e9ece4; }
     .eyebrow { text-transform: uppercase; letter-spacing: .13em; color: #56785d; font-size: 11px; font-weight: 800; }
     h2 { font-family: Georgia, serif; font-size: 29px; letter-spacing: -.035em; margin: 7px 0 7px; }
     p { margin: 0; color: #6a796f; line-height: 1.48; font-size: 14px; }
     .close { align-self: start; border: 0; background: #f1f3ec; border-radius: 50%; color: #697b6d; width: 32px; height: 32px; font-size: 18px; cursor: default; }
-    .body { padding: 23px 32px 27px; }
+    .body { min-height: 0; overflow-y: auto; padding: 23px 32px 27px; }
     .manuscript { display: flex; gap: 13px; align-items: center; background: #f4f5ed; border: 1px solid #e4e9db; border-radius: 11px; padding: 12px 14px; }
     .book { width: 37px; height: 45px; border-radius: 3px 6px 6px 3px; background: #ba816a; box-shadow: inset 4px 0 #965f4e; flex: none; }
     .manuscript strong, .sync strong { display: block; font-size: 14px; }
@@ -52,6 +52,8 @@
     .tab { border: 0; border-bottom: 2px solid transparent; background: none; color: #728075; padding: 11px 3px; font-weight: 700; cursor: pointer; }
     .tab[aria-selected="true"] { border-bottom-color: #31754a; color: #245b3b; }
     .history-lead { font-size: 13px; margin-bottom: 16px; }
+    .version-list { max-height: 230px; overflow-y: auto; overscroll-behavior: contain; padding-right: 8px; scrollbar-color: #aebfaf #f2f5ef; }
+    .version-list:focus-visible { outline: 2px solid #31754a; outline-offset: 2px; }
     .version { display: flex; gap: 13px; padding: 15px 0; border-top: 1px solid #e8ece5; }
     .timeline-dot { width: 10px; height: 10px; background: #b0bdb0; border-radius: 50%; margin: 5px 3px 0; flex: none; }
     .version.current .timeline-dot { background: #3d8b56; }
@@ -95,9 +97,13 @@
         </div>
         <div id="history-panel" role="tabpanel" aria-labelledby="history-tab" hidden>
           <h3>Manuskriptets versioner</h3><p class="history-lead">Tidigare versioner finns kvar. En återställning skulle sparas som en ny version.</p>
-          <div class="version current"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 12 <em>· Nuvarande</em></strong><span>I dag 09:42 · Synkroniserad med Core</span><p>Scen 7 redigerades</p></div><button disabled>Visa</button></div>
-          <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 11</strong><span>I går 18:10 · Synkroniserad med Core</span><p>Dialog och karaktärsanteckningar uppdaterades</p></div><button disabled>Jämför</button></div>
-          <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 10</strong><span>22 okt 14:20 · Synkroniserad med Core</span><p>Första utkastet av kapitel 3</p></div><button disabled>Jämför</button></div>
+          <div class="version-list" role="region" aria-label="Versionslista" tabindex="0">
+            <div class="version current"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 12 <em>· Nuvarande</em></strong><span>I dag 09:42 · Synkroniserad med Core</span><p>Scen 7 redigerades</p></div><button disabled>Visa</button></div>
+            <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 11</strong><span>I går 18:10 · Synkroniserad med Core</span><p>Dialog och karaktärsanteckningar uppdaterades</p></div><button disabled>Jämför</button></div>
+            <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 10</strong><span>22 okt 14:20 · Synkroniserad med Core</span><p>Första utkastet av kapitel 3</p></div><button disabled>Jämför</button></div>
+            <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 9</strong><span>20 okt 11:05 · Synkroniserad med Core</span><p>Miljöbeskrivningen omarbetades</p></div><button disabled>Jämför</button></div>
+            <div class="version"><span class="timeline-dot" aria-hidden="true"></span><div class="version-content"><strong>Version 8</strong><span>18 okt 16:30 · Synkroniserad med Core</span><p>Kapitelordningen ändrades</p></div><button disabled>Jämför</button></div>
+          </div>
           <div class="detail">Jämförelse och ”Återställ som ny version” är planerade åtgärder. Backup av hela Core hanteras separat.</div>
         </div>
       </div>
