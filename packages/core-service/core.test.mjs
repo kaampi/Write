@@ -1,0 +1,91 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { once } from 'node:events';
+import { openCore, createCoreServer } from './core.mjs';
+
+test('HTTP credentials, owner isolation, grants, revisions and proposal review', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'storybook-core-'));
+  const core = openCore(join(dir, 'core.db'));
+  const tokens = Object.fromEntries(['storybook', 'sandbox', 'comic'].map(app => [app, core.provision(app)]));
+  const server = createCoreServer(core);
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const call = async (app, method, path, data, overrideToken) => {
+    const res = await fetch(base + path, {
+      method, headers: { authorization: `Bearer ${overrideToken ?? tokens[app]}`, ...(data === undefined ? {} : { 'content-type': 'application/json' }) },
+      ...(data === undefined ? {} : { body: JSON.stringify(data) })
+    });
+    return { status: res.status, data: await res.json() };
+  };
+  try {
+    assert.equal((await call('storybook', 'GET', '/v1/workspaces', undefined, '0'.repeat(64))).status, 401);
+    const workspaces = {};
+    for (const app of Object.keys(tokens)) {
+      const result = await call(app, 'POST', '/v1/workspaces', { kind: app === 'storybook' ? 'manuscript' : app === 'sandbox' ? 'session' : 'comic-project', ownerApp: 'comic' });
+      assert.equal(result.status, 201);
+      assert.equal(result.data.owner_app, app);
+      workspaces[app] = result.data.id;
+    }
+    const manuscript = await call('storybook', 'POST', `/v1/workspaces/${workspaces.storybook}/records`, { entityId: 'shared-character', body: { text: 'original' }, ownerApp: 'sandbox' });
+    assert.equal(manuscript.status, 201);
+    const id = manuscript.data.id;
+    for (const app of ['sandbox', 'comic']) {
+      assert.equal((await call(app, 'GET', `/v1/workspaces/${workspaces.storybook}/records`)).status, 403);
+      assert.equal((await call(app, 'PUT', `/v1/records/${id}`, { expectedRevision: 1, body: { text: 'tampered' } })).status, 403);
+      assert.equal((await call(app, 'DELETE', `/v1/records/${id}`, { expectedRevision: 1 })).status, 403);
+      assert.equal((await call(app, 'POST', `/v1/workspaces/${workspaces.storybook}/grants`, { readerApp: app })).status, 403);
+      assert.equal((await call(app, 'POST', `/v1/workspaces/${workspaces.storybook}/records`, { body: { text: 'tampered' } })).status, 403);
+    }
+    assert.deepEqual((await call('storybook', 'GET', `/v1/records/${id}`)).data.body, { text: 'original' });
+    assert.equal((await call('storybook', 'POST', `/v1/workspaces/${workspaces.storybook}/grants`, { readerApp: 'sandbox' })).status, 201);
+    assert.equal((await call('sandbox', 'GET', `/v1/records/${id}`)).status, 200);
+    assert.equal((await call('sandbox', 'PUT', `/v1/records/${id}`, { expectedRevision: 1, body: {} })).status, 403);
+    const updated = await call('storybook', 'PUT', `/v1/records/${id}`, { expectedRevision: 1, body: { text: 'new canon' } });
+    assert.equal(updated.data.revision, 2);
+    assert.equal((await call('storybook', 'PUT', `/v1/records/${id}`, { expectedRevision: 1, body: {} })).status, 409);
+    const source = await call('sandbox', 'POST', `/v1/workspaces/${workspaces.sandbox}/records`, { body: { observation: 1 } });
+    assert.equal((await call('sandbox', 'GET', `/v1/revisions/${source.data.revisionId}`)).status, 200);
+    assert.equal((await call('comic', 'GET', `/v1/revisions/${source.data.revisionId}`)).status, 403);
+    assert.equal((await call('sandbox', 'POST', '/v1/proposals', { sourceWorkspaceId: workspaces.sandbox, targetWorkspaceId: workspaces.storybook, sourceRevision: randomInvalid(), entityId: 'shared-character', proposedChange: {} })).status, 400);
+    const proposal = await call('sandbox', 'POST', '/v1/proposals', { sourceWorkspaceId: workspaces.sandbox, targetWorkspaceId: workspaces.storybook, sourceRevision: source.data.revisionId, entityId: 'shared-character', proposedChange: { text: 'suggested' } });
+    assert.equal(proposal.status, 201);
+    assert.equal((await call('sandbox', 'POST', `/v1/proposals/${proposal.data.id}/review`, { status: 'accepted' })).status, 403);
+    assert.equal((await call('storybook', 'POST', `/v1/proposals/${proposal.data.id}/review`, { status: 'accepted', targetRecordId: source.data.id, expectedRevision: 1 })).status, 403);
+    assert.equal((await call('storybook', 'POST', `/v1/proposals/${proposal.data.id}/review`, { status: 'accepted', targetRecordId: id, expectedRevision: 1 })).status, 409);
+    const accepted = await call('storybook', 'POST', `/v1/proposals/${proposal.data.id}/review`, { status: 'accepted', targetRecordId: id, expectedRevision: 2 });
+    assert.equal(accepted.status, 201);
+    assert.equal(accepted.data.record.revision, 3);
+    assert.equal(accepted.data.record.sourceRevision, source.data.revisionId);
+    assert.deepEqual((await call('storybook', 'GET', `/v1/revisions/${updated.data.revisionId}`)).data.body, { text: 'new canon' });
+    assert.equal((await call('storybook', 'POST', `/v1/proposals/${proposal.data.id}/review`, { status: 'accepted' })).status, 409);
+    assert.deepEqual((await call('storybook', 'GET', `/v1/records/${id}`)).data.body, { text: 'suggested' });
+    assert.equal((await call('comic', 'GET', `/v1/records/${id}`)).status, 403);
+  } finally { server.close(); await once(server, 'close'); core.close(); rmSync(dir, { recursive: true, force: true }); }
+});
+function randomInvalid() { return 'missing-revision'; }
+
+test('every app is subject to the same ownership rule, including after a read grant', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'storybook-core-'));
+  const core = openCore(join(dir, 'core.db'));
+  const apps = ['storybook', 'sandbox', 'comic'];
+  try {
+    for (const owner of apps) {
+      const workspace = core.createWorkspace(owner, { kind: 'test' });
+      const record = core.writeRecord(owner, workspace.id, { body: { owner } });
+      for (const caller of apps.filter(app => app !== owner)) {
+        assert.throws(() => core.updateRecord(caller, record.id, { expectedRevision: 1, body: {} }), { status: 403 });
+        core.grant(owner, workspace.id, caller);
+        assert.equal(core.getRecord(caller, record.id).revision, 1);
+        assert.throws(() => core.updateRecord(caller, record.id, { expectedRevision: 1, body: {} }), { status: 403 });
+        assert.throws(() => core.updateRecord(caller, record.id, { expectedRevision: 1 }, true), { status: 403 });
+        assert.throws(() => core.writeRecord(caller, workspace.id, { body: {} }), { status: 403 });
+      }
+      assert.deepEqual(core.getRecord(owner, record.id).body, { owner });
+      assert.equal(core.getRecord(owner, record.id).revision, 1);
+    }
+    assert.equal(core.auditRows().filter(row => row.action === 'record.update' || row.action === 'record.delete').length, 0);
+  } finally { core.close(); rmSync(dir, { recursive: true, force: true }); }
+});

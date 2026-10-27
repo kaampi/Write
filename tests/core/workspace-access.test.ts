@@ -17,7 +17,7 @@ describe("Core workspace isolation", () => {
           { workspaceId: workspace.id, readerApp: caller }
         ])).toBe(true);
       });
-      it(${JSON.stringify("publication never grants write")}, () => {
+      it("publication never grants write", () => {
         expect(mayAccess({ app: caller }, workspace, "write", [
           { workspaceId: workspace.id, readerApp: caller }
         ])).toBe(caller === ownerApp);
