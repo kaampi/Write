@@ -26,9 +26,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Install frontend dependencies
         run: npm ci
-      - name: Update Rust lockfile for single-instance plugin
-        run: cargo update -p tauri-plugin-single-instance
-        working-directory: src-tauri
       - name: Build Windows Tauri application
         uses: tauri-apps/tauri-action@v0
         with:
