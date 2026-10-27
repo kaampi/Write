@@ -1,0 +1,41 @@
+name: Desktop single-instance build check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/desktop-single-instance
+    paths:
+      - "src-tauri/**"
+      - ".github/workflows/desktop-single-instance-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch GitHub dependencies over HTTPS
+        run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Update Rust lockfile for single-instance plugin
+        run: cargo update -p tauri-plugin-single-instance
+        working-directory: src-tauri
+      - name: Build Windows Tauri application
+        uses: tauri-apps/tauri-action@v0
+        with:
+          args: --target x86_64-pc-windows-msvc
+      - name: Upload test installer (no release)
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-single-instance-test
+          path: src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+          if-no-files-found: error
