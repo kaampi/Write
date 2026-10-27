@@ -1,6 +1,8 @@
 import { DatabaseSync } from 'node:sqlite';
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { createServer } from 'node:http';
+import { mkdir, open, readFile, rename, rm } from 'node:fs/promises';
+import { join } from 'node:path';
 
 const apps = new Set(['storybook', 'sandbox', 'comic']);
 const digest = token => createHash('sha256').update(token).digest();
@@ -21,6 +23,7 @@ export function openCore(path) {
     CREATE TABLE IF NOT EXISTS revisions (id TEXT PRIMARY KEY, record_id TEXT NOT NULL REFERENCES records(id), workspace_id TEXT NOT NULL REFERENCES workspaces(id), number INTEGER NOT NULL, body TEXT NOT NULL, deleted INTEGER NOT NULL, created_at TEXT NOT NULL, UNIQUE(record_id,number));
     CREATE TABLE IF NOT EXISTS proposals (id TEXT PRIMARY KEY, source_workspace_id TEXT NOT NULL REFERENCES workspaces(id), target_workspace_id TEXT NOT NULL REFERENCES workspaces(id), source_revision TEXT NOT NULL REFERENCES revisions(id), entity_id TEXT NOT NULL, change_body TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', created_at TEXT NOT NULL, reviewed_at TEXT);
     CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY, app TEXT NOT NULL, action TEXT NOT NULL, resource_id TEXT NOT NULL, at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS media (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL REFERENCES workspaces(id), sha256 TEXT NOT NULL, size INTEGER NOT NULL, content_type TEXT NOT NULL, created_at TEXT NOT NULL);
   `);
   const run = (sql, ...args) => db.prepare(sql).run(...args);
   const get = (sql, ...args) => db.prepare(sql).get(...args);
@@ -50,6 +53,21 @@ export function openCore(path) {
       db.prepare('VACUUM INTO ?').run(destination);
     },
     integrityCheck() { return db.prepare('PRAGMA integrity_check').get()?.integrity_check; },
+    authorizeWorkspace: authorize,
+    registerMedia(app, workspaceId, input) {
+      return transaction(() => {
+        authorize(app, workspaceId, 'write');
+        const id = randomUUID();
+        run('INSERT INTO media VALUES(?,?,?,?,?,?)', id, workspaceId, input.sha256, input.size, input.contentType, new Date().toISOString());
+        audit(app, 'media.create', id);
+        return { id, workspaceId, ...input };
+      });
+    },
+    getMedia(app, id) {
+      const media = get('SELECT * FROM media WHERE id=?', id) ?? fail(404, 'Media not found');
+      authorize(app, media.workspace_id, 'read');
+      return { id: media.id, workspaceId: media.workspace_id, sha256: media.sha256, size: media.size, contentType: media.content_type };
+    },
     provision(app) {
       if (!apps.has(app)) fail(400, 'Unknown app');
       const token = randomBytes(32).toString('hex');
@@ -156,7 +174,7 @@ export function openCore(path) {
   };
 }
 
-export function createCoreServer(core) {
+export function createCoreServer(core, { mediaDir } = {}) {
   return createServer(async (req, res) => {
     const send = (status, value) => { res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); res.end(JSON.stringify(value)); };
     try {
@@ -172,6 +190,34 @@ export function createCoreServer(core) {
       };
       const method = req.method;
       let result;
+      if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'media' && method === 'POST') {
+        if (!mediaDir) fail(503, 'Media storage not configured');
+        core.authorizeWorkspace(app, parts[2], 'write');
+        const contentType = req.headers['content-type'];
+        if (typeof contentType !== 'string' || !/^(image|audio|video|application)\/[a-z0-9.+-]+$/.test(contentType)) fail(400, 'Invalid content type');
+        const chunks = []; let size = 0;
+        for await (const chunk of req) { size += chunk.length; if (size > 10_000_000) fail(413, 'Media too large'); chunks.push(chunk); }
+        if (!size) fail(400, 'Empty media');
+        const bytes = Buffer.concat(chunks);
+        const hash = createHash('sha256').update(bytes).digest('hex');
+        await mkdir(mediaDir, { recursive: true, mode: 0o700 });
+        const path = join(mediaDir, hash), temp = join(mediaDir, '.' + randomUUID() + '.partial');
+        const file = await open(temp, 'wx', 0o600);
+        try { await file.writeFile(bytes); await file.sync(); } finally { await file.close(); }
+        try {
+          // Content-addressed files are immutable. Existing identical bytes need no replacement.
+          try { await rename(temp, path); } catch (error) { throw error; }
+          result = core.registerMedia(app, parts[2], { sha256: hash, size, contentType });
+        } finally { await rm(temp, { force: true }); }
+        send(201, result); return;
+      }
+      if (parts.length === 3 && parts[1] === 'media' && method === 'GET') {
+        if (!mediaDir) fail(503, 'Media storage not configured');
+        const media = core.getMedia(app, parts[2]);
+        const bytes = await readFile(join(mediaDir, media.sha256));
+        if (bytes.length !== media.size || createHash('sha256').update(bytes).digest('hex') !== media.sha256) fail(500, 'Media integrity error');
+        res.writeHead(200, { 'content-type': media.contentType, 'content-length': bytes.length, 'cache-control': 'no-store' }); res.end(bytes); return;
+      }
       if (parts.length === 2 && parts[1] === 'workspaces' && method === 'GET') result = core.listWorkspaces(app);
       else if (parts.length === 2 && parts[1] === 'workspaces' && method === 'POST') result = core.createWorkspace(app, await body());
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'POST') result = core.grant(app, parts[2], (await body()).readerApp);

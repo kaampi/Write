@@ -24,27 +24,49 @@ if (command === 'provision') {
   const token = core.provision(process.argv[3]);
   process.stdout.write(`${token}\n`);
   core.close();
-} else if (command === 'backup') {
+} else if (command === 'backup' || command === 'backup-schedule') {
   if (!process.env.CORE_BACKUP_DIR) throw new Error('Set CORE_BACKUP_DIR');
-  try {
-    const result = await createBackup(core, {
+  const passphrase = await recoveryPhrase();
+  const backup = () => createBackup(core, {
       mediaDir: process.env.CORE_MEDIA_DIR ?? file + '.media',
       backupDir: process.env.CORE_BACKUP_DIR,
-      passphrase: await recoveryPhrase(),
+      passphrase,
       keep: Number(process.env.CORE_BACKUP_KEEP ?? 10)
     });
-    process.stdout.write(JSON.stringify(result) + '\n');
-  } finally { core.close(); }
+  if (command === 'backup') {
+    try { process.stdout.write(JSON.stringify(await backup()) + '\n'); }
+    finally { core.close(); }
+  } else {
+    const hours = Number(process.env.CORE_BACKUP_INTERVAL_HOURS ?? 24);
+    if (!Number.isFinite(hours) || hours < 1 || hours > 168) throw new Error('Interval must be 1–168 hours');
+    let stopped = false, running = false, timer;
+    const stop = () => {
+      stopped = true;
+      clearTimeout(timer);
+      if (!running) core.close();
+    };
+    process.on('SIGTERM', stop); process.on('SIGINT', stop);
+    const loop = async () => {
+      if (stopped) return;
+      running = true;
+      try { process.stdout.write(JSON.stringify({ event: 'backup', ...await backup() }) + '\n'); }
+      catch (error) { process.stderr.write(JSON.stringify({ event: 'backup-error', message: error.message }) + '\n'); }
+      finally { running = false; }
+      if (stopped) core.close();
+      else timer = setTimeout(loop, hours * 60 * 60 * 1000);
+    };
+    await loop();
+  }
 } else if (!command) {
   const port = Number(process.env.CORE_PORT ?? 43127);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid CORE_PORT');
-  const server = createCoreServer(core);
+  const server = createCoreServer(core, { mediaDir: process.env.CORE_MEDIA_DIR ?? file + '.media' });
   server.listen(port, '127.0.0.1', () => process.stdout.write(`Core listening on 127.0.0.1:${port}\n`));
   const shutdown = () => server.close(() => { core.close(); process.exit(0); });
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 } else {
   core.close();
-  throw new Error('Usage: node server.mjs [provision <app>|backup|restore <archive> <new-directory>]');
+  throw new Error('Usage: node server.mjs [provision <app>|backup|backup-schedule|restore <archive> <new-directory>]');
 }
 }
