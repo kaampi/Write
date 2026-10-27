@@ -1446,6 +1446,18 @@ delningen meningslös):**
   read-only för andra appar, tydlig varningstext vid avstängd
   delning, ägarskaps-badge, Core-backup uttryckligen separat från
   synk/delning.
+- **Core blir en egen app, nådd via API (Mats, 2026-10-27) — minimal
+  påverkan på Tauri-skalet.** Om Core är en fristående app som
+  exponerar ett lokalt API (t.ex. `http://localhost:xxxx`), snarare än
+  en delad disk-fil eller en process StoryBook AI själv startar/
+  stänger, krävs ingen ny Tauri-dependency. `tauri-plugin-http` och
+  `capabilities/default.json`:s `http:default`-behörighet
+  (`http://*:*`) finns redan på plats — samma mekanism som redan
+  används mot lokal Ollama/OpenAI-kompatibla servrar. Enda möjliga
+  (valfria) justeringen: skärpa behörigheten till Core:s specifika
+  port om den är fast. Inget filsystem-plugin, ingen sidecar-binär,
+  ingen livscykelhantering behövs i StoryBook AI:s Tauri-kod.
+  Obekräftat av Mats ännu — dubbelkollas.
 
 Inget av detta är beslutat att byggas nu.
 
