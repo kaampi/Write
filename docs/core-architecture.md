@@ -59,6 +59,7 @@ Each app should expose a small Core panel for its own projects: connection and p
 - `/v1/proposals`: submit a proposal to another workspace; receiving owner alone may accept and materialize it.
 - `/v1/revisions/:id`: retrieve permitted immutable revisions.
 - `PUT /v1/shared-manuscripts/:projectId`: Storybook alone publishes a validated export and sets its readers atomically.
+- `GET /v1/shared-manuscripts`: authenticated apps see only the Storybook manuscript titles and metadata explicitly granted to them; select a record through the existing read-only record endpoint to load its full projection.
 - `DELETE /v1/shared-manuscripts/:projectId`: Storybook revokes all readers, including after local book deletion.
 - `PUT /v1/private-manuscripts/:projectId`: Storybook checkpoints a full private Book; other apps cannot read it.
 - `GET /v1/private-manuscripts/:projectId/versions`: Storybook lists its private revisions.
