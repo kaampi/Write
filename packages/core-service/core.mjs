@@ -152,20 +152,40 @@ export function openCore(path) {
         let recordId;
         if (old) {
           recordId = old.id;
-          run('UPDATE records SET revision=?, body=?, deleted=0, updated_at=? WHERE id=?', old.revision + 1, body, now, recordId);
-          audit(app, 'record.update', recordId);
+          const previous = JSON.parse(old.body);
+          // A retry, a reader toggle or a private-only edit must not invent a
+          // manuscript revision merely because exportedAt changed.
+          const { exportedAt: _oldAt, ...oldContent } = previous;
+          const { exportedAt: _newAt, ...newContent } = manuscript;
+          if (old.deleted || JSON.stringify(oldContent) !== JSON.stringify(newContent)) {
+            run('UPDATE records SET revision=?, body=?, deleted=0, updated_at=? WHERE id=?', old.revision + 1, body, now, recordId);
+            revision(record(recordId), now);
+            audit(app, 'record.update', recordId);
+          }
         } else {
           recordId = randomUUID();
           run('INSERT INTO records VALUES(?,?,?,?,?,?,?,?,?)', recordId, ws.id, null, null, 1, body, 0, now, now);
+          revision(record(recordId), now);
           audit(app, 'record.create', recordId);
         }
-        revision(record(recordId), now);
         for (const reader of shareReaders) {
           if (input.readers.includes(reader)) run('INSERT OR IGNORE INTO grants VALUES(?,?)', ws.id, reader);
           else run('DELETE FROM grants WHERE workspace_id=? AND reader_app=?', ws.id, reader);
         }
         audit(app, 'manuscript.publish', ws.id);
         return { workspace: ws, record: publicRecord(record(recordId)), readers: input.readers };
+      });
+    },
+    revokeSharedManuscript(app, projectId) {
+      if (app !== 'storybook') fail(403, 'Only Storybook can revoke a manuscript');
+      required(projectId, 'projectId');
+      return transaction(() => {
+        const ws = get('SELECT * FROM workspaces WHERE owner_app=? AND kind=? AND project_id=?', app, 'shared-manuscript', projectId);
+        if (ws) {
+          run('DELETE FROM grants WHERE workspace_id=?', ws.id);
+          audit(app, 'manuscript.revoke', ws.id);
+        }
+        return { projectId, readers: [] };
       });
     },
     writeRecord(app, id, input) {
@@ -293,6 +313,7 @@ export function createCoreServer(core, { mediaDir } = {}) {
       }
       if (parts.length === 2 && parts[1] === 'workspaces' && method === 'GET') result = core.listWorkspaces(app);
       else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'PUT') result = core.publishSharedManuscript(app, parts[2], await body());
+      else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'DELETE') result = core.revokeSharedManuscript(app, parts[2]);
       else if (parts.length === 2 && parts[1] === 'workspaces' && method === 'POST') result = core.createWorkspace(app, await body());
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'POST') result = core.grant(app, parts[2], (await body()).readerApp);
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'GET') result = core.listGrants(app, parts[2]);
