@@ -118,7 +118,7 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
         <LocaleSelect />
         <ThemeToggle />
       </div>
-      {coreOpen && store.book ? <CoreConnectionDialog key={store.book.id} bookId={store.book.id} onClose={() => setCoreOpen(false)} /> : null}
+      {coreOpen && store.book ? <CoreConnectionDialog key={store.book.id} bookId={store.book.id} onCheckpoint={store.checkpointBook} onClose={() => setCoreOpen(false)} /> : null}
     </header>
   );
 }

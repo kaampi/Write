@@ -167,6 +167,50 @@ test('private full-book snapshots cannot be granted to another app', async () =>
   } finally { server.close(); await once(server, 'close'); core.close(); rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('private manuscript snapshots keep immutable owner-only versions separate from shared exports', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'core-private-versions-'));
+  const core = openCore(join(dir, 'core.db'));
+  const tokens = Object.fromEntries(['storybook', 'sandbox', 'comic'].map(app => [app, core.provision(app)]));
+  const server = createCoreServer(core);
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const call = async (app, method, path, data) => {
+    const response = await fetch(base + path, {
+      method, headers: { authorization: `Bearer ${tokens[app]}`, ...(data ? { 'content-type': 'application/json' } : {}) },
+      ...(data ? { body: JSON.stringify(data) } : {})
+    });
+    return { status: response.status, body: await response.json() };
+  };
+  try {
+    const route = '/v1/private-manuscripts/book-one';
+    const first = { id: 'book-one', chapters: [{ prose: 'First draft' }], brainstorm: 'Secret ideas', facts: [{ status: 'ai_proposed' }] };
+    assert.deepEqual((await call('storybook', 'GET', `${route}/versions`)).body, { workspace: null, revisions: [] });
+    assert.equal((await call('comic', 'PUT', route, { book: first })).status, 403);
+    assert.equal((await call('storybook', 'PUT', route, { book: { ...first, id: 'other' } })).status, 400);
+    const saved = await call('storybook', 'PUT', route, { book: first });
+    assert.equal(saved.status, 200);
+    assert.equal(saved.body.workspace.kind, 'private-snapshot');
+    assert.equal(saved.body.record.body.brainstorm, 'Secret ideas');
+    const same = await call('storybook', 'PUT', route, { book: first });
+    assert.equal(same.body.record.revision, 1);
+    const changed = await call('storybook', 'PUT', route, { book: { ...first, chapters: [{ prose: 'Second draft' }] } });
+    assert.equal(changed.body.record.revision, 2);
+    const versions = (await call('storybook', 'GET', `${route}/versions`)).body;
+    assert.deepEqual(versions.revisions.map(row => row.number), [2, 1]);
+    assert.equal(versions.workspace.id, saved.body.workspace.id);
+    assert.deepEqual((await call('storybook', 'GET', `/v1/revisions/${versions.revisions[1].id}`)).body.body, first);
+    for (const app of ['sandbox', 'comic']) {
+      assert.equal((await call(app, 'GET', `${route}/versions`)).status, 403);
+      assert.equal((await call(app, 'GET', `/v1/revisions/${versions.revisions[0].id}`)).status, 403);
+      assert.equal((await call(app, 'GET', `/v1/records/${saved.body.record.id}`)).status, 403);
+      assert.equal((await call('storybook', 'PUT', `/v1/workspaces/${saved.body.workspace.id}/grants/${app}`, { visible: true })).status, 403);
+    }
+    const other = await call('storybook', 'PUT', '/v1/private-manuscripts/book-sv', { book: { id: 'book-sv', chapters: [], translated_from_book_id: 'book-one' } });
+    assert.notEqual(other.body.workspace.id, saved.body.workspace.id);
+    assert.equal((await call('storybook', 'GET', '/v1/private-manuscripts/book-sv/versions')).body.revisions.length, 1);
+  } finally { server.close(); await once(server, 'close'); core.close(); rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('shared manuscript publishing stores only a validated projection and atomically changes readers', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'core-shared-manuscript-'));
   const core = openCore(join(dir, 'core.db'));

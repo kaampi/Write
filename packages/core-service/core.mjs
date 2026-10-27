@@ -8,6 +8,7 @@ import { MANUSCRIPT_EXPORT_FORMAT, parseManuscriptExport } from '@ocedo-apps/sto
 const apps = new Set(['storybook', 'sandbox', 'comic']);
 const shareReaders = new Set(['sandbox', 'comic']);
 const MAX_SHARED_MANUSCRIPT_BYTES = 20_000_000;
+const MAX_PRIVATE_MANUSCRIPT_BYTES = 50_000_000;
 const digest = token => createHash('sha256').update(token).digest();
 const fail = (status, message) => { throw Object.assign(new Error(message), { status }); };
 const required = (value, name) => {
@@ -206,6 +207,48 @@ export function openCore(path) {
       const ws = get('SELECT id FROM workspaces WHERE owner_app=? AND kind=? AND project_id=?', app, 'shared-manuscript', projectId);
       return { projectId, exists: !!ws, readers: ws ? all('SELECT reader_app FROM grants WHERE workspace_id=? ORDER BY reader_app', ws.id).map(row => row.reader_app) : [] };
     },
+    savePrivateManuscript(app, projectId, input) {
+      if (app !== 'storybook') fail(403, 'Only Storybook can save private manuscripts');
+      required(projectId, 'projectId');
+      const book = input.book;
+      if (!book || typeof book !== 'object' || Array.isArray(book) || book.id !== projectId || !Array.isArray(book.chapters)) fail(400, 'Invalid private manuscript');
+      const body = JSON.stringify(book);
+      if (Buffer.byteLength(body) > MAX_PRIVATE_MANUSCRIPT_BYTES) fail(413, 'Private manuscript too large');
+      return transaction(() => {
+        let ws = get('SELECT * FROM workspaces WHERE owner_app=? AND kind=? AND project_id=?', app, 'private-snapshot', projectId);
+        const now = new Date().toISOString();
+        if (!ws) {
+          const id = randomUUID();
+          run('INSERT INTO workspaces(id,owner_app,kind,created_at,project_id) VALUES(?,?,?,?,?)', id, app, 'private-snapshot', now, projectId);
+          ws = workspace(id);
+          audit(app, 'workspace.create', id);
+        }
+        const old = get('SELECT * FROM records WHERE workspace_id=? AND entity_id=?', ws.id, 'full-book');
+        let recordId;
+        if (!old) {
+          recordId = randomUUID();
+          run('INSERT INTO records VALUES(?,?,?,?,?,?,?,?,?)', recordId, ws.id, 'full-book', null, 1, body, 0, now, now);
+          revision(record(recordId), now);
+          audit(app, 'record.create', recordId);
+        } else {
+          recordId = old.id;
+          if (old.deleted || old.body !== body) {
+            run('UPDATE records SET revision=?,body=?,deleted=0,updated_at=? WHERE id=?', old.revision + 1, body, now, recordId);
+            revision(record(recordId), now);
+            audit(app, 'record.update', recordId);
+          }
+        }
+        return { workspace: ws, record: publicRecord(record(recordId)) };
+      });
+    },
+    privateManuscriptVersions(app, projectId) {
+      if (app !== 'storybook') fail(403, 'Only Storybook can inspect private manuscripts');
+      required(projectId, 'projectId');
+      const ws = get('SELECT * FROM workspaces WHERE owner_app=? AND kind=? AND project_id=?', app, 'private-snapshot', projectId);
+      if (!ws) return { workspace: null, revisions: [] };
+      const rec = get('SELECT id FROM records WHERE workspace_id=? AND entity_id=?', ws.id, 'full-book');
+      return { workspace: ws, revisions: rec ? all('SELECT id,workspace_id,number,created_at,deleted FROM revisions WHERE record_id=? ORDER BY number DESC', rec.id) : [] };
+    },
     writeRecord(app, id, input) {
       return transaction(() => {
         const ws = authorize(app, id, 'write');
@@ -295,7 +338,7 @@ export function createCoreServer(core, { mediaDir } = {}) {
       if (parts[0] !== 'v1') fail(404, 'Not found');
       const body = async () => {
         const chunks = []; let size = 0;
-        for await (const chunk of req) { size += chunk.length; if (size > MAX_SHARED_MANUSCRIPT_BYTES + 1_000_000) fail(413, 'Body too large'); chunks.push(chunk); }
+        for await (const chunk of req) { size += chunk.length; if (size > MAX_PRIVATE_MANUSCRIPT_BYTES + 1_000_000) fail(413, 'Body too large'); chunks.push(chunk); }
         try { const parsed = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) fail(400, 'Invalid JSON object'); return parsed; }
         catch (error) { if (error.status) throw error; fail(400, 'Invalid JSON'); }
       };
@@ -334,6 +377,8 @@ export function createCoreServer(core, { mediaDir } = {}) {
       else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'PUT') result = core.publishSharedManuscript(app, parts[2], await body());
       else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'DELETE') result = core.revokeSharedManuscript(app, parts[2]);
       else if (parts.length === 4 && parts[1] === 'shared-manuscripts' && parts[3] === 'access' && method === 'GET') result = core.sharedManuscriptAccess(app, parts[2]);
+      else if (parts.length === 3 && parts[1] === 'private-manuscripts' && method === 'PUT') result = core.savePrivateManuscript(app, parts[2], await body());
+      else if (parts.length === 4 && parts[1] === 'private-manuscripts' && parts[3] === 'versions' && method === 'GET') result = core.privateManuscriptVersions(app, parts[2]);
       else if (parts.length === 2 && parts[1] === 'workspaces' && method === 'POST') result = core.createWorkspace(app, await body());
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'POST') result = core.grant(app, parts[2], (await body()).readerApp);
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'GET') result = core.listGrants(app, parts[2]);

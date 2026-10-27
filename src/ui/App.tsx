@@ -1,7 +1,7 @@
 import React, { Component, Fragment, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
 import { isTauri } from "@tauri-apps/api/core";
 import { coreConnection } from "@persistence/CoreDesktopTransport";
-import { flushCoreSharing } from "@persistence/CoreSharingRuntime";
+import { flushCoreSharing, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
 import { BookStoreProvider } from "./BookStore";
 import { useBookStore } from "./useBookStore";
 import { SeriesStoreProvider } from "./SeriesStore";
@@ -46,7 +46,7 @@ function Shell() {
   const [homeGuideOpen, setHomeGuideOpen] = useState(false);
   useEffect(() => {
     if (!isTauri()) return;
-    const retry = () => { void coreConnection().then(status => status.reachable ? flushCoreSharing() : undefined).catch(() => {}); };
+    const retry = () => { void coreConnection().then(status => status.reachable ? Promise.allSettled([flushCoreSharing(), flushCoreSnapshots()]) : undefined).catch(() => {}); };
     retry();
     const timer = window.setInterval(retry, 30_000);
     window.addEventListener("online", retry);

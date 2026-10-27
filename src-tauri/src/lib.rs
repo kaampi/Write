@@ -17,6 +17,8 @@ pub fn run() {
       core_bridge::core_pair,
       core_bridge::core_connection,
       core_bridge::core_shared_access,
+      core_bridge::core_save_private,
+      core_bridge::core_private_versions,
       core_bridge::core_publish_shared,
       core_bridge::core_revoke_shared
     ])
