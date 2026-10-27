@@ -1,5 +1,6 @@
 import { openCore, createCoreServer } from './core.mjs';
 import { backupEncryption, createBackup, restoreBackup } from './backup.mjs';
+import { createAdminBackup } from './admin.mjs';
 import { createInterface } from 'node:readline/promises';
 
 const recoveryPhrase = async () => {
@@ -24,6 +25,9 @@ const core = openCore(file);
 if (command === 'provision') {
   const token = core.provision(process.argv[3]);
   process.stdout.write(`${token}\n`);
+  core.close();
+} else if (command === 'provision-admin') {
+  process.stdout.write(`${core.provisionAdmin()}\n`);
   core.close();
 } else if (command === 'backup' || command === 'backup-schedule') {
   if (!process.env.CORE_BACKUP_DIR) throw new Error('Set CORE_BACKUP_DIR');
@@ -65,13 +69,14 @@ if (command === 'provision') {
 } else if (!command) {
   const port = Number(process.env.CORE_PORT ?? 43127);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid CORE_PORT');
-  const server = createCoreServer(core, { mediaDir: process.env.CORE_MEDIA_DIR ?? file + '.media' });
+  const mediaDir = process.env.CORE_MEDIA_DIR ?? file + '.media';
+  const server = createCoreServer(core, { mediaDir, adminBackup: createAdminBackup(core, mediaDir) });
   server.listen(port, '127.0.0.1', () => process.stdout.write(`Core listening on 127.0.0.1:${port}\n`));
   const shutdown = () => server.close(() => { core.close(); process.exit(0); });
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 } else {
   core.close();
-  throw new Error('Usage: node server.mjs [provision <app>|backup|backup-schedule|restore <archive> <new-directory>]');
+  throw new Error('Usage: node server.mjs [provision <app>|provision-admin|backup|backup-schedule|restore <archive> <new-directory>]');
 }
 }
