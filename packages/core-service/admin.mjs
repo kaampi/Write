@@ -1,7 +1,7 @@
-import { readdir, mkdtemp, rm, stat, chmod, realpath } from 'node:fs/promises';
+import { readdir, stat, realpath } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';
-import { tmpdir } from 'node:os';
-import { createBackup, restoreBackup } from './backup.mjs';
+import { createBackup } from './backup.mjs';
+import { drillBackup } from './drill.mjs';
 
 const fail = (status, message) => { throw Object.assign(new Error(message), { status }); };
 const archiveName = name => typeof name === 'string' && /^storybook-core-[a-zA-Z0-9-]+\.sbcore$/.test(name);
@@ -93,16 +93,14 @@ export function createAdminBackup(core, mediaDir, { schedule = setTimeout, cance
       return exclusive(async () => {
         const dir = await directory(settings());
         if (!archiveName(name) || !(await listIn(dir)).some(file => file.name === name)) fail(404, 'Backup not found');
-        const stage = await mkdtemp(join(tmpdir(), 'core-verify-'));
-        await chmod(stage, 0o700);
         try {
-          const result = await restoreBackup(join(dir, name), join(stage, 'checked'), passphrase);
-          core.recordAdminAction('backup.verify', name);
-          return { name, verified: result.verified, encryption: result.encryption };
+          const result = await drillBackup(join(dir, name), passphrase);
+          core.recordAdminAction('backup.drill', name);
+          return { name, ...result };
         } catch (error) {
           if (error.status) throw error;
-          fail(400, 'Backup verification failed; check the recovery phrase and archive');
-        } finally { await rm(stage, { recursive: true, force: true }); }
+          fail(400, 'Restore drill failed; check the recovery phrase, archive and Core media');
+        }
       });
     }
   };

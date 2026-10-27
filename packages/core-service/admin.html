@@ -36,8 +36,8 @@
         <div class="actions"><button id="unlock-schedule" type="button">Lås upp krypterat schema</button><button id="lock-schedule" type="button" class="secondary">Pausa krypterat schema</button></div>
       </section>
       <section class="card">
-        <h2>Skapa och kontrollera</h2>
-        <p>En backup innehåller en konsekvent SQLite-kopia och Core-media. Den verifieras innan den publiceras i backupmappen. En synkmapp, till exempel Nextcloud, kan användas som destination om den är monterad lokalt.</p>
+        <h2>Skapa och prova återställning</h2>
+        <p>En backup innehåller en konsekvent SQLite-kopia och Core-media. Den verifieras innan den publiceras i backupmappen. Återställningsprovet öppnar en separat tillfällig kopia, kontrollerar databasen och alla registrerade mediafiler och tar sedan bort provkopian. Den levande tjänsten påverkas inte. En synkmapp, till exempel Nextcloud, kan användas som destination om den är monterad lokalt.</p>
         <label>Återställningsfras vid kryptering<input id="passphrase" type="password" autocomplete="new-password" placeholder="Minst 12 tecken"></label>
         <p class="hint">Frasen skickas bara till den lokala Core-tjänsten för den här åtgärden och sparas inte i inställningarna. Förvara en kopia separat från backupmappen.</p>
         <button id="backup-now" type="button">Skapa backup nu</button>

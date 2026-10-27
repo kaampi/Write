@@ -46,12 +46,12 @@ async function listBackups() {
     const label = document.createElement('span');
     label.textContent = `${file.name} · ${(file.size / 1_000_000).toFixed(1)} MB · ${new Date(file.modifiedAt).toLocaleString('sv-SE')}`;
     const verify = document.createElement('button');
-    verify.type = 'button'; verify.className = 'secondary'; verify.textContent = 'Kontrollera';
+    verify.type = 'button'; verify.className = 'secondary'; verify.textContent = 'Prova återställning';
     verify.addEventListener('click', () => void run(verify, async () => {
       const passphrase = byId('passphrase').value;
       try {
         const result = await api('backups/verify', 'POST', { name: file.name, passphrase });
-        status(`${result.name}: verifierad (${result.encryption === 'encrypted' ? 'krypterad' : 'okrypterad'}).`);
+        status(`${result.name}: återställningsprov godkänt (${result.encryption === 'encrypted' ? 'krypterad' : 'okrypterad'}). ${result.counts.workspaces} arbetsytor, ${result.counts.revisions} versioner och ${result.counts.media} mediereferenser kontrollerade.`);
       } finally { byId('passphrase').value = ''; }
     }));
     item.append(label, verify); list.append(item);
