@@ -1,6 +1,15 @@
 name: Core checks
 
 on:
+  push:
+    branches:
+      - "feat/core-*"
+      - "feat/storybook-core-*"
+    paths:
+      - "packages/core-service/**"
+      - "src/persistence/**"
+      - "tests/persistence/**"
+      - ".github/workflows/core-checks.yml"
   pull_request:
     paths:
       - "packages/core-service/**"
