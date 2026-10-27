@@ -64,3 +64,22 @@ SQLite tables: `app_keys` (hashed credentials and verified app), `workspaces` (o
 PUT and DELETE require `expectedRevision`; conflicts return 409 without changing data. A proposal has `sourceWorkspaceId`, `targetWorkspaceId`, `sourceRevision`, `entityId`, and `proposedChange` (a complete replacement body). Acceptance requires `targetRecordId` and `expectedRevision`: the target owner explicitly selects its record, creates a new immutable revision with source provenance, and marks the proposal accepted in one transaction. Rejection records the decision without changing canon. The initial API leaves record creation, discovery, offline queues and synchronization to later app integration.
 
 Run `npm run test:core-service` for HTTP/SQLite isolation tests and `npm test -- --run tests/core/workspace-access.test.ts` for the pure policy tests.
+
+## Encrypted Core backups (first slice)
+
+The operator can select any writable directory through `CORE_BACKUP_DIR`, including a mounted external disk or a folder synchronized by another program. Core writes an authenticated AES-256-GCM encrypted `.sbcore` archive there. The archive contains a consistent SQLite snapshot made with `VACUUM INTO`, the contents of `CORE_MEDIA_DIR` (default: `CORE_DB_PATH.media`), and an encrypted manifest with checksums. The archive is decrypted and checked before its temporary name is published. Files with invalid media types such as symlinks are rejected. This first slice has a manual CLI; automatic scheduling and direct cloud uploads have not been implemented.
+
+```sh
+# Supply the recovery phrase on standard input using a secure prompt or secret store.
+CORE_DB_PATH=./core.db CORE_MEDIA_DIR=./media CORE_BACKUP_DIR=/mounted/backups \
+  CORE_BACKUP_KEEP=10 node packages/core-service/server.mjs backup
+
+# Restore to a NEW directory, leaving the running installation untouched.
+node packages/core-service/server.mjs restore /mounted/backups/storybook-core-....sbcore ./restored-core
+```
+
+The backup and restore commands read one recovery phrase line from standard input. Do not put it in shell arguments, environment variables, logs, or in the backup folder. Keep a recoverable copy separate from the storage destination: losing the phrase means losing access to the archive. The target folder receives only encrypted `.sbcore` files and optional `.keep` markers. An archive can be pinned by placing an empty `<archive>.keep` file next to it.
+
+`CORE_BACKUP_KEEP` defaults to 10 (range 1–1000). After a new backup passes decryption, checksums, and SQLite integrity validation, Core retains the newest N unpinned archives and removes older unpinned archives. Pinned copies are additional to N. Failed backup creation does not trigger pruning. Restoring refuses to overwrite an existing directory, checks authentication, every file hash and SQLite integrity, then publishes the restored directory. The operator must stop the old service before switching `CORE_DB_PATH` and `CORE_MEDIA_DIR` to the restored directory. App credentials are stored as hashes in SQLite; provision new credentials if required after moving installations.
+
+Media writers external to Core must not change files while a backup runs. Before connecting app media storage, Core must own writes and coordinate them with backup snapshots. This is a local encrypted export, not yet an automatic disaster recovery policy; schedule, destination health reporting and periodic restore drills remain follow-up work.

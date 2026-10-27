@@ -1,0 +1,33 @@
+name: Core checks
+
+on:
+  pull_request:
+    paths:
+      - "packages/core-service/**"
+      - "src/core/workspaceAccess.ts"
+      - "tests/core/workspace-access.test.ts"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.ts"
+      - ".github/workflows/core-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch git dependencies over HTTPS
+        run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test:core-service
+      - run: npm test -- --maxWorkers=2

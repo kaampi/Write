@@ -46,6 +46,10 @@ export function openCore(path) {
   };
   return {
     close: () => db.close(),
+    snapshotTo(destination) {
+      db.prepare('VACUUM INTO ?').run(destination);
+    },
+    integrityCheck() { return db.prepare('PRAGMA integrity_check').get()?.integrity_check; },
     provision(app) {
       if (!apps.has(app)) fail(400, 'Unknown app');
       const token = randomBytes(32).toString('hex');
