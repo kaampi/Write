@@ -17,6 +17,7 @@ button { background: #a7ddbb; color: #10211c; border: 0; border-radius: 7px; pad
 button:disabled { opacity: .55; cursor: wait; }
 button.secondary { background: transparent; border: 1px solid #719b85; color: #d7f1dd; }
 .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 .heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.5rem; }
 .heading:first-child { margin-top: 0; }
 .hint { font-size: .9rem; margin: .2rem 0 1rem; }

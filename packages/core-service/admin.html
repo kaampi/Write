@@ -24,9 +24,16 @@
             <label>Kryptering<select id="encrypted"><option value="on">Kryptera backup</option><option value="off">Kryptera inte backup</option></select></label>
             <label>Behåll senaste antal backuper<input id="keep" type="number" min="1" max="1000" value="10" required></label>
           </div>
+          <label>Automatisk backup, intervall i timmar (0 = avstängd)<input id="interval-hours" type="number" min="0" max="168" value="0" required></label>
           <p class="hint">Krypteringen gäller backupfilen, inte den levande SQLite-databasen. En okrypterad backup kan läsas av den som kommer åt filen. Filer du markerar med en <code>.keep</code>-fil bredvid sparas utöver gränsen.</p>
           <button type="submit">Spara inställningar</button>
         </form>
+      </section>
+      <section class="card">
+        <h2>Schema och körstatus</h2>
+        <p id="schedule-status" role="status">Hämtar status…</p>
+        <p class="hint">Core-tjänsten behöver vara igång. Okrypterade backuper schemaläggs efter start. Vid kryptering behöver du låsa upp schemat igen efter varje omstart; frasen finns bara i tjänstens minne. Att låsa den här webbläsarfliken stoppar inte ett upplåst schema.</p>
+        <div class="actions"><button id="unlock-schedule" type="button">Lås upp krypterat schema</button><button id="lock-schedule" type="button" class="secondary">Pausa krypterat schema</button></div>
       </section>
       <section class="card">
         <h2>Skapa och kontrollera</h2>

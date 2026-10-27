@@ -41,6 +41,9 @@ export function openCore(path) {
   if (!db.prepare('PRAGMA table_info(workspaces)').all().some(column => column.name === 'language')) {
     db.exec('ALTER TABLE workspaces ADD COLUMN language TEXT');
   }
+  if (!db.prepare('PRAGMA table_info(backup_settings)').all().some(column => column.name === 'interval_hours')) {
+    db.exec('ALTER TABLE backup_settings ADD COLUMN interval_hours INTEGER NOT NULL DEFAULT 0');
+  }
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS workspaces_project_owner ON workspaces(owner_app,kind,project_id) WHERE project_id IS NOT NULL');
   const run = (sql, ...args) => db.prepare(sql).run(...args);
   const get = (sql, ...args) => db.prepare(sql).get(...args);
@@ -105,15 +108,16 @@ export function openCore(path) {
       if (!row || !timingSafeEqual(hash, Buffer.from(row.key_hash, 'hex'))) fail(401, 'Unauthorized');
     },
     backupSettings() {
-      const row = get('SELECT backup_dir,encrypted,keep FROM backup_settings WHERE id=1');
-      return row ? { backupDir: row.backup_dir, encrypted: !!row.encrypted, keep: row.keep } : null;
+      const row = get('SELECT backup_dir,encrypted,keep,interval_hours FROM backup_settings WHERE id=1');
+      return row ? { backupDir: row.backup_dir, encrypted: !!row.encrypted, keep: row.keep, intervalHours: row.interval_hours } : null;
     },
     setBackupSettings(input) {
       if (!input || typeof input.backupDir !== 'string' || !isAbsolute(input.backupDir) || input.backupDir.length > 2048 || !input.backupDir.trim() ||
-          typeof input.encrypted !== 'boolean' || !Number.isSafeInteger(input.keep) || input.keep < 1 || input.keep > 1000) fail(400, 'Invalid backup settings');
+          typeof input.encrypted !== 'boolean' || !Number.isSafeInteger(input.keep) || input.keep < 1 || input.keep > 1000 ||
+          !Number.isSafeInteger(input.intervalHours) || (input.intervalHours !== 0 && (input.intervalHours < 1 || input.intervalHours > 168))) fail(400, 'Invalid backup settings');
       const backupDir = input.backupDir.trim();
       transaction(() => {
-        run('INSERT INTO backup_settings(id,backup_dir,encrypted,keep) VALUES(1,?,?,?) ON CONFLICT(id) DO UPDATE SET backup_dir=excluded.backup_dir,encrypted=excluded.encrypted,keep=excluded.keep', backupDir, input.encrypted ? 1 : 0, input.keep);
+        run('INSERT INTO backup_settings(id,backup_dir,encrypted,keep,interval_hours) VALUES(1,?,?,?,?) ON CONFLICT(id) DO UPDATE SET backup_dir=excluded.backup_dir,encrypted=excluded.encrypted,keep=excluded.keep,interval_hours=excluded.interval_hours', backupDir, input.encrypted ? 1 : 0, input.keep, input.intervalHours);
         audit('core-admin', 'backup.settings', 'core');
       });
       return this.backupSettings();
@@ -390,7 +394,13 @@ export function createCoreServer(core, { mediaDir, adminBackup } = {}) {
         };
         let result;
         if (url.pathname === '/admin/api/settings' && req.method === 'GET') result = core.backupSettings();
-        else if (url.pathname === '/admin/api/settings' && req.method === 'PUT') result = core.setBackupSettings(await adminBody());
+        else if (url.pathname === '/admin/api/settings' && req.method === 'PUT') {
+          result = core.setBackupSettings(await adminBody());
+          adminBackup?.reconfigure();
+        }
+        else if (url.pathname === '/admin/api/schedule' && req.method === 'GET') result = adminBackup ? adminBackup.scheduleStatus() : fail(503, 'Backup service unavailable');
+        else if (url.pathname === '/admin/api/schedule/unlock' && req.method === 'POST') result = adminBackup ? adminBackup.unlock((await adminBody()).passphrase) : fail(503, 'Backup service unavailable');
+        else if (url.pathname === '/admin/api/schedule/lock' && req.method === 'POST') result = adminBackup ? adminBackup.lock() : fail(503, 'Backup service unavailable');
         else if (url.pathname === '/admin/api/backups' && req.method === 'GET') result = adminBackup ? await adminBackup.list() : fail(503, 'Backup service unavailable');
         else if (url.pathname === '/admin/api/backups' && req.method === 'POST') result = adminBackup ? await adminBackup.backup((await adminBody()).passphrase) : fail(503, 'Backup service unavailable');
         else if (url.pathname === '/admin/api/backups/verify' && req.method === 'POST') {

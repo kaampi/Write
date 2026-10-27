@@ -6,8 +6,9 @@ import { createBackup, restoreBackup } from './backup.mjs';
 const fail = (status, message) => { throw Object.assign(new Error(message), { status }); };
 const archiveName = name => typeof name === 'string' && /^storybook-core-[a-zA-Z0-9-]+\.sbcore$/.test(name);
 
-export function createAdminBackup(core, mediaDir) {
-  let running = false;
+export function createAdminBackup(core, mediaDir, { schedule = setTimeout, cancel = clearTimeout, now = Date.now } = {}) {
+  let running = false, pending;
+  let stopped = false, phrase, timer, nextRunAt = null, lastSuccessAt = null, lastError = null;
   const settings = () => core.backupSettings() ?? fail(409, 'Configure a backup directory first');
   const directory = async config => {
     const dir = resolve(config.backupDir), media = resolve(mediaDir);
@@ -21,7 +22,26 @@ export function createAdminBackup(core, mediaDir) {
   const exclusive = async task => {
     if (running) fail(409, 'Another backup operation is running');
     running = true;
-    try { return await task(); } finally { running = false; }
+    pending = task();
+    try { return await pending; } finally { pending = undefined; running = false; }
+  };
+  const clearSchedule = () => { if (timer !== undefined) cancel(timer); timer = undefined; nextRunAt = null; };
+  const scheduleNext = () => {
+    clearSchedule();
+    const config = core.backupSettings();
+    if (stopped || !config?.intervalHours || (config.encrypted && !phrase)) return;
+    const delay = config.intervalHours * 60 * 60 * 1000;
+    nextRunAt = new Date(now() + delay).toISOString();
+    timer = schedule(async () => {
+      timer = undefined; nextRunAt = null;
+      if (stopped) return;
+      try {
+        await api.backup(phrase);
+        lastSuccessAt = new Date(now()).toISOString(); lastError = null;
+      } catch (error) { lastError = error instanceof Error ? error.message : String(error); }
+      scheduleNext();
+    }, delay);
+    timer?.unref?.();
   };
   const listIn = async dir => {
     let entries;
@@ -35,7 +55,28 @@ export function createAdminBackup(core, mediaDir) {
     }
     return files.sort((a, b) => b.name.localeCompare(a.name));
   };
-  return {
+  const api = {
+    scheduleStatus() {
+      const config = core.backupSettings();
+      return { state: !config?.intervalHours ? 'off' : config.encrypted && !phrase ? 'locked' : 'active',
+        nextRunAt, lastSuccessAt, lastError, running };
+    },
+    reconfigure() {
+      phrase = undefined;
+      lastError = null;
+      scheduleNext();
+      return this.scheduleStatus();
+    },
+    unlock(passphrase) {
+      const config = settings();
+      if (!config.intervalHours || !config.encrypted) fail(409, 'Encrypted schedule is not enabled');
+      if (typeof passphrase !== 'string' || passphrase.length < 12) fail(400, 'Recovery phrase must contain at least 12 characters');
+      phrase = passphrase;
+      scheduleNext();
+      return this.scheduleStatus();
+    },
+    lock() { phrase = undefined; scheduleNext(); return this.scheduleStatus(); },
+    async stop() { stopped = true; phrase = undefined; clearSchedule(); try { await pending; } catch { /* Already reported to the caller or schedule status. */ } },
     async list() {
       return listIn(await directory(settings()));
     },
@@ -65,4 +106,6 @@ export function createAdminBackup(core, mediaDir) {
       });
     }
   };
+  scheduleNext();
+  return api;
 }
