@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { isTauri } from "@tauri-apps/api/core";
+import { sortedChapters, type Book } from "@core/BookSchema";
+import { prepareCoreBookRestore } from "@core/coreRevisionRestore";
 import type { CoreShareReader } from "@persistence/CoreManuscriptPublication";
-import { coreConnection, corePrivateVersions, coreSharedAccess, pairCore, type CoreConnection, type CorePrivateVersions } from "@persistence/CoreDesktopTransport";
+import { coreConnection, corePrivateRevision, corePrivateVersions, coreSharedAccess, pairCore, type CoreConnection, type CorePrivateVersions } from "@persistence/CoreDesktopTransport";
 import { coreSharingOutbox, coreSnapshotOutbox, flushCoreSharing, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
 import { useLocale } from "./i18n";
 
@@ -17,7 +19,9 @@ const copy = {
     shared: "Sharing includes all chapter prose, synopsis and approved visible Story Bible facts. Brainstorm and hidden or unapproved facts stay private.",
     actual: "Current access in Core", unknown: "Core access has not been verified. Previously shared copies may still be accessible.", nobody: "No other app",
     saveVersion: "Save private version to Core", versions: "Private manuscript versions", noVersions: "No versions in Core yet.",
-    versionPending: "A private version is waiting to sync. Only confirmed Core versions can be restored."
+    versionPending: "A private version is waiting to sync. Only confirmed Core versions can be restored.",
+    view: "View", compare: "Compare", old: "Selected version", current: "Current manuscript", noChanges: "No text or fact changes in this view.",
+    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Story Bible facts"
   },
   sv: {
     title: "Storybook Core", close: "Stäng", local: "Manuset sparas fortfarande lokalt i Storybook.",
@@ -30,7 +34,9 @@ const copy = {
     shared: "Delning omfattar alla kapitels prosa, synopsis och godkända synliga fakta i Story Bible. Brainstorm och dolda eller ogranskade fakta förblir privata.",
     actual: "Faktisk åtkomst i Core", unknown: "Åtkomsten i Core är inte verifierad. Tidigare delade kopior kan fortfarande vara åtkomliga.", nobody: "Ingen annan app",
     saveVersion: "Spara privat version i Core", versions: "Privata manusversioner", noVersions: "Inga versioner i Core ännu.",
-    versionPending: "En privat version väntar på synk. Bara versioner som Core har tagit emot kan återställas."
+    versionPending: "En privat version väntar på synk. Bara versioner som Core har tagit emot kan återställas.",
+    view: "Visa", compare: "Jämför", old: "Vald version", current: "Nuvarande manus", noChanges: "Inga text- eller faktaändringar i den här vyn.",
+    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Fakta i Story Bible"
   },
   nb: {
     title: "Storybook Core", close: "Lukk", local: "Manuset lagres fortsatt lokalt i Storybook.",
@@ -43,11 +49,13 @@ const copy = {
     shared: "Deling omfatter all kapittelprosa, synopsis og godkjente synlige fakta i Story Bible. Brainstorm og skjulte eller ikke godkjente fakta forblir private.",
     actual: "Faktisk tilgang i Core", unknown: "Tilgangen i Core er ikke bekreftet. Tidligere delte kopier kan fortsatt være tilgjengelige.", nobody: "Ingen annen app",
     saveVersion: "Lagre privat versjon i Core", versions: "Private manusversjoner", noVersions: "Ingen versjoner i Core ennå.",
-    versionPending: "En privat versjon venter på synkronisering. Bare versjoner Core har mottatt kan gjenopprettes."
+    versionPending: "En privat versjon venter på synkronisering. Bare versjoner Core har mottatt kan gjenopprettes.",
+    view: "Vis", compare: "Sammenlign", old: "Valgt versjon", current: "Nåværende manus", noChanges: "Ingen tekst- eller faktaendringer i denne visningen.",
+    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Fakta i Story Bible"
   }
 };
 
-export function CoreConnectionDialog({ bookId, onCheckpoint, onClose }: { bookId: string; onCheckpoint: () => Promise<void>; onClose: () => void }) {
+export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onClose }: { bookId: string; currentBook: Book; onCheckpoint: () => Promise<void>; onClose: () => void }) {
   const { locale } = useLocale();
   const m = copy[locale as keyof typeof copy] ?? copy.en;
   const desktop = isTauri();
@@ -57,6 +65,7 @@ export function CoreConnectionDialog({ bookId, onCheckpoint, onClose }: { bookId
   const [remoteReaders, setRemoteReaders] = useState<CoreShareReader[] | null>(null);
   const [versions, setVersions] = useState<CorePrivateVersions | null>(null);
   const [snapshotPending, setSnapshotPending] = useState(false);
+  const [inspection, setInspection] = useState<{ book: Book; id: string; mode: "view" | "compare" } | null>(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState("");
   const [working, setWorking] = useState(false);
@@ -124,6 +133,14 @@ export function CoreConnectionDialog({ bookId, onCheckpoint, onClose }: { bookId
     if (connection.reachable) await flushCoreSharing();
   });
 
+  const inspect = (id: string, mode: "view" | "compare") => void run(async () => {
+    const workspace = versions?.workspace;
+    if (!workspace || !versions?.revisions.some(rev => rev.id === id)) throw new Error("Core version is unavailable");
+    const revision = await corePrivateRevision(id);
+    const prepared = prepareCoreBookRestore({ workspace, revision }, "same-book");
+    setInspection({ book: prepared.backup.book, id, mode });
+  });
+
   return (
     <div className="edit-overlay" role="presentation" onClick={onClose}>
       <section className="edit-card core-connection-card" role="dialog" aria-modal="true" aria-labelledby="core-connection-title" onClick={event => event.stopPropagation()}>
@@ -152,7 +169,29 @@ export function CoreConnectionDialog({ bookId, onCheckpoint, onClose }: { bookId
           <button type="button" disabled={working || loading} onClick={() => void run(async () => { await onCheckpoint(); if (connection.reachable) await flushCoreSnapshots(); })}>{m.saveVersion}</button>
           {snapshotPending ? <p role="status">{m.versionPending}</p> : null}
           {versions ? <div className="core-version-list">
-            {versions.revisions.length ? <ol>{versions.revisions.map(rev => <li key={rev.id}>#{rev.number} · {new Date(rev.created_at).toLocaleString(locale)}</li>)}</ol> : <p>{m.noVersions}</p>}
+            {versions.revisions.length ? <ol>{versions.revisions.map(rev => <li key={rev.id}>#{rev.number} · {new Date(rev.created_at).toLocaleString(locale)} <button type="button" disabled={working} onClick={() => inspect(rev.id, "view")}>{m.view}</button> <button type="button" disabled={working} onClick={() => inspect(rev.id, "compare")}>{m.compare}</button></li>)}</ol> : <p>{m.noVersions}</p>}
+          </div> : null}
+          {inspection ? <div className="core-revision-inspection">
+            <h3>{inspection.mode === "view" ? m.view : m.compare} · {inspection.book.title}</h3>
+            {inspection.mode === "view" ? <>
+              <h4>{m.synopsis}</h4><pre>{inspection.book.synopsis}</pre>
+              <h4>{m.brainstorm}</h4><pre>{inspection.book.brainstorm}</pre>
+              <h4>{m.facts}</h4><ul>{inspection.book.facts.map(fact => <li key={fact.id}>{fact.entity_label}: {fact.value}</li>)}</ul>
+              {sortedChapters(inspection.book).map(chapter => <section key={chapter.id}><h4>{chapter.title}</h4><pre>{chapter.prose}</pre></section>)}
+            </> : <>
+              {([
+                [m.synopsis, inspection.book.synopsis, currentBook.synopsis],
+                [m.brainstorm, inspection.book.brainstorm, currentBook.brainstorm],
+                [m.facts, JSON.stringify(inspection.book.facts, null, 2), JSON.stringify(currentBook.facts, null, 2)],
+                ...sortedChapters(inspection.book).map(chapter => [chapter.title, chapter.prose, currentBook.chapters.find(current => current.id === chapter.id)?.prose ?? ""]),
+                ...sortedChapters(currentBook).filter(chapter => !inspection.book.chapters.some(old => old.id === chapter.id)).map(chapter => [chapter.title, "", chapter.prose])
+              ] as string[][]).filter(([, old, current]) => old !== current).map(([label, old, current], index) =>
+                <section key={`${label}-${index}`}><h4>{label}</h4><div className="core-compare-columns"><div><strong>{m.old}</strong><pre>{old}</pre></div><div><strong>{m.current}</strong><pre>{current}</pre></div></div></section>
+              )}
+              {inspection.book.synopsis === currentBook.synopsis && inspection.book.brainstorm === currentBook.brainstorm &&
+                JSON.stringify(inspection.book.facts) === JSON.stringify(currentBook.facts) &&
+                JSON.stringify(inspection.book.chapters.map(ch => [ch.id, ch.prose])) === JSON.stringify(currentBook.chapters.map(ch => [ch.id, ch.prose])) ? <p>{m.noChanges}</p> : null}
+            </>}
           </div> : null}
         </section> : null}
         {error ? <p role="alert">{error}</p> : null}

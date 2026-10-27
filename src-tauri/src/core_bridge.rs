@@ -113,6 +113,21 @@ pub async fn core_private_versions(project_id: String) -> Result<Value, String> 
 }
 
 #[tauri::command]
+pub async fn core_private_revision(revision_id: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        if !valid_project_id(&revision_id) { return Err("Invalid revision ID".to_string()); }
+        let token = saved_token()?;
+        ureq::get(&format!("{CORE_URL}/v1/revisions/{revision_id}"))
+            .header("Authorization", format!("Bearer {token}"))
+            .call()
+            .map_err(|_| "Cannot read private Core revision".to_string())?
+            .body_mut()
+            .read_json()
+            .map_err(|_| "Invalid Core revision response".to_string())
+    }).await.map_err(|_| "Core revision request failed".to_string())?
+}
+
+#[tauri::command]
 pub async fn core_publish_shared(publication: Value) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || {
         let id = publication.get("projectId").and_then(Value::as_str)
