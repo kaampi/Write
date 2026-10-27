@@ -13,6 +13,9 @@ export type CoreTransport = (change: CoreChange) => Promise<void>;
 
 const DB_NAME = "storybook-core-outbox";
 const STORE = "pending";
+const SETTINGS = "auto-settings";
+const INTERVAL_MS = 10 * 60 * 1000;
+type AutoSetting = { id: string; enabled: boolean; lastSentAt: number | null };
 
 function request<T>(value: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -37,8 +40,11 @@ export class CoreSyncOutbox implements CoreSyncSink {
 
   private db(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const open = this.factory.open(DB_NAME, 1);
-      open.onupgradeneeded = () => open.result.createObjectStore(STORE, { keyPath: "id" });
+      const open = this.factory.open(DB_NAME, 2);
+      open.onupgradeneeded = () => {
+        if (!open.result.objectStoreNames.contains(STORE)) open.result.createObjectStore(STORE, { keyPath: "id" });
+        if (!open.result.objectStoreNames.contains(SETTINGS)) open.result.createObjectStore(SETTINGS, { keyPath: "id" });
+      };
       open.onsuccess = () => resolve(open.result);
       open.onerror = () => reject(open.error ?? new Error("Core outbox open failed"));
     });
@@ -62,6 +68,45 @@ export class CoreSyncOutbox implements CoreSyncSink {
     return this.put({ id, token: crypto.randomUUID(), scope: "private-snapshot", kind: "delete" });
   }
 
+  async autoChoice(id: string): Promise<AutoSetting> {
+    const db = await this.db();
+    try {
+      const row = await request(db.transaction(SETTINGS, "readonly").objectStore(SETTINGS).get(id)) as AutoSetting | undefined;
+      return row ?? { id, enabled: false, lastSentAt: null };
+    } finally { db.close(); }
+  }
+
+  async setAutoEnabled(id: string, enabled: boolean): Promise<void> {
+    if (!id) throw new Error("Invalid manuscript ID");
+    const db = await this.db();
+    try {
+      const tx = db.transaction(SETTINGS, "readwrite");
+      const done = transactionDone(tx);
+      const store = tx.objectStore(SETTINGS);
+      const row = await request(store.get(id)) as AutoSetting | undefined;
+      store.put({ id, enabled, lastSentAt: row?.lastSentAt ?? null } satisfies AutoSetting);
+      await done;
+    } finally { db.close(); }
+  }
+
+  /** Queue only for opted-in books. While offline, replace the queued copy with the latest local save. */
+  async enqueueAutoSave(book: Book, now = Date.now()): Promise<void> {
+    const db = await this.db();
+    try {
+      const tx = db.transaction([STORE, SETTINGS], "readwrite");
+      const done = transactionDone(tx);
+      const setting = await request(tx.objectStore(SETTINGS).get(book.id)) as AutoSetting | undefined;
+      if (setting?.enabled) {
+        const pending = tx.objectStore(STORE);
+        const existing = await request(pending.get(book.id)) as CoreChange | undefined;
+        if (existing?.kind === "save" || setting.lastSentAt === null || now - setting.lastSentAt >= INTERVAL_MS) {
+          pending.put({ id: book.id, token: crypto.randomUUID(), scope: "private-snapshot", kind: "save", book } satisfies CoreChange);
+        }
+      }
+      await done;
+    } finally { db.close(); }
+  }
+
   async pending(): Promise<CoreChange[]> {
     const db = await this.db();
     try { return await request(db.transaction(STORE, "readonly").objectStore(STORE).getAll()) as CoreChange[]; }
@@ -81,11 +126,18 @@ export class CoreSyncOutbox implements CoreSyncSink {
           await transport(change);
           const db = await this.db();
           try {
-            const tx = db.transaction(STORE, "readwrite");
+            const tx = db.transaction([STORE, SETTINGS], "readwrite");
             const done = transactionDone(tx);
             const store = tx.objectStore(STORE);
             const current = await request(store.get(change.id)) as CoreChange | undefined;
-            if (current?.token === change.token) store.delete(change.id);
+            if (current?.token === change.token) {
+              store.delete(change.id);
+              if (change.kind === "save") {
+                const settings = tx.objectStore(SETTINGS);
+                const row = await request(settings.get(change.id)) as AutoSetting | undefined;
+                settings.put({ id: change.id, enabled: row?.enabled ?? false, lastSentAt: Date.now() } satisfies AutoSetting);
+              }
+            }
             await done;
           } finally { db.close(); }
         }
