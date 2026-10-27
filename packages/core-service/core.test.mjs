@@ -89,3 +89,38 @@ test('every app is subject to the same ownership rule, including after a read gr
     assert.equal(core.auditRows().filter(row => row.action === 'record.update' || row.action === 'record.delete').length, 0);
   } finally { core.close(); rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('each project is private by default and its owner can share and revoke separately', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'core-visibility-'));
+  const core = openCore(join(dir, 'core.db'));
+  const tokens = Object.fromEntries(['storybook', 'sandbox', 'comic'].map(app => [app, core.provision(app)]));
+  const server = createCoreServer(core);
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const call = async (app, method, path, body) => {
+    const response = await fetch(base + path, {
+      method, headers: { authorization: `Bearer ${tokens[app]}`, ...(body ? { 'content-type': 'application/json' } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {})
+    });
+    return { status: response.status, body: await response.json() };
+  };
+  try {
+    const first = (await call('storybook', 'POST', '/v1/workspaces', { kind: 'manuscript', projectId: 'book-one' })).body;
+    const second = (await call('storybook', 'POST', '/v1/workspaces', { kind: 'manuscript', projectId: 'book-two' })).body;
+    const comic = (await call('comic', 'POST', '/v1/workspaces', { kind: 'comic-project', projectId: 'comic-one' })).body;
+    assert.equal(first.project_id, 'book-one');
+    assert.equal((await call('sandbox', 'GET', '/v1/workspaces')).body.length, 0);
+    assert.equal((await call('storybook', 'GET', `/v1/workspaces/${first.id}/grants`)).body.length, 0);
+    assert.equal((await call('sandbox', 'PUT', `/v1/workspaces/${first.id}/grants/comic`, { visible: true })).status, 403);
+    assert.equal((await call('storybook', 'PUT', `/v1/workspaces/${first.id}/grants/sandbox`, { visible: true })).status, 200);
+    assert.deepEqual((await call('sandbox', 'GET', '/v1/workspaces')).body.map(w => w.project_id), ['book-one']);
+    assert.equal((await call('comic', 'GET', '/v1/workspaces')).body.length, 1);
+    assert.equal((await call('sandbox', 'GET', `/v1/workspaces/${second.id}/records`)).status, 403);
+    assert.equal((await call('storybook', 'PUT', `/v1/workspaces/${first.id}/grants/sandbox`, { visible: false })).status, 200);
+    assert.equal((await call('sandbox', 'GET', '/v1/workspaces')).body.length, 0);
+    assert.equal((await call('sandbox', 'GET', `/v1/workspaces/${first.id}/records`)).status, 403);
+    assert.equal((await call('comic', 'PUT', `/v1/workspaces/${comic.id}/grants/storybook`, { visible: true })).status, 200);
+    assert.equal((await call('storybook', 'GET', '/v1/workspaces')).body.some(w => w.id === comic.id), true);
+    assert.equal((await call('storybook', 'PUT', `/v1/workspaces/${comic.id}/grants/sandbox`, { visible: true })).status, 403);
+  } finally { server.close(); await once(server, 'close'); core.close(); rmSync(dir, { recursive: true, force: true }); }
+});
