@@ -183,6 +183,7 @@ test('shared manuscript publishing stores only a validated projection and atomic
   };
   const projectId = 'book-one';
   const route = `/v1/shared-manuscripts/${projectId}`;
+  const access = `${route}/access`;
   const manuscript = {
     kind: 'storycore.manuscript-export', format: 2, exportedAt: '2026-10-27T00:00:00.000Z',
     sourceApp: 'storybook-ai', sourceBookId: projectId, title: 'Night Keys', illustrationStyle: '',
@@ -194,6 +195,8 @@ test('shared manuscript publishing stores only a validated projection and atomic
     bible: [{ kind: 'characters', label: 'Characters', entities: [{ entity_ref: 'emma', name: 'Emma', facts: [{ predicate: 'core.identity', label: 'Identity', value: 'Bartender' }], referenceImages: [] }] }]
   };
   try {
+    assert.deepEqual((await call('storybook', 'GET', access)).body, { projectId, exists: false, readers: [] });
+    assert.equal((await call('comic', 'GET', access)).status, 403);
     const privateWs = core.createWorkspace('storybook', { kind: 'private-snapshot', projectId });
     core.writeRecord('storybook', privateWs.id, { body: { brainstorm: 'Never shared', facts: [{ status: 'ai_proposed' }] } });
     assert.equal((await call('sandbox', 'PUT', route, { manuscript, readers: ['sandbox'] })).status, 403);
@@ -210,6 +213,7 @@ test('shared manuscript publishing stores only a validated projection and atomic
     assert.equal(workspace.kind, 'shared-manuscript');
     assert.notEqual(workspace.id, privateWs.id);
     assert.equal(record.revision, 1);
+    assert.deepEqual((await call('storybook', 'GET', access)).body, { projectId, exists: true, readers: ['sandbox'] });
     assert.equal(record.body.synopsis, 'The full synopsis.');
     assert.deepEqual(record.body.chapters.map(chapter => chapter.prose), ['Entire chapter one.', 'Entire chapter two.']);
     assert.equal(JSON.stringify(record.body).includes('Secret'), false);
@@ -240,6 +244,7 @@ test('shared manuscript publishing stores only a validated projection and atomic
     assert.equal((await call('comic', 'GET', `/v1/revisions/${record.revisionId}`)).body.body.synopsis, 'The full synopsis.');
     assert.equal((await call('sandbox', 'DELETE', route)).status, 403);
     assert.equal((await call('storybook', 'DELETE', route)).status, 200);
+    assert.deepEqual((await call('storybook', 'GET', access)).body, { projectId, exists: true, readers: [] });
     assert.equal((await call('comic', 'GET', `/v1/records/${record.id}`)).status, 403);
     assert.equal((await call('comic', 'GET', `/v1/revisions/${record.revisionId}`)).status, 403);
     assert.equal((await call('storybook', 'DELETE', route)).status, 200);

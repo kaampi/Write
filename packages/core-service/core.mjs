@@ -200,6 +200,12 @@ export function openCore(path) {
         return { projectId, readers: [] };
       });
     },
+    sharedManuscriptAccess(app, projectId) {
+      if (app !== 'storybook') fail(403, 'Only Storybook can inspect manuscript sharing');
+      required(projectId, 'projectId');
+      const ws = get('SELECT id FROM workspaces WHERE owner_app=? AND kind=? AND project_id=?', app, 'shared-manuscript', projectId);
+      return { projectId, exists: !!ws, readers: ws ? all('SELECT reader_app FROM grants WHERE workspace_id=? ORDER BY reader_app', ws.id).map(row => row.reader_app) : [] };
+    },
     writeRecord(app, id, input) {
       return transaction(() => {
         const ws = authorize(app, id, 'write');
@@ -327,6 +333,7 @@ export function createCoreServer(core, { mediaDir } = {}) {
       else if (parts.length === 2 && parts[1] === 'workspaces' && method === 'GET') result = core.listWorkspaces(app);
       else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'PUT') result = core.publishSharedManuscript(app, parts[2], await body());
       else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'DELETE') result = core.revokeSharedManuscript(app, parts[2]);
+      else if (parts.length === 4 && parts[1] === 'shared-manuscripts' && parts[3] === 'access' && method === 'GET') result = core.sharedManuscriptAccess(app, parts[2]);
       else if (parts.length === 2 && parts[1] === 'workspaces' && method === 'POST') result = core.createWorkspace(app, await body());
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'POST') result = core.grant(app, parts[2], (await body()).readerApp);
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'GET') result = core.listGrants(app, parts[2]);

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { isTauri } from "@tauri-apps/api/core";
 import type { CoreShareReader } from "@persistence/CoreManuscriptPublication";
-import { coreConnection, pairCore, type CoreConnection } from "@persistence/CoreDesktopTransport";
+import { coreConnection, coreSharedAccess, pairCore, type CoreConnection } from "@persistence/CoreDesktopTransport";
 import { coreSharingOutbox, flushCoreSharing } from "@persistence/CoreSharingRuntime";
 import { useLocale } from "./i18n";
 
@@ -14,7 +14,8 @@ const copy = {
     pairing: "Connecting…", saving: "Saving…", sandbox: "Show this manuscript in Sandbox",
     comic: "Show this manuscript in Comic", pending: "Waiting to sync with Core.", synced: "No local changes waiting to sync.",
     private: "Off by default. Turning both off removes access in Core when it reconnects.",
-    shared: "Sharing includes all chapter prose, synopsis and approved visible Story Bible facts. Brainstorm and hidden or unapproved facts stay private."
+    shared: "Sharing includes all chapter prose, synopsis and approved visible Story Bible facts. Brainstorm and hidden or unapproved facts stay private.",
+    actual: "Current access in Core", unknown: "Core access has not been verified. Previously shared copies may still be accessible.", nobody: "No other app"
   },
   sv: {
     title: "Storybook Core", close: "Stäng", local: "Manuset sparas fortfarande lokalt i Storybook.",
@@ -24,7 +25,8 @@ const copy = {
     pairing: "Ansluter…", saving: "Sparar…", sandbox: "Visa det här manuset i Sandbox",
     comic: "Visa det här manuset i Comic", pending: "Väntar på synk till Core.", synced: "Inga lokala ändringar väntar på synk.",
     private: "Av som standard. Stäng av båda för att återkalla åtkomst i Core när tjänsten nås igen.",
-    shared: "Delning omfattar alla kapitels prosa, synopsis och godkända synliga fakta i Story Bible. Brainstorm och dolda eller ogranskade fakta förblir privata."
+    shared: "Delning omfattar alla kapitels prosa, synopsis och godkända synliga fakta i Story Bible. Brainstorm och dolda eller ogranskade fakta förblir privata.",
+    actual: "Faktisk åtkomst i Core", unknown: "Åtkomsten i Core är inte verifierad. Tidigare delade kopior kan fortfarande vara åtkomliga.", nobody: "Ingen annan app"
   },
   nb: {
     title: "Storybook Core", close: "Lukk", local: "Manuset lagres fortsatt lokalt i Storybook.",
@@ -34,7 +36,8 @@ const copy = {
     pairing: "Kobler til…", saving: "Lagrer…", sandbox: "Vis dette manuset i Sandbox",
     comic: "Vis dette manuset i Comic", pending: "Venter på synkronisering med Core.", synced: "Ingen lokale endringer venter på synkronisering.",
     private: "Av som standard. Slå av begge for å trekke tilbake tilgangen i Core når tjenesten er tilgjengelig igjen.",
-    shared: "Deling omfatter all kapittelprosa, synopsis og godkjente synlige fakta i Story Bible. Brainstorm og skjulte eller ikke godkjente fakta forblir private."
+    shared: "Deling omfatter all kapittelprosa, synopsis og godkjente synlige fakta i Story Bible. Brainstorm og skjulte eller ikke godkjente fakta forblir private.",
+    actual: "Faktisk tilgang i Core", unknown: "Tilgangen i Core er ikke bekreftet. Tidligere delte kopier kan fortsatt være tilgjengelige.", nobody: "Ingen annen app"
   }
 };
 
@@ -45,27 +48,46 @@ export function CoreConnectionDialog({ bookId, onClose }: { bookId: string; onCl
   const [connection, setConnection] = useState<CoreConnection>({ paired: false, reachable: false });
   const [readers, setReaders] = useState<CoreShareReader[]>([]);
   const [pending, setPending] = useState(false);
+  const [remoteReaders, setRemoteReaders] = useState<CoreShareReader[] | null>(null);
+  const [loading, setLoading] = useState(true);
   const [token, setToken] = useState("");
   const [working, setWorking] = useState(false);
   const [error, setError] = useState("");
 
-  const refresh = useCallback(async () => {
-    const [status, choice] = await Promise.all([coreConnection(), coreSharingOutbox.choice(bookId)]);
-    setConnection(status);
-    setReaders(choice.readers);
-    setPending(choice.pending);
+  const load = useCallback(async () => {
+    const choiceVersion = await coreSharingOutbox.choiceVersion(bookId);
+    const status = await coreConnection();
+    let remote: CoreShareReader[] | null = null;
+    let issue: unknown = null;
+    if (status.reachable) {
+      try {
+        remote = (await coreSharedAccess(bookId)).readers;
+        await coreSharingOutbox.reconcile(bookId, remote, choiceVersion);
+      } catch (error) { issue = error; }
+    }
+    const choice = await coreSharingOutbox.choice(bookId);
+    return { status, remote, choice, issue };
   }, [bookId]);
+
+  const refresh = useCallback(async () => {
+    const { status, remote, choice, issue } = await load();
+    setConnection(status); setRemoteReaders(remote); setReaders(choice.readers); setPending(choice.pending);
+    if (issue) throw issue;
+  }, [load]);
 
   useEffect(() => {
     let active = true;
-    void Promise.all([coreConnection(), coreSharingOutbox.choice(bookId)])
-      .then(([status, choice]) => {
+    setLoading(true);
+    void load()
+      .then(({ status, remote, choice, issue }) => {
         if (!active) return;
-        setConnection(status); setReaders(choice.readers); setPending(choice.pending);
+        setConnection(status); setRemoteReaders(remote); setReaders(choice.readers); setPending(choice.pending);
+        if (issue) setError(issue instanceof Error ? issue.message : String(issue));
       })
-      .catch(err => { if (active) setError(String(err)); });
+      .catch(err => { if (active) setError(String(err)); })
+      .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [bookId]);
+  }, [load]);
 
   useEffect(() => {
     const key = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
@@ -100,13 +122,14 @@ export function CoreConnectionDialog({ bookId, onClose }: { bookId: string; onCl
         ) : null}
         {desktop && connection.paired ? <button type="button" disabled={working} onClick={() => void run(async () => { const status = await coreConnection(); if (status.reachable) await flushCoreSharing(); })}>{m.refresh}</button> : null}
         {desktop ? (
-          <fieldset disabled={working}>
+          <fieldset disabled={working || loading || (connection.reachable && remoteReaders === null)}>
             <legend>{m.title}</legend>
             <label><input type="checkbox" checked={readers.includes("sandbox")} onChange={() => toggle("sandbox")} /> {m.sandbox}</label>
             <label><input type="checkbox" checked={readers.includes("comic")} onChange={() => toggle("comic")} /> {m.comic}</label>
           </fieldset>
         ) : null}
         <p>{m.private}</p><p>{m.shared}</p>
+        {desktop ? <p role="status">{remoteReaders ? `${m.actual}: ${remoteReaders.length ? remoteReaders.join(", ") : m.nobody}` : m.unknown}</p> : null}
         {desktop ? <p role="status">{working ? m.saving : pending ? m.pending : m.synced}</p> : null}
         {error ? <p role="alert">{error}</p> : null}
       </section>

@@ -67,6 +67,22 @@ pub async fn core_connection() -> CoreConnection {
     }).await.unwrap_or(CoreConnection { paired: false, reachable: false })
 }
 
+/// Read the server's actual grant set after a restored Core or lost local queue.
+#[tauri::command]
+pub async fn core_shared_access(project_id: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        if !valid_project_id(&project_id) { return Err("Invalid manuscript ID".to_string()); }
+        let token = saved_token()?;
+        ureq::get(&format!("{CORE_URL}/v1/shared-manuscripts/{project_id}/access"))
+            .header("Authorization", format!("Bearer {token}"))
+            .call()
+            .map_err(|_| "Cannot read Core manuscript access".to_string())?
+            .body_mut()
+            .read_json()
+            .map_err(|_| "Invalid Core access response".to_string())
+    }).await.map_err(|_| "Core access request failed".to_string())?
+}
+
 #[tauri::command]
 pub async fn core_publish_shared(publication: Value) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || {
