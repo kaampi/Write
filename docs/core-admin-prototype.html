@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Storybook Core — hantering (designförslag)</title>
+  <style>
+    :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; color: #26312d; background: #f5f3ec; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, input, select { font: inherit; }
+    .shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+    aside { padding: 26px 18px; background: #18382f; color: #f6f3e9; }
+    .brand { display: flex; gap: 12px; align-items: center; margin: 0 8px 42px; font-weight: 750; letter-spacing: -.02em; }
+    .mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; background: #cbe7a5; color: #18382f; font-family: Georgia, serif; font-size: 25px; }
+    nav a { display: block; color: #cfddd3; text-decoration: none; padding: 12px 14px; border-radius: 10px; margin-bottom: 4px; }
+    nav a.active { background: #315b49; color: white; font-weight: 650; }
+    .aside-note { margin: 48px 10px 0; color: #a9c4b1; font-size: 12px; line-height: 1.5; }
+    main { max-width: 1220px; width: 100%; margin: auto; padding: 38px clamp(22px, 5vw, 64px) 80px; }
+    .eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: 11px; font-weight: 800; color: #4c765e; }
+    h1 { font-family: Georgia, serif; font-size: clamp(32px, 4vw, 46px); letter-spacing: -.045em; line-height: 1.05; margin: 8px 0 10px; }
+    h2 { font-size: 20px; letter-spacing: -.025em; margin: 0 0 5px; }
+    p { color: #64716b; line-height: 1.5; margin: 0; }
+    .top { display: flex; justify-content: space-between; gap: 20px; align-items: start; margin-bottom: 30px; }
+    .badge { white-space: nowrap; background: #e2f1df; color: #246143; border-radius: 100px; padding: 8px 12px; font-size: 12px; font-weight: 700; }
+    .notice { border: 1px solid #e8d39a; background: #fff9e9; color: #735c2d; border-radius: 12px; padding: 13px 17px; font-size: 13px; margin-bottom: 22px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 26px; }
+    .card { background: #fffefa; border: 1px solid #e5e8de; border-radius: 16px; box-shadow: 0 3px 14px #243a2910; }
+    .stat { padding: 19px 21px; }
+    .stat small { display: block; color: #68756e; font-size: 12px; margin-bottom: 9px; }
+    .stat strong { font-size: 22px; letter-spacing: -.03em; }
+    .stat span { display: block; color: #758077; font-size: 12px; margin-top: 5px; }
+    .section { padding: 24px; margin-bottom: 20px; }
+    .section-head { display: flex; align-items: start; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 7px; }
+    input, select { width: 100%; padding: 11px 12px; color: #26312d; background: white; border: 1px solid #ced8cf; border-radius: 9px; }
+    input:disabled, select:disabled { background: #f4f5f0; color: #7e8981; }
+    .hint { font-size: 12px; margin-top: 7px; }
+    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .choice { border: 1px solid #d8dfd5; border-radius: 11px; padding: 14px; background: white; }
+    .choice.selected { border: 2px solid #4d8660; background: #f3f9ed; padding: 13px; }
+    .choice strong { display: block; font-size: 13px; margin-bottom: 4px; }
+    .choice p { font-size: 12px; }
+    .radio { float: right; width: 17px; height: 17px; accent-color: #36754b; margin: 0; }
+    .providers { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 0; }
+    .provider { border: 1px solid #d9e2d7; background: #f7f8f3; color: #526056; border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+    .provider b { color: #89948a; margin-left: 5px; font-size: 10px; }
+    .actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 23px; }
+    button { border: 1px solid #cbd9ce; background: white; color: #315d40; border-radius: 9px; padding: 10px 14px; font-weight: 700; }
+    button:disabled { cursor: not-allowed; opacity: .65; }
+    .primary { color: white; background: #246444; border-color: #246444; }
+    .row { display: flex; justify-content: space-between; gap: 18px; align-items: center; padding: 15px 0; border-top: 1px solid #e9ece6; }
+    .row:first-of-type { margin-top: 14px; }
+    .row strong { display: block; font-size: 14px; }
+    .row span { color: #78857c; font-size: 12px; }
+    .status { color: #34764e !important; font-weight: 700; }
+    footer { color: #849087; font-size: 12px; margin-top: 18px; }
+    @media (max-width: 850px) { .shell { display: block; } aside { padding: 14px 20px; } .brand { margin: 0; } nav, .aside-note { display: none; } main { padding: 25px 18px 60px; } .grid, .stats { grid-template-columns: 1fr; } .top { display: block; } .badge { display: inline-block; margin-top: 15px; } }
+    @media (max-width: 500px) { .choices { grid-template-columns: 1fr; } .section { padding: 18px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand"><span class="mark">C</span><span>Storybook Core</span></div>
+      <nav aria-label="Core-hantering">
+        <a class="active" href="#overview">Översikt</a>
+        <a href="#backup">Backup och lagring</a>
+        <a href="#restore">Återställning</a>
+        <a href="#apps">Anslutna appar</a>
+      </nav>
+      <p class="aside-note">Delning av enskilda manuskript och projekt styrs i respektive app.</p>
+    </aside>
+    <main id="overview">
+      <div class="top">
+        <div><div class="eyebrow">Lokal datatjänst</div><h1>Din data, samlad och trygg.</h1><p>Här hanterar du Core och dess backuper. Dina appar styr själva vilka projekt de delar.</p></div>
+        <span class="badge">● Core körs lokalt</span>
+      </div>
+      <div class="notice"><strong>Designförslag.</strong> Värdena nedan är exempel. Den här sidan är ännu inte ansluten till Core och kan inte ändra några inställningar.</div>
+      <div class="stats">
+        <div class="card stat"><small>Anslutna appar</small><strong>3</strong><span>Storybook · Sandbox · Comic</span></div>
+        <div class="card stat"><small>Senaste verifierade backup</small><strong>I dag 02:00</strong><span>Extern mapp · 1,8 GB</span></div>
+        <div class="card stat"><small>Backupstatus</small><strong>Allt i ordning</strong><span>10 versioner sparade</span></div>
+      </div>
+      <section class="card section" id="backup">
+        <div class="section-head"><div><h2>Backup och lagring</h2><p>Välj var Core ska lägga sina återställningsbara kopior.</p></div></div>
+        <div class="grid">
+          <div><label for="destination">Lagringsmål</label><select id="destination" disabled><option>Extern mapp</option></select><p class="hint">Exempel: monterad disk eller synkroniserad mapp.</p></div>
+          <div><label for="folder">Mapp</label><input id="folder" value="/Backuper/Storybook Core" disabled><p class="hint">Visas först när ett mål har valts.</p></div>
+          <div><label for="interval">Intervall</label><select id="interval" disabled><option>Varje dag</option></select></div>
+          <div><label for="retention">Spara antal versioner</label><input id="retention" type="number" min="1" max="1000" value="10" disabled></div>
+        </div>
+        <div class="providers" aria-label="Planerade lagringsmål">
+          <span class="provider">Nextcloud <b>PLANERAT</b></span>
+          <span class="provider">WebDAV <b>PLANERAT</b></span>
+          <span class="provider">S3-kompatibel <b>PLANERAT</b></span>
+          <span class="provider">Google Drive <b>PLANERAT</b></span>
+          <span class="provider">OneDrive <b>PLANERAT</b></span>
+        </div>
+        <div style="margin-top:24px"><label>Kryptering för framtida backuper</label><p class="hint">Äldre backuper behåller sitt format när du ändrar detta val.</p></div>
+        <div class="choices" aria-label="Krypteringsalternativ">
+          <div class="choice selected"><input class="radio" type="radio" checked disabled aria-label="Kryptera med Core"><strong>Kryptera med Core</strong><p>Innehållet kan inte läsas på lagringsservern. Återställningsfras krävs.</p></div>
+          <div class="choice"><input class="radio" type="radio" disabled aria-label="Utan Core-kryptering"><strong>Utan Core-kryptering</strong><p>Ingen extra fras. Den som får tillgång till backupfilen kan läsa innehållet.</p></div>
+        </div>
+        <div class="actions"><button disabled>Testa lagringsmål</button><button class="primary" disabled>Spara inställningar</button></div>
+      </section>
+      <div class="grid">
+        <section class="card section" id="restore">
+          <h2>Återställning</h2><p>Kontrollera en backup innan den används. Aktiv data skrivs aldrig över utan ett separat steg.</p>
+          <div class="row"><div><strong>Senaste backup</strong><span>I dag 02:00 · verifierad · krypterad</span></div><span class="status">✓ Klar</span></div>
+          <div class="actions"><button disabled>Visa versioner</button><button disabled>Prova återställning</button></div>
+        </section>
+        <section class="card section" id="apps">
+          <h2>Anslutna appar</h2><p>Core bevarar varje apps ägarskap och visar bara projekt som den appen fått läsa.</p>
+          <div class="row"><div><strong>Storybook</strong><span>Senast synkroniserad 09:42</span></div><span class="status">● Ansluten</span></div>
+          <div class="row"><div><strong>Sandbox</strong><span>Senast synkroniserad 09:39</span></div><span class="status">● Ansluten</span></div>
+          <div class="row"><div><strong>Comic</strong><span>Senast synkroniserad 09:36</span></div><span class="status">● Ansluten</span></div>
+        </section>
+      </div>
+      <footer>Statisk prototyp · inga nycklar eller projektdata visas på sidan.</footer>
+    </main>
+  </div>
+</body>
+</html>
