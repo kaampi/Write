@@ -1,9 +1,14 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import type { CoreManuscriptPublication } from "./CoreManuscriptPublication";
+import { parseBook, type Book } from "@core/BookSchema";
 import type { CoreSharingTransport } from "./CoreSharingOutbox";
 
 export type CoreConnection = { paired: boolean; reachable: boolean };
 export type CoreSharedAccess = { projectId: string; exists: boolean; readers: ("sandbox" | "comic")[] };
+export type CorePrivateVersions = {
+  workspace: { id: string; owner_app: "storybook"; kind: "private-snapshot"; project_id: string } | null;
+  revisions: { id: string; workspace_id: string; number: number; created_at: string; deleted: boolean }[];
+};
 
 /** Credentials stay in the native bridge; the webview only sends the filtered publication. */
 export const coreDesktopTransport: CoreSharingTransport = {
@@ -28,6 +33,22 @@ export async function coreSharedAccess(projectId: string): Promise<CoreSharedAcc
   if (value.projectId !== projectId || typeof value.exists !== "boolean" || !Array.isArray(value.readers) ||
       value.readers.some(reader => reader !== "sandbox" && reader !== "comic")) {
     throw new Error("Invalid Core sharing access response");
+  }
+  return value;
+}
+
+export async function saveCorePrivateBook(book: Book): Promise<void> {
+  if (!isTauri()) throw new Error("Core private snapshots require the desktop app");
+  await invoke("core_save_private", { book: parseBook(book) });
+}
+
+export async function corePrivateVersions(projectId: string): Promise<CorePrivateVersions> {
+  if (!isTauri()) throw new Error("Core versions require the desktop app");
+  const value = await invoke<CorePrivateVersions>("core_private_versions", { projectId });
+  if (!value || !Array.isArray(value.revisions) ||
+      (value.workspace && (value.workspace.kind !== "private-snapshot" || value.workspace.owner_app !== "storybook" || value.workspace.project_id !== projectId)) ||
+      value.revisions.some(rev => typeof rev.id !== "string" || !Number.isSafeInteger(rev.number) || rev.workspace_id !== value.workspace?.id)) {
+    throw new Error("Invalid Core version response");
   }
   return value;
 }

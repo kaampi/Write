@@ -127,7 +127,7 @@ import {
 import { readContextWindow, writeContextWindow } from "@llm/contextWindow";
 import { withReasoningHeadroom } from "@llm/tokenBudget";
 import { BookNotFoundError, BookRepository } from "@persistence/Repository";
-import { coreSharingOutbox } from "@persistence/CoreSharingRuntime";
+import { coreSharingOutbox, coreSnapshotOutbox } from "@persistence/CoreSharingRuntime";
 import { SeriesRepository } from "@persistence/SeriesRepository";
 import {
   ManuscriptBackupError,
@@ -542,6 +542,14 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     setBook(next);
     await persist(next);
   }, [persist]);
+
+  const checkpointBook = useCallback(async () => {
+    const current = bookRef.current;
+    if (!current) throw new Error("No manuscript is open");
+    // Flush debounced edits to the authoritative local store before queuing the copy.
+    await flushSave(current);
+    await coreSnapshotOutbox.enqueueSave(current);
+  }, [flushSave]);
 
   const persistProseWrite = useCallback(
     async (
@@ -3422,6 +3430,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     newBook,
     newLanguageVersion,
     loadBook,
+    checkpointBook,
     importManuscript,
     importMarkdownManuscript,
     deleteBook,

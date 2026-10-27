@@ -84,6 +84,35 @@ pub async fn core_shared_access(project_id: String) -> Result<Value, String> {
 }
 
 #[tauri::command]
+pub async fn core_save_private(book: Value) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let id = book.get("id").and_then(Value::as_str).ok_or_else(|| "Missing manuscript ID".to_string())?;
+        if !valid_project_id(id) { return Err("Invalid manuscript ID".to_string()); }
+        let token = saved_token()?;
+        ureq::put(&format!("{CORE_URL}/v1/private-manuscripts/{id}"))
+            .header("Authorization", format!("Bearer {token}"))
+            .send_json(serde_json::json!({ "book": book }))
+            .map_err(|_| "Core did not accept the private manuscript".to_string())?;
+        Ok(())
+    }).await.map_err(|_| "Core private snapshot failed".to_string())?
+}
+
+#[tauri::command]
+pub async fn core_private_versions(project_id: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        if !valid_project_id(&project_id) { return Err("Invalid manuscript ID".to_string()); }
+        let token = saved_token()?;
+        ureq::get(&format!("{CORE_URL}/v1/private-manuscripts/{project_id}/versions"))
+            .header("Authorization", format!("Bearer {token}"))
+            .call()
+            .map_err(|_| "Cannot list private Core versions".to_string())?
+            .body_mut()
+            .read_json()
+            .map_err(|_| "Invalid Core version response".to_string())
+    }).await.map_err(|_| "Core version request failed".to_string())?
+}
+
+#[tauri::command]
 pub async fn core_publish_shared(publication: Value) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || {
         let id = publication.get("projectId").and_then(Value::as_str)

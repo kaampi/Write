@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { isTauri } from "@tauri-apps/api/core";
 import type { CoreShareReader } from "@persistence/CoreManuscriptPublication";
-import { coreConnection, coreSharedAccess, pairCore, type CoreConnection } from "@persistence/CoreDesktopTransport";
-import { coreSharingOutbox, flushCoreSharing } from "@persistence/CoreSharingRuntime";
+import { coreConnection, corePrivateVersions, coreSharedAccess, pairCore, type CoreConnection, type CorePrivateVersions } from "@persistence/CoreDesktopTransport";
+import { coreSharingOutbox, coreSnapshotOutbox, flushCoreSharing, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
 import { useLocale } from "./i18n";
 
 const copy = {
@@ -15,7 +15,9 @@ const copy = {
     comic: "Show this manuscript in Comic", pending: "Waiting to sync with Core.", synced: "No local changes waiting to sync.",
     private: "Off by default. Turning both off removes access in Core when it reconnects.",
     shared: "Sharing includes all chapter prose, synopsis and approved visible Story Bible facts. Brainstorm and hidden or unapproved facts stay private.",
-    actual: "Current access in Core", unknown: "Core access has not been verified. Previously shared copies may still be accessible.", nobody: "No other app"
+    actual: "Current access in Core", unknown: "Core access has not been verified. Previously shared copies may still be accessible.", nobody: "No other app",
+    saveVersion: "Save private version to Core", versions: "Private manuscript versions", noVersions: "No versions in Core yet.",
+    versionPending: "A private version is waiting to sync. Only confirmed Core versions can be restored."
   },
   sv: {
     title: "Storybook Core", close: "Stäng", local: "Manuset sparas fortfarande lokalt i Storybook.",
@@ -26,7 +28,9 @@ const copy = {
     comic: "Visa det här manuset i Comic", pending: "Väntar på synk till Core.", synced: "Inga lokala ändringar väntar på synk.",
     private: "Av som standard. Stäng av båda för att återkalla åtkomst i Core när tjänsten nås igen.",
     shared: "Delning omfattar alla kapitels prosa, synopsis och godkända synliga fakta i Story Bible. Brainstorm och dolda eller ogranskade fakta förblir privata.",
-    actual: "Faktisk åtkomst i Core", unknown: "Åtkomsten i Core är inte verifierad. Tidigare delade kopior kan fortfarande vara åtkomliga.", nobody: "Ingen annan app"
+    actual: "Faktisk åtkomst i Core", unknown: "Åtkomsten i Core är inte verifierad. Tidigare delade kopior kan fortfarande vara åtkomliga.", nobody: "Ingen annan app",
+    saveVersion: "Spara privat version i Core", versions: "Privata manusversioner", noVersions: "Inga versioner i Core ännu.",
+    versionPending: "En privat version väntar på synk. Bara versioner som Core har tagit emot kan återställas."
   },
   nb: {
     title: "Storybook Core", close: "Lukk", local: "Manuset lagres fortsatt lokalt i Storybook.",
@@ -37,11 +41,13 @@ const copy = {
     comic: "Vis dette manuset i Comic", pending: "Venter på synkronisering med Core.", synced: "Ingen lokale endringer venter på synkronisering.",
     private: "Av som standard. Slå av begge for å trekke tilbake tilgangen i Core når tjenesten er tilgjengelig igjen.",
     shared: "Deling omfatter all kapittelprosa, synopsis og godkjente synlige fakta i Story Bible. Brainstorm og skjulte eller ikke godkjente fakta forblir private.",
-    actual: "Faktisk tilgang i Core", unknown: "Tilgangen i Core er ikke bekreftet. Tidligere delte kopier kan fortsatt være tilgjengelige.", nobody: "Ingen annen app"
+    actual: "Faktisk tilgang i Core", unknown: "Tilgangen i Core er ikke bekreftet. Tidligere delte kopier kan fortsatt være tilgjengelige.", nobody: "Ingen annen app",
+    saveVersion: "Lagre privat versjon i Core", versions: "Private manusversjoner", noVersions: "Ingen versjoner i Core ennå.",
+    versionPending: "En privat versjon venter på synkronisering. Bare versjoner Core har mottatt kan gjenopprettes."
   }
 };
 
-export function CoreConnectionDialog({ bookId, onClose }: { bookId: string; onClose: () => void }) {
+export function CoreConnectionDialog({ bookId, onCheckpoint, onClose }: { bookId: string; onCheckpoint: () => Promise<void>; onClose: () => void }) {
   const { locale } = useLocale();
   const m = copy[locale as keyof typeof copy] ?? copy.en;
   const desktop = isTauri();
@@ -49,6 +55,8 @@ export function CoreConnectionDialog({ bookId, onClose }: { bookId: string; onCl
   const [readers, setReaders] = useState<CoreShareReader[]>([]);
   const [pending, setPending] = useState(false);
   const [remoteReaders, setRemoteReaders] = useState<CoreShareReader[] | null>(null);
+  const [versions, setVersions] = useState<CorePrivateVersions | null>(null);
+  const [snapshotPending, setSnapshotPending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState("");
   const [working, setWorking] = useState(false);
@@ -65,13 +73,20 @@ export function CoreConnectionDialog({ bookId, onClose }: { bookId: string; onCl
         await coreSharingOutbox.reconcile(bookId, remote, choiceVersion);
       } catch (error) { issue = error; }
     }
+    let privateVersions: CorePrivateVersions | null = null;
+    if (status.reachable) {
+      try { privateVersions = await corePrivateVersions(bookId); }
+      catch (error) { issue ??= error; }
+    }
     const choice = await coreSharingOutbox.choice(bookId);
-    return { status, remote, choice, issue };
+    const waiting = (await coreSnapshotOutbox.pending()).some(change => change.id === bookId);
+    return { status, remote, choice, issue, privateVersions, waiting };
   }, [bookId]);
 
   const refresh = useCallback(async () => {
-    const { status, remote, choice, issue } = await load();
+    const { status, remote, choice, issue, privateVersions, waiting } = await load();
     setConnection(status); setRemoteReaders(remote); setReaders(choice.readers); setPending(choice.pending);
+    setVersions(privateVersions); setSnapshotPending(waiting);
     if (issue) throw issue;
   }, [load]);
 
@@ -79,9 +94,10 @@ export function CoreConnectionDialog({ bookId, onClose }: { bookId: string; onCl
     let active = true;
     setLoading(true);
     void load()
-      .then(({ status, remote, choice, issue }) => {
+      .then(({ status, remote, choice, issue, privateVersions, waiting }) => {
         if (!active) return;
         setConnection(status); setRemoteReaders(remote); setReaders(choice.readers); setPending(choice.pending);
+        setVersions(privateVersions); setSnapshotPending(waiting);
         if (issue) setError(issue instanceof Error ? issue.message : String(issue));
       })
       .catch(err => { if (active) setError(String(err)); })
@@ -131,6 +147,14 @@ export function CoreConnectionDialog({ bookId, onClose }: { bookId: string; onCl
         <p>{m.private}</p><p>{m.shared}</p>
         {desktop ? <p role="status">{remoteReaders ? `${m.actual}: ${remoteReaders.length ? remoteReaders.join(", ") : m.nobody}` : m.unknown}</p> : null}
         {desktop ? <p role="status">{working ? m.saving : pending ? m.pending : m.synced}</p> : null}
+        {desktop ? <section>
+          <h3>{m.versions}</h3>
+          <button type="button" disabled={working || loading} onClick={() => void run(async () => { await onCheckpoint(); if (connection.reachable) await flushCoreSnapshots(); })}>{m.saveVersion}</button>
+          {snapshotPending ? <p role="status">{m.versionPending}</p> : null}
+          {versions ? <div className="core-version-list">
+            {versions.revisions.length ? <ol>{versions.revisions.map(rev => <li key={rev.id}>#{rev.number} · {new Date(rev.created_at).toLocaleString(locale)}</li>)}</ol> : <p>{m.noVersions}</p>}
+          </div> : null}
+        </section> : null}
         {error ? <p role="alert">{error}</p> : null}
       </section>
     </div>

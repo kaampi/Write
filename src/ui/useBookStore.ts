@@ -93,6 +93,8 @@ export type BookStoreValue = {
   newLanguageVersion: (targetLanguage: string) => Promise<void>;
   /** Loads another manuscript by id without opening it — used by the language switcher/stale check (roadmap-ideas.md #43). */
   loadBook: (id: string) => Promise<Book>;
+  /** Flush local edits, then queue an explicit owner-only Core checkpoint. */
+  checkpointBook: () => Promise<void>;
   importManuscript: (file: File) => Promise<void>;
   /** Assigns, or (with `undefined`) clears, which Series a book belongs to — works on any book, not just the open one. */
   setBookSeries: (bookId: string, seriesId: string | undefined) => Promise<void>;
