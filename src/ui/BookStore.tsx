@@ -127,6 +127,7 @@ import {
 import { readContextWindow, writeContextWindow } from "@llm/contextWindow";
 import { withReasoningHeadroom } from "@llm/tokenBudget";
 import { BookNotFoundError, BookRepository } from "@persistence/Repository";
+import { coreSharingOutbox } from "@persistence/CoreSharingRuntime";
 import { SeriesRepository } from "@persistence/SeriesRepository";
 import {
   ManuscriptBackupError,
@@ -301,7 +302,7 @@ function activeReader(book: Book, surface: EditorSurface, chapterId: string | nu
 }
 
 export function BookStoreProvider({ children }: { children: React.ReactNode }) {
-  const repo = useMemo(() => new BookRepository(), []);
+  const repo = useMemo(() => new BookRepository(undefined, coreSharingOutbox), []);
   const seriesRepo = useMemo(() => new SeriesRepository(), []);
   const [summaries, setSummaries] = useState<BookSummary[]>([]);
   const [book, setBook] = useState<Book | null>(null);

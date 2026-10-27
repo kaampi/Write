@@ -1,4 +1,7 @@
-import React, { Component, Fragment, useState, type ErrorInfo, type ReactNode } from "react";
+import React, { Component, Fragment, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
+import { isTauri } from "@tauri-apps/api/core";
+import { coreConnection } from "@persistence/CoreDesktopTransport";
+import { flushCoreSharing } from "@persistence/CoreSharingRuntime";
 import { BookStoreProvider } from "./BookStore";
 import { useBookStore } from "./useBookStore";
 import { SeriesStoreProvider } from "./SeriesStore";
@@ -41,6 +44,14 @@ function Shell() {
   const { book } = useBookStore();
   const { seriesId } = useSeriesStore();
   const [homeGuideOpen, setHomeGuideOpen] = useState(false);
+  useEffect(() => {
+    if (!isTauri()) return;
+    const retry = () => { void coreConnection().then(status => status.reachable ? flushCoreSharing() : undefined).catch(() => {}); };
+    retry();
+    const timer = window.setInterval(retry, 30_000);
+    window.addEventListener("online", retry);
+    return () => { window.clearInterval(timer); window.removeEventListener("online", retry); };
+  }, []);
   return (
     <div className="app-shell">
       <AppTopBar onOpenHomeGuide={() => setHomeGuideOpen(true)} />

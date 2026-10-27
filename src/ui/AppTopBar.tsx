@@ -3,6 +3,7 @@ import { useBookStore } from "./useBookStore";
 import { LocaleSelect } from "./LocaleSelect";
 import { ThemeToggle } from "./ThemeToggle";
 import { useLocale } from "./i18n";
+import { CoreConnectionDialog } from "./CoreConnectionDialog";
 
 const RECENT_LIMIT = 10;
 
@@ -10,6 +11,7 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
   const store = useBookStore();
   const { messages: m } = useLocale();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [coreOpen, setCoreOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,9 +114,11 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
       </button>
 
       <div className="app-top-chrome">
+        {store.book ? <button type="button" className="text-button" onClick={() => setCoreOpen(true)}>Core</button> : null}
         <LocaleSelect />
         <ThemeToggle />
       </div>
+      {coreOpen && store.book ? <CoreConnectionDialog key={store.book.id} bookId={store.book.id} onClose={() => setCoreOpen(false)} /> : null}
     </header>
   );
 }

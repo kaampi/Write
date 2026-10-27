@@ -7381,3 +7381,8 @@ button.illustration-genre-item:focus-visible {
     transform: scale(2);
   }
 }
+/* Core sharing remains a small per-manuscript dialog, even with long status text. */
+.core-connection-card { width: min(540px, calc(100vw - 32px)); max-height: min(80vh, 720px); overflow-y: auto; }
+.core-connection-card form, .core-connection-card fieldset { display: grid; gap: 12px; margin: 18px 0; }
+.core-connection-card input[type="password"] { display: block; width: 100%; margin-top: 8px; }
+.core-connection-card fieldset label { display: flex; align-items: center; gap: 8px; }
