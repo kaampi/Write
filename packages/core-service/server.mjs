@@ -1,5 +1,5 @@
 import { openCore, createCoreServer } from './core.mjs';
-import { createBackup, restoreBackup } from './backup.mjs';
+import { backupEncryption, createBackup, restoreBackup } from './backup.mjs';
 import { createInterface } from 'node:readline/promises';
 
 const recoveryPhrase = async () => {
@@ -15,7 +15,8 @@ const command = process.argv[2];
 if (command === 'restore') {
   const [archive, destination] = process.argv.slice(3);
   if (!archive || !destination) throw new Error('Usage: restore <archive> <new-directory>');
-  process.stdout.write(JSON.stringify(await restoreBackup(archive, destination, await recoveryPhrase())) + '\n');
+  const mode = await backupEncryption(archive);
+  process.stdout.write(JSON.stringify(await restoreBackup(archive, destination, mode === 'encrypted' ? await recoveryPhrase() : undefined)) + '\n');
 } else {
 const file = process.env.CORE_DB_PATH;
 if (!file) throw new Error('Set CORE_DB_PATH to a local SQLite file');
@@ -26,11 +27,15 @@ if (command === 'provision') {
   core.close();
 } else if (command === 'backup' || command === 'backup-schedule') {
   if (!process.env.CORE_BACKUP_DIR) throw new Error('Set CORE_BACKUP_DIR');
-  const passphrase = await recoveryPhrase();
+  const setting = process.env.CORE_BACKUP_ENCRYPTION ?? 'on';
+  if (setting !== 'on' && setting !== 'off') throw new Error('CORE_BACKUP_ENCRYPTION must be on or off');
+  const encrypted = setting === 'on';
+  const passphrase = encrypted ? await recoveryPhrase() : undefined;
   const backup = () => createBackup(core, {
       mediaDir: process.env.CORE_MEDIA_DIR ?? file + '.media',
       backupDir: process.env.CORE_BACKUP_DIR,
       passphrase,
+      encrypted,
       keep: Number(process.env.CORE_BACKUP_KEEP ?? 10)
     });
   if (command === 'backup') {

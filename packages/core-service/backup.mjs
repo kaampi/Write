@@ -7,6 +7,7 @@ import { once } from 'node:events';
 import { openCore } from './core.mjs';
 
 const MAGIC = Buffer.from('SBCORE01');
+const PLAIN_MAGIC = Buffer.from('SBPLAIN1');
 const HEADER_SIZE = MAGIC.length + 16 + 12;
 const MAX_MANIFEST = 8 * 1024 * 1024;
 const key = (passphrase, salt) => {
@@ -38,6 +39,17 @@ const checkName = name => {
   if (name.split('/').includes('..') || name.split('/').includes('.')) throw new Error('Invalid archive path');
 };
 
+export async function backupEncryption(archive) {
+  const file = await open(archive, 'r');
+  try {
+    const magic = Buffer.alloc(8);
+    if ((await file.read(magic, 0, 8, 0)).bytesRead !== 8) throw new Error('Invalid backup format');
+    if (magic.equals(MAGIC)) return 'encrypted';
+    if (magic.equals(PLAIN_MAGIC)) return 'plain';
+    throw new Error('Invalid backup format');
+  } finally { await file.close(); }
+}
+
 export async function restoreBackup(archive, destination, passphrase) {
   if (await exists(destination)) throw new Error('Restore destination must not exist');
   const parent = resolve(dirname(destination));
@@ -46,23 +58,26 @@ export async function restoreBackup(archive, destination, passphrase) {
   await chmod(stage, 0o700);
   const plain = join(stage, 'payload.tmp');
   try {
-    const source = await open(archive, 'r');
-    let header;
-    try {
-      header = Buffer.alloc(HEADER_SIZE);
-      if ((await source.read(header, 0, HEADER_SIZE, 0)).bytesRead !== HEADER_SIZE || !header.subarray(0, MAGIC.length).equals(MAGIC)) throw new Error('Invalid backup format');
-    } finally { await source.close(); }
+    const mode = await backupEncryption(archive);
     const size = (await stat(archive)).size;
-    if (size < HEADER_SIZE + 16) throw new Error('Truncated backup');
-    const tag = Buffer.alloc(16);
-    const handle = await open(archive, 'r');
-    try { await handle.read(tag, 0, 16, size - 16); } finally { await handle.close(); }
-    const decipher = createDecipheriv('aes-256-gcm', key(passphrase, header.subarray(8, 24)), header.subarray(24, 36));
-    decipher.setAuthTag(tag);
     const out = await open(plain, 'wx', 0o600);
     try {
-      for await (const chunk of createReadStream(archive, { start: HEADER_SIZE, end: size - 17 })) await out.writeFile(decipher.update(chunk));
-      await out.writeFile(decipher.final());
+      if (mode === 'encrypted') {
+        if (size < HEADER_SIZE + 16) throw new Error('Truncated backup');
+        const handle = await open(archive, 'r');
+        const header = Buffer.alloc(HEADER_SIZE), tag = Buffer.alloc(16);
+        try {
+          await handle.read(header, 0, HEADER_SIZE, 0);
+          await handle.read(tag, 0, 16, size - 16);
+        } finally { await handle.close(); }
+        const decipher = createDecipheriv('aes-256-gcm', key(passphrase, header.subarray(8, 24)), header.subarray(24, 36));
+        decipher.setAuthTag(tag);
+        for await (const chunk of createReadStream(archive, { start: HEADER_SIZE, end: size - 17 })) await out.writeFile(decipher.update(chunk));
+        await out.writeFile(decipher.final());
+      } else {
+        if (size < PLAIN_MAGIC.length + 4) throw new Error('Truncated backup');
+        for await (const chunk of createReadStream(archive, { start: PLAIN_MAGIC.length })) await out.writeFile(chunk);
+      }
     } finally { await out.close(); }
     const input = await open(plain, 'r');
     try {
@@ -106,13 +121,14 @@ export async function restoreBackup(archive, destination, passphrase) {
     } finally { db.close(); }
     await rm(plain);
     await rename(stage, destination);
-    return { destination, verified: true };
+    return { destination, verified: true, encryption: mode };
   } catch (error) { await rm(stage, { recursive: true, force: true }); throw error; }
 }
 
-export async function createBackup(core, { mediaDir, backupDir, passphrase, keep = 10 }) {
+export async function createBackup(core, { mediaDir, backupDir, passphrase, keep = 10, encrypted = true }) {
   if (!Number.isInteger(keep) || keep < 1 || keep > 1000) throw new Error('Keep must be between 1 and 1000');
-  key(passphrase, Buffer.alloc(16)); // Validate before creating a snapshot.
+  if (typeof encrypted !== 'boolean') throw new Error('Invalid encryption setting');
+  if (encrypted) key(passphrase, Buffer.alloc(16)); // Validate before creating a snapshot.
   await mkdir(backupDir, { recursive: true, mode: 0o700 });
   const stage = await mkdtemp(join(tmpdir(), 'core-backup-'));
   await chmod(stage, 0o700);
@@ -130,19 +146,19 @@ export async function createBackup(core, { mediaDir, backupDir, passphrase, keep
     }
     const manifest = Buffer.from(JSON.stringify({ version: 1, createdAt: new Date().toISOString(), files }));
     if (manifest.length > MAX_MANIFEST) throw new Error('Too many media files');
-    const salt = randomBytes(16), iv = randomBytes(12);
-    const cipher = createCipheriv('aes-256-gcm', key(passphrase, salt), iv);
+    const salt = encrypted ? randomBytes(16) : null, iv = encrypted ? randomBytes(12) : null;
+    const cipher = encrypted ? createCipheriv('aes-256-gcm', key(passphrase, salt), iv) : null;
+    const encode = bytes => cipher ? cipher.update(bytes) : bytes;
     const output = createWriteStream(temporary, { flags: 'wx', mode: 0o600 });
     try {
-      await write(output, Buffer.concat([MAGIC, salt, iv]));
+      await write(output, encrypted ? Buffer.concat([MAGIC, salt, iv]) : PLAIN_MAGIC);
       const length = Buffer.alloc(4); length.writeUInt32BE(manifest.length);
-      await write(output, cipher.update(length));
-      await write(output, cipher.update(manifest));
+      await write(output, encode(length));
+      await write(output, encode(manifest));
       for (const entry of entries) {
-        for await (const chunk of createReadStream(entry.path)) await write(output, cipher.update(chunk));
+        for await (const chunk of createReadStream(entry.path)) await write(output, encode(chunk));
       }
-      await write(output, cipher.final());
-      await write(output, cipher.getAuthTag());
+      if (cipher) { await write(output, cipher.final()); await write(output, cipher.getAuthTag()); }
       await finish(output);
     } catch (error) { output.destroy(); throw error; }
     // Verify decryption and all file hashes before publishing or pruning old copies.
@@ -154,7 +170,7 @@ export async function createBackup(core, { mediaDir, backupDir, passphrase, keep
       if (await exists(join(backupDir, name + '.keep'))) continue;
       if (++retained > keep) await rm(join(backupDir, name));
     }
-    return { path: target, verified: true };
+    return { path: target, verified: true, encryption: encrypted ? 'encrypted' : 'plain' };
   } finally {
     await rm(temporary, { force: true });
     await rm(stage, { recursive: true, force: true });

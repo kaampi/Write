@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { openCore } from './core.mjs';
-import { createBackup, restoreBackup } from './backup.mjs';
+import { backupEncryption, createBackup, restoreBackup } from './backup.mjs';
 
 test('encrypted backup restores revisions and media, validates key, and retains newest versions', async () => {
   const root = await mkdtemp(join(tmpdir(), 'core-backup-test-'));
@@ -43,5 +43,33 @@ test('encrypted backup restores revisions and media, validates key, and retains 
     const names = (await readdir(backupDir)).filter(name => name.endsWith('.sbcore'));
     assert.equal(names.length, 3);
     assert.ok(names.includes(first.path.split('/').at(-1)));
+  } finally { core.close(); await rm(root, { recursive: true, force: true }); }
+});
+
+test('plain backup restores without a phrase, detects corruption, and coexists with encrypted versions', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'core-plain-test-'));
+  const backupDir = join(root, 'backups'), mediaDir = join(root, 'media');
+  await mkdir(mediaDir);
+  const core = openCore(join(root, 'live.db'));
+  try {
+    const ws = core.createWorkspace('storybook', { kind: 'manuscript' });
+    const rec = core.writeRecord('storybook', ws.id, { body: { title: 'A private draft' } });
+    const secret = await createBackup(core, { backupDir, mediaDir, passphrase: 'long-recovery-phrase', keep: 2 });
+    const plain = await createBackup(core, { backupDir, mediaDir, encrypted: false, keep: 2 });
+    assert.equal(await backupEncryption(secret.path), 'encrypted');
+    assert.equal(await backupEncryption(plain.path), 'plain');
+    assert.equal((await readFile(plain.path)).includes(Buffer.from('A private draft')), true);
+    const restoredPath = join(root, 'plain-restored');
+    assert.equal((await restoreBackup(plain.path, restoredPath)).encryption, 'plain');
+    const restored = openCore(join(restoredPath, 'core.db'));
+    try { assert.deepEqual(restored.getRecord('storybook', rec.id).body, { title: 'A private draft' }); }
+    finally { restored.close(); }
+    const damaged = Buffer.from(await readFile(plain.path));
+    damaged[damaged.length - 1] ^= 1;
+    const damagedPath = join(root, 'damaged.sbcore');
+    await writeFile(damagedPath, damaged);
+    await assert.rejects(restoreBackup(damagedPath, join(root, 'damaged-restored')), /checksum|integrity|Invalid/);
+    assert.equal((await readdir(root)).includes('damaged-restored'), false);
+    assert.equal((await readdir(backupDir)).filter(name => name.endsWith('.sbcore')).length, 2);
   } finally { core.close(); await rm(root, { recursive: true, force: true }); }
 });
