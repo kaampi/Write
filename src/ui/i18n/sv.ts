@@ -425,6 +425,11 @@ export const sv: Messages = {
     whatHappenedPlaceholder: "Valfritt. Omskriv kapitel 2, ny författarröst på 3.",
     documentName: "Dokumentnamn",
     action: "Säkerhetskopia",
+    sendToCore: "Skicka till Core",
+    sendToCoreHint: "Sparar en privat version av manuset i din parkopplade Core-tjänst, utöver JSON-filen.",
+    sendToCoreSending: "Skickar…",
+    sendToCoreDone: "Sparat i Core.",
+    sendToCoreError: "Kunde inte nå Core just nu. Sparas lokalt och skickas automatiskt när anslutningen är tillbaka.",
     errors: {
       "not-backup": "Den filen är inte en manussäkerhetskopia.",
       "sandbox-export": "Den filen är en kartexport från Sandbox. Importera den i Sandbox, inte här.",

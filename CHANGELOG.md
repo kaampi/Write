@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.195] - 2026-10-27
+
+### Added
+- The Backup dialog now offers "Send to Core" alongside the existing JSON file backup, when paired with a desktop Core connection. It saves a private version of the open manuscript straight to Core without leaving the dialog, reusing the same checkpoint the Core connection dialog's own "Save private version to Core" button already uses. The JSON file stays the primary, always-available action — Core is an addition, never a replacement, consistent with Core being optional and never blocking local saves.
+
 ## [1.0.194] - 2026-10-27
 
 ### Added

@@ -425,6 +425,11 @@ export const nb: Messages = {
     whatHappenedPlaceholder: "Valgfritt. Omskriv kapittel 2, ny forfatterstemme på 3.",
     documentName: "Dokumentnavn",
     action: "Sikkerhetskopi",
+    sendToCore: "Send til Core",
+    sendToCoreHint: "Lagrer en privat versjon av manuset til din paret Core-tjeneste, i tillegg til JSON-filen.",
+    sendToCoreSending: "Sender…",
+    sendToCoreDone: "Lagret i Core.",
+    sendToCoreError: "Fikk ikke kontakt med Core akkurat nå. Lagres lokalt og sendes automatisk når tilkoblingen er tilbake.",
     errors: {
       "not-backup": "Den filen er ikke en manuskriptsikkerhetskopi.",
       "sandbox-export": "Den filen er en karteksport fra Sandbox. Importer den i Sandbox, ikke her.",

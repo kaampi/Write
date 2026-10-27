@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.194
+Status: living document, v1.0.195
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9466,6 +9466,51 @@ Riktig verifiering av parkoppling/Credential Manager/publicering
 kräver antingen Windows-CI eller Mats egen dator.
 
 v1.0.193 → v1.0.194.
+
+**Ändringslogg v1.0.195 (2026-10-27): "Skicka till Core" i
+Backup-dialogen.**
+
+Mats testade v1.0.194 på riktigt — parkopplade sin StoryBook AI mot
+Core — och observerade att appens egen "Backup"-knapp (ordet som
+redan används rakt av, både i UI och i Swedish-lokaliseringen
+"Säkerhetskopia") inte alls rörde Core, bara den befintliga
+JSON-filen. Vi resonerade fram till att det inte var fel att ha två
+lager (JSON = garanterat beroendefri, Core-checkpoints = extra
+skyddslager) — men att det var ett genuint UX-hål att
+Core-checkpoint-knappen ("Spara privat version i Core") låg begravd
+i en helt annan dialog (Core-anslutningsdialogen) än där man
+naturligt letar efter "spara en säker kopia".
+
+**Lösning:** en ny sekundärknapp "Skicka till Core" i samma
+Backup-dialog som JSON-exporten, synlig bara när `isTauri()` är
+sant (desktop) — annars osynlig, precis som Core-knappen i topnaven
+redan är gated. Återanvänder exakt samma mekanism som redan fanns:
+`store.checkpointBook()` (kö:ar en checkpoint, flush:ar debounced
+redigeringar till lokal lagring först) följt av `flushCoreSnapshots()`
+(skickar kön till Core, samma funktion Core-dialogens egen knapp
+redan anropar) — ingen ny backend-logik, bara samma flöde nått från
+ett nytt ställe. JSON-knappen (`m.backup.action`, primär) förblir
+huvudvalet; Core-knappen är uttryckligen ett tillägg, inte en
+ersättning — matchar invariant #10 i `core-architecture.md`
+("Core is optional; an unavailable Core must never block or alter
+local save").
+
+Statustext efter klick: "Sparat i Core." vid lyckad send,
+"Kunde inte nå Core just nu. Sparas lokalt och skickas automatiskt
+när anslutningen är tillbaka." vid fel (checkpointen ligger redan i
+den offline-tåliga kön och försöker igen automatiskt — felmeddelandet
+är informativt, inte en varning om dataförlust).
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (94 filer,
+1240 test, oförändrat) grön, `npm run build` rent. Playwright
+bekräftade i webbläsarversionen (inte Tauri) att Backup-dialogen bara
+visar "Cancel"/"Backup" — ingen "Skicka till Core"-knapp eller
+hint-text läcker igenom till en miljö där den inte skulle fungera.
+Inte testat i den riktiga Tauri-byggen i den här sessionen (samma
+Linux-miljöbegränsning som v1.0.194); Mats kan testa på sin dator
+när nästa desktop-bygge är klar.
+
+v1.0.194 → v1.0.195.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

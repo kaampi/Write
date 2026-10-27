@@ -832,6 +832,11 @@ export const en = {
     whatHappenedPlaceholder: "Optional. Recast chapter 2, new Voice on 3.",
     documentName: "Document name",
     action: "Backup",
+    sendToCore: "Send to Core",
+    sendToCoreHint: "Saves a private version of the manuscript to your paired Core service, in addition to the JSON file.",
+    sendToCoreSending: "Sending…",
+    sendToCoreDone: "Saved to Core.",
+    sendToCoreError: "Could not reach Core right now. Saved locally and will send automatically once the connection is back.",
     errors: {
       "not-backup": "That file is not a manuscript backup.",
       "sandbox-export": "That file is a Sandbox card export. Import it in Sandbox, not here.",

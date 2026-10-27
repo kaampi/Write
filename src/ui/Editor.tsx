@@ -98,6 +98,8 @@ import { TimelineBoardPanel } from "./TimelineBoard";
 import { useBookStore, type Busy } from "./useBookStore";
 import { downloadGeneratedBlob, downloadJson } from "./downloadJson";
 import { readLastJsonBackup, recordLastJsonBackup } from "./jsonBackupStamp";
+import { isTauri } from "@tauri-apps/api/core";
+import { flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
 import { BiblePanel } from "./BiblePanel";
 import { LoreImportCard } from "./LoreImportCard";
 import { SeriesImportCard } from "./SeriesImportCard";
@@ -653,6 +655,7 @@ export function Editor() {
   const [backupFilename, setBackupFilename] = useState("");
   const [backupSaving, setBackupSaving] = useState(false);
   const [backupError, setBackupError] = useState(false);
+  const [coreSendState, setCoreSendState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishSaving, setPublishSaving] = useState(false);
   const [publishError, setPublishError] = useState(false);
@@ -1173,6 +1176,7 @@ export function Editor() {
                 setBackupNote("");
                 setBackupFilename(manuscriptBackupBasename(book));
                 setBackupError(false);
+                setCoreSendState("idle");
                 setBackupOpen(true);
               }}
             >
@@ -2572,10 +2576,37 @@ export function Editor() {
               autoComplete="off"
               spellCheck={false}
             />
+            {isTauri() ? (
+              <>
+                <p className="quiet">{m.backup.sendToCoreHint}</p>
+                {coreSendState === "done" ? <p role="status">{m.backup.sendToCoreDone}</p> : null}
+                {coreSendState === "error" ? <p role="alert">{m.backup.sendToCoreError}</p> : null}
+              </>
+            ) : null}
             <div className="edit-actions">
               <button type="button" className="text-button" onClick={() => setBackupOpen(false)}>
                 {m.common.cancel}
               </button>
+              {isTauri() ? (
+                <button
+                  type="button"
+                  disabled={coreSendState === "sending"}
+                  onClick={() =>
+                    void (async () => {
+                      setCoreSendState("sending");
+                      try {
+                        await store.checkpointBook();
+                        await flushCoreSnapshots();
+                        setCoreSendState("done");
+                      } catch {
+                        setCoreSendState("error");
+                      }
+                    })()
+                  }
+                >
+                  {coreSendState === "sending" ? m.backup.sendToCoreSending : m.backup.sendToCore}
+                </button>
+              ) : null}
               <button type="submit" className="primary" disabled={backupSaving}>
                 {m.backup.action}
               </button>
