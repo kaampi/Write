@@ -5,7 +5,9 @@ on:
     paths:
       - "packages/core-service/**"
       - "src/core/workspaceAccess.ts"
+      - "src/persistence/**"
       - "tests/core/workspace-access.test.ts"
+      - "tests/persistence/**"
       - "package.json"
       - "package-lock.json"
       - "vite.config.ts"
