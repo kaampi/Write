@@ -323,7 +323,8 @@ export function createCoreServer(core, { mediaDir } = {}) {
         if (bytes.length !== media.size || createHash('sha256').update(bytes).digest('hex') !== media.sha256) fail(500, 'Media integrity error');
         res.writeHead(200, { 'content-type': media.contentType, 'content-length': bytes.length, 'cache-control': 'no-store' }); res.end(bytes); return;
       }
-      if (parts.length === 2 && parts[1] === 'workspaces' && method === 'GET') result = core.listWorkspaces(app);
+      if (parts.length === 2 && parts[1] === 'identity' && method === 'GET') result = { app };
+      else if (parts.length === 2 && parts[1] === 'workspaces' && method === 'GET') result = core.listWorkspaces(app);
       else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'PUT') result = core.publishSharedManuscript(app, parts[2], await body());
       else if (parts.length === 3 && parts[1] === 'shared-manuscripts' && method === 'DELETE') result = core.revokeSharedManuscript(app, parts[2]);
       else if (parts.length === 2 && parts[1] === 'workspaces' && method === 'POST') result = core.createWorkspace(app, await body());

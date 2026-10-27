@@ -1400,6 +1400,13 @@ Comic behöver originalets kanon måste originalet delas separat. Återställ
 samma bok med intakta översättningslänkar; en fristående kopia får nytt ID
 och lossas från översättningsgruppen.
 
+Desktopkopplingen byggs först för Windows: Storybook verifierar sin Core-
+nyckel mot `/v1/identity` och lagrar den i Windows Credential Manager.
+Tauri skickar den filtrerade projektionen eller en återkallelse till
+Core på loopback; nyckeln lämnas inte tillbaka till webbgränssnittet.
+Transporten är ännu inte instansierad av Storybooks UI. Anslutningsdialog,
+status, serieändringar och andra OS behöver egna steg före aktivering.
+
 ---
 
 ### 32. Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text ✅ byggd (v1.0.33)
