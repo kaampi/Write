@@ -16,6 +16,7 @@ import type { ImportedChapterCandidate } from "@core/manuscriptImport";
 import type { TextSpan } from "@core/textSpan";
 import type { PromptDebugEntry } from "./promptDebug";
 import type { LlmEngine } from "@llm/provider";
+import type { CoreBookRevision } from "@core/coreRevisionRestore";
 
 export type Busy =
   | "draft"
@@ -95,6 +96,7 @@ export type BookStoreValue = {
   loadBook: (id: string) => Promise<Book>;
   /** Flush local edits, then queue an explicit owner-only Core checkpoint. */
   checkpointBook: () => Promise<void>;
+  restoreCoreRevision: (source: CoreBookRevision, mode: "same-book" | "new-book") => Promise<boolean>;
   importManuscript: (file: File) => Promise<void>;
   /** Assigns, or (with `undefined`) clears, which Series a book belongs to — works on any book, not just the open one. */
   setBookSeries: (bookId: string, seriesId: string | undefined) => Promise<void>;

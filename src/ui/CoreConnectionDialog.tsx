@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { isTauri } from "@tauri-apps/api/core";
 import { sortedChapters, type Book } from "@core/BookSchema";
-import { prepareCoreBookRestore } from "@core/coreRevisionRestore";
+import { prepareCoreBookRestore, type CoreBookRevision } from "@core/coreRevisionRestore";
 import type { CoreShareReader } from "@persistence/CoreManuscriptPublication";
 import { coreConnection, corePrivateRevision, corePrivateVersions, coreSharedAccess, pairCore, type CoreConnection, type CorePrivateVersions } from "@persistence/CoreDesktopTransport";
 import { coreSharingOutbox, coreSnapshotOutbox, flushCoreSharing, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
@@ -21,7 +21,7 @@ const copy = {
     saveVersion: "Save private version to Core", versions: "Private manuscript versions", noVersions: "No versions in Core yet.",
     versionPending: "A private version is waiting to sync. Only confirmed Core versions can be restored.",
     view: "View", compare: "Compare", old: "Selected version", current: "Current manuscript", noChanges: "No text or fact changes in this view.",
-    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Story Bible facts"
+    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Story Bible facts", restore: "Restore this manuscript", fork: "Create new manuscript"
   },
   sv: {
     title: "Storybook Core", close: "Stäng", local: "Manuset sparas fortfarande lokalt i Storybook.",
@@ -36,7 +36,7 @@ const copy = {
     saveVersion: "Spara privat version i Core", versions: "Privata manusversioner", noVersions: "Inga versioner i Core ännu.",
     versionPending: "En privat version väntar på synk. Bara versioner som Core har tagit emot kan återställas.",
     view: "Visa", compare: "Jämför", old: "Vald version", current: "Nuvarande manus", noChanges: "Inga text- eller faktaändringar i den här vyn.",
-    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Fakta i Story Bible"
+    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Fakta i Story Bible", restore: "Återställ detta manus", fork: "Skapa nytt manus"
   },
   nb: {
     title: "Storybook Core", close: "Lukk", local: "Manuset lagres fortsatt lokalt i Storybook.",
@@ -51,11 +51,11 @@ const copy = {
     saveVersion: "Lagre privat versjon i Core", versions: "Private manusversjoner", noVersions: "Ingen versjoner i Core ennå.",
     versionPending: "En privat versjon venter på synkronisering. Bare versjoner Core har mottatt kan gjenopprettes.",
     view: "Vis", compare: "Sammenlign", old: "Valgt versjon", current: "Nåværende manus", noChanges: "Ingen tekst- eller faktaendringer i denne visningen.",
-    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Fakta i Story Bible"
+    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Fakta i Story Bible", restore: "Gjenopprett dette manuset", fork: "Opprett nytt manus"
   }
 };
 
-export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onClose }: { bookId: string; currentBook: Book; onCheckpoint: () => Promise<void>; onClose: () => void }) {
+export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRestore, onClose }: { bookId: string; currentBook: Book; onCheckpoint: () => Promise<void>; onRestore: (source: CoreBookRevision, mode: "same-book" | "new-book") => Promise<boolean>; onClose: () => void }) {
   const { locale } = useLocale();
   const m = copy[locale as keyof typeof copy] ?? copy.en;
   const desktop = isTauri();
@@ -65,7 +65,7 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onClos
   const [remoteReaders, setRemoteReaders] = useState<CoreShareReader[] | null>(null);
   const [versions, setVersions] = useState<CorePrivateVersions | null>(null);
   const [snapshotPending, setSnapshotPending] = useState(false);
-  const [inspection, setInspection] = useState<{ book: Book; id: string; mode: "view" | "compare" } | null>(null);
+  const [inspection, setInspection] = useState<{ book: Book; source: CoreBookRevision; mode: "view" | "compare" } | null>(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState("");
   const [working, setWorking] = useState(false);
@@ -137,8 +137,18 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onClos
     const workspace = versions?.workspace;
     if (!workspace || !versions?.revisions.some(rev => rev.id === id)) throw new Error("Core version is unavailable");
     const revision = await corePrivateRevision(id);
-    const prepared = prepareCoreBookRestore({ workspace, revision }, "same-book");
-    setInspection({ book: prepared.backup.book, id, mode });
+    const source = { workspace, revision };
+    const prepared = prepareCoreBookRestore(source, "same-book");
+    setInspection({ book: prepared.backup.book, source, mode });
+  });
+
+  const restore = (mode: "same-book" | "new-book") => void run(async () => {
+    if (!inspection) return;
+    const changed = await onRestore(inspection.source, mode);
+    if (changed) {
+      setInspection(null);
+      if (mode === "new-book") onClose();
+    }
   });
 
   return (
@@ -173,6 +183,7 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onClos
           </div> : null}
           {inspection ? <div className="core-revision-inspection">
             <h3>{inspection.mode === "view" ? m.view : m.compare} · {inspection.book.title}</h3>
+            <div className="core-restore-actions"><button type="button" disabled={working} onClick={() => restore("same-book")}>{m.restore}</button><button type="button" disabled={working} onClick={() => restore("new-book")}>{m.fork}</button></div>
             {inspection.mode === "view" ? <>
               <h4>{m.synopsis}</h4><pre>{inspection.book.synopsis}</pre>
               <h4>{m.brainstorm}</h4><pre>{inspection.book.brainstorm}</pre>
