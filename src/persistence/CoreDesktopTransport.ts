@@ -1,6 +1,7 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import type { CoreManuscriptPublication } from "./CoreManuscriptPublication";
 import { parseBook, type Book } from "@core/BookSchema";
+import type { CoreBookRevision } from "@core/coreRevisionRestore";
 import type { CoreSharingTransport } from "./CoreSharingOutbox";
 
 export type CoreConnection = { paired: boolean; reachable: boolean };
@@ -49,6 +50,16 @@ export async function corePrivateVersions(projectId: string): Promise<CorePrivat
       (value.workspace && (value.workspace.kind !== "private-snapshot" || value.workspace.owner_app !== "storybook" || value.workspace.project_id !== projectId)) ||
       value.revisions.some(rev => typeof rev.id !== "string" || !Number.isSafeInteger(rev.number) || rev.workspace_id !== value.workspace?.id)) {
     throw new Error("Invalid Core version response");
+  }
+  return value;
+}
+
+/** The owner-only revision body is validated by prepareCoreBookRestore before display or import. */
+export async function corePrivateRevision(revisionId: string): Promise<CoreBookRevision["revision"]> {
+  if (!isTauri()) throw new Error("Core versions require the desktop app");
+  const value = await invoke<CoreBookRevision["revision"]>("core_private_revision", { revisionId });
+  if (!value || value.id !== revisionId || typeof value.workspace_id !== "string" || typeof value.deleted !== "boolean") {
+    throw new Error("Invalid Core revision response");
   }
   return value;
 }
