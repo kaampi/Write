@@ -1348,10 +1348,22 @@ Versionsdialogen visar framtida helboksversioner i Core; Storybook har i dag
 bara prosa-historik per kapitel. Beslut för första implementationen: skapa
 helboksversioner av bekräftade synksnapshots i Core, men lova inte en version
 per lokal redigering eftersom synkkön slår ihop ändringar under offlineperioder.
-”Skapa nytt manuskript” kan utgå från befintlig importväg, men en fullständig
-Book-återställning med ursprungsreferens kräver egen validerad import. Exemplen
-på versionssammanfattningar är prototyptext; visa faktiska diffar eller
-frivilliga författaranteckningar när funktionen byggs, inte påhittade texter.
+Återläsning av en **full Book-snapshot** kan återanvända Storybooks befintliga
+`parseManuscriptBackup()` och sparflödet från Hem-sidans ”Importera backup”:
+samma `book.id` ber om bekräftelse och ersätter den lokala posten; ett ID
+som saknas lokalt skapar ett nytt manuskript på hyllan. Core-revisionens
+råa Book behöver först läggas i rätt Storybook-backupomslag och valideras.
+En `.sbcore`-fil återställer hela Core-tjänsten och är inte en sådan
+manuskriptfil; den delade `ManuscriptExport`-projektionen är inte heller
+en fullständig Book-backup. För ”Skapa nytt manuskript” behöver ett nytt
+ID skapas medvetet och referenser till översättningsgrupp/källmanus samt
+eventuell saknad serie hanteras. Ursprungsrevision och nytt Core-workspace
+är separat metadata. Befintlig filimport skriver över lokala kapitel-
+historikposter från senare arbete; en ”Återställ som ny version”-åtgärd
+måste säkra det aktuella läget och synka en ny Core-revision innan den
+kan lova att mellanliggande historik finns kvar. Exemplen på versions-
+sammanfattningar är prototyptext; visa faktiska diffar eller frivilliga
+författaranteckningar när funktionen byggs, inte påhittade texter.
 
 **Nästa byggsteg (se separat PR):** Core tar emot den validerade
 `ManuscriptExport`-projektionen i en `shared-manuscript`-workspace via en
