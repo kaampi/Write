@@ -12,7 +12,7 @@
     <header><span class="eyebrow">Lokal tjänst</span><h1>Storybook Core</h1><p>Backup för hela Core-databasen och dess media. Storybook, Sandbox och Comic behåller sina egna data och behörigheter.</p></header>
     <section class="card" id="login-card">
       <h2>Administratörsåtkomst</h2>
-      <p>Skapa en separat adminnyckel med <code>node packages/core-service/server.mjs provision-admin</code> och ange den här. Nyckeln sparas inte i webbläsaren.</p>
+      <p>Skapa en separat adminnyckel med <code>node packages/core-service/server.mjs provision-admin</code> och samma <code>CORE_DB_PATH</code> som tjänsten använder. Ange nyckeln här. Den sparas inte i webbläsaren.</p>
       <form id="login-form"><label>Adminnyckel<input id="admin-token" type="password" autocomplete="off" required></label><button type="submit">Öppna Core-hantering</button></form>
     </section>
     <div id="controls" hidden>
