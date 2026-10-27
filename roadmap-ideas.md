@@ -1384,6 +1384,56 @@ koda (inget av detta är beslutat att byggas nu):
   migrering (se ovan) påverkas inte förrän Core-sidan faktiskt är
   redo att ta emot kontinuerlig synk, inte bara en enstaka export.
 
+**Uppdatering (2026-10-27): prototyp för "Manuskript och Core"-dialogen
+i StoryBook AI — delning per app + versioner/grenar.** Mats delade två
+skärmdumpar: en "Delning"-flik (per-manuskript toggles för Sandbox/
+Comic, avstängt som standard, "andra appar får läsa, men kan inte
+ändra manuskriptet") och en "Versioner"-flik (manusets versionshistorik
+på HELA BOKEN-nivå, med "Jämför"/"Visa", och "Utgå från version N" →
+antingen "Återställ som ny version" eller "Skapa nytt manuskript",
+d.v.s. en gren).
+
+**Viktigast — vad som delas, uppstod ur en fråga om ComicBook AI
+behöver manuskriptet för beats/paneler (svar: ja, absolut, annars är
+delningen meningslös):**
+- **Ska alltid delas när delning är på:** hela manusets prosa (alla
+  kapitel), Synopsis, och de låsta Story Bible-fakta Draft självt
+  använder (`visibleLockedFacts`) — exakt det underlag Comic behöver
+  för att generera beats/paneler. Samma underlag StoryBook AI:s egen
+  skrivmotor redan jobbar utifrån, inte mindre.
+- **Ska aldrig delas, oavsett delningsläge:** Brainstorm (författarens
+  privata anteckningar — Draft självt läser aldrig Brainstorm heller,
+  ingen ny regel), ogranskade/avvisade fakta (`ai_proposed`/`flagged`
+  — bara förslag, inte kanon), och dolda fakta/entiteter
+  (`hidden_from_ai`). Samma filter `packManuscriptExport()` redan
+  bygger på för "Exportera för andra appar" — delningen till Sandbox/
+  Comic bör återanvända den, inte uppfinna en ny regel.
+- Kort sagt: fakta-lagret (Story Bible-metadata) filtreras likadant
+  som idag; själva manustexten delas i sin helhet — det var bara
+  fakta-filtreringen föregående anteckning syftade på, inte prosan.
+
+**Övriga observationer från samma prototyp-genomgång:**
+- **Manuskript-nivå-versionering är ett nytt begrepp.** StoryBook AI
+  har idag bara per-kapitel `history` (en kapitels prosa), ingen
+  "hela boken som en version"-modell. Kräver antingen att StoryBook AI
+  börjar skapa egna hel-bok-snapshots vid varje synk, eller att Core
+  bygger snapshotten själv av det som synkas in.
+- **"Skapa nytt manuskript" (gren från en äldre version) finns inte
+  idag.** Billigast att bygga genom att återanvända den befintliga
+  Import-manuscript-vägen (en ny bok från en Core-snapshot är
+  strukturellt samma sak som att importera ett manus), inte en ny
+  gren-mekanism från grunden.
+- **Varifrån kommer versionssammanfattningarna** ("Scen 7
+  redigerades")? Antingen ny diff-till-text-logik (automatisk) eller
+  manuellt skrivna commit-meddelanden (enklare, men kräver att
+  användaren orkar skriva dem) — inte bestämt.
+- Redan bra i prototypen, ingen anmärkning: avstängt som standard,
+  read-only för andra appar, tydlig varningstext vid avstängd
+  delning, ägarskaps-badge, Core-backup uttryckligen separat från
+  synk/delning.
+
+Inget av detta är beslutat att byggas nu.
+
 ---
 
 ### 32. Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text ✅ byggd (v1.0.33)
