@@ -23,6 +23,7 @@ const filesIn = async (root, sub = '') => {
   if (!await exists(root)) return [];
   const result = [];
   for (const entry of await readdir(join(root, sub), { withFileTypes: true })) {
+    if (entry.name.endsWith('.partial')) continue;
     const name = join(sub, entry.name);
     if (entry.isDirectory()) result.push(...await filesIn(root, name));
     else if (entry.isFile()) result.push({ path: join(root, name), name: 'media/' + name.split(sep).join('/') });
