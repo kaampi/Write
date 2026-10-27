@@ -21,7 +21,9 @@ const copy = {
     saveVersion: "Save private version to Core", versions: "Private manuscript versions", noVersions: "No versions in Core yet.",
     versionPending: "A private version is waiting to sync. Only confirmed Core versions can be restored.",
     view: "View", compare: "Compare", old: "Selected version", current: "Current manuscript", noChanges: "No text or fact changes in this view.",
-    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Story Bible facts", restore: "Restore this manuscript", fork: "Create new manuscript"
+    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Story Bible facts", restore: "Restore this manuscript", fork: "Create new manuscript",
+    auto: "Save private versions automatically", autoHint: "After local saves, Core makes a new version at most about every ten minutes. Offline changes stay queued as the latest copy. Turning this off stops future checkpoints; an already queued one still syncs.",
+    lastSnapshot: "Last confirmed private version"
   },
   sv: {
     title: "Storybook Core", close: "Stäng", local: "Manuset sparas fortfarande lokalt i Storybook.",
@@ -36,7 +38,9 @@ const copy = {
     saveVersion: "Spara privat version i Core", versions: "Privata manusversioner", noVersions: "Inga versioner i Core ännu.",
     versionPending: "En privat version väntar på synk. Bara versioner som Core har tagit emot kan återställas.",
     view: "Visa", compare: "Jämför", old: "Vald version", current: "Nuvarande manus", noChanges: "Inga text- eller faktaändringar i den här vyn.",
-    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Fakta i Story Bible", restore: "Återställ detta manus", fork: "Skapa nytt manus"
+    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Fakta i Story Bible", restore: "Återställ detta manus", fork: "Skapa nytt manus",
+    auto: "Spara privata versioner automatiskt", autoHint: "Efter lokal sparning skapas en ny Core-version högst ungefär var tionde minut. Vid avbrott köas den senaste kopian. Avstängning stoppar framtida checkpoints; en redan köad kopia synkas fortfarande.",
+    lastSnapshot: "Senaste bekräftade privata version"
   },
   nb: {
     title: "Storybook Core", close: "Lukk", local: "Manuset lagres fortsatt lokalt i Storybook.",
@@ -51,7 +55,9 @@ const copy = {
     saveVersion: "Lagre privat versjon i Core", versions: "Private manusversjoner", noVersions: "Ingen versjoner i Core ennå.",
     versionPending: "En privat versjon venter på synkronisering. Bare versjoner Core har mottatt kan gjenopprettes.",
     view: "Vis", compare: "Sammenlign", old: "Valgt versjon", current: "Nåværende manus", noChanges: "Ingen tekst- eller faktaendringer i denne visningen.",
-    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Fakta i Story Bible", restore: "Gjenopprett dette manuset", fork: "Opprett nytt manus"
+    synopsis: "Synopsis", brainstorm: "Brainstorm", facts: "Fakta i Story Bible", restore: "Gjenopprett dette manuset", fork: "Opprett nytt manus",
+    auto: "Lagre private versjoner automatisk", autoHint: "Etter lokal lagring lages en ny Core-versjon høyst omtrent hvert tiende minutt. Ved avbrudd legges den nyeste kopien i kø. Avslåing stopper fremtidige checkpoints; en allerede kølagt kopi synkroniseres fortsatt.",
+    lastSnapshot: "Siste bekreftede private versjon"
   }
 };
 
@@ -65,6 +71,8 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
   const [remoteReaders, setRemoteReaders] = useState<CoreShareReader[] | null>(null);
   const [versions, setVersions] = useState<CorePrivateVersions | null>(null);
   const [snapshotPending, setSnapshotPending] = useState(false);
+  const [autoEnabled, setAutoEnabled] = useState(false);
+  const [lastSnapshotAt, setLastSnapshotAt] = useState<number | null>(null);
   const [inspection, setInspection] = useState<{ book: Book; source: CoreBookRevision; mode: "view" | "compare" } | null>(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState("");
@@ -89,13 +97,15 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
     }
     const choice = await coreSharingOutbox.choice(bookId);
     const waiting = (await coreSnapshotOutbox.pending()).some(change => change.id === bookId);
-    return { status, remote, choice, issue, privateVersions, waiting };
+    const auto = await coreSnapshotOutbox.autoChoice(bookId);
+    return { status, remote, choice, issue, privateVersions, waiting, auto };
   }, [bookId]);
 
   const refresh = useCallback(async () => {
-    const { status, remote, choice, issue, privateVersions, waiting } = await load();
+    const { status, remote, choice, issue, privateVersions, waiting, auto } = await load();
     setConnection(status); setRemoteReaders(remote); setReaders(choice.readers); setPending(choice.pending);
     setVersions(privateVersions); setSnapshotPending(waiting);
+    setAutoEnabled(auto.enabled); setLastSnapshotAt(auto.lastSentAt);
     if (issue) throw issue;
   }, [load]);
 
@@ -103,10 +113,11 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
     let active = true;
     setLoading(true);
     void load()
-      .then(({ status, remote, choice, issue, privateVersions, waiting }) => {
+      .then(({ status, remote, choice, issue, privateVersions, waiting, auto }) => {
         if (!active) return;
         setConnection(status); setRemoteReaders(remote); setReaders(choice.readers); setPending(choice.pending);
         setVersions(privateVersions); setSnapshotPending(waiting);
+        setAutoEnabled(auto.enabled); setLastSnapshotAt(auto.lastSentAt);
         if (issue) setError(issue instanceof Error ? issue.message : String(issue));
       })
       .catch(err => { if (active) setError(String(err)); })
@@ -131,6 +142,14 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
     const next = readers.includes(reader) ? readers.filter(item => item !== reader) : [...readers, reader];
     await coreSharingOutbox.setReaders(bookId, next);
     if (connection.reachable) await flushCoreSharing();
+  });
+
+  const toggleAuto = () => void run(async () => {
+    await coreSnapshotOutbox.setAutoEnabled(bookId, !autoEnabled);
+    if (!autoEnabled) {
+      await onCheckpoint();
+      if (connection.reachable) await flushCoreSnapshots();
+    }
   });
 
   const inspect = (id: string, mode: "view" | "compare") => void run(async () => {
@@ -158,12 +177,12 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
         <p>{m.local}</p>
         <p role="status">{!desktop ? m.unavailable : connection.reachable ? m.connected : connection.paired ? m.offline : m.disconnected}</p>
         {desktop && !connection.paired ? (
-          <form onSubmit={event => { event.preventDefault(); void run(async () => { await pairCore(token.trim()); setToken(""); await flushCoreSharing(); }); }}>
+          <form onSubmit={event => { event.preventDefault(); void run(async () => { await pairCore(token.trim()); setToken(""); await Promise.allSettled([flushCoreSharing(), flushCoreSnapshots()]); }); }}>
             <label>{m.token}<input type="password" autoComplete="off" value={token} onChange={event => setToken(event.target.value)} disabled={working} /></label>
             <button type="submit" disabled={working || !token.trim()}>{working ? m.pairing : m.pair}</button>
           </form>
         ) : null}
-        {desktop && connection.paired ? <button type="button" disabled={working} onClick={() => void run(async () => { const status = await coreConnection(); if (status.reachable) await flushCoreSharing(); })}>{m.refresh}</button> : null}
+        {desktop && connection.paired ? <button type="button" disabled={working} onClick={() => void run(async () => { const status = await coreConnection(); if (status.reachable) await Promise.allSettled([flushCoreSharing(), flushCoreSnapshots()]); })}>{m.refresh}</button> : null}
         {desktop ? (
           <fieldset disabled={working || loading || (connection.reachable && remoteReaders === null)}>
             <legend>{m.title}</legend>
@@ -176,6 +195,9 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
         {desktop ? <p role="status">{working ? m.saving : pending ? m.pending : m.synced}</p> : null}
         {desktop ? <section>
           <h3>{m.versions}</h3>
+          <label><input type="checkbox" checked={autoEnabled} disabled={working || loading} onChange={toggleAuto} /> {m.auto}</label>
+          <p>{m.autoHint}</p>
+          {lastSnapshotAt ? <p>{m.lastSnapshot}: {new Date(lastSnapshotAt).toLocaleString(locale)}</p> : null}
           <button type="button" disabled={working || loading} onClick={() => void run(async () => { await onCheckpoint(); if (connection.reachable) await flushCoreSnapshots(); })}>{m.saveVersion}</button>
           {snapshotPending ? <p role="status">{m.versionPending}</p> : null}
           {versions ? <div className="core-version-list">

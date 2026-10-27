@@ -91,4 +91,48 @@ describe("opt-in Core sync queue", () => {
     expect(sent).toContain("Must be acknowledged");
     expect(await outbox.pending()).toEqual([]);
   });
+
+  it("automatically checkpoints only opted-in manuscripts and coalesces offline edits", async () => {
+    const outbox = new CoreSyncOutbox(indexedDB);
+    const book = createBook("Auto");
+    const privateBook = createBook("Private");
+    await outbox.enqueueAutoSave(book);
+    expect(await outbox.pending()).toEqual([]);
+    await outbox.setAutoEnabled(book.id, true);
+    await outbox.enqueueAutoSave(book);
+    await outbox.enqueueAutoSave(privateBook);
+    const newer = updateChapter(book, book.chapters[0]!.id, { prose: "Latest while offline" });
+    await outbox.enqueueAutoSave(newer);
+    expect(await outbox.pending()).toMatchObject([{ id: book.id, book: newer }]);
+    await outbox.flush(async () => {});
+    const acknowledged = (await outbox.autoChoice(book.id)).lastSentAt!;
+    await outbox.enqueueAutoSave(updateChapter(newer, newer.chapters[0]!.id, { prose: "Soon" }), acknowledged + 60_000);
+    expect(await outbox.pending()).toEqual([]);
+    const later = updateChapter(newer, newer.chapters[0]!.id, { prose: "After ten minutes" });
+    await outbox.enqueueAutoSave(later, acknowledged + 10 * 60_000);
+    expect(await outbox.pending()).toMatchObject([{ id: book.id, book: later }]);
+    await outbox.setAutoEnabled(book.id, false);
+    await outbox.enqueueAutoSave(updateChapter(later, later.chapters[0]!.id, { prose: "Disabled" }));
+    expect(await outbox.pending()).toMatchObject([{ id: book.id, book: later }]);
+  });
+
+  it("upgrades an existing private outbox without dropping a pending checkpoint", async () => {
+    const book = createBook("Queued on an older version");
+    const legacy = await new Promise<IDBDatabase>((resolve, reject) => {
+      const open = indexedDB.open("storybook-core-outbox", 1);
+      open.onupgradeneeded = () => open.result.createObjectStore("pending", { keyPath: "id" });
+      open.onsuccess = () => resolve(open.result);
+      open.onerror = () => reject(open.error);
+    });
+    await new Promise<void>((resolve, reject) => {
+      const tx = legacy.transaction("pending", "readwrite");
+      tx.objectStore("pending").put({ id: book.id, token: "legacy", scope: "private-snapshot", kind: "save", book });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    legacy.close();
+    const upgraded = new CoreSyncOutbox(indexedDB);
+    expect(await upgraded.pending()).toMatchObject([{ id: book.id, book }]);
+    expect((await upgraded.autoChoice(book.id)).enabled).toBe(false);
+  });
 });
