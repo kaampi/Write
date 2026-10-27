@@ -58,12 +58,11 @@ export async function restoreBackup(archive, destination, passphrase) {
     try { await handle.read(tag, 0, 16, size - 16); } finally { await handle.close(); }
     const decipher = createDecipheriv('aes-256-gcm', key(passphrase, header.subarray(8, 24)), header.subarray(24, 36));
     decipher.setAuthTag(tag);
-    const out = createWriteStream(plain, { mode: 0o600 });
+    const out = await open(plain, 'wx', 0o600);
     try {
-      for await (const chunk of createReadStream(archive, { start: HEADER_SIZE, end: size - 17 })) await write(out, decipher.update(chunk));
-      await write(out, decipher.final());
-      await finish(out);
-    } catch (error) { out.destroy(); throw error; }
+      for await (const chunk of createReadStream(archive, { start: HEADER_SIZE, end: size - 17 })) await out.writeFile(decipher.update(chunk));
+      await out.writeFile(decipher.final());
+    } finally { await out.close(); }
     const input = await open(plain, 'r');
     try {
       const length = Buffer.alloc(4);
