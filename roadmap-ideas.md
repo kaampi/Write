@@ -1390,6 +1390,16 @@ visas som väntande: mottagarens tidigare publicerade vy finns kvar tills
 Core svarat. Denna kö är ännu inte instansierad i appens UI. Vid inkoppling
 måste serieändringar också markera berörda delade böcker för ompublicering.
 
+**Språkversioner:** varje version är en egen `Book` med eget ID, egen
+Core-workspace, historik och delningsval. `translation_group_id` och
+`prose_language` följer med som katalogmetadata på den delade workspacen
+så Comic kan gruppera enbart versioner den har rätt att se. Att dela en
+svensk version delar inte originalet eller dess Story Bible: Storybook
+kopierar i dag inte synopsis/fakta till en nyskapad översättning. Om
+Comic behöver originalets kanon måste originalet delas separat. Återställ
+samma bok med intakta översättningslänkar; en fristående kopia får nytt ID
+och lossas från översättningsgruppen.
+
 ---
 
 ### 32. Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text ✅ byggd (v1.0.33)

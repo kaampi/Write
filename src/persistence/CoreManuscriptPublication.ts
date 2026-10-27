@@ -9,6 +9,9 @@ export type CoreManuscriptPublication = {
   projectId: string;
   manuscript: ManuscriptExport;
   readers: CoreShareReader[];
+  /** Catalog grouping only. Each language version keeps its own Book and workspace. */
+  translationGroupId: string;
+  language: string;
 };
 
 /** The only Storybook payload for the shareable Core workspace. Full Book snapshots use a private workspace. */
@@ -21,6 +24,8 @@ export function buildCoreManuscriptPublication(
   return {
     projectId: book.id,
     manuscript: parseManuscriptExport(packManuscriptExport(book, exportedAt, seriesFacts)),
-    readers: [...new Set(readers)]
+    readers: [...new Set(readers)],
+    translationGroupId: book.translation_group_id ?? book.id,
+    language: book.prose_language.trim()
   };
 }
