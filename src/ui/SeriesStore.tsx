@@ -25,6 +25,7 @@ import type { CorePredicate } from "@core/predicates";
 import { crossBookConsistencyIssues, type BookFactSet, type ConsistencyIssue } from "@core/seriesConsistency";
 import { SeriesNotFoundError, SeriesRepository } from "@persistence/SeriesRepository";
 import { BookRepository } from "@persistence/Repository";
+import { coreSharingOutbox } from "@persistence/CoreSharingRuntime";
 import { picturesFromFile } from "./entityImage";
 import {
   DEFAULT_OPENAI_COMPATIBLE_BASE_URL,
@@ -83,9 +84,11 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
   const persist = useCallback(
     async (next: Series) => {
       await repo.save(next);
+      // The series remains locally saved even if the optional Core queue is unavailable.
+      try { await coreSharingOutbox.enqueueSeriesSave(next.id, bookRepo); } catch { /* retry after the next local edit */ }
       setSummaries(await repo.list(bookCountBySeriesId));
     },
-    [repo, bookCountBySeriesId]
+    [repo, bookRepo, bookCountBySeriesId]
   );
 
   const createSeries = useCallback(

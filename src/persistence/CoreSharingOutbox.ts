@@ -82,6 +82,25 @@ export class CoreSharingOutbox implements CoreSyncSink {
     } finally { db.close(); }
   }
 
+  /** A series edit can change the exported facts of several shared books. */
+  async enqueueSeriesSave(seriesId: string, books: Pick<BookRepository, "list">): Promise<void> {
+    const related = new Set((await books.list()).filter(book => book.series_id === seriesId).map(book => book.id));
+    if (!related.size) return;
+    const db = await this.db();
+    try {
+      const tx = db.transaction(STORE, "readwrite");
+      const done = transactionDone(tx);
+      const store = tx.objectStore(STORE);
+      const choices = await request(store.getAll()) as SharingChoice[];
+      for (const current of choices) {
+        if (related.has(current.bookId) && current.readers.length) {
+          store.put({ ...current, pending: true, token: crypto.randomUUID() });
+        }
+      }
+      await done;
+    } finally { db.close(); }
+  }
+
   async enqueueDelete(bookId: string): Promise<void> {
     await this.setReaders(bookId, []);
   }

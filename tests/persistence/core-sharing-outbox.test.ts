@@ -95,4 +95,36 @@ describe("opt-in Core manuscript sharing choices", () => {
     });
     expect(revoked).toEqual([book.id]);
   });
+
+  it("requeues only shared books in an edited series and sends current inherited facts", async () => {
+    const choices = new CoreSharingOutbox(indexedDB);
+    const books = new BookRepository(indexedDB, choices);
+    const series = new SeriesRepository(indexedDB);
+    const world = createSeries("World");
+    const otherWorld = createSeries("Other");
+    await series.save(world);
+    await series.save(otherWorld);
+    const shared = { ...createBook("Shared"), series_id: world.id };
+    const privateBook = { ...createBook("Private"), series_id: world.id };
+    const unrelated = { ...createBook("Other shared"), series_id: otherWorld.id };
+    await Promise.all([books.save(shared), books.save(privateBook), books.save(unrelated)]);
+    await choices.setReaders(shared.id, ["comic"]);
+    await choices.setReaders(unrelated.id, ["sandbox"]);
+    const sent: string[] = [];
+    const transport: CoreSharingTransport = {
+      publish: async value => { sent.push(JSON.stringify(value)); },
+      revoke: async () => { throw new Error("Unexpected revoke"); }
+    };
+    await choices.flush(books, series, transport);
+    sent.length = 0;
+
+    await series.save({ ...world, facts: [visibleFact] });
+    await choices.enqueueSeriesSave(world.id, books);
+    expect(await choices.choice(shared.id)).toEqual({ readers: ["comic"], pending: true });
+    expect(await choices.choice(privateBook.id)).toEqual({ readers: [], pending: false });
+    expect(await choices.choice(unrelated.id)).toEqual({ readers: ["sandbox"], pending: false });
+    await choices.flush(books, series, transport);
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toContain("The harbor");
+  });
 });
