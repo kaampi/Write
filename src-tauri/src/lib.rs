@@ -1,11 +1,20 @@
 mod system_check;
 mod update_check;
 
+use tauri::Manager;
 use tauri_plugin_deep_link::DeepLinkExt;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
+    // Register first: a second launch should focus the existing desktop window.
+    .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+      if let Some(window) = app.get_webview_window("main") {
+        let _ = window.unminimize();
+        let _ = window.show();
+        let _ = window.set_focus();
+      }
+    }))
     .plugin(tauri_plugin_opener::init())
     .plugin(tauri_plugin_deep_link::init())
     .plugin(tauri_plugin_http::init())
