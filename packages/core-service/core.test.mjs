@@ -23,6 +23,8 @@ test('HTTP credentials, owner isolation, grants, revisions and proposal review',
   };
   try {
     assert.equal((await call('storybook', 'GET', '/v1/workspaces', undefined, '0'.repeat(64))).status, 401);
+    assert.deepEqual((await call('storybook', 'GET', '/v1/identity')).data, { app: 'storybook' });
+    assert.deepEqual((await call('comic', 'GET', '/v1/identity')).data, { app: 'comic' });
     const workspaces = {};
     for (const app of Object.keys(tokens)) {
       const result = await call(app, 'POST', '/v1/workspaces', { kind: app === 'storybook' ? 'manuscript' : app === 'sandbox' ? 'session' : 'comic-project', ownerApp: 'comic' });
