@@ -219,6 +219,10 @@ test('shared manuscript publishing stores only a validated projection and atomic
     assert.equal((await call('storybook', 'POST', `/v1/workspaces/${workspace.id}/records`, { body: { brainstorm: 'Secret' } })).status, 403);
     assert.equal((await call('storybook', 'PUT', `/v1/records/${record.id}`, { expectedRevision: 1, body: { brainstorm: 'Secret' } })).status, 403);
 
+    const repeated = await call('storybook', 'PUT', route, { manuscript: { ...manuscript, exportedAt: '2026-10-27T01:00:00.000Z' }, readers: ['sandbox'] });
+    assert.equal(repeated.status, 200);
+    assert.equal(repeated.body.record.revision, 1);
+
     const invalid = await call('storybook', 'PUT', route, { manuscript: { ...manuscript, sourceBookId: 'other' }, readers: ['comic'] });
     assert.equal(invalid.status, 400);
     assert.deepEqual((await call('sandbox', 'GET', '/v1/workspaces')).body.map(ws => ws.id), [workspace.id]);
@@ -232,5 +236,11 @@ test('shared manuscript publishing stores only a validated projection and atomic
     assert.equal((await call('sandbox', 'GET', `/v1/revisions/${record.revisionId}`)).status, 403);
     assert.equal((await call('comic', 'GET', `/v1/records/${record.id}`)).body.body.synopsis, 'Second synopsis.');
     assert.equal((await call('comic', 'GET', `/v1/revisions/${record.revisionId}`)).body.body.synopsis, 'The full synopsis.');
+    assert.equal((await call('sandbox', 'DELETE', route)).status, 403);
+    assert.equal((await call('storybook', 'DELETE', route)).status, 200);
+    assert.equal((await call('comic', 'GET', `/v1/records/${record.id}`)).status, 403);
+    assert.equal((await call('comic', 'GET', `/v1/revisions/${record.revisionId}`)).status, 403);
+    assert.equal((await call('storybook', 'DELETE', route)).status, 200);
+    assert.equal((await call('storybook', 'DELETE', '/v1/shared-manuscripts/never-shared')).status, 200);
   } finally { server.close(); await once(server, 'close'); core.close(); rmSync(dir, { recursive: true, force: true }); }
 });

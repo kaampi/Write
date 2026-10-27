@@ -1362,6 +1362,14 @@ serie-fakta. Fortfarande kvar: betrodd desktop-transport med OS-skyddad
 credential, per-manuskriptval i den riktiga dialogen och automatisk
 ompublicering vid relevanta ändringar. Prototypreglagen är inte aktiva.
 
+En följande isolerad byggbranch lagrar val per manuskript och väntande
+ändringar i separat IndexedDB, med återförsök när Core är tillbaka.
+Radering eller avstängd delning använder en idempotent återkallelse även
+om manuskriptet inte längre kan läsas lokalt. Osända återkallelser måste
+visas som väntande: mottagarens tidigare publicerade vy finns kvar tills
+Core svarat. Denna kö är ännu inte instansierad i appens UI. Vid inkoppling
+måste serieändringar också markera berörda delade böcker för ompublicering.
+
 ---
 
 ### 32. Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text ✅ byggd (v1.0.33)
