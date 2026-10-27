@@ -98,6 +98,8 @@ Encrypted backup and restore commands read one recovery phrase line from standar
 
 Plain backups expose the entire database, media and manifest to anyone who can read the destination. Their checksums detect accidental damage, but an attacker who can replace a plain archive can also replace its checksums. Encrypted archives authenticate their contents. Core must not claim that Nextcloud's server-side encryption, a private server or HTTPS provides the same protection as encryption before upload. Use HTTPS for any remote destination regardless of this setting.
 
+This setting encrypts only the exported backup archive. The live SQLite database and media directory are not encrypted by Core; access to them depends on local filesystem permissions or optional operating-system disk encryption.
+
 `CORE_BACKUP_KEEP` defaults to 10 (range 1–1000). After a new backup passes verification, Core retains the newest N unpinned archives across both formats and removes older unpinned archives. Pinned copies are additional to N. Failed backup creation does not trigger pruning. Restoring refuses to overwrite an existing directory, checks file hashes and SQLite integrity (plus authentication for encrypted archives), then publishes the restored directory. The operator must stop the old service before switching `CORE_DB_PATH` and `CORE_MEDIA_DIR` to the restored directory. App credentials are stored as hashes in SQLite; provision new credentials if required after moving installations.
 
 Media writers external to Core must not change files while a backup runs. This is a local encrypted export; destination health reporting and periodic restore drills remain follow-up work.
