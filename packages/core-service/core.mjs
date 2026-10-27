@@ -41,6 +41,7 @@ export function openCore(path) {
   const workspace = id => get('SELECT * FROM workspaces WHERE id=?', id) ?? fail(404, 'Workspace not found');
   const authorize = (app, id, operation) => {
     const ws = workspace(id);
+    if (ws.owner_app !== app && ws.kind === 'private-snapshot') fail(403, 'Forbidden');
     if (ws.owner_app !== app && (operation !== 'read' || !get('SELECT 1 FROM grants WHERE workspace_id=? AND reader_app=?', id, app))) fail(403, 'Forbidden');
     return ws;
   };
@@ -86,7 +87,7 @@ export function openCore(path) {
       if (!row || !timingSafeEqual(hash, Buffer.from(row.key_hash, 'hex'))) fail(401, 'Unauthorized');
       return row.app;
     },
-    listWorkspaces(app) { return all('SELECT w.* FROM workspaces w WHERE w.owner_app=? OR EXISTS (SELECT 1 FROM grants g WHERE g.workspace_id=w.id AND g.reader_app=?)', app, app); },
+    listWorkspaces(app) { return all("SELECT w.* FROM workspaces w WHERE w.owner_app=? OR (w.kind!='private-snapshot' AND EXISTS (SELECT 1 FROM grants g WHERE g.workspace_id=w.id AND g.reader_app=?))", app, app); },
     createWorkspace(app, input) {
       const kind = required(input.kind, 'kind');
       const projectId = input.projectId == null ? null : required(input.projectId, 'projectId');
@@ -106,6 +107,9 @@ export function openCore(path) {
       return transaction(() => {
         const ws = authorize(app, id, 'write');
         if (readerApp === ws.owner_app) fail(400, 'Owner access is inherent');
+        // Full local project snapshots may contain hidden facts, notes and drafts.
+        // They must never become readable through a workspace grant.
+        if (visible && ws.kind === 'private-snapshot') fail(403, 'Private snapshots cannot be shared');
         if (visible) run('INSERT OR IGNORE INTO grants VALUES(?,?)', id, readerApp);
         else run('DELETE FROM grants WHERE workspace_id=? AND reader_app=?', id, readerApp);
         audit(app, visible ? 'grant.create' : 'grant.revoke', id);

@@ -62,6 +62,6 @@ describe("opt-in Core sync queue", () => {
     const connected = new BookRepository(indexedDB, outbox);
     await connected.save(book);
     await connected.delete(book.id);
-    expect(await outbox.pending()).toMatchObject([{ id: book.id, kind: "delete" }]);
+    expect(await outbox.pending()).toMatchObject([{ id: book.id, scope: "private-snapshot", kind: "delete" }]);
   });
 });

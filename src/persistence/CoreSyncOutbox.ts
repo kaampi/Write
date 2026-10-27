@@ -1,8 +1,8 @@
 import type { Book } from "@core/BookSchema";
 
 export type CoreChange =
-  | { id: string; token: string; kind: "save"; book: Book }
-  | { id: string; token: string; kind: "delete" };
+  | { id: string; token: string; scope: "private-snapshot"; kind: "save"; book: Book }
+  | { id: string; token: string; scope: "private-snapshot"; kind: "delete" };
 
 export interface CoreSyncSink {
   enqueueSave(book: Book): Promise<void>;
@@ -29,7 +29,7 @@ function transactionDone(tx: IDBTransaction): Promise<void> {
   });
 }
 
-/** Separate database: enabling this queue does not upgrade Storybook's working book store. */
+/** Owner-only full-book snapshots. Never publish these to a grantable workspace. */
 export class CoreSyncOutbox implements CoreSyncSink {
   private draining: Promise<void> | null = null;
 
@@ -55,11 +55,11 @@ export class CoreSyncOutbox implements CoreSyncSink {
   }
 
   enqueueSave(book: Book): Promise<void> {
-    return this.put({ id: book.id, token: crypto.randomUUID(), kind: "save", book });
+    return this.put({ id: book.id, token: crypto.randomUUID(), scope: "private-snapshot", kind: "save", book });
   }
 
   enqueueDelete(id: string): Promise<void> {
-    return this.put({ id, token: crypto.randomUUID(), kind: "delete" });
+    return this.put({ id, token: crypto.randomUUID(), scope: "private-snapshot", kind: "delete" });
   }
 
   async pending(): Promise<CoreChange[]> {

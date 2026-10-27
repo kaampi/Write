@@ -4,6 +4,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { once } from 'node:events';
+import { DatabaseSync } from 'node:sqlite';
 import { openCore, createCoreServer } from './core.mjs';
 
 test('HTTP credentials, owner isolation, grants, revisions and proposal review', async () => {
@@ -122,5 +123,44 @@ test('each project is private by default and its owner can share and revoke sepa
     assert.equal((await call('comic', 'PUT', `/v1/workspaces/${comic.id}/grants/storybook`, { visible: true })).status, 200);
     assert.equal((await call('storybook', 'GET', '/v1/workspaces')).body.some(w => w.id === comic.id), true);
     assert.equal((await call('storybook', 'PUT', `/v1/workspaces/${comic.id}/grants/sandbox`, { visible: true })).status, 403);
+  } finally { server.close(); await once(server, 'close'); core.close(); rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('private full-book snapshots cannot be granted to another app', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'core-private-snapshot-'));
+  const core = openCore(join(dir, 'core.db'));
+  const tokens = Object.fromEntries(['storybook', 'sandbox', 'comic'].map(app => [app, core.provision(app)]));
+  const server = createCoreServer(core);
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const call = async (app, method, path, body) => {
+    const response = await fetch(base + path, {
+      method, headers: { authorization: `Bearer ${tokens[app]}`, ...(body ? { 'content-type': 'application/json' } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {})
+    });
+    return { status: response.status, body: await response.json() };
+  };
+  try {
+    const ws = (await call('storybook', 'POST', '/v1/workspaces', { kind: 'private-snapshot', projectId: 'book-one' })).body;
+    const rec = (await call('storybook', 'POST', `/v1/workspaces/${ws.id}/records`, {
+      body: { title: 'Draft', brainstorm: 'private notes', facts: [{ status: 'ai_proposed' }] }
+    })).body;
+    for (const app of ['sandbox', 'comic']) {
+      assert.equal((await call('storybook', 'POST', `/v1/workspaces/${ws.id}/grants`, { readerApp: app })).status, 403);
+      assert.equal((await call('storybook', 'PUT', `/v1/workspaces/${ws.id}/grants/${app}`, { visible: true })).status, 403);
+      assert.equal((await call(app, 'GET', '/v1/workspaces')).body.length, 0);
+      assert.equal((await call(app, 'GET', `/v1/records/${rec.id}`)).status, 403);
+      assert.equal((await call(app, 'GET', `/v1/revisions/${rec.revisionId}`)).status, 403);
+    }
+    // A stale grant from an older database must not bypass the read boundary.
+    const db = new DatabaseSync(join(dir, 'core.db'));
+    try { db.prepare('INSERT INTO grants(workspace_id,reader_app) VALUES(?,?)').run(ws.id, 'sandbox'); }
+    finally { db.close(); }
+    assert.equal((await call('sandbox', 'GET', '/v1/workspaces')).body.length, 0);
+    assert.equal((await call('sandbox', 'GET', `/v1/records/${rec.id}`)).status, 403);
+    assert.equal((await call('sandbox', 'GET', `/v1/revisions/${rec.revisionId}`)).status, 403);
+    assert.equal((await call('storybook', 'PUT', `/v1/workspaces/${ws.id}/grants/sandbox`, { visible: false })).status, 200);
+    assert.deepEqual((await call('storybook', 'GET', `/v1/workspaces/${ws.id}/grants`)).body, []);
+    assert.equal((await call('storybook', 'GET', `/v1/records/${rec.id}`)).body.body.brainstorm, 'private notes');
   } finally { server.close(); await once(server, 'close'); core.close(); rmSync(dir, { recursive: true, force: true }); }
 });
