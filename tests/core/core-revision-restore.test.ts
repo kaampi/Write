@@ -48,6 +48,14 @@ describe("Core manuscript restore preparation", () => {
     expect(withSeries.backup.book.series_id).toBe("old-series");
   });
 
+  it("retains the current translation family when restoring a source revision from before it existed", () => {
+    const oldSource = { ...createBook("Novel"), id: "original" };
+    const current = { ...oldSource, translation_group_id: "family-created-later" };
+    const prepared = prepareCoreBookRestore(source(oldSource), "same-book", { currentBook: current });
+    expect(prepared.backup.book.translation_group_id).toBe("family-created-later");
+    expect(prepared.backup.book.id).toBe("original");
+  });
+
   it("rejects shared projections, deleted revisions, mismatched workspaces and reused IDs", () => {
     const book = { ...createBook("Novel"), id: "original" };
     expect(() => prepareCoreBookRestore({ ...source(book), workspace: { ...source(book).workspace, kind: "shared-manuscript" } }, "same-book")).toThrow();
@@ -57,5 +65,6 @@ describe("Core manuscript restore preparation", () => {
     expect(() => prepareCoreBookRestore({ ...source(book), revision: { ...source(book).revision, workspace_id: "other" } }, "same-book")).toThrow();
     expect(() => prepareCoreBookRestore(source({ kind: "storycore.manuscript-export", sourceBookId: "original" }), "same-book")).toThrow();
     expect(() => prepareCoreBookRestore(source(book), "new-book", { newBookId: "original" })).toThrow();
+    expect(() => prepareCoreBookRestore(source(book), "same-book", { currentBook: { ...book, id: "another-book" } })).toThrow();
   });
 });

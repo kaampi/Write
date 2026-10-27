@@ -31,6 +31,12 @@ export function openCore(path) {
   if (!db.prepare('PRAGMA table_info(workspaces)').all().some(column => column.name === 'project_id')) {
     db.exec('ALTER TABLE workspaces ADD COLUMN project_id TEXT');
   }
+  if (!db.prepare('PRAGMA table_info(workspaces)').all().some(column => column.name === 'translation_group_id')) {
+    db.exec('ALTER TABLE workspaces ADD COLUMN translation_group_id TEXT');
+  }
+  if (!db.prepare('PRAGMA table_info(workspaces)').all().some(column => column.name === 'language')) {
+    db.exec('ALTER TABLE workspaces ADD COLUMN language TEXT');
+  }
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS workspaces_project_owner ON workspaces(owner_app,kind,project_id) WHERE project_id IS NOT NULL');
   const run = (sql, ...args) => db.prepare(sql).run(...args);
   const get = (sql, ...args) => db.prepare(sql).get(...args);
@@ -136,6 +142,9 @@ export function openCore(path) {
       catch { fail(400, 'Invalid manuscript export'); }
       if (manuscript.format !== MANUSCRIPT_EXPORT_FORMAT) fail(400, 'Current manuscript export format required');
       if (manuscript.sourceBookId !== projectId) fail(400, 'Manuscript ID mismatch');
+      const translationGroupId = input.translationGroupId == null ? projectId : required(input.translationGroupId, 'translationGroupId');
+      const language = input.language == null ? '' : input.language;
+      if (typeof language !== 'string' || language.length > 128) fail(400, 'Invalid language');
       // Store the parsed contract, never unrecognized fields from a full Book.
       const body = JSON.stringify(manuscript);
       if (Buffer.byteLength(body) > MAX_SHARED_MANUSCRIPT_BYTES) fail(413, 'Manuscript too large');
@@ -144,9 +153,12 @@ export function openCore(path) {
         const now = new Date().toISOString();
         if (!ws) {
           const id = randomUUID();
-          run('INSERT INTO workspaces(id,owner_app,kind,created_at,project_id) VALUES(?,?,?,?,?)', id, app, 'shared-manuscript', now, projectId);
+          run('INSERT INTO workspaces(id,owner_app,kind,created_at,project_id,translation_group_id,language) VALUES(?,?,?,?,?,?,?)', id, app, 'shared-manuscript', now, projectId, translationGroupId, language.trim());
           ws = workspace(id);
           audit(app, 'workspace.create', id);
+        } else if (ws.translation_group_id !== translationGroupId || ws.language !== language.trim()) {
+          run('UPDATE workspaces SET translation_group_id=?,language=? WHERE id=?', translationGroupId, language.trim(), ws.id);
+          ws = workspace(ws.id);
         }
         const old = get('SELECT * FROM records WHERE workspace_id=?', ws.id);
         let recordId;

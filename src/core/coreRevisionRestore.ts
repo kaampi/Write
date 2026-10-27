@@ -18,7 +18,7 @@ export type PreparedCoreRestore = {
 export function prepareCoreBookRestore(
   source: CoreBookRevision,
   mode: "same-book" | "new-book",
-  options: { availableSeriesIds?: ReadonlySet<string>; newBookId?: string; at?: string } = {}
+  options: { availableSeriesIds?: ReadonlySet<string>; newBookId?: string; at?: string; currentBook?: Book } = {}
 ): PreparedCoreRestore {
   if (!source?.workspace || !source.revision ||
       source.workspace.owner_app !== "storybook" || source.workspace.kind !== "private-snapshot" ||
@@ -31,6 +31,21 @@ export function prepareCoreBookRestore(
   catch { throw new ManuscriptBackupError("unreadable", "The Core revision is not a full Storybook manuscript."); }
   if (book.id !== source.workspace.project_id) {
     throw new ManuscriptBackupError("unreadable", "The Core revision belongs to a different manuscript.");
+  }
+
+  if (mode === "same-book" && options.currentBook) {
+    if (options.currentBook.id !== book.id) {
+      throw new ManuscriptBackupError("unreadable", "The current manuscript has a different ID.");
+    }
+    // A historical source revision can predate the creation of its
+    // translation family. Restore its content without orphaning siblings.
+    const { translation_group_id: _oldGroup, translated_from_book_id: _oldSource, ...content } = book;
+    book = {
+      ...content,
+      ...(options.currentBook.translation_group_id ? { translation_group_id: options.currentBook.translation_group_id } : {}),
+      ...(options.currentBook.translated_from_book_id ? { translated_from_book_id: options.currentBook.translated_from_book_id } : {})
+    };
+    void _oldGroup; void _oldSource;
   }
 
   if (mode === "new-book") {

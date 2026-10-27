@@ -242,5 +242,23 @@ test('shared manuscript publishing stores only a validated projection and atomic
     assert.equal((await call('comic', 'GET', `/v1/revisions/${record.revisionId}`)).status, 403);
     assert.equal((await call('storybook', 'DELETE', route)).status, 200);
     assert.equal((await call('storybook', 'DELETE', '/v1/shared-manuscripts/never-shared')).status, 200);
+
+    const sourceMetadata = await call('storybook', 'PUT', route, {
+      manuscript: { ...manuscript, synopsis: 'Second synopsis.' }, readers: [],
+      translationGroupId: 'translation-family', language: 'English'
+    });
+    assert.equal(sourceMetadata.body.record.revision, 2);
+    const translated = await call('storybook', 'PUT', '/v1/shared-manuscripts/book-sv', {
+      manuscript: { ...manuscript, sourceBookId: 'book-sv', synopsis: '', chapters: manuscript.chapters.map(chapter => ({ ...chapter, prose: 'Swedish prose' })), bible: [] },
+      readers: ['comic'], translationGroupId: 'translation-family', language: 'Svenska'
+    });
+    assert.equal(translated.status, 200);
+    assert.notEqual(translated.body.workspace.id, workspace.id);
+    assert.equal(translated.body.record.revision, 1);
+    const comicCatalog = (await call('comic', 'GET', '/v1/workspaces')).body;
+    assert.deepEqual(comicCatalog.map(ws => [ws.project_id, ws.translation_group_id, ws.language]),
+      [['book-sv', 'translation-family', 'Svenska']]);
+    assert.equal((await call('comic', 'GET', `/v1/records/${record.id}`)).status, 403);
+    assert.equal((await call('comic', 'GET', `/v1/workspaces/${privateWs.id}/records`)).status, 403);
   } finally { server.close(); await once(server, 'close'); core.close(); rmSync(dir, { recursive: true, force: true }); }
 });
