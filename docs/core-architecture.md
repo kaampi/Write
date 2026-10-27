@@ -33,3 +33,34 @@ A record can reference `entityId` and `sourceRevision`; references never imply o
 5. Comic integration, migrations, backup and offline sync.
 
 **Security note:** a caller-supplied `ownerApp` is not authentication. Desktop apps must obtain scoped credentials through the local service; the service validates them before passing the verified principal to the authorization layer.
+
+## Executable local service (first slice)
+
+`packages/core-service` runs independently of the Storybook UI on Node 22.13+ (tested on Node 24). It uses Node's built-in SQLite driver and HTTP server; no Tauri or Vite process is required. Data persists at `CORE_DB_PATH`. The server listens on `127.0.0.1` only, default port 43127. For example:
+
+```sh
+CORE_DB_PATH=./core.db node packages/core-service/server.mjs provision storybook
+CORE_DB_PATH=./core.db node packages/core-service/server.mjs provision sandbox
+CORE_DB_PATH=./core.db node packages/core-service/server.mjs provision comic
+CORE_DB_PATH=./core.db node packages/core-service/server.mjs
+```
+
+Capture each generated token once and supply it as `Authorization: Bearer <token>` to that app. Provisioning is an administrator action performed outside the HTTP API. Store the tokens in an OS credential store, keep the SQLite file and token storage private to the local account, and never embed any token in frontend JavaScript. A same-user process with direct filesystem access to the DB remains outside this API's isolation boundary. Token rotation, OS-mediated app attestation, encrypted storage and multi-user installation are future integration work.
+
+### Data model and routes
+
+SQLite tables: `app_keys` (hashed credentials and verified app), `workspaces` (owner and kind), `grants` (explicit read permission), `records` (current state), `revisions` (immutable per-record history), `proposals` (separate pending submission), and `audit` (successful changes). IDs are UUIDs. A record optionally has `entityId` and `sourceRevision` as references; these do not transfer ownership. `kind` distinguishes manuscript, session and comic project, but each workspace has its own timeline. The DB is version zero; migrations and external media storage are not yet implemented.
+
+| Method | Route | Permission |
+| --- | --- | --- |
+| GET, POST | `/v1/workspaces` | List owned or granted; create owned |
+| POST | `/v1/workspaces/:id/grants` | Owner grants a reader app |
+| GET, POST | `/v1/workspaces/:id/records` | Owner or grantee reads; owner writes |
+| GET, PUT, DELETE | `/v1/records/:id` | Owner or grantee reads; owner changes |
+| GET | `/v1/revisions/:id` | Owner or grantee reads |
+| POST | `/v1/proposals` | Source owner submits its own existing revision |
+| POST | `/v1/proposals/:id/review` | Target owner rejects or accepts |
+
+PUT and DELETE require `expectedRevision`; conflicts return 409 without changing data. A proposal has `sourceWorkspaceId`, `targetWorkspaceId`, `sourceRevision`, `entityId`, and `proposedChange` (a complete replacement body). Acceptance requires `targetRecordId` and `expectedRevision`: the target owner explicitly selects its record, creates a new immutable revision with source provenance, and marks the proposal accepted in one transaction. Rejection records the decision without changing canon. The initial API leaves record creation, discovery, offline queues and synchronization to later app integration.
+
+Run `npm run test:core-service` for HTTP/SQLite isolation tests and `npm test -- --run tests/core/workspace-access.test.ts` for the pure policy tests.

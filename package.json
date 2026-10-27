@@ -9,6 +9,7 @@
     "start": "vite --open",
     "build": "tsc -b && vite build",
     "test": "vitest run",
+    "test:core-service": "node --test packages/core-service/*.test.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "tauri": "tauri"
