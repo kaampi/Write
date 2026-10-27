@@ -1332,6 +1332,58 @@ exporten använder. Ny knapp "Exportera för andra appar".
 **Kvarstår:** ComicBook AI:s sida — byta ut dess egen gissande
 importkod mot StoryCore. Inte gjort än.
 
+**Uppdatering (2026-10-27): Core blir en riktig lokal datatjänst, inte
+bara en exportfil — arkitekturinfo för framtida utveckling, inget att
+koda i StoryBook AI nu.** Mats har börjat utveckla "Storybook Core"
+som en gemensam plats där StoryBook AI, ComicBook AI och Sandbox AI
+sparar sina manuskript/projekt — ett betydligt större steg än
+byggsteg 1:s enkelriktade exportfil ovan. Delade en designprototyp
+för Cores allmänna inställningar: en lokal tjänst ("Lokal
+datatjänst — Din data, samlad och trygg") med backup/lagringsmål
+(extern mapp, senare Nextcloud/WebDAV/S3/Google Drive/OneDrive,
+markerade PLANERAT), valfri kryptering av backupfiler, en separat
+"Prova återställning"-funktion som aldrig skriver över aktiv data
+utan ett uttryckligt extra steg, och en lista över anslutna appar
+(StoryBook/Sandbox/Comic) med synk-status per app.
+
+Första formuleringen ("Core som valfri backupkopia") var enligt Mats
+själv för försiktig. Han förtydligade: **en manuell backup till Core
+ska inte vara mekanismen som gör data tillgänglig för andra appar.**
+Den riktiga arkitekturen han föreslår:
+
+| Del | Roll |
+|---|---|
+| StoryBook AI:s IndexedDB | Lokal arbetskopia och kö för ändringar när Core saknas |
+| Core | Gemensam källa för bekräftade och delade revisioner |
+| Core-backup | Katastrofskydd för Core, fristående från synkroniseringen |
+
+StoryBook AI fortsätter spara i IndexedDB för snabbhet och
+offline-arbete (oförändrat — ingen omläggning av den egna
+datalagringen), men synkroniserar automatiskt varje ändring till sin
+egen arbetsyta i Core i bakgrunden. Så fort Core bekräftat en
+revision kan Sandbox och Comic läsa den därifrån, enligt StoryBook
+AI:s egna delningsregler — de läser aldrig StoryBook AI:s IndexedDB
+direkt och väntar aldrig på en manuell backup. StoryBook AI äger
+fortfarande sin information och är ensam om att skriva den i Core
+(samma "varje app äger bara sin egen kanon"-princip som byggsteg 1
+redan slog fast ovan — bara mekanismen för HUR en bekräftad revision
+blir synlig för andra appar som ändras, från engångs-exportfil till
+kontinuerlig synk).
+
+Konsekvenser för StoryBook AI, den dagen detta blir aktuellt att
+koda (inget av detta är beslutat att byggas nu):
+- Appen behöver visa om ändringar är synkroniserade till Core eller
+  fortfarande väntar i kön — en ny status-indikator, troligen nära
+  Backup-knappen eller i Settings.
+- Fungerar fortfarande offline/utan Core igång — ändringar köar lokalt
+  i IndexedDB och synkar när tjänsten blir tillgänglig igen, aldrig
+  en hård beroende.
+- Ersätter på sikt (eller kompletterar) dagens enkelriktade
+  `packManuscriptExport()`/"Exportera för andra appar"-knapp med en
+  bakgrundssynk — men den knappen och ComicBook AI:s kvarstående
+  migrering (se ovan) påverkas inte förrän Core-sidan faktiskt är
+  redo att ta emot kontinuerlig synk, inte bara en enstaka export.
+
 ---
 
 ### 32. Fri fråga till AI om det skrivna — kritisk hantverksfeedback på fri text ✅ byggd (v1.0.33)
