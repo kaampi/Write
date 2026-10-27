@@ -98,10 +98,10 @@
           <span class="provider">Google Drive <b>PLANERAT</b></span>
           <span class="provider">OneDrive <b>PLANERAT</b></span>
         </div>
-        <div style="margin-top:24px"><label>Kryptering för framtida backuper</label><p class="hint">Äldre backuper behåller sitt format när du ändrar detta val.</p></div>
+        <div style="margin-top:24px"><label>Kryptering av backupfiler</label><p class="hint">Gäller bara nya backupfiler, inte Core-databasen eller äldre backuper.</p></div>
         <div class="choices" aria-label="Krypteringsalternativ">
-          <div class="choice selected"><input class="radio" type="radio" checked disabled aria-label="Kryptera med Core"><strong>Kryptera med Core</strong><p>Innehållet kan inte läsas på lagringsservern. Återställningsfras krävs.</p></div>
-          <div class="choice"><input class="radio" type="radio" disabled aria-label="Utan Core-kryptering"><strong>Utan Core-kryptering</strong><p>Ingen extra fras. Den som får tillgång till backupfilen kan läsa innehållet.</p></div>
+          <div class="choice selected"><input class="radio" type="radio" checked disabled aria-label="Kryptera backup"><strong>Kryptera backup</strong><p>Backupfilen blir oläsbar utan återställningsfrasen.</p></div>
+          <div class="choice"><input class="radio" type="radio" disabled aria-label="Kryptera inte backup"><strong>Kryptera inte backup</strong><p>Ingen extra fras. Den som får tillgång till backupfilen kan läsa innehållet.</p></div>
         </div>
         <div class="actions"><button disabled>Testa lagringsmål</button><button class="primary" disabled>Spara inställningar</button></div>
       </section>
