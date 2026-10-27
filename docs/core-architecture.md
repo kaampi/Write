@@ -19,7 +19,11 @@ Core is a neutral local service for Storybook, Sandbox and Comic. Every applicat
 
 The current Storybook IndexedDB stores (`books`, `series`, `illustration_styles`) are not being replaced or migrated by this Core slice. Core starts as an opt-in copy of explicitly selected Storybook-owned data, with separate Core revision IDs. The existing repository APIs and local behavior remain unchanged.
 
-Future synchronization must be a separate adapter outside the IndexedDB write transaction: complete the local save first, queue a retryable outbound change, then send it when Core is available. A Core failure must leave the local write successful and visibly mark the copy as pending. Import from Core into Storybook must require an explicit user choice and must not silently overwrite IndexedDB data. Core backups cover only successfully synchronized data; local app export remains necessary for pending changes. Any later decision to change the primary store requires its own migration plan, tests and explicit product decision.
+Future automatic synchronization must be a separate adapter outside the IndexedDB write transaction: complete the local save first, queue a retryable outbound change, then send it when Core is available. No manual backup action is needed for sharing. A Core failure must leave the local write successful and visibly mark the copy as pending. Import from Core into Storybook must require an explicit user choice and must not silently overwrite IndexedDB data. Core backups cover only successfully synchronized data; local app export remains necessary for pending changes. Any later decision to change the primary store requires its own migration plan, tests and explicit product decision.
+
+Each manuscript, Sandbox session or Comic project gets its own workspace, optionally linked to the local app's project ID through `projectId`. A new workspace is private. The owning app may grant read access to `storybook`, `sandbox`, or `comic` individually, and may revoke it at any time. Revocation immediately removes access to workspace discovery, current records, revisions and media through the Core API. Neither a shared entity ID nor a grant gives another app write access. A client UI should show per-project switches for the other apps, default off; the Core setting is the enforced authority for shared reads.
+
+Each app should expose a small Core panel for its own projects: connection and pending-sync state, plus the per-project sharing switches. Service-wide administration belongs to a separate local Core management surface: backup destination and schedule, recovery, storage health and credential provisioning. The management surface must not grant one creative app permission to change another app's project data.
 
 ## Initial resources
 
@@ -61,6 +65,8 @@ SQLite tables: `app_keys` (hashed credentials and verified app), `workspaces` (o
 | --- | --- | --- |
 | GET, POST | `/v1/workspaces` | List owned or granted; create owned |
 | POST | `/v1/workspaces/:id/grants` | Owner grants a reader app |
+| GET | `/v1/workspaces/:id/grants` | Owner views reader apps |
+| PUT | `/v1/workspaces/:id/grants/:readerApp` | Owner sets `visible: true/false` |
 | GET, POST | `/v1/workspaces/:id/records` | Owner or grantee reads; owner writes |
 | GET, PUT, DELETE | `/v1/records/:id` | Owner or grantee reads; owner changes |
 | GET | `/v1/revisions/:id` | Owner or grantee reads |

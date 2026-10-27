@@ -25,6 +25,10 @@ export function openCore(path) {
     CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY, app TEXT NOT NULL, action TEXT NOT NULL, resource_id TEXT NOT NULL, at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS media (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL REFERENCES workspaces(id), sha256 TEXT NOT NULL, size INTEGER NOT NULL, content_type TEXT NOT NULL, created_at TEXT NOT NULL);
   `);
+  if (!db.prepare('PRAGMA table_info(workspaces)').all().some(column => column.name === 'project_id')) {
+    db.exec('ALTER TABLE workspaces ADD COLUMN project_id TEXT');
+  }
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS workspaces_project_owner ON workspaces(owner_app,kind,project_id) WHERE project_id IS NOT NULL');
   const run = (sql, ...args) => db.prepare(sql).run(...args);
   const get = (sql, ...args) => db.prepare(sql).get(...args);
   const all = (sql, ...args) => db.prepare(sql).all(...args);
@@ -85,13 +89,28 @@ export function openCore(path) {
     listWorkspaces(app) { return all('SELECT w.* FROM workspaces w WHERE w.owner_app=? OR EXISTS (SELECT 1 FROM grants g WHERE g.workspace_id=w.id AND g.reader_app=?)', app, app); },
     createWorkspace(app, input) {
       const kind = required(input.kind, 'kind');
+      const projectId = input.projectId == null ? null : required(input.projectId, 'projectId');
       const id = randomUUID(), now = new Date().toISOString();
-      transaction(() => { run('INSERT INTO workspaces VALUES(?,?,?,?)', id, app, kind, now); audit(app, 'workspace.create', id); });
+      transaction(() => { run('INSERT INTO workspaces(id,owner_app,kind,created_at,project_id) VALUES(?,?,?,?,?)', id, app, kind, now, projectId); audit(app, 'workspace.create', id); });
       return workspace(id);
     },
+    listGrants(app, id) {
+      authorize(app, id, 'write');
+      return all('SELECT reader_app AS readerApp FROM grants WHERE workspace_id=? ORDER BY reader_app', id);
+    },
     grant(app, id, readerApp) {
-      if (!apps.has(readerApp)) fail(400, 'Unknown reader');
-      return transaction(() => { authorize(app, id, 'write'); run('INSERT OR IGNORE INTO grants VALUES(?,?)', id, readerApp); audit(app, 'grant.create', id); return { workspaceId: id, readerApp }; });
+      return this.setVisibility(app, id, readerApp, true);
+    },
+    setVisibility(app, id, readerApp, visible) {
+      if (!apps.has(readerApp) || typeof visible !== 'boolean') fail(400, 'Invalid visibility');
+      return transaction(() => {
+        const ws = authorize(app, id, 'write');
+        if (readerApp === ws.owner_app) fail(400, 'Owner access is inherent');
+        if (visible) run('INSERT OR IGNORE INTO grants VALUES(?,?)', id, readerApp);
+        else run('DELETE FROM grants WHERE workspace_id=? AND reader_app=?', id, readerApp);
+        audit(app, visible ? 'grant.create' : 'grant.revoke', id);
+        return { workspaceId: id, readerApp, visible };
+      });
     },
     listRecords(app, id) {
       authorize(app, id, 'read');
@@ -221,6 +240,10 @@ export function createCoreServer(core, { mediaDir } = {}) {
       if (parts.length === 2 && parts[1] === 'workspaces' && method === 'GET') result = core.listWorkspaces(app);
       else if (parts.length === 2 && parts[1] === 'workspaces' && method === 'POST') result = core.createWorkspace(app, await body());
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'POST') result = core.grant(app, parts[2], (await body()).readerApp);
+      else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'GET') result = core.listGrants(app, parts[2]);
+      else if (parts.length === 5 && parts[1] === 'workspaces' && parts[3] === 'grants' && method === 'PUT') {
+        result = core.setVisibility(app, parts[2], parts[4], (await body()).visible);
+      }
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'records' && method === 'GET') result = core.listRecords(app, parts[2]);
       else if (parts.length === 4 && parts[1] === 'workspaces' && parts[3] === 'records' && method === 'POST') result = core.writeRecord(app, parts[2], await body());
       else if (parts.length === 3 && parts[1] === 'records' && method === 'GET') result = core.getRecord(app, parts[2]);
