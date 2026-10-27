@@ -127,6 +127,9 @@ import {
 import { readContextWindow, writeContextWindow } from "@llm/contextWindow";
 import { withReasoningHeadroom } from "@llm/tokenBudget";
 import { BookNotFoundError, BookRepository } from "@persistence/Repository";
+import { coreBookSink, coreSnapshotOutbox, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
+import type { CoreBookRevision } from "@core/coreRevisionRestore";
+import { persistCoreRestore } from "@core/coreRestoreWorkflow";
 import { SeriesRepository } from "@persistence/SeriesRepository";
 import {
   ManuscriptBackupError,
@@ -301,7 +304,7 @@ function activeReader(book: Book, surface: EditorSurface, chapterId: string | nu
 }
 
 export function BookStoreProvider({ children }: { children: React.ReactNode }) {
-  const repo = useMemo(() => new BookRepository(), []);
+  const repo = useMemo(() => new BookRepository(undefined, coreBookSink), []);
   const seriesRepo = useMemo(() => new SeriesRepository(), []);
   const [summaries, setSummaries] = useState<BookSummary[]>([]);
   const [book, setBook] = useState<Book | null>(null);
@@ -541,6 +544,55 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     setBook(next);
     await persist(next);
   }, [persist]);
+
+  const checkpointBook = useCallback(async () => {
+    const current = bookRef.current;
+    if (!current) throw new Error("No manuscript is open");
+    // Flush debounced edits to the authoritative local store before queuing the copy.
+    await flushSave(current);
+    await coreSnapshotOutbox.enqueueSave(current);
+  }, [flushSave]);
+
+  const restoreCoreRevision = useCallback(async (source: CoreBookRevision, mode: "same-book" | "new-book"): Promise<boolean> => {
+    const current = bookRef.current;
+    if (!current || source.workspace.project_id !== current.id) throw new Error("The Core version belongs to another manuscript");
+    if (busy) throw new Error("Wait for the current operation before restoring a manuscript");
+    const availableSeriesIds = new Set((await seriesRepo.list()).map(item => item.id));
+    if (mode === "same-book" && !window.confirm(format(getMessages().home.replaceConfirm, { title: current.title }))) return false;
+
+    await flushSave(current);
+    const restored = await persistCoreRestore(source, mode, {
+      currentBook: current,
+      availableSeriesIds,
+      idExists: id => repo.get(id).then(() => true, error => {
+        if (error instanceof BookNotFoundError) return false;
+        throw error;
+      }),
+      save: book => repo.save(book),
+      checkpointCurrent: async book => {
+        // Keep the current state recoverable before replacing the local row.
+        await coreSnapshotOutbox.enqueueSave(book);
+        await flushCoreSnapshots();
+      }
+    });
+    bookRef.current = restored;
+    setSummaries(await repo.list());
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setBusy(null);
+    withViewTransition(() => {
+      setBook(restored);
+      setChapterIdState(sortedChapters(restored)[0]?.id ?? null);
+      setSurface(openingSurface(restored));
+      setChapterFeedback(null);
+      setCriticFeedback(null);
+    });
+    localStorage.setItem(LAST_BOOK_KEY, restored.id);
+    setError(null);
+    await coreSnapshotOutbox.enqueueSave(restored);
+    try { await flushCoreSnapshots(); } catch { /* locally restored; queued for retry */ }
+    return true;
+  }, [busy, flushSave, repo, seriesRepo]);
 
   const persistProseWrite = useCallback(
     async (
@@ -3421,6 +3473,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     newBook,
     newLanguageVersion,
     loadBook,
+    checkpointBook,
+    restoreCoreRevision,
     importManuscript,
     importMarkdownManuscript,
     deleteBook,

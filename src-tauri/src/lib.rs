@@ -1,5 +1,6 @@
 mod system_check;
 mod update_check;
+mod core_bridge;
 
 use tauri_plugin_deep_link::DeepLinkExt;
 
@@ -12,7 +13,15 @@ pub fn run() {
     .invoke_handler(tauri::generate_handler![
       system_check::detect_gpu_suggestion,
       system_check::open_external_url,
-      update_check::check_for_updates
+      update_check::check_for_updates,
+      core_bridge::core_pair,
+      core_bridge::core_connection,
+      core_bridge::core_shared_access,
+      core_bridge::core_save_private,
+      core_bridge::core_private_versions,
+      core_bridge::core_private_revision,
+      core_bridge::core_publish_shared,
+      core_bridge::core_revoke_shared
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {

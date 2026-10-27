@@ -55,6 +55,32 @@ describe("packManuscriptExport", () => {
     expect(packManuscriptExport(book).bible).toEqual([]);
   });
 
+  it("shares complete manuscript prose and synopsis while excluding private and unapproved Bible material", () => {
+    let book = createBook("Night Keys");
+    book = updateChapter(book, book.chapters[0]!.id, { prose: "Chapter one in full." });
+    book = addChapter(book);
+    book = updateChapter(book, book.chapters[1]!.id, { prose: "Chapter two in full." });
+    book = {
+      ...book,
+      synopsis: "The full story synopsis.",
+      brainstorm: "private brainstorm secret",
+      brainstorm_notes: [{ id: "note-one", text: "private note secret", x: 24, y: 24, color: "gold" }],
+      facts: [
+        baseFact,
+        { ...baseFact, id: "proposed", value: "unapproved secret", status: "ai_proposed" },
+        { ...baseFact, id: "flagged", value: "flagged secret", status: "flagged" },
+        { ...baseFact, id: "hidden", value: "hidden secret", hidden_from_ai: true },
+        { ...baseFact, id: "hidden-entity", entity_ref: "private", entity_label: "Private", value: "entity secret" }
+      ],
+      hidden_entities: ["private"]
+    };
+    const packed = packManuscriptExport(book);
+    expect(packed.chapters.map(chapter => chapter.prose)).toEqual(["Chapter one in full.", "Chapter two in full."]);
+    expect(packed.synopsis).toBe("The full story synopsis.");
+    expect(JSON.stringify(packed)).not.toMatch(/private brainstorm secret|private note secret|unapproved secret|flagged secret|hidden secret|entity secret/);
+    expect(packed.bible.flatMap(section => section.entities).flatMap(entity => entity.facts.map(fact => fact.value))).toEqual(["Bartender"]);
+  });
+
   it("bakes a series' own locked facts into the bible alongside the book's own", () => {
     const seriesFact: NarrativeFact = { ...baseFact, id: "s1", entity_ref: "dun-sorrow", entity_label: "Dun Sorrow", predicate: "core.place", value: "A fog-bound harbor town" };
     const book = createBook("Night Keys");

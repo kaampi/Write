@@ -1,0 +1,45 @@
+name: Core checks
+
+on:
+  push:
+    branches:
+      - "feat/core-*"
+      - "feat/storybook-core-*"
+    paths:
+      - "src/core/coreRevisionRestore.ts"
+      - "src/persistence/**"
+      - "tests/core/core-revision-restore.test.ts"
+      - "tests/persistence/**"
+      - ".github/workflows/core-checks.yml"
+  pull_request:
+    paths:
+      - "src/core/workspaceAccess.ts"
+      - "src/core/coreRevisionRestore.ts"
+      - "src/persistence/**"
+      - "tests/core/workspace-access.test.ts"
+      - "tests/core/core-revision-restore.test.ts"
+      - "tests/persistence/**"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.ts"
+      - ".github/workflows/core-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch git dependencies over HTTPS
+        run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test -- --maxWorkers=2

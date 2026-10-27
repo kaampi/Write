@@ -9,6 +9,17 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.194] - 2026-10-27
+
+### Added
+- A "Core" button in the top bar, visible whenever a manuscript is open, opens a per-manuscript connection dialog for Storybook Core — a separate, optional local service (own repo: `ocedo-apps/StoryCore`) that can hold private whole-manuscript version checkpoints and a filtered, shareable projection for sibling apps (Sandbox, Comic). Off by default; the manuscript's prose and Story Bible keep living in local IndexedDB exactly as before regardless of Core's presence.
+- Desktop-only for now: pairing, publishing and revoking read through a native Tauri bridge (`core_bridge.rs`) using a loopback-only connection (`127.0.0.1:43127`) and Windows Credential Manager for the paired key — never exposed to the webview or persisted in browser storage. The browser/web build shows the dialog but reports that the connection requires the desktop app.
+- An offline-tolerant sharing queue (`CoreSharingOutbox`) marks a manuscript's Sandbox/Comic visibility pending on every local save or deletion and retries publication on launch, reconnection and a 30-second interval — a Core outage never blocks or alters the local save itself.
+- Sharing publishes only the existing filtered export (`packManuscriptExport` — full prose and synopsis, but only locked, visible Story Bible facts; Brainstorm and unapproved/hidden facts never cross this boundary), the same rule Draft itself already follows.
+
+### Fixed
+- `@ocedo-apps/storycore` (the shared schema this release's Core wiring depends on) is consumed as a git dependency pinned to that repo's root — its own package.json must stay buildable as that package directly, not nested under a `packages/` nothing outside the repo can see. Restructured there to keep that contract intact while still separating it from the actual Core service's code (now in that repo's own `packages/service`).
+
 ## [1.0.193] - 2026-10-26
 
 ### Fixed

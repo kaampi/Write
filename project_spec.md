@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.193
+Status: living document, v1.0.194
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9395,6 +9395,77 @@ egen kortpadding) inte fick dubbel marginal som ser fel ut — bara
 lite mer luft, ingen regression.
 
 v1.0.192 → v1.0.193.
+
+**Ändringslogg v1.0.194 (2026-10-27): Storybook Core-anslutning, första
+klient-integrationen.**
+
+Mats bad mig "Kör på med klient-integrationen" efter att vi tillsammans
+hade flyttat själva Core-tjänsten till ett eget repo (`ocedo-apps/StoryCore`,
+se roadmap-ideas.md #31) och Mats hade provat tjänsten live på sin egen
+dator (startat servern, loggat in på adminsidan, skapat en testarbetsyta
+via API, tagit en backup och provat återställning — allt fungerade).
+Den koden fanns redan uttänkt och byggd i 26 staplade draft-PR:ar i det
+här repot (#2–#27, byggda av Mats tillsammans med ChatGPT Codex) — men
+blandade server-kod (som redan flyttats) med klient-kod. Extraherade
+bara klient-delarna (allt utom `packages/core-service/**`, som redan
+ligger i StoryCore) ur den sista grenen i stapeln och applicerade som
+en ren patch ovanpå `main`.
+
+**Vad som landade:**
+- Ny "Core"-knapp i topnaven, syns när ett manus är öppet
+  (`AppTopBar.tsx`), öppnar `CoreConnectionDialog.tsx` — per-manus
+  dialog för parkoppling och delningsval (Sandbox/Comic), av som
+  standard.
+- `src-tauri/src/core_bridge.rs` — Tauri-kommandon (`core_pair`,
+  `core_connection`, `core_publish_shared`, `core_revoke_shared`) som
+  pratar med Core över loopback (`127.0.0.1:43127`) och lagrar
+  parkopplingsnyckeln i Windows Credential Manager (`keyring`-crate,
+  Windows-only feature). Nyckeln lämnas aldrig till webvyn.
+- `CoreSharingOutbox`/`CoreSharingRuntime` — en offline-tålig kö:
+  varje lokalt sparande markerar ett redan delat manus som "pending"
+  och försöker synka vid uppstart, återanslutning och var 30:e sekund.
+  En nere-Core blockerar eller ändrar aldrig det lokala sparandet.
+- `CoreManuscriptPublication.ts` — bygger publiceringen från den
+  redan befintliga `packManuscriptExport()` (samma filter som Draft
+  självt använder: fullständig prosa, bara låsta synliga Story
+  Bible-fakta, aldrig Brainstorm eller ogranskat).
+- `coreRevisionRestore.ts`/`coreRestoreWorkflow.ts` — förbereder
+  återställning av en Core-version (byt ut befintligt manus eller
+  skapa ett nytt), återanvänder Storybooks befintliga
+  backup-importflöde (`parseManuscriptBackup`) precis som vi
+  resonerade fram till i förra loggningen av #31.
+- Två nya CI-workflows (`core-checks.yml` ubuntu, `core-desktop-checks.yml`
+  windows-latest för Rust-bryggan) — plockade bort de rader som
+  pekade på `packages/core-service` (flyttat), resten oförändrat.
+- `docs/core-architecture.md` uppdaterad: pekar nu till StoryCore-repot
+  för tjänstens egna kommandon istället för en lokal `packages/core-service`-
+  sökväg som inte längre finns här.
+
+**En sak till som gick sönder och fick lagas under tiden:** min
+tidigare omstrukturering av StoryCore till `packages/schema` +
+`packages/service` bröt faktiskt StoryBook AI:s redan existerande
+git-dependency mot StoryCore (`@ocedo-apps/storycore` i detta repots
+`package.json`, pekar på StoryCore-repots rot) — npm:s
+git-dependencies kan inte peka på en undermapp, så roten måste
+fortsätta VARA schema-paketet. Fixat i StoryCore (se dess egen logg)
+innan den här integrationen byggdes vidare, annars hade `npm install`
+här gått sönder helt.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (94 testfiler,
+1240 test) grön, `npm run build` rent. Playwright-rök-test i
+webbläsarversionen (inte Tauri): skapade ett nytt manus, Core-knappen
+syns i topnaven, dialogen öppnas och visar korrekt "Core connection
+requires the Windows desktop app" (det förväntade beteendet när
+`isTauri()` är falskt) — ingen krasch, inga oväntade fel. Rust-sidan
+(`core_bridge.rs`, `keyring`-beroendet) kunde INTE kompileras lokalt
+i den här miljön (Linux-containern saknar GTK/WebKit-utvecklingsbibliotek
+som hela Tauri-byggkedjan kräver på Linux, oavsett om ändringen rör
+Rust eller inte) — det är precis därför `core-desktop-checks.yml`
+redan var inriktad på `windows-latest` i den ursprungliga PR-stapeln.
+Riktig verifiering av parkoppling/Credential Manager/publicering
+kräver antingen Windows-CI eller Mats egen dator.
+
+v1.0.193 → v1.0.194.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
