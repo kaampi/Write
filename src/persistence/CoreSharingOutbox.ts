@@ -53,6 +53,32 @@ export class CoreSharingOutbox implements CoreSyncSink {
     } finally { db.close(); }
   }
 
+  async choiceVersion(bookId: string): Promise<string | null> {
+    const db = await this.db();
+    try {
+      const row = await request(db.transaction(STORE, "readonly").objectStore(STORE).get(bookId)) as SharingChoice | undefined;
+      return row?.token ?? null;
+    } finally { db.close(); }
+  }
+
+  /** Adopt Core's verified grants only when no local change is awaiting delivery. */
+  async reconcile(bookId: string, remoteReaders: readonly CoreShareReader[], expectedToken?: string | null): Promise<void> {
+    if (!bookId || remoteReaders.some(reader => !allowed.has(reader))) throw new Error("Invalid Core readers");
+    const readers = [...new Set(remoteReaders)].sort();
+    const db = await this.db();
+    try {
+      const tx = db.transaction(STORE, "readwrite");
+      const done = transactionDone(tx);
+      const store = tx.objectStore(STORE);
+      const current = await request(store.get(bookId)) as SharingChoice | undefined;
+      if (expectedToken !== undefined && (current?.token ?? null) !== expectedToken) { await done; return; }
+      if (!current?.pending && (current?.readers.join() ?? "") !== readers.join()) {
+        store.put({ bookId, readers, pending: false, token: crypto.randomUUID() } satisfies SharingChoice);
+      }
+      await done;
+    } finally { db.close(); }
+  }
+
   async setReaders(bookId: string, readers: readonly CoreShareReader[]): Promise<void> {
     if (!bookId || readers.some(reader => !allowed.has(reader))) throw new Error("Invalid Core sharing choice");
     const selected = [...new Set(readers)].sort();

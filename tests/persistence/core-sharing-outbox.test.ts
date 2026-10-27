@@ -127,4 +127,31 @@ describe("opt-in Core manuscript sharing choices", () => {
     expect(sent).toHaveLength(1);
     expect(sent[0]).toContain("The harbor");
   });
+
+  it("adopts verified Core grants after local choice loss without overwriting a pending revocation", async () => {
+    const choices = new CoreSharingOutbox(indexedDB);
+    const bookId = createBook("Restored").id;
+    await choices.reconcile(bookId, ["comic"]);
+    expect(await choices.choice(bookId)).toEqual({ readers: ["comic"], pending: false });
+    await choices.setReaders(bookId, []);
+    await choices.reconcile(bookId, ["comic"]);
+    expect(await choices.choice(bookId)).toEqual({ readers: [], pending: true });
+    await expect(choices.reconcile(bookId, ["storybook" as "comic"])).rejects.toThrow("Invalid Core readers");
+    await choices.flush(new BookRepository(indexedDB), new SeriesRepository(indexedDB), {
+      publish: async () => { throw new Error("Unexpected publish"); },
+      revoke: async () => {}
+    });
+    await choices.reconcile(bookId, ["sandbox"]);
+    expect(await choices.choice(bookId)).toEqual({ readers: ["sandbox"], pending: false });
+
+    const versionBeforeRequest = await choices.choiceVersion(bookId);
+    await choices.setReaders(bookId, []);
+    await choices.flush(new BookRepository(indexedDB), new SeriesRepository(indexedDB), {
+      publish: async () => { throw new Error("Unexpected publish"); },
+      revoke: async () => {}
+    });
+    // A remote response fetched before the revocation must not restore its old grants.
+    await choices.reconcile(bookId, ["sandbox"], versionBeforeRequest);
+    expect(await choices.choice(bookId)).toEqual({ readers: [], pending: false });
+  });
 });

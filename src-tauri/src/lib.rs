@@ -16,6 +16,7 @@ pub fn run() {
       update_check::check_for_updates,
       core_bridge::core_pair,
       core_bridge::core_connection,
+      core_bridge::core_shared_access,
       core_bridge::core_publish_shared,
       core_bridge::core_revoke_shared
     ])
