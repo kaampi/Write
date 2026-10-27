@@ -1,4 +1,5 @@
 import { parseBook, summarizeBook, type Book, type BookSummary } from "@core/BookSchema";
+import type { CoreSyncSink } from "./CoreSyncOutbox";
 
 const DB_NAME = "storybook-ai";
 const STORE = "books";
@@ -52,7 +53,11 @@ export function openStorybookDb(factory: IDBFactory = globalThis.indexedDB): Pro
 }
 
 export class BookRepository {
-  constructor(private readonly factory: IDBFactory = globalThis.indexedDB) {}
+  constructor(
+    private readonly factory: IDBFactory = globalThis.indexedDB,
+    private readonly coreSync?: CoreSyncSink,
+    private readonly onSyncQueueError?: (error: unknown) => void
+  ) {}
 
   private async db(): Promise<IDBDatabase> {
     return openDb(this.factory);
@@ -87,12 +92,16 @@ export class BookRepository {
     const db = await this.db();
     await asPromise(db.transaction(STORE, "readwrite").objectStore(STORE).put(parsed));
     db.close();
+    try { await this.coreSync?.enqueueSave(parsed); }
+    catch (error) { try { this.onSyncQueueError?.(error); } catch { /* local save remains authoritative */ } }
   }
 
   async delete(id: string): Promise<void> {
     const db = await this.db();
     await asPromise(db.transaction(STORE, "readwrite").objectStore(STORE).delete(id));
     db.close();
+    try { await this.coreSync?.enqueueDelete(id); }
+    catch (error) { try { this.onSyncQueueError?.(error); } catch { /* local delete remains authoritative */ } }
   }
 }
 

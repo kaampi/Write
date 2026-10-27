@@ -1,11 +1,22 @@
 name: Core checks
 
 on:
+  push:
+    branches:
+      - "feat/core-*"
+      - "feat/storybook-core-*"
+    paths:
+      - "packages/core-service/**"
+      - "src/persistence/**"
+      - "tests/persistence/**"
+      - ".github/workflows/core-checks.yml"
   pull_request:
     paths:
       - "packages/core-service/**"
       - "src/core/workspaceAccess.ts"
+      - "src/persistence/**"
       - "tests/core/workspace-access.test.ts"
+      - "tests/persistence/**"
       - "package.json"
       - "package-lock.json"
       - "vite.config.ts"
