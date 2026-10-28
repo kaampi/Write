@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocale } from "./i18n";
 import { QuickstartCards } from "./QuickstartCards";
+import { CloseIconButton } from "./CloseIconButton";
 
 const HELP_TIP_WIDTH = 280;
 
@@ -259,9 +260,7 @@ export function GuidePanel({ scrollTo }: { scrollTo?: GuideSectionId | null }) {
           <div className="edit-card ai-setup-card" role="dialog" aria-modal="true" aria-label={m.guide.connectAiButton}>
             <div className="stats-card-head">
               <p className="chapter-craft-label">{m.guide.connectAiButton}</p>
-              <button type="button" className="text-button" onClick={() => setAiSetupOpen(false)}>
-                {m.common.close}
-              </button>
+              <CloseIconButton onClick={() => setAiSetupOpen(false)} label={m.common.close} />
             </div>
             <QuickstartCards />
           </div>

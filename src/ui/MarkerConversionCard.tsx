@@ -3,6 +3,7 @@ import { DEFAULT_MARKER_CONVERSION_RULES, type MarkerConversionRule } from "@cor
 import { FORMATTING_STYLES, type ProseFormattingStyle } from "@core/proseFormatting";
 import type { Book } from "@core/BookSchema";
 import { count, format, useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 /**
  * "Convert markers to formatting", as its own top-bar tool rather than a
@@ -48,9 +49,7 @@ export function MarkerConversionCard({
         <div className="bible-card-head">
           <h2 id="marker-convert-title">{m.markerConvert.heading}</h2>
           <div className="bible-card-head-actions">
-            <button type="button" className="text-button" onClick={onClose}>
-              {m.bible.close}
-            </button>
+            <CloseIconButton onClick={onClose} label={m.bible.close} />
           </div>
         </div>
         <p className="quiet">{m.markerConvert.intro}</p>

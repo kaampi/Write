@@ -20,6 +20,7 @@ import {
   resolveContextRefs
 } from "@core/chapterContext";
 import { estimateTokens } from "./promptDebug";
+import { CloseIconButton } from "./CloseIconButton";
 import {
   ADVANCED_POV_MODES,
   PRIMARY_POV_MODES,
@@ -2194,9 +2195,7 @@ export function Editor() {
           >
             <div className="chapter-popover-head">
               <strong>{chapterPopover.kind === "settings" ? m.editor.chapterSettingsToggle : m.editor.scenesPopoverTitle}</strong>
-              <button type="button" className="icon-button" aria-label={m.common.close} onClick={() => setChapterPopover(null)}>
-                ×
-              </button>
+              <CloseIconButton onClick={() => setChapterPopover(null)} label={m.common.close} />
             </div>
             {chapterPopover.kind === "settings" ? (
               <ChapterSettingsSection

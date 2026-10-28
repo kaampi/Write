@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { Book, WritingGoal } from "@core/BookSchema";
 import { computeGoalPace, manuscriptWordCount } from "@core/writingGoal";
 import { count, format, useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 export function ProgressCard({
   book,
@@ -50,9 +51,7 @@ export function ProgressCard({
       <div className="edit-card" role="dialog" aria-modal="true" aria-labelledby="progress-title">
         <div className="stats-card-head">
           <p className="chapter-craft-label">{m.progress.title}</p>
-          <button type="button" className="text-button" onClick={onClose}>
-            {m.common.close}
-          </button>
+          <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
         <h2 id="progress-title">{count(currentWords, m.stats.wordsShort)}</h2>
 

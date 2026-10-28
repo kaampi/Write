@@ -3,6 +3,7 @@ import { ManuscriptExportError, type ManuscriptExport } from "@ocedo-apps/storyc
 import { BIBLE_KIND_LABELS } from "@core/bibleGroups";
 import { parseSeriesImport, seriesFactDrafts, seriesImportEntities, type SeriesImportEntity } from "@core/seriesImport";
 import { count, format, useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 /**
  * "Bring the series forward" (roadmap-ideas.md #44): read a previous book's
@@ -77,9 +78,7 @@ export function SeriesImportCard({
         <div className="bible-card-head">
           <h2 id="series-import-title">{m.bible.importSeriesTitle}</h2>
           <div className="bible-card-head-actions">
-            <button type="button" className="text-button" onClick={onClose}>
-              {m.bible.close}
-            </button>
+            <CloseIconButton onClick={onClose} label={m.bible.close} />
           </div>
         </div>
         <p className="quiet">{m.bible.importSeriesLede}</p>

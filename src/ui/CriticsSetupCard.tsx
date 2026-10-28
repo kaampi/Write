@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CRITIC_PERSONA_IDS, type CriticPersonaId } from "@core/critics";
 import { useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 /**
  * Shown before every critics run — pick which voices read this chapter.
@@ -33,9 +34,7 @@ export function CriticsSetupCard({ onStart, onClose }: { onStart: (personas: Cri
       <div className="edit-card stats-card" role="dialog" aria-modal="true" aria-labelledby="critics-setup-title">
         <div className="stats-card-head">
           <p className="chapter-craft-label">{m.critics.action}</p>
-          <button type="button" className="text-button" onClick={onClose}>
-            {m.common.close}
-          </button>
+          <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
         <h2 id="critics-setup-title">{m.critics.setupTitle}</h2>
         <p className="quiet">{m.critics.setupLede}</p>

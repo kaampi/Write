@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { format, useLocale } from "./i18n";
 import type { AskManuscriptAnswer } from "@core/askManuscript";
+import { CloseIconButton } from "./CloseIconButton";
 
 export function AskManuscriptPanel({
   answer,
@@ -37,9 +38,7 @@ export function AskManuscriptPanel({
       >
         <div className="dialog-head">
           <h2 id="ask-manuscript-title">{m.askManuscript.title}</h2>
-          <button type="button" className="text-button" onClick={onClose}>
-            {m.common.close}
-          </button>
+          <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
 
         <div className="ask-manuscript-scroll">

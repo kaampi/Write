@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { splitLoreArticles, type LoreArticleCandidate } from "@core/loreImport";
 import { count, format, useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 /**
  * A porting aid for an author's existing lorebook (roadmap-ideas.md #28,
@@ -57,9 +58,7 @@ export function LoreImportCard({
         <div className="bible-card-head">
           <h2 id="lore-import-title">{m.bible.importLoreTitle}</h2>
           <div className="bible-card-head-actions">
-            <button type="button" className="text-button" onClick={onClose}>
-              {m.bible.close}
-            </button>
+            <CloseIconButton onClick={onClose} label={m.bible.close} />
           </div>
         </div>
         <p className="quiet">{m.bible.importLoreLede}</p>

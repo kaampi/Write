@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { parseTagList } from "@core/characterProfile";
+import { CloseIconButton } from "./CloseIconButton";
 import {
   newIllustrationStyle,
   searchIllustrationStyles,
@@ -128,9 +129,7 @@ export function IllustrationStyleLibraryCard({
         <div className="edit-card illustration-library-card" role="dialog" aria-modal="true" aria-labelledby="illustration-library-title">
           <div className="stats-card-head">
             <p className="chapter-craft-label">{m.illustration.libraryTitle}</p>
-            <button type="button" className="text-button" onClick={onClose}>
-              {m.common.close}
-            </button>
+            <CloseIconButton onClick={onClose} label={m.common.close} />
           </div>
           <div className="illustration-library-toolbar">
             <input

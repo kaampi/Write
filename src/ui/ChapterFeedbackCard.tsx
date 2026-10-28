@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FEEDBACK_CATEGORIES, type FeedbackItem } from "@core/chapterFeedback";
 import { readerCategory } from "@core/reader";
 import { useLocale, format } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 export function ChapterFeedbackCard({
   items,
@@ -42,9 +43,7 @@ export function ChapterFeedbackCard({
       <div className="edit-card stats-card" role="dialog" aria-modal="true" aria-labelledby="notes-title">
         <div className="stats-card-head">
           <p className="chapter-craft-label">{m.notes.review}</p>
-          <button type="button" className="text-button" onClick={onClose}>
-            {m.common.close}
-          </button>
+          <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
         <h2 id="notes-title">{items.length > 0 ? m.notes.title : m.notes.emptyTitle}</h2>
         <p className="quiet">

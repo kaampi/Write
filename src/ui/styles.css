@@ -584,6 +584,20 @@ textarea:focus-visible,
   color: var(--text);
 }
 
+/* The one dialog-dismiss icon (see CloseIconButton.tsx) - sage, not text-dim, so it reads as a distinct "leave" control rather than a plain icon-button among others in the same head row. */
+.close-icon-button {
+  color: var(--sage);
+}
+
+.close-icon-button svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.close-icon-button:hover {
+  color: var(--text);
+}
+
 .text-button.danger:hover {
   color: var(--danger);
 }

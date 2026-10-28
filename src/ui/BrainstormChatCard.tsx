@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { BrainstormChatMessage } from "@core/brainstorm";
 import { useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 function AuthorAvatar() {
   return (
@@ -71,9 +72,7 @@ export function BrainstormChatCard({
         <div className="stats-card-head">
           <p className="chapter-craft-label">{m.brainstormChat.title}</p>
           <div className="bible-card-head-actions">
-            <button type="button" className="text-button" onClick={onClose}>
-              {m.common.close}
-            </button>
+            <CloseIconButton onClick={onClose} label={m.common.close} />
           </div>
         </div>
         <div className="interview-body">

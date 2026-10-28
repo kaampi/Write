@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { format, useLocale } from "./i18n";
 import { openExternalUrl, type UpdateStatus } from "./desktopBridge";
+import { CloseIconButton } from "./CloseIconButton";
 
 const CHANGELOG_URL = "https://github.com/kaampi/Write/blob/main/CHANGELOG.md";
 
@@ -36,9 +37,7 @@ export function UpdateCheckDialog({
       <div className="edit-card" role="dialog" aria-modal="true" aria-labelledby="update-check-title">
         <div className="stats-card-head">
           <p className="chapter-craft-label">{m.home.desktopCheckUpdate}</p>
-          <button type="button" className="text-button" onClick={onClose}>
-            {m.common.close}
-          </button>
+          <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
         <h2 id="update-check-title">{m.home.desktopCheckUpdate}</h2>
 

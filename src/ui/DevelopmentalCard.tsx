@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import type { Book } from "@core/BookSchema";
+import { CloseIconButton } from "./CloseIconButton";
 import { chapterScenes } from "@core/bookScene";
 import { proseChapters } from "@core/proofread";
 import {
@@ -73,9 +74,7 @@ export function DevelopmentalCard({
               {m.common.stop}
             </button>
           ) : (
-            <button type="button" className="text-button" onClick={onClose}>
-              {m.common.close}
-            </button>
+            <CloseIconButton onClick={onClose} label={m.common.close} />
           )}
         </div>
         <h2 id="developmental-title">{live || paused || failed ? m.developmental.runningTitle : m.developmental.resultsTitle}</h2>

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.206
+Status: living document, v1.0.207
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9907,6 +9907,52 @@ huruvida en specificitetskonflikt tyst åt upp ändringen. Framtida
 spacing-/layout-fixar bör mätas, inte bara byggas.
 
 v1.0.205 → v1.0.206.
+
+**Ändringslogg v1.0.206 → v1.0.207 (2026-10-28): en gemensam
+stängningsikon.** Mats: "Jag upplever att vi har olika sätt för att
+stänga dialogrutor. Ibland Close och ibland X." + skickade en SVG
+(kvadrat med X, magenta/sage-ton) och bad att den användes
+konsekvent, uppe till höger.
+
+**Scoping (fråga till Mats, svarat "Börja smalt"):** ca 30 av
+appens dialoger/kort har en "Close"-knapp, men bara en del av dem
+har en egen rubrikrads-stängningskontroll (titel + stängningsknapp
+i samma rad) — resten har bara EN "Close"/"Cancel"-knapp längst ner,
+ofta ihop med en primär åtgärd ("Fråga", "Spara", "Starta"). Att
+lägga till en ny hörn-X i de senare hade varit en omdesign av varje
+enskilt korts layout, inte en konsekvensfix. Mats valde att bara
+göra om de som redan har en egen hörnkontroll.
+
+**Genomförande:** skapade `CloseIconButton.tsx` (en delad
+komponent, SVG:n inbäddad med `fillRule="evenodd"` så X:et klipps ut
+korrekt, färgad via CSS `--sage` genom en ny `.close-icon-button`-
+modifierare på den redan existerande `.icon-button`-basklassen).
+Bytte ut stängningsknappen i alla kort/dialoger med en egen
+rubrikrad — tre återkommande CSS-mönster täckte nästan alla:
+`dialog-head` (Core-dialogen, Sök i manus, Inställningar),
+`stats-card-head` (Kritiker, Proofread, Developmental edit, Guide/
+Handbook AI-setup, Prose Stats, Progress, Uppdateringskontroll — två
+av dem, Proofread/Developmental, har en villkorlig Stopp-knapp under
+körning som fick vara kvar som text) och `bible-card-head-actions`
+(Story Bible-korten: import manus, lore-import, markerkonvertering,
+plotline-redigering, serieimport, samt BiblePanels egna två
+overlay-kort). Plus kapitel-popoverns `×`-tecken i `Editor.tsx`, som
+redan var ikonbaserat men inkonsekvent.
+
+~24 filer, ~26 ersatta knappar. Lämnade medvetet orört: fristående
+footer-"Close"/"Cancel"-knappar ihop med en primär knapp (Fråga om
+passage, Sök/ersätt, Prompt-inspektören, kapitel-banderollernas
+inline-stäng, illustrera-dialogens footer) och bild-lightboxens egen
+`illustration-lightbox-close` (en halvgenomskinlig pill ovanpå
+godtyckliga bilder — en annan kontrast-situation, inte samma mönster
+som en textdialogs rubrikrad).
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Renderade Inställningar-dialogen på
+riktigt i headless browser och bekräftade visuellt att ikonen visas
+uppe till höger i rubrikraden.
+
+v1.0.206 → v1.0.207.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

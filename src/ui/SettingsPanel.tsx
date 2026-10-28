@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { CloseIconButton } from "./CloseIconButton";
 import { peopleLabels } from "@core/bibleGroups";
 import {
   ADVANCED_POV_MODES,
@@ -123,9 +124,7 @@ export function SettingsPanel({
             <h2 id="settings-title">{m.editor.settings}</h2>
             <HelpTip body={m.editor.settingsLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.settings })} />
           </span>
-          <button type="button" className="text-button" onClick={onClose}>
-            {m.common.close}
-          </button>
+          <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
 
         <div className="settings-card-columns">

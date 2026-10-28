@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.207] - 2026-10-28
+
+### Changed
+- Every dialog/card that has its own header-row dismiss control now uses the same close icon (a new design asset) instead of a mix of a "Close" text button and a plain "×" character — about 20 dialogs, including Settings, the Core connection dialog, Ask the Manuscript, the Story Bible cards, Critics/Proofread/Developmental Edit, and the chapter options popover. Cards whose only close action sits in a footer row next to a primary button (e.g. "Ask about this passage", Find/Replace) keep their text "Close"/"Cancel" button — that's a different pattern (a footer confirm/cancel row), not the header dismiss control this request was about.
+
 ## [1.0.206] - 2026-10-28
 
 ### Fixed

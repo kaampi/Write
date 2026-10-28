@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Plotline } from "@core/BookSchema";
 import { PLOTLINE_COLORS, type PlotlineColor } from "@core/plotlineColors";
 import { format, useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 /**
  * One edit surface for a thread's name, color, and optional description,
@@ -41,9 +42,7 @@ export function PlotlineEditCard({
         <div className="bible-card-head">
           <h2 id="plotline-edit-title">{m.plotlines.editTitle}</h2>
           <div className="bible-card-head-actions">
-            <button type="button" className="text-button" onClick={onClose}>
-              {m.bible.close}
-            </button>
+            <CloseIconButton onClick={onClose} label={m.bible.close} />
           </div>
         </div>
         <label className="bible-field">

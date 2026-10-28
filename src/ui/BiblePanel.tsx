@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { CloseIconButton } from "./CloseIconButton";
 import {
   BIBLE_KIND_ADD_PREDICATES,
   BIBLE_KIND_DEFAULT_PREDICATE,
@@ -662,9 +663,7 @@ export function BiblePanel({
             <div className="bible-card-head">
               <h2 id="interview-picker-title">{m.bible.interviewPickerTitle}</h2>
               <div className="bible-card-head-actions">
-                <button type="button" className="text-button" onClick={() => setOverlay(null)}>
-                  {m.bible.close}
-                </button>
+                <CloseIconButton onClick={() => setOverlay(null)} label={m.bible.close} />
               </div>
             </div>
             <p className="quiet">{m.bible.interviewPickerLede}</p>
@@ -1052,9 +1051,7 @@ export function OverlayCard({
           )}
           <div className="bible-card-head-actions">
             {actions}
-            <button type="button" className="text-button" onClick={onClose}>
-              {m.bible.close}
-            </button>
+            <CloseIconButton onClick={onClose} label={m.bible.close} />
           </div>
         </div>
         {children}

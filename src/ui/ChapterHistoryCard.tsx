@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { ProseHistoryOp, ProseRevision } from "@core/BookSchema";
 import { LIVE_HISTORY_ID, defaultCompareId, diffProse, type ProseDiffHunk } from "@core/proseDiff";
 import { useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 export function ChapterHistoryCard({
   revisions,
@@ -71,9 +72,7 @@ export function ChapterHistoryCard({
       <div className="edit-card stats-card history-card" role="dialog" aria-modal="true" aria-labelledby="history-title">
         <div className="stats-card-head">
           <p className="chapter-craft-label">{m.history.kicker}</p>
-          <button type="button" className="text-button" onClick={onClose}>
-            {m.common.close}
-          </button>
+          <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
         <h2 id="history-title">{revisions.length > 0 ? m.history.title : m.history.emptyTitle}</h2>
         <p className="quiet">{m.history.intro}</p>

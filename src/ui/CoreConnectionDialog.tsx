@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { isTauri } from "@tauri-apps/api/core";
+import { CloseIconButton } from "./CloseIconButton";
 import { sortedChapters, type Book } from "@core/BookSchema";
 import { prepareCoreBookRestore, type CoreBookRevision } from "@core/coreRevisionRestore";
 import type { CoreShareReader } from "@persistence/CoreManuscriptPublication";
@@ -203,7 +204,7 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
             <h2 id="core-connection-title" title={currentBook.title} className="core-connection-title">{shortTitle}</h2>
             <p className="quiet">{m.subtitle}</p>
           </div>
-          <button type="button" className="text-button" onClick={onClose}>{m.close}</button>
+          <CloseIconButton onClick={onClose} label={m.close} />
         </div>
         <div className="core-connection-status">
           <p>{m.local}</p>

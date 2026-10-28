@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { PROOFREAD_STAGES, type ProofreadStage } from "@core/proofread";
 import { collectPlaceholders, type Placeholder } from "@core/placeholders";
 import { count, format, useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 /**
  * Shown before every proofread run (first start and "run again" alike) so
@@ -51,9 +52,7 @@ export function ProofreadSetupCard({
       <div className="edit-card stats-card proofread-card" role="dialog" aria-modal="true" aria-labelledby="proofread-setup-title">
         <div className="stats-card-head">
           <p className="chapter-craft-label">{m.proofread.action}</p>
-          <button type="button" className="text-button" onClick={onClose}>
-            {m.common.close}
-          </button>
+          <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
         <h2 id="proofread-setup-title">{m.proofread.setupTitle}</h2>
         <p className="quiet">{m.proofread.setupLede}</p>

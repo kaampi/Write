@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { analyzeProse, entityNameTokens, type ProseStats } from "@core/proseStats";
+import { CloseIconButton } from "./CloseIconButton";
 import {
   scoreDirectness,
   scorePacing,
@@ -279,9 +280,7 @@ export function ProseStatsCard({
       <div className="edit-card stats-card" role="dialog" aria-modal="true" aria-labelledby="stats-title">
         <div className="stats-card-head">
           <p className="chapter-craft-label">{m.stats.label}</p>
-          <button type="button" className="text-button" onClick={onClose}>
-            {m.common.close}
-          </button>
+          <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
         <h2 id="stats-title">{stats.words > 0 ? m.stats.title : m.stats.emptyTitle}</h2>
 

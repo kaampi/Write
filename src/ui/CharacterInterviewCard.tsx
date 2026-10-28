@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { InterviewMessage } from "@core/characterInterview";
 import type { BibleKind } from "@core/bibleGroups";
 import { format, useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 function CharacterAvatar({ thumb, label }: { thumb: string | undefined; label: string }) {
   return (
@@ -150,9 +151,7 @@ export function CharacterInterviewCard({
             >
               {extracting ? m.interview.extracting : m.interview.extractAction}
             </button>
-            <button type="button" className="text-button" onClick={onClose}>
-              {m.common.close}
-            </button>
+            <CloseIconButton onClick={onClose} label={m.common.close} />
           </div>
         </div>
         <div className="interview-body">

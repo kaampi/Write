@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import type { Book } from "@core/BookSchema";
+import { CloseIconButton } from "./CloseIconButton";
 import {
   PROOFREAD_STAGES,
   flagStale,
@@ -80,9 +81,7 @@ export function ProofreadCard({
               {m.common.stop}
             </button>
           ) : (
-            <button type="button" className="text-button" onClick={onClose}>
-              {m.common.close}
-            </button>
+            <CloseIconButton onClick={onClose} label={m.common.close} />
           )}
         </div>
         <h2 id="proofread-title">{live || paused || failed ? m.proofread.runningTitle : m.proofread.resultsTitle}</h2>

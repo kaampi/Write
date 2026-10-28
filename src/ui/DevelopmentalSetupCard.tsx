@@ -1,6 +1,7 @@
 import type { Book } from "@core/BookSchema";
 import { hasAnyTaggedThread } from "@core/developmental";
 import { useLocale } from "./i18n";
+import { CloseIconButton } from "./CloseIconButton";
 
 /**
  * Shown before every developmental-analysis run (roadmap-ideas.md #14) —
@@ -25,9 +26,7 @@ export function DevelopmentalSetupCard({ book, onStart, onClose }: { book: Book;
       <div className="edit-card stats-card proofread-card" role="dialog" aria-modal="true" aria-labelledby="developmental-setup-title">
         <div className="stats-card-head">
           <p className="chapter-craft-label">{m.developmental.action}</p>
-          <button type="button" className="text-button" onClick={onClose}>
-            {m.common.close}
-          </button>
+          <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
         <h2 id="developmental-setup-title">{m.developmental.setupTitle}</h2>
         <p className="quiet">{m.developmental.setupLede}</p>
