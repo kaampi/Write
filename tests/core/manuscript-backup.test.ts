@@ -102,7 +102,7 @@ describe("manuscript backup", () => {
 
   it("rejects a newer format", () => {
     const book = createBook("Night Keys");
-    expect(() => parseManuscriptBackup({ kind: MANUSCRIPT_BACKUP_KIND, format: 99, book })).toThrow(/newer StoryBook/);
+    expect(() => parseManuscriptBackup({ kind: MANUSCRIPT_BACKUP_KIND, format: 99, book })).toThrow(/newer kaampi Write/);
   });
 
   it("names the restore file from the title and day", () => {

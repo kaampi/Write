@@ -24,7 +24,7 @@ import { visibleLockedFacts } from "./visibility";
  * hidden entity), not `lockedFacts` alone the way Publish intentionally
  * does — a fact the author hid from the model should stay hidden here too.
  *
- * Produces StoryCore's `ManuscriptExport` shape (roadmap-ideas.md #31) —
+ * Produces kaampi Codex's `ManuscriptExport` shape (roadmap-ideas.md #31) —
  * kaampi Write is the only writer of this file; see @ocedo-apps/storycore's
  * own README for the read-only, propose-only contract this exists to keep.
  *

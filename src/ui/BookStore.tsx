@@ -555,7 +555,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
 
   const restoreCoreRevision = useCallback(async (source: CoreBookRevision, mode: "same-book" | "new-book"): Promise<boolean> => {
     const current = bookRef.current;
-    if (!current || source.workspace.project_id !== current.id) throw new Error("The Core version belongs to another manuscript");
+    if (!current || source.workspace.project_id !== current.id) throw new Error("The kaampi Codex version belongs to another manuscript");
     if (busy) throw new Error("Wait for the current operation before restoring a manuscript");
     const availableSeriesIds = new Set((await seriesRepo.list()).map(item => item.id));
     if (mode === "same-book" && !window.confirm(format(getMessages().home.replaceConfirm, { title: current.title }))) return false;

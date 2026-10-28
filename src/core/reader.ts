@@ -48,7 +48,7 @@ export type ReaderTuning = {
 
 /**
  * Bands for a prose tool. Picture-book illustration rules are not applied:
- * ages 4–7 use early-reader diction because StoryBook drafts chapters, not spreads.
+ * ages 4–7 use early-reader diction because kaampi Write drafts chapters, not spreads.
  */
 export function readerCategory(age: number | undefined): ReaderCategory {
   if (age === undefined || age >= ADULT_READER_AGE) return "adult";

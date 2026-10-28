@@ -191,7 +191,7 @@ export const nb: Messages = {
     backupDueTitle: "Manuskriptet har endret seg siden siste JSON-sikkerhetskopi",
     backupTitle: "Sikkerhetskopi",
     appExport: "Eksporter for andre apper",
-    appExportTitle: "Last ned en StoryCore-eksport av manuset — låste Story Bible-fakta og kapitler, til for at en søsterapp som ComicBook AI skal kunne importere. Et øyeblikksbilde, ingen levende kobling.",
+    appExportTitle: "Last ned en kaampi Codex-eksport av manuset — låste Story Bible-fakta og kapitler, til for at en søsterapp som kaampi Comic skal kunne importere. Et øyeblikksbilde, ingen levende kobling.",
     publish: "Publiser",
     archiveNav: "Arkiv",
     toolsNav: "Verktøy",
@@ -425,16 +425,16 @@ export const nb: Messages = {
     whatHappenedPlaceholder: "Valgfritt. Omskriv kapittel 2, ny forfatterstemme på 3.",
     documentName: "Dokumentnavn",
     action: "Sikkerhetskopi",
-    sendToCore: "Send til Core",
-    sendToCoreHint: "Lagrer en privat versjon av manuset til din paret Core-tjeneste, i tillegg til JSON-filen.",
+    sendToCore: "Send til kaampi Codex",
+    sendToCoreHint: "Lagrer en privat versjon av manuset til din parede kaampi Codex, i tillegg til JSON-filen.",
     sendToCoreSending: "Sender…",
-    sendToCoreDone: "Lagret i Core.",
-    sendToCoreError: "Fikk ikke kontakt med Core akkurat nå. Lagres lokalt og sendes automatisk når tilkoblingen er tilbake.",
+    sendToCoreDone: "Lagret i kaampi Codex.",
+    sendToCoreError: "Fikk ikke kontakt med kaampi Codex akkurat nå. Lagres lokalt og sendes automatisk når tilkoblingen er tilbake.",
     errors: {
       "not-backup": "Den filen er ikke en manuskriptsikkerhetskopi.",
       "sandbox-export": "Den filen er en karteksport fra kaampi Explore. Importer den i kaampi Explore, ikke her.",
-      "not-manuscript": "Den filen er ikke en StoryBook-manuskriptsikkerhetskopi.",
-      "newer-format": "Denne sikkerhetskopien kommer fra en nyere StoryBook. Oppdater appen og prøv på nytt.",
+      "not-manuscript": "Den filen er ikke en kaampi Write-manuskriptsikkerhetskopi.",
+      "newer-format": "Denne sikkerhetskopien kommer fra en nyere kaampi Write. Oppdater appen og prøv på nytt.",
       unreadable: "Manuskriptet i filen kunne ikke leses."
     }
   },
@@ -1122,11 +1122,11 @@ export const nb: Messages = {
       },
       publish: {
         heading: "Publiser",
-        body: "Når historien er klar til å forlate arbeidsflaten, bruker du Publiser.\n\nTenk på forskjellen:\nStoryBook-prosjektet = verkstedet ditt\nPubliseringen = det leseren får\n\nBrainstorm, arbeidsnotater og annen planlegging trenger derfor ikke bli med i den publiserte historien. Velg formatet som passer hvordan teksten skal brukes, og jobb videre med resultatet der det trengs.\n\nParagraph style tilbyr to konvensjoner: den vante tomme linjen mellom avsnitt, eller en innrykket stil uten tom linje i klassisk bokstil, med kapittelets åpnende avsnitt satt uten innrykk, som i trykk."
+        body: "Når historien er klar til å forlate arbeidsflaten, bruker du Publiser.\n\nTenk på forskjellen:\nkaampi Write-prosjektet = verkstedet ditt\nPubliseringen = det leseren får\n\nBrainstorm, arbeidsnotater og annen planlegging trenger derfor ikke bli med i den publiserte historien. Velg formatet som passer hvordan teksten skal brukes, og jobb videre med resultatet der det trengs.\n\nParagraph style tilbyr to konvensjoner: den vante tomme linjen mellom avsnitt, eller en innrykket stil uten tom linje i klassisk bokstil, med kapittelets åpnende avsnitt satt uten innrykk, som i trykk."
       },
       backup: {
         heading: "Sikkerhetskopi",
-        body: "Publisering og sikkerhetskopiering er ikke det samme.\n\nEn publisert bok er for leseren. En StoryBook-sikkerhetskopi er for å kunne gjenopprette selve prosjektet. Den kan derfor inneholde informasjon som ikke finnes i den publiserte versjonen.\n\nLagre sikkerhetskopier jevnlig, spesielt før større endringer.\n\nImporter sikkerhetskopi brukes til kaampi Writes egne sikkerhetskopier. Det er ikke det samme som å importere et manus eller lore fra et annet skriveprogram.\n\n”Export for other apps” er en tredje, annerledes ting — verken en sikkerhetskopi eller en lesekopi. Den skriver et øyeblikksbilde i et delt format for et søskenprogram (som ComicBook AI) å importere: låste, synlige Story Bible-fakta og kapitler, gruppert etter type. Ulåste, flaggede eller skjult-for-AI-fakta er aldri med — samme synlighetsregel som Skriv utkast selv følger."
+        body: "Publisering og sikkerhetskopiering er ikke det samme.\n\nEn publisert bok er for leseren. En kaampi Write-sikkerhetskopi er for å kunne gjenopprette selve prosjektet. Den kan derfor inneholde informasjon som ikke finnes i den publiserte versjonen.\n\nLagre sikkerhetskopier jevnlig, spesielt før større endringer.\n\nImporter sikkerhetskopi brukes til kaampi Writes egne sikkerhetskopier. Det er ikke det samme som å importere et manus eller lore fra et annet skriveprogram.\n\n”Export for other apps” er en tredje, annerledes ting — verken en sikkerhetskopi eller en lesekopi. Den skriver et øyeblikksbilde i et delt format for et søskenprogram (som kaampi Comic) å importere: låste, synlige Story Bible-fakta og kapitler, gruppert etter type. Ulåste, flaggede eller skjult-for-AI-fakta er aldri med — samme synlighetsregel som Skriv utkast selv følger."
       },
       "network-ai-server": {
         heading: "En AI-server på en annen datamaskin i nettverket",

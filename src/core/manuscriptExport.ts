@@ -1121,7 +1121,7 @@ function rtfBlock(
 
 // ===================== IDML (InDesign Markup Language) =====================
 //
-// A from-scratch IDML writer — ComicBook AI, the sibling repo Mats pointed
+// A from-scratch IDML writer — kaampi Comic, the sibling repo Mats pointed
 // at as a reference, turned out to have no IDML export anywhere in it
 // (confirmed by searching the repo directly: zero hits for "idml",
 // "InDesign", or "icml" in its code, PROJECT_SPEC.md, or README). Built
@@ -1517,7 +1517,7 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * be any shape, not just a rectangle); `GeometricBounds` is a cached summary
  * value, and a `TextFrame` with no `PathGeometry` of its own has no
  * authoritative shape for a reader to fall back on. Found by comparing
- * against ComicBook AI's own IDML writer, which includes a PathGeometry on
+ * against kaampi Comic's own IDML writer, which includes a PathGeometry on
  * every page item it draws and has never once used a bare GeometricBounds
  * for one — the one difference between a frame this writer always
  * generated and one a reference implementation actually produces.
@@ -1526,7 +1526,7 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * in `idmlPreferencesXml`) and `AppliedMaster="${masterSelf}"` on the Page
  * (never `"n"`) both match what a real InDesign (21.6) export Mats shared
  * directly actually writes — an earlier version of this writer used
- * `AllowPageShuffle="false"` (following ComicBook AI's own, never-threaded
+ * `AllowPageShuffle="false"` (following kaampi Comic's own, never-threaded
  * writer) and `AppliedMaster="n"` on every page, a combination no real
  * InDesign-authored document ever produces for an ordinary content page.
  * Changed together while investigating a real report of InDesign inserting
@@ -1540,7 +1540,7 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * along X) instead of every Spread sitting at an identical "0 0" — a real
  * InDesign document's pasteboard is one continuous strip with every Spread
  * occupying its own successive segment of it, never multiple Spreads
- * stacked on top of each other; ComicBook AI's own (never-threaded) IDML
+ * stacked on top of each other; kaampi Comic's own (never-threaded) IDML
  * writer never surfaced this, since reading order for independent,
  * non-threaded pages doesn't depend on pasteboard position the way a
  * reader resolving a threaded Story's auto-flow across many Spreads might.
@@ -1549,12 +1549,12 @@ function idmlRectPathGeometry(width: number, height: number): string {
  * pasteboard moves.
  *
  * `TextFrame` carries `ItemLayer="${IDML_LAYER}"` — every page item in a
- * real IDML package belongs to a Layer (ComicBook AI's own writer sets
+ * real IDML package belongs to a Layer (kaampi Comic's own writer sets
  * this on every item it draws, never omits it), and this writer never
  * did, nor ever declared the Layer itself in `designmap.xml`. Found by
  * comparing against a real InDesign (21.6) export Mats shared directly —
  * the first real InDesign-authored reference available for this part of
- * the format, after ComicBook AI's own writer (never threaded, so it
+ * the format, after kaampi Comic's own writer (never threaded, so it
  * couldn't surface everything a reader does with a multi-page threaded
  * flow specifically).
  *

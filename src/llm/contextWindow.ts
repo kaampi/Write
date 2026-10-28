@@ -3,7 +3,7 @@
  * `num_ctx`). Nothing running in a browser can see the author's GPU/VRAM —
  * there is no web API for that — so this is never auto-detected. Ollama's
  * own default (historically as low as 2048) is often far smaller than what
- * the connected model and hardware could actually handle, and StoryBook's
+ * the connected model and hardware could actually handle, and kaampi Write's
  * own Draft prompt (full chapter so far + Story Bible + synopsis) can
  * exceed it easily on anything but a short chapter — silently degrading the
  * model's grip on recently-written detail. `DEFAULT_CONTEXT_WINDOW` is a

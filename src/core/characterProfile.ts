@@ -3,7 +3,7 @@ import { groupBibleEntities, type EntityKind } from "./bibleGroups";
 import { lockedFacts, type NarrativeFact } from "./NarrativeFact";
 import { entityIsHidden } from "./visibility";
 
-/** Same builtins as Sandbox Character Studio. Custom they/xe stay out of StoryBook. */
+/** Same builtins as kaampi Explore's Character Studio. Custom they/xe stay out of kaampi Write. */
 export const CHARACTER_PRONOUNS = ["she", "he", "it"] as const;
 export type CharacterPronoun = (typeof CHARACTER_PRONOUNS)[number];
 

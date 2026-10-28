@@ -30,7 +30,7 @@ export function downloadText(filename: string, text: string, type = "text/plain"
 /**
  * Open the native picker during the click/submit event when available.
  * Brave can disable this API, so retain the regular browser download path
- * used by ComicBook AI. That path follows the browser's download settings;
+ * used by kaampi Comic. That path follows the browser's download settings;
  * it cannot force a Save As dialog or confirm that the file reached disk.
  * Only picker cancellation is treated as cancellation. Write/close errors
  * must reach the caller rather than silently starting another download.

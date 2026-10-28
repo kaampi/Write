@@ -9,6 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.205] - 2026-10-28
+
+### Changed
+- Renamed "Core" to "kaampi Codex" throughout the app's visible text (the Core connection dialog, the Backup dialog's "Send to Core" action, and a handful of error messages) — "Core" was the old internal/working name for the service now branded kaampi Codex. Also rewrote the Core connection dialog's explanatory copy (what it is, what "not connected" or "offline" actually mean) to read more like an explanation and less like a status code, for someone opening it without prior context on kaampi Write or kaampi Codex.
+- Caught several other leftover "StoryBook"/"StoryCore"/"ComicBook AI" mentions in error messages, guide text and code comments that the original rename pass missed.
+
 ## [1.0.204] - 2026-10-28
 
 ### Changed

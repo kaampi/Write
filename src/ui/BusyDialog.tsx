@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
  * no visible output of its own to watch while it runs — unlike Draft/Extend/
  * Recast/Polish, which stream their result straight into the prose the
  * author is already looking at, where this dialog would only get in the
- * way. Ported from ComicBook AI's BeatAnalysisDialog (same focus trap,
+ * way. Ported from kaampi Comic's BeatAnalysisDialog (same focus trap,
  * Escape/Cancel, background inert, reduced-motion support) — see its own
  * comment there for the rationale behind each piece of that plumbing.
  */

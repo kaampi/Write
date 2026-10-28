@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.204
+Status: living document, v1.0.205
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9828,6 +9828,56 @@ inte en bugg.
 grön, `npm run build` rent, visuellt bekräftat i headless browser.
 
 v1.0.203 → v1.0.204.
+
+**Ändringslogg v1.0.204 → v1.0.205 (2026-10-28): "Core" blir
+"kaampi Codex" i UI:t, och texterna skrivs om pedagogiskt.** Mats
+föreslog "kaampi Write Codex" som eyebrow-titel istället för "kaampi
+Write Core" ("Core har vi ju dumpat"), och bad om mer flytande,
+pedagogisk text i dialogens förklarande stycken för någon som inte
+använt Core/Codex och Write förut.
+
+**Genomgång:** bytte varje synlig förekomst av ordet "Core" (som
+produktnamn, inte den tekniska identitetssträngen) till "kaampi
+Codex" — `CoreConnectionDialog.tsx` i alla tre språk (titel,
+statusrader, knappar, flikinnehåll), Backup-dialogens "Send to
+Core"-knapp och dess hjälptext/status, samt ett par felmeddelanden
+(`BookStore.tsx`, `manuscriptBackup.ts`).
+
+**Samtidigt fångade jag flera kvarglömda märkesnamn** det
+ursprungliga namnbytespasset missade helt, eftersom min sökning då
+bara letade efter "StoryBook AI"/"ComicBook AI" (med mellanslag) och
+"StoryCore" (hela ordet) — inte böjda/sammansatta former: "A
+StoryBook backup", "StoryBook-projektet", "StoryCore manuscript
+export", kvarvarande "ComicBook AI" i kodkommentarer
+(`manuscriptExport.ts`s IDML-jämförelser, `downloadJson.ts`,
+`BusyDialog.tsx`), och "Sandbox Character Studio" i en kommentar.
+Alla bytta till kaampi Write/Comic/Explore/Codex. Ett test
+(`manuscript-backup.test.ts`) matchade på den gamla
+felmeddelandetexten och behövde uppdateras i samma commit.
+
+**Omskriven förklarande text (exempel, engelska):**
+- `subtitle`: "Sharing and versions in Core for this manuscript." →
+  "kaampi Codex is an optional local helper: it can back up this
+  manuscript and share parts of it with your other kaampi apps."
+- `local`: "This manuscript stays in kaampi Write's local storage."
+  → "By default, this manuscript stays only in kaampi Write's own
+  local storage on this computer — nothing else is needed."
+- `disconnected`: "Core is not paired." → "kaampi Codex isn't
+  connected yet. Pair it below to turn on automatic backups and
+  sharing with your other kaampi apps."
+- `offline`/`connected` fick samma behandling — förklarar vad
+  tillståndet faktiskt betyder istället för bara ett statusord.
+  Samma ton återskapad på svenska och norska, inte ord-för-ord-
+  översatt.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test,
+efter fixen av det brutna testet) grön, `npm run build` rent.
+Återskapade dialogen i headless browser (nytt manus, spoofad
+`window.isTauri`) för att bekräfta layouten håller med den längre
+texten — ingen överlappning eller klippning trots att flera strängar
+blev betydligt längre.
+
+v1.0.204 → v1.0.205.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

@@ -331,11 +331,11 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   publish: {
     heading: "Publish",
-    body: "When the story is ready to leave the workspace, use Publish.\n\nThink of the difference:\nThe StoryBook project = your workshop\nThe published copy = what the reader gets\n\nBrainstorm, working notes, and other planning don't need to follow into the published story. Choose the format that fits how the text will be used, and continue working with the result from there when needed.\n\nParagraph style offers two conventions: the familiar blank line between paragraphs, or an indented, no-blank-line classic book style with the chapter's opening paragraph left flush, as in print."
+    body: "When the story is ready to leave the workspace, use Publish.\n\nThink of the difference:\nThe kaampi Write project = your workshop\nThe published copy = what the reader gets\n\nBrainstorm, working notes, and other planning don't need to follow into the published story. Choose the format that fits how the text will be used, and continue working with the result from there when needed.\n\nParagraph style offers two conventions: the familiar blank line between paragraphs, or an indented, no-blank-line classic book style with the chapter's opening paragraph left flush, as in print."
   },
   backup: {
     heading: "Backup",
-    body: "Publishing and backing up aren't the same thing.\n\nA published book is for the reader. A StoryBook backup is for restoring the project itself. It can therefore contain information that isn't in the published version.\n\nSave backups regularly, especially before major changes.\n\nImport backup is used for kaampi Write's own backups. That's not the same as importing a manuscript or lore from another writing program.\n\n\"Export for other apps\" is a third, different thing again — not a backup, and not a reading copy either. It writes a snapshot in a shared format for a sibling app (such as ComicBook AI) to import: locked, visible Story Bible facts and chapters, grouped by kind. Unlocked, flagged, or hidden-from-the-model facts never go into it, the same visibility rule Draft itself follows."
+    body: "Publishing and backing up aren't the same thing.\n\nA published book is for the reader. A kaampi Write backup is for restoring the project itself. It can therefore contain information that isn't in the published version.\n\nSave backups regularly, especially before major changes.\n\nImport backup is used for kaampi Write's own backups. That's not the same as importing a manuscript or lore from another writing program.\n\n\"Export for other apps\" is a third, different thing again — not a backup, and not a reading copy either. It writes a snapshot in a shared format for a sibling app (such as kaampi Comic) to import: locked, visible Story Bible facts and chapters, grouped by kind. Unlocked, flagged, or hidden-from-the-model facts never go into it, the same visibility rule Draft itself follows."
   },
   "network-ai-server": {
     heading: "An AI server on another computer on the network",
@@ -598,7 +598,7 @@ export const en = {
     backupDueTitle: "This manuscript has changed since the last JSON backup",
     backupTitle: "Backup",
     appExport: "Export for other apps",
-    appExportTitle: "Download a StoryCore manuscript export — locked Story Bible facts and chapters, for a sibling app like ComicBook AI to import. A snapshot, not a live link.",
+    appExportTitle: "Download a kaampi Codex manuscript export — locked Story Bible facts and chapters, for a sibling app like kaampi Comic to import. A snapshot, not a live link.",
     publish: "Publish",
     archiveNav: "File",
     toolsNav: "Tools",
@@ -832,16 +832,16 @@ export const en = {
     whatHappenedPlaceholder: "Optional. Recast chapter 2, new Voice on 3.",
     documentName: "Document name",
     action: "Backup",
-    sendToCore: "Send to Core",
-    sendToCoreHint: "Saves a private version of the manuscript to your paired Core service, in addition to the JSON file.",
+    sendToCore: "Send to kaampi Codex",
+    sendToCoreHint: "Saves a private version of the manuscript to your paired kaampi Codex, in addition to the JSON file.",
     sendToCoreSending: "Sending…",
-    sendToCoreDone: "Saved to Core.",
-    sendToCoreError: "Could not reach Core right now. Saved locally and will send automatically once the connection is back.",
+    sendToCoreDone: "Saved to kaampi Codex.",
+    sendToCoreError: "Could not reach kaampi Codex right now. Saved locally and will send automatically once the connection is back.",
     errors: {
       "not-backup": "That file is not a manuscript backup.",
       "sandbox-export": "That file is a kaampi Explore card export. Import it in kaampi Explore, not here.",
-      "not-manuscript": "That file is not a StoryBook manuscript backup.",
-      "newer-format": "This backup is from a newer StoryBook. Update the app, then try again.",
+      "not-manuscript": "That file is not a kaampi Write manuscript backup.",
+      "newer-format": "This backup is from a newer kaampi Write. Update the app, then try again.",
       unreadable: "The manuscript inside this file could not be read."
     }
   },
