@@ -69,3 +69,14 @@ export async function pairCore(token: string): Promise<void> {
   if (!isTauri()) throw new Error("Core pairing requires the desktop app");
   await invoke("core_pair", { token });
 }
+
+/** Tries to pair from a freshly installed Core's own first-run file (same machine, no key to copy). Resolves to false, never throws, when there's nothing to claim. */
+export async function coreAutoClaim(): Promise<boolean> {
+  if (!isTauri()) return false;
+  try {
+    await invoke("core_auto_claim");
+    return true;
+  } catch {
+    return false;
+  }
+}

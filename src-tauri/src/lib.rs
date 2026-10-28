@@ -15,6 +15,7 @@ pub fn run() {
       system_check::open_external_url,
       update_check::check_for_updates,
       core_bridge::core_pair,
+      core_bridge::core_auto_claim,
       core_bridge::core_connection,
       core_bridge::core_shared_access,
       core_bridge::core_save_private,

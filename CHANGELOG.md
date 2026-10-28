@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.197] - 2026-10-28
+
+### Added
+- Pairing with a local Core connection no longer requires copying a 64-character key by hand on a machine where Core was just installed. A freshly installed Core writes its first-run pairing credentials to a local file next to its database; the desktop app now reads Storybook's own entry from that file automatically (via a new `core_auto_claim` Tauri command) before ever showing the manual key field, claiming it once so a sibling app reading the same file later gets its own turn instead of the same token. The manual key field is still there as a fallback whenever auto-pairing finds nothing (different machines, a key already claimed, non-Windows).
+
 ## [1.0.196] - 2026-10-28
 
 ### Changed

@@ -3,7 +3,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { sortedChapters, type Book } from "@core/BookSchema";
 import { prepareCoreBookRestore, type CoreBookRevision } from "@core/coreRevisionRestore";
 import type { CoreShareReader } from "@persistence/CoreManuscriptPublication";
-import { coreConnection, corePrivateRevision, corePrivateVersions, coreSharedAccess, pairCore, type CoreConnection, type CorePrivateVersions } from "@persistence/CoreDesktopTransport";
+import { coreAutoClaim, coreConnection, corePrivateRevision, corePrivateVersions, coreSharedAccess, pairCore, type CoreConnection, type CorePrivateVersions } from "@persistence/CoreDesktopTransport";
 import { coreSharingOutbox, coreSnapshotOutbox, flushCoreSharing, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
 import { useLocale } from "./i18n";
 
@@ -124,7 +124,10 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
   useEffect(() => {
     let active = true;
     setLoading(true);
-    void load()
+    // A freshly installed Core left its pairing key in a local file next to the
+    // database; try that silently before ever asking the user to paste one.
+    void (desktop ? coreAutoClaim() : Promise.resolve(false))
+      .then(() => load())
       .then(({ status, remote, choice, issue, privateVersions, waiting, auto }) => {
         if (!active) return;
         setConnection(status); setRemoteReaders(remote); setReaders(choice.readers); setPending(choice.pending);
@@ -135,7 +138,7 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
       .catch(err => { if (active) setError(String(err)); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [load]);
+  }, [load, desktop]);
 
   useEffect(() => {
     const key = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };

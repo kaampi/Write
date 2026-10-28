@@ -29,6 +29,16 @@ fn saved_token() -> Result<String, String> {
     Err("Core desktop pairing is currently available on Windows only".to_string())
 }
 
+/// Matches Core's own default database location exactly
+/// (packages/service/server.mjs's defaultDbPath) — the installer never
+/// overrides it, so this is the one place a freshly installed Core leaves
+/// its first-run pairing credentials.
+#[cfg(target_os = "windows")]
+fn bootstrap_path() -> Result<std::path::PathBuf, String> {
+    let base = std::env::var("LOCALAPPDATA").map_err(|_| "LOCALAPPDATA is not set".to_string())?;
+    Ok(std::path::Path::new(&base).join("StoryCore").join("core.db.bootstrap.json"))
+}
+
 fn check_identity(token: &str) -> Result<(), String> {
     let identity: Value = ureq::get(&format!("{CORE_URL}/v1/identity"))
         .header("Authorization", format!("Bearer {token}"))
@@ -57,6 +67,42 @@ pub async fn core_pair(token: String) -> Result<(), String> {
         #[cfg(not(target_os = "windows"))]
         { Err("Core desktop pairing is currently available on Windows only".to_string()) }
     }).await.map_err(|_| "Core pairing failed".to_string())?
+}
+
+/// Looks for a freshly installed Core's own first-run pairing file instead
+/// of asking a human to copy a 64-character key by hand — the common case
+/// of "both on the same machine, Core was just installed". Claims only
+/// Storybook's own entry, so a later call (or ComicBook AI/Sandbox reading
+/// the same file) never hands the same token out twice; sibling apps'
+/// entries are left untouched for them to claim on their own. Fails
+/// quietly (a plain error, nothing shown as a crash) whenever there's
+/// nothing to claim — the caller falls back to the manual key field.
+#[tauri::command]
+pub async fn core_auto_claim() -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        #[cfg(target_os = "windows")]
+        {
+            let path = bootstrap_path()?;
+            let raw = std::fs::read_to_string(&path).map_err(|_| "No local Core pairing file found".to_string())?;
+            let mut doc: Value = serde_json::from_str(&raw).map_err(|_| "Core pairing file is unreadable".to_string())?;
+            let token = doc.get("storybook").and_then(Value::as_str)
+                .filter(|candidate| candidate.len() == 64 && candidate.bytes().all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase()))
+                .ok_or_else(|| "No unclaimed Storybook credential in the pairing file".to_string())?
+                .to_string();
+            check_identity(&token)?;
+            credential()?.set_password(&token).map_err(|_| "Could not save the Core credential".to_string())?;
+            // Already paired successfully at this point - a failure to
+            // update the file below just means it stays claimable again,
+            // not that pairing itself failed.
+            if let Some(object) = doc.as_object_mut() {
+                object.insert("storybook".to_string(), Value::Null);
+                let _ = std::fs::write(&path, serde_json::to_string_pretty(&doc).unwrap_or(raw));
+            }
+            Ok(())
+        }
+        #[cfg(not(target_os = "windows"))]
+        { Err("Core desktop pairing is currently available on Windows only".to_string()) }
+    }).await.map_err(|_| "Core auto-pairing failed".to_string())?
 }
 
 #[tauri::command]

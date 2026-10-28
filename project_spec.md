@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.196
+Status: living document, v1.0.197
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9560,6 +9560,59 @@ ger ingen riktig Tauri-IPC-bro, inget appfel. Riktig parkoppling/
 Credential Manager-flödet är fortfarande inte testat i den här miljön.
 
 v1.0.195 → v1.0.196.
+
+**Ändringslogg v1.0.196 → v1.0.197 (2026-10-28): automatisk
+parkoppling mot en nyinstallerad Core — uppgift 4 och 5 av 5 i
+"enklare installation/koppling"-jobbet** (uppgift 1–3, byggda i
+StoryCore-repot, redan klara och verifierade på riktig Windows-CI:
+auto-provisionering + bootstrap-fil, Node SEA-paketering till en
+fristående `.exe`, en icke-upphöjd Windows-installerare med
+Startup-genväg). Mats: "Kör på med 4 och 5."
+
+**4 — Tauri-bryggan läser bootstrap-filen (`core_bridge.rs`):**
+- Ny `bootstrap_path()`-hjälpfunktion (Windows-bara, bakom samma
+  `#[cfg(target_os = "windows")]`-gränser som resten av bryggan):
+  `%LOCALAPPDATA%\StoryCore\core.db.bootstrap.json` — exakt samma
+  sökväg som Core-tjänstens egen `defaultDbPath()` i
+  `packages/service/server.mjs` (StoryCore-repot) lämnar filen vid,
+  eftersom installeraren aldrig skriver över den.
+- Ny `core_auto_claim`-kommando: läser filen, tar `storybook`-fältet
+  (ett 64-tecken hex-värde, samma validering som `core_pair` redan
+  gör), verifierar det mot Core precis som manuell parkoppling
+  (`check_identity`), sparar det i Windows Credential Manager vid
+  träff — och sätter sedan `storybook`-fältet till `null` i filen på
+  disk, så att en syskon-app (ComicBook AI, Sandbox) som läser samma
+  fil senare får sitt eget, oanvända fält och aldrig samma token igen.
+  Misslyckas tyst (vanligt `Result`-fel, ingen krasch) om filen saknas,
+  är oläsbar eller redan är tömd på Storybooks fält — anroparen faller
+  tillbaka till det manuella fältet precis som innan.
+- Registrerad i `lib.rs`s `invoke_handler!`-lista.
+- `CoreDesktopTransport.ts` fick en tunn `coreAutoClaim()`-wrapper
+  (samma `isTauri()`-mönster som övriga `core_*`-anrop) som fångar
+  alla fel internt och returnerar `false` istället för att kasta —
+  UI-sidan ska aldrig behöva skilja "inget att hämta" från ett
+  oväntat fel här.
+
+**5 — UI försöker auto-parkoppling före det manuella fältet
+(`CoreConnectionDialog.tsx`):** dialogens befintliga första
+`useEffect` (den som laddar anslutningsstatus när dialogen öppnas)
+anropar nu `coreAutoClaim()` innan `load()` när `desktop` är sant —
+om den lyckas är `core_connection` redan parkopplad nästa gång
+statusen läses in, och det manuella nyckelfältet (`desktop &&
+!connection.paired`) visas aldrig. Misslyckas den (annan maskin,
+redan hämtat fält, icke-Windows) syns ingen skillnad alls — samma
+manuella fält som förut. Ingen ny state, inget nytt UI-villkor;
+bara ett tyst försök insatt före den redan existerande laddningen.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (94 filer,
+1240 test, oförändrat) grön, `npm run build` rent. Rust-sidan
+(`core_bridge.rs`, `lib.rs`) kan inte bygga/typkontrolleras i den
+här sandlådan (saknar GTK/WebKit för en fullständig Tauri-build) —
+verifieras istället på riktig `windows-latest`-CI
+(`desktop-build.yml`/`core-desktop-checks.yml`) efter push, samma
+mönster som uppgift 1–3 i StoryCore.
+
+v1.0.196 → v1.0.197.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
