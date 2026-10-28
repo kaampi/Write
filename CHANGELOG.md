@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.208] - 2026-10-28
+
+### Fixed
+- The new close icon sat noticeably below the actual top-right corner in some dialogs — the header rows it lives in use `align-items: baseline` (Story Bible cards) or `center` (Settings, Core dialog), both wrong for an icon-only button next to a plain text title, dragging it down. Pinned with `align-self: flex-start` so it sits flush at the top regardless of the row's own alignment.
+
 ## [1.0.207] - 2026-10-28
 
 ### Changed

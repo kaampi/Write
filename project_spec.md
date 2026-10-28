@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.207
+Status: living document, v1.0.208
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9953,6 +9953,39 @@ riktigt i headless browser och bekräftade visuellt att ikonen visas
 uppe till höger i rubrikraden.
 
 v1.0.206 → v1.0.207.
+
+**Ändringslogg v1.0.207 → v1.0.208 (2026-10-28): stängningsikonen
+hängde för lågt.** Mats skickade två skärmdumpar — ikonen satt
+märkbart under det faktiska hörnet, med en pil som pekade på var den
+borde vara istället. "Ikonen ska ligga högst upp i hörnet."
+
+**Grundorsak:** rubrikraderna `CloseIconButton` sitter i använder
+`align-items: baseline` (`.bible-card-head`,
+`.bible-card-head-actions` — Story Bible-korten) eller `center`
+(`.dialog-head`, `.stats-card-head` — Core-dialogen, Inställningar
+m.fl.). Båda är fel för en ikon-only-knapp bredvid vanlig text:
+baseline försöker linjera mot text som inte finns i en ikonknapp,
+och center centrerar knappen mot hela radens höjd — för Core-
+dialogens tre-raders rubrikblock (eyebrow+titel+undertext) landar
+"centrum" en bra bit ner, inte vid toppen.
+
+**Fix:** en rad, `align-self: flex-start` på `.close-icon-button` —
+åsidosätter föräldraradens `align-items` oavsett vilket värde den
+har (det är precis vad `align-self` är till för), så samma fix
+gäller alla ~24 ställen utan att behöva särskiljas per rubrikmönster.
+
+**Verifiering:** mätte faktiskt avståndet i headless browser igen
+(samma lärdom som v1.0.206 - bygg-grönt bevisar inget om CSS-
+specificitet eller alignment) på Core-dialogen: 18.6px från kortets
+topp, vilket är exakt kortets egen top-padding (`1.1rem`) och inget
+mer — ikonen ligger nu precis vid rubrikens egen topp, inte längre
+ner. `align-self` åsidosätter `align-items` oavsett värde per CSS-
+specifikationen, så samma mekanism gäller garanterat även de
+baseline-justerade Story Bible-korten utan att behöva mäta varje
+enskilt ställe för sig. `tsc --noEmit` rent, hela testsviten (1240
+test) grön, `npm run build` rent.
+
+v1.0.207 → v1.0.208.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
