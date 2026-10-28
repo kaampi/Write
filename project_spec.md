@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.198
+Status: living document, v1.0.199
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9662,6 +9662,43 @@ test, oförändrat — inget testar synliga strängar mot "StoryBook AI")
 grön, `npm run build` rent.
 
 v1.0.197 → v1.0.198.
+
+**Ändringslogg v1.0.198 → v1.0.199 (2026-10-28): riktig kaampi-logga.**
+Mats: "Storybook Tauri heter nu kaampi Write men i själva appen är
+det fortfarande Storybook loggan. Men som tur är har jag en ny :)" —
+skickade två SVG:er: `logo_kaampi.svg` (fristående "kaampi"-märket,
+sparat som referens i `public/brand/kaampi.svg` för framtida bruk,
+t.ex. en kaampi.com-webb) och `logo_kaampi_write.svg` (den
+sammansatta "kaampi Write"-logotypen — samma märke plus det grå
+"Write"-ordmärket, exakt samma bildförhållande som de gamla
+`logo.png`/`logo-dark.png`, 1193×202 mot 1364×319).
+
+Bytte `public/logo.png`→`public/logo.svg` (ljus bakgrund, originalet
+rakt av) och `public/logo-dark.png`→`public/logo-dark.svg` (mörk
+bakgrund — skapad genom att invertera de två textfärgerna,
+rgb(35,31,32)→rgb(240,240,242) och rgb(103,112,132)→
+rgb(168,176,194); den magentafärgade accentrutan rgb(255,0,143)
+oförändrad i båda). Uppdaterade `<img>`-referenserna i
+`AppTopBar.tsx` och `Home.tsx` till de nya filnamnen och tog bort de
+gamla PNG-filerna. SVG istället för PNG var ett medvetet val, inte
+bara en filtypskonvertering — skarpare rendering på alla
+skärmstorlekar/upplösningar, och källan var redan vektor.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Renderade faktiskt hemskärmen i en
+headless webbläsare i båda temalägena (knappen växlar appens eget
+tema, inte OS:ets `prefers-color-scheme`) och bekräftade visuellt
+att rätt variant visas mot rätt bakgrund — skärpa och kontrast ser
+bra ut i båda.
+
+**Kvarstående, inte löst här:** Tauri-app-ikonen
+(`src-tauri/icons/*`, `.ico`/`.icns` för Windows/Mac, used för
+installer/aktivitetsfält) är fortfarande den gamla StoryBook-ikonen.
+Ingen av de två skickade loggorna är kvadratiska (bredformat
+ordmärken), så en ny kvadratisk ikon/symbol behövs separat — frågat
+Mats om han har en, inte löst i den här ändringen.
+
+v1.0.198 → v1.0.199.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

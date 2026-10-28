@@ -37,8 +37,8 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
   return (
     <header className="app-top-bar">
       <button type="button" className="app-top-logo-button" onClick={store.closeBook} aria-label={m.appBar.goHome}>
-        <img className="app-top-logo app-top-logo-light" src="/logo.png" alt="kaampi Write" />
-        <img className="app-top-logo app-top-logo-dark" src="/logo-dark.png" alt="kaampi Write" />
+        <img className="app-top-logo app-top-logo-light" src="/logo.svg" alt="kaampi Write" />
+        <img className="app-top-logo app-top-logo-dark" src="/logo-dark.svg" alt="kaampi Write" />
       </button>
 
       <div className="app-top-menu" ref={menuRef}>

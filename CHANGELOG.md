@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.199] - 2026-10-28
+
+### Changed
+- Replaced the StoryBook AI wordmark with the new kaampi Write logo (provided as SVG, swapped in as vector files for crisp rendering at any size instead of the previous raster PNGs), in both the top bar and the home screen, with matching light/dark variants.
+
 ## [1.0.198] - 2026-10-28
 
 ### Changed
