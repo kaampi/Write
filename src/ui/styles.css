@@ -2847,7 +2847,10 @@ button:disabled {
   margin: 0;
   background: transparent;
   border-color: transparent;
-  padding-left: 0;
+  /* Symmetric padding (the shared input rule's default 0.7rem both sides)
+     so centered text isn't skewed - this used to zero out padding-left
+     specifically to flush the text left, which centering no longer wants. */
+  text-align: center;
 }
 
 .manuscript-board,

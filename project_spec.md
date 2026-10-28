@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.208
+Status: living document, v1.0.209
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9986,6 +9986,28 @@ enskilt ställe för sig. `tsc --noEmit` rent, hela testsviten (1240
 test) grön, `npm run build` rent.
 
 v1.0.207 → v1.0.208.
+
+**Ändringslogg v1.0.208 → v1.0.209 (2026-10-28): kapitelrubriken
+centrerad.** Mats skickade en skärmdump av kapitelrubriken i
+editorn ("Chapter 1 - A new beginning") och bad att den ligger
+centrerad.
+
+`.chapter-title` är en `<input>`, ingen `<h1>` — texten var
+vänsterjusterad (webbläsarens standard) och fick dessutom
+`padding-left: 0` från den befintliga regeln, som tidigare flushade
+texten mot vänsterkanten. Lade till `text-align: center` och tog
+bort `padding-left: 0`-overridet så fältet återgår till den delade
+input-regelns symmetriska `0.7rem`-padding på båda sidor — annars
+hade centrerad text landat synligt skev (noll padding vänster, 0.7rem
+höger).
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Fyllde i ett kapitel i en headless
+browser och läste `getComputedStyle`: `textAlign: "center"`,
+`paddingLeft`/`paddingRight` båda `11.2px` (0.7rem) — symmetriskt,
+inte bara "ser centrerat ut".
+
+v1.0.208 → v1.0.209.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

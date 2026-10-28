@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.209] - 2026-10-28
+
+### Changed
+- The chapter title field in the editor is now centered instead of left-aligned, including the padding on both sides (it previously zeroed the left padding to flush the old left-aligned text, which skewed centered text off-axis).
+
 ## [1.0.208] - 2026-10-28
 
 ### Fixed
