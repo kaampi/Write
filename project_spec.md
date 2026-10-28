@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.201
+Status: living document, v1.0.202
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9743,6 +9743,40 @@ taggar i `index.html`s `<head>`.
 **Verifiering:** `tsc --noEmit` rent, `npm run build` rent.
 
 v1.0.200 → v1.0.201.
+
+**Ändringslogg v1.0.201 → v1.0.202 (2026-10-28): UI-typsnittet blir
+Barlow.** Mats byggde en typsnittsjämförelse-artefakt
+(claude.ai/artifact/RE3gw5TB8tdVi3KNE1SriG) som visade Figtree/
+Newsreader mot Barlow/Source Serif 4 sida vid sida på en riktig vy
+av hemskärmen. Gillade båda, men påpekade att serifferna är så lika
+att det knappt märks, och att Newsreader är mjukare/mer editoriell
+än Source Serif 4 — föreslog att behålla Newsreader men byta
+Figtree → Barlow (som matchar kaampi-loggans Bahnschrift-känsla, och
+dessutom är mer kondenserad, bra för trånga UI-strängar i
+svenska/norska översättningarna).
+
+**Teknisk skillnad mot Figtree:** Barlow finns bara som statiska
+per-vikt-filer på Google Fonts, ingen `wght`-variabelaxel. Laddade
+ner sex TTF:er (Regular/Medium/SemiBold/Bold + Italic/BoldItalic)
+från google/fonts-repot, konverterade till woff2 med fontTools,
+lade till som sex separata `@font-face`-block istället för
+Figtrees enda variabla block. En vikt utan exakt matchning (t.ex.
+`.core-tab`s 650) matchar nu automatiskt till närmaste statiska vikt
+(700) via webbläsarens egen font-matchning — ingen skillnad i CSS,
+bara i vilken fil som faktiskt laddas.
+
+Bytt `--font-ui` till `"Barlow"` — alla ställen som redan använde
+`var(--font-ui)` (arton stycken) fick den nya fonten automatiskt,
+ingen annan kod ändrad. `public/fonts/figtree-variable.woff2`
+borttagen, sex `barlow-*.woff2`-filer tillagda.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Renderade hemskärmen i en headless
+webbläsare och läste faktiskt ut `getComputedStyle` för att bekräfta
+att `<h1>` fortfarande får Newsreader och `<body>` nu får Barlow —
+inte bara en visuell kontroll.
+
+v1.0.201 → v1.0.202.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

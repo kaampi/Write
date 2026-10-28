@@ -1,15 +1,60 @@
 /*
- * Self-hosted fonts (Figtree, Newsreader, IBM Plex Mono — SIL Open Font
+ * Self-hosted fonts (Barlow, Newsreader, IBM Plex Mono — SIL Open Font
  * License). Bundled locally rather than loaded from Google Fonts so the
  * app makes no network request of any kind, matching the "fully offline"
  * claim in the guide's philosophy section.
+ *
+ * Barlow ships as static per-weight files (no variable "wght" axis), unlike
+ * the Figtree variable font it replaces — hence one @font-face per weight/
+ * style instead of a single `font-weight: 400 700` range. A CSS weight with
+ * no exact match (e.g. the tabs' 650) resolves to the nearest static face.
  */
 @font-face {
-  font-family: "Figtree";
+  font-family: "Barlow";
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 400;
   font-display: swap;
-  src: url("/fonts/figtree-variable.woff2") format("woff2");
+  src: url("/fonts/barlow-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/barlow-medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/barlow-semibold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/barlow-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/barlow-italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/barlow-bold-italic.woff2") format("woff2");
 }
 
 @font-face {
@@ -291,7 +336,7 @@
   --plotline-coral: #fb7185;
   --plotline-grey: #9ca3af;
   --plotline-charcoal: #6b7280;
-  --font-ui: "Figtree", system-ui, sans-serif;
+  --font-ui: "Barlow", system-ui, sans-serif;
   --font-prose: "Newsreader", Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   color-scheme: dark;

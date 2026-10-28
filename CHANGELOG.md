@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.202] - 2026-10-28
+
+### Changed
+- The UI typeface changed from Figtree to Barlow, matching the condensed grotesque family the kaampi logo itself is built on (Bahnschrift). Newsreader stays as the headline/prose typeface — the two sit close enough that the swap isn't worth it, and Newsreader's warmer, more editorial character fits a writing tool better than a fully neutral serif would. Self-hosted as before (six static weights/styles, no network request).
+
 ## [1.0.201] - 2026-10-28
 
 ### Added
