@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.196] - 2026-10-28
+
+### Changed
+- The Storybook Core dialog is reorganized into two tabs, Sharing and Versions, instead of one long scrolling list — the sharing switches and the private-version controls (save now, auto-save, version history, restore/compare) were sharing a single view with no separation. The dialog heading now shows the open manuscript's own title (truncated with an ellipsis past 32 characters) instead of a generic "Storybook Core" label — you already know you're in a Core dialog from the button you just clicked; what you don't get for free is which manuscript. The dialog's outer size now stays fixed regardless of which tab is open — only the tab's own content scrolls, so switching tabs no longer resizes the card.
+
 ## [1.0.195] - 2026-10-27
 
 ### Added

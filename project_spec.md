@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.195
+Status: living document, v1.0.196
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9511,6 +9511,55 @@ Linux-miljöbegränsning som v1.0.194); Mats kan testa på sin dator
 när nästa desktop-bygge är klar.
 
 v1.0.194 → v1.0.195.
+
+**Ändringslogg v1.0.196 (2026-10-28): Core-dialogen omorganiserad i
+flikar, efter en delad designartefakt med Mats.**
+
+Mats laddade upp ett eget HTML-mockup-förslag (statisk prototyp, två
+flikar "Delning"/"Versioner") och bad mig kommentera och bygga ett eget
+förslag han kunde jämföra med — en interaktiv Design-canvas-artefakt
+(claude.ai/artifact/ARH6MVVokSJiSZmZg88oUS), grundad i appens egna
+riktiga färgtokens ur `styles.css` och verklig kopia från den befintliga
+dialogen, inte generisk platshållartext. Mats testade artefakten live,
+lämnade en kommentar direkt i artefakten ("Ska vi istället skriva namnet
+på Manuskriptet?" — besvarad och löst i tråden), och bad sedan om två
+till ändringar (titel-trunkering med "…", fast dialoghöjd oavsett
+aktiv flik) innan han godkände och bad mig bygga in det på riktigt.
+
+**Bytt i `CoreConnectionDialog.tsx`:**
+- Parkoppling/anslutningsstatus (formulär, status rad, "Kontrollera
+  anslutning") ligger kvar överst, utanför flikarna — gäller båda
+  flikarna lika, går inte att dela upp.
+- Ny flikrad "Delning"/"Versioner" (bara på desktop, samma `isTauri()`-
+  gate som resten av dialogen): Delning-fliken fick sandbox/comic-
+  kryssrutorna + delningsstatus; Versioner-fliken fick auto-spara-
+  kryssrutan, "Spara privat version"-knappen, versionslistan och
+  jämför/återställ-panelen — exakt samma logik/state som innan, bara
+  flyttad under rätt flik, ingen ny datahantering.
+- Rubriken visar nu `currentBook.title` (trunkerad till 32 tecken +
+  "…" om längre, med fullständig titel i `title`-attributet för hover)
+  istället för det statiska "Storybook Core" — det gamla värdet flyttades
+  till en liten eyebrow-etikett ovanför istället, eftersom man redan vet
+  att man öppnat Core-dialogen (man klickade just på en knapp som heter
+  "Core") men inte annars ser vilket manus dialogen gäller.
+- Ny CSS (`styles.css`): `.core-connection-card` fick fast höjd
+  (`min(640px, 86vh)`) och flex-kolumn-layout istället för bara
+  `max-height`/`overflow-y`, så att `.core-tab-panel` (den enda delen
+  som faktiskt scrollar, `flex:1; min-height:0; overflow-y:auto`) är det
+  som växer/krymper internt — inte hela dialogrutan — när man byter flik.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (94 filer, 1240
+test, oförändrat) grön, `npm run build` rent. Playwright kunde inte
+testa desktop-gated UI direkt (samma begränsning som tidigare), så jag
+spoofade `window.isTauri = true` i en headless webbläsarsession för att
+faktiskt rendera flikarna och mäta kortets höjd — bekräftat identisk
+höjd (619.1875px) före och efter flikbyte, rubriken trunkerad korrekt,
+Versioner-panelens innehåll (auto-spara-text m.m.) synligt och rätt.
+De två `invoke`-felen som syntes i testet var väntade — spoofningen
+ger ingen riktig Tauri-IPC-bro, inget appfel. Riktig parkoppling/
+Credential Manager-flödet är fortfarande inte testat i den här miljön.
+
+v1.0.195 → v1.0.196.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

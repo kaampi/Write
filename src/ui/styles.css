@@ -7381,11 +7381,29 @@ button.illustration-genre-item:focus-visible {
     transform: scale(2);
   }
 }
-/* Core sharing remains a small per-manuscript dialog, even with long status text. */
-.core-connection-card { width: min(540px, calc(100vw - 32px)); max-height: min(80vh, 720px); overflow-y: auto; }
+/*
+ * Core sharing remains a small per-manuscript dialog. Fixed height (not
+ * just a max-height) plus a flex column, so switching between the
+ * Sharing/Versions tabs scrolls the tab panel instead of resizing the
+ * whole card — the card's outer size stays constant either way.
+ */
+.core-connection-card { width: min(540px, calc(100vw - 32px)); height: min(640px, 86vh); display: flex; flex-direction: column; overflow: hidden; }
 .core-connection-card form, .core-connection-card fieldset { display: grid; gap: 12px; margin: 18px 0; }
 .core-connection-card input[type="password"] { display: block; width: 100%; margin-top: 8px; }
 .core-connection-card fieldset label { display: flex; align-items: center; gap: 8px; }
+.core-connection-eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--sage); font-size: 0.72rem; font-weight: 650; }
+.core-connection-title {
+  margin: 0.25rem 0 0;
+  max-width: 26rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.core-connection-status { flex: 0 0 auto; display: grid; gap: 0.5rem; }
+.core-tabs { flex: 0 0 auto; display: flex; gap: 1.25rem; border-bottom: 1px solid var(--border-soft); margin-top: 0.75rem; }
+.core-tab { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--text-dim); font-weight: 650; font-size: 0.9rem; padding: 0.6rem 0.1rem; }
+.core-tab.is-active { border-bottom-color: var(--ink); color: var(--text); }
+.core-tab-panel { flex: 1; min-height: 0; overflow-y: auto; padding-top: 0.75rem; }
 .core-version-list { max-height: 13rem; overflow-y: auto; margin-top: 0.75rem; }
 .core-revision-inspection { max-height: 18rem; overflow-y: auto; margin-top: 1rem; border-top: 1px solid var(--border); }
 .core-revision-inspection pre { white-space: pre-wrap; overflow-wrap: anywhere; }
