@@ -9,12 +9,12 @@ import { useLocale } from "./i18n";
 
 const copy = {
   en: {
-    title: "Storybook Core", close: "Close", local: "This manuscript stays in Storybook's local storage.",
+    title: "kaampi Write Core", close: "Close", local: "This manuscript stays in kaampi Write's local storage.",
     unavailable: "Core connection requires the Windows desktop app.",
     disconnected: "Core is not paired.", offline: "Core is paired but currently unavailable. Changes will be queued locally.",
-    connected: "Core is connected.", token: "Storybook pairing key", pair: "Connect", refresh: "Check connection",
-    pairing: "Connecting…", saving: "Saving…", sandbox: "Show this manuscript in Sandbox",
-    comic: "Show this manuscript in Comic", pending: "Waiting to sync with Core.", synced: "No local changes waiting to sync.",
+    connected: "Core is connected.", token: "kaampi Write pairing key", pair: "Connect", refresh: "Check connection",
+    pairing: "Connecting…", saving: "Saving…", sandbox: "Show this manuscript in kaampi Explore",
+    comic: "Show this manuscript in kaampi Comic", pending: "Waiting to sync with Core.", synced: "No local changes waiting to sync.",
     private: "Off by default. Turning both off removes access in Core when it reconnects.",
     shared: "Sharing includes all chapter prose, synopsis and approved visible Story Bible facts. Brainstorm and hidden or unapproved facts stay private.",
     actual: "Current access in Core", unknown: "Core access has not been verified. Previously shared copies may still be accessible.", nobody: "No other app",
@@ -28,12 +28,12 @@ const copy = {
     shareHeading: "Show this manuscript in"
   },
   sv: {
-    title: "Storybook Core", close: "Stäng", local: "Manuset sparas fortfarande lokalt i Storybook.",
+    title: "kaampi Write Core", close: "Stäng", local: "Manuset sparas fortfarande lokalt i kaampi Write.",
     unavailable: "Core-anslutning kräver Windows-appen.",
     disconnected: "Core är inte parkopplad.", offline: "Core är parkopplad men inte tillgänglig just nu. Ändringar köas lokalt.",
-    connected: "Core är ansluten.", token: "Parkopplingsnyckel för Storybook", pair: "Anslut", refresh: "Kontrollera anslutning",
-    pairing: "Ansluter…", saving: "Sparar…", sandbox: "Visa det här manuset i Sandbox",
-    comic: "Visa det här manuset i Comic", pending: "Väntar på synk till Core.", synced: "Inga lokala ändringar väntar på synk.",
+    connected: "Core är ansluten.", token: "Parkopplingsnyckel för kaampi Write", pair: "Anslut", refresh: "Kontrollera anslutning",
+    pairing: "Ansluter…", saving: "Sparar…", sandbox: "Visa det här manuset i kaampi Explore",
+    comic: "Visa det här manuset i kaampi Comic", pending: "Väntar på synk till Core.", synced: "Inga lokala ändringar väntar på synk.",
     private: "Av som standard. Stäng av båda för att återkalla åtkomst i Core när tjänsten nås igen.",
     shared: "Delning omfattar alla kapitels prosa, synopsis och godkända synliga fakta i Story Bible. Brainstorm och dolda eller ogranskade fakta förblir privata.",
     actual: "Faktisk åtkomst i Core", unknown: "Åtkomsten i Core är inte verifierad. Tidigare delade kopior kan fortfarande vara åtkomliga.", nobody: "Ingen annan app",
@@ -47,12 +47,12 @@ const copy = {
     shareHeading: "Visa manuskriptet i"
   },
   nb: {
-    title: "Storybook Core", close: "Lukk", local: "Manuset lagres fortsatt lokalt i Storybook.",
+    title: "kaampi Write Core", close: "Lukk", local: "Manuset lagres fortsatt lokalt i kaampi Write.",
     unavailable: "Core-tilkobling krever Windows-appen.",
     disconnected: "Core er ikke paret.", offline: "Core er paret, men ikke tilgjengelig nå. Endringer legges i lokal kø.",
-    connected: "Core er tilkoblet.", token: "Paringsnøkkel for Storybook", pair: "Koble til", refresh: "Kontroller tilkobling",
-    pairing: "Kobler til…", saving: "Lagrer…", sandbox: "Vis dette manuset i Sandbox",
-    comic: "Vis dette manuset i Comic", pending: "Venter på synkronisering med Core.", synced: "Ingen lokale endringer venter på synkronisering.",
+    connected: "Core er tilkoblet.", token: "Paringsnøkkel for kaampi Write", pair: "Koble til", refresh: "Kontroller tilkobling",
+    pairing: "Kobler til…", saving: "Lagrer…", sandbox: "Vis dette manuset i kaampi Explore",
+    comic: "Vis dette manuset i kaampi Comic", pending: "Venter på synkronisering med Core.", synced: "Ingen lokale endringer venter på synkronisering.",
     private: "Av som standard. Slå av begge for å trekke tilbake tilgangen i Core når tjenesten er tilgjengelig igjen.",
     shared: "Deling omfatter all kapittelprosa, synopsis og godkjente synlige fakta i Story Bible. Brainstorm og skjulte eller ikke godkjente fakta forblir private.",
     actual: "Faktisk tilgang i Core", unknown: "Tilgangen i Core er ikke bekreftet. Tidligere delte kopier kan fortsatt være tilgjengelige.", nobody: "Ingen annen app",

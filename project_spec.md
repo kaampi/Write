@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.202
+Status: living document, v1.0.203
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9777,6 +9777,37 @@ att `<h1>` fortfarande får Newsreader och `<body>` nu får Barlow —
 inte bara en visuell kontroll.
 
 v1.0.201 → v1.0.202.
+
+**Ändringslogg v1.0.202 → v1.0.203 (2026-10-28): kvarglömt
+"Storybook" i Core-dialogen.** Mats skickade en skärmbild av
+Core-anslutningsdialogen — eyebrow-etiketten sa fortfarande
+"STORYBOOK CORE" och texten "This manuscript stays in Storybook's
+local storage." Namnbytespasset den 28:e missade den här
+komponenten helt, trots att `CoreConnectionDialog.tsx` faktiskt var
+med i den ursprungliga träfflistan för "Sandbox"-sökningen — bara
+inte åtgärdad då.
+
+**Bytt i `CoreConnectionDialog.tsx` (alla tre språk):** `title`
+("Storybook Core" → "kaampi Write Core"), `local`
+("...i Storybook" → "...i kaampi Write"), `token`
+("Parkopplingsnyckel för Storybook" → "...för kaampi Write"),
+`sandbox` ("Visa i Sandbox" → "Visa i kaampi Explore") och `comic`
+("Visa i Comic" → "Visa i kaampi Comic") — de sistnämnda två är
+delningsswitcharna på Delning-fliken, samma "Sandbox"/"Comic"-
+mönster som redan fixades i i18n-filerna och READMEn men som
+missades just i den här komponentens egna inline-copy-objekt.
+
+Passade även på att fixa två kvarglömda felmeddelanden i
+`coreRevisionRestore.ts` ("A Storybook-owned private Core revision
+is required." / "...not a full Storybook manuscript.") — ren
+visningstext, rör inte den tekniska identitetssträngen
+`owner_app !== "storybook"` några rader ovanför, som är orörd av
+avsikt (Core-kontraktets egen nyckel, inte ett visningsnamn).
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent.
+
+v1.0.202 → v1.0.203.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

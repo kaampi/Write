@@ -2,7 +2,7 @@ import { parseBook, type Book } from "./BookSchema";
 import { newId, nowIso } from "./ids";
 import { ManuscriptBackupError, packManuscriptBackup, parseManuscriptBackup, type ManuscriptBackup } from "./manuscriptBackup";
 
-/** The Core workspace and immutable revision must be fetched with Storybook's verified identity. */
+/** The Core workspace and immutable revision must be fetched with kaampi Write's verified identity. */
 export type CoreBookRevision = {
   workspace: { id: string; owner_app: string; kind: string; project_id: string | null };
   revision: { id: string; workspace_id: string; body: unknown; deleted: boolean };
@@ -24,11 +24,11 @@ export function prepareCoreBookRestore(
       source.workspace.owner_app !== "storybook" || source.workspace.kind !== "private-snapshot" ||
       source.revision.workspace_id !== source.workspace.id || source.revision.deleted ||
       !source.revision.id || !source.workspace.project_id) {
-    throw new ManuscriptBackupError("unreadable", "A Storybook-owned private Core revision is required.");
+    throw new ManuscriptBackupError("unreadable", "A kaampi Write-owned private Core revision is required.");
   }
   let book: Book;
   try { book = parseBook(source.revision.body); }
-  catch { throw new ManuscriptBackupError("unreadable", "The Core revision is not a full Storybook manuscript."); }
+  catch { throw new ManuscriptBackupError("unreadable", "The Core revision is not a full kaampi Write manuscript."); }
   if (book.id !== source.workspace.project_id) {
     throw new ManuscriptBackupError("unreadable", "The Core revision belongs to a different manuscript.");
   }

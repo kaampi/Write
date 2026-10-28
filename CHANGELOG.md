@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.203] - 2026-10-28
+
+### Fixed
+- The Core connection dialog still said "Storybook Core" and referred to "Storybook" by name in several places (pairing key label, local-storage notice, and the "show this manuscript in Sandbox/Comic" sharing switches) — missed in the earlier rename pass. Now says kaampi Write / kaampi Explore / kaampi Comic throughout. A couple of Core-revision-restore error messages had the same leftover naming and are fixed too.
+
 ## [1.0.202] - 2026-10-28
 
 ### Changed
