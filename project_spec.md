@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.199
+Status: living document, v1.0.200
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9699,6 +9699,30 @@ ordmärken), så en ny kvadratisk ikon/symbol behövs separat — frågat
 Mats om han har en, inte löst i den här ändringen.
 
 v1.0.198 → v1.0.199.
+
+**Ändringslogg v1.0.199 → v1.0.200 (2026-10-28): app-ikonen.** Jag
+frågade om en kvadratisk symbol för Tauri-app-ikonen eftersom
+ingendera skickad logga var kvadratisk. Mats skickade ett 480×480
+PNG: magenta kvadrat med ett vitt, seriffat "W" i samma stil som
+"Write"-ordmärket.
+
+Genererade hela ikonuppsättningen från källbilden med Tauris egen
+`npx tauri icon`-kommando istället för att skala/beskära manuellt —
+skriver alla storlekar/format (`.ico`, `.icns`, `32x32.png` upp till
+`128x128@2x.png`, hela Windows Store-plattan `Square*Logo.png`/
+`StoreLogo.png`) konsekvent från en enda källa. Kommandot skrev även
+iOS/Android-ikonuppsättningar den här appen inte använder (inget
+mobilt bundle-mål i `tauri.conf.json`) — de togs bort igen.
+
+Källbilden sparad som `public/brand/app-icon-source.png` för
+framtida ombygge (t.ex. om storlekskraven ändras).
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent. Den
+faktiska ikon-/installer-bygget kan bara verifieras på riktig
+Windows-CI (samma begränsning som alltid i den här sandlådan för
+Tauri/Rust-sidan) — visuellt kontrollerad på skärm här innan commit.
+
+v1.0.199 → v1.0.200.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

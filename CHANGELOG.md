@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.200] - 2026-10-28
+
+### Changed
+- Replaced the desktop app icon (taskbar, window, installer, Windows Store tile assets) with the new kaampi Write mark — a magenta square with a white serif "W" — generated from a single square source image via Tauri's own icon generator so every required size and format (`.ico`, `.icns`, all PNG tiers) stays consistent.
+
 ## [1.0.199] - 2026-10-28
 
 ### Changed
