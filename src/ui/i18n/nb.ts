@@ -432,7 +432,7 @@ export const nb: Messages = {
     sendToCoreError: "Fikk ikke kontakt med Core akkurat nå. Lagres lokalt og sendes automatisk når tilkoblingen er tilbake.",
     errors: {
       "not-backup": "Den filen er ikke en manuskriptsikkerhetskopi.",
-      "sandbox-export": "Den filen er en karteksport fra Sandbox. Importer den i Sandbox, ikke her.",
+      "sandbox-export": "Den filen er en karteksport fra kaampi Explore. Importer den i kaampi Explore, ikke her.",
       "not-manuscript": "Den filen er ikke en StoryBook-manuskriptsikkerhetskopi.",
       "newer-format": "Denne sikkerhetskopien kommer fra en nyere StoryBook. Oppdater appen og prøv på nytt.",
       unreadable: "Manuskriptet i filen kunne ikke leses."
@@ -1427,7 +1427,7 @@ export const nb: Messages = {
     reviewCount: "Gjennomgang · {count}",
     lockedCount: "{count} låste",
     exportCards: "Eksporter kort",
-    exportCardsTitle: "Last ned karakterer, steder og gjenstander til Sandbox",
+    exportCardsTitle: "Last ned karakterer, steder og gjenstander til kaampi Explore",
     importLoreNav: "Importer lore",
     importLoreTitle: "Importer en lore-artikkel",
     importLoreLede: "Lim inn tekst fra din egen lorebok. En AI leser gjennom den og foreslår fakta til riktig kort — akkurat som når fakta hentes ut fra et kapittel. Ingenting låses direkte; alt havner i granskingskøen. Selve teksten lagres ikke i boken, bare faktaene den gir opphav til.",

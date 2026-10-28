@@ -7,7 +7,7 @@ npm install
 npm run dev
 ```
 
-Opens on [http://localhost:5175](http://localhost:5175) so it does not collide with Sandbox (5173).
+Opens on [http://localhost:5175](http://localhost:5175) so it does not collide with kaampi Explore (5173).
 
 Allow the origin:
 

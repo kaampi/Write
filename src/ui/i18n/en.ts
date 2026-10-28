@@ -839,7 +839,7 @@ export const en = {
     sendToCoreError: "Could not reach Core right now. Saved locally and will send automatically once the connection is back.",
     errors: {
       "not-backup": "That file is not a manuscript backup.",
-      "sandbox-export": "That file is a Sandbox card export. Import it in Sandbox, not here.",
+      "sandbox-export": "That file is a kaampi Explore card export. Import it in kaampi Explore, not here.",
       "not-manuscript": "That file is not a StoryBook manuscript backup.",
       "newer-format": "This backup is from a newer StoryBook. Update the app, then try again.",
       unreadable: "The manuscript inside this file could not be read."
@@ -1437,7 +1437,7 @@ export const en = {
     reviewCount: "Review · {count}",
     lockedCount: "{count} locked",
     exportCards: "Export cards",
-    exportCardsTitle: "Download characters, places, and objects for Sandbox",
+    exportCardsTitle: "Download characters, places, and objects for kaampi Explore",
     importLoreNav: "Import lore",
     importLoreTitle: "Import a lore article",
     importLoreLede: "Paste text from your own lorebook. An AI reads through it and proposes facts for the right cards — the same as extracting facts from a chapter. Nothing locks in directly; everything lands in the review queue. The text itself is never saved to the book, only whatever facts come out of it.",

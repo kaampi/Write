@@ -432,7 +432,7 @@ export const sv: Messages = {
     sendToCoreError: "Kunde inte nå Core just nu. Sparas lokalt och skickas automatiskt när anslutningen är tillbaka.",
     errors: {
       "not-backup": "Den filen är inte en manussäkerhetskopia.",
-      "sandbox-export": "Den filen är en kartexport från Sandbox. Importera den i Sandbox, inte här.",
+      "sandbox-export": "Den filen är en kartexport från kaampi Explore. Importera den i kaampi Explore, inte här.",
       "not-manuscript": "Den filen är inte en StoryBook-manussäkerhetskopia.",
       "newer-format": "Den här säkerhetskopian kommer från en nyare StoryBook. Uppdatera appen och försök igen.",
       unreadable: "Manuset i filen gick inte att läsa."
@@ -1427,7 +1427,7 @@ export const sv: Messages = {
     reviewCount: "Granskning · {count}",
     lockedCount: "{count} låsta",
     exportCards: "Exportera kort",
-    exportCardsTitle: "Ladda ner karaktärer, platser och föremål till Sandbox",
+    exportCardsTitle: "Ladda ner karaktärer, platser och föremål till kaampi Explore",
     importLoreNav: "Importera lore",
     importLoreTitle: "Importera en lore-artikel",
     importLoreLede: "Klistra in text från din egen lorebok. En AI läser igenom den och föreslår fakta till rätt kort — precis som när fakta plockas ut ur ett kapitel. Inget låses direkt; allt hamnar i granskningskön. Texten sparas inte i boken, bara de fakta som blir av den.",
