@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Desktop launcher for kaampi Write — serves the app locally, no separate install steps."
 authors = ["ocedo-apps"]
 license = ""
-repository = "https://github.com/ocedo-apps/storybook-ai"
+repository = "https://github.com/kaampi/Write"
 edition = "2024"
 rust-version = "1.90"
 

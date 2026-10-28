@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { format, useLocale } from "./i18n";
 import { openExternalUrl, type UpdateStatus } from "./desktopBridge";
 
-const CHANGELOG_URL = "https://github.com/ocedo-apps/StoryBook-AI/blob/main/CHANGELOG.md";
+const CHANGELOG_URL = "https://github.com/kaampi/Write/blob/main/CHANGELOG.md";
 
 export function UpdateCheckDialog({
   checking,

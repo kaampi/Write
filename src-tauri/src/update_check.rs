@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 
-const RELEASES_URL: &str = "https://api.github.com/repos/ocedo-apps/StoryBook-AI/releases/latest";
+const RELEASES_URL: &str = "https://api.github.com/repos/kaampi/Write/releases/latest";
 
 #[derive(Deserialize)]
 struct GithubRelease {

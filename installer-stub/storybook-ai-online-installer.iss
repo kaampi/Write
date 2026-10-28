@@ -26,7 +26,7 @@
 
 #define MyAppName "kaampi Write Online Installer"
 #define MyAppVersion "1.0"
-#define StoryBookDownloadURL "https://github.com/ocedo-apps/StoryBook-AI/releases/latest/download/StoryBook-AI-Setup.exe"
+#define StoryBookDownloadURL "https://github.com/kaampi/Write/releases/latest/download/StoryBook-AI-Setup.exe"
 #define OllamaDownloadURL "https://ollama.com/download/OllamaSetup.exe"
 
 [Setup]

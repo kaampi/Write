@@ -78,7 +78,7 @@ A record can reference `entityId` and `sourceRevision`; references never imply o
 
 ## Executable local service (first slice)
 
-The Core service lives in its own repository, [`ocedo-apps/StoryCore`](https://github.com/ocedo-apps/StoryCore), at `packages/service/` — not in this repo. Storybook only consumes it as an HTTP client (`src/persistence/CoreDesktopTransport.ts`, the Tauri bridge) and, for schema validation, as the `@ocedo-apps/storycore` npm dependency declared in this repo's `package.json`. The commands below are run from a checkout of the StoryCore repo, not this one.
+The Core service lives in its own repository, [`kaampi/Codex`](https://github.com/kaampi/Codex) (branded kaampi Codex; `StoryCore` on npm), at `packages/service/` — not in this repo. Storybook only consumes it as an HTTP client (`src/persistence/CoreDesktopTransport.ts`, the Tauri bridge) and, for schema validation, as the `@ocedo-apps/storycore` npm dependency declared in this repo's `package.json`. The commands below are run from a checkout of the StoryCore repo, not this one.
 
 It runs independently of the Storybook UI on Node 22.13+ (tested on Node 24). It uses Node's built-in SQLite driver and HTTP server; no Tauri or Vite process is required. Data persists at `CORE_DB_PATH`. The server listens on `127.0.0.1` only, default port 43127. For example:
 
