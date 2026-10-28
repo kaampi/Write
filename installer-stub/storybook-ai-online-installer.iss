@@ -1,4 +1,4 @@
-; -- StoryBook AI — online installer stub --
+; -- kaampi Write — online installer stub --
 ;
 ; A small bootstrapper (roadmap-ideas.md #35), inspired by the "online
 ; installer" pattern on OnlyOffice's download page: instead of bundling
@@ -7,12 +7,12 @@
 ;   1. Ollama's own official Windows installer, run silently — but only
 ;      if the user opts in on the page below AND neither Ollama nor
 ;      LM Studio is already detected; and
-;   2. the current StoryBook AI installer (always the latest GitHub
+;   2. the current kaampi Write installer (always the latest GitHub
 ;      Release — this file never needs to be rebuilt just because the
 ;      app shipped a new version), handed off to the user normally so
 ;      they see the same installer screens already tested in v1.0.30+.
 ;
-; StoryBook AI's own Settings already support LM Studio (or any other
+; kaampi Write's own Settings already support LM Studio (or any other
 ; OpenAI-compatible local server) via the "OpenAI-compatible" engine
 ; option — this stub's job is only to not get in that person's way by
 ; presuming they want Ollama too.
@@ -24,7 +24,7 @@
 ; official jrsoftware/issrc Examples/DownloadFiles.iss), not a
 ; third-party plugin DLL — nothing extra to bundle or keep updated.
 
-#define MyAppName "StoryBook AI Online Installer"
+#define MyAppName "kaampi Write Online Installer"
 #define MyAppVersion "1.0"
 #define StoryBookDownloadURL "https://github.com/ocedo-apps/StoryBook-AI/releases/latest/download/StoryBook-AI-Setup.exe"
 #define OllamaDownloadURL "https://ollama.com/download/OllamaSetup.exe"
@@ -47,7 +47,7 @@ SolidCompression=yes
 Compression=lzma
 
 [Messages]
-WelcomeLabel2=This will set up StoryBook AI on your computer.%n%nThe next page lets you choose whether to also install Ollama, the local AI engine StoryBook AI uses — skip it if you already use Ollama, prefer LM Studio, or have your own local server.%n%nStoryBook AI itself never sends your manuscript anywhere; see the in-app Guide for details.
+WelcomeLabel2=This will set up kaampi Write on your computer.%n%nThe next page lets you choose whether to also install Ollama, the local AI engine kaampi Write uses — skip it if you already use Ollama, prefer LM Studio, or have your own local server.%n%nkaampi Write itself never sends your manuscript anywhere; see the in-app Guide for details.
 
 [Files]
 ; Both of these are downloaded fresh at install time, not bundled into
@@ -63,8 +63,8 @@ Source: "{#OllamaDownloadURL}"; DestName: "OllamaSetup.exe"; DestDir: "{tmp}"; E
 ; switches, not something specific to Ollama.
 Filename: "{tmp}\OllamaSetup.exe"; Parameters: "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART"; StatusMsg: "Installing Ollama..."; Flags: waituntilterminated; Check: WantOllama
 ; Handed off normally (no silent flag) — the user finishes install the
-; same way as downloading StoryBook AI directly, nothing new to learn.
-Filename: "{tmp}\StoryBook-AI-Setup.exe"; Description: "Continue to the StoryBook AI installer"; Flags: nowait postinstall skipifsilent shellexec
+; same way as downloading kaampi Write directly, nothing new to learn.
+Filename: "{tmp}\StoryBook-AI-Setup.exe"; Description: "Continue to the kaampi Write installer"; Flags: nowait postinstall skipifsilent shellexec
 
 [Code]
 const
@@ -100,11 +100,11 @@ procedure InitializeWizard;
 begin
   OllamaChoicePage := CreateInputOptionPage(wpWelcome,
     'Local AI engine', 'Install Ollama?',
-    'StoryBook AI needs a local AI engine to write with. Ollama is the ' +
+    'kaampi Write needs a local AI engine to write with. Ollama is the ' +
     'one it''s built around, and this installer can set it up for you ' +
     '(a large download, around 1.5 GB, done silently in the background).' + #13#10#13#10 +
     'If you already have Ollama, already use LM Studio, or run your own ' +
-    'local server, leave this unchecked — StoryBook AI''s own Settings ' +
+    'local server, leave this unchecked — kaampi Write''s own Settings ' +
     'can connect to any OpenAI-compatible server, LM Studio included.',
     False, False);
   OllamaChoicePage.Add('Install Ollama automatically');

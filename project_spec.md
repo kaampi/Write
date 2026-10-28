@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.197
+Status: living document, v1.0.198
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9613,6 +9613,55 @@ verifieras istället på riktig `windows-latest`-CI
 mönster som uppgift 1–3 i StoryCore.
 
 v1.0.196 → v1.0.197.
+
+**Ändringslogg v1.0.197 → v1.0.198 (2026-10-28): namnbytet — StoryBook
+AI blir kaampi Write.** Mats har köpt kaampi.com/.se och bestämt
+appnamnen för hela det kreativa ekosystemet: StoryBook AI → kaampi
+Write, ComicBook AI → kaampi Comic, Sandbox AI → kaampi Explore,
+StoryCore → kaampi Codex (de tre sistnämnda görs i sina egna repon).
+Ocedo-apps-organisationen och Vira berörs inte — de hör inte till
+kaampi-ekosystemet.
+
+**Vad som byttes i det här repot:** varje synlig förekomst av
+"StoryBook AI" — fönstertitel och `productName` i `tauri.conf.json`,
+alla tre språkfiler (`i18n/en.ts`, `sv.ts`, `nb.ts`, 30 förekomster
+var), `AppTopBar.tsx`/`Home.tsx` (bild-`alt`-text), felmeddelanden i
+`ollama.ts`/`provider.ts`, launcher-skripten (`starta.bat/.sh/.command`),
+README, `docs/guide.md`, `docs/running.md`, installer-stubben
+(`installer-stub/storybook-ai-online-installer.iss`, både `MyAppName`
+och löptext), `package.json`s och `Cargo.toml`s `description`-fält,
+samt CI-workflow-namnen — blev "kaampi Write".
+
+**Vad som INTE byttes, medvetet:**
+- `tauri.conf.json`s `identifier` (`se.ocedo.storybookai`) och
+  deep-link-schemat (`storybookai`) — Tauri/Windows egna
+  app-identiteter. Byts de nu tappar den redan installerade appen på
+  Mats dator sin koppling till sin egen installationspost (uppdatering/
+  avinstallation skulle se ut som en helt ny app).
+- Core-identitetssträngen `"app": "storybook"` som `check_identity`
+  i `core_bridge.rs` jämför mot, och samma sträng på Core-tjänstens
+  sida (StoryCore-repot) — en teknisk nyckel, inte ett visningsnamn.
+  Byts den krävs synkroniserad ändring i båda repona samtidigt och
+  Mats måste parkoppla om.
+- Windows Credential Manager-posten (`se.ocedo.storybookai.core`) —
+  rör Mats redan sparade, riktiga parkopplingsnyckel. Att byta den nu
+  utan migrering skulle kräva ominstallation/omparkoppling i onödan.
+- `package.json`s `name`-fält (`storybook-ai`, ren teknisk slug) och
+  GitHub-repots URL/namn — repot flyttas inte i detta steg; det är
+  Mats eget, separata steg (Transfer ownership till kaampi-orgen) när
+  han är redo. GitHub:s omdirigering gör att den gamla länken
+  fortsätter fungera under tiden.
+- Historiska loggposter i `project_spec.md`, `CHANGELOG.md` och
+  `roadmap-ideas.md` (allt ovanför den här posten) — de beskriver vad
+  som hände under det namn appen bar då; att skriva om historien
+  retroaktivt kändes mer missvisande än att bara fortsätta framåt
+  under det nya namnet härifrån.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (94 filer, 1240
+test, oförändrat — inget testar synliga strängar mot "StoryBook AI")
+grön, `npm run build` rent.
+
+v1.0.197 → v1.0.198.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

@@ -49,7 +49,7 @@ export const sv: Messages = {
     titlePlaceholder: "Titel",
     open: "Skapa",
     importBackup: "Importera backup",
-    importBackupCardLede: "Återställ ett manus du tidigare säkerhetskopierat från StoryBook AI.",
+    importBackupCardLede: "Återställ ett manus du tidigare säkerhetskopierat från kaampi Write.",
     importBackupCardAction: "Välj en backupfil",
     importManuscriptButton: "Importera manus (textfil)",
     importManuscriptCardLede: "Starta från en vanlig text- eller Markdown-export från ett annat skrivverktyg.",
@@ -767,8 +767,8 @@ export const sv: Messages = {
         body: "AI-modellen är det som faktiskt skriver och resonerar med dig. Vi rekommenderar en modell tränad för skönlitterär prosa, till exempel fluffy/l3-8b-stheno-v3.2 (sök efter \"stheno\" i Ollama). Annars fungerar vilken allmän chattmodell som helst — till exempel llama3 eller mistral."
       },
       {
-        heading: "Koppla den till StoryBook AI",
-        body: "Kör du Ollama? Inget att ställa in — StoryBook AI hittar den automatiskt. Kör du LM Studio eller en annan server istället? Öppna Inställningar → Modeller, välj den under Motor, och klistra in serveradressen den visar dig."
+        heading: "Koppla den till kaampi Write",
+        body: "Kör du Ollama? Inget att ställa in — kaampi Write hittar den automatiskt. Kör du LM Studio eller en annan server istället? Öppna Inställningar → Modeller, välj den under Motor, och klistra in serveradressen den visar dig."
       }
     ],
     categories: {
@@ -785,7 +785,7 @@ export const sv: Messages = {
     sections: {
       privacy: {
         heading: "Ett helt stängt digitalt kassaskåp",
-        body: "StoryBook AI är byggd kring en enda regel: ditt manus är din egendom, och det ska aldrig lämna din dator. Det finns ingen väg ut mot internet i själva appen — inga API-nycklar till ChatGPT, Claude eller andra molntjänster (det är inte en saknad funktion, utan ett medvetet val), och typsnitten ligger paketerade i appen istället för att hämtas utifrån. Din text lagras enbart lokalt i webbläsaren, och AI-modellen körs enbart på din egen processor. Den fristående skrivbordsappen (frivillig) kan kolla om det finns en nyare version av sig själv — aldrig av ditt manus, som den inte ens har tillgång till. Oavsett vad du skriver — dagbok, företagshemligheter eller nästa stora fantasy-epos — stannar varje bokstav hos dig."
+        body: "kaampi Write är byggd kring en enda regel: ditt manus är din egendom, och det ska aldrig lämna din dator. Det finns ingen väg ut mot internet i själva appen — inga API-nycklar till ChatGPT, Claude eller andra molntjänster (det är inte en saknad funktion, utan ett medvetet val), och typsnitten ligger paketerade i appen istället för att hämtas utifrån. Din text lagras enbart lokalt i webbläsaren, och AI-modellen körs enbart på din egen processor. Den fristående skrivbordsappen (frivillig) kan kolla om det finns en nyare version av sig själv — aldrig av ditt manus, som den inte ens har tillgång till. Oavsett vad du skriver — dagbok, företagshemligheter eller nästa stora fantasy-epos — stannar varje bokstav hos dig."
       },
       author: {
         heading: "Författaren vinner alltid över AI:n",
@@ -805,7 +805,7 @@ export const sv: Messages = {
       },
       "illustration-prompts": {
         heading: "Illustrationsprompter",
-        body: "Markera ett stycke och välj Illustrationsprompt… i högerklicksmenyn. Modellen skriver en bildgenereringsprompt — inte en bild — byggd på stycket, dina låsta Story Bible-fakta och manusets illustrationsstil, redo att klistras in i vilket bildverktyg du än använder; StoryBook AI förblir helt lokal och genererar aldrig själva bilden. Sätt en standardstil under Inställningar → Illustrationsstil, eller öppna stilbiblioteket för att spara namngivna, återanvändbara stilar — var och en med egna genretaggar och en exempelbild — så att varje prompt håller samma look genom hela boken."
+        body: "Markera ett stycke och välj Illustrationsprompt… i högerklicksmenyn. Modellen skriver en bildgenereringsprompt — inte en bild — byggd på stycket, dina låsta Story Bible-fakta och manusets illustrationsstil, redo att klistras in i vilket bildverktyg du än använder; kaampi Write förblir helt lokal och genererar aldrig själva bilden. Sätt en standardstil under Inställningar → Illustrationsstil, eller öppna stilbiblioteket för att spara namngivna, återanvändbara stilar — var och en med egna genretaggar och en exempelbild — så att varje prompt håller samma look genom hela boken."
       },
       "brainstorm-synopsis": {
         heading: "Brainstorm & Synopsis",
@@ -852,7 +852,7 @@ export const sv: Messages = {
     faq: [
       {
         heading: "”Ingen lokal modell hittades”",
-        body: "StoryBook AI når inte din lokala server. Kör du Ollama? Se till att den är igång. Kör du LM Studio eller en annan server? Kolla Inställningar → Modeller — motorn och serveradressen måste stämma med det som faktiskt körs på din dator."
+        body: "kaampi Write når inte din lokala server. Kör du Ollama? Se till att den är igång. Kör du LM Studio eller en annan server? Kolla Inställningar → Modeller — motorn och serveradressen måste stämma med det som faktiskt körs på din dator."
       },
       {
         heading: "Var lagras min bok?",
@@ -864,14 +864,14 @@ export const sv: Messages = {
       },
       {
         heading: "Kan jag använda en betald AI-tjänst istället?",
-        body: "Nej — medvetet. StoryBook AI pratar bara någonsin med en modell som körs på din egen dator eller nätverk. Det är inte en saknad funktion; det är hela poängen: ditt manus behöver aldrig lämna din maskin."
+        body: "Nej — medvetet. kaampi Write pratar bara någonsin med en modell som körs på din egen dator eller nätverk. Det är inte en saknad funktion; det är hela poängen: ditt manus behöver aldrig lämna din maskin."
       }
     ]
   },
   handbook: {
     title: "Guide",
     intro:
-      "StoryBook AI innehåller många verktyg, men du behöver inte lära dig allt innan du börjar.\nDu kan skriva en hel bok genom att skapa kapitel och skriva i editorn. De andra verktygen finns där när du behöver hjälp med idéer, struktur, karaktärer, kontinuitet, redigering eller publicering.\n\nBörja enkelt. Lägg till struktur när berättelsen behöver den.",
+      "kaampi Write innehåller många verktyg, men du behöver inte lära dig allt innan du börjar.\nDu kan skriva en hel bok genom att skapa kapitel och skriva i editorn. De andra verktygen finns där när du behöver hjälp med idéer, struktur, karaktärer, kontinuitet, redigering eller publicering.\n\nBörja enkelt. Lägg till struktur när berättelsen behöver den.",
     categories: {
       "getting-started": "Kom igång",
       "how-you-work": "Så kan du arbeta",
@@ -886,7 +886,7 @@ export const sv: Messages = {
     sections: {
       "connect-local-ai": {
         heading: "Koppla en lokal AI",
-        body: "StoryBook AI arbetar med en lokal AI-modell.\nDet innebär att AI-funktionerna använder den modell du själv har anslutit till StoryBook AI.\nFör att använda funktioner som utkast, omskrivning, analys och intervjuer behöver du därför först ha en fungerande lokal AI-anslutning.\n\nFölj snabbstarten för att:\n1. Installera en lokal AI-lösning.\n2. Välja en modell.\n3. Ansluta den till StoryBook AI.\n\nNär anslutningen fungerar kan du börja skriva."
+        body: "kaampi Write arbetar med en lokal AI-modell.\nDet innebär att AI-funktionerna använder den modell du själv har anslutit till kaampi Write.\nFör att använda funktioner som utkast, omskrivning, analys och intervjuer behöver du därför först ha en fungerande lokal AI-anslutning.\n\nFölj snabbstarten för att:\n1. Installera en lokal AI-lösning.\n2. Välja en modell.\n3. Ansluta den till kaampi Write.\n\nNär anslutningen fungerar kan du börja skriva."
       },
       "connection-presets": {
         heading: "Anslutningsgenvägar",
@@ -901,12 +901,12 @@ export const sv: Messages = {
         body: "Ett kapitel består i grunden av två saker:\n\nKapitelbrief\nVad kapitlet ska göra.\n\nManus\nTexten som läsaren faktiskt kommer att läsa.\n\nEn brief kan exempelvis vara:\n”Erik anländer till den gamla järnvägsstationen. Där möter han en kvinna som verkar känna hans far. Hon vägrar förklara hur och lämnar ett gammalt fotografi på bordet.”\n\nSjälva kapitlet är sedan berättelsen som växer fram ur detta.\nDu kan skriva kapitlet själv eller använda Skriv utkast för att få ett första material att arbeta vidare med."
       },
       "map-of-storybook-ai": {
-        heading: "En karta över StoryBook AI",
+        heading: "En karta över kaampi Write",
         body: "UTFORSKA\n💡 Brainstorm · 💬 Intervjua världen\nHär får idéer vara osäkra.\n↓\nPLANERA\n📖 Synopsis · 🗂 Kapitelbriefs · 🎬 Scener · 🧵 Trådar · 🕒 Timeline\nHär formar du berättelsen.\n↓\nETABLERA\n📚 Story Bible · 🔎 Extrahera fakta · ✓ Granska · 🔒 Lås\nHär bestämmer du vad som ska betraktas som etablerat.\n↓\nSKRIV\n✍️ Kapitel — Skriv utkast · Skriv en beat · Förläng · Brodera ut · Skriv om\n↓\nGRANSKA\n🔎 Analysera · ✨ Polish · 💬 Fråga manuset · 🗨 Fråga om en passage · ✓ Kontinuitet · ✓ Korrekturläs · 🧭 Developmental analysis\n↓\nFÄRDIGSTÄLL\n🖼 Bilder · 🌐 Språkversioner · 📤 Publicera · 💾 Säkerhetskopiera\n\nDet är en karta.\nInte en obligatorisk ordning."
       },
       "no-required-workflow": {
         heading: "Du behöver inte använda allt",
-        body: "StoryBook AI kan användas på många olika sätt.\nDet finns inget obligatoriskt arbetsflöde.\n\nDu kan exempelvis arbeta så här:\n\nJag vill bara börja skriva\nKapitel → Skriv → Nästa kapitel. Planera först när du behöver det.\n\nJag vill planera berättelsen\nBrainstorm → Synopsis → Kapitelbriefs → Kapitel\n\nJag vill arbeta mycket strukturerat\nSynopsis → Berättelsemetod → Trådar → Kapitelbriefs → Scener → Timeline → Kapitel\n\nJag har redan ett manus\nLägg in befintlig text → Analysera → Story Bible → Bearbeta → Publicera\n\nJag kommer från ett annat skrivverktyg\nTa med manus och lore → Importera → Granska → Fortsätt skriva\n\nDu väljer själv hur mycket struktur du behöver."
+        body: "kaampi Write kan användas på många olika sätt.\nDet finns inget obligatoriskt arbetsflöde.\n\nDu kan exempelvis arbeta så här:\n\nJag vill bara börja skriva\nKapitel → Skriv → Nästa kapitel. Planera först när du behöver det.\n\nJag vill planera berättelsen\nBrainstorm → Synopsis → Kapitelbriefs → Kapitel\n\nJag vill arbeta mycket strukturerat\nSynopsis → Berättelsemetod → Trådar → Kapitelbriefs → Scener → Timeline → Kapitel\n\nJag har redan ett manus\nLägg in befintlig text → Analysera → Story Bible → Bearbeta → Publicera\n\nJag kommer från ett annat skrivverktyg\nTa med manus och lore → Importera → Granska → Fortsätt skriva\n\nDu väljer själv hur mycket struktur du behöver."
       },
       "three-workflows": {
         heading: "Tre kompletta arbetsflöden",
@@ -918,7 +918,7 @@ export const sv: Messages = {
       },
       "most-important-principle": {
         heading: "Den viktigaste principen",
-        body: "StoryBook AI innehåller många funktioner eftersom olika författare arbetar på olika sätt.\nDet betyder inte att alla funktioner måste användas.\n\nBörja med berättelsen.\nNär du stöter på ett problem, välj det verktyg som hjälper med just det problemet.\n\nUtforska när du behöver idéer.\nPlanera när du behöver riktning.\nLås fakta när något ska bli etablerat.\nSkriv när du vet tillräckligt för att fortsätta.\nGranska när du vill förstå vad du har skrivit.\n\nOch framför allt:\nVerktygen ska anpassa sig efter ditt sätt att skriva – inte tvärtom."
+        body: "kaampi Write innehåller många funktioner eftersom olika författare arbetar på olika sätt.\nDet betyder inte att alla funktioner måste användas.\n\nBörja med berättelsen.\nNär du stöter på ett problem, välj det verktyg som hjälper med just det problemet.\n\nUtforska när du behöver idéer.\nPlanera när du behöver riktning.\nLås fakta när något ska bli etablerat.\nSkriv när du vet tillräckligt för att fortsätta.\nGranska när du vill förstå vad du har skrivit.\n\nOch framför allt:\nVerktygen ska anpassa sig efter ditt sätt att skriva – inte tvärtom."
       },
       "brainstorm-free": {
         heading: "Brainstorm – tänk fritt",
@@ -938,7 +938,7 @@ export const sv: Messages = {
       },
       "development-methods": {
         heading: "Berättelsemetoder",
-        body: "StoryBook AI innehåller flera metoder som kan hjälpa dig utveckla eller strukturera berättelsen.\nDe är helt frivilliga.\nDu kan alltid välja:\nIngen metod – skriv fritt"
+        body: "kaampi Write innehåller flera metoder som kan hjälpa dig utveckla eller strukturera berättelsen.\nDe är helt frivilliga.\nDu kan alltid välja:\nIngen metod – skriv fritt"
       },
       "snowflake-method": {
         heading: "Snowflake",
@@ -946,7 +946,7 @@ export const sv: Messages = {
       },
       "three-act": {
         heading: "Tre akter",
-        body: "Tre akter passar när du vill ha en enkel dramatisk stomme.\nStoryBook AI använder centrala vändpunkter som:\n• Upptakt\n• Utlösande händelse\n• Steget in i andra akten\n• Mittpunkt\n• Allt är förlorat\n• Klimax\n• Upplösning\n\nDessa blir Trådar som du kan koppla till berättelsens kapitel.\n\nExempel\nUtlösande händelse: ”Nora hittar ett brev från sin försvunne far.” (Kapitel 3)\nSenare — Mittpunkt: ”Nora upptäcker att brevet skrevs efter datumet då hennes far påstås ha försvunnit.” (Kapitel 12)\n\nMetoden hjälper dig se berättelsens större rörelse.\nDen skriver inte berättelsen åt dig."
+        body: "Tre akter passar när du vill ha en enkel dramatisk stomme.\nkaampi Write använder centrala vändpunkter som:\n• Upptakt\n• Utlösande händelse\n• Steget in i andra akten\n• Mittpunkt\n• Allt är förlorat\n• Klimax\n• Upplösning\n\nDessa blir Trådar som du kan koppla till berättelsens kapitel.\n\nExempel\nUtlösande händelse: ”Nora hittar ett brev från sin försvunne far.” (Kapitel 3)\nSenare — Mittpunkt: ”Nora upptäcker att brevet skrevs efter datumet då hennes far påstås ha försvunnit.” (Kapitel 12)\n\nMetoden hjälper dig se berättelsens större rörelse.\nDen skriver inte berättelsen åt dig."
       },
       "save-the-cat": {
         heading: "Save the Cat",
@@ -954,7 +954,7 @@ export const sv: Messages = {
       },
       "heros-journey": {
         heading: "Hjältens resa",
-        body: "Hjältens resa passar berättelser där huvudpersonens förändring står i centrum.\nStoryBook AI använder tolv steg:\n1. Vardagsvärlden\n2. Kallelsen\n3. Att avvisa kallelsen\n4. Att möta mentorn\n5. Att korsa tröskeln\n6. Prövningar, allierade och fiender\n7. Närmande till den inre grottan\n8. Den stora prövningen\n9. Belöningen\n10. Vägen tillbaka\n11. Återuppståndelsen\n12. Återkomsten med elixiret\n\nÄven dessa skapas som Trådar.\n\n”Resan” behöver inte vara bokstavlig. En karaktär kan lämna sin trygga värld genom att flytta, börja en relation, förlora sitt arbete, upptäcka en hemlighet eller fatta ett beslut som förändrar livet."
+        body: "Hjältens resa passar berättelser där huvudpersonens förändring står i centrum.\nkaampi Write använder tolv steg:\n1. Vardagsvärlden\n2. Kallelsen\n3. Att avvisa kallelsen\n4. Att möta mentorn\n5. Att korsa tröskeln\n6. Prövningar, allierade och fiender\n7. Närmande till den inre grottan\n8. Den stora prövningen\n9. Belöningen\n10. Vägen tillbaka\n11. Återuppståndelsen\n12. Återkomsten med elixiret\n\nÄven dessa skapas som Trådar.\n\n”Resan” behöver inte vara bokstavlig. En karaktär kan lämna sin trygga värld genom att flytta, börja en relation, förlora sitt arbete, upptäcka en hemlighet eller fatta ett beslut som förändrar livet."
       },
       "method-differences": {
         heading: "Skillnaden mellan metoderna",
@@ -978,7 +978,7 @@ export const sv: Messages = {
       },
       "story-bible-memory": {
         heading: "Story Bible – berättelsens minne",
-        body: "Story Bible samlar information som berättelsen behöver komma ihåg. Det kan vara:\n• personer\n• platser\n• relationer\n• grupper\n• föremål\n• händelser\n• regler och begrepp i världen\n\nAnta att manuset säger:\n”Nora gick uppför trappan till fyrtornet. Hon hade inte varit där sedan hennes far försvann för tjugo år sedan.”\n\nStoryBook AI kan identifiera möjliga fakta. Exempel:\n”Nora har en far.”\n”Noras far försvann för tjugo år sedan.”\n”Nora har tidigare varit vid fyrtornet.”\n\nDu granskar förslagen. Först när du bestämmer att något ska låsas blir det etablerad information som StoryBook AI kan förhålla sig till."
+        body: "Story Bible samlar information som berättelsen behöver komma ihåg. Det kan vara:\n• personer\n• platser\n• relationer\n• grupper\n• föremål\n• händelser\n• regler och begrepp i världen\n\nAnta att manuset säger:\n”Nora gick uppför trappan till fyrtornet. Hon hade inte varit där sedan hennes far försvann för tjugo år sedan.”\n\nkaampi Write kan identifiera möjliga fakta. Exempel:\n”Nora har en far.”\n”Noras far försvann för tjugo år sedan.”\n”Nora har tidigare varit vid fyrtornet.”\n\nDu granskar förslagen. Först när du bestämmer att något ska låsas blir det etablerad information som kaampi Write kan förhålla sig till."
       },
       "what-is-canon": {
         heading: "Vad betyder kanon?",
@@ -1002,11 +1002,11 @@ export const sv: Messages = {
       },
       "interview-sandbox": {
         heading: "Intervjun är en sandlåda",
-        body: "Det här är mycket viktigt: det som sägs under intervjun påverkar inte hur boken skrivs. AI får hitta på och experimentera under samtalet.\n\nAnta att Nora säger:\n”Min far brukade ta med mig till fyrtornet när jag var liten.”\nDet betyder inte att StoryBook AI hädanefter får använda detta som etablerad information när ett kapitel skrivs.\nFörst måste du välja att göra informationen till fakta.\n\nArbetsflödet är:\nIntervju → AI säger något intressant → Extrahera fakta → Granska → Lås fakta → Story Bible → Nu kan informationen påverka framtida AI-skrivande\n\nTänk:\nIntervju ≠ kanon\nLåsta fakta = kanon\n\nDet gör att du kan ställa vilda frågor och prova idéer utan att riskera att de börjar påverka berättelsen."
+        body: "Det här är mycket viktigt: det som sägs under intervjun påverkar inte hur boken skrivs. AI får hitta på och experimentera under samtalet.\n\nAnta att Nora säger:\n”Min far brukade ta med mig till fyrtornet när jag var liten.”\nDet betyder inte att kaampi Write hädanefter får använda detta som etablerad information när ett kapitel skrivs.\nFörst måste du välja att göra informationen till fakta.\n\nArbetsflödet är:\nIntervju → AI säger något intressant → Extrahera fakta → Granska → Lås fakta → Story Bible → Nu kan informationen påverka framtida AI-skrivande\n\nTänk:\nIntervju ≠ kanon\nLåsta fakta = kanon\n\nDet gör att du kan ställa vilda frågor och prova idéer utan att riskera att de börjar påverka berättelsen."
       },
       "interview-to-story": {
         heading: "Från intervju till berättelse",
-        body: "Under intervjun kanske Nora säger:\n”Min mor ljög alltid om vad som hände med pappa. Jag lärde mig tidigt att vuxna berättar den version av sanningen som passar dem.”\n\nDu tycker att idén är intressant. Efter intervjun kan StoryBook AI hjälpa dig identifiera möjliga fakta:\n”Noras mor undanhöll information om faderns försvinnande.”\n\nNu väljer du.\nLås faktan — då blir informationen en etablerad del av Story Bible.\nLås den inte — då förblir den något som bara utforskades under intervjun och ska inte behandlas som etablerad information när boken skrivs.\n\nNär en fakta blir sann senare i kapitlet\nEn viktig detalj: en fakta som låses till ett kapitel gäller från kapitlets första sida. Draft får alltså använda faktan redan där — även om den egentligen blir sann först senare i kapitlet.\n\nExempel: huvudpersonen träffar en gammal vän, Marcus, i kapitel 6. Kapitlet börjar som en vanlig återförening. Först en bit in inser huvudpersonen att Marcus i hemlighet har arbetat emot honom hela tiden — Marcus är antagonisten. Plockar du ut ”Marcus är antagonisten” från intervjun och låser den till kapitel 6, har Draft tillgång till avslöjandet redan när den inledande återföreningen ska skrivas som om ingen ännu vet vad Marcus egentligen gör.\n\nLås faktan till en specifik scen istället\nOm faktan ska bli tillgänglig först när avslöjandet sker kan du koppla den till den scen där det händer.\n\nDela först kapitel 6 i scener (Scener → Dela i två…) vid punkten där avslöjandet sker, så att återföreningen och avslöjandet blir separata scener. När du sedan plockar ut faktan från intervjun visar väljaren Från och med kapitlets scener — välj avslöjandets scen istället för Hela kapitlet. Nu får Draft tillgång till faktan först från och med den scenen.\n\nSkriver du scen för scen (Scener → Draft) kan du därför skriva återföreningen utan att Draft ännu har tillgång till faktan. När du kommer till avslöjandets scen får Draft tillgång till den, och den gäller sedan för resten av kapitlet.\n\nViktigt: det fungerar bara vid scenvis Draft\nScenkopplingen påverkar bara Draft när du skriver en scen i taget. Kör du Draft för hela kapitlet får Draft tillgång till alla fakta som hör till kapitlet, oavsett vilken scen de är kopplade till.\n\nFöredrar du att skriva hela kapitel i ett svep gäller därför den enklare lösningen fortfarande: vänta med att låsa faktan tills du har skrivit förbi vändningen, eller skriv kapitlet i två omgångar och lås faktan först inför den andra omgången."
+        body: "Under intervjun kanske Nora säger:\n”Min mor ljög alltid om vad som hände med pappa. Jag lärde mig tidigt att vuxna berättar den version av sanningen som passar dem.”\n\nDu tycker att idén är intressant. Efter intervjun kan kaampi Write hjälpa dig identifiera möjliga fakta:\n”Noras mor undanhöll information om faderns försvinnande.”\n\nNu väljer du.\nLås faktan — då blir informationen en etablerad del av Story Bible.\nLås den inte — då förblir den något som bara utforskades under intervjun och ska inte behandlas som etablerad information när boken skrivs.\n\nNär en fakta blir sann senare i kapitlet\nEn viktig detalj: en fakta som låses till ett kapitel gäller från kapitlets första sida. Draft får alltså använda faktan redan där — även om den egentligen blir sann först senare i kapitlet.\n\nExempel: huvudpersonen träffar en gammal vän, Marcus, i kapitel 6. Kapitlet börjar som en vanlig återförening. Först en bit in inser huvudpersonen att Marcus i hemlighet har arbetat emot honom hela tiden — Marcus är antagonisten. Plockar du ut ”Marcus är antagonisten” från intervjun och låser den till kapitel 6, har Draft tillgång till avslöjandet redan när den inledande återföreningen ska skrivas som om ingen ännu vet vad Marcus egentligen gör.\n\nLås faktan till en specifik scen istället\nOm faktan ska bli tillgänglig först när avslöjandet sker kan du koppla den till den scen där det händer.\n\nDela först kapitel 6 i scener (Scener → Dela i två…) vid punkten där avslöjandet sker, så att återföreningen och avslöjandet blir separata scener. När du sedan plockar ut faktan från intervjun visar väljaren Från och med kapitlets scener — välj avslöjandets scen istället för Hela kapitlet. Nu får Draft tillgång till faktan först från och med den scenen.\n\nSkriver du scen för scen (Scener → Draft) kan du därför skriva återföreningen utan att Draft ännu har tillgång till faktan. När du kommer till avslöjandets scen får Draft tillgång till den, och den gäller sedan för resten av kapitlet.\n\nViktigt: det fungerar bara vid scenvis Draft\nScenkopplingen påverkar bara Draft när du skriver en scen i taget. Kör du Draft för hela kapitlet får Draft tillgång till alla fakta som hör till kapitlet, oavsett vilken scen de är kopplade till.\n\nFöredrar du att skriva hela kapitel i ett svep gäller därför den enklare lösningen fortfarande: vänta med att låsa faktan tills du har skrivit förbi vändningen, eller skriv kapitlet i två omgångar och lås faktan först inför den andra omgången."
       },
       "brainstorm-vs-interview": {
         heading: "Brainstorm och intervju",
@@ -1014,19 +1014,19 @@ export const sv: Messages = {
       },
       "three-levels-of-information": {
         heading: "Tre nivåer av information",
-        body: "En användbar mental modell är:\n\nUtforska\nBrainstorm och intervjuer. ”Tänk om…?” Här får idéerna vara osäkra.\n↓\nPlanera\nSynopsis, briefs, Scener och Trådar. ”Det här tänker jag ska hända.” Här formar du berättelsen.\n↓\nEtablera\nLåsta fakta i Story Bible. ”Det här är sant i berättelsens värld.” Här finns information som StoryBook AI kan förhålla sig till när berättelsen skrivs."
+        body: "En användbar mental modell är:\n\nUtforska\nBrainstorm och intervjuer. ”Tänk om…?” Här får idéerna vara osäkra.\n↓\nPlanera\nSynopsis, briefs, Scener och Trådar. ”Det här tänker jag ska hända.” Här formar du berättelsen.\n↓\nEtablera\nLåsta fakta i Story Bible. ”Det här är sant i berättelsens värld.” Här finns information som kaampi Write kan förhålla sig till när berättelsen skrivs."
       },
       "extract-facts": {
         heading: "Extrahera fakta ur manus",
-        body: "Du behöver inte fylla Story Bible manuellt medan du skriver. När ett kapitel innehåller information som kan vara värd att komma ihåg kan StoryBook AI hjälpa dig extrahera möjliga fakta.\n\nArbetsflödet är:\nKapitel → Extrahera fakta → Förslag → Granska → Godkänn och lås → Story Bible\n\nAI föreslår. Du bestämmer."
+        body: "Du behöver inte fylla Story Bible manuellt medan du skriver. När ett kapitel innehåller information som kan vara värd att komma ihåg kan kaampi Write hjälpa dig extrahera möjliga fakta.\n\nArbetsflödet är:\nKapitel → Extrahera fakta → Förslag → Granska → Godkänn och lås → Story Bible\n\nAI föreslår. Du bestämmer."
       },
       "moving-from-other-tool": {
         heading: "Flytta från ett annat skrivverktyg",
-        body: "Har du redan arbetat med berättelsen någon annanstans behöver du inte börja om. Du kanske redan har:\n• manus\n• karaktärsbeskrivningar\n• platser\n• worldbuilding\n• lore\n• organisationer\n• föremål\n• historik\n• regler för världen\n\nStoryBook AI kan hjälpa dig ta med materialet."
+        body: "Har du redan arbetat med berättelsen någon annanstans behöver du inte börja om. Du kanske redan har:\n• manus\n• karaktärsbeskrivningar\n• platser\n• worldbuilding\n• lore\n• organisationer\n• föremål\n• historik\n• regler för världen\n\nkaampi Write kan hjälpa dig ta med materialet."
       },
       "import-lore": {
         heading: "Importera lore",
-        body: "Öppna: Story Bible → Importera lore\n\nKlistra in en artikel eller text från ditt befintliga material. Det kan exempelvis vara:\n”Fyrtornet byggdes 1892 på öns norra udde. Tornet har varit obemannat sedan 1987. Lokalbefolkningen undviker platsen efter mörkrets inbrott.”\n\nStoryBook AI:s lokala AI läser texten och föreslår fakta. Du granskar sedan förslagen.\n\nOriginaltexten sparas inte som en del av boken. Det är de fakta du väljer att godkänna som förs vidare.\n\nDen nuvarande lore-importen arbetar med en artikel eller text i taget."
+        body: "Öppna: Story Bible → Importera lore\n\nKlistra in en artikel eller text från ditt befintliga material. Det kan exempelvis vara:\n”Fyrtornet byggdes 1892 på öns norra udde. Tornet har varit obemannat sedan 1987. Lokalbefolkningen undviker platsen efter mörkrets inbrott.”\n\nkaampi Write:s lokala AI läser texten och föreslår fakta. Du granskar sedan förslagen.\n\nOriginaltexten sparas inte som en del av boken. Det är de fakta du väljer att godkänna som förs vidare.\n\nDen nuvarande lore-importen arbetar med en artikel eller text i taget."
       },
       "lore-relevance-filter": {
         heading: "Håll en stor importerad Story Bible relevant",
@@ -1050,7 +1050,7 @@ export const sv: Messages = {
       },
       "ai-not-autopilot": {
         heading: "AI är inte autopilot",
-        body: "StoryBook AI är inte byggt kring: ”Skriv min bok.”\n\nTanken är snarare:\nDu bestämmer riktningen.\n↓\nAI hjälper där du vill ha hjälp.\n↓\nDu läser resultatet.\n↓\nDu ändrar, behåller eller kastar det.\n↓\nBerättelsen utvecklas.\n\nDu kan skriva flera kapitel helt utan AI. Du kan använda AI bara när du fastnar. Eller skapa råutkast som du sedan skriver om kraftigt. Alla är normala sätt att använda StoryBook AI."
+        body: "kaampi Write är inte byggt kring: ”Skriv min bok.”\n\nTanken är snarare:\nDu bestämmer riktningen.\n↓\nAI hjälper där du vill ha hjälp.\n↓\nDu läser resultatet.\n↓\nDu ändrar, behåller eller kastar det.\n↓\nBerättelsen utvecklas.\n\nDu kan skriva flera kapitel helt utan AI. Du kan använda AI bara när du fastnar. Eller skapa råutkast som du sedan skriver om kraftigt. Alla är normala sätt att använda kaampi Write."
       },
       darlings: {
         heading: "Darlings — döda dina älsklingar, behåll kropparna",
@@ -1062,7 +1062,7 @@ export const sv: Messages = {
       },
       "pov-tense-voice": {
         heading: "Perspektiv, tempus och berättarröst",
-        body: "StoryBook AI kan få information om hur berättelsen ska berättas. Det kan exempelvis handla om:\n• perspektiv\n• tempus\n• synvinkel\n• berättarröst\n\nEnskilda kapitel kan vid behov avvika från bokens grundinställningar. Det kan vara användbart om huvuddelen av romanen exempelvis berättas i tredje person men ett särskilt kapitel behöver en annan synvinkel.\n\nOm du använder AI för större omskrivningar efter en sådan förändring bör du alltid läsa resultatet noggrant.\n\nPerspektiv handlar om mer än att byta pronomen."
+        body: "kaampi Write kan få information om hur berättelsen ska berättas. Det kan exempelvis handla om:\n• perspektiv\n• tempus\n• synvinkel\n• berättarröst\n\nEnskilda kapitel kan vid behov avvika från bokens grundinställningar. Det kan vara användbart om huvuddelen av romanen exempelvis berättas i tredje person men ett särskilt kapitel behöver en annan synvinkel.\n\nOm du använder AI för större omskrivningar efter en sådan förändring bör du alltid läsa resultatet noggrant.\n\nPerspektiv handlar om mer än att byta pronomen."
       },
       reader: {
         heading: "Läsare",
@@ -1110,7 +1110,7 @@ export const sv: Messages = {
       },
       "images-illustrations": {
         heading: "Bilder och illustrationer",
-        body: "StoryBook AI kan hjälpa dig arbeta med bilder på två olika sätt.\n\nEgna bilder\nDu kan lägga till bilder till berättelsen. Det kan vara användbart för illustrerade berättelser, barnböcker eller projekt där bilder är en del av läsupplevelsen.\n\nIllustrationsprompter\nDu kan också använda text ur berättelsen som grund för en bildbeskrivning.\n\nExempel — manus: ”Erik stod ensam på perrongen. Dimman låg tät över spåren och stationsklockan hade stannat på 03:17.”\nStoryBook AI kan hjälpa dig omvandla passagen till en illustrationsprompt baserad på motivet och projektets valda visuella stil. Själva berättelsetexten ändras inte."
+        body: "kaampi Write kan hjälpa dig arbeta med bilder på två olika sätt.\n\nEgna bilder\nDu kan lägga till bilder till berättelsen. Det kan vara användbart för illustrerade berättelser, barnböcker eller projekt där bilder är en del av läsupplevelsen.\n\nIllustrationsprompter\nDu kan också använda text ur berättelsen som grund för en bildbeskrivning.\n\nExempel — manus: ”Erik stod ensam på perrongen. Dimman låg tät över spåren och stationsklockan hade stannat på 03:17.”\nkaampi Write kan hjälpa dig omvandla passagen till en illustrationsprompt baserad på motivet och projektets valda visuella stil. Själva berättelsetexten ändras inte."
       },
       typography: {
         heading: "Typografi",
@@ -1126,11 +1126,11 @@ export const sv: Messages = {
       },
       backup: {
         heading: "Säkerhetskopiera",
-        body: "Publicering och säkerhetskopiering är inte samma sak.\n\nEn publicerad bok är till för läsaren. En StoryBook-säkerhetskopia är till för att kunna återställa själva projektet. Den kan därför innehålla information som inte finns i den publicerade versionen.\n\nSpara säkerhetskopior regelbundet, särskilt innan större förändringar.\n\nImportera backup används för StoryBook AI:s egna säkerhetskopior. Det är inte samma sak som att importera ett manus eller lore från ett annat skrivprogram.\n\n”Export for other apps” är en tredje, annorlunda sak — varken en säkerhetskopia eller en läskopia. Den skriver en ögonblicksbild i ett delat format för ett syskonprogram (som ComicBook AI) att importera: låsta, synliga Story Bible-fakta och kapitel, grupperade efter sort. Olåsta, flaggade eller dolda-för-AI-fakta finns aldrig med — samma synlighetsregel som Skriv utkast själv följer."
+        body: "Publicering och säkerhetskopiering är inte samma sak.\n\nEn publicerad bok är till för läsaren. En StoryBook-säkerhetskopia är till för att kunna återställa själva projektet. Den kan därför innehålla information som inte finns i den publicerade versionen.\n\nSpara säkerhetskopior regelbundet, särskilt innan större förändringar.\n\nImportera backup används för kaampi Write:s egna säkerhetskopior. Det är inte samma sak som att importera ett manus eller lore från ett annat skrivprogram.\n\n”Export for other apps” är en tredje, annorlunda sak — varken en säkerhetskopia eller en läskopia. Den skriver en ögonblicksbild i ett delat format för ett syskonprogram (som ComicBook AI) att importera: låsta, synliga Story Bible-fakta och kapitel, grupperade efter sort. Olåsta, flaggade eller dolda-för-AI-fakta finns aldrig med — samma synlighetsregel som Skriv utkast själv följer."
       },
       "network-ai-server": {
         heading: "En AI-server på en annan dator i nätverket",
-        body: "Har du en kraftfull dator eller server på samma nätverk, och vill skriva på StoryBook AI från en annan dator — en bärbar, till exempel? Det går, men kräver inställningar på tre ställen: i StoryBook AI, på serverdatorn, och i dess brandvägg.\n\nVälj motorn som matchar det som körs där\nÖppna Inställningar → Modeller. Oavsett om den andra datorn kör Ollama eller LM Studio, välj samma motor här — båda har nu ett fält för serveradress.\n\nSkriv in den andra datorns nätverksadress\nI fältet Serveradress: http://[den andra datorns nätverks-IP]:[port] — till exempel http://192.168.1.50:11434 för Ollama, eller http://192.168.1.50:1234 för LM Studio. Lämna tomt för att använda den här datorns egen standard istället. Lägg inte till /v1 på slutet, StoryBook AI gör det själv. Hitta den andra datorns nätverksadress med ipconfig (Windows) eller ifconfig/ip addr (Mac/Linux) på just den datorn.\n\nLåt servern lyssna på nätverket, inte bara sig själv\nKör den andra datorn Ollama: starta den med miljövariabeln OLLAMA_HOST=0.0.0.0 så den lyssnar brett, och OLLAMA_ORIGINS satt till adressen StoryBook AI faktiskt körs ifrån (eller OLLAMA_ORIGINS=* för att tillåta vilken adress som helst) — annars nekar den webbläsarens anrop även om själva anslutningen fungerar.\nKör den LM Studio: fliken Developer → Server-inställningarna → slå på ”Serve on Local Network” och ”Enable CORS”.\n\nBrandväggen på serverdatorn\nDen måste tillåta inkommande anslutningar på porten (11434 för Ollama, oftast 1234 för LM Studio) från resten av nätverket — annars släpps anropet aldrig igenom, även om allt ovan är rätt.\n\nVarje dator har för övrigt sitt eget bibliotek av manus — bara AI-anslutningen delas, inte det du skrivit. Vill du fortsätta på samma bok från båda datorerna, använd Backup/Återställ för att flytta den."
+        body: "Har du en kraftfull dator eller server på samma nätverk, och vill skriva på kaampi Write från en annan dator — en bärbar, till exempel? Det går, men kräver inställningar på tre ställen: i kaampi Write, på serverdatorn, och i dess brandvägg.\n\nVälj motorn som matchar det som körs där\nÖppna Inställningar → Modeller. Oavsett om den andra datorn kör Ollama eller LM Studio, välj samma motor här — båda har nu ett fält för serveradress.\n\nSkriv in den andra datorns nätverksadress\nI fältet Serveradress: http://[den andra datorns nätverks-IP]:[port] — till exempel http://192.168.1.50:11434 för Ollama, eller http://192.168.1.50:1234 för LM Studio. Lämna tomt för att använda den här datorns egen standard istället. Lägg inte till /v1 på slutet, kaampi Write gör det själv. Hitta den andra datorns nätverksadress med ipconfig (Windows) eller ifconfig/ip addr (Mac/Linux) på just den datorn.\n\nLåt servern lyssna på nätverket, inte bara sig själv\nKör den andra datorn Ollama: starta den med miljövariabeln OLLAMA_HOST=0.0.0.0 så den lyssnar brett, och OLLAMA_ORIGINS satt till adressen kaampi Write faktiskt körs ifrån (eller OLLAMA_ORIGINS=* för att tillåta vilken adress som helst) — annars nekar den webbläsarens anrop även om själva anslutningen fungerar.\nKör den LM Studio: fliken Developer → Server-inställningarna → slå på ”Serve on Local Network” och ”Enable CORS”.\n\nBrandväggen på serverdatorn\nDen måste tillåta inkommande anslutningar på porten (11434 för Ollama, oftast 1234 för LM Studio) från resten av nätverket — annars släpps anropet aldrig igenom, även om allt ovan är rätt.\n\nVarje dator har för övrigt sitt eget bibliotek av manus — bara AI-anslutningen delas, inte det du skrivit. Vill du fortsätta på samma bok från båda datorerna, använd Backup/Återställ för att flytta den."
       },
       "ai-writing-wrong-things": {
         heading: "Om AI börjar skriva fel saker",
@@ -1447,9 +1447,9 @@ export const sv: Messages = {
     importSeriesLede: "Ladda upp föregående boks \"Export för andra appar\"-fil för att ta med dess låsta fakta som förslag i granskningskön — ett faktum som gällde i förra boken är inte automatiskt sant i den här, så inget låses in direkt. Välj vilka karaktärer, platser och andra entiteter som ska tas med nedan.",
     importSeriesUpload: "Ladda upp exportfil",
     importSeriesParseError: {
-      "not-export": "Den filen är inte en export från StoryBook AI.",
+      "not-export": "Den filen är inte en export från kaampi Write.",
       "wrong-kind": "Den filen är inte en manusexport.",
-      "newer-format": "Den exporten gjordes med en nyare version av StoryBook AI än den här förstår.",
+      "newer-format": "Den exporten gjordes med en nyare version av kaampi Write än den här förstår.",
       invalid: "Den filen kunde inte läsas som en export."
     },
     importSeriesFoundCount: "\"{title}\" — hittade {count} entiteter",
@@ -1961,7 +1961,7 @@ export const sv: Messages = {
     smartQuotesResultNone: "Inga raka citattecken hittades — inget att konvertera."
   },
   errors: {
-    ollamaOrigins: "Den lokala servern tog inte emot webbläsaren. Kör du Ollama? Starta den med OLLAMA_ORIGINS satt till adressen StoryBook AI faktiskt körs från — OLLAMA_ORIGINS=http://localhost:5175 om det är den här datorn, eller OLLAMA_ORIGINS=* för att tillåta vilken adress som helst, enklast när du ansluter från en annan maskin i nätverket. Kör du LM Studio eller en annan server? Leta efter en inställning för vilka webbadresser som får ansluta (kallas ofta CORS eller allowed origins).",
+    ollamaOrigins: "Den lokala servern tog inte emot webbläsaren. Kör du Ollama? Starta den med OLLAMA_ORIGINS satt till adressen kaampi Write faktiskt körs från — OLLAMA_ORIGINS=http://localhost:5175 om det är den här datorn, eller OLLAMA_ORIGINS=* för att tillåta vilken adress som helst, enklast när du ansluter från en annan maskin i nätverket. Kör du LM Studio eller en annan server? Leta efter en inställning för vilka webbadresser som får ansluta (kallas ofta CORS eller allowed origins).",
     noModel: "Ingen lokal modell hittades. Starta Ollama eller din lokala server och ladda om.",
     notJson: "Den filen är inte JSON.",
     backupUnreadable: "Kunde inte läsa den säkerhetskopian.",

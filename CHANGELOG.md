@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.198] - 2026-10-28
+
+### Changed
+- Renamed the app from "StoryBook AI" to "kaampi Write" throughout the visible UI, in-app copy (all three locales), window title, installer prose, launcher scripts and documentation — part of the wider "kaampi" rebrand of the creative-tool suite (alongside kaampi Comic, kaampi Explore and kaampi Codex). This release intentionally does not touch anything that identifies the already-installed desktop app to Windows or to a paired local Core service: the Tauri app identifier (`se.ocedo.storybookai`), the deep-link scheme, the Core pairing identity string (`"app": "storybook"`), and the Windows Credential Manager entry are all unchanged, so an existing install keeps working and stays paired exactly as before. The GitHub repository itself has not moved yet; that is a separate, deliberate step.
+
 ## [1.0.197] - 2026-10-28
 
 ### Added

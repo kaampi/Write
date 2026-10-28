@@ -102,7 +102,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          name: StoryBook AI v${{ steps.version.outputs.version }}
+          name: kaampi Write v${{ steps.version.outputs.version }}
           body_path: ${{ steps.changelog.outputs.path }}
           files: |
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe

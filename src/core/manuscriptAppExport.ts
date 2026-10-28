@@ -25,7 +25,7 @@ import { visibleLockedFacts } from "./visibility";
  * does — a fact the author hid from the model should stay hidden here too.
  *
  * Produces StoryCore's `ManuscriptExport` shape (roadmap-ideas.md #31) —
- * StoryBook AI is the only writer of this file; see @ocedo-apps/storycore's
+ * kaampi Write is the only writer of this file; see @ocedo-apps/storycore's
  * own README for the read-only, propose-only contract this exists to keep.
  *
  * `seriesFacts`, when this book belongs to a Series, are baked straight

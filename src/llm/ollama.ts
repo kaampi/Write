@@ -163,7 +163,7 @@ export class OllamaProvider implements LLMProvider {
   private emptyStreamError(): StreamChunk {
     return {
       type: "error",
-      message: "Ollama finished without sending any reply text. If this is a reasoning/thinking model, check whether it streams its answer as reasoning content rather than the final reply — StoryBook AI only reads the final reply."
+      message: "Ollama finished without sending any reply text. If this is a reasoning/thinking model, check whether it streams its answer as reasoning content rather than the final reply — kaampi Write only reads the final reply."
     };
   }
 

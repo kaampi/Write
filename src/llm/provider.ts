@@ -78,7 +78,7 @@ export function assertLocalOnlyBaseUrl(baseUrl: string, providerName: string): v
   }
   if (CLOUD_HOSTNAME_PATTERNS.some((pattern) => pattern.test(hostname))) {
     throw new LocalProviderConfigError(
-      `${providerName}: "${hostname}" is a cloud API host. StoryBook AI only talks to local model servers.`
+      `${providerName}: "${hostname}" is a cloud API host. kaampi Write only talks to local model servers.`
     );
   }
 }
@@ -303,7 +303,7 @@ export class OpenAICompatibleLocalProvider implements LocalModelProvider {
   private emptyStreamError(): StreamChunk {
     return {
       type: "error",
-      message: `${this.name} finished without sending any reply text. If this is a reasoning/thinking model, check whether it streams its answer as reasoning content rather than the final reply — StoryBook AI only reads the final reply.`
+      message: `${this.name} finished without sending any reply text. If this is a reasoning/thinking model, check whether it streams its answer as reasoning content rather than the final reply — kaampi Write only reads the final reply.`
     };
   }
 

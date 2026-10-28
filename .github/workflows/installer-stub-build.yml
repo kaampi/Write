@@ -6,7 +6,7 @@ name: Online installer stub (Windows)
 # result to a dedicated "installer-stub" GitHub Release (not the app's own
 # v<version> releases from desktop-build.yml) — the stub's own source rarely
 # changes, and its download page link should stay the same name/URL
-# regardless of which StoryBook AI version it happens to fetch at runtime.
+# regardless of which kaampi Write version it happens to fetch at runtime.
 permissions:
   contents: write
 
@@ -38,12 +38,12 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: installer-stub
-          name: StoryBook AI — online installer
+          name: kaampi Write — online installer
           body: |
             The small bootstrap installer (see roadmap-ideas.md #35): downloads
             and installs Ollama if it isn't already present, then hands off to
-            the current StoryBook AI installer. Always points at the latest
-            StoryBook AI release — this isn't tied to the app's own version
+            the current kaampi Write installer. Always points at the latest
+            kaampi Write release — this isn't tied to the app's own version
             numbers, so this release gets updated in place as the stub itself
             changes, not on every app release.
           files: installer-stub/output/StoryBookAI-OnlineInstaller.exe

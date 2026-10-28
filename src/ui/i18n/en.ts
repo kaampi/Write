@@ -16,7 +16,7 @@ const guideCategories: Record<GuideCategoryId, string> = {
 const guideSections: Record<GuideMainSectionId, { heading: string; body: string }> = {
   privacy: {
     heading: "A fully closed digital safe",
-    body: "StoryBook AI is built around one rule: your manuscript is your property, and it should never leave your computer. There is no way out to the internet in the app itself — no API keys for ChatGPT, Claude, or other cloud services (that's not a missing feature, it's a deliberate choice), and the fonts ship bundled with the app instead of being fetched from anywhere. Your text lives only in your browser, and the AI model runs only on your own processor. The separate desktop app (optional) can check whether a newer version of itself exists — never of your manuscript, which it doesn't even have access to. Whatever you're writing — a diary, trade secrets, or your next big fantasy epic — every letter stays with you."
+    body: "kaampi Write is built around one rule: your manuscript is your property, and it should never leave your computer. There is no way out to the internet in the app itself — no API keys for ChatGPT, Claude, or other cloud services (that's not a missing feature, it's a deliberate choice), and the fonts ship bundled with the app instead of being fetched from anywhere. Your text lives only in your browser, and the AI model runs only on your own processor. The separate desktop app (optional) can check whether a newer version of itself exists — never of your manuscript, which it doesn't even have access to. Whatever you're writing — a diary, trade secrets, or your next big fantasy epic — every letter stays with you."
   },
   author: {
     heading: "Author beats AI, always",
@@ -36,7 +36,7 @@ const guideSections: Record<GuideMainSectionId, { heading: string; body: string 
   },
   "illustration-prompts": {
     heading: "Illustration prompts",
-    body: "Select a passage and choose Illustration prompt… from the right-click menu. The model writes an image-generation prompt — not a picture — built from the passage, your locked Story Bible facts, and your manuscript's illustration style, ready to paste into whatever image generator you use; StoryBook AI stays fully local and never generates the image itself. Set a default style under Settings → Illustration style, or open the style library to save named, reusable styles — each with its own genre tags and an example image — so every prompt keeps a consistent look across the book."
+    body: "Select a passage and choose Illustration prompt… from the right-click menu. The model writes an image-generation prompt — not a picture — built from the passage, your locked Story Bible facts, and your manuscript's illustration style, ready to paste into whatever image generator you use; kaampi Write stays fully local and never generates the image itself. Set a default style under Settings → Illustration style, or open the style library to save named, reusable styles — each with its own genre tags and an example image — so every prompt keeps a consistent look across the book."
   },
   "brainstorm-synopsis": {
     heading: "Brainstorm & Synopsis",
@@ -95,7 +95,7 @@ const handbookCategories: Record<HandbookCategoryId, string> = {
 const handbookSections: Record<HandbookSectionId, { heading: string; body: string }> = {
   "connect-local-ai": {
     heading: "Connect a local AI",
-    body: "StoryBook AI works with a local AI model.\nThat means the AI features use the model you have connected to StoryBook AI yourself.\nTo use features like drafting, rewriting, analysis, and interviews, you first need a working local AI connection.\n\nFollow the quickstart to:\n1. Install a local AI solution.\n2. Choose a model.\n3. Connect it to StoryBook AI.\n\nOnce the connection works, you can start writing."
+    body: "kaampi Write works with a local AI model.\nThat means the AI features use the model you have connected to kaampi Write yourself.\nTo use features like drafting, rewriting, analysis, and interviews, you first need a working local AI connection.\n\nFollow the quickstart to:\n1. Install a local AI solution.\n2. Choose a model.\n3. Connect it to kaampi Write.\n\nOnce the connection works, you can start writing."
   },
   "connection-presets": {
     heading: "Connection presets",
@@ -110,12 +110,12 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
     body: "A chapter is, at its core, two things:\n\nChapter brief\nWhat the chapter needs to accomplish.\n\nManuscript\nThe text the reader will actually read.\n\nA brief might be, for example:\n\"Erik arrives at the old railway station. There he meets a woman who seems to know his father. She refuses to explain how, and leaves an old photograph on the table.\"\n\nThe chapter itself is then the story that grows out of that.\nYou can write the chapter yourself, or use Draft to get a first pass to work from."
   },
   "map-of-storybook-ai": {
-    heading: "A map of StoryBook AI",
+    heading: "A map of kaampi Write",
     body: "EXPLORE\n💡 Brainstorm · 💬 Interview the world\nHere ideas get to be uncertain.\n↓\nPLAN\n📖 Synopsis · 🗂 Chapter briefs · 🎬 Scenes · 🧵 Plotlines · 🕒 Timeline\nHere you shape the story.\n↓\nESTABLISH\n📚 Story Bible · 🔎 Extract facts · ✓ Review · 🔒 Lock\nHere you decide what counts as established.\n↓\nWRITE\n✍️ Chapters — Draft · Write a beat · Extend · Elaborate · Rewrite\n↓\nREVIEW\n🔎 Analyze · ✨ Polish · 💬 Ask Manuscript · 🗨 Ask about a passage · ✓ Continuity · ✓ Proofread · 🧭 Developmental analysis\n↓\nFINISH\n🖼 Images · 🌐 Language versions · 📤 Publish · 💾 Backup\n\nIt's a map.\nNot a required order."
   },
   "no-required-workflow": {
     heading: "You don't need to use everything",
-    body: "StoryBook AI can be used in many different ways.\nThere is no required workflow.\n\nYou could, for example, work like this:\n\nI just want to start writing\nChapter → Write → Next chapter. Plan later, when you need to.\n\nI want to plan the story\nBrainstorm → Synopsis → Chapter briefs → Chapters\n\nI want to work in a very structured way\nSynopsis → Development method → Plotlines → Chapter briefs → Scenes → Timeline → Chapters\n\nI already have a manuscript\nBring in the existing text → Analyze → Story Bible → Revise → Publish\n\nI'm coming from another writing tool\nBring your manuscript and lore → Import → Review → Keep writing\n\nYou decide how much structure you need."
+    body: "kaampi Write can be used in many different ways.\nThere is no required workflow.\n\nYou could, for example, work like this:\n\nI just want to start writing\nChapter → Write → Next chapter. Plan later, when you need to.\n\nI want to plan the story\nBrainstorm → Synopsis → Chapter briefs → Chapters\n\nI want to work in a very structured way\nSynopsis → Development method → Plotlines → Chapter briefs → Scenes → Timeline → Chapters\n\nI already have a manuscript\nBring in the existing text → Analyze → Story Bible → Revise → Publish\n\nI'm coming from another writing tool\nBring your manuscript and lore → Import → Review → Keep writing\n\nYou decide how much structure you need."
   },
   "three-workflows": {
     heading: "Three complete workflows",
@@ -127,7 +127,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "most-important-principle": {
     heading: "The most important principle",
-    body: "StoryBook AI contains many features because different authors work in different ways.\nThat doesn't mean every feature has to be used.\n\nStart with the story.\nWhen you hit a problem, choose the tool that helps with that specific problem.\n\nExplore when you need ideas.\nPlan when you need direction.\nLock facts when something should become established.\nWrite when you know enough to continue.\nReview when you want to understand what you've written.\n\nAnd above all:\nThe tools should adapt to how you write — not the other way around."
+    body: "kaampi Write contains many features because different authors work in different ways.\nThat doesn't mean every feature has to be used.\n\nStart with the story.\nWhen you hit a problem, choose the tool that helps with that specific problem.\n\nExplore when you need ideas.\nPlan when you need direction.\nLock facts when something should become established.\nWrite when you know enough to continue.\nReview when you want to understand what you've written.\n\nAnd above all:\nThe tools should adapt to how you write — not the other way around."
   },
   "brainstorm-free": {
     heading: "Brainstorm – think freely",
@@ -147,7 +147,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "development-methods": {
     heading: "Development methods",
-    body: "StoryBook AI includes several methods that can help you develop or structure the story.\nThey are entirely optional.\nYou can always choose:\nNo method — write freely"
+    body: "kaampi Write includes several methods that can help you develop or structure the story.\nThey are entirely optional.\nYou can always choose:\nNo method — write freely"
   },
   "snowflake-method": {
     heading: "Snowflake",
@@ -155,7 +155,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "three-act": {
     heading: "Three-Act Structure",
-    body: "Three-Act Structure works well when you want a simple dramatic backbone.\nStoryBook AI uses key turning points such as:\n• Setup\n• Inciting incident\n• Break into two\n• Midpoint\n• All is lost\n• Climax\n• Resolution\n\nThese become Plotlines you can attach to the story's chapters.\n\nExample\nInciting incident: \"Nora finds a letter from her missing father.\" (Chapter 3)\nLater — Midpoint: \"Nora discovers the letter was written after the date her father is said to have disappeared.\" (Chapter 12)\n\nThe method helps you see the story's larger movement.\nIt doesn't write the story for you."
+    body: "Three-Act Structure works well when you want a simple dramatic backbone.\nkaampi Write uses key turning points such as:\n• Setup\n• Inciting incident\n• Break into two\n• Midpoint\n• All is lost\n• Climax\n• Resolution\n\nThese become Plotlines you can attach to the story's chapters.\n\nExample\nInciting incident: \"Nora finds a letter from her missing father.\" (Chapter 3)\nLater — Midpoint: \"Nora discovers the letter was written after the date her father is said to have disappeared.\" (Chapter 12)\n\nThe method helps you see the story's larger movement.\nIt doesn't write the story for you."
   },
   "save-the-cat": {
     heading: "Save the Cat",
@@ -163,7 +163,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "heros-journey": {
     heading: "Hero's Journey",
-    body: "Hero's Journey works well for stories where the protagonist's transformation is central.\nStoryBook AI uses twelve steps:\n1. Ordinary World\n2. Call to Adventure\n3. Refusal of the Call\n4. Meeting the Mentor\n5. Crossing the Threshold\n6. Tests, Allies, Enemies\n7. Approach to the Inmost Cave\n8. The Ordeal\n9. Reward\n10. The Road Back\n11. Resurrection\n12. Return with the Elixir\n\nThese, too, are created as Plotlines.\n\nThe \"journey\" doesn't have to be literal. A character can leave their safe world by moving, starting a relationship, losing their job, discovering a secret, or making a decision that changes their life."
+    body: "Hero's Journey works well for stories where the protagonist's transformation is central.\nkaampi Write uses twelve steps:\n1. Ordinary World\n2. Call to Adventure\n3. Refusal of the Call\n4. Meeting the Mentor\n5. Crossing the Threshold\n6. Tests, Allies, Enemies\n7. Approach to the Inmost Cave\n8. The Ordeal\n9. Reward\n10. The Road Back\n11. Resurrection\n12. Return with the Elixir\n\nThese, too, are created as Plotlines.\n\nThe \"journey\" doesn't have to be literal. A character can leave their safe world by moving, starting a relationship, losing their job, discovering a secret, or making a decision that changes their life."
   },
   "method-differences": {
     heading: "The difference between the methods",
@@ -187,7 +187,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "story-bible-memory": {
     heading: "Story Bible – the story's memory",
-    body: "Story Bible gathers information the story needs to remember. It could be:\n• people\n• places\n• relationships\n• groups\n• objects\n• events\n• rules and concepts in the world\n\nSuppose the manuscript says:\n\"Nora walked up the stairs to the lighthouse. She hadn't been there since her father disappeared twenty years ago.\"\n\nStoryBook AI can identify possible facts. For example:\n\"Nora has a father.\"\n\"Nora's father disappeared twenty years ago.\"\n\"Nora has been to the lighthouse before.\"\n\nYou review the suggestions. Only once you decide something should be locked does it become established information StoryBook AI can rely on."
+    body: "Story Bible gathers information the story needs to remember. It could be:\n• people\n• places\n• relationships\n• groups\n• objects\n• events\n• rules and concepts in the world\n\nSuppose the manuscript says:\n\"Nora walked up the stairs to the lighthouse. She hadn't been there since her father disappeared twenty years ago.\"\n\nkaampi Write can identify possible facts. For example:\n\"Nora has a father.\"\n\"Nora's father disappeared twenty years ago.\"\n\"Nora has been to the lighthouse before.\"\n\nYou review the suggestions. Only once you decide something should be locked does it become established information kaampi Write can rely on."
   },
   "what-is-canon": {
     heading: "What does canon mean?",
@@ -211,11 +211,11 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "interview-sandbox": {
     heading: "The interview is a sandbox",
-    body: "This is very important: what's said during the interview doesn't affect how the book is written. The AI is free to invent and experiment during the conversation.\n\nSuppose Nora says:\n\"My father used to take me to the lighthouse when I was little.\"\nThat doesn't mean StoryBook AI is now free to use this as established information when a chapter is written.\nYou first have to choose to turn the information into a fact.\n\nThe workflow is:\nInterview → AI says something interesting → Extract facts → Review → Lock facts → Story Bible → Now the information can affect future AI writing\n\nThink of it as:\nInterview ≠ canon\nLocked facts = canon\n\nThat lets you ask wild questions and try out ideas without risking them starting to affect the story."
+    body: "This is very important: what's said during the interview doesn't affect how the book is written. The AI is free to invent and experiment during the conversation.\n\nSuppose Nora says:\n\"My father used to take me to the lighthouse when I was little.\"\nThat doesn't mean kaampi Write is now free to use this as established information when a chapter is written.\nYou first have to choose to turn the information into a fact.\n\nThe workflow is:\nInterview → AI says something interesting → Extract facts → Review → Lock facts → Story Bible → Now the information can affect future AI writing\n\nThink of it as:\nInterview ≠ canon\nLocked facts = canon\n\nThat lets you ask wild questions and try out ideas without risking them starting to affect the story."
   },
   "interview-to-story": {
     heading: "From interview to story",
-    body: "During the interview, Nora might say:\n\"My mother always lied about what happened to Dad. I learned early that adults tell whichever version of the truth suits them.\"\n\nYou find the idea interesting. After the interview, StoryBook AI can help you identify possible facts:\n\"Nora's mother withheld information about the father's disappearance.\"\n\nNow you choose.\nLock the fact — then it becomes an established part of Story Bible.\nDon't lock it — then it stays something explored during the interview, and shouldn't be treated as established information when the book is written.\n\nWhen a fact only becomes true later in the chapter\nOne important detail: a fact locked to a chapter applies from the chapter's first page. Draft can use the fact right there — even if it's actually only true later in the chapter.\n\nExample: your protagonist meets an old friend, Marcus, in chapter 6. The chapter opens as an ordinary reunion. Only partway through does the protagonist realize Marcus is the one who's secretly been working against him — Marcus is the antagonist. If you extract \"Marcus is the antagonist\" from the Interview and lock it to chapter 6, Draft has access to the reveal already when it writes the opening reunion, as if nobody yet knows what Marcus is really up to.\n\nLock the fact to a specific scene instead\nIf the fact should only become available once the reveal happens, you can link it to the scene where it happens.\n\nFirst split chapter 6 into scenes (Scenes → Split into two…) at the point where the reveal happens, so the reunion and the reveal become separate scenes. When you then extract the fact from the Interview, the \"As of\" picker shows that chapter's scenes — pick the reveal's scene instead of \"Whole chapter\". Draft now only gets access to the fact from that scene onward.\n\nIf you draft scene by scene (Scenes → Draft), you can write the reunion without Draft having access to the fact yet. Once you reach the reveal's scene, Draft gets access to it, and it then applies for the rest of the chapter.\n\nImportant: this only works with scene-by-scene Draft\nThe scene link only affects Draft when you write one scene at a time. Run Draft for the whole chapter, and Draft has access to every fact attributed to the chapter, whichever scene it's linked to.\n\nIf you prefer drafting whole chapters in one pass, the simpler workaround still applies: hold off locking the fact until you've written past the turn, or draft the chapter in two passes and lock the fact only before the second."
+    body: "During the interview, Nora might say:\n\"My mother always lied about what happened to Dad. I learned early that adults tell whichever version of the truth suits them.\"\n\nYou find the idea interesting. After the interview, kaampi Write can help you identify possible facts:\n\"Nora's mother withheld information about the father's disappearance.\"\n\nNow you choose.\nLock the fact — then it becomes an established part of Story Bible.\nDon't lock it — then it stays something explored during the interview, and shouldn't be treated as established information when the book is written.\n\nWhen a fact only becomes true later in the chapter\nOne important detail: a fact locked to a chapter applies from the chapter's first page. Draft can use the fact right there — even if it's actually only true later in the chapter.\n\nExample: your protagonist meets an old friend, Marcus, in chapter 6. The chapter opens as an ordinary reunion. Only partway through does the protagonist realize Marcus is the one who's secretly been working against him — Marcus is the antagonist. If you extract \"Marcus is the antagonist\" from the Interview and lock it to chapter 6, Draft has access to the reveal already when it writes the opening reunion, as if nobody yet knows what Marcus is really up to.\n\nLock the fact to a specific scene instead\nIf the fact should only become available once the reveal happens, you can link it to the scene where it happens.\n\nFirst split chapter 6 into scenes (Scenes → Split into two…) at the point where the reveal happens, so the reunion and the reveal become separate scenes. When you then extract the fact from the Interview, the \"As of\" picker shows that chapter's scenes — pick the reveal's scene instead of \"Whole chapter\". Draft now only gets access to the fact from that scene onward.\n\nIf you draft scene by scene (Scenes → Draft), you can write the reunion without Draft having access to the fact yet. Once you reach the reveal's scene, Draft gets access to it, and it then applies for the rest of the chapter.\n\nImportant: this only works with scene-by-scene Draft\nThe scene link only affects Draft when you write one scene at a time. Run Draft for the whole chapter, and Draft has access to every fact attributed to the chapter, whichever scene it's linked to.\n\nIf you prefer drafting whole chapters in one pass, the simpler workaround still applies: hold off locking the fact until you've written past the turn, or draft the chapter in two passes and lock the fact only before the second."
   },
   "brainstorm-vs-interview": {
     heading: "Brainstorm and interview",
@@ -223,19 +223,19 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "three-levels-of-information": {
     heading: "Three levels of information",
-    body: "A useful mental model:\n\nExplore\nBrainstorm and interviews. \"What if…?\" Here ideas get to be uncertain.\n↓\nPlan\nSynopsis, briefs, Scenes, and Plotlines. \"This is what I think will happen.\" Here you shape the story.\n↓\nEstablish\nLocked facts in Story Bible. \"This is true in the story's world.\" Here is information StoryBook AI can rely on when the story is written."
+    body: "A useful mental model:\n\nExplore\nBrainstorm and interviews. \"What if…?\" Here ideas get to be uncertain.\n↓\nPlan\nSynopsis, briefs, Scenes, and Plotlines. \"This is what I think will happen.\" Here you shape the story.\n↓\nEstablish\nLocked facts in Story Bible. \"This is true in the story's world.\" Here is information kaampi Write can rely on when the story is written."
   },
   "extract-facts": {
     heading: "Extract facts from the manuscript",
-    body: "You don't have to fill Story Bible by hand as you write. When a chapter contains information worth remembering, StoryBook AI can help you extract possible facts.\n\nThe workflow is:\nChapter → Extract facts → Suggestions → Review → Approve and lock → Story Bible\n\nAI suggests. You decide."
+    body: "You don't have to fill Story Bible by hand as you write. When a chapter contains information worth remembering, kaampi Write can help you extract possible facts.\n\nThe workflow is:\nChapter → Extract facts → Suggestions → Review → Approve and lock → Story Bible\n\nAI suggests. You decide."
   },
   "moving-from-other-tool": {
     heading: "Moving from another writing tool",
-    body: "If you've already worked on the story elsewhere, you don't need to start over. You might already have:\n• a manuscript\n• character descriptions\n• places\n• worldbuilding\n• lore\n• organizations\n• objects\n• history\n• rules of the world\n\nStoryBook AI can help you bring the material with you."
+    body: "If you've already worked on the story elsewhere, you don't need to start over. You might already have:\n• a manuscript\n• character descriptions\n• places\n• worldbuilding\n• lore\n• organizations\n• objects\n• history\n• rules of the world\n\nkaampi Write can help you bring the material with you."
   },
   "import-lore": {
     heading: "Import lore",
-    body: "Open: Story Bible → Import lore\n\nPaste an article or text from your existing material. It could be, for example:\n\"The lighthouse was built in 1892 on the island's northern point. It has been unmanned since 1987. The locals avoid the place after dark.\"\n\nStoryBook AI's local AI reads the text and suggests facts. You then review the suggestions.\n\nThe original text isn't saved as part of the book. It's the facts you choose to approve that carry forward.\n\nThe current lore import works with one article or text at a time."
+    body: "Open: Story Bible → Import lore\n\nPaste an article or text from your existing material. It could be, for example:\n\"The lighthouse was built in 1892 on the island's northern point. It has been unmanned since 1987. The locals avoid the place after dark.\"\n\nkaampi Write's local AI reads the text and suggests facts. You then review the suggestions.\n\nThe original text isn't saved as part of the book. It's the facts you choose to approve that carry forward.\n\nThe current lore import works with one article or text at a time."
   },
   "lore-relevance-filter": {
     heading: "Keeping a large imported Story Bible relevant",
@@ -259,7 +259,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "ai-not-autopilot": {
     heading: "AI is not autopilot",
-    body: "StoryBook AI isn't built around: \"Write my book.\"\n\nThe idea is instead:\nYou decide the direction.\n↓\nAI helps where you want help.\n↓\nYou read the result.\n↓\nYou change, keep, or discard it.\n↓\nThe story develops.\n\nYou can write several chapters entirely without AI. You can use AI only when you get stuck. Or generate rough drafts that you then rewrite heavily. All of these are normal ways to use StoryBook AI."
+    body: "kaampi Write isn't built around: \"Write my book.\"\n\nThe idea is instead:\nYou decide the direction.\n↓\nAI helps where you want help.\n↓\nYou read the result.\n↓\nYou change, keep, or discard it.\n↓\nThe story develops.\n\nYou can write several chapters entirely without AI. You can use AI only when you get stuck. Or generate rough drafts that you then rewrite heavily. All of these are normal ways to use kaampi Write."
   },
   darlings: {
     heading: "Darlings — kill your darlings, keep the bodies",
@@ -271,7 +271,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "pov-tense-voice": {
     heading: "Point of view, tense, and narrative voice",
-    body: "StoryBook AI can be given information about how the story should be told. This can include:\n• point of view\n• tense\n• viewpoint\n• narrative voice\n\nIndividual chapters can, when needed, deviate from the book's overall settings. That can be useful if most of the novel is told in third person but one particular chapter needs a different viewpoint.\n\nIf you use AI for larger rewrites after such a change, always read the result carefully.\n\nPoint of view is about more than swapping pronouns."
+    body: "kaampi Write can be given information about how the story should be told. This can include:\n• point of view\n• tense\n• viewpoint\n• narrative voice\n\nIndividual chapters can, when needed, deviate from the book's overall settings. That can be useful if most of the novel is told in third person but one particular chapter needs a different viewpoint.\n\nIf you use AI for larger rewrites after such a change, always read the result carefully.\n\nPoint of view is about more than swapping pronouns."
   },
   reader: {
     heading: "Reader",
@@ -319,7 +319,7 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "images-illustrations": {
     heading: "Images and illustrations",
-    body: "StoryBook AI can help you work with images in two different ways.\n\nYour own images\nYou can add images to the story. Useful for illustrated stories, children's books, or projects where images are part of the reading experience.\n\nIllustration prompts\nYou can also use text from the story as the basis for an image description.\n\nExample — manuscript: \"Erik stood alone on the platform. Fog lay thick over the tracks, and the station clock had stopped at 3:17.\"\nStoryBook AI can help you turn the passage into an illustration prompt based on the subject and the project's chosen visual style. The story text itself isn't changed."
+    body: "kaampi Write can help you work with images in two different ways.\n\nYour own images\nYou can add images to the story. Useful for illustrated stories, children's books, or projects where images are part of the reading experience.\n\nIllustration prompts\nYou can also use text from the story as the basis for an image description.\n\nExample — manuscript: \"Erik stood alone on the platform. Fog lay thick over the tracks, and the station clock had stopped at 3:17.\"\nkaampi Write can help you turn the passage into an illustration prompt based on the subject and the project's chosen visual style. The story text itself isn't changed."
   },
   typography: {
     heading: "Typography",
@@ -335,11 +335,11 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   backup: {
     heading: "Backup",
-    body: "Publishing and backing up aren't the same thing.\n\nA published book is for the reader. A StoryBook backup is for restoring the project itself. It can therefore contain information that isn't in the published version.\n\nSave backups regularly, especially before major changes.\n\nImport backup is used for StoryBook AI's own backups. That's not the same as importing a manuscript or lore from another writing program.\n\n\"Export for other apps\" is a third, different thing again — not a backup, and not a reading copy either. It writes a snapshot in a shared format for a sibling app (such as ComicBook AI) to import: locked, visible Story Bible facts and chapters, grouped by kind. Unlocked, flagged, or hidden-from-the-model facts never go into it, the same visibility rule Draft itself follows."
+    body: "Publishing and backing up aren't the same thing.\n\nA published book is for the reader. A StoryBook backup is for restoring the project itself. It can therefore contain information that isn't in the published version.\n\nSave backups regularly, especially before major changes.\n\nImport backup is used for kaampi Write's own backups. That's not the same as importing a manuscript or lore from another writing program.\n\n\"Export for other apps\" is a third, different thing again — not a backup, and not a reading copy either. It writes a snapshot in a shared format for a sibling app (such as ComicBook AI) to import: locked, visible Story Bible facts and chapters, grouped by kind. Unlocked, flagged, or hidden-from-the-model facts never go into it, the same visibility rule Draft itself follows."
   },
   "network-ai-server": {
     heading: "An AI server on another computer on the network",
-    body: "Have a powerful computer or server on the same network, and want to write in StoryBook AI from a different machine — a laptop, say? That works, but needs settings in three places: in StoryBook AI, on the server machine, and its firewall.\n\nPick the engine that matches what's running there\nOpen Settings → Models. Whether the other machine runs Ollama or LM Studio, choose that same engine here — both have a server address field.\n\nEnter the other computer's network address\nIn the Server address field: http://[the other computer's network IP]:[port] — for example http://192.168.1.50:11434 for Ollama, or http://192.168.1.50:1234 for LM Studio. Leave it empty to use this computer's own default instead. Don't add /v1 at the end — StoryBook AI adds that itself. Find that computer's network address with ipconfig (Windows) or ifconfig/ip addr (Mac/Linux), run on that same machine.\n\nLet the server listen on the network, not just itself\nIf the other machine runs Ollama: start it with the environment variable OLLAMA_HOST=0.0.0.0 so it listens broadly, and OLLAMA_ORIGINS set to the address StoryBook AI is actually running from (or OLLAMA_ORIGINS=* to allow any address) — otherwise it refuses the browser's request even once the connection itself works.\nIf it runs LM Studio: the Developer tab → Server settings → turn on “Serve on Local Network” and “Enable CORS”.\n\nThe server machine's firewall\nIt must allow inbound connections on that port (11434 for Ollama, usually 1234 for LM Studio) from the rest of the network — otherwise the request never gets through, even with everything above set correctly.\n\nEach computer also keeps its own separate shelf of manuscripts — only the AI connection is shared, not what you've written. To keep working on the same book from both machines, use Backup/Restore to move it across."
+    body: "Have a powerful computer or server on the same network, and want to write in kaampi Write from a different machine — a laptop, say? That works, but needs settings in three places: in kaampi Write, on the server machine, and its firewall.\n\nPick the engine that matches what's running there\nOpen Settings → Models. Whether the other machine runs Ollama or LM Studio, choose that same engine here — both have a server address field.\n\nEnter the other computer's network address\nIn the Server address field: http://[the other computer's network IP]:[port] — for example http://192.168.1.50:11434 for Ollama, or http://192.168.1.50:1234 for LM Studio. Leave it empty to use this computer's own default instead. Don't add /v1 at the end — kaampi Write adds that itself. Find that computer's network address with ipconfig (Windows) or ifconfig/ip addr (Mac/Linux), run on that same machine.\n\nLet the server listen on the network, not just itself\nIf the other machine runs Ollama: start it with the environment variable OLLAMA_HOST=0.0.0.0 so it listens broadly, and OLLAMA_ORIGINS set to the address kaampi Write is actually running from (or OLLAMA_ORIGINS=* to allow any address) — otherwise it refuses the browser's request even once the connection itself works.\nIf it runs LM Studio: the Developer tab → Server settings → turn on “Serve on Local Network” and “Enable CORS”.\n\nThe server machine's firewall\nIt must allow inbound connections on that port (11434 for Ollama, usually 1234 for LM Studio) from the rest of the network — otherwise the request never gets through, even with everything above set correctly.\n\nEach computer also keeps its own separate shelf of manuscripts — only the AI connection is shared, not what you've written. To keep working on the same book from both machines, use Backup/Restore to move it across."
   },
   "ai-writing-wrong-things": {
     heading: "If AI starts writing the wrong things",
@@ -456,7 +456,7 @@ export const en = {
     titlePlaceholder: "Title",
     open: "Create",
     importBackup: "Import backup",
-    importBackupCardLede: "Restore a manuscript you've backed up from StoryBook AI before.",
+    importBackupCardLede: "Restore a manuscript you've backed up from kaampi Write before.",
     importBackupCardAction: "Choose a backup file",
     importManuscriptButton: "Import manuscript (text file)",
     importManuscriptCardLede: "Start from a plain text or Markdown export of another writing tool.",
@@ -1175,8 +1175,8 @@ export const en = {
         body: "The AI model is what actually writes and reasons with you. We recommend one tuned for fiction, for example fluffy/l3-8b-stheno-v3.2 (search for \"stheno\" in Ollama). Otherwise, any general chat model works — for example llama3 or mistral."
       },
       {
-        heading: "Connect it to StoryBook AI",
-        body: "Using Ollama? Nothing to configure — StoryBook AI finds it automatically. Using LM Studio or another server instead? Open Settings → Models, choose it under Engine, and paste the server address it shows you."
+        heading: "Connect it to kaampi Write",
+        body: "Using Ollama? Nothing to configure — kaampi Write finds it automatically. Using LM Studio or another server instead? Open Settings → Models, choose it under Engine, and paste the server address it shows you."
       }
     ],
     categories: guideCategories,
@@ -1185,7 +1185,7 @@ export const en = {
     faq: [
       {
         heading: "“No local model found”",
-        body: "StoryBook AI cannot reach your local server. Using Ollama? Make sure it is running. Using LM Studio or another server? Check Settings → Models — the engine and server address need to match what is actually running on your computer."
+        body: "kaampi Write cannot reach your local server. Using Ollama? Make sure it is running. Using LM Studio or another server? Check Settings → Models — the engine and server address need to match what is actually running on your computer."
       },
       {
         heading: "Where is my book stored?",
@@ -1197,14 +1197,14 @@ export const en = {
       },
       {
         heading: "Can I use a paid AI service instead?",
-        body: "No — on purpose. StoryBook AI only ever talks to a model running on your own computer or network. That is not a missing feature; it is the whole point: your manuscript never has to leave your machine."
+        body: "No — on purpose. kaampi Write only ever talks to a model running on your own computer or network. That is not a missing feature; it is the whole point: your manuscript never has to leave your machine."
       }
     ]
   },
   handbook: {
     title: "Guide",
     intro:
-      "StoryBook AI contains many tools, but you don't need to learn all of them before you start.\nYou can write a whole book just by creating chapters and writing in the editor. The other tools are there when you need help with ideas, structure, characters, continuity, editing, or publishing.\n\nStart simple. Add structure when the story needs it.",
+      "kaampi Write contains many tools, but you don't need to learn all of them before you start.\nYou can write a whole book just by creating chapters and writing in the editor. The other tools are there when you need help with ideas, structure, characters, continuity, editing, or publishing.\n\nStart simple. Add structure when the story needs it.",
     categories: handbookCategories,
     sections: handbookSections
   },
@@ -1457,9 +1457,9 @@ export const en = {
     importSeriesLede: "Upload the previous book's \"Export for other apps\" file to bring its locked facts forward as review candidates — a fact that held last book isn't automatically still true in this one, so nothing locks in directly. Pick which characters, places and other entities to bring in below.",
     importSeriesUpload: "Upload export file",
     importSeriesParseError: {
-      "not-export": "That file isn't a StoryBook AI export.",
+      "not-export": "That file isn't a kaampi Write export.",
       "wrong-kind": "That file isn't a manuscript export.",
-      "newer-format": "That export was made with a newer version of StoryBook AI than this one understands.",
+      "newer-format": "That export was made with a newer version of kaampi Write than this one understands.",
       invalid: "That file couldn't be read as an export."
     },
     importSeriesFoundCount: "\"{title}\" — found {count} entities",
@@ -1971,7 +1971,7 @@ export const en = {
     smartQuotesResultNone: "No straight quotes found — nothing to convert."
   },
   errors: {
-    ollamaOrigins: "The local server did not accept the browser. Using Ollama? Start it with OLLAMA_ORIGINS set to wherever StoryBook AI is actually running from — OLLAMA_ORIGINS=http://localhost:5175 if it's this computer, or OLLAMA_ORIGINS=* to allow any address, simplest when connecting from another machine on your network. Using LM Studio or another server? Look for a setting about which web addresses are allowed to connect (often called CORS or allowed origins).",
+    ollamaOrigins: "The local server did not accept the browser. Using Ollama? Start it with OLLAMA_ORIGINS set to wherever kaampi Write is actually running from — OLLAMA_ORIGINS=http://localhost:5175 if it's this computer, or OLLAMA_ORIGINS=* to allow any address, simplest when connecting from another machine on your network. Using LM Studio or another server? Look for a setting about which web addresses are allowed to connect (often called CORS or allowed origins).",
     noModel: "No local model found. Start Ollama or your local server, then reload.",
     notJson: "That file is not JSON.",
     backupUnreadable: "Could not read that backup.",

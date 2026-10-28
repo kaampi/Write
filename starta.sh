@@ -4,7 +4,7 @@
 cd "$(dirname "$0")" || exit 1
 
 echo ""
-echo " StoryBook AI"
+echo " kaampi Write"
 echo " http://localhost:5175"
 echo ""
 

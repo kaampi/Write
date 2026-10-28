@@ -1,10 +1,10 @@
 @echo off
 chcp 65001 >nul
-title StoryBook AI
+title kaampi Write
 cd /d "%~dp0"
 
 echo.
-echo  StoryBook AI
+echo  kaampi Write
 echo  http://localhost:5175
 echo.
 

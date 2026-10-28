@@ -122,8 +122,8 @@ export function Home({
   return (
     <div className="home">
       <header className="home-brand">
-        <img className="home-logo home-logo-light" src="/logo.png" alt="StoryBook AI" />
-        <img className="home-logo home-logo-dark" src="/logo-dark.png" alt="StoryBook AI" />
+        <img className="home-logo home-logo-light" src="/logo.png" alt="kaampi Write" />
+        <img className="home-logo home-logo-dark" src="/logo-dark.png" alt="kaampi Write" />
         <div className="home-heading-row">
           <h1>
             {m.home.headline}

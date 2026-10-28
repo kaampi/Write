@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "StoryBook AI",
-  "version": "1.0.197",
+  "productName": "kaampi Write",
+  "version": "1.0.198",
   "identifier": "se.ocedo.storybookai",
   "build": {
     "frontendDist": "../dist",
@@ -19,7 +19,7 @@
   "app": {
     "windows": [
       {
-        "title": "StoryBook AI",
+        "title": "kaampi Write",
         "width": 1320,
         "height": 860,
         "minWidth": 900,
