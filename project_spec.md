@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.203
+Status: living document, v1.0.204
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9808,6 +9808,26 @@ avsikt (Core-kontraktets egen nyckel, inte ett visningsnamn).
 grön, `npm run build` rent.
 
 v1.0.202 → v1.0.203.
+
+**Ändringslogg v1.0.203 → v1.0.204 (2026-10-28): mellanrum i
+Core-dialogen.** Mats skickade en skärmbild av eyebrow-etiketten och
+titeln i Core-dialogen ("STORYBOOK CORE" / "The Weight of the
+Course" — från hans ännu inte uppdaterade körande app) och bad om
+mer mellanrum mellan de två textraderna. `.core-connection-title`s
+`margin-top` höjd från `0.25rem` till `0.5rem`.
+
+Återskapade dialogen på riktigt i en headless webbläsare (nytt
+manus, spoofad `window.isTauri`, klickade fram till Core-dialogen)
+för att verifiera både mellanrummet och att v1.0.203:s namnbyte
+faktiskt syns: eyebrow-etiketten läser nu "KAAMPI WRITE CORE", inte
+"kaampi Codex" som Mats antog i sitt meddelande — flaggat till
+honom i svaret, inte ändrat ensidigt eftersom det är ett namnval,
+inte en bugg.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent, visuellt bekräftat i headless browser.
+
+v1.0.203 → v1.0.204.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
