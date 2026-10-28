@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.200
+Status: living document, v1.0.201
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9723,6 +9723,26 @@ Windows-CI (samma begränsning som alltid i den här sandlådan för
 Tauri/Rust-sidan) — visuellt kontrollerad på skärm här innan commit.
 
 v1.0.199 → v1.0.200.
+
+**Ändringslogg v1.0.200 → v1.0.201 (2026-10-28): webbläsarflikens
+favicon.** Mats: "Ska favico vara genomskinlig eller blir W vitt?" —
+upptäckte att `index.html` aldrig haft någon `<link rel="icon">` alls,
+så frågan gällde egentligen vad som skulle sättas första gången.
+Förklarade att källbilden redan är solid magenta (ingen alfakanal),
+och frågade vilket han ville ha. Mats: "Nej det blir bra med vitt W"
+— dvs. samma solida magenta-ruta som app-ikonen, ingen genomskinlig
+variant.
+
+Lade till `public/favicon-32x32.png` och `public/favicon.png` (512px,
+för skarpare bokmärken/högupplösta skärmar), båda beskurna direkt
+från samma ikonkälla som Tauri-app-ikonen (`src-tauri/icons/32x32.png`
+och `icon.png`) — inget nytt genererat, bara kopierat till `public/`
+så Vite serverar dem som statiska filer. Två `<link rel="icon">`-
+taggar i `index.html`s `<head>`.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent.
+
+v1.0.200 → v1.0.201.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.201] - 2026-10-28
+
+### Added
+- A browser-tab favicon, set for the first time (none was configured before) — the same magenta kaampi Write mark as the desktop app icon, not transparent.
+
 ## [1.0.200] - 2026-10-28
 
 ### Changed
