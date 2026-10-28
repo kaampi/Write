@@ -7437,8 +7437,11 @@ button.illustration-genre-item:focus-visible {
 .core-connection-card input[type="password"] { display: block; width: 100%; margin-top: 8px; }
 .core-connection-card fieldset label { display: flex; align-items: center; gap: 8px; }
 .core-connection-eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--sage); font-size: 0.72rem; font-weight: 650; }
-.core-connection-title {
-  margin: 0.5rem 0 0;
+.core-connection-card .core-connection-title {
+  /* `.edit-card h2` (tag+class) otherwise outranks the single-class
+     `.core-connection-title` selector and wins margin:0 regardless of
+     source order - this needed real specificity, not just a bigger value. */
+  margin: 0.85rem 0 0;
   max-width: 26rem;
   white-space: nowrap;
   overflow: hidden;

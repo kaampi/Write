@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.205
+Status: living document, v1.0.206
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -9878,6 +9878,35 @@ texten — ingen överlappning eller klippning trots att flera strängar
 blev betydligt längre.
 
 v1.0.204 → v1.0.205.
+
+**Ändringslogg v1.0.205 → v1.0.206 (2026-10-28): mellanrums-fixen
+gjorde faktiskt ingenting.** Mats: "Jag ser inte att mellanrummet
+mellan kaampi Write Codex och Bokens namn har ökat?" — med rätta.
+Mätte faktiskt avståndet i en headless browser istället för att bara
+titta: `title.top - eyebrow.bottom` gav **0px**, trots att
+`.core-connection-title`s `margin-top` redan höjts två gånger
+(0.25rem → 0.5rem i v1.0.204, aldrig verifierat med en riktig
+mätning, bara "ser rimligt ut").
+
+**Grundorsaken:** `.edit-card h2 { margin: 0; ... }` (rad ~4902,
+tagg+klass, specificitet 0-1-1) vann över `.core-connection-title`
+(en klass, specificitet 0-1-0) oavsett käll-ordning eller hur stort
+margin-värdet sattes — CSS-specificitet, inte storleken på värdet,
+avgjorde. `.core-connection-card` ärver `.edit-card`s klass, så båda
+reglerna matchade samma `<h2>`.
+
+**Fix:** `.core-connection-title` → `.core-connection-card
+.core-connection-title` (två klasser, specificitet 0-2-0), höjt till
+`0.85rem`. Verifierade den här gången med en riktig DOM-mätning
+(`getComputedStyle().marginTop`) innan commit: `13.6px`, inte 0.
+
+**Lärdom värd att skriva ner:** en CSS-ändring i den här kodbasen är
+inte "verifierad" förrän avståndet faktiskt mätts i en riktig
+renderad sida — ett `npm run build` som lyckas säger ingenting om
+huruvida en specificitetskonflikt tyst åt upp ändringen. Framtida
+spacing-/layout-fixar bör mätas, inte bara byggas.
+
+v1.0.205 → v1.0.206.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

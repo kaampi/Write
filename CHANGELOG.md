@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.206] - 2026-10-28
+
+### Fixed
+- The previous spacing fix for the Core dialog's title (v1.0.204) silently did nothing — a more specific `.edit-card h2 { margin: 0; }` rule was overriding it regardless of the margin value, so the gap stayed at 0px no matter how large a number was set. Fixed by raising the selector's own specificity instead of just raising the value, and increased the gap enough to be clearly visible this time.
+
 ## [1.0.205] - 2026-10-28
 
 ### Changed
