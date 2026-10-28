@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.210] - 2026-10-28
+
+### Changed
+- The close icon's color is now the same neutral gray as the native scrollbar thumb (sampled per theme, not a themed accent color), so it reads as a quiet chrome control rather than drawing extra attention.
+
 ## [1.0.209] - 2026-10-28
 
 ### Changed

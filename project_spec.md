@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.209
+Status: living document, v1.0.210
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10008,6 +10008,33 @@ browser och läste `getComputedStyle`: `textAlign: "center"`,
 inte bara "ser centrerat ut".
 
 v1.0.208 → v1.0.209.
+
+**Ändringslogg v1.0.209 → v1.0.210 (2026-10-28): stängningsikonens
+färg.** Mats: "Visst kan du ändra färgen på Close ikonen som är
+SVG?" — frågade vilken färg, svar: "Samma grå som i scrollisten
+(alltså olika grå beroende på ljust eller mörkt tema)", med två
+tätt beskurna skärmdumpar av scrollistens tumme.
+
+Scrollisten är inte stylad i appens CSS alls (ingen
+`::-webkit-scrollbar`-regel existerar) — den är webbläsarens/
+webviewens egen native-rendering, inget CSS-värde att referera
+direkt. Läste av de faktiska pixelfärgerna i Mats skärmdumpar med
+Pillow istället för att gissa: mörkt tema `rgb(99,99,99)` =
+`#636363`, ljust tema `rgb(209,209,209)` = `#d1d1d1`.
+
+Lade till en ny tematoken `--scrollbar-gray` (bara för det här
+syftet, inte en del av den vanliga färgpaletten) i både `:root` och
+`[data-theme="light"]`, satte `.close-icon-button { color:
+var(--scrollbar-gray); }` istället för `var(--sage)`.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Växlade mellan båda temana i headless
+browser och läste `getComputedStyle().color`: `rgb(99, 99, 99)`
+respektive `rgb(209, 209, 209)` — identiskt med de uppmätta
+pixelvärdena från Mats egna skärmdumpar, inte bara en ungefärlig
+gråton.
+
+v1.0.209 → v1.0.210.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

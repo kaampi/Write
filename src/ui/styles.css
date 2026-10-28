@@ -306,6 +306,7 @@
   --ink: #d06a48;
   --on-ink: #fff8f3;
   --sage: #7ea394;
+  --scrollbar-gray: #636363;
   --ai: #b392c4;
   --flag: #d4a054;
   --danger: #c97872;
@@ -355,6 +356,7 @@
   --ink: #c24f30;
   --on-ink: #fff8f3;
   --sage: #3f7466;
+  --scrollbar-gray: #d1d1d1;
   --ai: #6e4e86;
   --flag: #a36b1c;
   --danger: #b24c46;
@@ -584,9 +586,9 @@ textarea:focus-visible,
   color: var(--text);
 }
 
-/* The one dialog-dismiss icon (see CloseIconButton.tsx) - sage, not text-dim, so it reads as a distinct "leave" control rather than a plain icon-button among others in the same head row. align-self: flex-start pins it to the top of its row regardless of the row's own align-items (dialog-head/stats-card-head use center, bible-card-head(-actions) use baseline) - against a tall multi-line title block or a plain text sibling, either default drags an icon-only button down away from the actual top-right corner. */
+/* The one dialog-dismiss icon (see CloseIconButton.tsx) - same neutral gray as the native scrollbar thumb (sampled per theme, not a design-system color - --scrollbar-gray exists solely for this match) rather than a themed color, so it reads as a quiet chrome control. align-self: flex-start pins it to the top of its row regardless of the row's own align-items (dialog-head/stats-card-head use center, bible-card-head(-actions) use baseline) - against a tall multi-line title block or a plain text sibling, either default drags an icon-only button down away from the actual top-right corner. */
 .close-icon-button {
-  color: var(--sage);
+  color: var(--scrollbar-gray);
   align-self: flex-start;
 }
 
