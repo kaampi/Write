@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.220
+Status: living document, v1.0.221
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10621,6 +10621,36 @@ rubriken "Manuscript settings" och intakta General/Typography/
 Illustrations/Proofreading/Polish-sektioner.
 
 v1.0.219 → v1.0.220.
+
+
+**Ändringslogg v1.0.220 → v1.0.221 (2026-10-29): App Settings i två
+kolumner, samma storlek som Manuscript settings.** Mats, direkt efter
+v1.0.220 landat: "vi kan göra Settings rutan lika stor som Manuscript
+Settings och ha två kolumner Sektionen Editor på höger sida." Den
+smala enkolumns-varianten (`.app-settings-card`, `min(42rem, 100%)`)
+tog bort `AI SETTINGS`-sektionen (motor/modell/context window/primer)
++ `EDITOR`-sektionen (revisions/pappersfärg) ovanpå varandra i en lång
+scrollande kolumn - onödigt trångt jämfört med hur Manuscript settings
+redan löser samma problem.
+
+**Implementation:** Tog bort hela `.app-settings-card`-modifier-
+klassen och dess smalnande CSS (`width: min(42rem, 100%)` +
+`grid-template-columns: 1fr`) - dialogen återanvänder nu
+`.settings-card` rakt av (samma `min(78rem, 100%)`-bredd,
+`min(94vh, 70rem)`-höjd, samma tvåkolumns-grid som Manuscript
+settings redan har). `AppSettingsDialog.tsx`: flyttade `EDITOR`-
+sektionen (Revisions + Editor paper) till en andra
+`.settings-card-column`, så "AI settings" står ensam i vänsterkolumnen
+och "Editor" i högerkolumnen - istället för att båda sektionerna låg i
+samma kolumn.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent, headless Playwright-skärmdump mot en
+riktig `vite preview`-build bekräftade två `.settings-card-column`-
+element och rätt visuell layout (AI settings vänster, Editor höger,
+samma bredd/höjd som Manuscript settings).
+
+v1.0.220 → v1.0.221.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

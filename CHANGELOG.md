@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.221] - 2026-10-29
+
+### Changed
+- The app-wide Settings dialog is now the same size as Manuscript settings, with a two-column layout — AI settings on the left, Editor (revisions, paper color) on the right — instead of a cramped single narrow column.
+
 ## [1.0.220] - 2026-10-29
 
 ### Changed

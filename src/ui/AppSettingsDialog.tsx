@@ -123,7 +123,7 @@ export function AppSettingsDialog({
   return (
     <div className="edit-overlay" role="presentation" onClick={onClose}>
       <div
-        className="edit-card settings-card app-settings-card"
+        className="edit-card settings-card"
         role="dialog"
         aria-modal="true"
         aria-labelledby="app-settings-title"
@@ -252,7 +252,9 @@ export function AppSettingsDialog({
                 </button>
               </div>
             </section>
+          </div>
 
+          <div className="settings-card-column">
             <section className="settings-block">
               <h2 className="settings-heading">{m.editor.editorSettingsHeading}</h2>
               <div className="settings-field-row">
