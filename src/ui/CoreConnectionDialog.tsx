@@ -12,7 +12,7 @@ const copy = {
   en: {
     title: "kaampi Write Codex", close: "Close",
     local: "By default, this manuscript stays only in kaampi Write's own local storage on this computer — nothing else is needed.",
-    unavailable: "Connecting to kaampi Codex is only possible in the Windows desktop app, not here in the browser.",
+    unavailable: "Connecting to kaampi Codex is only possible in the desktop app, not here in the browser.",
     disconnected: "kaampi Codex isn't connected yet. Pair it below to turn on automatic backups and sharing with your other kaampi apps.",
     offline: "kaampi Codex is paired, but isn't reachable right now. Your work keeps saving locally and will sync automatically once it's back.",
     connected: "kaampi Codex is connected — this manuscript can back up and sync.",
@@ -34,7 +34,7 @@ const copy = {
   sv: {
     title: "kaampi Write Codex", close: "Stäng",
     local: "Som standard sparas det här manuset bara lokalt i kaampi Write på den här datorn — inget annat behövs.",
-    unavailable: "Koppling till kaampi Codex går bara att göra i Windows-appen, inte här i webbläsaren.",
+    unavailable: "Koppling till kaampi Codex går bara att göra i skrivbordsappen, inte här i webbläsaren.",
     disconnected: "kaampi Codex är inte kopplad än. Parkoppla nedan för att slå på automatiska säkerhetskopior och delning med dina andra kaampi-appar.",
     offline: "kaampi Codex är parkopplad men går inte att nå just nu. Ditt arbete sparas fortsatt lokalt och synkas automatiskt när den är tillbaka.",
     connected: "kaampi Codex är ansluten — manuset kan säkerhetskopieras och synkas.",
@@ -56,7 +56,7 @@ const copy = {
   nb: {
     title: "kaampi Write Codex", close: "Lukk",
     local: "Som standard lagres dette manuset bare lokalt i kaampi Write på denne datamaskinen — ingenting annet trengs.",
-    unavailable: "Tilkobling til kaampi Codex er bare mulig i Windows-appen, ikke her i nettleseren.",
+    unavailable: "Tilkobling til kaampi Codex er bare mulig i skrivebordsappen, ikke her i nettleseren.",
     disconnected: "kaampi Codex er ikke tilkoblet ennå. Par den under for å slå på automatiske sikkerhetskopier og deling med dine andre kaampi-apper.",
     offline: "kaampi Codex er paret, men kan ikke nås akkurat nå. Arbeidet ditt lagres fortsatt lokalt og synkroniseres automatisk når den er tilbake.",
     connected: "kaampi Codex er tilkoblet — manuset kan sikkerhetskopieres og synkroniseres.",

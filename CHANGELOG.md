@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.216] - 2026-10-29
+
+### Added
+- A Linux desktop build (`.deb` and `.AppImage`), alongside the existing Windows installer. kaampi Codex pairing — previously Windows-only — now works from the Linux desktop app too, storing its credential in the Secret Service (GNOME Keyring, KWallet, etc.) instead of Windows Credential Manager.
+
 ## [1.0.215] - 2026-10-29
 
 ### Changed

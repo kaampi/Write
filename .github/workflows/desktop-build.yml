@@ -1,21 +1,26 @@
-name: Desktop build (Windows)
+name: Desktop build (Windows, Linux)
 
-# Builds the Tauri desktop launcher (roadmap-ideas.md #35). Windows-only for
-# now, matching the current plan — no macOS/Linux targets configured in
-# src-tauri/tauri.conf.json yet. Manually triggered, plus a self-check on any
-# push to main that touches the desktop project, so a broken build surfaces
-# immediately instead of silently rotting until someone runs it by hand.
+# Builds the Tauri desktop launcher (roadmap-ideas.md #35) for Windows and
+# Linux (tauri.conf.json's bundle.targets lists nsis/deb/appimage together -
+# each OS's build only produces the targets that apply to it, the others
+# are silently skipped by the bundler). macOS has no job yet: no Apple
+# Keychain feature wired into Cargo.toml's keyring dependency, and no
+# signing/notarization setup, both separate pieces of work. Manually
+# triggered, plus a self-check on any push to main that touches the desktop
+# project, so a broken build surfaces immediately instead of silently
+# rotting until someone runs it by hand.
 #
-# Unsigned build: no code-signing secrets are configured (see roadmap-ideas.md
-# #35 — deferred until there's a budget for it). The resulting .exe will
-# trigger a Windows SmartScreen warning; that's expected for now, not a
-# failure of this workflow.
-# Also publishes a GitHub Release (tagged v<package.json version>) with the
-# .exe attached, so there's a permanent download link that doesn't expire
+# Unsigned builds: no code-signing secrets are configured (see
+# roadmap-ideas.md #35 — deferred until there's a budget for it). The
+# Windows .exe will trigger a SmartScreen warning; that's expected for now,
+# not a failure of this workflow.
+# Both jobs publish to the SAME GitHub Release (tagged v<package.json
+# version>) - one release per version, with the platform's own installer
+# assets attached, so there's a permanent download link that doesn't expire
 # after 90 days like a plain workflow-run artifact, and something the
 # in-app "Check for updates" feature (roadmap-ideas.md #35) can compare
-# against. Re-running on the same version updates that release's asset
-# in place rather than failing on an existing tag.
+# against. Re-running on the same version updates that release's assets in
+# place rather than failing on an existing tag.
 permissions:
   contents: write
 
@@ -31,7 +36,7 @@ on:
       - ".github/workflows/desktop-build.yml"
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -107,4 +112,70 @@ jobs:
           files: |
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
             StoryBook-AI-Setup.exe
+          fail_on_unmatched_files: true
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same fix as the Windows job - see its own comment above.
+      - name: Fetch GitHub git dependencies over HTTPS, not SSH
+        run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # Tauri's own Linux runtime deps (webkit2gtk, gtk3, the system tray
+      # bits) plus patchelf, which the AppImage bundler shells out to.
+      # Verified against a real build in the dev sandbox first (also
+      # Ubuntu 24.04/noble) before writing this list, rather than guessing
+      # from Tauri's own docs alone.
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libsoup-3.0-dev patchelf
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build the Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --target x86_64-unknown-linux-gnu
+
+      - name: Upload the Linux bundles (workflow artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-ai-linux-bundles
+          path: |
+            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
+            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
+          if-no-files-found: error
+
+      - name: Read app version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Extract this version's changelog section
+        id: changelog
+        run: |
+          awk '/^## \[/{n++} n==1{print} n==2{exit}' CHANGELOG.md > release-notes.md
+          echo "path=release-notes.md" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: kaampi Write v${{ steps.version.outputs.version }}
+          body_path: ${{ steps.changelog.outputs.path }}
+          files: |
+            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
+            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
           fail_on_unmatched_files: true

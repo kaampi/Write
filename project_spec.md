@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.215
+Status: living document, v1.0.216
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10281,6 +10281,92 @@ centrerad i maximerat läge, ingen dubblett kvar i den gamla
 fotknappraden.
 
 v1.0.214 → v1.0.215.
+
+**Ändringslogg v1.0.215 → v1.0.216 (2026-10-29): Linux-stöd för
+skrivbordsappen, inklusive Codex-parkoppling.** Mats undrade vad som
+krävs för att erbjuda Write (och syskonapparna) på Linux/Mac. Svarade
+med en kartläggning: själva kaampi Codex-tjänsten var redan
+plattformsoberoende i sin kod (bara paketerings-/CI-lagret saknade
+Linux), men Write hade två egna spärrar — `core_bridge.rs`s
+`#[cfg(target_os = "windows")]` runt all Codex-parkoppling, och
+`tauri.conf.json`s `bundle.targets` som bara listade `nsis`.
+
+**Steg 1, i kaampi/Codex-repot (separat från den här ändringsloggen,
+se det repots egen historik):** ett nytt CI-jobb på `ubuntu-latest`
+som bygger och smoke-testar `storycore-service` för Linux, samt
+`installer-linux/install.sh` - en `systemd --user`-tjänst som Linux-
+motsvarighet till Windows Startup-genvägen. Byggde och körde SEA-
+binären lokalt i den här sandlådan (Linux) innan något skrevs till
+CI, för att vara säker på att det fungerar, inte bara borde.
+
+**Steg 2, här i Write:**
+- `src-tauri/Cargo.toml`: ny `[target.'cfg(target_os = "linux")'.dependencies]`-
+  sektion, `keyring` med `linux-native`/`sync-secret-service`/
+  `vendored`-features (Secret Service via D-Bus - GNOME Keyring,
+  KWallet, etc.) - samma crate som redan användes för Windows
+  Credential Manager, bara en annan backend.
+- `src-tauri/src/core_bridge.rs`: alla `#[cfg(target_os = "windows")]`
+  runt `credential()`/`saved_token()`/`core_pair`/`core_auto_claim`
+  utökade till `#[cfg(any(target_os = "windows", target_os =
+  "linux"))]`. Ny `bootstrap_path()`-gren för Linux: `~/.storycore/
+  core.db.bootstrap.json`, matchar exakt Codex-tjänstens egen
+  `defaultDbPath()`-fallback för alla icke-Windows-plattformar
+  (`homedir()/.storycore` i `server.mjs`) - samma sökväg som redan
+  verifierades fungera i kartläggningssamtalet.
+- `src-tauri/tauri.conf.json`: `bundle.targets` utökad från `["nsis"]`
+  till `["nsis", "deb", "appimage"]` - Tauris bundlare hoppar
+  automatiskt över mål som inte gäller den aktuella plattformen, så
+  samma konfigfil fungerar oförändrad på både `windows-latest` och
+  `ubuntu-latest` i CI.
+- `.github/workflows/desktop-build.yml`: nytt `build-linux`-jobb,
+  speglar `build-windows` men installerar Linux-byggberoenden
+  (`libgtk-3-dev`, `libwebkit2gtk-4.1-dev`, `libayatana-
+  appindicator3-dev`, `librsvg2-dev`, `libsoup-3.0-dev`, `patchelf` -
+  samma lista som verifierades fungera lokalt, inte gissad från
+  dokumentationen) och publicerar `.deb`/`.AppImage` till SAMMA
+  `v<version>`-release som Windows-bygget, istället för att
+  fragmentera i separata per-OS-releaser.
+- Copy-strängen i `CoreConnectionDialog.tsx` ("Connecting to kaampi
+  Codex is only possible in the Windows desktop app...") rättad i
+  alla tre språk - sa uttryckligen "Windows", vilket inte längre
+  stämmer eftersom `desktop = isTauri()` redan var plattforms-
+  oberoende även innan den här ändringen; bara ordalydelsen var fel.
+- README.md och running.md uppdaterade: "Windows desktop app" blev
+  "Desktop app", med egna rader för `.deb`/`.AppImage`, och en notis
+  om att macOS fortfarande saknar bygge.
+
+**Verifiering, med riktig kompilering - inte bara `tsc`/vitest:**
+installerade Tauris Linux-byggberoenden i den här sandlådan
+(`libgtk-3-dev` m.fl., tillgängliga via `apt-get` efter `apt-get
+update` - paketlistan var initialt för gammal) och körde `cargo
+check`/`cargo test` på riktigt: alla 7 Rust-tester gröna, inklusive
+`keyring`-cratets Linux-backend som faktiskt löstes och byggdes
+(`dbus-secret-service`, `linux-keyutils`). Körde sedan en FULLSTÄNDIG
+`npx tauri build --target x86_64-unknown-linux-gnu`: byggde både
+`.deb` (17.7 MB) och `.AppImage` (92.2 MB) utan fel. `dpkg-deb
+--info` på `.deb`-filen bekräftade att `libwebkit2gtk-4.1-0`/
+`libgtk-3-0` autodetekterades korrekt som beroenden (medvetet INTE
+override:ade `bundle.linux.deb.depends` manuellt - skulle ha
+riskerat att tysta Tauris egen, korrekta auto-detektion). `ldd` på
+den byggda binären bekräftade att alla dynamiska bibliotek löstes
+(`not found` gav tom output). Körde sedan den faktiska binären under
+`xvfb-run` (virtuell X-server) i tio sekunder - startade, renderade,
+kraschade inte; enda utskriften var en harmlös EGL/DRI3-varning
+(väntat utan riktig GPU i en headless miljö). `tsc --noEmit` rent,
+hela testsviten (1240 test) grön, `npm run build` rent.
+
+**Kvarstår innan Write faktiskt är fullt Linux-redo i praktiken:**
+Mats måste installera kaampi Codex på sin egen Linux-maskin (se det
+repots `installer-linux/install.sh`) och faktiskt para ihop en
+Write-installation mot den på riktig hårdvara - allt ovan är
+verifierat i en sandlåda utan en riktig Secret Service-daemon igång,
+så `credential()?.set_password(...)`-anropet i `core_pair`/
+`core_auto_claim` har inte körts mot en faktisk GNOME
+Keyring/KWallet än. macOS är fortfarande helt obyggt (ingen Apple
+Keychain-feature i `keyring`-beroendet, ingen signerings-/
+notariseringsuppsättning).
+
+v1.0.215 → v1.0.216.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
