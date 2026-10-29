@@ -1078,7 +1078,25 @@ export const sv: Messages = {
       },
       "write-with-ai": {
         heading: "Skriv tillsammans med AI",
-        body: "AI behöver inte skriva hela kapitel. Välj det minsta verktyget som löser problemet.\n\nSkriv utkast — när kapitlet ännu inte har någon text.\nFörläng — när du har börjat skriva men behöver komma vidare.\nBrodera ut — när en passage går för fort eller behöver mer innehåll.\nSkriv om — när du vet vad du vill förändra. Exempel: ”Gör dialogen mer obekväm utan att personerna säger rakt ut vad de är arga över.”\nSkriv en beat — när du vet exakt vilken mindre händelse som ska ske. Exempel: ”Nora hör steg i trappan och gömmer brevet innan dörren öppnas.”"
+        body: "AI behöver inte skriva hela kapitel. Välj det minsta verktyget som faktiskt löser problemet du har just nu — de tre sätten nedan täcker ett tomt kapitel, ett kapitel som redan är på gång, och en enstaka saknad händelse.",
+        steps: [
+          {
+            heading: "Börja med Draft",
+            body: "Ett nytt kapitel öppnas tomt, med bara sin brief ovanför sidan. Tryck Draft så skriver modellen hela kapitlet utifrån synopsis, Story Bible, briefen, kameran, Reader och prosaspråket — allt som redan är etablerat, inget du behöver upprepa för hand. Samma knapp fortsätter fungera även när kapitlet redan har viss prosa: den fyller i det som saknas och fortsätter där texten slutar, istället för att börja om.",
+            image: { src: "/handbook/write-with-ai/draft-empty-chapter.png", alt: "Ett tomt kapitel med Draft-knappen markerad i verktygsraden under sidan" }
+          },
+          {
+            heading: "Markera en passage för Extend, Elaborate eller Rewrite",
+            body: "Markera valfri sträcka text och högerklicka: Extend fortsätter där markeringen slutar, Elaborate utvidgar själva passagen utan att driva berättelsen framåt, och Rewrite… öppnar ett fält för din egen instruktion — till exempel ”gör dialogen mer obekväm utan att personerna säger rakt ut vad de är arga över”. Bara den markerade texten ändras; resten av kapitlet förblir exakt som det var.",
+            image: { src: "/handbook/write-with-ai/selection-menu.png", alt: "En markerad mening med högerklicksmenyn öppen, som visar Extend, Elaborate, Rewrite… med mera" }
+          },
+          {
+            heading: "Skriv en beat, utan att markera något",
+            body: "Högerklicka utan att markera något och menyn krymper till ett enda par alternativ. Write a beat… beskriver vad som händer härnäst i en rad — ”Nora hör steg i trappan och gömmer brevet innan dörren öppnas” — och modellen skriver bara det: ett kort stycke, inte resten av scenen, infogat exakt vid markören.",
+            image: { src: "/handbook/write-with-ai/beat-menu.png", alt: "Markören placerad mitt i ett stycke med högerklicksmenyn öppen, som visar Write a beat… och Drop a placeholder…" }
+          }
+        ],
+        tip: "Prova detta: om ett kapitel kör fast mitt i en scen, ta till Write a beat innan Draft eller Extend — att namnge nästa lilla sak som händer är ofta lättare än att be modellen fortsätta på egen hand, och det håller dig, inte modellen, som den som bestämmer vad som händer härnäst."
       },
       "attached-context": {
         heading: "Bifogad kontext",

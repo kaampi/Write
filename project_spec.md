@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.224
+Status: living document, v1.0.225
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10816,6 +10816,81 @@ preview`-build bekräftade att buggen var borta och att alla tre
 logotyper (Write/Explore/Comic) renderar rent i båda teman.
 
 v1.0.223 → v1.0.224.
+
+
+**Ändringslogg v1.0.224 → v1.0.225 (2026-10-29): pilot för
+Sudowrite-stilig, pedagogisk Guide med riktiga skärmdumpar.** Mats
+pekade på hur Sudowrite beskriver sin app: "mer som en riktig manual
+med skärmdumpar... Kan vi åstadkomma nåt liknande men samma
+pedagogiska (eller helst ännu mer pedagogisk) text och med
+skärmdumpar. Snyggt uppdelat som de har?" med en länk till deras
+dokumentation.
+
+**Research:** hämtade Sudowrites dokumentationssida (WebFetch) för
+att faktiskt se mönstret innan något byggdes, inte gissa: kategoriserad
+sidomeny, en uppgift per artikel, kort intro följt av H2/H3-steg,
+skärmdumpar direkt efter varje steg, märkta tips-rutor, citerade
+exempel-prompter.
+
+**Avstämning innan bygget:** frågade Mats två saker som avgör
+omfånget - var dokumentationen ska bo (riktig hostad sajt vs.
+markdown i repot vs. appens egen Guide/Handbook) och hur stort första
+steget ska vara (pilot vs. allt på en gång). Svar: bygg ut appens
+egen Guide/Handbook (`HandbookPanel.tsx` - redan nio kategorier, en
+sektion per ämne, men hittills bara rubrik+en tät brödtextparagraf,
+inga bilder), och börja med en pilot i en sektion innan resten görs om.
+
+**Vald pilot:** "Write together with AI" (5.1, under kategorin
+Writing) - samma typ av kärnfunktion som Sudowrites eget exempel
+(deras "Write"-sida). Innehöll sedan tidigare en tät uppräkning av
+Draft/Extend/Elaborate/Rewrite/Write a beat i en enda paragraf.
+
+**Datamodell:** `HandbookPanel.tsx` fick en ny, valfri `HandbookStep`-
+typ (`heading`, `body`, valfri `image: {src, alt}`), och
+`handbookSections`-typen i `en.ts` fick två nya valfria fält (`steps?:
+HandbookStep[]`, `tip?: string`) - alla andra sektioner opåverkade
+eftersom fälten är valfria (`sv.ts`/`nb.ts` behöver inget ändras
+förutom pilot-sektionen själv, tack vare strukturell typning mot
+`Messages = typeof en`). `HandbookPanel.tsx`s renderare utökad: om en
+sektion har `steps`, rendera varje steg som eget `<h4>` + stycke +
+valfri bild; om sektionen har `tip`, rendera en sista tips-ruta.
+Sektioner utan dessa fält renderas precis som innan.
+
+**Riktiga skärmdumpar, inte fabricerade:** körde appens riktiga
+dev-server i sandlådan, styrde den med headless Playwright (samma
+teknik som använts genomgående i sessionen för att verifiera UI) -
+skapade ett riktigt manus, skrev in ett exempelstycke prosa
+("Nora pressed her back against the cold brick..."), och fångade tre
+skärmdumpar av det faktiska gränssnittet: (1) ett tomt kapitel med
+Draft-knappen, (2) en markering med högerklicksmenyn öppen
+(Extend/Elaborate/Rewrite…), (3) ingen markering, högerklicksmenyn med
+bara Write a beat…/Drop a placeholder…. Beskar bort den röda
+Ollama-anslutningsbannern ur varje bild (inte representativt för en
+lyckad anslutning) genom riktade element-/clip-skärmdumpar istället
+för hela sidan. Sparade i `public/handbook/write-with-ai/`.
+
+**Faktafel hittat och rättat under skrivandet:** första utkastet av
+pilot-texten påstod att Draft-knappen byter text till "Continue" när
+kapitlet redan har prosa - grep i `Editor.tsx` visade att knappen
+alltid heter "Draft" (bekräftat även av `docs/guide.md` punkt 6:
+"Draft fills or continues the chapter"). Rättat innan commit istället
+för att låta ett plausibelt men fel påstående stå kvar i
+användardokumentationen.
+
+**Ny CSS:** `.handbook-steps`/`.handbook-step`/`.handbook-step-image`
+(bild med ram, rundade hörn, skugga - samma `var(--shadow)` som
+övriga kort) och `.handbook-tip` (vänsterkant i `var(--sage)`,
+`var(--raised)`-bakgrund - samma färgspråk som redan etablerat för
+"lyckad"-status i CodexHomeCard).
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test,
+inklusive `tests/ui/i18n.test.ts`s strukturella konsistenskontroll
+mellan språken) grön, `npm run build` rent. Headless Playwright mot
+en riktig `vite preview`-build bekräftade att alla tre
+steg-skärmdumpar och tips-rutan faktiskt renderas i Guide-vyn,
+inbäddade mellan 5.1 och nästa sektion (5.2).
+
+v1.0.224 → v1.0.225.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

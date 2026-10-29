@@ -107,6 +107,21 @@ export const HANDBOOK_SECTION_IDS = [
 ] as const;
 export type HandbookSectionId = (typeof HANDBOOK_SECTION_IDS)[number];
 
+/**
+ * An optional, more pedagogical layout for a section: a short intro (the
+ * section's own `body`) followed by labelled steps, each with its own real
+ * screenshot of the app — closer to how kaampi Write's own feature set is
+ * actually used, task by task, rather than one dense paragraph. Most
+ * sections still just use `heading`/`body` alone; `steps` is opt-in per
+ * section, starting with "write-with-ai" as the pilot (Mats, pointing at
+ * Sudowrite's own docs: "samma pedagogiska... text och med skärmdumpar").
+ */
+export interface HandbookStep {
+  heading: string;
+  body: string;
+  image?: { src: string; alt: string };
+}
+
 export const HANDBOOK_SECTION_CATEGORY: Record<HandbookSectionId, HandbookCategoryId> = {
   "connect-local-ai": "getting-started",
   "connection-presets": "getting-started",
@@ -246,6 +261,20 @@ export function HandbookPanel() {
                   {categoryIndex}.{index + 1} {entry.heading}
                 </h3>
                 <p className="handbook-body">{entry.body}</p>
+                {entry.steps ? (
+                  <ol className="handbook-steps">
+                    {entry.steps.map((step, stepIndex) => (
+                      <li key={stepIndex} className="handbook-step">
+                        <h4>{step.heading}</h4>
+                        <p className="handbook-body">{step.body}</p>
+                        {step.image ? (
+                          <img className="handbook-step-image" src={step.image.src} alt={step.image.alt} loading="lazy" />
+                        ) : null}
+                      </li>
+                    ))}
+                  </ol>
+                ) : null}
+                {entry.tip ? <p className="handbook-tip">{entry.tip}</p> : null}
               </article>
             );
           })}

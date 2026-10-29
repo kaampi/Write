@@ -9,7 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
-## [1.0.224] - 2026-10-29
+## [1.0.225] - 2026-10-29
+
+### Changed
+- Piloted a more pedagogical layout for the in-app Guide, inspired by Sudowrite's own docs: the "Write together with AI" section now walks through Draft, selecting a passage for Extend/Elaborate/Rewrite, and Write a beat as three labelled steps, each illustrated with a real screenshot of the app, plus a closing tip. Other Guide sections are unchanged for now — this was a trial of the format before extending it further.
+
+
 
 ### Changed
 - The top-bar app switcher now shows each app's actual wordmark logo (kaampi Write, Explore, Comic), matching kaampi Explore's own switcher, instead of plain text. Dark-mode versions of the kaampi Explore and kaampi Comic logos were generated using the exact same recolor kaampi Write's own light/dark logo pair already uses.

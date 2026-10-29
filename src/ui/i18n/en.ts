@@ -1,5 +1,5 @@
 import type { GuideCategoryId, GuideMainSectionId } from "../GuidePanel";
-import type { HandbookCategoryId, HandbookSectionId } from "../HandbookPanel";
+import type { HandbookCategoryId, HandbookSectionId, HandbookStep } from "../HandbookPanel";
 
 const guideCategories: Record<GuideCategoryId, string> = {
   "getting-started": "Introduction",
@@ -92,7 +92,10 @@ const handbookCategories: Record<HandbookCategoryId, string> = {
   help: "Help & Troubleshooting"
 };
 
-const handbookSections: Record<HandbookSectionId, { heading: string; body: string }> = {
+const handbookSections: Record<
+  HandbookSectionId,
+  { heading: string; body: string; steps?: HandbookStep[]; tip?: string }
+> = {
   "connect-local-ai": {
     heading: "Connect a local AI",
     body: "kaampi Write works with a local AI model.\nThat means the AI features use the model you have connected to kaampi Write yourself.\nTo use features like drafting, rewriting, analysis, and interviews, you first need a working local AI connection.\n\nFollow the quickstart to:\n1. Install a local AI solution.\n2. Choose a model.\n3. Connect it to kaampi Write.\n\nOnce the connection works, you can start writing."
@@ -247,7 +250,25 @@ const handbookSections: Record<HandbookSectionId, { heading: string; body: strin
   },
   "write-with-ai": {
     heading: "Write together with AI",
-    body: "AI doesn't have to write whole chapters. Choose the smallest tool that solves the problem.\n\nDraft — when the chapter has no text yet.\nExtend — when you've started writing but need to move forward.\nElaborate — when a passage moves too fast or needs more content.\nRewrite — when you know what you want to change. Example: \"Make the dialogue more uncomfortable without the characters saying outright what they're angry about.\"\nWrite a beat — when you know exactly which smaller event should happen. Example: \"Nora hears footsteps on the stairs and hides the letter before the door opens.\""
+    body: "AI doesn't have to write whole chapters. Choose the smallest tool that actually solves the problem in front of you — the three ways below cover an empty chapter, a chapter already in progress, and a single missing beat.",
+    steps: [
+      {
+        heading: "Start with Draft",
+        body: "A new chapter opens empty, with just its brief above the page. Press Draft and the model writes the whole chapter from the synopsis, the Story Bible, the brief, the camera, Reader, and prose language — everything already established, nothing you have to repeat by hand. The same button keeps working once the chapter already has some prose: it fills in what's missing and continues on from where the text stops, rather than starting over.",
+        image: { src: "/handbook/write-with-ai/draft-empty-chapter.png", alt: "An empty chapter with the Draft button highlighted in the toolbar below the page" }
+      },
+      {
+        heading: "Select a passage for Extend, Elaborate, or Rewrite",
+        body: "Select any stretch of prose and right-click: Extend continues on from where the selection ends, Elaborate expands the passage itself without moving the story forward, and Rewrite… opens a field for your own instruction — for example \"make the dialogue more uncomfortable without the characters saying outright what they're angry about.\" Only the selected text changes; the rest of the chapter stays exactly as it was.",
+        image: { src: "/handbook/write-with-ai/selection-menu.png", alt: "A selected sentence with the right-click menu open, showing Extend, Elaborate, Rewrite…, and more" }
+      },
+      {
+        heading: "Write a beat, without selecting anything",
+        body: "Right-click with nothing selected and the menu shrinks to a single pair of options. Write a beat… describes what happens next in one line — \"Nora hears footsteps on the stairs and hides the letter before the door opens\" — and the model writes just that: a short paragraph, not the rest of the scene, dropped in exactly at the cursor.",
+        image: { src: "/handbook/write-with-ai/beat-menu.png", alt: "The cursor placed in the middle of a paragraph with the right-click menu open, showing Write a beat… and Drop a placeholder…" }
+      }
+    ],
+    tip: "Try this: if a chapter stalls mid-scene, reach for Write a beat before Draft or Extend — naming the next small thing that happens is often easier than asking the model to keep going on its own, and it keeps you, not the model, deciding what happens next."
   },
   "attached-context": {
     heading: "Attached context",
