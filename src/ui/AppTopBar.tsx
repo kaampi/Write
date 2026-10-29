@@ -5,6 +5,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useLocale } from "./i18n";
 import { CoreConnectionDialog } from "./CoreConnectionDialog";
 import { AppSettingsDialog } from "./AppSettingsDialog";
+import { AppSwitcher } from "./AppSwitcher";
 
 const RECENT_LIMIT = 10;
 
@@ -118,6 +119,8 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
       <button type="button" className="text-button" onClick={() => setSettingsOpen(true)}>
         {m.editor.appSettings}
       </button>
+
+      <AppSwitcher />
 
       <div className="app-top-chrome">
         {store.book ? (

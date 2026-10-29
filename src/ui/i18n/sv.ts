@@ -39,6 +39,23 @@ export const sv: Messages = {
     viewAll: "Visa alla manuskript",
     goHome: "Gå till alla manuskript"
   },
+  companionApps: {
+    nav: "Dina kreativa appar",
+    openApp: "Öppna {name}",
+    appInfo: "Information och adress för {name}",
+    aboutApp: "Om {name}",
+    addressLabel: "App-adress",
+    statusAvailable: "Appen körs och är redo att öppnas.",
+    statusUnreachable: "Appen kan inte nås. Den kan vara installerad men inte igång. Starta den och försök igen.",
+    statusWrongApp: "En annan tjänst svarade på den här adressen. Kontrollera appens adress och försök igen.",
+    statusUnknown: "Automatiska kontroller finns bara i skrivbordsappen. Du kan fortfarande öppna adressen själv.",
+    checking: "Kontrollerar appen…",
+    tryAgain: "Försök igen",
+    saveAddress: "Spara adress",
+    openAppAction: "Öppna appen ↗",
+    getApp: "Hämta appen och installationsguiden ↗",
+    invalidAddress: "Använd en HTTP- eller HTTPS-adress utan inloggningsuppgifter."
+  },
   home: {
     headline: "Skriv prosan.",
     truth: "Story Bible håller sanning.",

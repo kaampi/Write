@@ -593,6 +593,78 @@ body {
   flex: 0 0 auto;
 }
 
+/* Mirrors kaampi Explore's own top-bar app switcher (Mats, 2026-10-29) —
+   margin: 0 auto on top of .app-top-chrome's own margin-left: auto splits
+   the bar's free space across both, landing the switcher roughly centered
+   between the left-aligned menu group and the right-aligned chrome. */
+.app-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0 auto;
+  flex: 0 0 auto;
+}
+
+.app-switcher-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 0;
+  border-radius: 7px;
+  padding: 0.35rem 0.6rem;
+  background: none;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+button.app-switcher-item:hover {
+  background: var(--raised);
+}
+
+.app-switcher-item.is-active {
+  background: var(--raised);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.app-switcher-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.app-switcher-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.app-switcher-dot.is-available {
+  background: var(--sage);
+}
+
+.app-switcher-config {
+  border: 0;
+  background: none;
+  padding: 0.3rem 0.15rem;
+  color: var(--text-faint);
+  font-size: 0.72rem;
+}
+
+.app-switcher-config:hover {
+  color: var(--text);
+}
+
+.edit-card.app-switcher-card {
+  width: min(26rem, 100%);
+  display: grid;
+  gap: 0.75rem;
+}
+
 button,
 input,
 select,

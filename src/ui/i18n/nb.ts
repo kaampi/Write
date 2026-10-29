@@ -39,6 +39,23 @@ export const nb: Messages = {
     viewAll: "Vis alle manuskripter",
     goHome: "Gå til alle manuskripter"
   },
+  companionApps: {
+    nav: "Dine kreative apper",
+    openApp: "Åpne {name}",
+    appInfo: "Informasjon og adresse for {name}",
+    aboutApp: "Om {name}",
+    addressLabel: "App-adresse",
+    statusAvailable: "Appen kjører og er klar til å åpnes.",
+    statusUnreachable: "Appen kan ikke nås. Den kan være installert, men ikke i gang. Start den og prøv igjen.",
+    statusWrongApp: "En annen tjeneste svarte på denne adressen. Sjekk appens adresse og prøv igjen.",
+    statusUnknown: "Automatiske kontroller finnes bare i skrivebordsappen. Du kan fortsatt åpne adressen selv.",
+    checking: "Kontrollerer appen…",
+    tryAgain: "Prøv igjen",
+    saveAddress: "Lagre adresse",
+    openAppAction: "Åpne appen ↗",
+    getApp: "Hent appen og installasjonsguiden ↗",
+    invalidAddress: "Bruk en HTTP- eller HTTPS-adresse uten påloggingsinformasjon."
+  },
   home: {
     headline: "Skriv prosaen.",
     truth: "Story Bible holder sanning.",

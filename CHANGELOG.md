@@ -9,7 +9,10 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
-## [1.0.222] - 2026-10-29
+## [1.0.223] - 2026-10-29
+
+### Added
+- A top-bar app switcher, matching kaampi Explore's own: kaampi Write, kaampi Explore and kaampi Comic as a row of links next to each other. In the desktop app, a sibling app that's actually running shows as a live, clickable link with a status dot; otherwise (or in the plain web app, where a live check isn't possible) clicking opens a small dialog with the app's address, an install link, and a manual "Open app" action.
 
 ### Changed
 - The top-bar button that opens the per-manuscript backup/sharing/versions dialog is now labeled "Codex" instead of the leftover internal name "Core" (the dialog's own copy already said "kaampi Codex" throughout — only the button itself hadn't caught up).

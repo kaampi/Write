@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.222
+Status: living document, v1.0.223
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10679,6 +10679,87 @@ språk) i `AppTopBar.tsx`, ersätter den hårdkodade strängen "Core".
 grön, `npm run build` rent.
 
 v1.0.221 → v1.0.222.
+
+
+**Ändringslogg v1.0.222 → v1.0.223 (2026-10-29): app-switcher i
+toppmenyn, hämtad från kaampi Explore.** Mats skickade en skärmdump av
+Explores toppmeny: "Explore har en koppling överst i toppmenyn till
+andra appar som jag tänker att vi kan lägga in i Writer också."
+
+**Research i kaampi/Explore (klonad till sandlådan, `kaampi/Explore`
+tillagt i sessionen):** `src/ui/home/AppSwitcher.tsx` +
+`src/integrations/localApps.ts` + `server/localApps.ts`. Explore
+löser korsursprungsproblemet (kolla om kaampi Write/Comic faktiskt kör
+på en given localhost-port) med en egen Vite-serverplugin som gör
+anropet server-side - webbläsaren pratar bara med Explores egen
+origin, aldrig direkt med Write/Comics port. Write har ingen egen
+backend (statisk SPA + Tauri-skal), så den trickseln går inte att
+kopiera rakt av.
+
+**Vad som faktiskt går att göra i Write:** redan löst en gång för
+lokala AI-servrar - `tauriFetch.ts`s `localServerFetch()` dirigerar
+om anropet genom Tauris HTTP-plugin (Rust, inte webview) i
+skrivbordsappen, vilket kringgår CORS helt. Samma teknik återanvänd
+här: `checkCompanionApp()` i nya `src/ui/companionApps.ts` försöker
+bara en riktig kontroll i skrivbordsappen - webbappen har ingen
+backend att gå via (precis samma begränsning Explores README redan
+dokumenterar för sitt eget "hosted/static preview"-läge: "no local
+status backend"), så där stannar statusen på "unknown" och adressen
+får öppnas manuellt. Identitetskontrollen matchar varje app-plattas
+faktiska `<title>`-tagg, normaliserad till [a-z0-9] - samma fallback
+Explores egen `server/localApps.ts` redan använder för de två
+syskon-apparna som ännu saknar en delad
+`/.well-known/storycore-app.json`-identitetsfil (ingen av de tre
+apparna serverar en sådan idag).
+
+**Implementation:**
+- `src/ui/companionApps.ts`: adresser (Explore `:5173`, Comic
+  `:5176`), `safeAppAddress`/`isLoopbackAddress` (kopierade valideringar
+  från Explores egen modul), `checkCompanionApp`, läs/spara adress i
+  localStorage (`storybook-ai.companion-app-<id>`), `openCompanionAddress`
+  som växlar mellan `openExternalUrl` (skrivbordsappen, samma Rust-
+  öppnare som redan används för Ollama-nedladdning/ändringslogg) och
+  `window.open` (webbappen).
+- `src/ui/AppSwitcher.tsx`: ny komponent, visuellt en rad med "kaampi
+  Write" (icke-interaktiv, markerad som aktuell app - samma mönster
+  som Explores egen namn-knapp när den visar sin egen startsida), samt
+  Explore/Comic som antingen en klickbar länk med statuspunkt (hittad,
+  körs) eller en vanlig knapp som öppnar en liten dialog (adressfält,
+  installationslänk, Försök igen/Spara adress/Öppna appen) - exakt
+  Explores egen modal, fast byggd med Writes egna dialog-klasser
+  (`edit-overlay`/`edit-card`) och alla tre språken istället för bara
+  engelska.
+- `AppTopBar.tsx`: `<AppSwitcher />` placerad mellan vänstergruppen
+  (Manuscripts/Guide/Settings) och `.app-top-chrome` - `margin: 0
+  auto` på `.app-switcher` delar flex-radens lediga utrymme med
+  `.app-top-chrome`s egen `margin-left: auto`, vilket landar switchern
+  ungefär mitt i raden, samma visuella placering som skärmdumpen av
+  Explore.
+- Nya i18n-nycklar (`companionApps.*`) i alla tre språk.
+
+**Hittat i förbifarten, inte åtgärdat här:** Explores egen
+title-matchning för Write (`server/localApps.ts`s `TITLE`-tabell)
+förväntar sig fortfarande `"storybookai"` - en kvarleva från appens
+gamla namn innan den döptes om till kaampi Write. Writes faktiska
+`<title>` är `"kaampi Write"`, vilket normaliserar till
+`"kaampiwrite"` - en missmatchning som gör att Explores egen
+app-switcher troligen rapporterar Write som "wrong-app" även när
+Write faktiskt kör. Det är en bugg i kaampi/Explore, inte i Write;
+flaggat till Mats separat istället för att fixas i den här commiten.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Headless Playwright mot en riktig `vite
+preview`-build bekräftade layouten (tre poster i switchern, "kaampi
+Write" markerad som aktuell) och webbläget (ingen backend att pröva
+mot - dialogen visar korrekt "Automatic checks are only available in
+the desktop app", förifylld standardadress, installationslänk,
+Öppna appen-knapp). Det skrivbordsspecifika liveflödet (en riktig
+`tauriFetch`-sökning mot en faktiskt körande Explore/Comic-instans)
+går inte att testa i den här sandlådan - samma ärlighetsnivå som
+redan hållits för macOS-bygget: byggt och typchecka rent, men den
+riktiga nätverksvägen vilar på verklig användning.
+
+v1.0.222 → v1.0.223.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

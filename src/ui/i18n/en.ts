@@ -446,6 +446,23 @@ export const en = {
     viewAll: "View all manuscripts",
     goHome: "Go to all manuscripts"
   },
+  companionApps: {
+    nav: "Your creative apps",
+    openApp: "Open {name}",
+    appInfo: "{name} information and address",
+    aboutApp: "About {name}",
+    addressLabel: "App address",
+    statusAvailable: "The app is running and ready to open.",
+    statusUnreachable: "The app cannot be reached. It may be installed but not running. Start it and try again.",
+    statusWrongApp: "A different service answered at this address. Check the app's address and try again.",
+    statusUnknown: "Automatic checks are only available in the desktop app. You can still open the address yourself.",
+    checking: "Checking the app…",
+    tryAgain: "Try again",
+    saveAddress: "Save address",
+    openAppAction: "Open app ↗",
+    getApp: "Get the app & installation guide ↗",
+    invalidAddress: "Use an HTTP or HTTPS app address without credentials."
+  },
   home: {
     headline: "Write the prose.",
     truth: "The Story Bible holds truth.",
