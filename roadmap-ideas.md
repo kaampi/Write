@@ -58,6 +58,7 @@ inte en ensidig lista.
 | 53 | Guiden: ny "Skrivtips"-kategori med skrivråd, inte verktygsdokumentation | ✅ byggd (v1.0.187) — se nedan |
 | 54 | Git-baserad fillagring/versionskontroll (StelaWare-jämförelse) | ⬜ arkitekturlucka, inte en idé att bygga — se nedan |
 | 55 | Begär `navigator.storage.persist()` vid start, så webbläsaren inte rensar IndexedDB-data under diskutrymmesbrist | ⬜ ej påbörjad, billig defensiv åtgärd — se nedan |
+| 56 | Codex över LAN — jobba mot samma manus från flera datorer i samma nätverk | ⬜ ej påbörjad, måttlig kodändring men installationsrisk — se nedan |
 
 Plus det egna designspåret ("Det enda stora arkitekturbeslutet" nedan,
 Scene/BookScene/NarrativeFact-gränsen) — ett öppet samtal, inte en
@@ -3041,6 +3042,88 @@ Källmaterial redan i huset, båda delade av Mats:
 
 Inte påbörjad — börja smalt (en handfull korta avsnitt från det här
 materialet) snarare än att bygga ut en hel skrivkurs på en gång.
+
+---
+
+### 56. Codex över LAN — jobba mot samma manus från flera datorer i samma nätverk
+
+**Bakgrund (Mats, 2026-10-29):** har Write installerat på en
+kontorsdator och en laptop, båda med sin egen lokala Codex-instans.
+Upptäckte att de två Codex-instanserna inte känner till varandra —
+kan alltså inte jobba med "samma dokument" mellan maskinerna idag.
+Fråga: "Jag tror att även om man inte vill att mina texter ska
+skickas ut på internet så kan man vilja jobba hemma i ett nätverk som
+man känner sig trygg med." Pekade själv på att löftestexten ("lämnar
+aldrig din dator") skulle behöva bli "lämnar aldrig ditt nätverk" om
+det här byggs.
+
+**Nuläge, bekräftat i koden:** Codex-tjänsten binder uttryckligen till
+`127.0.0.1` (`packages/service/server.mjs`: `server.listen(port,
+'127.0.0.1', ...)`), och Write pratar med den via en hårdkodad
+konstant `const CORE_URL: &str = "http://127.0.0.1:43127";`
+(`src-tauri/src/core_bridge.rs`). Localhost-bara är alltså en
+medveten, inte bara en råkad, gräns just nu.
+
+**Vad som skulle krävas (uppskattning, inte en plan):**
+1. **Codex:** byt bindningsadress från `127.0.0.1` till `0.0.0.0`
+   (eller en specifik LAN-adress) — en rad i `server.mjs`, litet.
+   Autentiseringen (64-tecken bearer-token per app, redan byggd)
+   gäller redan oavsett varifrån anropet kommer, så själva
+   säkerhetsmodellen behöver inte byggas om — men trafiken går över
+   vanlig HTTP, inte HTTPS, så token skickas i klartext på det lokala
+   nätverket. Rimligt för ett hemmanätverk man litar på (vilket är
+   precis Mats egen ram för frågan), men värt att vara tydlig med i
+   gränssnittet, inte dölja.
+2. **Write:** `CORE_URL` måste bli konfigurerbar istället för en
+   konstant — en ny inställning ("Codex-adress"), sparad lokalt,
+   och alla `ureq::`-anrop i `core_bridge.rs` (åtta ställen) måste
+   läsa den istället för konstanten. Mekaniskt, inte svårt, men
+   rör en fil som redan är känslig (credential-hantering).
+3. **Parkopplingsflödet måste tänkas om.** Idag antar auto-upptäckt
+   (`core_auto_claim`) att Codex körs på samma maskin (läser
+   bootstrap-filen från den lokala disken). Över LAN måste minst en
+   maskin istället peka manuellt mot en ANNAN maskins Codex-adress —
+   inte bara en nätverksinställning, utan en annan användarresa.
+
+**Den egentliga risken är inte kodmängden, det är installations-
+upplevelsen för en icke-tekniker:**
+- **Brandväggsprompt.** Första gången Codex faktiskt lyssnar på en
+  LAN-nåbar port kommer Windows/macOS/Linux sannolikt fråga ("Tillåt
+  det här programmet genom brandväggen?") eller blockera tyst som
+  default — exakt samma kategori friktion som SmartScreen/Gatekeeper-
+  varningarna redan dokumenterade i `docs/running.md`.
+- **IP-adressen som rör sig.** Användaren måste veta vilken adress
+  den andra datorns Codex faktiskt har (`192.168.1.42` eller
+  liknande) — och den kan ändras om routern delar ut nya DHCP-leaser.
+  Antingen måste adressen visas tydligt (Codex-tjänstens admin-sida
+  redan föreslagen plats) med en "kopiera adress"-knapp, eller så
+  behövs hostname/mDNS-baserad upplösning (`.local`-adresser) för att
+  slippa det föränderliga IP-numret — en egen, inte-trivial
+  utökning.
+- **Arkitekturomställning:** idag parkopplar varje Write-installation
+  automatiskt mot sin EGEN dators Codex. Över LAN måste användaren
+  först förstå att en av maskinerna (eller en tredje, dedikerad
+  maskin) ska vara "den som har Codex", och peka de andra mot den —
+  ett nytt mentalt steg, inte bara ett nytt textfält.
+
+**Bedömning:** själva kodändringen är måttlig (dagar, inte veckor) —
+men "krånglig installation för en icke-tekniker" är en reell risk,
+inte en överdrift. Brandväggsdialoger och IP-adresser är precis den
+typen av friktion som annars gjort att appen hittills kunnat vara
+"dubbelklicka och det bara fungerar". Skulle behöva göras med omsorg
+(tydliga statusmeddelanden, en synlig "kopiera adress"-knapp, kanske
+hostname-upplösning för att slippa föränderliga IP:n) för att hålla
+samma enkelhetsnivå som resten av installationsflödet.
+
+**Dokumentation som måste ändras om det byggs:** varje plats som
+idag säger "lämnar aldrig din dator"/"never leaves your computer" —
+`installer/storycore-installer.iss`s välkomsttext, `CoreConnectionDialog.tsx`s
+kopiors formulering, `installer-linux/install.sh`s utskrift — skulle
+behöva bli "lämnar aldrig ditt nätverk" (eller mer precist: "lämnar
+aldrig datorer du själv parkopplat"), inte bara en kodändring utan en
+förtroendeformulering som måste vara lika tydlig som den nuvarande.
+
+Inte påbörjad.
 
 ---
 
