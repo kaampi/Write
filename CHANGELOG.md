@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.219] - 2026-10-29
+
+### Added
+- A kaampi Codex card on the start screen, as prominent as the other start cards — shows connection status at a glance (connected, paired but offline, or not connected with an inline pairing-key field) instead of requiring a manuscript to already be open to find the small "Core" button that did this before.
+
 ## [1.0.218] - 2026-10-29
 
 ### Changed

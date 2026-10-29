@@ -56,6 +56,13 @@ export const sv: Messages = {
     importManuscriptCardAction: "Välj en fil",
     guideCardLede: "Osäker på var du ska börja? Guiden går igenom varje del av appen.",
     guideCardAction: "Öppna Guiden",
+    codexCard: "kaampi Codex",
+    codexConnected: "Ansluten — säkerhetskopior och delning med dina andra kaampi-appar är på.",
+    codexOffline: "Parkopplad, men går inte att nå just nu. Ditt arbete sparas fortsatt lokalt.",
+    codexCardLede: "Inte ansluten än. Klistra in parkopplingsnyckeln från kaampi Codex första-gången-skärm, eller lämna det här — helt valfritt.",
+    codexTokenPlaceholder: "Parkopplingsnyckel",
+    codexConnectAction: "Anslut",
+    codexConnecting: "Ansluter…",
     startHeading: "Var vill du börja?",
     importManuscriptTitle: "Importera ett manus (textfil)",
     importManuscriptLede:

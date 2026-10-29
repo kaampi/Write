@@ -17,6 +17,7 @@ import {
 } from "./desktopBridge";
 import { UpdateCheckDialog } from "./UpdateCheckDialog";
 import { ImportManuscriptCard } from "./ImportManuscriptCard";
+import { CodexHomeCard } from "./CodexHomeCard";
 
 const GPU_TIER_KEY = {
   "3b": "desktopGpuTier3b",
@@ -183,6 +184,7 @@ export function Home({
               <span className="home-start-card-action">{m.home.guideCardAction} →</span>
             </span>
           </button>
+          {isDesktopApp() ? <CodexHomeCard /> : null}
         </div>
         <input
           ref={fileRef}

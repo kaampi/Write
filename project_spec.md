@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.218
+Status: living document, v1.0.219
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10484,6 +10484,58 @@ sitter nu direkt under kapitelrubriken "Chapter 1", ovanför
 brödtexten.
 
 v1.0.217 → v1.0.218.
+
+**Ändringslogg v1.0.218 → v1.0.219 (2026-10-29): Codex-status synlig
+på startsidan.** Mats, efter installation på Linux: "det är inte
+glasklart när jag startar Write hur jag connectar till Codex?" Kollade
+koden: knappen som öppnar parkopplingsdialogen var bokstavligen
+hårdkodad till texten "Core" (inte "Codex", inte översatt), och
+visades bara uppe till höger EFTER att ett manus redan öppnats —
+aldrig på startskärmen. Föreslog en lösning, Mats: "På startsidan
+borde det finnas en information 'Codex connected'/'Connect to Codex
+manually'. Minst lika viktigt som de andra 'korten'."
+
+**Implementation:**
+- Ny `CodexHomeCard.tsx`: en React-komponent som själv hämtar
+  anslutningsstatus (`coreAutoClaim()` + `coreConnection()` från
+  `CoreDesktopTransport.ts` — redan app-breda, inte manus-bundna,
+  så ingen bok behövs för det här) och renderar tre lägen:
+  - **Ansluten + nåbar:** grön statustext ("Connected — backups and
+    sharing...").
+  - **Parkopplad men inte nåbar just nu:** neutral statustext
+    ("Paired, but not reachable...").
+  - **Inte parkopplad:** samma inline-formulär-mönster som "Start a
+    new manuscript"-kortet redan använder (textfält + en
+    "Connect →"-knapp direkt i kortet) - inte en separat dialog.
+- `Home.tsx`: kortet infogat i samma `.home-start-cards`-rutnät som
+  de fyra befintliga korten (New manuscript/Import backup/Import
+  manuscript/Guide), gated på `isDesktopApp()` - syns bara i
+  skrivbordsappen, aldrig i webbläsarläge (där parkoppling ändå inte
+  går att göra).
+- Ny CSS för statustexten (`--sage` för "ansluten", `--text-dim` för
+  "offline") - behövde höja selektor-specificiteten
+  (`.home-start-card-copy > .home-codex-status.is-connected`) för att
+  faktiskt slå den redan existerande `.home-start-card-copy > span`-
+  regeln, samma typ av specificitetsfälla som redan dokumenterad
+  tidigare i den här loggen (v1.0.206) - löst genom högre
+  specificitet, inte `!important`.
+- Nya i18n-strängar (`codexCard`, `codexConnected`, `codexOffline`,
+  `codexCardLede`, `codexTokenPlaceholder`, `codexConnectAction`,
+  `codexConnecting`) i alla tre språk.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Den riktiga `invoke()`-bryggan finns
+förstås inte i en spoofad webbläsarmiljö (samma "Cannot read
+properties of undefined (reading 'invoke')"-begränsning som synts
+genomgående i den här sessionen) - mockade därför
+`window.__TAURI_INTERNALS__.invoke` direkt i ett headless Playwright-
+skript för att faktiskt kunna rendera och skärmdumpa alla tre lägena
+(ansluten/offline/inte ansluten) istället för att bara anta att koden
+"borde" se rätt ut. Alla tre skärmdumpar bekräftade rätt layout,
+samma kortstorlek och mönster som de fyra andra korten, och att
+formuläret bara visas i "inte ansluten"-läget.
+
+v1.0.218 → v1.0.219.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

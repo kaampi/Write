@@ -56,6 +56,13 @@ export const nb: Messages = {
     importManuscriptCardAction: "Velg en fil",
     guideCardLede: "Usikker på hvor du skal begynne? Guiden går gjennom hver del av appen.",
     guideCardAction: "Åpne Guiden",
+    codexCard: "kaampi Codex",
+    codexConnected: "Tilkoblet — sikkerhetskopier og deling med dine andre kaampi-apper er på.",
+    codexOffline: "Paret, men kan ikke nås akkurat nå. Arbeidet ditt lagres fortsatt lokalt.",
+    codexCardLede: "Ikke tilkoblet ennå. Lim inn paringsnøkkelen fra kaampi Codex sin egen førstegangsskjerm, eller la dette stå — helt valgfritt.",
+    codexTokenPlaceholder: "Paringsnøkkel",
+    codexConnectAction: "Koble til",
+    codexConnecting: "Kobler til…",
     startHeading: "Hvor vil du begynne?",
     importManuscriptTitle: "Importer et manuskript (tekstfil)",
     importManuscriptLede:

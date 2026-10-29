@@ -850,6 +850,23 @@ button:disabled {
   font-weight: 650;
 }
 
+/*
+ * CodexHomeCard's own status line. Needs more specificity than two classes
+ * alone (the child combinator + :not() in .home-start-card-copy's own
+ * plain-span rule above already outweighs that) to actually override its
+ * var(--text-dim) default — raising specificity here rather than reaching
+ * for !important, the same fix this project settled on once before for
+ * exactly this kind of "my more-specific-looking rule lost anyway" case.
+ */
+.home-start-card-copy > .home-codex-status.is-connected {
+  color: var(--sage);
+  font-weight: 600;
+}
+
+.home-start-card-copy > .home-codex-status.is-offline {
+  color: var(--text-dim);
+}
+
 .home-start-card-form {
   display: flex;
   flex-direction: column;

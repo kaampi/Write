@@ -463,6 +463,13 @@ export const en = {
     importManuscriptCardAction: "Choose a file",
     guideCardLede: "Not sure where to start? The Guide walks through every part of the app.",
     guideCardAction: "Open the Guide",
+    codexCard: "kaampi Codex",
+    codexConnected: "Connected — backups and sharing with your other kaampi apps are on.",
+    codexOffline: "Paired, but not reachable right now. Your work keeps saving locally.",
+    codexCardLede: "Not connected yet. Paste the pairing key from kaampi Codex's own first-run screen, or leave this — it's entirely optional.",
+    codexTokenPlaceholder: "Pairing key",
+    codexConnectAction: "Connect",
+    codexConnecting: "Connecting…",
     startHeading: "Where would you like to start?",
     importManuscriptTitle: "Import a manuscript (text file)",
     importManuscriptLede:
