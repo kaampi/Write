@@ -202,6 +202,7 @@ export const nb: Messages = {
     publish: "Publiser",
     archiveNav: "Arkiv",
     toolsNav: "Verktøy",
+    codexNav: "Codex",
     settings: "Manuskriptinnstillinger",
     settingsLede:
       "Hvordan dette manuskriptet skrives. Ikke Story Bible. Kapitlene kan fortsatt overstyre kamera, stemme og Leser.",

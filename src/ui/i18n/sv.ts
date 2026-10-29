@@ -202,6 +202,7 @@ export const sv: Messages = {
     publish: "Publicera",
     archiveNav: "Arkiv",
     toolsNav: "Verktyg",
+    codexNav: "Codex",
     settings: "Manusinställningar",
     settingsLede:
       "Hur det här manuset skrivs. Inte Story Bible. Kapitlen kan fortfarande överstyra kamera, röst och Läsare.",

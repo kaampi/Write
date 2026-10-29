@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.222] - 2026-10-29
+
+### Changed
+- The top-bar button that opens the per-manuscript backup/sharing/versions dialog is now labeled "Codex" instead of the leftover internal name "Core" (the dialog's own copy already said "kaampi Codex" throughout — only the button itself hadn't caught up).
+
 ## [1.0.221] - 2026-10-29
 
 ### Changed

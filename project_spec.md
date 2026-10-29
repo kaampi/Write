@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.221
+Status: living document, v1.0.222
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10651,6 +10651,34 @@ element och rätt visuell layout (AI settings vänster, Editor höger,
 samma bredd/höjd som Manuscript settings).
 
 v1.0.220 → v1.0.221.
+
+
+**Ändringslogg v1.0.221 → v1.0.222 (2026-10-29): "Core"-knappen döpt
+om till "Codex".** Mats: "Ska vi flytta on Codex inställningarna i
+Settings? (Oavsett så byt namn från Core till Codex)". Kollade
+`CoreConnectionDialog.tsx` i sin helhet: all text i själva dialogen
+sa redan "kaampi Codex" genomgående (titel, status, alla etiketter) -
+det var bara triggerknappen i `AppTopBar.tsx` som fortfarande hade det
+hårdkodade, oöversatta ordet "Core" kvar.
+
+**Beslut om flytten:** Nej, dialogen flyttas inte till den app-breda
+Settings. Till skillnad från motor/modell/context window (v1.0.220)
+är allt i den här dialogen bokbundet i grunden - `bookId`/`currentBook`
+skickas in som obligatoriska props, och innehållet (delning med andra
+kaampi-appar, privata versioner/checkpoints, återställning) är data
+om just DET öppna manuset, inte appen som helhet. Parkoppling
+(pair/token) finns redan på två ställen av bekvämlighetsskäl - i
+`CodexHomeCard` på startsidan (v1.0.219) och överst i den här dialogen
+- ett tredje ställe i Settings skulle bara vara ännu en kopia, inte en
+konsolidering.
+
+**Implementation:** Ny i18n-nyckel `codexNav` ("Codex" i alla tre
+språk) i `AppTopBar.tsx`, ersätter den hårdkodade strängen "Core".
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent.
+
+v1.0.221 → v1.0.222.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

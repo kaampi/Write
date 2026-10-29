@@ -609,6 +609,7 @@ export const en = {
     publish: "Publish",
     archiveNav: "File",
     toolsNav: "Tools",
+    codexNav: "Codex",
     settings: "Manuscript settings",
     settingsLede:
       "How this manuscript is written. Not Story Bible. Chapters can still override camera, Voice, and Reader.",

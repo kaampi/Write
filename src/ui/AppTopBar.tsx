@@ -120,7 +120,11 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
       </button>
 
       <div className="app-top-chrome">
-        {store.book ? <button type="button" className="text-button" onClick={() => setCoreOpen(true)}>Core</button> : null}
+        {store.book ? (
+          <button type="button" className="text-button" onClick={() => setCoreOpen(true)}>
+            {m.editor.codexNav}
+          </button>
+        ) : null}
         <LocaleSelect />
         <ThemeToggle />
       </div>
