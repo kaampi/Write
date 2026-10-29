@@ -44,14 +44,16 @@ Each is a sibling, not a module of another — kaampi Write can send locked Stor
 
 ## Quickstart
 
-On Windows, double-click **`starta.bat`**. On macOS, double-click **`starta.command`**. On Linux, run **`./starta.sh`** from a terminal (or double-click it, if your file manager runs executable scripts). Each installs dependencies on first run and then starts the app. Or, on any platform:
+**Windows desktop app (recommended)** — download the installer from the [latest release](https://github.com/kaampi/Write/releases/latest) and run it. This is the only way to pair with **kaampi Codex** for backup and sync with your other kaampi apps: pairing needs the compiled desktop app specifically and is unavailable from a browser tab, however it's launched.
+
+**Running from source** (any platform, or for development — no Codex pairing) — on Windows, double-click **`starta.bat`**. On macOS, double-click **`starta.command`**. On Linux, run **`./starta.sh`** from a terminal (or double-click it, if your file manager runs executable scripts). Each installs dependencies on first run and then starts the app. Or, on any platform:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Opens on [http://localhost:5175](http://localhost:5175) so it does not collide with kaampi Explore (5173). See [Running kaampi Write](docs/running.md) for the Ollama origin setting and how Backup/Publish get your work out.
+Opens on [http://localhost:5175](http://localhost:5175) so it does not collide with kaampi Explore (5173). See [Running kaampi Write](docs/running.md) for the Ollama origin setting, the Codex-pairing limitation, and how Backup/Publish get your work out.
 
 ## Documentation
 
