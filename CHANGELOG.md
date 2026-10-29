@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.215] - 2026-10-29
+
+### Changed
+- The Maximize/Restore control moved from the bottom action bar to the top-right of the chapter-name panel, and now renders as an icon instead of the words "Maximize"/"Restore".
+
 ## [1.0.214] - 2026-10-29
 
 ### Changed

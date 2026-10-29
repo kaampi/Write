@@ -3354,6 +3354,26 @@ button:disabled {
   margin: 0 auto;
 }
 
+/*
+ * Mats wanted Maximize moved up here, "längst till höger" (far right) of
+ * the chapter-name panel - previously it lived in the bottom action bar,
+ * underneath the prose. .chapter-title keeps text-align: center for its
+ * own box; giving it flex: 1 here means that box is now the row's
+ * remaining width (full width minus the button), not the full row, so
+ * the title text sits very slightly left of the row's true center - an
+ * acceptable trade for the button living at the actual right edge Mats
+ * asked for instead of being centered.
+ */
+.chapter-head-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.chapter-head-row .chapter-title {
+  flex: 1;
+}
+
 .chapter-threads {
   display: flex;
   flex-wrap: wrap;
@@ -5622,16 +5642,9 @@ button:disabled {
   padding: 0.45rem 0.8rem;
 }
 
-.actions button.maximize-btn {
-  background: none;
-  border: 0;
-  color: var(--text-dim);
-  padding: 0.45rem 0.55rem;
-}
-
-.actions button.maximize-btn:hover,
-.actions button.maximize-btn:focus-visible {
-  color: var(--text);
+.maximize-icon-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .editor.is-maximized .editor-top {

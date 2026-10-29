@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.214
+Status: living document, v1.0.215
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10227,6 +10227,60 @@ ett riktigt kapitel med varmt papper i mörkt tema för att se
 pappersytan renderas korrekt i sitt sammanhang.
 
 v1.0.213 → v1.0.214.
+
+**Ändringslogg v1.0.214 → v1.0.215 (2026-10-29): Maximize flyttad till
+kapitelnamnets panel, som ikon.** Mats: "Jag vill flytta Maximize till
+panelen där kapitelnamnet står, längst till höger. Jag har två svg
+filer som du kan använda istället för texterna Mazximize och
+Restore" — skickade två SVG-filer (en rundad kvadrat med utåtpekande
+pil för Maximize, två överlappande rektanglar för Restore), båda med
+fast fyllnadsfärg.
+
+**Implementation:**
+- `MaximizeButton` (Editor.tsx, delad av Chapter/Synopsis/Brainstorm/
+  Board-vyerna) renderar nu `<MaximizeIcon />`/`<RestoreIcon />`
+  istället för `m.editor.maximize`/`m.editor.restore`-texten. Båda
+  SVG:erna konverterade från Mats fasta hex-färger (`#212121`/
+  `#1C274C`) till `fill="currentColor"`, samma mönster som
+  `CloseIconButton` - följer knappens egen textfärg (och ärver
+  hover-färgen) istället för att vara en fast färg som skulle bli
+  osynlig eller fel i något av temana. Maximize-ikonens egen
+  `opacity="0.5"`-bakgrundscirkel behölls som den var i originalet -
+  ger samma två-nivåers "badge bakom pil"-effekt, bara i knappens
+  egen nyans istället för fast marinblått.
+- Flyttad bara för den faktiska kapitelredigeringsvyn (den enda med
+  ett redigerbart kapitelnamn - Mats egen formulering, "panelen där
+  kapitelnamnet står"): togs bort från `.manuscript-foot`s
+  åtgärdsrad längst ner och lades istället i en ny `.chapter-head-row`
+  bredvid `<input className="chapter-title">`, längst till höger i
+  kapitelnamnpanelen. Synopsis/Brainstorm/Board behöll sin Maximize-
+  knapp på sin gamla plats i respektive åtgärdsrad (Mats bad bara om
+  den ena panelen) - men den delade komponenten gör att alla fyra nu
+  visar ikonen istället för text.
+- Ny CSS `.chapter-head-row` (flex-rad) + `.chapter-title { flex: 1 }`
+  inom den raden - kapitelnamnets textfält tar upp återstående bredd
+  istället för hela panelens bredd, vilket gör att dess egen
+  centrerade text (från v1.0.206-ish centreringsfixen) hamnar en
+  aning vänster om panelens sanna mittpunkt. En medveten avvägning:
+  knappen sitter nu vid den faktiska högerkanten Mats bad om.
+- Tog bort den gamla `.actions button.maximize-btn`-regeln (textknapp-
+  stil, inte längre använd) och lade till en liten `.maximize-icon-
+  button svg`-regel (1.25rem) - större än standardikonknappens
+  0.95rem eftersom den nu står bredvid en 1.7rem-rubrik, inte i en
+  tät åtgärdsrad med andra knappar.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Skapade ett testmanus i headless browser
+och öppnade Kapitel 1 - mätte knappens bounding box mot `.chapter-
+head-inner`s egen: knappens högerkant (627px) landade exakt på
+panelens högerkant (627px), alltså verkligen "längst till höger".
+Klickade knappen och läste `aria-label` efteråt ("Restore" istället
+för "Maximize") och tog en skärmdump av både normalt och maximerat
+läge - ikonen syns tydligt i båda, rubriken förblir synlig och
+centrerad i maximerat läge, ingen dubblett kvar i den gamla
+fotknappraden.
+
+v1.0.214 → v1.0.215.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

@@ -354,6 +354,45 @@ function StatsButton({ onOpen }: { onOpen: () => void }) {
   );
 }
 
+/** Rounded square with an outward-pointing arrow — "enter focus mode". */
+function MaximizeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        opacity="0.5"
+        d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z"
+        fill="currentColor"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12.5 7C12.5 6.58579 12.8358 6.25 13.25 6.25H17C17.4142 6.25 17.75 6.58579 17.75 7V10.75C17.75 11.1642 17.4142 11.5 17 11.5C16.5858 11.5 16.25 11.1642 16.25 10.75V8.81066L12.5303 12.5303C12.2374 12.8232 11.7626 12.8232 11.4697 12.5303C11.1768 12.2374 11.1768 11.7626 11.4697 11.4697L15.1893 7.75H13.25C12.8358 7.75 12.5 7.41421 12.5 7Z"
+        fill="currentColor"
+      />
+      <path
+        d="M2 17.5C2 15.3787 2 14.318 2.65901 13.659C3.31802 13 4.37868 13 6.5 13C8.62132 13 9.68198 13 10.341 13.659C11 14.318 11 15.3787 11 17.5C11 19.6213 11 20.682 10.341 21.341C9.68198 22 8.62132 22 6.5 22C4.37868 22 3.31802 22 2.65901 21.341C2 20.682 2 19.6213 2 17.5Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+/** Two overlapping panes — "leave focus mode, restore the rest of the editor". */
+function RestoreIcon() {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <path
+        d="M5.08496 4H9.99961C11.1042 4 11.9996 4.89543 11.9996 6V10.9146C12.5822 10.7087 12.9996 10.1531 12.9996 9.5V6C12.9996 4.34315 11.6565 3 9.99961 3H6.49961C5.8465 3 5.29088 3.4174 5.08496 4Z"
+        fill="currentColor"
+      />
+      <path
+        d="M4.5 5C3.67157 5 3 5.67157 3 6.5V11.5C3 12.3284 3.67157 13 4.5 13H9.5C10.3284 13 11 12.3284 11 11.5V6.5C11 5.67157 10.3284 5 9.5 5H4.5Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 function MaximizeButton({
   maximized,
   onToggle
@@ -365,12 +404,13 @@ function MaximizeButton({
   return (
     <button
       type="button"
-      className="text-button maximize-btn"
+      className="icon-button maximize-icon-button"
       onClick={onToggle}
       aria-pressed={maximized}
+      aria-label={maximized ? m.editor.restore : m.editor.maximize}
       title={maximized ? m.editor.restoreTitle : m.editor.maximizeTitle}
     >
-      {maximized ? m.editor.restore : m.editor.maximize}
+      {maximized ? <RestoreIcon /> : <MaximizeIcon />}
     </button>
   );
 }
@@ -1939,14 +1979,17 @@ export function Editor() {
             <div className="chapter-head">
               {/* Chapter settings and Scenes now live in the settings/scenes popover rendered below, not inline here — see chapterPopover's own comment. */}
               <div className="chapter-head-inner">
-                <input
-                  className="chapter-title"
-                  value={chapter.title}
-                  onChange={(event) =>
-                    void store.patchBook((current) => updateChapter(current, chapter.id, { title: event.target.value }))
-                  }
-                  aria-label={m.editor.chapterTitle}
-                />
+                <div className="chapter-head-row">
+                  <input
+                    className="chapter-title"
+                    value={chapter.title}
+                    onChange={(event) =>
+                      void store.patchBook((current) => updateChapter(current, chapter.id, { title: event.target.value }))
+                    }
+                    aria-label={m.editor.chapterTitle}
+                  />
+                  <MaximizeButton maximized={maximized} onToggle={() => setMaximized((on) => !on)} />
+                </div>
                 {plotlinesForChapter(book, chapter).length > 0 ? (
                   <div className="chapter-threads">
                     <span className="chapter-threads-label">{m.plotlines.chapterThreadsLabel}</span>
@@ -2063,7 +2106,6 @@ export function Editor() {
                   }}
                 />
                 <div className="actions">
-                  <MaximizeButton maximized={maximized} onToggle={() => setMaximized((on) => !on)} />
                   {busy === "draft" || busy === "extend" || busy === "elaborate" || busy === "instruct" || busy === "recast" ? (
                     <button type="button" onClick={store.stopDraft}>
                       {m.common.stop}
