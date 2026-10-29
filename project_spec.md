@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.227
+Status: living document, v1.0.228
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10983,6 +10983,59 @@ bekräfta att det normala mörka bläcket fortfarande används där —
 ingen regression.
 
 v1.0.226 → v1.0.227.
+
+
+**Ändringslogg v1.0.227 → v1.0.228 (2026-10-29): toppraden harmonierad
+mot kaampi Explore.** Mats skickade en skärmdump av Explores toppmeny:
+"Kan vi försöka harmonera Toppraden med hur den ser ut för Explore.
+Storlek på logga, marginaler och padding etc. Vi ska ha kvar Writers
+menyval men logga storlekar laytout..."
+
+**Första felsökning:** min lokala klon av kaampi/Explore (`/home/user/sandbox-ai`)
+var 81 commits efter `origin/main` och visade fortfarande den gamla
+"Sandbox AI ✧"-textbrandningen i `App.tsx` — inte alls det Mats
+skärmdumpade. `git pull` hämtade in bland annat "Always show app logos
+in the header switcher", som bytte Explores toppmeny till riktiga
+SVG-loggor. Utan den uppdateringen hade jag matchat fel referens.
+
+**Mätning av Explores faktiska värden** (`src/ui/experience.css`,
+`.sb-header`/`.sb-brand`/`.sb-apps`): fast bal-höjd `84px`, padding
+`0 33px` (bara horisontellt, ingen vertikal — höjden styr istället),
+gap `22px`. Huvudloggan (`.sb-brand__logo`) `width: 240px`. Switcher-
+loggorna (`.sb-switch-logo`, bilder, inte text) `width: 120px`, själva
+knapparna `padding: 12px 10px; min-height: 44px; border-radius: 8px`,
+aktiv flik `background: var(--panel-raised)`. Write och Explores
+loggor delar samma SVG-viewBox-höjd (202 enheter; Write 1193 bred,
+Explore 1358, Comic 1253) — så en höjdbaserad skalning (istället för
+Explores breddbaserade) ger samma visuella skala oavsett appnamnets
+längd: 240px bredd på Explores egen 1358-enheters logga motsvarar
+≈36px höjd, vilket är vad `.app-top-logo` sattes till.
+
+**Ändringar i `src/ui/styles.css`** (ingen React-ändring behövdes —
+`AppSwitcher.tsx` använde redan bild-loggor, inte text):
+- `.app-top-bar`: `height: 5.25rem` (84px), `padding: 0 2.0625rem`
+  (33px, bara horisontellt), `gap: 1.375rem` (22px) — tidigare
+  `padding: 0.5rem 1rem`, ingen fast höjd.
+- `.app-top-logo`: `height: 1.7rem` → `2.25rem` (36px).
+- `.app-switcher`: `gap: 0.3rem` → `0.625rem` (10px).
+- `.app-switcher-item`: `padding: 0.35rem 0.6rem` →
+  `0.75rem 0.625rem` (12px/10px), `border-radius: 7px` → `8px`,
+  tillagt `min-height: 2.75rem` (44px) och `justify-content: center`.
+- `.app-switcher-brand` (loggan inuti switcher-flikarna): `height: 0.85rem`
+  → `1.25rem` (20px).
+
+Writers egna menyval (Manuscripts, Guide, Settings) och höger-chrome
+(Codex, språk, tema) rördes inte — bara storlek/padding/marginaler på
+den delade raden, som Mats bad om.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1240/1240
+tester gröna. Headless Playwright mot en riktig körande dev-instans
+(ny bok, ljust tema) — skärmdump av den nya toppraden bekräftar större
+logga, fast radhöjd, bredare switcher-flikar med samma avrundning och
+bakgrundsmarkering på aktiv flik som Explores egen rad, med Writers
+nav-knappar kvar till vänster.
+
+v1.0.227 → v1.0.228.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

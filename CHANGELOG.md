@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.228] - 2026-10-29
+
+### Changed
+- The top bar's logo size, height, horizontal padding, and app-switcher pill spacing/sizing now match kaampi Explore's own top bar, for a consistent look across the family. Write's own menu items (Manuscripts, Guide, Settings) are unchanged.
+
 ## [1.0.227] - 2026-10-29
 
 ### Fixed

@@ -477,11 +477,18 @@ body {
   flex-direction: column;
 }
 
+/* Height, horizontal padding, and gap match kaampi Explore's own top bar
+   (.sb-header: height 84px, padding 0 33px, gap 22px) — Mats: "Kan vi
+   försöka harmonera Toppraden med hur den ser ut för Explore. Storlek på
+   logga, marginaler och padding." Write keeps its own nav items (the
+   Manuscripts menu, Guide, Settings) inside this same bar rather than
+   Explore's separate grid columns, so only the sizing is mirrored. */
 .app-top-bar {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  padding: 0.5rem 1rem;
+  gap: 1.375rem;
+  height: 5.25rem;
+  padding: 0 2.0625rem;
   border-bottom: 1px solid var(--border-soft);
   background: var(--panel);
   flex: 0 0 auto;
@@ -499,7 +506,7 @@ body {
 }
 
 .app-top-logo {
-  height: 1.7rem;
+  height: 2.25rem;
   width: auto;
 }
 
@@ -600,7 +607,7 @@ body {
 .app-switcher {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.625rem;
   margin: 0 auto;
   flex: 0 0 auto;
 }
@@ -608,10 +615,12 @@ body {
 .app-switcher-item {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.3rem;
   border: 0;
-  border-radius: 7px;
-  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  min-height: 2.75rem;
+  padding: 0.75rem 0.625rem;
   background: none;
   color: var(--text-dim);
   font-size: 0.72rem;
@@ -636,7 +645,7 @@ button.app-switcher-item:hover {
 
 /* Reuses the main logo's own light/dark swap classes (app-top-logo-light/-dark toggle on [data-theme]) at a smaller height that fits this compact row. Sets only height/width, not display — .app-top-logo-light/-dark already own that, and this class sits later in the sheet, so a display rule here would win on tied specificity and show both images at once. */
 .app-switcher-brand {
-  height: 0.85rem;
+  height: 1.25rem;
   width: auto;
 }
 
