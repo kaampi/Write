@@ -3187,6 +3187,111 @@ Inte påbörjad.
 
 ---
 
+## Idéer från konkurrensjämförelse (Type.ai, 2026-10-29)
+
+Mats nämnde Type.ai efter en diskussion om prompt caching (se nedan)
+och bad om en konkurrensanalys — uttryckligen "mer som en bakgrund",
+inget byggbeslut. Research via webbsök och Type.ais egen sajt
+(type.ai, deras Novelcrafter-jämförelsesida) plus ett antal
+tredjepartsrecensioner (BookBird, en Medium-recension som testat
+samma 40 000-ordsmanus mot tre verktyg, Jessica K Murrays recension)
+— inget av det är självupplevt eller källkodsgranskat, till skillnad
+från StelaWare-analysen ovan (Type.ai har ingen öppen källkod).
+
+**Vad det är:** ett webbaserat ordbehandlare-plus-AI-verktyg för
+romaner, noveller och manus — taglinen är "The intelligent editor
+for storytellers". Positionerar sig uttryckligen som "the most
+popular alternative to ChatGPT and Claude for long-form creative
+writing", med jämförelsesidor mot Sudowrite, Squibler, Novelcrafter,
+ChatGPT och Claude.
+
+**Den arkitektoniska grundskillnaden, bekräftad direkt från deras
+egen sajt:** Type.ai kör mot molnmodeller — "Premium AI models from
+Anthropic, OpenAI, and Google" — inte lokalt. Deras integritetslöfte
+är "No AI models are trained on your data, ever", vilket är ett löfte
+om *användning* av datan, inte om att den *lämnar datorn* — en
+kategoriskt svagare garanti än Writes "lämnar aldrig din dator"
+eftersom manuset fortfarande skickas till en tredje parts server för
+varje anrop. Det här är precis den typ av skillnad Write är byggt för
+att slippa, och bekräftar att "lokal AI som grundval, inte tillval"
+fortsatt är rätt profil mot den här typen av konkurrent.
+
+**Affärsmodell:** gratisnivå med engångskrediter, sedan betalnivåer
+från ca $8/månad (årsbetalning) upp till $96/månad, med AI-
+användning avräknad i krediter som ingår i varje nivå (extra krediter
+kan köpas till). En recensent uppskattade kreditåtgången för en hel
+roman till runt 380 000 krediter — inte en liten kostnad över tid.
+Novelcrafter (tidigare jämförd, se ovan i filen) har redan visat samma
+mönster: separat API-nyckel/molnkostnad är normen bland konkurrenter.
+Write har ingen marginalkostnad per generering alls (lokal modell,
+redan betald hårdvara) — en skillnad värd att fortsätta lyfta fram i
+marknadsföring, inte bara teknisk dokumentation.
+
+**Funktion för funktion, mot vad Write redan har:**
+- **Story notes** (karaktärer/platser/ögonblick, uppdateras automatiskt
+  när nya karaktärer dyker upp i prosan) ↔ vår **Story Bible** med
+  `core.*`-entiteter, lås-mekanism och scen-proveniens. Viktig
+  skillnad: Type.ais anteckningar verkar vara chatt-underhållna och
+  mjuka (ingen lås-mekanism nämnd), medan vår Story Bible kräver ett
+  uttryckligt Lock innan nåt räknas som kanon — author > AI-principen
+  vi redan byggt på (§9). En recensents fristående test av Type.ais
+  kontinuitetskontroll (inte samma sak som deras notes, men relaterat)
+  hittade bara 3 av 10 kända fel i en roman och missade saker som
+  våningsnummer och en adress som bytte värde mitt i boken — svagt
+  resultat som indirekt stärker värdet av vår mer strukturerade,
+  låsbara modell istället för fri chattdrivet minne.
+- **AI Chat-sidopanel** (brainstorma karaktärer/handling/miljö i en
+  sidopanel bredvid manuset) ↔ närmast vår **Ask Manuscript** / **Ask
+  about chapter** / **Interview the world**, fast de är uppgifts-
+  specifika verktyg snarare än en generell, alltid synlig chatt. Ingen
+  ny idé här, bara en annan form på liknande innehåll.
+- **Inline-omskrivning** (markera text, ge en avsikt, acceptera/avvisa
+  utan att lämna sidan) ↔ vårt **Rewrite…**-flöde med chips (POV leak,
+  starkare verb osv) plus Manual Edit. Båda löser samma problem på
+  snarlikt sätt.
+- **Reviews** (en genomgång av hela utkastet, radvisa AI-förslag) ↔
+  vårt **Proofread** (grammatik, upprepade scener, stil mellan
+  kapitel, sparar framsteg allteftersom) + **Developmental analysis**
+  + **Continuity**. En recensent klagade specifikt på att Type.ais
+  Reviews-pass saknar en Stopp-knapp och ingen exporterbar rapport en
+  gång klar — Proofread har redan framstegssparning och går att
+  avbryta, så vi ligger redan bättre där, inget att ändra.
+- **Anpassad skrivstil** (regler för egen röst) ↔ vår **Voice** (manus-
+  och kapitelnivå) + **Author voice**-skrivtips.
+- **Modellval inbyggt** (GPT-5, Claude 4.5 Sonnet, inga API-nycklar) ↔
+  vårt **Settings → AI settings** med `ConnectionPresetList` — samma
+  idé (växla mellan modeller utan att skriva om anslutningen varje
+  gång), fast vi pekar mot lokala servrar istället för inbyggda
+  molnmodeller.
+- **Export** (PDF/Word/HTML/Markdown, uppläst ljudversion) ↔ vår
+  **Publish** (HTML/ePub/PDF). Deras uppläsningsfunktion (genererad
+  ljudbok med vald röst) är nåt vi inte har — kopplar till den tidiga
+  TTS/ljudbok-diskussionen tidigare i den här sessionen (Chatterbox,
+  lokal modell) som Mats själv sa "vi kan börja spåna" om, fortfarande
+  olöst.
+
+**Svagheter recensenter faktiskt stötte på**, värda att känna till
+som "vad vi redan undviker genom vår arkitektur": en recensents
+webbläsarflik frös (~1,8 GB minne) under en Fix errors-körning;
+anteckningar går inte att exportera ("a real loss for planners");
+endast engelska stöds; inga namngivna modellversioner syns i
+inställningarna; ingen angiven lagringstid för uppladdade dokument.
+Inget av detta är särskilt förvånande för en molnbaserad SaaS, men
+bekräftar indirekt värdet av Writes lokala, inga-tysta-tidsgränser-
+modell.
+
+**Bedömning:** ingen ny funktionslucka upptäckt här som inte redan
+täcks av nåt vi har eller redan medvetet avfärdat (molnmodell-tillval
+= punkt 51, redan "inte nu"). Den tydligaste nyttan av den här
+jämförelsen är positioneringsmässig, inte teknisk: Type.ais eget
+marknadsspråk ("alternative to ChatGPT/Claude") visar att även en väl
+finansierad konkurrent fortfarande byggs ovanpå molnmodeller med
+löpande kreditkostnad — Writes "ingen marginalkostnad, lämnar aldrig
+din dator"-profil är fortsatt en riktig, inte bara teoretisk,
+differentiering. Inget nytt byggbeslut från den här genomgången.
+
+---
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**
