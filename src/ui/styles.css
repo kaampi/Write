@@ -427,6 +427,28 @@
   --editor-paper-text: #f3eadc;
 }
 
+/*
+ * The scrollbar is native chrome, not something styled elsewhere in this
+ * file (Mats: "kanske ska scrollisten och få bli ljus om pappret är
+ * det" - the scrollbar stayed the dark theme's own dark gray even on a
+ * light paper, since it otherwise just follows the app theme's
+ * color-scheme regardless of the paper underneath it). color-scheme is
+ * inherited, so setting it directly on .prose-body (the scrolling box
+ * itself, further down) makes the browser render that one scrollbar to
+ * match the paper's own lightness instead of the app theme's - "default"
+ * paper needs no override here since it already mirrors the active
+ * theme's own color-scheme from :root.
+ */
+[data-paper="warm"] .prose-body,
+[data-paper="sepia"] .prose-body,
+[data-paper="gray"] .prose-body {
+  color-scheme: light;
+}
+
+[data-paper="dark"] .prose-body {
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
 }

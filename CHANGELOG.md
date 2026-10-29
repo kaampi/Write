@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.214] - 2026-10-29
+
+### Changed
+- The editor's scrollbar now matches the chosen paper color, not just the app's dark/light theme — a light scrollbar on a warm/sepia/gray paper, a dark one on dark paper, regardless of which theme the rest of the app is in.
+
 ## [1.0.213] - 2026-10-29
 
 ### Fixed

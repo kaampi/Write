@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.213
+Status: living document, v1.0.214
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10188,6 +10188,45 @@ igen — alla tre fick bounding boxes helt innanför fönstret
 i något fall.
 
 v1.0.212 → v1.0.213.
+
+**Ändringslogg v1.0.213 → v1.0.214 (2026-10-29): scrollisten matchar
+pappersfärgen.** Mats, efter att ha sett den varma pappersfärgen i
+mörkt tema: "Det blev bra med pappersfärgen. Men kanske ska
+scrollisten och få bli ljus om pappret är det. Eller vad tycker du?"
+— skickade en skärmdump som visade en mörk scrollist mot ett ljust,
+varmt papper, vilket stack ut.
+
+**Grundorsak:** scrollisten är native rendering, inte stylad i CSS
+(ingen `::-webkit-scrollbar`-regel finns i projektet). Webviewen
+avgör scrollistens ljusa/mörka utseende via CSS-egenskapen
+`color-scheme`, som bara var satt på `:root`/`[data-theme="light"]`
+— alltså styrd av APPENS tema, helt oberoende av vilken pappersfärg
+som faktiskt visades i den scrollbara ytan.
+
+**Fix:** `color-scheme` sätts nu även direkt på `.prose-body` (den
+faktiska scrollbara rutan) per `[data-paper]`-värde: `light` för
+warm/sepia/gray, `dark` för `dark`-förinställningen. `color-scheme`
+är en ärvd egenskap, så den nya regeln vinner över det som annars
+ärvs från `:root`/temat, specifikt för den här ena rutan. "Följ
+temat" (ingen `[data-paper]` satt) får ingen egen regel och fortsätter
+därför ärva appens egen `color-scheme` som förut - exakt rätt
+eftersom den förinställningen redan är tänkt att se ut som temat.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Körde hela flödet i en riktig headless
+browser - inte bara DOM-attribut manipulerade för hand, utan de
+faktiska UI-kontrollerna (temaväxlingsknappen, den nya pappers-
+`<select>`en i Settings) - och läste `getComputedStyle(.prose-body)
+.colorScheme` efter varje steg: mörkt tema + "Följ temat" gav `dark`,
+en riktig klick på temaväxlaren gav `light` (följer alltså fortfarande
+temat korrekt), och att därefter välja "Dark"-förinställningen i
+Settings medan appens tema fortfarande var ljust gav `dark` igen -
+bekräftar att pappersfärgens egen scrollist-färg nu är oberoende av
+appens tema, precis som Mats efterfrågade. Tog också en skärmdump av
+ett riktigt kapitel med varmt papper i mörkt tema för att se
+pappersytan renderas korrekt i sitt sammanhang.
+
+v1.0.213 → v1.0.214.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
