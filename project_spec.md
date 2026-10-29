@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.216
+Status: living document, v1.0.217
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10367,6 +10367,74 @@ Keychain-feature i `keyring`-beroendet, ingen signerings-/
 notariseringsuppsättning).
 
 v1.0.215 → v1.0.216.
+
+**Ändringslogg v1.0.216 → v1.0.217 (2026-10-29): macOS-stöd för
+skrivbordsappen, inklusive Codex-parkoppling.** Mats: "Kör macOS-
+stödet nu också" - direkt uppföljning på Linux-arbetet, samma kväll.
+
+**Steg 1, i kaampi/Codex-repot (separat från den här ändringsloggen,
+se det repots egen historik):** ett nytt CI-jobb på `macos-latest`
+som bygger och smoke-testar `storycore-service` för macOS, samt
+`installer-macos/install.sh` - en `launchd`-LaunchAgent som macOS-
+motsvarighet till systemd-tjänsten på Linux. Kunde INTE byggas och
+köras lokalt i den här sandlådan som Linux-bygget kunde (Node SEA
+kopierar den aktuella plattformens egen `node`-binär som bas - en
+riktig macOS-binär kräver en riktig Mac, inte bara en annan
+`--target`-flagga). Upptäckte och fixade på vägen en namnkrock: både
+Linux- och macOS-binären hette tidigare bara `storycore-service`
+(ingen filändelse) och hade krockat i samma GitHub Release - bytte
+till `storycore-service-linux`/`storycore-service-macos`.
+
+**Steg 2, här i Write:**
+- `src-tauri/Cargo.toml`: ny `[target.'cfg(target_os = "macos")'.dependencies]`-
+  sektion, `keyring` med `apple-native`-feature (Keychain).
+- `src-tauri/src/core_bridge.rs`: alla `#[cfg(any(target_os =
+  "windows", target_os = "linux"))]` utökade med `target_os =
+  "macos"`. `bootstrap_path()` för macOS delar Linux-grenen rakt av
+  (`~/.storycore/core.db.bootstrap.json`) - Codex-tjänstens egen
+  `defaultDbPath()`-check i `server.mjs` är ett vanligt `!== 'win32'`,
+  inte Linux-specifikt, så samma sökväg var redan rätt för macOS
+  utan någon ändring på Codex-sidan.
+- `src-tauri/tauri.conf.json`: `bundle.targets` utökad med `app`/`dmg`.
+  Byggde om Linux-bundeln efteråt i sandlådan för att bekräfta att de
+  nya, på Linux irrelevanta målen verkligen hoppas över tyst av
+  bundlaren (precis som dokumenterat) - samma två filer (.deb,
+  .AppImage) som innan, ingen regression.
+- `.github/workflows/desktop-build.yml`: nytt `build-macos`-jobb på
+  `macos-latest`, bygger en universal binär (`aarch64-apple-darwin` +
+  `x86_64-apple-darwin` via `--target universal-apple-darwin`) - en
+  enda nedladdning som kör nativt på både Apple Silicon och Intel,
+  samma "användaren ska inte behöva veta sin egen hårdvara"-princip
+  som redan gäller Windows-installeraren (roadmap-ideas.md #35).
+  Publicerar bara `.dmg` till releasen (en `.app` är i sig en mapp,
+  inte en enskild fil en GitHub Release kan hålla som asset).
+- Dokumentation (README, running.md, workflow-kommentarer) uppdaterad
+  genomgående: macOS är unsigned OCH onotariserad, vilket är värre än
+  Windows SmartScreen-varningen - Gatekeeper VÄGRAR öppna appen alls
+  från en vanlig dubbelklickning, inte bara varnar. Dokumenterat
+  work-around (högerklicka → Open en gång, eller `xattr -cr`) i
+  running.md.
+
+**Verifiering - samma gräns som gäller Windows redan:** kunde inte
+kompilera macOS-koden på riktigt här (provade `cargo check --target
+x86_64-apple-darwin` ändå, av nyfikenhet - floppade exakt som väntat
+på `objc2-exception-helper`s Objective-C-kompilering, som kräver
+Apples egen `cc`/SDK, inte bara en Rust-target). Det som GICK att
+verifiera gjordes: `cargo check`/`cargo test` på den riktiga Linux-
+koden efter cfg-utökningarna (alla 7 Rust-test fortsatt gröna, ingen
+regression av att lägga till en tredje `target_os`-gren), en
+fullständig ombyggnad av Linux Tauri-bundeln för att bekräfta att de
+nya `app`/`dmg`-målen inte stör något på Linux, YAML-syntaxkontroll
+av alla ändrade workflow-filer, och XML-validering av den genererade
+launchd-plisten i Codex-repot. `tsc --noEmit` rent, hela testsviten
+(1240 test) grön, `npm run build` rent. Den faktiska macOS-
+verifieringen (bygget går igenom, appen startar, Gatekeeper-
+beteendet stämmer, Keychain-parkoppling fungerar på riktigt) vilar
+helt på `macos-latest`-runnern i GitHub Actions - samma tillitsnivå
+det här projektet redan haft för Windows-bygget under hela sessionen,
+eftersom sandlådan aldrig kunnat bygga det själv heller.
+
+v1.0.216 → v1.0.217.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

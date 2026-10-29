@@ -33,3 +33,6 @@ keyring = { version = "=3.6.3", default-features = false, features = ["windows-n
 
 [target.'cfg(target_os = "linux")'.dependencies]
 keyring = { version = "=3.6.3", default-features = false, features = ["linux-native", "sync-secret-service", "vendored"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+keyring = { version = "=3.6.3", default-features = false, features = ["apple-native"] }

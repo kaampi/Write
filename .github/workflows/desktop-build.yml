@@ -1,21 +1,29 @@
-name: Desktop build (Windows, Linux)
+name: Desktop build (Windows, Linux, macOS)
 
-# Builds the Tauri desktop launcher (roadmap-ideas.md #35) for Windows and
-# Linux (tauri.conf.json's bundle.targets lists nsis/deb/appimage together -
-# each OS's build only produces the targets that apply to it, the others
-# are silently skipped by the bundler). macOS has no job yet: no Apple
-# Keychain feature wired into Cargo.toml's keyring dependency, and no
-# signing/notarization setup, both separate pieces of work. Manually
+# Builds the Tauri desktop launcher (roadmap-ideas.md #35) for Windows,
+# Linux, and macOS (tauri.conf.json's bundle.targets lists
+# nsis/deb/appimage/app/dmg together - each OS's build only produces the
+# targets that apply to it, the others are silently skipped by the
+# bundler). The macOS job couldn't be built-and-verified in this project's
+# own Linux dev sandbox the way the Linux job was (Tauri's macOS backend
+# needs Apple's own Objective-C toolchain/SDK, which isn't available to
+# cross-compile from Linux) - it leans on this workflow's own
+# windows-latest/ubuntu-latest/macos-latest runners for real verification,
+# same trust model the Windows build has always had here. Manually
 # triggered, plus a self-check on any push to main that touches the desktop
 # project, so a broken build surfaces immediately instead of silently
 # rotting until someone runs it by hand.
 #
 # Unsigned builds: no code-signing secrets are configured (see
 # roadmap-ideas.md #35 — deferred until there's a budget for it). The
-# Windows .exe will trigger a SmartScreen warning; that's expected for now,
-# not a failure of this workflow.
-# Both jobs publish to the SAME GitHub Release (tagged v<package.json
-# version>) - one release per version, with the platform's own installer
+# Windows .exe will trigger a SmartScreen warning; that's expected. The
+# macOS .app/.dmg are unsigned AND unnotarized - macOS Gatekeeper refuses
+# to open them at all from a plain double-click ("app is damaged" or
+# "unidentified developer"), not just a warning dialog like Windows/Linux
+# - see docs/running.md for the right-click-Open/xattr workaround users
+# need until there's a budget for an Apple Developer ID.
+# All three jobs publish to the SAME GitHub Release (tagged v<package.json
+# version>) - one release per version, with each platform's own installer
 # assets attached, so there's a permanent download link that doesn't expire
 # after 90 days like a plain workflow-run artifact, and something the
 # in-app "Check for updates" feature (roadmap-ideas.md #35) can compare
@@ -178,4 +186,66 @@ jobs:
           files: |
             src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
             src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
+          fail_on_unmatched_files: true
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same fix as the Windows/Linux jobs - see the Windows job's own comment.
+      - name: Fetch GitHub git dependencies over HTTPS, not SSH
+        run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          # One binary that runs natively on both Apple Silicon and Intel
+          # Macs, rather than two separate downloads - a non-technical
+          # author shouldn't have to know their own Mac's chip (the same
+          # "don't make them pick" reasoning roadmap-ideas.md #35 already
+          # applies to the Windows installer).
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build the Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --target universal-apple-darwin
+
+      - name: Upload the macOS bundles (workflow artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-ai-macos-bundles
+          path: |
+            src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+
+      - name: Read app version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Extract this version's changelog section
+        id: changelog
+        run: |
+          awk '/^## \[/{n++} n==1{print} n==2{exit}' CHANGELOG.md > release-notes.md
+          echo "path=release-notes.md" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: kaampi Write v${{ steps.version.outputs.version }}
+          body_path: ${{ steps.changelog.outputs.path }}
+          files: |
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
           fail_on_unmatched_files: true

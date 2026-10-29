@@ -44,7 +44,7 @@ Each is a sibling, not a module of another — kaampi Write can send locked Stor
 
 ## Quickstart
 
-**Desktop app (recommended)** — download the installer for your platform from the [latest release](https://github.com/kaampi/Write/releases/latest): `.exe` for Windows, `.deb` or `.AppImage` for Linux. This is the only way to pair with **kaampi Codex** for backup and sync with your other kaampi apps: pairing needs the compiled desktop app specifically and is unavailable from a browser tab, however it's launched. No macOS build yet.
+**Desktop app (recommended)** — download the installer for your platform from the [latest release](https://github.com/kaampi/Write/releases/latest): `.exe` for Windows, `.deb` or `.AppImage` for Linux, `.dmg` for macOS (universal — one download for both Apple Silicon and Intel). This is the only way to pair with **kaampi Codex** for backup and sync with your other kaampi apps: pairing needs the compiled desktop app specifically and is unavailable from a browser tab, however it's launched. The macOS build is unsigned and unnotarized — see [Running kaampi Write](docs/running.md) for the one-time step Gatekeeper requires before it'll open.
 
 **Running from source** (any platform, or for development — no Codex pairing) — on Windows, double-click **`starta.bat`**. On macOS, double-click **`starta.command`**. On Linux, run **`./starta.sh`** from a terminal (or double-click it, if your file manager runs executable scripts). Each installs dependencies on first run and then starts the app. Or, on any platform:
 

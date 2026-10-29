@@ -13,41 +13,38 @@ fn valid_project_id(id: &str) -> bool {
     !id.is_empty() && id.len() <= 256 && id.bytes().all(|byte| byte.is_ascii_alphanumeric() || byte == b'-' || byte == b'_')
 }
 
-// macOS isn't wired up yet (no keyring dependency configured for it in
-// Cargo.toml, and no Codex installer exists for it) - only Windows and
-// Linux have a credential()/bootstrap_path() below. Add "macos" to both
-// of these cfg lists, plus an Apple Keychain feature in Cargo.toml's own
-// [target.'cfg(target_os = "macos")'.dependencies], when that lands.
-#[cfg(any(target_os = "windows", target_os = "linux"))]
+#[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
 fn credential() -> Result<keyring::Entry, String> {
     keyring::Entry::new("se.ocedo.storybookai.core", "storybook")
         .map_err(|_| "The system credential store is unavailable".to_string())
 }
 
-#[cfg(any(target_os = "windows", target_os = "linux"))]
+#[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
 fn saved_token() -> Result<String, String> {
     credential()?.get_password().map_err(|_| "Storybook is not paired with Core".to_string())
 }
 
-#[cfg(not(any(target_os = "windows", target_os = "linux")))]
+#[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
 fn saved_token() -> Result<String, String> {
-    Err("Core desktop pairing is currently available on Windows and Linux only".to_string())
+    Err("Core desktop pairing is not available on this platform".to_string())
 }
 
 /// Matches Core's own default database location exactly
 /// (packages/service/server.mjs's defaultDbPath) — the installer never
 /// overrides it, so this is the one place a freshly installed Core leaves
 /// its first-run pairing credentials. Windows: %LOCALAPPDATA%\StoryCore;
-/// Linux: ~/.storycore, server.mjs's own homedir()-based fallback for
-/// every non-Windows platform (so this same branch would already be
-/// correct for macOS too, once it's otherwise wired up above).
+/// Linux and macOS share one branch: ~/.storycore, server.mjs's own
+/// homedir()-based fallback for every non-Windows platform (its own
+/// process.platform check is a plain `!== 'win32'`, not a Linux-specific
+/// one, so this was already the right path for macOS the moment Codex
+/// itself ran there - nothing Core-side needed to change for this).
 #[cfg(target_os = "windows")]
 fn bootstrap_path() -> Result<std::path::PathBuf, String> {
     let base = std::env::var("LOCALAPPDATA").map_err(|_| "LOCALAPPDATA is not set".to_string())?;
     Ok(std::path::Path::new(&base).join("StoryCore").join("core.db.bootstrap.json"))
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "linux", target_os = "macos"))]
 fn bootstrap_path() -> Result<std::path::PathBuf, String> {
     let home = std::env::var("HOME").map_err(|_| "HOME is not set".to_string())?;
     Ok(std::path::Path::new(&home).join(".storycore").join("core.db.bootstrap.json"))
@@ -69,7 +66,8 @@ fn check_identity(token: &str) -> Result<(), String> {
 
 /// Pair once using the 64-character secret from Core's administrator-only provisioning.
 /// The secret is held by the system credential store (Windows Credential
-/// Manager, or the Secret Service on Linux), never returned to the webview.
+/// Manager, the Secret Service on Linux, or Keychain on macOS), never
+/// returned to the webview.
 #[tauri::command]
 pub async fn core_pair(token: String) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || {
@@ -77,10 +75,10 @@ pub async fn core_pair(token: String) -> Result<(), String> {
             return Err("Invalid Core credential".to_string());
         }
         check_identity(&token)?;
-        #[cfg(any(target_os = "windows", target_os = "linux"))]
+        #[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
         { credential()?.set_password(&token).map_err(|_| "Could not save the Core credential".to_string()) }
-        #[cfg(not(any(target_os = "windows", target_os = "linux")))]
-        { Err("Core desktop pairing is currently available on Windows and Linux only".to_string()) }
+        #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
+        { Err("Core desktop pairing is not available on this platform".to_string()) }
     }).await.map_err(|_| "Core pairing failed".to_string())?
 }
 
@@ -95,7 +93,7 @@ pub async fn core_pair(token: String) -> Result<(), String> {
 #[tauri::command]
 pub async fn core_auto_claim() -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(|| {
-        #[cfg(any(target_os = "windows", target_os = "linux"))]
+        #[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
         {
             let path = bootstrap_path()?;
             let raw = std::fs::read_to_string(&path).map_err(|_| "No local Core pairing file found".to_string())?;
@@ -115,8 +113,8 @@ pub async fn core_auto_claim() -> Result<(), String> {
             }
             Ok(())
         }
-        #[cfg(not(any(target_os = "windows", target_os = "linux")))]
-        { Err("Core desktop pairing is currently available on Windows and Linux only".to_string()) }
+        #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
+        { Err("Core desktop pairing is not available on this platform".to_string()) }
     }).await.map_err(|_| "Core auto-pairing failed".to_string())?
 }
 

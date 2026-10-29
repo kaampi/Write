@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "kaampi Write",
-  "version": "1.0.216",
+  "version": "1.0.217",
   "identifier": "se.ocedo.storybookai",
   "build": {
     "frontendDist": "../dist",
@@ -35,7 +35,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "deb", "appimage"],
+    "targets": ["nsis", "deb", "appimage", "app", "dmg"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.217] - 2026-10-29
+
+### Added
+- A macOS desktop build (`.dmg`, universal — one download for both Apple Silicon and Intel), alongside the existing Windows and Linux installers. kaampi Codex pairing now works from the macOS desktop app too, storing its credential in Keychain. Unsigned and unnotarized: Gatekeeper requires a one-time right-click-Open (or `xattr -cr`) before it'll launch — see docs/running.md.
+
 ## [1.0.216] - 2026-10-29
 
 ### Added
