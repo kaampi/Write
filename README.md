@@ -1,10 +1,46 @@
-# kaampi Write
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/logo-dark.svg">
+    <img src="public/logo.svg" alt="kaampi Write" width="420">
+  </picture>
+</p>
 
-A local-first prose tool. The Story Bible holds truth. The model drafts. You decide.
+<p align="center">A local-first prose tool. The Story Bible holds truth. The model drafts. You decide.</p>
 
-This is a sibling of [kaampi Explore](https://github.com/ocedo-apps/Sandbox-AI), not a part of it. Campaign export (this app → kaampi Explore campaigns) comes later. The other direction has a first piece: kaampi Explore's Storyboard can group campaign scenes into chapters and export chapter shells (title + brief, no prose) as JSON — this app does not read that file back in yet. No cloud API keys: kaampi Write talks to a local model server on your own computer or network — [Ollama](https://ollama.com), or any OpenAI-compatible server such as LM Studio, llama.cpp, or vLLM (see [Models](docs/models.md)). Cloud providers (OpenAI, Anthropic, Google, and others) are deliberately excluded — the provider layer refuses to resolve to their hostnames, not just undocumented.
+<p align="center">
+  <a href="https://github.com/kaampi/Write/actions/workflows/desktop-build.yml"><img src="https://github.com/kaampi/Write/actions/workflows/desktop-build.yml/badge.svg" alt="Desktop build status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPLv3-blue.svg" alt="License: GPLv3"></a>
+</p>
 
-The UI is English, Swedish, or Norwegian Bokmål. **Prose language** on Settings is the language of the sentences. Export files and model prompts follow that field when it is set, otherwise the language of the manuscript.
+kaampi Write is a desktop writing tool for long-form fiction — novels and series — built around a **Story Bible**: locked facts about your people, places, objects, groups, and events that every draft, rewrite, and consistency check is checked against. The model fills in prose; it never gets to invent canon on its own.
+
+**No cloud API keys, ever.** kaampi Write only talks to a model server running on your own computer or network — [Ollama](https://ollama.com), or any OpenAI-compatible server such as LM Studio, llama.cpp, or vLLM (see [Models](docs/models.md)). Cloud providers (OpenAI, Anthropic, Google, and others) are deliberately excluded at the network layer — the provider code refuses to resolve to their hostnames, not just undocumented as an option.
+
+The UI is English, Swedish, or Norwegian Bokmål. **Prose language** on Settings is the language of the sentences themselves — export files and model prompts follow that field when it is set, otherwise the language of the manuscript.
+
+## What's inside
+
+- **Story Bible** — people, places, objects, groups, and events, each locked or still a draft. Drafting, Extend, Elaborate, and Rewrite all check against locked facts; **Extract facts** proposes new rows from what you've already written instead of making you fill out forms up front.
+- **Brainstorm → Synopsis → Briefs** — a private scratch board for ideas, a synopsis that becomes the map, and a brief per chapter as a writing instruction, not canon. **Development method** offers guided structures (Snowflake, three-act, Save the Cat, Hero's Journey) if you want one.
+- **Draft, Extend, Elaborate, Rewrite** — fills or continues a chapter from the synopsis, Story Bible, brief, Plotlines, camera (POV/tense/viewpoint), Reader tier, and prose language. Select a passage to extend it, expand it, or rewrite it with a chip-filled instruction (POV leak, stronger verbs, active voice, show don't tell, long sentence).
+- **Analyze & Proofread** — an opt-in review pass that flags lines doing neither characterization nor scene work, named-feelings telling, Voice drift, and beats against a locked trait; Proofread is a slower whole-manuscript pass (grammar, repeated scenes, cross-chapter style, age report) that never rewrites on its own.
+- **Stats** — directness, pacing, vocabulary, echo and repeated-phrase detection, POV leaks, mixed-focus paragraphs, rare-word highlighting with Review-suggested alternatives.
+- **Timeline & Plotlines** — reading order against story-time order, threads as coloured bars across chapters, a gap in the bar is a gap in the thread.
+- **History** — a snapshot before every Draft, Recast, Extend, Elaborate, Rewrite, or Restore, with a word-level diff between any two versions; Restore never silently loses the current text.
+- **Publish** — export to HTML, ePub, RTF, and ODT (PDF coming), with per-manuscript typography, drop caps, scene-break style, page size and margins.
+
+See [The Loop](docs/guide.md) for the full walkthrough, step by step.
+
+## The kaampi family
+
+kaampi Write is one of four sibling apps that share a Story Bible via **[kaampi Codex](https://github.com/kaampi/Codex)**, a local sync service — never a cloud account:
+
+- **[kaampi Write](https://github.com/kaampi/Write)** (this app) — long-form prose
+- **[kaampi Comic](https://github.com/kaampi/Comic)** — comic scripting and panel layout
+- **[kaampi Explore](https://github.com/kaampi/Explore)** — tabletop campaign sandbox
+- **[kaampi Codex](https://github.com/kaampi/Codex)** — the local sync service the others pair with
+
+Each is a sibling, not a module of another — kaampi Write can send locked Story Bible cards to kaampi Explore shelves, and kaampi Explore's Storyboard can export chapter shells (title + brief, no prose) for kaampi Write to pick up. No app requires any of the others.
 
 ## Quickstart
 
@@ -27,3 +63,7 @@ Opens on [http://localhost:5175](http://localhost:5175) so it does not collide w
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for what changed in each release.
+
+## License
+
+[GNU GPLv3](LICENSE).
