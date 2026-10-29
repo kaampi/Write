@@ -472,7 +472,13 @@ body {
 .app-top-menu-panel {
   position: absolute;
   top: calc(100% + 0.4rem);
-  left: 0;
+  /* Every one of these triggers (File/Tools/Settings/Find-Replace, the
+     locale selector, the theme toggle) sits in the right-aligned part of
+     the top bar - anchoring the panel to the trigger's left edge let it
+     grow rightward past the window edge, forcing an unwanted horizontal
+     scrollbar on the whole app. Anchoring to the right edge instead keeps
+     it growing leftward, into space that's actually there. */
+  right: 0;
   z-index: 45;
   width: max(14rem, min(20rem, 60vw));
   max-height: min(70vh, 28rem);

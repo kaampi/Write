@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.210
+Status: living document, v1.0.211
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10035,6 +10035,35 @@ pixelvärdena från Mats egna skärmdumpar, inte bara en ungefärlig
 gråton.
 
 v1.0.209 → v1.0.210.
+
+**Ändringslogg v1.0.210 → v1.0.211 (2026-10-29): FILE/TOOLS-menyerna
+orsakade en horisontell scrollist.** Mats skickade en skärmdump:
+"Jag noterar att de drop-down menyer som man får när man klickar på
+File och Tools ligger så nära högerkanten att man får en scrollist
+för fönstret."
+
+**Grundorsak:** `.app-top-menu-panel` (den delade `TopMenu`-
+komponentens meny-CSS, används av File/Tools/Settings/Find-Replace,
+språkväljaren och temaväxlaren — alla sex sitter i den högerjusterade
+delen av topplisten) var ankrad med `left: 0` relativt sin egen
+trigger-knapp och växte sedan åt höger (`width: max(14rem, min(20rem,
+60vw))`). För en trigger nära fönstrets högerkant skjuter panelen då
+ut förbi kanten, vilket tvingar fram webbläsarens/webviewens
+horisontella scrollist för hela appen — inte bara menyn, hela
+fönstret fick en scrollist i botten.
+
+**Fix:** en rad, `left: 0` → `right: 0` — panelen ankras nu vid
+sin triggers högerkant och växer åt vänster istället, in i utrymme
+som faktiskt finns. Gäller alla sex menyer samtidigt eftersom de
+delar samma CSS-regel; ingen skillnad mellan dem att särskilja.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Öppnade både FILE- och TOOLS-menyn i en
+headless browser och läste `document.documentElement.scrollWidth >
+clientWidth` före och efter — `false` i båda fallen, ingen
+horisontell overflow kvar.
+
+v1.0.210 → v1.0.211.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

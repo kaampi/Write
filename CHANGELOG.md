@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.211] - 2026-10-29
+
+### Fixed
+- The File/Tools/Settings/Find-Replace menus (and the locale and theme-mode dropdowns) opened anchored to their trigger's left edge, which could push the panel past the window's right edge and force an unwanted horizontal scrollbar on the whole app — all of these triggers live in the right-aligned part of the top bar. Anchored to the trigger's right edge instead, so the panel grows into space that's actually there.
+
 ## [1.0.210] - 2026-10-28
 
 ### Changed
