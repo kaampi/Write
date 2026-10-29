@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.225
+Status: living document, v1.0.226
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10891,6 +10891,45 @@ steg-skärmdumpar och tips-rutan faktiskt renderas i Guide-vyn,
 inbäddade mellan 5.1 och nästa sektion (5.2).
 
 v1.0.224 → v1.0.225.
+
+
+**Ändringslogg v1.0.225 → v1.0.226 (2026-10-29): Guide-pilotens
+skärmdumpar om i ljust tema, högre upplösning.** Mats: "Jag tänker
+att vi använder ljust tema för skärmdumparna. Kan du använda en högre
+skärmupplösning för skärmdumparna. Jag har 2560x1440."
+
+**Omtagning:** samma headless Playwright-teknik som innan, men nu med
+`viewport: 2560x1440` (matchar Mats egen skärm) och ett klick på
+tema-knappen innan något annat händer. Två tekniska problem dök upp
+och fick lösas under tagningen, inte bara antas bort:
+- Den tomma-kapitel-bilden blev onödigt dominerad av tomrum vid den
+  höga upplösningen (sidan fyller tillgänglig höjd, och ett tomt
+  kapitel har inget innehåll att fylla den med) — löst genom att
+  tillfälligt köra den specifika skärmdumpen med en kortare
+  webbläsarhöjd (820px) så Draft-knappen hamnar strax under
+  platshållartexten, istället för hundratals pixlar tomrum.
+- Exakt textmarkering (för Extend/Elaborate/Rewrite-skärmdumpen) gick
+  fel första försöket — `Range.getBoundingClientRect()` på en
+  flerradig markering returnerar EN rektangel som spänner över båda
+  radernas fulla höjd, så hörnpunkterna hamnade inte på själva texten.
+  Löst med `Range.getClientRects()` istället, som ger en rektangel
+  per visuell rad, och drog musen genom varje radens mittpunkt.
+
+**Resultat:** samma tre skärmdumpar (tomt kapitel + Draft, markering +
+Extend/Elaborate/Rewrite-menyn, ingen markering + Write a beat-menyn),
+nu i ljust tema vid 2560×1440 källupplösning — `.handbook-step-image`
+skalar ner dem till `min(100%, 26rem)` i Guiden, så den högre
+källupplösningen ger skarpare rendering vid den faktiska visningsstorleken,
+ungefär som en retina-tillgång. Ersatte filerna på plats i
+`public/handbook/write-with-ai/` (samma filnamn, samma i18n-referenser
+— ingen kodändring behövdes, bara nya bilder).
+
+**Verifiering:** `npm run build` rent, headless Playwright-skärmdump
+av den renderade Guide-sidan mot en riktig `vite preview`-build
+bekräftade att alla tre bilderna visas korrekt, skarpa och utan den
+röda anslutningsbannern.
+
+v1.0.225 → v1.0.226.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

@@ -9,7 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
-## [1.0.225] - 2026-10-29
+## [1.0.226] - 2026-10-29
+
+### Changed
+- The three screenshots in the Guide's "Write together with AI" pilot section are now captured in the light theme at a higher source resolution (2560×1440), replacing the earlier dark-theme, lower-resolution versions.
+
+
 
 ### Changed
 - Piloted a more pedagogical layout for the in-app Guide, inspired by Sudowrite's own docs: the "Write together with AI" section now walks through Draft, selecting a passage for Extend/Elaborate/Rewrite, and Write a beat as three labelled steps, each illustrated with a real screenshot of the app, plus a closing tip. Other Guide sections are unchanged for now — this was a trial of the format before extending it further.
