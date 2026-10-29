@@ -59,6 +59,7 @@ inte en ensidig lista.
 | 54 | Git-baserad fillagring/versionskontroll (StelaWare-jämförelse) | ⬜ arkitekturlucka, inte en idé att bygga — se nedan |
 | 55 | Begär `navigator.storage.persist()` vid start, så webbläsaren inte rensar IndexedDB-data under diskutrymmesbrist | ⬜ ej påbörjad, billig defensiv åtgärd — se nedan |
 | 56 | Codex över LAN — jobba mot samma manus från flera datorer i samma nätverk | ⬜ ej påbörjad, måttlig kodändring men installationsrisk — se nedan |
+| 57 | Fler UI-språk (tyska, franska m.fl.) — latinsk skrift är görbart, icke-latinska skrifter (Indic, arabiska/hebreiska) och RTL kraftigt dyrare | ⬜ ej påbörjad, avvaktar efterfrågan — se nedan |
 
 Plus det egna designspåret ("Det enda stora arkitekturbeslutet" nedan,
 Scene/BookScene/NarrativeFact-gränsen) — ett öppet samtal, inte en
@@ -3122,6 +3123,65 @@ kopiors formulering, `installer-linux/install.sh`s utskrift — skulle
 behöva bli "lämnar aldrig ditt nätverk" (eller mer precist: "lämnar
 aldrig datorer du själv parkopplat"), inte bara en kodändring utan en
 förtroendeformulering som måste vara lika tydlig som den nuvarande.
+
+Inte påbörjad.
+
+---
+
+### 57.
+
+Mats noterade att flera läsare av hans Reddit-inlägg verkar vara från
+Indien, och funderade högt om det vore värt att bredda vilka som
+appen kan locka: "Hur skulle det fungera att skapa en indisk
+version? Då blir inte bara språket annat även alfabetet eller?" och
+senare, om höger-till-vänster-skrift: "Är det kopplat till andra
+alfabeten också?"
+
+**UI-text (menyer, dialoger) är redan arkitekturerat för fler språk** —
+`src/ui/i18n/{en,sv,nb}.ts`, samma nästlade namnrymd i alla tre, med
+`format()`/`count()`-hjälpare för interpolation/pluralisering. En ny
+`de.ts`/`fr.ts` är samma mönster, bara ren översättningsvolym (runt
+230+ nycklar), inget arkitekturjobb.
+
+**Själva manuset är redan språkneutralt.** `book.prose_language` är
+fritext — en författare kan redan idag skriva på vilket språk som
+helst modellen klarar, oavsett vilket UI-språk som är valt. Den
+begränsande faktorn där är inte Write utan den lokala modellens
+faktiska språkförmåga (många öppna modeller är klart svagare på t.ex.
+hindi eller tamil än på engelska/svenska) — utanför Writes egen
+kontroll.
+
+**Skriftsystemet, inte språket, är den faktiska kostnadsskillnaden:**
+- **Latinsk skrift (tyska, franska m.fl.):** inget extra arbete.
+  De bundlade typsnitten (Literata, Lora, Spectral, Alegreya m.fl.,
+  `src/core/publishFonts.ts`) är vanliga Google Fonts-familjer byggda
+  för europeiska språk — har redan täckning för ü/ö/ä/é/è/ç osv.
+- **Icke-latinsk skrift (Devanagari, Tamil, Bengali, arabiska,
+  hebreiska...):** typsnitten saknar glyfer för dessa skrifter helt.
+  Text skulle antingen inte visas, eller falla tillbaka på
+  systemtypsnitt och se inkonsekvent ut mot resten av editorns
+  typografi — kräver egna bundlade typsnitt (t.ex. Noto Sans/Serif
+  Devanagari/Tamil) per skriftsystem som ska stödjas.
+- **RTL (arabiska, hebreiska, urdu) är ett eget lager ovanpå
+  skriftbytet, inte en konsekvens av det:** `direction: rtl` på
+  prosan, markörbeteende, och i princip hela gränssnittets layout
+  förväntas spegla sig (menyer, ikoner, scrollbars från vänster till
+  höger). Kodbasens CSS använder idag genomgående fysiska
+  riktningsegenskaper istället för logiska (`margin-left`/
+  `margin-right`/`text-align: left` — 50 träffar i `styles.css` vid
+  en snabb sökning 2026-10-29) snarare än CSS logical properties
+  (`margin-inline-start` etc.), vilket är precis det som måste
+  genomgås/bytas ut för att RTL ska fungera rakt igenom, inte bara i
+  själva prosatexten.
+
+**Bedömning:** fler latinska språk (tyska, franska) är rent
+översättningsarbete, görbart på kort tid den dag efterfrågan finns.
+Icke-latinska skriftsystem är en betydligt större insats
+(typsnittsarbete, inte bara översättning). RTL är störst av alla tre
+— mer i stil med en arkitekturändring (CSS-genomgång av hela
+gränssnittet) än en lokalisering, och inget vi sett konkret efterfrågan
+på. Mats: "det känns som mycket jobb för lite ull" — RTL/nya alfabet
+läggs åt sidan helt tills vidare, inte ens som prioriterad roadmap-post.
 
 Inte påbörjad.
 
