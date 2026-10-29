@@ -236,6 +236,16 @@ export const sv: Messages = {
     historyLimit: "Versioner",
     historyLimitLede:
       "Hur många tidigare versioner av ett kapitel som sparas, från Skriv utkast, Omskriv, Förläng, Utveckla och Skriv om. Så fort gränsen nås försvinner den äldsta versionen först. Det du skriver själv för hand sparas inte som en egen version — bara de här åtgärderna gör det.",
+    paperLabel: "Pappersyta",
+    paperLede:
+      "Själva skrivytans bakgrund och textfärg, separat från appens mörka/ljusa tema — så du kan ha mörkt tema överallt annars men skriva på en ljusare sida. Gäller hela appen, inte bara det här manuset.",
+    paperOptions: {
+      default: "Följ temat",
+      warm: "Varm vit",
+      sepia: "Sepia",
+      gray: "Mjuk grå",
+      dark: "Mörk"
+    },
     dropCapLabel: "Anfang",
     dropCapLede:
       "En stor begynnelsebokstav på varje kapitels första stycke, som sträcker sig över valt antal rader. Visas direkt i skrivytan och följer med till Publish-export (HTML, ePub, RTF, ODT; PDF inte än).",

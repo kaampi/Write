@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.211
+Status: living document, v1.0.212
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10064,6 +10064,95 @@ clientWidth` före och efter — `false` i båda fallen, ingen
 horisontell overflow kvar.
 
 v1.0.210 → v1.0.211.
+
+**Ändringslogg v1.0.211 → v1.0.212 (2026-10-29): ny inställning —
+pappersfärg för editorytan.** Mats: "Jag skulle vilja lägga till en
+grej på settings. Om man borde kunna välja vilken färg man vill ha
+editorytan, alltså själva 'pappret'. Mörkt tema kan vara bra men det
+är lite jobbigt att skriva och läsa ljusa texter på mörk bakgrund, så
+man borde kunna ändra."
+
+**Scope, klargjort via två frågor till Mats innan implementation:**
+1. Hur fri ska färgväljaren vara? → "Några färdiga färger att välja
+   mellan (Rekommenderat)" — alltså fasta förinställningar, inte en
+   fri färgväljare. Varje förinställning har en förvald, läsbar
+   textfärg inbakad; ingen risk för att användaren råkar skapa en
+   oläsbar kombination.
+2. Ska pappersfärgen gälla hela appen eller per manus? → "Hela appen,
+   ett val för dig (Rekommenderat)" — samma mönster som det befintliga
+   mörkt/ljust-temat (`theme.ts`): ett globalt val sparat i
+   `localStorage`, INTE ett fält på `Book` (till skillnad från det
+   redan existerande `editor_background`-fältet, som bara styr en
+   dekorativ textur runt manuskriptkortet, aldrig själva pappret/
+   texten).
+
+**Implementation:**
+- Ny fil `src/ui/paper.ts`, byggd efter exakt samma mönster som
+  `theme.ts`: `type Paper = "default" | "warm" | "sepia" | "gray" |
+  "dark"`, `PAPER_KEY = "storybook-ai.paper"`, `readPaper()`/
+  `applyPaper()` som sätter/läser `localStorage` och togglar ett eget
+  `[data-paper]`-attribut på `<html>` — medvetet ett SEPARAT attribut
+  från `[data-theme]`, inte infogat i det, så att "mörkt tema, ljust
+  papper" förblir en giltig kombination. Det är hela poängen med
+  funktionen.
+- `index.html`s inline pre-paint-skript (samma som redan läser tema
+  och språk innan första målning, för att undvika en flimrande fel-
+  tema-blixt) läser nu även `storybook-ai.paper` och sätter
+  `dataset.paper` tidigt.
+- `main.tsx` anropar `applyPaper(readPaper())` vid uppstart, bredvid
+  den redan existerande `applyTheme(readTheme())`.
+- Två nya CSS custom properties, `--editor-paper-bg`/
+  `--editor-paper-text`, definierade en gång på `:root` (mörkt tema)
+  som `var(--panel)`/`var(--text)` — alltså en referens, inte ett
+  fast värde. Ingen motsvarande omdefinition behövdes under
+  `[data-theme="light"]`: CSS-egna egenskaper med `var()`-referenser
+  löses dynamiskt vid användningsplatsen mot den egenskap som faktiskt
+  gäller där, inte vid definitionsplatsen, så `--editor-paper-bg`
+  följer automatiskt vilket tema som faktiskt är aktivt för "Följ
+  temat"-läget. Verifierat (inte antaget) via `getComputedStyle()` i
+  headless browser i båda temana — se Verifiering nedan.
+- Fyra nya regler, `[data-paper="warm"|"sepia"|"gray"|"dark"]`,
+  skrivna på toppnivå (inte under `[data-theme="light"]` eller
+  `:root`) så att varje förinställning ger exakt samma utseende
+  oavsett vilket tema som råkar vara aktivt — en varm sida ska se varm
+  ut oavsett om resten av appen är mörk eller ljus:
+  - `warm`: bakgrund `#faf5ed`, text `#2a2218` (samma som ljusa temats
+    egna panel/text)
+  - `sepia`: bakgrund `#f0e4cf`, text `#4a3826`
+  - `gray`: bakgrund `#e8e6e2`, text `#2b2b2b`
+  - `dark`: bakgrund `#1c1814`, text `#f3eadc` (samma som mörka temats
+    egna panel/text)
+- Fyra konsumentregler i `styles.css` bytte från `var(--panel)`/
+  `var(--text)` till de nya tokens: `.prose-body`s bakgrund,
+  `.prose-fade-top`/`.prose-fade-bottom`s gradienter, och `.prose`s
+  textfärg (båda reglerna, bas och `[data-theme="light"] .prose`) —
+  där textfärgsregeln redan hade en fallback-kedja för manusets egna
+  publiceringsfärg (`--prose-body-color-dark`/`-light`); den kedjan är
+  oförändrad, bara dess fallback-värde bytte från `var(--text)` till
+  `var(--editor-paper-text)`, så prioritetsordningen blir: manusets
+  egen publiceringsfärg (om satt) → det nya globala pappersvalet →
+  temats standardtextfärg.
+- Ny `<select>` i `SettingsPanel.tsx`s GENERAL-sektion, bredvid
+  "Revisions"-fältet. Använder lokal `useState(readPaper)` +
+  `applyPaper()` vid ändring — INTE `onPatch`/`book.*`, eftersom detta
+  är ett globalt val, inte ett manus-fält. Samma mönster som
+  `ThemeToggle.tsx`, bara med fem alternativ istället för en knapp.
+- Nya i18n-strängar (`paperLabel`, `paperLede`, `paperOptions.{default,
+  warm,sepia,gray,dark}`) i alla tre språkfiler (en/sv/nb).
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. Körde ett headless Playwright-skript som
+växlade `[data-theme]` och `[data-paper]` i alla 10 kombinationer
+(2 teman × 5 förinställningar) och läste `getComputedStyle()` för
+`--editor-paper-bg`/`--editor-paper-text` varje gång: "Följ temat"
+gav `#1c1814`/`#f3eadc` i mörkt tema och `#faf5ed`/`#2a2218` i ljust
+tema (alltså identiskt med temats egna `--panel`/`--text`, som
+avsett), medan de fyra namngivna förinställningarna gav exakt samma
+par oavsett vilket tema som var aktivt — bekräftar att "mörkt tema,
+varmt papper" fungerar som den egentliga poängen med funktionen,
+inte bara i teorin.
+
+v1.0.211 → v1.0.212.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

@@ -643,6 +643,16 @@ export const en = {
     historyLimit: "Revisions",
     historyLimitLede:
       "How many earlier versions of a chapter are kept, going back through Draft, Recast, Extend, Elaborate, and Rewrite. Once you go over the limit, the oldest version is dropped first. Typing on your own doesn't create a version — only those actions do.",
+    paperLabel: "Editor paper",
+    paperLede:
+      "The writing surface's own background and text color, separate from the app's dark/light theme — so you can keep a dark theme everywhere else while writing on a lighter page. Applies to the whole app, not just this manuscript.",
+    paperOptions: {
+      default: "Match theme",
+      warm: "Warm white",
+      sepia: "Sepia",
+      gray: "Soft gray",
+      dark: "Dark"
+    },
     dropCapLabel: "Drop cap",
     dropCapLede:
       'A large opening letter for each chapter\'s first paragraph, spanning the chosen number of lines — sometimes called an "anfang". Shows live in the editor and carries into Publish exports (HTML, ePub, RTF, ODT; PDF not yet).',

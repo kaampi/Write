@@ -307,6 +307,15 @@
   --on-ink: #fff8f3;
   --sage: #7ea394;
   --scrollbar-gray: #636363;
+  /* Settings → Editor paper (paper.ts, [data-paper] on <html>) - the
+     writing surface's own background/text, independent of light/dark
+     theme. Defaults to the theme's own --panel/--text so "Match theme"
+     (no [data-paper] set) looks identical to before this existed; the
+     actual preset blocks (further down) override both with fixed colors
+     that don't vary by theme, by design - a "warm" page should look the
+     same warm whether the rest of the app is in dark or light theme. */
+  --editor-paper-bg: var(--panel);
+  --editor-paper-text: var(--text);
   --ai: #b392c4;
   --flag: #d4a054;
   --danger: #c97872;
@@ -388,6 +397,34 @@
   --plotline-grey: #6b7280;
   --plotline-charcoal: #1f2937;
   color-scheme: light;
+}
+
+/*
+ * Settings → Editor paper presets (paper.ts). Deliberately NOT scoped
+ * under [data-theme="light"]/:root - each preset is one fixed look
+ * regardless of which overall theme is active, so "dark app, warm paper"
+ * (the actual point of this feature - a reader asked for a lighter
+ * writing surface without giving up the dark theme everywhere else) is a
+ * real, supported combination, not an accident of cascade order.
+ */
+[data-paper="warm"] {
+  --editor-paper-bg: #faf5ed;
+  --editor-paper-text: #2a2218;
+}
+
+[data-paper="sepia"] {
+  --editor-paper-bg: #f0e4cf;
+  --editor-paper-text: #4a3826;
+}
+
+[data-paper="gray"] {
+  --editor-paper-bg: #e8e6e2;
+  --editor-paper-text: #2b2b2b;
+}
+
+[data-paper="dark"] {
+  --editor-paper-bg: #1c1814;
+  --editor-paper-text: #f3eadc;
 }
 
 * {
@@ -4034,13 +4071,13 @@ button:disabled {
 .prose-fade-top {
   top: 0;
   border-radius: 6px 6px 0 0;
-  background: linear-gradient(to bottom, var(--panel) 0%, transparent 100%);
+  background: linear-gradient(to bottom, var(--editor-paper-bg) 0%, transparent 100%);
 }
 
 .prose-fade-bottom {
   bottom: 0;
   border-radius: 0 0 6px 6px;
-  background: linear-gradient(to top, var(--panel) 0%, transparent 100%);
+  background: linear-gradient(to top, var(--editor-paper-bg) 0%, transparent 100%);
 }
 
 .prose-wrap .model-aside {
@@ -4051,7 +4088,7 @@ button:disabled {
 .prose-body {
   position: relative;
   flex: 1 1 auto;
-  background: var(--panel);
+  background: var(--editor-paper-bg);
   border: 1px solid var(--border-soft);
 }
 
@@ -4071,7 +4108,7 @@ button:disabled {
    * actually reading or writing.
    */
   padding: 60px 3rem 80px;
-  color: var(--prose-body-color-dark, var(--text));
+  color: var(--prose-body-color-dark, var(--editor-paper-text));
 }
 
 /*
@@ -4086,7 +4123,7 @@ button:disabled {
  * missing, so an unset custom property never renders invisible text.
  */
 [data-theme="light"] .prose {
-  color: var(--prose-body-color-light, var(--text));
+  color: var(--prose-body-color-light, var(--editor-paper-text));
 }
 
 /*

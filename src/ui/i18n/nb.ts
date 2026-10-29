@@ -236,6 +236,16 @@ export const nb: Messages = {
     historyLimit: "Versjoner",
     historyLimitLede:
       "Hvor mange tidligere versjoner av et kapittel som lagres, fra Lag utkast, Omskriv, Forleng, Utdyp og Skriv om. Så snart grensen nås, forsvinner den eldste versjonen først. Det du skriver selv for hånd lagres ikke som en egen versjon — bare disse handlingene gjør det.",
+    paperLabel: "Papiroverflate",
+    paperLede:
+      "Selve skriveflatens bakgrunn og tekstfarge, separat fra appens mørke/lyse tema — så du kan ha mørkt tema overalt ellers, men skrive på en lysere side. Gjelder hele appen, ikke bare dette manuset.",
+    paperOptions: {
+      default: "Følg temaet",
+      warm: "Varm hvit",
+      sepia: "Sepia",
+      gray: "Myk grå",
+      dark: "Mørk"
+    },
     dropCapLabel: "Anfang",
     dropCapLede:
       "En stor forbokstav på hvert kapittels første avsnitt, som strekker seg over valgt antall linjer. Vises direkte i skriveflaten og følger med til Publish-eksport (HTML, ePub, RTF, ODT; PDF ikke ennå).",

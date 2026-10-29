@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.212] - 2026-10-29
+
+### Added
+- A new "Editor paper" setting (Settings → General): choose the writing surface's own background and text color from five presets (Match theme, Warm white, Sepia, Soft gray, Dark), independent of the app's overall dark/light theme. Lets you keep a dark theme everywhere else while writing on a lighter page, without that fighting the theme toggle. Applies app-wide, saved locally, like the theme choice itself — not a per-manuscript setting.
+
 ## [1.0.211] - 2026-10-29
 
 ### Fixed

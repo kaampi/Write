@@ -28,6 +28,7 @@ import {
 import { BlobThumbnail } from "./BlobThumbnail";
 import { HelpTip } from "./GuidePanel";
 import { format, useLocale } from "./i18n";
+import { applyPaper, parsePaper, readPaper, PAPERS } from "./paper";
 
 export function SettingsPanel({
   book,
@@ -101,6 +102,7 @@ export function SettingsPanel({
   const showViewpoint = needsViewpoint(book.pov);
   const selectedStyle = findStyleByPromptText(illustrationStyles, book.illustration_style);
   const [editingText, setEditingText] = useState(false);
+  const [paper, setPaper] = useState(readPaper);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -185,6 +187,27 @@ export function SettingsPanel({
                       else setHistoryLimitDraft(String(historyLimit));
                     }}
                   />
+                </label>
+                <label className="reader-field">
+                  <span className="field-label-row">
+                    {m.editor.paperLabel}
+                    <HelpTip body={m.editor.paperLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.paperLabel })} />
+                  </span>
+                  <select
+                    value={paper}
+                    aria-label={m.editor.paperLabel}
+                    onChange={(event) => {
+                      const next = parsePaper(event.target.value);
+                      applyPaper(next);
+                      setPaper(next);
+                    }}
+                  >
+                    {PAPERS.map((option) => (
+                      <option key={option} value={option}>
+                        {m.editor.paperOptions[option]}
+                      </option>
+                    ))}
+                  </select>
                 </label>
               </div>
               <div className="craft-fields">

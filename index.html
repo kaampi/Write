@@ -12,6 +12,10 @@
           document.documentElement.dataset.theme = "light";
           document.documentElement.style.colorScheme = "light";
         }
+        var paper = localStorage.getItem("storybook-ai.paper");
+        if (paper && paper !== "default") {
+          document.documentElement.dataset.paper = paper;
+        }
         var loc = localStorage.getItem("storybook-ai.locale");
         if (loc) {
           document.documentElement.lang = loc.split("-")[0];
