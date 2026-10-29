@@ -509,13 +509,12 @@ body {
 .app-top-menu-panel {
   position: absolute;
   top: calc(100% + 0.4rem);
-  /* Every one of these triggers (File/Tools/Settings/Find-Replace, the
-     locale selector, the theme toggle) sits in the right-aligned part of
-     the top bar - anchoring the panel to the trigger's left edge let it
-     grow rightward past the window edge, forcing an unwanted horizontal
-     scrollbar on the whole app. Anchoring to the right edge instead keeps
-     it growing leftward, into space that's actually there. */
-  right: 0;
+  /* Default: anchor to the trigger's own left edge. Right for the
+     "Manuscripts" menu (AppTopBar.tsx), which sits near the window's
+     left edge - anchoring it to the right instead pushed it off the
+     left edge of the window (Mats: "När jag klickar på manuscripts så
+     hamnar dialogrutan utanför skärmen"). */
+  left: 0;
   z-index: 45;
   width: max(14rem, min(20rem, 60vw));
   max-height: min(70vh, 28rem);
@@ -527,6 +526,17 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: var(--shadow);
+}
+
+/* File/Tools (Editor.tsx's own TopMenu) sit in the right-aligned part of
+   the manuscript top bar - anchoring to the left edge there pushed the
+   panel past the window's right edge instead, forcing a horizontal
+   scrollbar. Anchor those to the right edge specifically, rather than
+   changing the shared default and breaking the left-aligned Manuscripts
+   menu that reuses the same base class. */
+.app-top-menu-panel--end {
+  left: auto;
+  right: 0;
 }
 
 .app-top-menu-item {

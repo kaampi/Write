@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.212
+Status: living document, v1.0.213
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10153,6 +10153,41 @@ varmt papper" fungerar som den egentliga poängen med funktionen,
 inte bara i teorin.
 
 v1.0.211 → v1.0.212.
+
+**Ändringslogg v1.0.212 → v1.0.213 (2026-10-29): Manuscripts-menyn
+hamnade utanför skärmen.** Mats skickade en skärmdump: "När jag
+klickar på manuscripts så hamnar dialogrutan utanför skärmen" — text
+avklippt i vänsterkant ("w manuscript…", "t" istället för "Delete").
+
+**Grundorsak:** v1.0.211s fix för FILE/TOOLS-menyernas överflöd
+("left: 0" → "right: 0" på den delade `.app-top-menu-panel`-klassen)
+var för bred. Klassen används på två helt olika ställen:
+`AppTopBar.tsx`s "Manuscripts"-meny, som sitter nära fönstrets
+VÄNSTERKANT, och `Editor.tsx`s `TopMenu`-komponent (FILE/TOOLS), som
+sitter nära HÖGERKANTEN. Att ankra båda vid höger löste FILE/TOOLS
+men bröt Manuscripts — den växte åt vänster rakt ut genom fönstrets
+vänsterkant istället.
+
+**Fix:** `.app-top-menu-panel` fick tillbaka sitt ursprungliga
+`left: 0` som standard (rätt för Manuscripts), och en ny
+modifierarklass `.app-top-menu-panel--end` (`left: auto; right: 0`)
+lades till separat, applicerad bara på `Editor.tsx`s `TopMenu`-
+instanser (FILE/TOOLS). De två ställena delar fortfarande grund-
+stilen (bredd, padding, bakgrund, skugga) men ankras nu var för sig
+utifrån var de faktiskt sitter i topplisten, istället för att dela en
+enda ankringsregel som bara kan vara rätt för ena sidan åt gången.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. I en headless browser (1280×800 viewport):
+öppnade Manuscripts-menyn på startskärmen och mätte dess
+bounding box — helt innanför fönstret (x: 196–517px av 1280px),
+`scrollWidth > clientWidth` falskt. Skapade sedan ett testmanus för
+att nå editorn och öppnade FILE-, TOOLS- och Manuscripts-menyerna där
+igen — alla tre fick bounding boxes helt innanför fönstret
+(0 ≤ left och right ≤ 1280 för alla tre), ingen horisontell overflow
+i något fall.
+
+v1.0.212 → v1.0.213.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.213] - 2026-10-29
+
+### Fixed
+- The "Manuscripts" menu (top-left) opened anchored to its own right edge — a fix meant only for the right-aligned File/Tools menus but applied to the shared panel style everywhere — which pushed it off the left edge of the window since the Manuscripts trigger itself sits at the left. Manuscripts now anchors left again; File/Tools keep their own right-anchored variant.
+
 ## [1.0.212] - 2026-10-29
 
 ### Added

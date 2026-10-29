@@ -437,7 +437,7 @@ function TopMenu({ label, children }: { label: string; children: React.ReactNode
         {label}
       </button>
       {open ? (
-        <div className="app-top-menu-panel" role="menu" onClick={() => setOpen(false)}>
+        <div className="app-top-menu-panel app-top-menu-panel--end" role="menu" onClick={() => setOpen(false)}>
           {children}
         </div>
       ) : null}
