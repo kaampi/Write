@@ -128,7 +128,7 @@ import { DispositionBoard } from "./DispositionBoard";
 import { BrainstormBoard } from "./BrainstormBoard";
 import { BusyDialog } from "./BusyDialog";
 import { ProseCanvas } from "./ProseCanvas";
-import { EDITOR_BACKGROUND_URLS, EDITOR_BACKGROUND_TILED } from "./editorBackgrounds";
+import { EDITOR_BACKGROUND_URLS, EDITOR_BACKGROUND_TILED, EDITOR_BACKGROUND_DARK } from "./editorBackgrounds";
 import { ProseStatsCard } from "./ProseStatsCard";
 import { FindReplaceCard, type FindHighlight, type FindLaunch } from "./FindReplaceCard";
 import { ProofreadCard } from "./ProofreadCard";
@@ -548,6 +548,15 @@ function manuscriptBackgroundStyle(background: Book["editor_background"]): React
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat"
   };
+}
+
+/**
+ * Extra class for `.manuscript` so the chapter title and (on the Synopsis
+ * panel) the lede can switch to a light ink — they sit directly on this
+ * backdrop with no paper surface of their own, see EDITOR_BACKGROUND_DARK.
+ */
+function manuscriptBackgroundClassName(background: Book["editor_background"]): string {
+  return background !== "none" && EDITOR_BACKGROUND_DARK[background] ? " manuscript-dark-bg" : "";
 }
 
 /**
@@ -1898,7 +1907,10 @@ export function Editor() {
         ) : onHandbook ? (
           <HandbookPanel />
         ) : onSynopsis ? (
-          <main className="manuscript manuscript-inset" style={manuscriptBackgroundStyle(book.editor_background)}>
+          <main
+            className={`manuscript manuscript-inset${manuscriptBackgroundClassName(book.editor_background)}`}
+            style={manuscriptBackgroundStyle(book.editor_background)}
+          >
             <h1 className="chapter-title">{m.editor.synopsis}</h1>
             <p className="synopsis-lede">{m.editor.synopsisLede}</p>
             <ProseCanvas
@@ -1973,7 +1985,10 @@ export function Editor() {
             </footer>
           </main>
         ) : (
-          <main className="manuscript" style={manuscriptBackgroundStyle(book.editor_background)}>
+          <main
+            className={`manuscript${manuscriptBackgroundClassName(book.editor_background)}`}
+            style={manuscriptBackgroundStyle(book.editor_background)}
+          >
             <div className="chapter-head">
               {/* Chapter settings and Scenes now live in the settings/scenes popover rendered below, not inline here — see chapterPopover's own comment. */}
               <div className="chapter-head-inner">

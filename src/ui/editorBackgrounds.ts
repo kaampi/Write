@@ -40,3 +40,21 @@ export const EDITOR_BACKGROUND_TILED: Record<Exclude<Book["editor_background"], 
   pine: true,
   leaves: true
 };
+
+/**
+ * Which editor_background values are dark enough that the manuscript's own
+ * light-theme ink color (meant for a pale paper) becomes illegible against
+ * them — measured as each image's average luminance. The Synopsis panel's
+ * heading and lede sit directly on this backdrop with no paper surface of
+ * their own, so they need to switch to a light ink when it's one of these.
+ */
+export const EDITOR_BACKGROUND_DARK: Record<Exclude<Book["editor_background"], "none">, boolean> = {
+  forest: true,
+  "milky-way": true,
+  cork: false,
+  triangles: true,
+  fabric: true,
+  school: false,
+  pine: false,
+  leaves: false
+};

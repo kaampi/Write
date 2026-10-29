@@ -3019,10 +3019,24 @@ button:disabled {
   margin: 0;
   background: transparent;
   border-color: transparent;
+  color: var(--manuscript-ink, var(--text));
   /* Symmetric padding (the shared input rule's default 0.7rem both sides)
      so centered text isn't skewed - this used to zero out padding-left
      specifically to flush the text left, which centering no longer wants. */
   text-align: center;
+}
+
+.synopsis-lede {
+  color: var(--manuscript-ink, var(--text));
+}
+
+/* editor_background can paint a dark photo/tile straight behind the
+   Synopsis heading/lede and (on the manuscript view) the chapter title
+   input - both are transparent with no paper surface of their own, so
+   switch their ink to a light color instead of the usual dark-on-paper
+   --text. See EDITOR_BACKGROUND_DARK in editorBackgrounds.ts. */
+.manuscript.manuscript-dark-bg {
+  --manuscript-ink: #fff8f3;
 }
 
 .manuscript-board,

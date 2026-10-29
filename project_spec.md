@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.226
+Status: living document, v1.0.227
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10930,6 +10930,59 @@ bekräftade att alla tre bilderna visas korrekt, skarpa och utan den
 röda anslutningsbannern.
 
 v1.0.225 → v1.0.226.
+
+
+**Ändringslogg v1.0.226 → v1.0.227 (2026-10-29): Synopsis-rubriken
+oläsbar mot mörk editorbakgrund.** Mats skickade en skärmdump: "Här
+stötte jag på en litet problem. Jag har valt en mörkbakgrund i
+editorn och appen har light mode. Då syns inte rubrikerna när man
+t ex går till Synopsis" — rubriken "Synopsis" och ingresstexten
+("The story in a nutshell: ...") var nästan osynliga, mörk text mot
+en mörk strukturbakgrund. Uppföljningsfråga besvarad innan felsökning
+startade: "Det är bara synopsis som ärver editorns bakgrund de andra
+(Brainstorm Development method Briefs och Timeline) har sin egen
+bakgrund" — vilket avgränsade felet korrekt.
+
+**Grundorsak:** `editor_background` (BookSchema, nio lägen: none,
+forest, milky-way, cork, triangles, fabric, school, pine, leaves)
+målas som en inline `backgroundImage` direkt på `.manuscript`-elementet
+i `Editor.tsx` (`manuscriptBackgroundStyle`). Synopsis-panelen renderar
+`<h1 className="chapter-title">` och `<p className="synopsis-lede">`
+som direkta barn till det elementet, utan egen pappersyta — till
+skillnad från `ProseCanvas` som har sin egen ljusa `--editor-paper-bg`.
+Båda textklasserna saknade egen `color`-regel och ärvde därför bara
+`var(--text)` (appens ljusa tema-bläck, tänkt för ljust papper) —
+fel när bakgrunden är ett mörkt foto eller mönster. Samma mönster
+gäller `.chapter-title` som `<input>` i den vanliga kapitelvyn, men
+Mats bekräftade att bara Synopsis är ett faktiskt observerat problem
+där.
+
+**Fix:** varje bakgrund klassad ljus/mörk efter uppmätt genomsnittlig
+luminans (ImageMagick `-colorspace Gray -resize 1x1`, tröskel runt
+140/255): forest (100), milky-way (36), triangles (12) och fabric (80)
+räknas som mörka; cork (163), school (222), pine (231) och leaves
+(241) som ljusa. Ny `EDITOR_BACKGROUND_DARK`-karta i
+`editorBackgrounds.ts`. Ny `manuscriptBackgroundClassName()` i
+`Editor.tsx` lägger till klassen `manuscript-dark-bg` på
+`.manuscript`-elementet (båda renderingarna, Synopsis och vanlig
+kapitelvy) när vald bakgrund är mörk. I `styles.css` sätter
+`.manuscript.manuscript-dark-bg` en `--manuscript-ink: #fff8f3`
+CSS-variabel, och `.chapter-title`/`.synopsis-lede` läser
+`color: var(--manuscript-ink, var(--text))` — oförändrat utseende
+när ingen eller en ljus bakgrund är vald, ljust bläck bara när
+`--manuscript-ink` faktiskt är satt.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1240/1240
+tester gröna (ingen av dem rörde detta, men inget gick sönder).
+Headless Playwright mot en riktig körande dev-instans: skapade en
+testbok, satte `editor_background: "fabric"` (mörk) i Manuscript
+settings, öppnade Synopsis — rubrik och ingress syns nu tydligt i
+ljust bläck mot den mörka strukturen, exakt samma vy som Mats
+skärmdump men läsbar. Upprepade med `"cork"` (ljus bakgrund) för att
+bekräfta att det normala mörka bläcket fortfarande används där —
+ingen regression.
+
+v1.0.226 → v1.0.227.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

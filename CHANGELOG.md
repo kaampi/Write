@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.227] - 2026-10-29
+
+### Fixed
+- The Synopsis panel's heading and lede no longer become illegible when a dark editor background texture (e.g. "Fabric", "Triangles", "Forest", "Milky Way") is selected in Manuscript Settings — they now switch to a light ink automatically instead of always using the dark, paper-oriented ink color.
+
 ## [1.0.226] - 2026-10-29
 
 ### Changed
