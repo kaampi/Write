@@ -59,7 +59,7 @@ export function AppSwitcher() {
     <>
       <nav className="app-switcher" aria-label={m.companionApps.nav}>
         <span className="app-switcher-item is-active" aria-current="page">
-          kaampi Write
+          <CompanionLogo logoLight="/logo.svg" logoDark="/logo-dark.svg" name="kaampi Write" />
         </span>
         {COMPANION_APP_IDS.map((id) => {
           const app = COMPANION_APPS[id];
@@ -72,7 +72,7 @@ export function AppSwitcher() {
                 onClick={() => void openCompanionAddress(status.address)}
                 title={format(m.companionApps.openApp, { name: app.name })}
               >
-                {app.name}
+                <CompanionLogo logoLight={app.logoLight} logoDark={app.logoDark} name={app.name} />
                 <i className="app-switcher-dot is-available" aria-hidden="true" />
               </button>
               <button
@@ -92,7 +92,7 @@ export function AppSwitcher() {
               onClick={() => setOpenId(id)}
               title={format(m.companionApps.aboutApp, { name: app.name })}
             >
-              {app.name}
+              <CompanionLogo logoLight={app.logoLight} logoDark={app.logoDark} name={app.name} />
             </button>
           );
         })}
@@ -106,6 +106,16 @@ export function AppSwitcher() {
           onClose={() => setOpenId(null)}
         />
       ) : null}
+    </>
+  );
+}
+
+/** Reuses the main logo's own light/dark swap classes (AppTopBar.tsx) — they already just toggle visibility per [data-theme], with no size baked in, so a different height here doesn't fight them. */
+function CompanionLogo({ logoLight, logoDark, name }: { logoLight: string; logoDark: string; name: string }) {
+  return (
+    <>
+      <img className="app-switcher-brand app-top-logo-light" src={logoLight} alt={name} />
+      <img className="app-switcher-brand app-top-logo-dark" src={logoDark} alt={name} />
     </>
   );
 }

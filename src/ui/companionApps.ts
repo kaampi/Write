@@ -12,11 +12,23 @@ export const DEFAULT_COMPANION_ADDRESSES: Record<CompanionAppId, string> = {
 export interface CompanionAppMeta {
   name: string;
   repository: string;
+  logoLight: string;
+  logoDark: string;
 }
 
 export const COMPANION_APPS: Record<CompanionAppId, CompanionAppMeta> = {
-  explore: { name: "kaampi Explore", repository: "https://github.com/kaampi/Explore" },
-  comic: { name: "kaampi Comic", repository: "https://github.com/kaampi/Comic" }
+  explore: {
+    name: "kaampi Explore",
+    repository: "https://github.com/kaampi/Explore",
+    logoLight: "/brand/companions/explore.svg",
+    logoDark: "/brand/companions/explore-dark.svg"
+  },
+  comic: {
+    name: "kaampi Comic",
+    repository: "https://github.com/kaampi/Comic",
+    logoLight: "/brand/companions/comic.svg",
+    logoDark: "/brand/companions/comic-dark.svg"
+  }
 };
 
 /**

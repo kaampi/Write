@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.223
+Status: living document, v1.0.224
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10760,6 +10760,62 @@ redan hållits för macOS-bygget: byggt och typchecka rent, men den
 riktiga nätverksvägen vilar på verklig användning.
 
 v1.0.222 → v1.0.223.
+
+
+**Ändringslogg v1.0.223 → v1.0.224 (2026-10-29): riktiga loggor i
+app-switchern.** Mats, efter att v1.0.223 landat: "har du lagt in
+loggorna också? Säg inte ut så på skärmbilderna?" - switchern visade
+bara ren text, inga logotyper, till skillnad från skärmdumpen han
+ursprungligen delade av Explores egen switcher. Skickade sedan fyra
+officiella SVG-logotyper ("kaampi Write/Explore/Comic/Codex",
+enhetlig stil - svart "kaampi" + rosa kvadrat + app-namnet i en egen
+accentfärg per app).
+
+**Fynd:** den skickade Write-logotypen var byte-identisk med Writes
+redan befintliga `public/logo.svg` (ljust tema). Write har redan ett
+ljust/mörkt par (`logo.svg`/`logo-dark.svg`) där den enda skillnaden
+är en mekanisk färgswitch: "kaampi"+kvadrat går från nästan svart
+(35,31,32) till nästan vitt (240,240,242), och själva app-namnets
+accentfärg ljusas upp med en konstant offset per kanal (uppmätt:
++65/+64/+62, dvs grovt "+64"). Explore/Comic/Codex-logotyperna Mats
+skickade hade bara den ljusa varianten - genererade mörka varianter
+med exakt samma transform (Python-skript, `fill:rgb(35,31,32)` →
+`rgb(240,240,242)`, accentfärgen +64 per kanal och klamrad vid 255),
+sparade i `public/brand/companions/{explore,comic,codex}.svg` +
+`-dark.svg`. Explore: (132,103,106)→(196,167,170). Comic:
+(103,132,106)→(167,196,170). Codex: (189,147,0)→(253,211,64) -
+sparad för framtida bruk, inte kopplad till något i den här ändringen.
+Verifierade resultatet visuellt (ljust+mörkt bakgrund, headless
+Playwright-skärmdump av alla fyra logotyper i båda varianterna) innan
+de kopplades in - färgerna höll ihop visuellt med Writes egen
+redan godkända mörka logotyp.
+
+**Implementation:** `companionApps.ts`s `COMPANION_APPS`-post fick
+`logoLight`/`logoDark`-sökvägar. Ny `CompanionLogo`-komponent i
+`AppSwitcher.tsx` återanvänder AppTopBar.tsx:s egna
+`.app-top-logo-light`/`.app-top-logo-dark`-klasser (ren visa/dölj per
+`[data-theme]`, ingen storlek inbakad) för själva temaväxlingen, med
+en egen `.app-switcher-brand`-klass bara för höjd/bredd i den
+kompakta switcher-raden.
+
+**Bugg hittad och fixad under verifieringen:** min första CSS-version
+av `.app-switcher-brand` satte även `display: block` - det kolliderar
+med `.app-top-logo-light`s `display: none` vid oavgjord specificitet
+(båda är enkla klassväljare), och eftersom `.app-switcher-brand` låg
+senare i stilmallen vann den, vilket visade BÅDA logotyperna
+samtidigt (ljus+mörk övertonade varandra, syntes tydligt som
+dubblerad/suddig text i den första skärmdumpen). Fixat genom att bara
+sätta höjd/bredd i `.app-switcher-brand`, aldrig `display` - precis
+den typ av specificitetsfälla som redan dokumenterats två gånger
+tidigare i den här loggen (v1.0.206, v1.0.219).
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent, headless Playwright-skärmdumpar av
+toppmenyn i båda ljus- och mörkt-läge mot en riktig `vite
+preview`-build bekräftade att buggen var borta och att alla tre
+logotyper (Write/Explore/Comic) renderar rent i båda teman.
+
+v1.0.223 → v1.0.224.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

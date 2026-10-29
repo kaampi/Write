@@ -9,7 +9,10 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
-## [1.0.223] - 2026-10-29
+## [1.0.224] - 2026-10-29
+
+### Changed
+- The top-bar app switcher now shows each app's actual wordmark logo (kaampi Write, Explore, Comic), matching kaampi Explore's own switcher, instead of plain text. Dark-mode versions of the kaampi Explore and kaampi Comic logos were generated using the exact same recolor kaampi Write's own light/dark logo pair already uses.
 
 ### Added
 - A top-bar app switcher, matching kaampi Explore's own: kaampi Write, kaampi Explore and kaampi Comic as a row of links next to each other. In the desktop app, a sibling app that's actually running shows as a live, clickable link with a status dot; otherwise (or in the plain web app, where a live check isn't possible) clicking opens a small dialog with the app's address, an install link, and a manual "Open app" action.

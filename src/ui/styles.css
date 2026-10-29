@@ -634,6 +634,12 @@ button.app-switcher-item:hover {
   align-items: center;
 }
 
+/* Reuses the main logo's own light/dark swap classes (app-top-logo-light/-dark toggle on [data-theme]) at a smaller height that fits this compact row. Sets only height/width, not display — .app-top-logo-light/-dark already own that, and this class sits later in the sheet, so a display rule here would win on tied specificity and show both images at once. */
+.app-switcher-brand {
+  height: 0.85rem;
+  width: auto;
+}
+
 .app-switcher-dot {
   display: inline-block;
   width: 6px;
