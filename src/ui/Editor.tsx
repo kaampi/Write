@@ -624,8 +624,7 @@ function silentBusyCopy(
 export function Editor() {
   const store = useBookStore();
   const { messages: m } = useLocale();
-  const { book, chapterId, surface, busy, error, models, model, writingPrimer, reviewModel, translateModel, ollamaError, chapterFeedback, criticFeedback, modelAsides } =
-    store;
+  const { book, chapterId, surface, busy, error, ollamaError, chapterFeedback, criticFeedback, modelAsides } = store;
   if (!book) return null;
 
   const chapters = sortedChapters(book);
@@ -2465,27 +2464,8 @@ export function Editor() {
       {settingsOpen ? (
         <SettingsPanel
           book={book}
-          models={models}
-          model={model}
-          reviewModel={reviewModel}
-          translateModel={translateModel}
-          engine={store.engine}
-          baseUrl={store.baseUrl}
-          contextWindow={store.contextWindow}
-          writingPrimer={writingPrimer}
-          historyLimit={store.historyLimit}
           illustrationStyles={illustrationStyles.styles}
           onPatch={(mutate) => void store.patchBook(mutate)}
-          onModel={store.setModel}
-          onReviewModel={store.setReviewModel}
-          onTranslateModel={store.setTranslateModel}
-          onEngine={store.setEngine}
-          onBaseUrl={store.setBaseUrl}
-          onContextWindow={store.setContextWindow}
-          onSuggestContextWindow={store.suggestContextWindow}
-          onPrimer={store.setWritingPrimer}
-          onResetPrimer={store.resetWritingPrimer}
-          onHistoryLimit={store.setHistoryLimit}
           onBrowseIllustrationLibrary={() => setIllustrationLibraryOpen(true)}
           onClose={() => setSettingsOpen(false)}
         />

@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.219
+Status: living document, v1.0.220
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10536,6 +10536,91 @@ samma kortstorlek och mönster som de fyra andra korten, och att
 formuläret bara visas i "inte ansluten"-läget.
 
 v1.0.218 → v1.0.219.
+
+
+**Ändringslogg v1.0.219 → v1.0.220 (2026-10-29): Settings delat i
+"Settings" (app-brett) och "Manuscript settings" (per manus).** Lång
+diskussion med Mats om startsidans trösklar ledde in på en sidospår:
+Settings låg bara inne i ett öppet manus, men innehöll flera fält som
+redan var app-breda (localStorage, inte `book.*`) — motor/modell,
+baseUrl, context window, writing primer, revisions-gräns, pappersfärg.
+Mats drog en tydlig parallell till Affinity: "Even om det är ett mycket
+större system så har man Settings och sedan Document settings. [...]
+SÅ vad sägs om Setting för appen i stort som ett huvudval och sedan
+Manuscript settings när man är inne i editorn och det menyvalet kan
+ligga där nuvarande Settings." Sista instruktionen: "Kör igång med det
+och låt settings ligga som en egen topp meny grupperat med de andra
+valen på vänster sida."
+
+**Vad som faktiskt var app-brett (bekräftat i kod, inte bara via UI):**
+`model`/`reviewModel`/`translateModel`/`engine`/`baseUrl` och
+`contextWindow` (`src/llm/contextWindow.ts`), `historyLimit`
+(`src/core/proseHistory.ts`) och `writingPrimer`
+(`src/core/writingPrimer.ts`, nyckling på modellnamn) — alla
+localStorage-baserade i `BookStore.tsx`, ingen av dem en `book.*`-fält.
+Pappersfärgen (`src/ui/paper.ts`) likaså, fast den av bekvämlighet låg
+i Settings GENERAL-sektion sedan tidigare — samma felplacering som nu
+rättades till.
+
+**Implementation:**
+- Ny `AppSettingsDialog.tsx`: innehåller allt ovanstående plus hela
+  `ConnectionPresetList`-funktionen (flyttad, inte kopierad, från
+  `SettingsPanel.tsx`) och `ModelSelect` ×3 (Writing/Review/Translate,
+  importerad från `SettingsPanel.tsx` som fortfarande exporterar den).
+  Återanvänder `.settings-card`-klassens befintliga CSS (fältbredder,
+  textarea-storlekar) men lägger till en egen modifier-klass
+  `.app-settings-card` som smalnar av kortet till en kolumn
+  (`min(42rem, 100%)` istället för de två kolumnernas `78rem`) — ingen
+  ny CSS-struktur behövdes, bara `grid-template-columns: 1fr` under
+  den klassen.
+- `SettingsPanel.tsx` krympt rejält: tog bort hela AI-anslutnings-
+  sektionen (`ConnectionPresetList`, modellväljarna, context window,
+  writing primer), historyLimit-fältet och pappersfärgsfältet från
+  GENERAL. Kvar: Prose language/Reader, POV/Tense/Viewpoint/Voice
+  (GENERAL), hela Typography-sektionen, Illustrations, Proofread
+  thoroughness + "Filter lore by relevance" (nu egen "Proofreading"-
+  sektion, tidigare ihopblandad med AI-sektionen), och Polish — allt
+  fortfarande `book.*`-fält eller bok-specifik craft. Rubriken bytte
+  text från "Settings" till "Manuscript settings" (samma i18n-nyckel
+  `settings`, bara ändrat värde — inget behövde döpas om i koden).
+- `Home.tsx`: hela `<section className="home-connect">`-blocket
+  ("Connect a local AI", kollapsande motor/baseUrl/modell-fält) borttaget
+  tillsammans med sitt öppna/stängt-state och GPU-förslags-logiken —
+  allt det flyttade in i `AppSettingsDialog.tsx` istället. Home.tsx
+  tappade därmed sitt beroende av `ModelSelect`,
+  `DEFAULT_OPENAI_COMPATIBLE_BASE_URL`/`DEFAULT_OLLAMA_BASE_URL` och
+  flera `useBookStore()`-fält den inte längre behöver.
+- `AppTopBar.tsx`: ny "Settings"-knapp i den vänsterjusterade
+  menygruppen (efter "Guide", före den högerjusterade
+  språk/tema-gruppen — exakt Mats instruktion), eget `settingsOpen`-
+  state, villkorlig `<AppSettingsDialog>` som läser samtliga props
+  direkt från det redan tillgängliga `useBookStore()`-objektet (kräver
+  inget öppet manus).
+- `Editor.tsx`: `<SettingsPanel>`-anropet trimmat till bara de props
+  panelen fortfarande tar emot; flera nu oanvända store-fält
+  (`models`/`model`/`writingPrimer`/`reviewModel`/`translateModel`)
+  togs bort ur destruktureringen (`ollamaError` behölls — används
+  fortfarande för felbannern).
+- Nya i18n-nycklar i alla tre språk: `appSettings` ("Settings"),
+  `appSettingsLede`, `editorSettingsHeading` ("Editor"),
+  `proofreadHeading` ("Proofreading"). `settings`-nyckelns värde
+  ändrat till "Manuscript settings" (sv: "Manusinställningar", nb:
+  "Manuskriptinnstillinger").
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test,
+94 testfiler) grön, `npm run build` rent. Visuell verifiering med
+headless Playwright mot en riktig `vite preview`-build (inte bara
+dev-server): bekräftade att `.home-connect` inte längre finns på
+startsidan, att startsidans korträkning är tillbaka till fyra, att
+"Settings"-knappen finns i topmenyn och öppnar `.app-settings-card`
+med rubriken "Settings" samt AI-sektionen (motor/modell/context
+window/primer) och en ny "Editor"-sektion (Revisions + pappersfärg)
+vid skroll; att "Manuscript settings"-knappen inne i ett öppnat
+manus öppnar den krympta `.settings-card` (utan AI-sektionen) med
+rubriken "Manuscript settings" och intakta General/Typography/
+Illustrations/Proofreading/Polish-sektioner.
+
+v1.0.219 → v1.0.220.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

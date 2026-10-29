@@ -4,6 +4,7 @@ import { LocaleSelect } from "./LocaleSelect";
 import { ThemeToggle } from "./ThemeToggle";
 import { useLocale } from "./i18n";
 import { CoreConnectionDialog } from "./CoreConnectionDialog";
+import { AppSettingsDialog } from "./AppSettingsDialog";
 
 const RECENT_LIMIT = 10;
 
@@ -12,6 +13,7 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
   const { messages: m } = useLocale();
   const [menuOpen, setMenuOpen] = useState(false);
   const [coreOpen, setCoreOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -113,12 +115,41 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
         {m.guide.nav}
       </button>
 
+      <button type="button" className="text-button" onClick={() => setSettingsOpen(true)}>
+        {m.editor.appSettings}
+      </button>
+
       <div className="app-top-chrome">
         {store.book ? <button type="button" className="text-button" onClick={() => setCoreOpen(true)}>Core</button> : null}
         <LocaleSelect />
         <ThemeToggle />
       </div>
       {coreOpen && store.book ? <CoreConnectionDialog key={store.book.id} currentBook={store.book} bookId={store.book.id} onCheckpoint={store.checkpointBook} onRestore={store.restoreCoreRevision} onClose={() => setCoreOpen(false)} /> : null}
+      {settingsOpen ? (
+        <AppSettingsDialog
+          models={store.models}
+          model={store.model}
+          reviewModel={store.reviewModel}
+          translateModel={store.translateModel}
+          engine={store.engine}
+          baseUrl={store.baseUrl}
+          contextWindow={store.contextWindow}
+          writingPrimer={store.writingPrimer}
+          historyLimit={store.historyLimit}
+          ollamaError={store.ollamaError}
+          onModel={store.setModel}
+          onReviewModel={store.setReviewModel}
+          onTranslateModel={store.setTranslateModel}
+          onEngine={store.setEngine}
+          onBaseUrl={store.setBaseUrl}
+          onContextWindow={store.setContextWindow}
+          onSuggestContextWindow={store.suggestContextWindow}
+          onPrimer={store.setWritingPrimer}
+          onResetPrimer={store.resetWritingPrimer}
+          onHistoryLimit={store.setHistoryLimit}
+          onClose={() => setSettingsOpen(false)}
+        />
+      ) : null}
     </header>
   );
 }

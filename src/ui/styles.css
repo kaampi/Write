@@ -2575,6 +2575,16 @@ button:disabled {
   width: min(78rem, 100%);
 }
 
+/* App Settings reuses the Manuscript settings dialog's chrome and spacing, but has half the content, so it stays single-column at half the width. */
+.edit-card.app-settings-card {
+  width: min(42rem, 100%);
+  height: min(90vh, 52rem);
+}
+
+.app-settings-card .settings-card-columns {
+  grid-template-columns: 1fr;
+}
+
 /*
  * Matches .ask-manuscript-answer's own 48rem reading measure, plus
  * .edit-card's horizontal padding — the window follows the text width

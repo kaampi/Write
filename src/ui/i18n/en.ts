@@ -609,9 +609,14 @@ export const en = {
     publish: "Publish",
     archiveNav: "File",
     toolsNav: "Tools",
-    settings: "Settings",
+    settings: "Manuscript settings",
     settingsLede:
       "How this manuscript is written. Not Story Bible. Chapters can still override camera, Voice, and Reader.",
+    appSettings: "Settings",
+    appSettingsLede:
+      "App-wide, not tied to any one manuscript: which AI server to use, the writing primer, how many revisions to keep, and the editor's paper color.",
+    editorSettingsHeading: "Editor",
+    proofreadHeading: "Proofreading",
     generalHeading: "General",
     typographyHeading: "Typography",
     illustrationsHeading: "Illustrations",

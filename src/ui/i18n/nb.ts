@@ -202,9 +202,14 @@ export const nb: Messages = {
     publish: "Publiser",
     archiveNav: "Arkiv",
     toolsNav: "Verktøy",
-    settings: "Innstillinger",
+    settings: "Manuskriptinnstillinger",
     settingsLede:
       "Hvordan dette manuskriptet skrives. Ikke Story Bible. Kapitlene kan fortsatt overstyre kamera, stemme og Leser.",
+    appSettings: "Innstillinger",
+    appSettingsLede:
+      "Gjelder hele appen, ikke et enkelt manuskript: hvilken AI-server som brukes, skriveprimer, hvor mange versjoner som lagres, og redigeringsvinduets papirfarge.",
+    editorSettingsHeading: "Redigering",
+    proofreadHeading: "Korrekturlesing",
     generalHeading: "Generelt",
     typographyHeading: "Typografi",
     illustrationsHeading: "Illustrasjoner",

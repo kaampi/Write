@@ -9,100 +9,32 @@ import {
   parsePov,
   parseTense
 } from "@core/craft";
-import { DEFAULT_WRITING_PRIMER } from "@core/writingPrimer";
-import { MIN_PROSE_HISTORY_LIMIT, MAX_PROSE_HISTORY_LIMIT } from "@core/proseHistory";
 import { READER_CATEGORIES, READER_TIER_AGE, applyReaderAge, readerCategory, type ReaderCategory } from "@core/reader";
 import { findStyleByPromptText, ILLUSTRATION_ORIENTATIONS, type IllustrationStyle } from "@core/illustrationStyle";
 import { PUBLISH_FONTS } from "@core/publishFonts";
 import { DEFAULT_POLISH_PROMPT, type Book } from "@core/BookSchema";
-import { DEFAULT_OPENAI_COMPATIBLE_BASE_URL, type LlmEngine } from "@llm/provider";
-import { DEFAULT_OLLAMA_BASE_URL } from "@llm/ollama";
-import { MIN_CONTEXT_WINDOW, MAX_CONTEXT_WINDOW } from "@llm/contextWindow";
-import {
-  loadConnectionPresets,
-  matchesPreset,
-  newConnectionPreset,
-  saveConnectionPresets,
-  type ConnectionPreset
-} from "@llm/connectionPresets";
 import { BlobThumbnail } from "./BlobThumbnail";
 import { HelpTip } from "./GuidePanel";
 import { format, useLocale } from "./i18n";
-import { applyPaper, parsePaper, readPaper, PAPERS } from "./paper";
 
 export function SettingsPanel({
   book,
-  models,
-  model,
-  reviewModel,
-  translateModel,
-  engine,
-  baseUrl,
-  contextWindow,
-  writingPrimer,
-  historyLimit,
   illustrationStyles,
   onPatch,
-  onModel,
-  onReviewModel,
-  onTranslateModel,
-  onEngine,
-  onBaseUrl,
-  onContextWindow,
-  onSuggestContextWindow,
-  onPrimer,
-  onResetPrimer,
-  onHistoryLimit,
   onBrowseIllustrationLibrary,
   onClose
 }: {
   book: Book;
-  models: string[];
-  model: string;
-  reviewModel: string;
-  translateModel: string;
-  engine: LlmEngine;
-  baseUrl: string;
-  contextWindow: number;
-  writingPrimer: string;
-  historyLimit: number;
   illustrationStyles: IllustrationStyle[];
   onPatch: (mutate: (book: Book) => Book) => void;
-  onModel: (name: string) => void;
-  onReviewModel: (name: string) => void;
-  onTranslateModel: (name: string) => void;
-  onEngine: (engine: LlmEngine) => void;
-  onBaseUrl: (url: string) => void;
-  onContextWindow: (n: number) => void;
-  onSuggestContextWindow: () => Promise<number | null>;
-  onPrimer: (text: string) => void;
-  onResetPrimer: () => void;
-  onHistoryLimit: (n: number) => void;
   onBrowseIllustrationLibrary: () => void;
   onClose: () => void;
 }) {
   const { messages: m } = useLocale();
-  const [suggestingContext, setSuggestingContext] = useState(false);
-  const [contextSuggestResult, setContextSuggestResult] = useState<"found" | "none" | null>(null);
-  // Kept as a separate, uncommitted draft while typing — committing (and
-  // therefore clamping to MIN_CONTEXT_WINDOW) on every keystroke meant a
-  // single digit typed partway through a bigger number (e.g. the "3" in
-  // "32000") was below the minimum and got silently snapped up to it,
-  // wiping out whatever was typed next. Only commit, and let the min/max
-  // clamp apply, once the author leaves the field.
-  const [contextWindowDraft, setContextWindowDraft] = useState(String(contextWindow));
-  useEffect(() => {
-    setContextWindowDraft(String(contextWindow));
-  }, [contextWindow]);
-  const [historyLimitDraft, setHistoryLimitDraft] = useState(String(historyLimit));
-  useEffect(() => {
-    setHistoryLimitDraft(String(historyLimit));
-  }, [historyLimit]);
   const people = peopleLabels(book.facts, book.entity_kinds);
   const showViewpoint = needsViewpoint(book.pov);
   const selectedStyle = findStyleByPromptText(illustrationStyles, book.illustration_style);
   const [editingText, setEditingText] = useState(false);
-  const [paper, setPaper] = useState(readPaper);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -167,47 +99,6 @@ export function SettingsPanel({
                     ))}
                   </select>
                   {readerCategory(book.reader_age) !== "adult" ? <p className="reader-hint">{m.editor.readerTierHint}</p> : null}
-                </label>
-                <label className="reader-field">
-                  <span className="field-label-row">
-                    {m.editor.historyLimit}
-                    <HelpTip body={m.editor.historyLimitLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.historyLimit })} />
-                  </span>
-                  <input
-                    type="number"
-                    min={MIN_PROSE_HISTORY_LIMIT}
-                    max={MAX_PROSE_HISTORY_LIMIT}
-                    inputMode="numeric"
-                    value={historyLimitDraft}
-                    aria-label={m.editor.historyLimit}
-                    onChange={(event) => setHistoryLimitDraft(event.target.value)}
-                    onBlur={() => {
-                      const n = Number(historyLimitDraft);
-                      if (Number.isFinite(n)) onHistoryLimit(n);
-                      else setHistoryLimitDraft(String(historyLimit));
-                    }}
-                  />
-                </label>
-                <label className="reader-field">
-                  <span className="field-label-row">
-                    {m.editor.paperLabel}
-                    <HelpTip body={m.editor.paperLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.paperLabel })} />
-                  </span>
-                  <select
-                    value={paper}
-                    aria-label={m.editor.paperLabel}
-                    onChange={(event) => {
-                      const next = parsePaper(event.target.value);
-                      applyPaper(next);
-                      setPaper(next);
-                    }}
-                  >
-                    {PAPERS.map((option) => (
-                      <option key={option} value={option}>
-                        {m.editor.paperOptions[option]}
-                      </option>
-                    ))}
-                  </select>
                 </label>
               </div>
               <div className="craft-fields">
@@ -485,79 +376,7 @@ export function SettingsPanel({
 
           <div className="settings-card-column">
             <section className="settings-block">
-              <span className="settings-card-title">
-                <h2 className="settings-heading">{m.editor.modelsHeading}</h2>
-                <HelpTip body={m.editor.uiLanguageStays} ariaLabel={format(m.common.infoAbout, { field: m.editor.modelsHeading })} />
-              </span>
-              <div className="settings-engine">
-                <ConnectionPresetList engine={engine} baseUrl={baseUrl} onEngine={onEngine} onBaseUrl={onBaseUrl} />
-              </div>
-              <div className="settings-models">
-                <ModelSelect label={m.editor.writing} value={model} models={models} emptyLabel={m.editor.noModels} onChange={onModel} />
-                <ModelSelect
-                  label={m.editor.review}
-                  value={reviewModel}
-                  models={models}
-                  emptyLabel={m.editor.noModels}
-                  onChange={onReviewModel}
-                />
-                <ModelSelect
-                  label={m.editor.translateModelLabel}
-                  value={translateModel}
-                  models={models}
-                  emptyLabel={m.editor.noModels}
-                  followLabel={m.editor.translateModelFollowWriting}
-                  onChange={onTranslateModel}
-                />
-              </div>
-              <label className="reader-field">
-                <span className="field-label-row">
-                  {m.editor.contextWindowLabel}
-                  <HelpTip body={m.editor.contextWindowLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.contextWindowLabel })} />
-                </span>
-                <div className="context-window-row">
-                  <input
-                    type="number"
-                    min={MIN_CONTEXT_WINDOW}
-                    max={MAX_CONTEXT_WINDOW}
-                    inputMode="numeric"
-                    value={contextWindowDraft}
-                    aria-label={m.editor.contextWindowLabel}
-                    onChange={(event) => setContextWindowDraft(event.target.value)}
-                    onBlur={() => {
-                      const n = Number(contextWindowDraft);
-                      if (Number.isFinite(n)) onContextWindow(n);
-                      else setContextWindowDraft(String(contextWindow));
-                    }}
-                  />
-                  {engine === "ollama" ? (
-                    <button
-                      type="button"
-                      className="text-button"
-                      disabled={suggestingContext}
-                      onClick={() => {
-                        setSuggestingContext(true);
-                        setContextSuggestResult(null);
-                        void onSuggestContextWindow().then((found) => {
-                          setSuggestingContext(false);
-                          setContextSuggestResult(found !== null ? "found" : "none");
-                        });
-                      }}
-                    >
-                      {suggestingContext ? m.editor.contextWindowSuggesting : m.editor.contextWindowSuggest}
-                    </button>
-                  ) : null}
-                </div>
-              </label>
-              {engine === "ollama" ? (
-                contextSuggestResult === "found" ? (
-                  <p className="quiet">{format(m.editor.contextWindowSuggested, { value: contextWindow })}</p>
-                ) : contextSuggestResult === "none" ? (
-                  <p className="quiet">{m.editor.contextWindowSuggestError}</p>
-                ) : null
-              ) : (
-                <p className="quiet">{m.editor.contextWindowOpenAiNote}</p>
-              )}
+              <h2 className="settings-heading">{m.editor.proofreadHeading}</h2>
               <label className="craft-field">
                 <span className="field-label-row">
                   {m.editor.proofreadThoroughnessLabel}
@@ -591,29 +410,6 @@ export function SettingsPanel({
                   {m.editor.filterLoreLabel}
                 </label>
                 <HelpTip body={m.editor.filterLoreLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.filterLoreLabel })} />
-              </div>
-              <label className="voice-field">
-                <span className="field-label-row">
-                  {m.editor.primerTitle}
-                  <HelpTip body={m.editor.primerLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.primerTitle })} />
-                </span>
-                <textarea
-                  className="primer-field"
-                  value={writingPrimer}
-                  onChange={(event) => onPrimer(event.target.value)}
-                  rows={6}
-                  aria-label={format(m.editor.primerAria, { model })}
-                />
-              </label>
-              <div className="edit-actions">
-                <button
-                  type="button"
-                  className="text-button"
-                  onClick={onResetPrimer}
-                  disabled={writingPrimer.trim() === DEFAULT_WRITING_PRIMER.trim()}
-                >
-                  {m.editor.primerRestore}
-                </button>
               </div>
             </section>
 
@@ -649,196 +445,6 @@ export function SettingsPanel({
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-/**
- * A named engine+address combination the author can expand to see or
- * change, and switch to by expanding it — one tile per saved local server,
- * so swapping between e.g. Ollama, LM Studio, and a test rig like Strata
- * doesn't mean retyping the address each time (roadmap-ideas.md, tester
- * feedback 2026-10-09). When the live engine/address doesn't match any
- * saved preset (first run, or an edit not saved yet), an unsaved "Current
- * connection" tile fills in so the fields are never hidden — "+ New model"
- * always saves whatever is live right now under a new name.
- */
-function ConnectionPresetList({
-  engine,
-  baseUrl,
-  onEngine,
-  onBaseUrl
-}: {
-  engine: LlmEngine;
-  baseUrl: string;
-  onEngine: (engine: LlmEngine) => void;
-  onBaseUrl: (url: string) => void;
-}) {
-  const { messages: m } = useLocale();
-  const [presets, setPresets] = useState<ConnectionPreset[]>(() => loadConnectionPresets());
-  const [expandedId, setExpandedId] = useState<string | null>(
-    () => presets.find((preset) => matchesPreset(preset, engine, baseUrl))?.id ?? null
-  );
-  const [justCreatedId, setJustCreatedId] = useState<string | null>(null);
-
-  const updatePresets = (next: ConnectionPreset[]) => {
-    setPresets(next);
-    saveConnectionPresets(next);
-  };
-
-  const selectPreset = (preset: ConnectionPreset) => {
-    if (expandedId === preset.id) {
-      setExpandedId(null);
-      return;
-    }
-    setExpandedId(preset.id);
-    onEngine(preset.engine);
-    onBaseUrl(preset.baseUrl);
-  };
-
-  const hasActivePreset = presets.some((preset) => matchesPreset(preset, engine, baseUrl));
-
-  const engineField = (
-    <label className="craft-field">
-      <span className="field-label-row">
-        {m.editor.engineLabel}
-        <HelpTip body={m.editor.engineLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.engineLabel })} />
-      </span>
-      <select
-        value={engine}
-        onChange={(event) => onEngine(event.target.value === "openai-compatible" ? "openai-compatible" : "ollama")}
-        aria-label={m.editor.engineLabel}
-      >
-        <option value="ollama">{m.editor.engineOllama}</option>
-        <option value="openai-compatible">{m.editor.engineOpenAiCompatible}</option>
-      </select>
-    </label>
-  );
-
-  const baseUrlField = (
-    <label className="voice-field">
-      <span className="field-label-row">
-        {m.editor.baseUrlLabel}
-        <HelpTip body={m.editor.baseUrlLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.baseUrlLabel })} />
-      </span>
-      <input
-        value={baseUrl}
-        onChange={(event) => onBaseUrl(event.target.value)}
-        placeholder={engine === "ollama" ? DEFAULT_OLLAMA_BASE_URL : DEFAULT_OPENAI_COMPATIBLE_BASE_URL}
-        aria-label={m.editor.baseUrlLabel}
-      />
-    </label>
-  );
-
-  return (
-    <div className="connection-presets">
-      {hasActivePreset ? null : (
-        <div className="connection-preset is-active">
-          <div className="connection-preset-head connection-preset-head-static">
-            <span>{m.editor.connectionPresetsCurrentLabel}</span>
-          </div>
-          <div className="connection-preset-body">
-            {engineField}
-            {baseUrlField}
-          </div>
-        </div>
-      )}
-      {presets.map((preset) => {
-        const isOpen = expandedId === preset.id;
-        const isActive = matchesPreset(preset, engine, baseUrl);
-        return (
-          <div className={isActive ? "connection-preset is-active" : "connection-preset"} key={preset.id}>
-            {isOpen ? (
-              <div className="connection-preset-head">
-                <input
-                  className="connection-preset-name"
-                  value={preset.name}
-                  onChange={(event) =>
-                    updatePresets(presets.map((item) => (item.id === preset.id ? { ...item, name: event.target.value } : item)))
-                  }
-                  aria-label={m.editor.connectionPresetNameLabel}
-                  autoFocus={preset.id === justCreatedId}
-                  onFocus={(event) => event.target.select()}
-                  onBlur={() => setJustCreatedId(null)}
-                />
-                {isActive ? <span className="connection-preset-active">{m.editor.connectionPresetActive}</span> : null}
-                <button
-                  type="button"
-                  className="icon-button chevron"
-                  aria-expanded={isOpen}
-                  aria-label={`${m.common.close}: ${preset.name}`}
-                  onClick={() => setExpandedId(null)}
-                >
-                  ▾
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="connection-preset-head"
-                aria-expanded={isOpen}
-                onClick={() => selectPreset(preset)}
-              >
-                <span className="connection-preset-name-label">
-                  {preset.name}
-                  <span className="connection-preset-subtitle">
-                    {preset.engine === "ollama" ? m.editor.engineOllama : preset.baseUrl || m.editor.engineOpenAiCompatible}
-                  </span>
-                </span>
-                {isActive ? <span className="connection-preset-active">{m.editor.connectionPresetActive}</span> : null}
-                <span className="chevron" aria-hidden="true">
-                  ▸
-                </span>
-              </button>
-            )}
-            {isOpen ? (
-              <div className="connection-preset-body">
-                {engineField}
-                {baseUrlField}
-                <div className="connection-preset-actions">
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label={`${m.editor.connectionPresetDelete}: ${preset.name}`}
-                    onClick={() => {
-                      if (!window.confirm(format(m.editor.connectionPresetDeleteConfirm, { name: preset.name }))) return;
-                      updatePresets(presets.filter((item) => item.id !== preset.id));
-                      setExpandedId(null);
-                    }}
-                  >
-                    ×
-                  </button>
-                  <button
-                    type="button"
-                    className="text-button"
-                    onClick={() =>
-                      updatePresets(presets.map((item) => (item.id === preset.id ? { ...item, engine, baseUrl } : item)))
-                    }
-                  >
-                    {m.editor.connectionPresetUpdate}
-                  </button>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
-      <button
-        type="button"
-        className="text-button connection-preset-add"
-        onClick={() => {
-          const preset = newConnectionPreset(
-            engine,
-            baseUrl,
-            presets.map((item) => item.name)
-          );
-          updatePresets([...presets, preset]);
-          setExpandedId(preset.id);
-          setJustCreatedId(preset.id);
-        }}
-      >
-        {m.editor.connectionPresetNew}
-      </button>
     </div>
   );
 }

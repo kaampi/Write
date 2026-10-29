@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.220] - 2026-10-29
+
+### Changed
+- Split Settings into two dialogs: a new, always-reachable "Settings" on the top bar (its own menu item, next to Manuscripts and Guide) for everything app-wide — AI engine and server, the three model pickers, context window, writing primer, how many revisions to keep, and the editor's paper color — and "Manuscript settings" (the old in-editor Settings, renamed) for what's specific to the open manuscript: craft fields, typography, illustrations, proofreading thoroughness, and polish instructions. The duplicate "Connect a local AI" section on the start screen is gone — Settings now covers that from anywhere, with no manuscript needed first.
+
 ## [1.0.219] - 2026-10-29
 
 ### Added

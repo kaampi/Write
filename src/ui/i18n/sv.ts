@@ -202,9 +202,14 @@ export const sv: Messages = {
     publish: "Publicera",
     archiveNav: "Arkiv",
     toolsNav: "Verktyg",
-    settings: "Inställningar",
+    settings: "Manusinställningar",
     settingsLede:
       "Hur det här manuset skrivs. Inte Story Bible. Kapitlen kan fortfarande överstyra kamera, röst och Läsare.",
+    appSettings: "Inställningar",
+    appSettingsLede:
+      "Gäller hela appen, inte ett enskilt manus: vilken AI-server som används, skrivprimer, hur många versioner som sparas, och redigerarens pappersfärg.",
+    editorSettingsHeading: "Redigerare",
+    proofreadHeading: "Korrekturläsning",
     generalHeading: "Allmänt",
     typographyHeading: "Typografi",
     illustrationsHeading: "Illustrationer",
