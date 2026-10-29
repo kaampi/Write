@@ -96,6 +96,7 @@ export function ProseCanvas({
   instructAction,
   rewriteWho = "",
   aside,
+  chapterImage,
   nameLinks,
   onJumpToEntity,
   formatting = [],
@@ -152,6 +153,8 @@ export function ProseCanvas({
   /** Named viewpoint when the camera needs one. Empty = stay in the camera. */
   rewriteWho?: string;
   aside?: React.ReactNode;
+  /** Scrolls away with the prose, unlike the chapter-head banner above the scroll area — Mats wanted the chapter's own picture to feel like part of the page, not a fixed header. Chapter prose only; omitted for Synopsis. */
+  chapterImage?: React.ReactNode;
   /** Story Bible entities whose names, when Ctrl/Cmd-clicked in the text, jump to their card. */
   nameLinks?: { entity_ref: string; entity_label: string }[];
   onJumpToEntity?: (entityRef: string) => void;
@@ -666,6 +669,7 @@ export function ProseCanvas({
       <div className="prose-fade prose-fade-top" aria-hidden="true" style={{ right: scrollbarWidth }} />
       <div className="prose-fade prose-fade-bottom" aria-hidden="true" style={{ right: scrollbarWidth }} />
       <div className="prose-scroll" ref={scrollRef}>
+      {chapterImage}
       {aside}
       <div className="prose-body" ref={bodyRef}>
       {overlayOn ? (

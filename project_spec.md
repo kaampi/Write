@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.217
+Status: living document, v1.0.218
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -10435,6 +10435,55 @@ det här projektet redan haft för Windows-bygget under hela sessionen,
 eftersom sandlådan aldrig kunnat bygga det själv heller.
 
 v1.0.216 → v1.0.217.
+
+**Ändringslogg v1.0.217 → v1.0.218 (2026-10-29): kapitelbilden flyttad
+in i själva editorn, scrollar med texten.** Mats: "de bilder man kan
+lägga in för varje kapitel borde synas överst i editorn. Eller?" -
+jag kollade koden: `ChapterStartImageBanner` fanns redan (ladda upp
+en bild per kapitel, `chapter.startImage`-fältet), men levde gömd
+inne i kapitlets inställningspopover (kugghjulet i kapitellistan),
+aldrig synlig medan man faktiskt skriver. Föreslog två lägen
+(diskret miniatyr vs. alltid synlig bred banner) - Mats: "Jag skulle
+hellre lägga den i själva editorn och att den scrollar upp med
+texten."
+
+**Grundfråga:** `.chapter-head` (rubriken, Maximize-ikonen) ligger
+UTANFÖR den scrollande ytan - den stannar kvar medan prosan rullar
+under. Mats ville ha bilden som en del av den scrollande ytan
+istället, så den rullar bort tillsammans med texten när man läser/
+skriver vidare nedåt - inte som ett fast element i huvudet.
+
+**Implementation:**
+- `ProseCanvas.tsx` fick en ny `chapterImage?: React.ReactNode`-prop,
+  renderad direkt innanför `.prose-scroll` (den faktiska scroll-
+  behållaren), före den redan existerande `aside`-proppen (använd för
+  ContinuityWarning/PlaceholdersPanel/DarlingsPanel) - samma mönster,
+  bara en ny plats i samma lista av saker som scrollar med texten.
+- `Editor.tsx`: `chapterImage={<ChapterStartImageBanner .../>}`
+  kopplad till kapitlets egna `ProseCanvas`-anrop, borttagen från
+  `ChapterSettingsSection` (ingen dubblett-kontroll på två ställen).
+  Städade bort de nu oanvända `startImage`/`onSetStartImage`/
+  `onRemoveStartImage`-propparna från `ChapterSettingsSection` och
+  den nu oanvända `EntityPicture`-importen.
+- Ingen CSS-ändring behövdes - `.chapter-start-image` var redan byggd
+  som en bred banner (max-bredd 54rem, matchar prosans egen 60rem-
+  kolumn minus padding) snarare än en smal popover-widget, så den
+  såg redan rätt ut direkt i den nya platsen.
+
+**Verifiering:** `tsc --noEmit` rent, hela testsviten (1240 test)
+grön, `npm run build` rent. I en headless browser: skapade ett
+testmanus, laddade upp en genererad testbild via filinputen - som nu
+bekräftat sitter inne i `.prose-scroll`, inte i inställnings-
+popovern (0 träffar där efteråt) - och mätte bildens `boundingBox()`
+före och efter att manuellt sätta `scrollTop = 400` på scroll-
+behållaren: bildens y-position gick från synlig till -260px, alltså
+bevisat förflyttad utanför synfältet av scrollningen, inte bara ett
+fast element som råkar se likadant ut. Skärmdump bekräftade också det
+visuella: bilden (med "Replace image"/"Remove image"-knapparna)
+sitter nu direkt under kapitelrubriken "Chapter 1", ovanför
+brödtexten.
+
+v1.0.217 → v1.0.218.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

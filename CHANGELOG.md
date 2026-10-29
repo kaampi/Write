@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.218] - 2026-10-29
+
+### Changed
+- The chapter image moved from a settings popover into the editor itself, right below the chapter title — it now scrolls away with the prose instead of being tucked out of sight in Chapter settings.
+
 ## [1.0.217] - 2026-10-29
 
 ### Added
