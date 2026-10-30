@@ -77,6 +77,7 @@ export const nb: Messages = {
     codexConnected: "Tilkoblet — sikkerhetskopier og deling med dine andre kaampi-apper er på.",
     codexOffline: "Paret, men kan ikke nås akkurat nå. Arbeidet ditt lagres fortsatt lokalt.",
     codexCardLede: "Ikke tilkoblet ennå. Lim inn paringsnøkkelen fra kaampi Codex sin egen førstegangsskjerm, eller la dette stå — helt valgfritt.",
+    codexDesktopOnly: "Tilkobling til kaampi Codex er bare mulig i skrivebordsappen, ikke her i nettleseren.",
     codexTokenPlaceholder: "Paringsnøkkel",
     codexConnectAction: "Koble til",
     codexConnecting: "Kobler til…",

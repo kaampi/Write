@@ -7,7 +7,6 @@ import { count, format, translateError, useLocale } from "./i18n";
 import { checkForUpdates, isDesktopApp, type UpdateStatus } from "./desktopBridge";
 import { UpdateCheckDialog } from "./UpdateCheckDialog";
 import { ImportManuscriptCard } from "./ImportManuscriptCard";
-import { CodexHomeCard } from "./CodexHomeCard";
 
 export function Home({
   guideOpen,
@@ -121,7 +120,6 @@ export function Home({
               <span className="home-start-card-action">{m.home.guideCardAction} →</span>
             </span>
           </button>
-          {isDesktopApp() ? <CodexHomeCard /> : null}
         </div>
         <input
           ref={fileRef}

@@ -77,6 +77,7 @@ export const sv: Messages = {
     codexConnected: "Ansluten — säkerhetskopior och delning med dina andra kaampi-appar är på.",
     codexOffline: "Parkopplad, men går inte att nå just nu. Ditt arbete sparas fortsatt lokalt.",
     codexCardLede: "Inte ansluten än. Klistra in parkopplingsnyckeln från kaampi Codex första-gången-skärm, eller lämna det här — helt valfritt.",
+    codexDesktopOnly: "Koppling till kaampi Codex går bara att göra i skrivbordsappen, inte här i webbläsaren.",
     codexTokenPlaceholder: "Parkopplingsnyckel",
     codexConnectAction: "Anslut",
     codexConnecting: "Ansluter…",

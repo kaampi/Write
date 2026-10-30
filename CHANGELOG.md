@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.229] - 2026-10-30
+
+### Changed
+- The "Codex" nav button in the top bar is now always visible, including on the Home screen before any manuscript is open, with a small dot showing whether it's connected. Clicking it without a manuscript open shows pairing and connection status only; the full sharing/versions dialog still opens once a manuscript is open. The separate "kaampi Codex" card on Home is removed — this is now the one place for it.
+
 ## [1.0.228] - 2026-10-29
 
 ### Changed

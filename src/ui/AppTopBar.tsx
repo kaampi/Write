@@ -4,6 +4,8 @@ import { LocaleSelect } from "./LocaleSelect";
 import { ThemeToggle } from "./ThemeToggle";
 import { useLocale } from "./i18n";
 import { CoreConnectionDialog } from "./CoreConnectionDialog";
+import { CodexConnectDialog } from "./CodexConnectDialog";
+import { coreAutoClaim, coreConnection, type CoreConnection } from "@persistence/CoreDesktopTransport";
 import { AppSettingsDialog } from "./AppSettingsDialog";
 import { AppSwitcher } from "./AppSwitcher";
 
@@ -14,8 +16,22 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
   const { messages: m } = useLocale();
   const [menuOpen, setMenuOpen] = useState(false);
   const [coreOpen, setCoreOpen] = useState(false);
+  const [codexConnectOpen, setCodexConnectOpen] = useState(false);
+  const [codexStatus, setCodexStatus] = useState<CoreConnection | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let active = true;
+    void coreAutoClaim()
+      .then(() => coreConnection())
+      .then((status) => {
+        if (active) setCodexStatus(status);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -123,15 +139,31 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
       <AppSwitcher />
 
       <div className="app-top-chrome">
-        {store.book ? (
-          <button type="button" className="text-button" onClick={() => setCoreOpen(true)}>
-            {m.editor.codexNav}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          className="text-button app-codex-nav"
+          onClick={() => (store.book ? setCoreOpen(true) : setCodexConnectOpen(true))}
+        >
+          {m.editor.codexNav}
+          <i className={codexStatus?.reachable ? "app-switcher-dot is-available" : "app-switcher-dot"} aria-hidden="true" />
+        </button>
         <LocaleSelect />
         <ThemeToggle />
       </div>
-      {coreOpen && store.book ? <CoreConnectionDialog key={store.book.id} currentBook={store.book} bookId={store.book.id} onCheckpoint={store.checkpointBook} onRestore={store.restoreCoreRevision} onClose={() => setCoreOpen(false)} /> : null}
+      {coreOpen && store.book ? (
+        <CoreConnectionDialog
+          key={store.book.id}
+          currentBook={store.book}
+          bookId={store.book.id}
+          onCheckpoint={store.checkpointBook}
+          onRestore={store.restoreCoreRevision}
+          onClose={() => {
+            setCoreOpen(false);
+            void coreConnection().then(setCodexStatus);
+          }}
+        />
+      ) : null}
+      {codexConnectOpen ? <CodexConnectDialog onClose={() => setCodexConnectOpen(false)} onStatusChange={setCodexStatus} /> : null}
       {settingsOpen ? (
         <AppSettingsDialog
           models={store.models}

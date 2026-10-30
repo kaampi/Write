@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.228
+Status: living document, v1.0.229
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -11036,6 +11036,80 @@ bakgrundsmarkering på aktiv flik som Explores egen rad, med Writers
 nav-knappar kvar till vänster.
 
 v1.0.227 → v1.0.228.
+
+
+**Ändringslogg v1.0.228 → v1.0.229 (2026-10-30): Codex flyttad in i
+toppmenyn, hem-kortet borttaget.** Kom ur en designrunda kring en ny
+startsida (ännu bara en designskiss, inte byggd på riktigt — se
+Figma-liknande Design-canvasen "kaampi Write — ny startsida"). Mats
+undrade om vi borde "pusha" för Codex på startsidan samt visa en liten
+"Codex Connected"-notis när ansluten. Svarade att `CodexHomeCard`
+redan gjorde exakt det — men bara i ett eget kort på Home, och bara i
+skrivbordsappen. Mats observerade sen: "Jag tänker att vi har
+toppmenyn redan på startsidan. Då finns Codex där?" — vilket visade
+sig vara nästan sant men inte helt: `AppTopBar.tsx`s "Codex"-knapp var
+villkorad på `store.book`, osynlig på Home eftersom inget manus är
+öppet där. Föreslog att laga det istället för att duplicera i två
+ställen; Mats: "Kör den vägen, ta bort hem-kortet."
+
+**Problemet med att bara ta bort villkoret:** `CoreConnectionDialog`
+(dialogen knappen öppnar) är tungt bok-scopad — kräver `bookId`/
+`currentBook`, och dess två flikar (Delning, Versioner) är i grunden
+per-manus-funktioner (checkpoint/restore, synliga-i-Explore/Comic).
+Själva parkopplingen är däremot appbred sen tidigare (se
+`CodexHomeCard`s egen kommentar). Att göra `bookId`/`currentBook`
+valfria i den befintliga dialogen hade krävt att dölja halva
+komponenten villkorligt — bedömde det som större regressionsrisk än
+att bygga en egen, lätt variant för "inget manus öppet än".
+
+**Lösning:**
+- Ny `src/ui/CodexConnectDialog.tsx` — hämtad rakt ur `CodexHomeCard`s
+  logik (samma `coreAutoClaim`/`coreConnection`/`pairCore`-anrop,
+  samma tre lägen: connected/offline/push-med-parkopplingsformulär)
+  men som en overlay-dialog (`edit-overlay`/`edit-card
+  app-switcher-card`, samma mönster som `AppSwitcher.tsx`s
+  `CompanionAppDialog`) istället för ett Home-kort. Ny i18n-nyckel
+  `home.codexDesktopOnly` (alla tre språk) för webbläsarfallet —
+  samma text som `CoreConnectionDialog`s egen `unavailable`-copy, för
+  konsekvens mellan de två dialogerna.
+- `AppTopBar.tsx`: "Codex"-knappen är nu alltid synlig (villkoret på
+  `store.book` borttaget). Hämtar anslutningsstatus själv vid mount
+  (`coreAutoClaim` → `coreConnection`) för en liten prick på knappen
+  (`.app-switcher-dot`, samma klass som app-switcherns egen
+  tillgänglig-indikator — sage när `reachable`, annars grå). Klick: med
+  öppet manus → befintliga `CoreConnectionDialog` som förut; utan →
+  nya `CodexConnectDialog`. Status synkas om när endera dialogen
+  stängs, så prickens färg stämmer oavsett vilken väg man anslöt
+  genom.
+- `Home.tsx`: `CodexHomeCard`-raden borttagen helt.
+  `src/ui/CodexHomeCard.tsx` raderad (ingen annan referens någonstans,
+  bekräftat med grep innan borttagning — inga tester täckte den
+  specifikt heller).
+- `styles.css`: generaliserade `.home-start-card-copy >
+  .home-codex-status.is-connected/.is-offline` till fristående
+  `.home-codex-status.is-connected/.is-offline` (den gamla
+  föräldra-kopplingen pekade mot ett kort som inte finns längre; den
+  nya dialogen har ingen `.home-start-card-copy`-wrapper). Ny
+  `.app-codex-nav { display:inline-flex; gap:0.4rem }` så knapp-text
+  och prick hamnar i linje.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1240/1240
+tester gröna (ingen av dem rörde Codex-UI specifikt, men inget gick
+sönder). Headless Playwright mot en riktig körande dev-instans:
+bekräftade "Codex"-knappen syns på Home (ingen bok öppen) med sin
+prick; klick öppnar `CodexConnectDialog` och visar rätt
+webbläsar-meddelande ("only possible in the desktop app..."), eftersom
+`isTauri()` är falskt i den körande testmiljön; öppnade sen ett nytt
+manus och bekräftade att den gamla bok-scopade `CoreConnectionDialog`
+(Delning/Versioner-flikarna) fortfarande fungerar oförändrat därifrån.
+
+Design-canvasens båda artboards ("innan ditt första manus" och "du har
+redan manus") uppdaterade i efterhand så de inte längre visar
+Codex-kort/notis på själva Home-ytan — en kommentar i varje artboard
+pekar till toppmenyn istället, så skissen inte motsäger det som nu
+faktiskt är byggt.
+
+v1.0.228 → v1.0.229.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

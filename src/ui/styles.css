@@ -662,6 +662,15 @@ button.app-switcher-item:hover {
   background: var(--sage);
 }
 
+/* The top bar's own Codex nav button, always visible now (not just with a
+   manuscript open) - the small dot reuses the switcher's own connected
+   indicator rather than inventing a second one. */
+.app-codex-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .app-switcher-config {
   border: 0;
   background: none;
@@ -945,12 +954,12 @@ button:disabled {
  * for !important, the same fix this project settled on once before for
  * exactly this kind of "my more-specific-looking rule lost anyway" case.
  */
-.home-start-card-copy > .home-codex-status.is-connected {
+.home-codex-status.is-connected {
   color: var(--sage);
   font-weight: 600;
 }
 
-.home-start-card-copy > .home-codex-status.is-offline {
+.home-codex-status.is-offline {
   color: var(--text-dim);
 }
 

@@ -505,6 +505,7 @@ export const en = {
     codexConnected: "Connected — backups and sharing with your other kaampi apps are on.",
     codexOffline: "Paired, but not reachable right now. Your work keeps saving locally.",
     codexCardLede: "Not connected yet. Paste the pairing key from kaampi Codex's own first-run screen, or leave this — it's entirely optional.",
+    codexDesktopOnly: "Connecting to kaampi Codex is only possible in the desktop app, not here in the browser.",
     codexTokenPlaceholder: "Pairing key",
     codexConnectAction: "Connect",
     codexConnecting: "Connecting…",
