@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.239] - 2026-10-31
+
+### Fixed
+- An invalid local-server address (e.g. an unfinished URL saved while setting up Ollama or an OpenAI-compatible server) no longer bricks the whole app. The address check threw before any error handling could catch it, crashing straight into the full-page error screen on every app start — now it surfaces as the normal "can't reach the server" state in Settings instead.
+
 ## [1.0.238] - 2026-10-31
 
 ### Fixed

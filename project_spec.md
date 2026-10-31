@@ -11491,6 +11491,50 @@ build` rent, 1240/1240 tester gröna.
 
 v1.0.237 → v1.0.238.
 
+**Ändringslogg v1.0.238 → v1.0.239 (2026-10-31): ogiltig serveradress
+bröt hela appen permanent.** Tester (via Mats): klistrade av misstag
+in en ofullständig adress när hen ställde in en lokal API-server. Write
+fastnade på en tom sida som bara sa att adressen inte var giltig —
+ingen tillbaka-pil, inget synligt sätt ut. Stängde appen, öppnade den
+igen — fortfarande fast.
+
+**Grundorsak:** `listEngineModels` (`BookStore.tsx`) anropas
+automatiskt i en `useEffect` vid varje appstart (och varje gång
+motor/adress ändras) för att lista tillgängliga modeller. Den var en
+vanlig, icke-async funktion som konstruerar en `OllamaModelProvider`
+eller `OpenAICompatibleLocalProvider` direkt. De konstruktorerna
+anropar `assertLocalOnlyBaseUrl` synkront, som kastar
+`LocalProviderConfigError` direkt — INTE som en avvisad Promise — när
+adressen inte går att tolka med `new URL(...)`. Eftersom
+`listEngineModels` själv inte var `async`, lät den det synkrona
+kastet undkomma funktionen helt, förbi `.catch()`:en på anropsstället,
+rakt in i appens egen toppnivå-`ErrorBoundary` (`App.tsx`) — samma
+krasch-skärm som finns för riktigt oväntade fel, fast helt utan
+"tillbaka"-funktion utöver en "Försök igen"-knapp som bara
+återmonterar trädet och genast kraschar likadant igen, eftersom den
+trasiga adressen redan låg sparad i `localStorage`. Varje omstart av
+appen körde om samma effekt mot samma trasiga adress — permanent fast,
+precis som testaren beskrev.
+
+**Fix:** en rad, `function` → `async function` på `listEngineModels`.
+En `async`-funktion fångar automatiskt ett synkront kast i sin egen
+kropp och gör om det till en vanlig avvisning — `.catch()`:en på
+anropsstället (som redan fanns och redan hanterar detta korrekt via
+`ollamaHint()`) fångar den nu som väntat, och felet visas som appens
+vanliga "kan inte nå servern"-läge i Settings istället för att
+kaschra hela appen.
+
+**Verifiering:** Playwright, riktig reproduktion: satte
+`storybook-ai.base-url` till en ofullständig adress
+(`http://192.168.1.`) och `storybook-ai.engine` till
+`openai-compatible` i `localStorage`, laddade om sidan. Före fixen
+hade detta kraschat rakt in i `.crash`-skärmen (bekräftat via
+kodläsning av kastkedjan, inte bara teori). Efter fixen: ingen
+`.crash`-skärm, Home renderas helt normalt med sin vanliga rubrik.
+`tsc --noEmit` rent, `npm run build` rent, 1240/1240 tester gröna.
+
+v1.0.238 → v1.0.239.
+
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
 riktiga byggsteget, efter flera rundors arkitekturdiskussion (se

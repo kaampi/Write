@@ -281,8 +281,18 @@ function withRequestTimeout(abort: AbortController): { timedOut: () => boolean; 
  * on the local network) is used as given. Routed through the Provider
  * classes rather than calling listOllamaModels directly so Ollama gets the
  * same assertLocalOnlyBaseUrl guard OpenAI-compatible already had.
+ *
+ * `async` is load-bearing here, not style: the Provider constructors call
+ * assertLocalOnlyBaseUrl synchronously, which throws immediately (not as a
+ * rejected promise) for a malformed address. A plain function would let
+ * that throw escape this call entirely, past the `.catch()` at the one
+ * call site, straight into the app's top-level ErrorBoundary — and since
+ * the bad address is the one already persisted in localStorage, it would
+ * re-crash on every single app start, before Settings (where it could be
+ * fixed) ever gets to render. `async` catches a synchronous throw from its
+ * own body and turns it into a normal rejection instead.
  */
-function listEngineModels(engine: LlmEngine, baseUrl: string): Promise<string[]> {
+async function listEngineModels(engine: LlmEngine, baseUrl: string): Promise<string[]> {
   const trimmed = baseUrl.trim();
   if (engine === "openai-compatible") {
     if (!trimmed) return Promise.reject(new LocalProviderConfigError(STORE_ERROR.serverUrlMissing));
