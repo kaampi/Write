@@ -27,7 +27,11 @@ export function nameHitCount(text: string, from: string): number {
 export function renameEntityLabel(facts: NarrativeFact[], entity_ref: string, nextLabel: string): NarrativeFact[] {
   const label = nextLabel.trim();
   if (!label) return facts;
-  return facts.map((fact) => (fact.entity_ref === entity_ref ? { ...fact, entity_label: label } : fact));
+  return facts.map((fact) => {
+    if (fact.entity_ref === entity_ref) fact = { ...fact, entity_label: label };
+    if (fact.claimed_by_ref === entity_ref) fact = { ...fact, claimed_by_label: label };
+    return fact;
+  });
 }
 
 export function manuscriptNameHits(book: Book, from: string): number {

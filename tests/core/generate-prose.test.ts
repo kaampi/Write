@@ -395,6 +395,35 @@ describe("position-aware Story Bible in Draft (roadmap-ideas.md #24)", () => {
     const firstChapter = withProse.chapters.find((c) => c.id === firstId)!;
     expect(recastUserPrompt(withProse, firstChapter)).toContain("The captain confesses");
   });
+
+  // "A character's lie shouldn't become a fact in your AI story memory" (Mats, 2026-10-31).
+  it("labels an unconfirmed fact as a character's claim, not settled backstory", () => {
+    const { book, firstId } = bookWithTwoChapters();
+    const withFact = {
+      ...book,
+      facts: [
+        fact({
+          id: "1",
+          chapter_id: firstId,
+          value: "The bridge burned before the guard arrived",
+          confidence: "unconfirmed",
+          claimed_by_label: "Mara"
+        })
+      ]
+    };
+    const firstChapter = withFact.chapters.find((c) => c.id === firstId)!;
+    const prompt = draftUserPrompt(withFact, firstChapter);
+    expect(prompt).toContain("The bridge burned before the guard arrived");
+    expect(prompt).toContain("unconfirmed");
+    expect(prompt).toContain("claimed by Mara");
+  });
+
+  it("renders a confirmed fact the plain way, with no unconfirmed label", () => {
+    const { book, firstId } = bookWithTwoChapters();
+    const withFact = { ...book, facts: [fact({ id: "1", chapter_id: firstId, value: "The captain confesses" })] };
+    const firstChapter = withFact.chapters.find((c) => c.id === firstId)!;
+    expect(draftUserPrompt(withFact, firstChapter)).not.toContain("unconfirmed");
+  });
 });
 
 describe("formatStorySoFar", () => {

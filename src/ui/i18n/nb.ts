@@ -1638,6 +1638,9 @@ export const nb: Messages = {
       brief: "Brief",
       series: "Forrige bok"
     },
+    unconfirmed: "Ubekreftet — bare noe en karakter har hevdet, ikke fastslått bakgrunn.",
+    unconfirmedClaimedBy: "Ubekreftet — hevdet av {name}, ikke fastslått bakgrunn.",
+    unconfirmedBadge: "Ubekreftet",
     conflictsWith: "Kolliderer med: {value}",
     similarTo: "Ligner: {value} — ser ut som samme fakta, bare mer detaljert",
     lock: "Lås",

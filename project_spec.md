@@ -11792,6 +11792,63 @@ nya).
 
 v1.0.244 → v1.0.245.
 
+**Ändringslogg v1.0.245 → v1.0.246 (2026-10-31): "A character's lie
+shouldn't become a fact in your AI story memory".** Mats delade en
+fråga han sett (och, efter att länken visade sig vara en App Store-
+sida utan svar, ett faktiskt svarsförslag från en läsare): en fakta
+ska attribueras ("source: Mara to the guard; status: unconfirmed"),
+inte bara flatas ut till platt sanning. Kollade vårt eget schema
+först - `source`/`origin` spårar bara VEM som matade in faktan
+(författare/extraktor) och VILKEN yta den kom från, aldrig vem i
+berättelsen som faktiskt hävdade den. Mats: "Ja tack."
+
+**Två nya valfria fält på `NarrativeFact`:** `confidence:
+"confirmed"|"unconfirmed"` (saknas = confirmed, samma
+bakåtkompatibla mönster som alla andra valfria fält i schemat) och
+`claimed_by_ref`/`claimed_by_label` (samma denormaliserings-mönster
+som `source_book_title`). Oberoende av `status` - en osäker fakta kan
+fortfarande vara `locked` (författaren är säker på att PÅSTÅENDET är
+canon, utan att påståendet självt är sant i världen).
+
+**Extraktorn** (`EXTRACTOR_SYSTEM`): ny regel - om en fakta bara
+någonsin kommer från en karaktärs egen mun (dialog, brev, tanke) och
+berättarrösten aldrig bekräftar den oberoende, sätt
+`"confidence":"unconfirmed"` och `"claimed_by":"<namnet>"`. Allt
+berättarrösten själv slår fast, eller som fler än en oberoende
+karaktär/händelse bekräftar, förblir vanligt `"confirmed"` (standard,
+fälten utelämnas). `parseExtractorPayload` läser och validerar de nya
+fälten, `factFromDraft` (ConsistencyGate.ts) bär dem rakt igenom till
+den skapade faktan.
+
+**Stänger loopen i själva Draft-prompten** - annars hade modellen
+fortfarande sett en osäker fakta som platt sanning i nästa kapitel.
+`formatBibleForPrompt` (generateProse.ts) annoterar nu en osäker rad:
+`"Mara · Event: bridge burned before arrival (unconfirmed — claimed
+by Mara; not settled backstory, stays consistent with what was
+said)"` istället för att rendera den identiskt med en bekräftad fakta.
+
+**UI:** Story Bible-kortens låsta fakta-rad och granskningskön
+(`BiblePanel.tsx`) visar en orange "UNCONFIRMED"-badge/textrad med
+vem som hävdade det, samma varningsfärg (`--flag`) som en flaggad
+konflikt redan använder. `renameEntityLabel` (renameEntity.ts)
+uppdaterad att även hålla `claimed_by_label` i synk om den som hävdat
+något byter namn.
+
+**Verifiering:** fyra testfiler utökade - `extract-facts.test.ts`
+(parsning av confidence/claimed_by, och att claimed_by utan
+"unconfirmed" ignoreras), `consistency-gate.test.ts` (fälten bärs
+igenom `applyExtractorDrafts`), `generate-prose.test.ts` (Draft-
+prompten innehåller "unconfirmed" och "claimed by Mara" för en osäker
+fakta, ingenting extra för en vanlig), `rename-entity.test.ts`
+(namnbyte uppdaterar claimed_by_label). Playwright: skapade en
+karaktär med en fakta, injicerade confidence/claimed_by direkt i
+IndexedDB (extraktorn själv kräver en riktig AI-anslutning den här
+sandlådan inte har), bekräftade badgen renderas med rätt
+tooltip-text. `tsc --noEmit` rent, `npm run build` rent, 1251/1251
+tester gröna (åtta nya).
+
+v1.0.245 → v1.0.246.
+
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
 riktiga byggsteget, efter flera rundors arkitekturdiskussion (se

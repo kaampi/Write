@@ -6943,6 +6943,27 @@ button:disabled {
   font-size: 0.8rem !important;
 }
 
+/* "A character's lie shouldn't become a fact in your AI story memory"
+   (Mats, 2026-10-31) - flags a claim that only came from someone's mouth,
+   same warning color as a flagged conflict since both mean "look before
+   you trust this". */
+.fact-unconfirmed {
+  color: var(--flag);
+}
+
+.fact-unconfirmed-badge {
+  margin-left: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--flag);
+  border: 1px solid var(--flag);
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+  vertical-align: middle;
+}
+
 .proposal-actions {
   display: flex;
   gap: 0.5rem;

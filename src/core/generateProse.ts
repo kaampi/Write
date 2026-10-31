@@ -56,11 +56,22 @@ export function formatPlotlinesForPrompt(book: Book, chapter: Chapter): string {
 const DEFAULT_EMPTY_BIBLE =
   "No established facts yet. You may introduce named people and places if the brief asks for them. Do not invent a secret history.";
 
+/**
+ * An `unconfirmed` fact (Mats, 2026-10-31: "A character's lie shouldn't
+ * become a fact in your AI story memory") is labeled as a claim, not
+ * flattened into the same plain assertion a confirmed fact gets - Draft
+ * can keep a lie, rumor, or guess consistent with what was actually said,
+ * without treating it as the scene's own settled backstory.
+ */
+function renderFactRow(fact: NarrativeFact): string {
+  const claim = `${fact.entity_label} · ${PREDICATE_LABELS[fact.predicate]}: ${fact.value}`;
+  if (fact.confidence !== "unconfirmed") return `- ${claim}`;
+  const claimant = fact.claimed_by_label ?? fact.claimed_by_ref;
+  return `- ${claim} (unconfirmed${claimant ? ` — claimed by ${claimant}` : ""}; not settled backstory, stays consistent with what was said)`;
+}
+
 function renderBibleRows(rows: NarrativeFact[], book: Book, empty: string): string {
-  const body =
-    rows.length === 0
-      ? empty
-      : rows.map((fact) => `- ${fact.entity_label} · ${PREDICATE_LABELS[fact.predicate]}: ${fact.value}`).join("\n");
+  const body = rows.length === 0 ? empty : rows.map(renderFactRow).join("\n");
   return withCharacterProfiles(body, book.facts, book.profiles, book.hidden_entities);
 }
 

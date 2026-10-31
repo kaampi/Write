@@ -80,6 +80,32 @@ export const NarrativeFactSchema = z.object({
   source_book_id: z.string().min(1).optional(),
   source_book_title: z.string().min(1).optional(),
   source_chapter_title: z.string().min(1).optional(),
+  /**
+   * "A character's lie shouldn't become a fact in your AI story memory" -
+   * Mats, 2026-10-31, relaying a reader's question. Missing means
+   * "confirmed" (the overwhelming majority of facts, and every fact from
+   * before this field existed) - a claim the narration itself states as
+   * true, not just something one character asserted. "unconfirmed" is for
+   * a claim that only ever came from someone's mouth: a lie, a rumor, a
+   * guess, an alibi - still worth remembering (a later chapter may need to
+   * know exactly what was claimed), but never fed to Draft as settled
+   * backstory the way a locked fact normally is. Independent of `status`:
+   * an unconfirmed claim can still be `locked` (the author is certain the
+   * CLAIM itself is canon - that's what got said - without that claim
+   * being true in-world).
+   */
+  confidence: z.enum(["confirmed", "unconfirmed"]).optional(),
+  /**
+   * Who in the story made an `unconfirmed` claim - the entity_ref of a
+   * character, same deterministic slugify(name) scheme as entity_ref
+   * itself. `claimed_by_label` is denormalized display text (same
+   * reasoning as `source_book_title`: still readable if that character's
+   * card is later renamed or merged away). Both optional and only
+   * meaningful alongside `confidence: "unconfirmed"` - a confirmed fact
+   * has no single claimant, it is simply true.
+   */
+  claimed_by_ref: z.string().min(1).optional(),
+  claimed_by_label: z.string().min(1).optional(),
   created_at: z.string().min(1)
 });
 export type NarrativeFact = z.infer<typeof NarrativeFactSchema>;
@@ -89,6 +115,9 @@ export type FactDraft = {
   entity_label: string;
   predicate: CorePredicate;
   value: string;
+  confidence?: "confirmed" | "unconfirmed";
+  claimed_by_ref?: string;
+  claimed_by_label?: string;
 };
 
 export function isActiveFact(fact: NarrativeFact): boolean {

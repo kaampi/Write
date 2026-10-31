@@ -142,11 +142,16 @@ export function parseExtractorPayload(raw: string): FactDraft[] {
     // other. Name *variants* ("Dr. Mortimer" vs "Dr. James Mortimer") still
     // become separate cards; that needs either grounding the extractor in
     // the existing cast or a real merge feature, not attempted here.
+    const confidenceRaw = typeof rec.confidence === "string" ? rec.confidence.trim() : "";
+    const confidence = confidenceRaw === "unconfirmed" ? "unconfirmed" : undefined;
+    const claimedBy = confidence === "unconfirmed" && typeof rec.claimed_by === "string" ? rec.claimed_by.trim() : "";
     drafts.push({
       entity_ref: slugify(label),
       entity_label: label,
       predicate: predicateRaw,
-      value
+      value,
+      ...(confidence ? { confidence } : {}),
+      ...(claimedBy ? { claimed_by_ref: slugify(claimedBy), claimed_by_label: claimedBy } : {})
     });
   }
   return drafts;
@@ -168,11 +173,12 @@ export const PREDICATE_GUIDE = `- predicate must be one of: core.identity, core.
 - entity_label is the person's, place's, object's, group's, or concept's displayed name. Spell it exactly the same way, every time, whenever the same fact-holder comes up again in this extraction — matching spellings are how the app recognizes it is the same card; a different spelling (a title added or dropped, a nickname) is treated as a different card.`;
 
 export const EXTRACTOR_SYSTEM = `You extract established narrative facts from accepted prose.
-Return JSON only, shaped as: {"facts":[{"entity_label":"...","predicate":"core.identity","value":"..."}]}
+Return JSON only, shaped as: {"facts":[{"entity_label":"...","predicate":"core.identity","value":"...","confidence":"unconfirmed","claimed_by":"..."}]}
 
 Rules:
 - Only claims the text states as true. No metaphor, mood, subtext, or guesses.
 ${PREDICATE_GUIDE}
+- A character's lie should not become a fact in your story memory. If a claim is only ever spoken by a character - in dialogue, a letter, a thought - and the narration never confirms it independently (no other character agrees, no event bears it out), set "confidence":"unconfirmed" and "claimed_by" to that character's name, spelled exactly as their own entity_label. This covers a lie, a rumor, a guess, an alibi, or anything stated as true only because someone in the scene said so. Omit both fields (the default is "confirmed") for anything the narration itself asserts, or that more than one independent character or event bears out.
 - Skip style, clothing-of-the-moment, and implied feelings.
 - If nothing is extractable, return {"facts":[]}.`;
 

@@ -1638,6 +1638,9 @@ export const sv: Messages = {
       brief: "Brief",
       series: "Föregående bok"
     },
+    unconfirmed: "Obekräftat — bara något en karaktär påstått, inte fastslagen bakgrund.",
+    unconfirmedClaimedBy: "Obekräftat — hävdat av {name}, inte fastslagen bakgrund.",
+    unconfirmedBadge: "Obekräftat",
     conflictsWith: "Krockar med: {value}",
     similarTo: "Liknar: {value} — verkar vara samma fakta, fast mer detaljerad",
     lock: "Lås",

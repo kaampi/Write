@@ -176,6 +176,35 @@ describe("applyExtractorDrafts", () => {
     const next = applyExtractorDrafts([], [{ ...emmaIdentity, predicate: "core.trait", value: "Slow to trust" }], 0);
     expect(next[0]?.origin).toBeUndefined();
   });
+
+  // "A character's lie shouldn't become a fact in your AI story memory" (Mats, 2026-10-31).
+  it("carries an unconfirmed draft's confidence and claimant through onto the proposed fact", () => {
+    const next = applyExtractorDrafts(
+      [],
+      [
+        {
+          entity_ref: "bridge",
+          entity_label: "Bridge",
+          predicate: "core.event",
+          value: "Burned before the guard arrived",
+          confidence: "unconfirmed",
+          claimed_by_ref: "mara",
+          claimed_by_label: "Mara"
+        }
+      ],
+      0
+    );
+    expect(next[0]?.confidence).toBe("unconfirmed");
+    expect(next[0]?.claimed_by_ref).toBe("mara");
+    expect(next[0]?.claimed_by_label).toBe("Mara");
+  });
+
+  it("leaves confidence and claimed_by unset for an ordinary draft, same as before this field existed", () => {
+    const next = applyExtractorDrafts([], [emmaIdentity], 0);
+    expect(next[0]?.confidence).toBeUndefined();
+    expect(next[0]?.claimed_by_ref).toBeUndefined();
+    expect(next[0]?.claimed_by_label).toBeUndefined();
+  });
 });
 
 describe("approveFact / rejectFact", () => {

@@ -119,6 +119,55 @@ describe("parseExtractorPayload", () => {
     const drafts = parseExtractorPayload(raw);
     expect(drafts).toEqual([{ entity_ref: "emma", entity_label: "Emma", predicate: "core.identity", value: "Bartender" }]);
   });
+
+  // "A character's lie shouldn't become a fact in your AI story memory" (Mats, 2026-10-31).
+  it("carries confidence and claimed_by through for an unconfirmed claim", () => {
+    const drafts = parseExtractorPayload(
+      JSON.stringify({
+        facts: [
+          {
+            entity_label: "Bridge",
+            predicate: "core.event",
+            value: "Burned before the guard arrived",
+            confidence: "unconfirmed",
+            claimed_by: "Mara"
+          }
+        ]
+      })
+    );
+    expect(drafts).toEqual([
+      {
+        entity_ref: "bridge",
+        entity_label: "Bridge",
+        predicate: "core.event",
+        value: "Burned before the guard arrived",
+        confidence: "unconfirmed",
+        claimed_by_ref: "mara",
+        claimed_by_label: "Mara"
+      }
+    ]);
+  });
+
+  it("drops confidence/claimed_by for anything the model doesn't explicitly mark unconfirmed", () => {
+    const drafts = parseExtractorPayload(
+      JSON.stringify({
+        facts: [{ entity_label: "Bridge", predicate: "core.event", value: "Burned down", confidence: "confirmed" }]
+      })
+    );
+    expect(drafts).toEqual([{ entity_ref: "bridge", entity_label: "Bridge", predicate: "core.event", value: "Burned down" }]);
+  });
+
+  it("ignores claimed_by on its own, without an explicit unconfirmed confidence", () => {
+    // claimed_by only means anything alongside confidence: "unconfirmed" -
+    // a model that sends claimed_by without marking the claim unconfirmed
+    // hasn't actually said anything is in doubt.
+    const drafts = parseExtractorPayload(
+      JSON.stringify({
+        facts: [{ entity_label: "Bridge", predicate: "core.event", value: "Burned down", claimed_by: "Mara" }]
+      })
+    );
+    expect(drafts).toEqual([{ entity_ref: "bridge", entity_label: "Bridge", predicate: "core.event", value: "Burned down" }]);
+  });
 });
 
 describe("interviewExtractorUserPrompt", () => {

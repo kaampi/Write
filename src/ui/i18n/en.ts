@@ -1651,6 +1651,9 @@ export const en = {
       brief: "Brief",
       series: "Previous book"
     },
+    unconfirmed: "Unconfirmed — only claimed by a character, not settled backstory.",
+    unconfirmedClaimedBy: "Unconfirmed — claimed by {name}, not settled backstory.",
+    unconfirmedBadge: "Unconfirmed",
     conflictsWith: "Conflicts with: {value}",
     similarTo: "Similar to: {value} — looks like the same fact, more detailed",
     lock: "Lock",

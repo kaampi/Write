@@ -47,6 +47,20 @@ describe("renameEntityLabel", () => {
     expect(next.filter((row) => row.entity_ref === "emma").every((row) => row.entity_label === "Amelia")).toBe(true);
     expect(next.find((row) => row.entity_ref === "the-odyssey")?.entity_label).toBe("The Odyssey");
   });
+
+  it("also updates claimed_by_label when the renamed entity is the one who made an unconfirmed claim", () => {
+    const bridgeClaim: NarrativeFact = {
+      ...fact("Bridge", "bridge", "Burned before the guard arrived"),
+      predicate: "core.event",
+      confidence: "unconfirmed",
+      claimed_by_ref: "emma",
+      claimed_by_label: "Emma"
+    };
+    const next = renameEntityLabel([bridgeClaim], "emma", "Amelia");
+    // The claim's own subject (the Bridge card) is untouched - only the claimant's name changes.
+    expect(next[0]?.entity_label).toBe("Bridge");
+    expect(next[0]?.claimed_by_label).toBe("Amelia");
+  });
 });
 
 describe("replaceNameInManuscript", () => {

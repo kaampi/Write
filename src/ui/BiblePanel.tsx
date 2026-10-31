@@ -2086,6 +2086,8 @@ export function PendingFact({
     status: string;
     origin?: FactOrigin | undefined;
     is_merge_suggestion?: boolean | undefined;
+    confidence?: "confirmed" | "unconfirmed" | undefined;
+    claimed_by_label?: string | undefined;
   };
   against?: { value: string };
   /** Existing same-kind cards this pending fact could belong to instead of becoming its own new one. Empty hides the picker entirely. */
@@ -2108,6 +2110,11 @@ export function PendingFact({
       </p>
       {fact.origin ? (
         <p className="quiet proposal-source">{format(m.bible.sourceLabel, { source: m.bible.sources[fact.origin] })}</p>
+      ) : null}
+      {fact.confidence === "unconfirmed" ? (
+        <p className="quiet proposal-source fact-unconfirmed">
+          {fact.claimed_by_label ? format(m.bible.unconfirmedClaimedBy, { name: fact.claimed_by_label }) : m.bible.unconfirmed}
+        </p>
       ) : null}
       <textarea value={draft} onChange={(event) => setDraft(event.target.value)} rows={2} aria-label={m.bible.factText} />
       {against ? (
@@ -2167,6 +2174,8 @@ function LockedFact({
     value: string;
     hidden_from_ai?: boolean | undefined;
     position_override?: "include" | "exclude" | undefined;
+    confidence?: "confirmed" | "unconfirmed" | undefined;
+    claimed_by_label?: string | undefined;
   };
   onSave: (value: string) => void;
   onRetract: () => void;
@@ -2202,6 +2211,11 @@ function LockedFact({
       <li className={hidden ? "locked-fact is-hidden-from-model" : "locked-fact"}>
         <span className="pred">{m.bible.predicates[fact.predicate]}</span>
         {fact.value}
+        {fact.confidence === "unconfirmed" ? (
+          <span className="fact-unconfirmed-badge" title={fact.claimed_by_label ? format(m.bible.unconfirmedClaimedBy, { name: fact.claimed_by_label }) : m.bible.unconfirmed}>
+            {m.bible.unconfirmedBadge}
+          </span>
+        ) : null}
         <div className="fact-actions">
           <button
             type="button"

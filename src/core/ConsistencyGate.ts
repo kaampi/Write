@@ -141,6 +141,9 @@ export function factFromDraft(
   if (args.source_book_id) fact.source_book_id = args.source_book_id;
   if (args.source_book_title) fact.source_book_title = args.source_book_title;
   if (args.source_chapter_title) fact.source_chapter_title = args.source_chapter_title;
+  if (draft.confidence) fact.confidence = draft.confidence;
+  if (draft.claimed_by_ref) fact.claimed_by_ref = draft.claimed_by_ref;
+  if (draft.claimed_by_label) fact.claimed_by_label = draft.claimed_by_label;
   return fact;
 }
 

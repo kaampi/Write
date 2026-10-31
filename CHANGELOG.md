@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.246] - 2026-10-31
+
+### Added
+- Extract facts can now mark a claim "unconfirmed" when it only ever came from a character's own mouth — a lie, a rumor, a guess — instead of flattening it into the same settled backstory a narration-confirmed fact gets. Shown with an "Unconfirmed" badge in the Story Bible, and labeled as a claim (with who made it, when known) rather than flat truth in Draft's own prompt, so a character's lie stays consistent without being treated as what actually happened.
+
 ## [1.0.245] - 2026-10-31
 
 ### Added
