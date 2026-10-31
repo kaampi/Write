@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.230
+Status: living document, v1.0.231
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -11222,6 +11222,32 @@ inställningen kvar efter en full sidomladdning (localStorage); och
 att "Open the Guide"-knappen i bubblan faktiskt öppnar Guide-overlayn.
 
 v1.0.229 → v1.0.230.
+
+
+**Ändringslogg v1.0.230 → v1.0.231 (2026-10-31): maskoten växer med
+bubblan.** Mats: "Kan man låta Kaamilla (och andra karaktärer) få
+växa på höjden om textrutan växer?" Testat visuellt i samma
+Playwright-testsida som resten av bubbel-arbetet innan något ändrades
+i appen.
+
+**Lösning, ren CSS, ingen JS:** `.mascot-tip` bytte `align-items:
+flex-start` → `stretch`; `.mascot-tip-avatar` bytte sin fasta `width:
+5.25rem` mot `width: auto; height: auto; align-self: stretch` plus
+`min-height: 4.5rem`/`max-height: 9rem` som tak och golv. Med både
+bredd och höjd satta till `auto` sätter webbläsaren bildens bredd
+utifrån dess egen bildproportion när höjden sträcks till radens höjd
+— ingen distorsion, ingen uträkning i JS. Eftersom bubblans egen
+`max-height` redan avgör radens höjd (den är det högsta
+innehållsbestämda elementet), och avataren bara följer efter inom
+sitt min/max-spann, påverkade ändringen inte heller var spetsen
+hamnar i de korta `.has-point`-bubblorna.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1240/1240
+tester gröna. Headless Playwright mot en riktig körande dev-instans:
+Kaamilla syns tydligt större bredvid "Open the Guide"-tipsets högre
+bubbla jämfört med tidigare, fortfarande skarp och oförvrängd.
+
+v1.0.230 → v1.0.231.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

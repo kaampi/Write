@@ -1021,13 +1021,22 @@ button:disabled {
  */
 .mascot-tip {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0.875rem;
 }
 
+/* width/height both auto + align-items: stretch above - the image's own
+   aspect ratio sets its width as its stretched height changes, so Kaamilla
+   scales up for a taller (e.g. has-action) bubble without distorting
+   (Mats, 2026-10-31: "Kan man låta Kaamilla ... få växa på höjden om
+   textrutan växer?"). min/max-height keep her from getting too small for
+   "Hej!" or too large next to a 4-line tip. */
 .mascot-tip-avatar {
-  width: 5.25rem;
+  width: auto;
   height: auto;
+  align-self: stretch;
+  min-height: 4.5rem;
+  max-height: 9rem;
   flex: 0 0 auto;
   filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.18));
 }

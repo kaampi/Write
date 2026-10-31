@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "kaampi Write",
-  "version": "1.0.230",
+  "version": "1.0.231",
   "identifier": "se.ocedo.storybookai",
   "build": {
     "frontendDist": "../dist",

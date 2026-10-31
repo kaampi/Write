@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.231] - 2026-10-31
+
+### Changed
+- The mascot's own avatar now scales up proportionally when its speech bubble is taller (e.g. a tip with a linked action), instead of staying a fixed size regardless of the bubble next to it.
+
 ## [1.0.230] - 2026-10-31
 
 ### Added
