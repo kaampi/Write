@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.238] - 2026-10-31
+
+### Fixed
+- The mascot speech bubble now stays light (its own comic-style colors) in dark theme instead of flipping to dark along with the rest of the UI.
+
 ## [1.0.237] - 2026-10-31
 
 ### Fixed

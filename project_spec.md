@@ -11472,6 +11472,25 @@ rent, 1240/1240 tester gröna.
 
 v1.0.236 → v1.0.237.
 
+**Ändringslogg v1.0.237 → v1.0.238 (2026-10-31): pratbubblan ljus även
+i Dark theme.** Mats: "Där satt den. EN sak jag ser nu är att
+pratbubblan borde nog vara ljus även med Dark theme." `.mascot-bubble`
+använde `background: var(--paper); color: var(--text)` — dessa tokens
+flippar till mörka värden (`#231e18` / `#f3eadc`) i dark theme, så
+bubblan blev en mörk ruta istället för en vit seriepratbubbla. Fix:
+bytte till fasta hexvärden (samma som light themes `--paper`/`--text`/
+`--border-soft`: `#fffdf8` / `#2a2218` / `#e4d8c8`) istället för
+tema-variablerna, så bubblan alltid är ljus oavsett tema. Ingen
+visuell skillnad i light theme (samma färger som förut), men i dark
+theme syns den nu som en vit bubbla mot den mörka bakgrunden.
+
+**Verifiering:** Playwright-skärmdump i dark theme bekräftar ljus
+bubbla med mörk text, knappen "Open the Guide" fortfarande orange
+(egen `.primary`-klass, opåverkad). `tsc --noEmit` rent, `npm run
+build` rent, 1240/1240 tester gröna.
+
+v1.0.237 → v1.0.238.
+
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
 riktiga byggsteget, efter flera rundors arkitekturdiskussion (se
