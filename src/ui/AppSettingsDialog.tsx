@@ -14,6 +14,7 @@ import {
 } from "@llm/connectionPresets";
 import { ModelSelect } from "./SettingsPanel";
 import { applyPaper, parsePaper, readPaper, PAPERS } from "./paper";
+import { MASCOT_IDS, readMascot, setMascot, type MascotId } from "./mascot";
 import {
   detectGpuSuggestion,
   isDesktopApp,
@@ -98,6 +99,7 @@ export function AppSettingsDialog({
     setHistoryLimitDraft(String(historyLimit));
   }, [historyLimit]);
   const [paper, setPaper] = useState(readPaper);
+  const [mascot, setMascotState] = useState<MascotId>(readMascot);
 
   const connected = models.length > 0 && !ollamaError;
   const [gpuSuggestion, setGpuSuggestion] = useState<GpuSuggestion | null>(null);
@@ -295,6 +297,27 @@ export function AppSettingsDialog({
                     {PAPERS.map((option) => (
                       <option key={option} value={option}>
                         {m.editor.paperOptions[option]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="reader-field">
+                  <span className="field-label-row">
+                    {m.editor.mascotLabel}
+                    <HelpTip body={m.editor.mascotLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.mascotLabel })} />
+                  </span>
+                  <select
+                    value={mascot}
+                    aria-label={m.editor.mascotLabel}
+                    onChange={(event) => {
+                      const next = event.target.value as MascotId;
+                      setMascot(next);
+                      setMascotState(next);
+                    }}
+                  >
+                    {MASCOT_IDS.map((option) => (
+                      <option key={option} value={option}>
+                        {m.editor.mascotOptions[option]}
                       </option>
                     ))}
                   </select>

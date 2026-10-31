@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.230] - 2026-10-31
+
+### Added
+- An optional mascot (Kaamilla, more to come) can show up with tips on Home, such as pointing out the Guide — off by default, turned on from Settings. Short tips get a speech bubble with a pointed corner anchored near the mascot's mouth; tips with a linked action (like opening the Guide) drop the point and use a plain bubble with a docked button instead, since those are long enough that a point would land nowhere near the mouth either way.
+
 ## [1.0.229] - 2026-10-30
 
 ### Changed

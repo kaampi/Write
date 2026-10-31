@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.229
+Status: living document, v1.0.230
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -11110,6 +11110,118 @@ pekar till toppmenyn istället, så skissen inte motsäger det som nu
 faktiskt är byggt.
 
 v1.0.228 → v1.0.229.
+
+
+**Ändringslogg v1.0.229 → v1.0.230 (2026-10-31): maskot med pratbubbla,
+första platsen på Home.** Lång designrunda, utgick från att Mats
+mockade en egen version av startsidan (en "Design"-canvas han
+dupplicerade från min skiss) med en ihopslagen pill-formad CTA och en
+illustrerad maskot-karaktär istället för fyra likvärdiga kort. Jag
+flaggade två saker innan vi gick vidare: maskoten är ett
+varumärkesbeslut (ingen annan kaampi-app har illustrerade karaktärer),
+och skissen visade fortfarande bara en smal kolumn, inte den breda
+skärm-användning som var hela anledningen till att vi tog upp
+startsidan. Mats skickade sen tre egna, färdiga karaktärsblad (inte
+stock) — Kaamilla, Kaamy, en robot "Kaambot" — tänkta som ett
+familjebrett maskotsystem för tips/meddelanden/frågor.
+
+**Avgränsningar, i tur och ordning:**
+- Går den att stänga av? Ja, uttryckligen efterfrågat — Write riktar
+  sig delvis mot författare som kan tycka en pratande maskot är
+  störande. Av som standard.
+- En maskot för hela familjen, eller per app? Mats konstaterade själv
+  att Comic är fel ställe — appens hela syfte är användarens egen
+  bildkonst i en vald stil, så en konkurrerande illustrationsstil
+  (hans exempel: "en Franquin-guide när man skapar en Manara-serie")
+  är en riktig stilkrock på ett sätt som inte gäller Write/Explore
+  (rena text/UI-ytor). Löst genom att göra inställningen per-app,
+  byggd bara i Write denna gång.
+- Tre karaktärer samtidigt, eller ett val? Mats idé: en
+  inställningsskärm ("Who do you want to meet? Kaamilla, Kaamy,
+  Kaambot?"), en vald maskot istället för tre som konkurrerar om
+  samma plats. Bara Kaamilla har konst än; Kaamy/Kaambot är
+  förberedda i typen (`MascotId`) men inte kopplade i UI:t förrän
+  Mats skickar deras bilder — hellre det än ett väljarläge med
+  alternativ som inte renderar något.
+
+**Pratbubblans form, flera iterationer testade visuellt (headless
+Playwright mot en lokal testsida, inte bara beskrivet i ord) innan
+något byggdes på riktigt:**
+- Första försöket: separat SVG-svans ovanpå en CSS-ruta. Mats:
+  "svansen ligger ovanpå rutan" — två separata former möts aldrig
+  pixelexakt utan dagar av finjustering. Övergavs.
+- Mats förslag istället: låt ETT hörn av bubblans egen `border-radius`
+  vara spetsigt (`border-bottom-left-radius: 0`) — ingen extra form,
+  ingen söm, en enda CSS-rad.
+- Var ska spetsen sitta, och var ska bubblan växa ifrån? Flera
+  rundor: spetsen måste sitta vid MUNNEN, inte handen. Eftersom
+  spetsen är bubblans BOTTEN-hörn måste bubblans TOPP vara fast
+  förankrad nära munnen och växa nedåt — fel håll första försöket
+  (förankrad nedåt, växte uppåt) gjorde att spetsen bara stämde för
+  kort text. Mats: "Ska vi börja bygga rutan uppifrån med spetsen i
+  botten. Så blir spetsen helt rätt för kortare texter och acceptabel
+  vid längre?" — exakt den lösningen som landade.
+- Två riktiga buggar Mats hittade i testet: (1) `max-height` räknade
+  inte med paddingen (saknade `box-sizing: border-box`) så "4 raders"
+  gräns i praktiken släppte igenom en femte rad; (2) bubblan hade en
+  fast `max-width` oavsett textlängd — en bredare ruta för lång text
+  ger färre rader på köpet, vilket också håller spetsen närmare
+  munnen. Båda fixade och verifierade i samma testsida.
+- Typsnitt: Mats ville bädda in Comic Relief (Google Fonts, SIL OFL)
+  för bubbeltexten. Appen laddar annars ALDRIG typsnitt över nätet
+  (se kommentaren överst i styles.css, "fully offline"-kravet) —
+  laddade därför ner woff2-filerna (latin-subset, täcker å/ä/ö/æ/ø)
+  och lade dem i `public/fonts/` precis som Barlow/Newsreader/IBM
+  Plex Mono redan görs, istället för en `<link>` till
+  fonts.googleapis.com.
+- Länk/åtgärd i en bubbla: tre alternativ diskuterade (länk i texten;
+  fristående knapp under; en särskilt formad "tips-knapp"). Landade
+  på en knapp DOCKAD inuti bubblans egen ruta (Mats: "kör på det"),
+  sen findjusterat på hans begäran: ingen avdelande linje, centrerad
+  knapp, padding under. Samtidigt bestämt: har tipset en knapp
+  kopplad till sig skippas den spetsiga formen helt — en docked-knapp
+  gör bubblan garanterat 3+ rader, så spetsen skulle ändå hamnat långt
+  från munnen; bättre en vanlig rundad ruta då.
+
+**Byggt (inget av detta fanns i någon tidigare testsida, bara i
+Write-koden):**
+- `src/ui/mascot.ts` — `MascotId = "none" | "kaamilla"` (Kaamy/Kaambot
+  tillagda i typen den dagen konst finns), localStorage-baklagrad
+  precis som `theme.ts`. Appbred, inte manus-knuten (Mats: "Kanske
+  ska inställningen vara per app?") — Homes tips behövs innan något
+  manus finns. Egen `subscribeMascot()`-mekanism (en `Set` av
+  lyssnare) eftersom webbläsarens `storage`-event bara triggar i
+  ANDRA flikar, aldrig den flik som själv skrev värdet — utan den
+  uppdaterades Home aldrig när inställningen ändrades i samma flik
+  (hittad och fixad under egen Playwright-verifiering: valde
+  Kaamilla i Settings, stängde dialogen, Home visade fortfarande
+  inget — klassiskt "useState(läsFunktion) läser bara en gång vid
+  mount"-fel).
+- `src/ui/MascotTip.tsx` — avatar + bubbla, `action`-prop avgör
+  spetsig/kort vs. rundad/med-knapp-läge.
+- `public/mascots/kaamilla.png` — Mats egen bild, sparad rakt av.
+- `src/ui/i18n/{en,sv,nb}.ts` — nya nycklar `mascotLabel`/
+  `mascotLede`/`mascotOptions` i `editor`-namespacet (samma
+  `editorSettingsHeading`-sektion som Pappersyta/Revisions).
+- `AppSettingsDialog.tsx` — ny "Maskot"-väljare, tredje fältet i en
+  redan existerande tre-kolumners `.settings-field-row` (ingen
+  CSS-ändring behövdes där, griden var redan förberedd för tre).
+- `Home.tsx` — när en maskot är vald ersätts "New here? Read the
+  quickstart"-kortet i 2×2-griden med `<MascotTip>` ovanför griden
+  (samma lede/action-text som kortet redan hade, `m.home.guideCardLede`/
+  `guideCardAction`, inga nya översättningar för själva tipset); när
+  maskoten är av (standard) är Home pixel-för-pixel oförändrad.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent (mascots/
+och de nya woff2-filerna bekräftat i `dist/`), 1240/1240 tester
+gröna. Headless Playwright mot en riktig körande dev-instans,
+flera pass: Home oförändrad med maskot av (regressionskoll);
+Settings-dialogens nya fält; Home med Kaamilla aktiv i både ljust och
+mörkt tema (bubbla, knapp och Comic Relief-typsnitt läsbart i båda);
+inställningen kvar efter en full sidomladdning (localStorage); och
+att "Open the Guide"-knappen i bubblan faktiskt öppnar Guide-overlayn.
+
+v1.0.229 → v1.0.230.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

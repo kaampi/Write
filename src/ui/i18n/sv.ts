@@ -277,6 +277,13 @@ export const sv: Messages = {
       gray: "Mjuk grå",
       dark: "Mörk"
     },
+    mascotLabel: "Maskot",
+    mascotLede:
+      "En följeslagare som dyker upp med tips då och då, som att peka ut Guiden på en ny startsida. Helt valfritt — av som standard. Gäller hela appen, inte bara det här manuset.",
+    mascotOptions: {
+      none: "Av",
+      kaamilla: "Kaamilla"
+    },
     dropCapLabel: "Anfang",
     dropCapLede:
       "En stor begynnelsebokstav på varje kapitels första stycke, som sträcker sig över valt antal rader. Visas direkt i skrivytan och följer med till Publish-export (HTML, ePub, RTF, ODT; PDF inte än).",

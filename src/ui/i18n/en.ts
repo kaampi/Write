@@ -705,6 +705,13 @@ export const en = {
       gray: "Soft gray",
       dark: "Dark"
     },
+    mascotLabel: "Mascot",
+    mascotLede:
+      "A companion who shows up with tips here and there, like pointing out the Guide on a new Home screen. Entirely optional — off by default. Applies to the whole app, not just this manuscript.",
+    mascotOptions: {
+      none: "Off",
+      kaamilla: "Kaamilla"
+    },
     dropCapLabel: "Drop cap",
     dropCapLede:
       'A large opening letter for each chapter\'s first paragraph, spanning the chosen number of lines — sometimes called an "anfang". Shows live in the editor and carries into Publish exports (HTML, ePub, RTF, ODT; PDF not yet).',

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { groupManuscripts } from "@core/translation";
 import { useBookStore } from "./useBookStore";
 import { useSeriesStore } from "./useSeriesStore";
@@ -7,6 +7,8 @@ import { count, format, translateError, useLocale } from "./i18n";
 import { checkForUpdates, isDesktopApp, type UpdateStatus } from "./desktopBridge";
 import { UpdateCheckDialog } from "./UpdateCheckDialog";
 import { ImportManuscriptCard } from "./ImportManuscriptCard";
+import { MascotTip } from "./MascotTip";
+import { MASCOT_NAMES, readMascot, subscribeMascot } from "./mascot";
 
 export function Home({
   guideOpen,
@@ -25,6 +27,8 @@ export function Home({
   const [newSeriesTitle, setNewSeriesTitle] = useState("");
   const [search, setSearch] = useState("");
   const [importOpen, setImportOpen] = useState(false);
+  const [mascot, setMascotValue] = useState(readMascot);
+  useEffect(() => subscribeMascot(setMascotValue), []);
   const fileRef = useRef<HTMLInputElement>(null);
   const standaloneSummaries = summaries.filter((item) => !item.series_id);
   const filteredSummaries = standaloneSummaries.filter((item) => item.title.toLowerCase().includes(search.trim().toLowerCase()));
@@ -80,6 +84,14 @@ export function Home({
 
       <section className="home-start" aria-label={m.home.startHeading}>
         <h2 className="settings-heading home-heading-lg">{m.home.startHeading}</h2>
+        {mascot !== "none" ? (
+          <MascotTip
+            mascot={mascot}
+            name={MASCOT_NAMES[mascot]}
+            text={m.home.guideCardLede}
+            action={{ label: `${m.home.guideCardAction} →`, onClick: onOpenGuide }}
+          />
+        ) : null}
         <div className="home-start-cards">
           <div className="home-start-card">
             <span className="home-start-card-copy">
@@ -113,13 +125,15 @@ export function Home({
               <span className="home-start-card-action">{m.home.importManuscriptCardAction} →</span>
             </span>
           </button>
-          <button type="button" className="home-start-card" onClick={onOpenGuide}>
-            <span className="home-start-card-copy">
-              <strong>{m.guide.openFromHome}</strong>
-              <span>{m.home.guideCardLede}</span>
-              <span className="home-start-card-action">{m.home.guideCardAction} →</span>
-            </span>
-          </button>
+          {mascot === "none" ? (
+            <button type="button" className="home-start-card" onClick={onOpenGuide}>
+              <span className="home-start-card-copy">
+                <strong>{m.guide.openFromHome}</strong>
+                <span>{m.home.guideCardLede}</span>
+                <span className="home-start-card-action">{m.home.guideCardAction} →</span>
+              </span>
+            </button>
+          ) : null}
         </div>
         <input
           ref={fileRef}

@@ -57,6 +57,28 @@
   src: url("/fonts/barlow-bold-italic.woff2") format("woff2");
 }
 
+/*
+ * Comic Relief (SIL Open Font License), for the mascot's own speech
+ * bubbles (Mats: "Kan vi bädda in Comic Relief som font?") - same
+ * self-hosting rule as the rest of this block, latin subset only
+ * (covers en/sv/nb, including å/ä/ö/æ/ø).
+ */
+@font-face {
+  font-family: "Comic Relief";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/comic-relief-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Comic Relief";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/comic-relief-bold.woff2") format("woff2");
+}
+
 @font-face {
   font-family: "Newsreader";
   font-style: normal;
@@ -986,6 +1008,64 @@ button:disabled {
   .home-start-cards {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/*
+ * The mascot's own speech bubbles (MascotTip.tsx). Two shapes:
+ * .has-point for a short, action-less tip, capped at ~2 lines so the
+ * pointed corner - anchored near the top, where the mascot's mouth is,
+ * growing down - never drifts far from it. .has-action skips the point
+ * entirely: a docked button inside the bubble makes it long enough
+ * (3+ lines) that the point would land nowhere near the mouth anyway, so
+ * it's a plain rounded card instead (Mats, 2026-10-30/31 design pass).
+ */
+.mascot-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+}
+
+.mascot-tip-avatar {
+  width: 5.25rem;
+  height: auto;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.18));
+}
+
+.mascot-bubble {
+  box-sizing: border-box;
+  min-width: 4rem;
+  max-width: 23.75rem;
+  width: fit-content;
+  margin-top: 0.25rem;
+  background: var(--paper);
+  border: 1.5px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 0.75rem 1rem;
+  font-family: "Comic Relief", "Comic Sans MS", var(--font-ui);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.mascot-bubble.has-point {
+  border-bottom-left-radius: 2px;
+  max-height: calc(1.45em * 2 + 1.5rem);
+  overflow: hidden;
+}
+
+.mascot-bubble.has-action {
+  max-height: calc(1.45em * 4 + 1.5rem + 2.8rem);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.mascot-bubble-action-row {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 0.4rem;
 }
 
 .link-button {
