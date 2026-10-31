@@ -11412,6 +11412,47 @@ tester gröna. Alla tre avstånd mätta direkt i DOM:en via Playwright
 
 v1.0.234 → v1.0.235.
 
+**Ändringslogg v1.0.235 → v1.0.236 (2026-10-31): fyrapunktsjämförelse
+mot Mats referensbild.** Mats skickade en skärmdump av sin egen
+referensmockup och jämförde mot det jag levererat: "Hela paketet är
+centrerat. Texten ovanför pill och maskoten under är inskjuten. Texten
+'Start a new...' har mer padding till vänster och höger. Den rosa
+pilen (Create/Send) ligger alldeles för långt från höger kant på
+pill."
+
+**Fyra fix:**
+1. **Centrering** — `.home`s `max-width` sänkt från `100rem` till
+   exakt `90.5rem` (pillens egna `87.5rem` plus `.home`s sidopadding
+   på `1.5rem` vardera). Nu matchar `.home`s innehållsbredd pillens
+   egen bredd exakt, så hela paketet renderas centrerat i stället för
+   vänsterjusterat med oanvänt utrymme till höger.
+2. **Inskjutning** — `.home-brand` (rubrik + ingress) och
+   `.home-start > .mascot-tip` (maskot-bubblan) fick båda
+   `margin-left: 2.5rem`, så de sitter indragna relativt pillen och
+   korten som spänner full bredd — exakt vad Mats observerade i sin
+   referensbild.
+3. **Padding kring "Start a new..."** — `.home-hero-pill`s
+   horisontella padding höjd från `2.25rem` till `3rem`, och gap:et
+   mellan label och input-fält höjt från `1.25rem` till `1.75rem`.
+4. **Pilens position** — grundorsaken var att `.home-hero-input`s
+   `max-width: 55.625rem`-tak lämnar oanvänt flex-grow-utrymme i
+   raden som inte automatiskt omfördelas till den fasta
+   `.home-hero-submit`-knappen bredvid. Fix: `margin-left: auto` på
+   `.home-hero-submit`, vilket pinnar den mot pillens egna högerkant
+   oavsett hur mycket input-fältet faktiskt växte.
+
+**Verifiering:** `.home-hero-pill`s egen `max-width: 87.5rem` togs
+bort (redundant nu när föräldern `.home` redan begränsar till samma
+bredd) — bara `width: 100%` kvar. Playwright-mätning efteråt:
+`.home` har identiskt vänster- och högermarginal mot fönsterkanten
+(80px vardera vid 1608px fönsterbredd) — paketet är centrerat.
+Pillen fortfarande exakt 1400px. Pilens högerkant sitter 49px från
+pillens egen högerkant, samma som pillens högerpadding (3rem ≈ 48px)
+— flush med padding, precis som vänstersidan. `tsc --noEmit` rent,
+`npm run build` rent, 1240/1240 tester gröna.
+
+v1.0.235 → v1.0.236.
+
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
 riktiga byggsteget, efter flera rundors arkitekturdiskussion (se

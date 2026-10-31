@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.236] - 2026-10-31
+
+### Changed
+- Home's hero area now matches the reference design more closely: the page content is centered as a whole (not left-biased), the headline and mascot tip sit indented relative to the full-width pill and cards, the pill's label has more horizontal breathing room, and the arrow button is pinned flush to the pill's own right padding instead of trailing behind unclaimed flex space.
+
 ## [1.0.235] - 2026-10-31
 
 ### Fixed

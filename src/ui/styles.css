@@ -820,15 +820,24 @@ button:disabled {
    margins (margin: 0 auto) skips the default stretch behavior entirely
    and shrink-wraps to its content instead, no matter how high max-width
    is set. width: 100% is what actually lets it reach max-width. */
+/* max-width here is the pill's own 1400px plus this element's side
+   padding (1.5rem each), so the pill can reach exactly 1400px edge to
+   edge while .home itself stays centered as a whole - Mats, 2026-10-31:
+   "Hela paketet är centrerat." Content no longer has spare width to
+   drift left-aligned within a wider box. */
 .home {
   width: 100%;
-  max-width: 100rem;
+  max-width: 90.5rem;
   margin: 0 auto;
   padding: 4.6875rem 1.5rem 4rem;
 }
 
+/* Inset relative to the pill/cards below, which span the full width
+   (Mats: the heading and the mascot are "inskjuten" - indented - while
+   Import backup/Import manuscript share the pill's own edge). */
 .home-brand {
   display: block;
+  margin-left: 2.5rem;
 }
 
 .home-connect {
@@ -924,11 +933,14 @@ button:disabled {
 }
 
 /* Exact gap Mats measured (2026-10-31): 35px from the pill's bottom edge
-   to the mascot's own tip below it. Scoped to Home rather than on
-   .mascot-tip itself, since that component is meant to be reused
-   elsewhere (Guide, empty states, ...) with its own spacing needs. */
+   to the mascot's own tip below it, plus the same inset as .home-brand
+   so the heading and mascot both sit indented relative to the full-width
+   pill/cards. Scoped to Home rather than on .mascot-tip itself, since
+   that component is meant to be reused elsewhere (Guide, empty states,
+   ...) with its own spacing needs. */
 .home-start > .mascot-tip {
   margin-top: 2.1875rem;
+  margin-left: 2.5rem;
 }
 
 /*
@@ -942,13 +954,12 @@ button:disabled {
  */
 .home-hero-pill {
   width: 100%;
-  max-width: 87.5rem;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.75rem;
   height: 9.375rem;
-  padding: 0 2.25rem;
+  padding: 0 3rem;
   background: var(--panel);
   border: 1px solid var(--border-soft);
   border-radius: 999px;
@@ -980,6 +991,7 @@ button:disabled {
 
 .home-hero-submit {
   flex: 0 0 auto;
+  margin-left: auto;
   width: 4.375rem;
   height: 3.4375rem;
   display: flex;
