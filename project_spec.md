@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.232
+Status: living document, v1.0.233
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -11294,6 +11294,48 @@ varning löst med samma `!`-konvention som redan används i
 mascot-bilder bekräftade i `dist/mascots/`), 1240/1240 tester gröna.
 
 v1.0.231 → v1.0.232.
+
+
+**Ändringslogg v1.0.232 → v1.0.233 (2026-10-31): pill-formad
+start-knapp på Home, på riktigt.** Startsidearbetet från tidigare i
+sessionen (en Design-canvas, "kaampi Write — ny startsida") visade sig
+inte vara källan till en skärmdump Mats skickade med en stor
+rosa-pil-pill-ruta — efter lite fram och tillbaka (jag läste canvasen
+på nytt, trodde Mats editerat den live i webbläsaren, men den visade
+fortfarande min egen senaste version) klargjorde Mats: skärmdumpen var
+av den riktiga körande appen, med en pill han byggt lokalt själv,
+utanför den här sessionen. Bad om exakta mått: "Pillrutan är 1400x
+150px med helt rundade hörn. Texten 'Start new...' är Barlow 18 px."
+samt en pil-ikon exporterad som SVG från Affinity Designer (tre
+överlappande pilar i kaampis rosa, 33/66/100% opacitet).
+
+**Byggt, rakt i `Home.tsx`/`styles.css` (ingen ny mockup-runda
+den här gången):**
+- `public/icons/pill-arrow.svg` — Mats egen Affinity-export, sparad
+  oförändrad.
+- Ny `.home-hero-pill`: fast höjd 9.375rem (150px, pillformen ska
+  inte sträckas av bredden), flytande bredd upp till 87.5rem
+  (1400px), `border-radius: 999px`. Innehåller `.home-hero-label`
+  (Barlow 18px/600) och en `.home-hero-row` med `.home-hero-input`
+  (rundad textinmatning) + `.home-hero-submit` (rund rosa
+  pil-knapp, Mats egen SVG).
+- `Home.tsx`: den gamla lilla "New manuscript"-kortet (en av fyra
+  likvärdiga kort i `.home-start-cards`) ersatt av den nya pillen,
+  flyttad överst i `.home-start`-sektionen, före maskot-tipset. De
+  återstående korten (Import backup, Import manuscript, och
+  Guide-kortet när ingen maskot är vald) ligger kvar i griden —
+  den klarar sig fint med färre kort (2 eller 3) utan CSS-ändring.
+  Samma `title`/`setTitle`/`submitNew`-state återanvänt rakt av,
+  ingen ny logik.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent (ikonen
+bekräftad i `dist/icons/`), 1240/1240 tester gröna. Headless
+Playwright mot en riktig körande dev-instans, skickad till Mats som
+skärmdump för avstämning — nära mockupen, men pilikonen sitter mindre
+centrerad/större i sin runda knapp än i Mats egen bild; flaggat som
+öppen finjustering, inte löst än.
+
+v1.0.232 → v1.0.233.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

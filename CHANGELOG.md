@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.233] - 2026-10-31
+
+### Changed
+- Home's "Start a new manuscript" card is now a large pill-shaped hero input, replacing the smaller card it used to share equal billing with Import backup and Import manuscript.
+
 ## [1.0.232] - 2026-10-31
 
 ### Added

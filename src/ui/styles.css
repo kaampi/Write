@@ -917,6 +917,75 @@ button:disabled {
   margin: 1.4rem 0 2.2rem;
 }
 
+/*
+ * The big pill-shaped "Start a new manuscript" CTA (Mats's own Affinity
+ * mockup, 2026-10-31: 1400x150px, fully rounded corners, Barlow 18px
+ * label). Fixed height (the pill shape itself is what should stay
+ * constant, not stretch oddly at different widths); width is fluid up to
+ * the mockup's own 1400px so it still works at narrower windows.
+ */
+.home-hero-pill {
+  width: 100%;
+  max-width: 87.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 9.375rem;
+  padding: 0 2.25rem;
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+}
+
+.home-hero-label {
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.home-hero-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.home-hero-input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 1rem;
+  padding: 0 1.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--paper);
+  color: var(--text);
+}
+
+.home-hero-submit {
+  flex: 0 0 auto;
+  width: 3.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: #f7cfe2;
+  cursor: pointer;
+}
+
+.home-hero-submit img {
+  width: 1.5rem;
+  height: auto;
+  display: block;
+}
+
+.home-hero-submit:hover {
+  background: #f3b9d6;
+}
+
 .home-start-cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

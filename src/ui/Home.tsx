@@ -83,7 +83,22 @@ export function Home({
       </header>
 
       <section className="home-start" aria-label={m.home.startHeading}>
-        <h2 className="settings-heading home-heading-lg">{m.home.startHeading}</h2>
+        <form className="home-hero-pill" action="#" onSubmit={submitNew}>
+          <span className="home-hero-label">{m.home.newManuscript}</span>
+          <span className="home-hero-row">
+            <input
+              className="home-hero-input"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder={m.home.titlePlaceholder}
+              autoComplete="off"
+              aria-label={m.home.newManuscript}
+            />
+            <button type="submit" className="home-hero-submit" aria-label={m.home.open}>
+              <img src="/icons/pill-arrow.svg" alt="" aria-hidden="true" />
+            </button>
+          </span>
+        </form>
         {mascot !== "none" ? (
           <MascotTip
             key={mascot}
@@ -94,24 +109,6 @@ export function Home({
           />
         ) : null}
         <div className="home-start-cards">
-          <div className="home-start-card">
-            <span className="home-start-card-copy">
-              <strong>{m.home.newManuscript}</strong>
-              <span>{m.home.newManuscriptCardLede}</span>
-            </span>
-            <form className="home-start-card-form" action="#" onSubmit={submitNew}>
-              <input
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder={m.home.titlePlaceholder}
-                autoComplete="off"
-                aria-label={m.home.newManuscript}
-              />
-              <button type="submit" className="home-start-card-action">
-                {m.home.open} →
-              </button>
-            </form>
-          </div>
           <button type="button" className="home-start-card" onClick={() => fileRef.current?.click()}>
             <span className="home-start-card-copy">
               <strong>{m.home.importBackup}</strong>
