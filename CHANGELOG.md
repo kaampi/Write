@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.237] - 2026-10-31
+
+### Fixed
+- The title input on Home's hero pill no longer leaves a visible gap before the arrow button — it now stretches to fill the row up to the button, instead of stopping short at a fixed max-width.
+
 ## [1.0.236] - 2026-10-31
 
 ### Changed

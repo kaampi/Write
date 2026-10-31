@@ -11453,6 +11453,25 @@ pillens egen högerkant, samma som pillens högerpadding (3rem ≈ 48px)
 
 v1.0.235 → v1.0.236.
 
+**Ändringslogg v1.0.236 → v1.0.237 (2026-10-31): glapp mellan
+input-fält och pil.** Mats, efter att ha sett skärmdumpen i chatten:
+"Inputfältet måste sträckas ut så att det ligger snyggt nära pilen.
+Det är ett glapp där nu." Orsak: `.home-hero-input` hade fortfarande
+`max-width: 55.625rem` kvar från tidigare, vilket nu (efter att pilen
+pinnats till höger med `margin-left: auto` i v1.0.236) lämnade ett
+synligt tomrum mellan input-fältets högerkant och pilen. Fix: tog bort
+`max-width` helt från `.home-hero-input` — `flex: 1 1 auto` fyller nu
+hela det tillgängliga utrymmet i raden fram till pilen, med bara det
+vanliga `gap`-avståndet (1.75rem) kvar.
+
+**Verifiering:** Playwright-mätning: input-fältet 992px brett (växte
+från tidigare tak på 890px), avstånd input→pil exakt 28px (=1.75rem,
+radens eget `gap`), pilens högerkant fortfarande 49px från pillens
+egen högerkant (oförändrat). `tsc --noEmit` rent, `npm run build`
+rent, 1240/1240 tester gröna.
+
+v1.0.236 → v1.0.237.
+
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
 riktiga byggsteget, efter flera rundors arkitekturdiskussion (se

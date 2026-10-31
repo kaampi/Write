@@ -977,7 +977,6 @@ button:disabled {
 .home-hero-input {
   flex: 1 1 auto;
   min-width: 0;
-  max-width: 55.625rem;
   height: 4.3125rem;
   box-sizing: border-box;
   font: inherit;
