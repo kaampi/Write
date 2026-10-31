@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.234] - 2026-10-31
+
+### Changed
+- The pill-shaped hero on Home matches the mockup more closely: the duplicate logo above the headline is removed, the label and the title field sit on one row instead of two, and the arrow button lost its circular background in favor of a plain, larger icon, all at the exact sizes given.
+
 ## [1.0.233] - 2026-10-31
 
 ### Changed

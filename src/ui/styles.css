@@ -919,19 +919,20 @@ button:disabled {
 
 /*
  * The big pill-shaped "Start a new manuscript" CTA (Mats's own Affinity
- * mockup, 2026-10-31: 1400x150px, fully rounded corners, Barlow 18px
- * label). Fixed height (the pill shape itself is what should stay
- * constant, not stretch oddly at different widths); width is fluid up to
- * the mockup's own 1400px so it still works at narrower windows.
+ * mockup, exact measurements he gave 2026-10-31: pill 1400x150px, fully
+ * rounded; label + input on ONE row, not stacked; input 890x69px; arrow
+ * icon 70x55px with no button background of its own, just the icon.
+ * Fixed height on the pill and input (the shapes themselves shouldn't
+ * stretch); the input's width is capped at 890px but can shrink below
+ * that on a narrower window rather than overflow the pill.
  */
 .home-hero-pill {
   width: 100%;
   max-width: 87.5rem;
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 1.25rem;
   height: 9.375rem;
   padding: 0 2.25rem;
   background: var(--panel);
@@ -940,21 +941,20 @@ button:disabled {
 }
 
 .home-hero-label {
+  flex: 0 0 auto;
   font-family: var(--font-ui);
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--text);
-}
-
-.home-hero-row {
-  display: flex;
-  align-items: stretch;
-  gap: 0.75rem;
+  white-space: nowrap;
 }
 
 .home-hero-input {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
+  max-width: 55.625rem;
+  height: 4.3125rem;
+  box-sizing: border-box;
   font: inherit;
   font-size: 1rem;
   padding: 0 1.4rem;
@@ -966,24 +966,25 @@ button:disabled {
 
 .home-hero-submit {
   flex: 0 0 auto;
-  width: 3.75rem;
+  width: 4.375rem;
+  height: 3.4375rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   border: 0;
-  border-radius: 999px;
-  background: #f7cfe2;
+  background: none;
   cursor: pointer;
 }
 
 .home-hero-submit img {
-  width: 1.5rem;
-  height: auto;
+  width: 100%;
+  height: 100%;
   display: block;
 }
 
-.home-hero-submit:hover {
-  background: #f3b9d6;
+.home-hero-submit:hover img {
+  opacity: 0.8;
 }
 
 .home-start-cards {
@@ -1418,28 +1419,6 @@ button:disabled {
 .find-more {
   margin: 0;
   padding: 0 0.65rem 0.45rem;
-}
-
-.home-logo {
-  height: 5.2rem;
-  width: auto;
-  margin: 0 0 0.75rem;
-}
-
-.home-logo-light {
-  display: none;
-}
-
-.home-logo-dark {
-  display: block;
-}
-
-[data-theme="light"] .home-logo-light {
-  display: block;
-}
-
-[data-theme="light"] .home-logo-dark {
-  display: none;
 }
 
 .home h1 {

@@ -63,8 +63,6 @@ export function Home({
   return (
     <div className="home">
       <header className="home-brand">
-        <img className="home-logo home-logo-light" src="/logo.svg" alt="kaampi Write" />
-        <img className="home-logo home-logo-dark" src="/logo-dark.svg" alt="kaampi Write" />
         <div className="home-heading-row">
           <h1>
             {m.home.headline}
@@ -85,19 +83,17 @@ export function Home({
       <section className="home-start" aria-label={m.home.startHeading}>
         <form className="home-hero-pill" action="#" onSubmit={submitNew}>
           <span className="home-hero-label">{m.home.newManuscript}</span>
-          <span className="home-hero-row">
-            <input
-              className="home-hero-input"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder={m.home.titlePlaceholder}
-              autoComplete="off"
-              aria-label={m.home.newManuscript}
-            />
-            <button type="submit" className="home-hero-submit" aria-label={m.home.open}>
-              <img src="/icons/pill-arrow.svg" alt="" aria-hidden="true" />
-            </button>
-          </span>
+          <input
+            className="home-hero-input"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder={m.home.titlePlaceholder}
+            autoComplete="off"
+            aria-label={m.home.newManuscript}
+          />
+          <button type="submit" className="home-hero-submit" aria-label={m.home.open}>
+            <img src="/icons/pill-arrow.svg" alt="" aria-hidden="true" />
+          </button>
         </form>
         {mascot !== "none" ? (
           <MascotTip

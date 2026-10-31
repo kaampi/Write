@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.233
+Status: living document, v1.0.234
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -11336,6 +11336,39 @@ centrerad/större i sin runda knapp än i Mats egen bild; flaggat som
 öppen finjustering, inte löst än.
 
 v1.0.232 → v1.0.233.
+
+
+**Ändringslogg v1.0.233 → v1.0.234 (2026-10-31): pillen rättad mot
+mockupen.** Mats, direkt efter att v1.0.233 skickats: "Om du kollar
+tycker du verkligen att det är likt?" — befogat, tre skillnader mot
+hans Affinity-mockup:
+
+1. Den gamla, separata "kaampi Write"-loggan ovanför rubriken fanns
+   kvar i min version men inte i hans skärmdump (toppmenyn har redan
+   en egen logga) — `.home-logo`/`.home-logo-light`/`.home-logo-dark`
+   och de två `<img>`-taggarna i `Home.tsx` borttagna helt (ingen
+   annan kod refererade klasserna, bekräftat med grep innan
+   borttagning).
+2. "Input fältet ska ligga bakom texten Start new..." — jag hade
+   byggt två rader (etikett ovanför, fält+knapp under); Mats menade en
+   enda rad, fält direkt efter etiketten. `.home-hero-row`-wrappern
+   togs bort, `.home-hero-pill` är nu själv en rak flex-rad
+   (`align-items: center`) med etikett, fält och knapp som tre syskon.
+3. Pilen: 70×55px (`.home-hero-submit`) utan den rosa cirkelbakgrunden
+   — knappen är nu osynlig (`background: none`), bara ikonen syns, i
+   sin fulla angivna storlek istället för en nedskalad 24px-ikon i en
+   60px rosa knapp.
+
+Input-fältets exakta mått (890×69px) behölls som ett `max-width`/fast
+`height` snarare än en helt fast bredd, så det kan krympa på smalare
+fönster istället för att svämma över pillen — bredden är annars
+precis Mats mått.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1240/1240
+tester gröna. Headless Playwright mot samma körande dev-instans,
+skickad till Mats som ny skärmdump för avstämning.
+
+v1.0.233 → v1.0.234.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första
