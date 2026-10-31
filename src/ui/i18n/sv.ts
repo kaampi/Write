@@ -282,7 +282,8 @@ export const sv: Messages = {
       "En följeslagare som dyker upp med tips då och då, som att peka ut Guiden på en ny startsida. Helt valfritt — av som standard. Gäller hela appen, inte bara det här manuset.",
     mascotOptions: {
       none: "Av",
-      kaamilla: "Kaamilla"
+      kaamilla: "Kaamilla",
+      kaamy: "Kaamy"
     },
     dropCapLabel: "Anfang",
     dropCapLede:

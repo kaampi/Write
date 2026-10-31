@@ -710,7 +710,8 @@ export const en = {
       "A companion who shows up with tips here and there, like pointing out the Guide on a new Home screen. Entirely optional — off by default. Applies to the whole app, not just this manuscript.",
     mascotOptions: {
       none: "Off",
-      kaamilla: "Kaamilla"
+      kaamilla: "Kaamilla",
+      kaamy: "Kaamy"
     },
     dropCapLabel: "Drop cap",
     dropCapLede:

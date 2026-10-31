@@ -3,28 +3,52 @@
  * per-manuscript (Mats: "Kanske ska inställningen vara per app?") - Home's
  * own tips need it before any manuscript exists.
  *
- * Only "kaamilla" has real art so far; Mats is sending Kaamy/Kaambot
- * artwork separately. Add them here (and to MASCOT_IDS/MASCOT_IMAGES)
- * once those files land, rather than offering a picker option with
- * nothing behind it.
+ * Kaamilla and Kaamy have real art now; Kaambot doesn't yet. Add it here
+ * (and to MASCOT_IDS/MASCOT_POSES) once that art lands, rather than
+ * offering a picker option with nothing behind it.
  */
-export type MascotId = "none" | "kaamilla";
+export type MascotId = "none" | "kaamilla" | "kaamy";
 
-export const MASCOT_IDS: MascotId[] = ["none", "kaamilla"];
+export const MASCOT_IDS: MascotId[] = ["none", "kaamilla", "kaamy"];
 
-export const MASCOT_IMAGES: Record<Exclude<MascotId, "none">, string> = {
-  kaamilla: "/mascots/kaamilla.png"
+/**
+ * Several poses per character so the same mascot doesn't always show the
+ * same picture (Mats, 2026-10-31: "Vi kanske kan slumpa ut en av
+ * bilderna så att det inte alltid är samma bild?"). First entry is each
+ * character's original/default pose.
+ */
+export const MASCOT_POSES: Record<Exclude<MascotId, "none">, string[]> = {
+  kaamilla: [
+    "/mascots/kaamilla.png",
+    "/mascots/kaamilla-thinking.png",
+    "/mascots/kaamilla-idea.png",
+    "/mascots/kaamilla-shrug.png",
+    "/mascots/kaamilla-laugh.png"
+  ],
+  kaamy: [
+    "/mascots/kaamy.png",
+    "/mascots/kaamy-shrug.png",
+    "/mascots/kaamy-thumbsup.png",
+    "/mascots/kaamy-coffee.png",
+    "/mascots/kaamy-thinking.png"
+  ]
 };
+
+export function pickMascotPose(mascot: Exclude<MascotId, "none">): string {
+  const poses = MASCOT_POSES[mascot];
+  return poses[Math.floor(Math.random() * poses.length)]!;
+}
 
 /** Proper names, same in every language - like the app's own name, not translated. */
 export const MASCOT_NAMES: Record<Exclude<MascotId, "none">, string> = {
-  kaamilla: "Kaamilla"
+  kaamilla: "Kaamilla",
+  kaamy: "Kaamy"
 };
 
 const MASCOT_KEY = "storybook-ai.mascot";
 
 export function parseMascot(value: string | null | undefined): MascotId {
-  return value === "kaamilla" ? "kaamilla" : "none";
+  return value === "kaamilla" || value === "kaamy" ? value : "none";
 }
 
 export function readMascot(): MascotId {

@@ -282,7 +282,8 @@ export const nb: Messages = {
       "En følgesvenn som dukker opp med tips innimellom, som å peke ut Guiden på en ny startskjerm. Helt valgfritt — av som standard. Gjelder hele appen, ikke bare dette manuset.",
     mascotOptions: {
       none: "Av",
-      kaamilla: "Kaamilla"
+      kaamilla: "Kaamilla",
+      kaamy: "Kaamy"
     },
     dropCapLabel: "Anfang",
     dropCapLede:

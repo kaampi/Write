@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.231
+Status: living document, v1.0.232
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -11248,6 +11248,52 @@ Kaamilla syns tydligt större bredvid "Open the Guide"-tipsets högre
 bubbla jämfört med tidigare, fortfarande skarp och oförvrängd.
 
 v1.0.230 → v1.0.231.
+
+
+**Ändringslogg v1.0.231 → v1.0.232 (2026-10-31): Kaamy + slumpade
+poser.** Mats skickade Kaamys fem bilder (bas + axlar-upp, tummen upp,
+kaffekopp, fundersam) — två sändningar innan filerna faktiskt
+synkades till disk (en känd brist i den här sessionen: bilder i
+meddelanden mitt i en pågående tur saknar ibland den filsökväg jag
+behöver för att läsa dem; löst genom att be Mats skicka om, vilket
+fungerade andra gången). Fyra Kaambot-bilder och en extra
+Kaamilla-pose (tummen upp, blinkande) skickades också men drabbades av
+samma synkproblem och är fortfarande inte mottagna när den här
+versionen skrevs.
+
+**Byggt:**
+- `mascot.ts`: `MascotId` utökad med `"kaamy"`; ny `MASCOT_POSES`
+  (ersätter den gamla `MASCOT_IMAGES`) — en array av poser per
+  karaktär istället för en enda bild. Ny `pickMascotPose()` som väljer
+  slumpmässigt ur arrayen.
+- `MascotTip.tsx`: slår upp posen EN gång vid mount
+  (`useState(() => pickMascotPose(mascot))`), inte vid varje
+  omrendering — annars skulle bilden hoppa runt varje gång React
+  renderar om komponenten av andra skäl.
+- `Home.tsx`: `<MascotTip key={mascot} .../>` — nyckeln tvingar en
+  ny mount (och därmed en ny slumpad pose) när användaren byter
+  karaktär i Settings; annars hade komponenten behållit den gamla
+  karaktärens pose-sträng efter ett byte.
+- i18n: `mascotOptions.kaamy: "Kaamy"` i alla tre språk.
+
+**Öppen fråga från Mats, inte avgjord än:** "Ska dessa kunna dyka upp
+dynamiskt eller vet vi vart och när de dyker upp? Om det är det
+senare så kan vi faktiskt bestämma vilken bild, finjustera
+textbubblan etc." Svarade: idag är ALLA tips författade i kod på
+fasta platser (just nu bara en: Home), inget genereras dynamiskt —
+så vi kan tekniskt sett handplocka pose per tips. Rekommenderade
+ändå att låta slumpmässigt/automatiskt vara standard även framöver
+(skalar utan handpåläggning för varje ny tips-plats; stämmer också
+bättre överens med att slumpa poser alls), men med en valfri
+pose-override per tips för enstaka ställen där det är värt det.
+Inte byggd — väntar på Mats beslut.
+
+**Verifiering:** `tsc --noEmit` rent (en `noUncheckedIndexedAccess`-
+varning löst med samma `!`-konvention som redan används i
+`proseDom.ts`/`askManuscript.ts`), `npm run build` rent (alla tio
+mascot-bilder bekräftade i `dist/mascots/`), 1240/1240 tester gröna.
+
+v1.0.231 → v1.0.232.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

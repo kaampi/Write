@@ -86,6 +86,7 @@ export function Home({
         <h2 className="settings-heading home-heading-lg">{m.home.startHeading}</h2>
         {mascot !== "none" ? (
           <MascotTip
+            key={mascot}
             mascot={mascot}
             name={MASCOT_NAMES[mascot]}
             text={m.home.guideCardLede}

@@ -9,6 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.232] - 2026-10-31
+
+### Added
+- Kaamy joins Kaamilla as a selectable mascot in Settings.
+- Each mascot now has several poses and shows a random one each time its tip appears, instead of always the same picture.
+
 ## [1.0.231] - 2026-10-31
 
 ### Changed
