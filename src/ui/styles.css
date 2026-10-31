@@ -815,10 +815,16 @@ button:disabled {
 
 /* Home */
 
+/* width: 100% matters here, not just decoration - .home is a flex item in
+   .app-shell's column layout, and a flex item with auto cross-axis
+   margins (margin: 0 auto) skips the default stretch behavior entirely
+   and shrink-wraps to its content instead, no matter how high max-width
+   is set. width: 100% is what actually lets it reach max-width. */
 .home {
-  max-width: 80rem;
+  width: 100%;
+  max-width: 100rem;
   margin: 0 auto;
-  padding: 12vh 1.5rem 4rem;
+  padding: 4.6875rem 1.5rem 4rem;
 }
 
 .home-brand {
@@ -914,7 +920,15 @@ button:disabled {
 }
 
 .home-start {
-  margin: 1.4rem 0 2.2rem;
+  margin: 3.75rem 0 2.2rem;
+}
+
+/* Exact gap Mats measured (2026-10-31): 35px from the pill's bottom edge
+   to the mascot's own tip below it. Scoped to Home rather than on
+   .mascot-tip itself, since that component is meant to be reused
+   elsewhere (Guide, empty states, ...) with its own spacing needs. */
+.home-start > .mascot-tip {
+  margin-top: 2.1875rem;
 }
 
 /*
@@ -1434,7 +1448,7 @@ button:disabled {
   color: var(--text-dim);
   font-size: 1.05rem;
   line-height: 1.5;
-  margin: 0 0 2.5rem;
+  margin: 0;
   max-width: 36rem;
   grid-column: 1 / -1;
 }

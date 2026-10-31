@@ -1,6 +1,6 @@
 # Project Spec — Open Source Narrative Engine (RPG + Bokverktyg)
 
-Status: living document, v1.0.234
+Status: living document, v1.0.235
 Relaterade dokument: `narrative-core-addendum.md` (v0.2-beslut),
 `roadmap-ideas.md` (idéer och prioritering för Scene, Context
 Inspector, Ask Manuscript m.fl. — v1.0, 2026-09-24)
@@ -11369,6 +11369,48 @@ tester gröna. Headless Playwright mot samma körande dev-instans,
 skickad till Mats som ny skärmdump för avstämning.
 
 v1.0.233 → v1.0.234.
+
+
+**Ändringslogg v1.0.234 → v1.0.235 (2026-10-31): varför pillen aldrig
+blev 1400px, plus exakta avstånd.** Mats: "Är verkligen pill 1400 PX
+bred?" — befogat, mätte med Playwright istället för att gissa.
+`.home-hero-pill`s egen `max-width:1400px` var korrekt, men
+`.home` (föräldern) rendrade bara 933px bred trots `max-width:1280px`
+(senare testat upp till 1600px, fortfarande 933px) — `max-width` var
+alltså aldrig den bindande begränsningen.
+
+**Grundorsak, en klassisk flexbox-fälla:** `.home` sitter som
+flex-item i `.app-shell` (`display:flex; flex-direction:column`).
+`.home` hade `margin: 0 auto` men inget `width: 100%`. Auto-marginaler
+på en flex-items tväraxel (horisontellt i en kolumn-flex) kopplar bort
+standard-`stretch`-beteendet helt — elementet krymper istället till
+sitt EGET INNEHÅLLS bredd ("shrink-to-fit", ungefär som
+`width: fit-content`) och centreras sen med auto-marginalerna runt
+den krympta boxen. `max-width` blir då en övre gräns som aldrig nås,
+eftersom innehållet redan är smalare. Fix: lade till `width: 100%`
+på `.home` — enda raden som faktiskt behövdes. Bekräftat med
+Playwright-mätning efteråt: pillen 1400px exakt, `.home` 1600px
+(dess nya `max-width`, höjt från 1280px samtidigt). Testat vid 1200px
+fönsterbredd också — ingen horisontell overflow, pillen krymper
+proportionerligt.
+
+**Samma tur, tre exakta avstånd Mats mätte i sin mockup:** 75px
+topbar→rubrik, 60px ingress→pill, 35px pill→maskot-bubbla.
+`.home`s `padding-top` bytt från `12vh` (vy-höjdsrelativt, matchade
+aldrig en fast siffra) till fast `4.6875rem` (75px). `.lede`s
+`margin-bottom` nollställd (var `2.5rem`) och `.home-start`s
+`margin-top` satt till exakt `3.75rem` (60px) istället för att låta
+marginalerna kollapsa oförutsägbart. Ny scopead regel
+`.home-start > .mascot-tip { margin-top: 2.1875rem }` (35px) —
+medvetet INTE lagd direkt på `.mascot-tip` själv, eftersom den
+komponenten är tänkt att återanvändas på andra ställen (Guide, tomma
+vyer) med sina egna avståndsbehov.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1240/1240
+tester gröna. Alla tre avstånd mätta direkt i DOM:en via Playwright
+(`getBoundingClientRect`) och bekräftade exakta: 75/60/35px.
+
+v1.0.234 → v1.0.235.
 
 
 **Ändringslogg v1.0.34 → v1.0.35 (2026-10-02):** StoryCore — första

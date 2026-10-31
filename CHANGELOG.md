@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.235] - 2026-10-31
+
+### Fixed
+- Home's own container (and the pill hero inside it) could never actually reach its specified max-width on a wide screen — a flexbox quirk (auto side margins skip the default stretch behavior) left it shrink-wrapped to its content instead. The pill now genuinely reaches 1400px on a wide enough window.
+
+### Changed
+- Exact vertical spacing on Home's hero area, matched to measurements: 75px from the top bar to the headline, 60px from the lede to the pill, 35px from the pill to the mascot's tip.
+
 ## [1.0.234] - 2026-10-31
 
 ### Changed
