@@ -11792,6 +11792,44 @@ nya).
 
 v1.0.244 → v1.0.245.
 
+v1.0.245 → v1.0.246.
+
+**Ändringslogg v1.0.246 → v1.0.247 (2026-10-31): "Tas unconfirmed fact
+med mellan böcker i en serie?"** Mats frågade. Svaret var nej på ett sätt
+som inte var medvetet: "Send to series" (`promoteBookFact`, både den
+enstaka knappen och "Create series from this book"-bulkflödet) byggde
+sitt `FactDraft` manuellt med bara `entity_ref`/`entity_label`/
+`predicate`/`value` - `confidence`/`claimed_by_ref`/`claimed_by_label`
+följde aldrig med, eftersom serie-funktionen (v1.0.242) kom innan
+attributions-fälten (v1.0.246) existerade. En osäker fakta blev alltså
+alltid `confirmed` by default så fort den skickades till serien.
+
+Diskuterade två vägar: föra fälten vidare rakt av, eller varna/blockera
+eftersom "Send to series" är författarens egen medvetna handling att
+fastslå canon - att göra det med en obekräftad claim bör vara ett
+val, inte en bieffekt. Mats: "2 blir mest rätt."
+
+**Enstaka "Send to series"** (`BiblePanel.tsx`, `onPromote`-hanteraren
+på entitetskortet): om fakta har `confidence === "unconfirmed"`, ett
+`window.confirm` med fakta-värdet och vem som hävdade det (om känt)
+innan `promoteBookFact` anropas - avbryter author inte, görs ingenting.
+
+**Bulk "Create series from this book"** (`createSeriesFromBook`): ingen
+per-fakta-dialog vid ett engångsklick som kan beröra dussintals fakta -
+obekräftade fakta hoppas istället över automatiskt (stannar i boken,
+blir inte serie-canon), och ett `window.alert` efteråt rapporterar hur
+många som hoppades över, med hänvisning till att skicka dem enskilt om
+de ändå ska gälla hela serien.
+
+Tre nya i18n-nycklar (`promoteUnconfirmedConfirm`,
+`promoteUnconfirmedConfirmClaimedBy`, `seriesSkippedUnconfirmed`) i
+alla tre språk, samma `--flag`-vokabulär som badgen redan använder.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1251/1251
+tester gröna (ingen regression - ingen ny unit-testfil, logiken sitter
+i BiblePanel.tsx som redan saknar unit-tester och testas via
+Playwright).
+
 **Ändringslogg v1.0.245 → v1.0.246 (2026-10-31): "A character's lie
 shouldn't become a fact in your AI story memory".** Mats delade en
 fråga han sett (och, efter att länken visade sig vara en App Store-

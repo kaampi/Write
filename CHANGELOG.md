@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.247] - 2026-10-31
+
+### Changed
+- "Send to series" now warns before promoting an unconfirmed claim (a character's lie, rumor, or guess) to series-wide canon — confirming it anyway still works, but it's a deliberate choice now instead of a silent default. "Create series from this book" skips unconfirmed facts automatically and reports how many it left behind, rather than quietly promoting them to canon for every book in the series.
+
 ## [1.0.246] - 2026-10-31
 
 ### Added

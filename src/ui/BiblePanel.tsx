@@ -189,13 +189,19 @@ export function BiblePanel({
     try {
       const created = await createSeries(book.title);
       await setBookSeries(book.id, created.id);
+      let skippedUnconfirmed = 0;
       for (const fact of visibleLockedFacts(book.facts, book.hidden_entities)) {
+        if (fact.confidence === "unconfirmed") {
+          skippedUnconfirmed += 1;
+          continue;
+        }
         const chapterTitle = fact.chapter_id ? book.chapters.find((chapter) => chapter.id === fact.chapter_id)?.title : undefined;
         await promoteBookFact(
           { entity_ref: fact.entity_ref, entity_label: fact.entity_label, predicate: fact.predicate, value: fact.value },
           { book_id: book.id, book_title: book.title, ...(chapterTitle ? { chapter_title: chapterTitle } : {}) }
         );
       }
+      if (skippedUnconfirmed > 0) window.alert(format(m.bible.seriesSkippedUnconfirmed, { count: String(skippedUnconfirmed) }));
     } finally {
       setCreatingSeries(false);
     }
@@ -599,6 +605,13 @@ export function BiblePanel({
                 onPromote: (id: string) => {
                   const fact = openEntity.facts.find((row) => row.id === id);
                   if (!fact) return;
+                  if (fact.confidence === "unconfirmed") {
+                    const claimant = fact.claimed_by_label ?? fact.claimed_by_ref;
+                    const message = claimant
+                      ? format(m.bible.promoteUnconfirmedConfirmClaimedBy, { value: fact.value, name: claimant })
+                      : format(m.bible.promoteUnconfirmedConfirm, { value: fact.value });
+                    if (!window.confirm(message)) return;
+                  }
                   const chapterTitle = fact.chapter_id ? book.chapters.find((chapter) => chapter.id === fact.chapter_id)?.title : undefined;
                   void promoteBookFact(
                     { entity_ref: fact.entity_ref, entity_label: fact.entity_label, predicate: fact.predicate, value: fact.value },
