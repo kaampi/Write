@@ -3292,6 +3292,56 @@ differentiering. Inget nytt byggbeslut från den här genomgången.
 
 ---
 
+## Insikter om att skriva med AI utan att låta den skriva (Reddit r/getrecall, delad 2026-11-01)
+
+Mats delade ett Reddit-inlägg (r/getrecall) med rubriken "Writing a
+book with AI without letting it write a word: 5 lessons from an
+author who did it" - om en författare (Fernand) som skrev en bok om
+AI utan att låta AI formulera en enda mening av den. Värt att notera:
+inlägget är i grunden ett kundberättelse/marknadsföringsstycke för
+Recall (ett moln-baserat "spara och sammanfatta allt"-verktyg -
+webbläsartillägg + chatt över hela biblioteket, plus MCP-koppling för
+Claude/ChatGPT), inte en oberoende artikel - men själva arbetssättet
+är intressant oavsett vilket verktyg som används.
+
+Fem lärdomar, destillerade från Mats' inklistrade text:
+
+1. **Teserna kom före källorna, inte efter.** Han skrev varje tes
+   (argument, exempel, motargument) i en tom anteckning innan han
+   rörde AI alls. Först därefter sökte han bland sina egna sparade
+   poddar/intervjuer för vem som höll med och vem som inte gjorde det.
+2. **AI användes för att hitta motröster, inte medhåll.** Ett
+   sökprompt kört mot hela biblioteket (2 384 källor) hittade 14
+   teser och faktiska motröster för 12 av dem på ungefär tre minuter
+   - och avslöjade en motsägelse i hans eget manus han själv missat.
+3. **Inget citat utan att höra originalet själv.** Varje svar länkade
+   tillbaka till exakt tidsstämpel i käll-ljudet/videon; han lyssnade
+   på det faktiska ögonblicket (en Geoffrey Hinton-intervju, 8:56)
+   innan citatet fick stå på sidan.
+4. **Fler källor gjorde boken kortare, inte längre.** Biblioteket växte
+   till över 4000 kort under skrivandet, men utkastet krympte från
+   cirka 130 till 107 sidor - starkare belägg per tes gjorde det
+   lättare att se vad som inte höll och kunde strykas.
+5. **AI fick aldrig skriva boken åt honom.** Han dikterade varje
+   kapitel själv och använde AI bara för att putsa formuleringar, med
+   en egen kontroll att putsningen aldrig ändrade vad han menade. Hans
+   egen formulering: AI är så bra på att berätta tilltalande historier
+   att man annars till slut "skriver boken AI sa att du skulle
+   skriva."
+
+**Den återkommande principen, oavsett verktyg:** fråga AI vad du
+missat och vem som är emot dig - inte "skriv det här åt mig".
+
+**Koppling till Write:** samma author > AI-princip vi redan byggt på
+(§9) och samma instinkt som låg bakom attributions-arbetet för osäkra
+fakta (v1.0.246-247, se Ändringslogg) - ett citat/påstående ska vara
+spårbart till sin källa, inte flatas ut till obestridd sanning bara
+för att en modell råkade formulera det snyggt. Ingen konkret
+byggidé härifrån just nu, bara en anteckning om arbetssättet som
+inspiration. Inte påbörjad.
+
+---
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**
