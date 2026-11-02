@@ -11794,6 +11794,64 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.247 → v1.0.248 (2026-11-02): serie-UI-buggar en
+läsare hittade.** En läsare på Reddit ("hen") rapporterade fyra saker
+efter att ha testat serie-funktionen: ville klona/modifiera en Story
+Bible för en annan historia (ingen sådan funktion finns), fastnade på
+en "brainstorm/synopsis-sida hen inte ville skriva" efter att ha
+skapat en serie, tappade sitt största manus helt från startsidan utan
+att hitta det igen, hittade ingen knapp för att bli av med en "untitled
+book" som dök upp tillsammans med serien, och hittade ingen "create a
+series"-knapp på det stora manuset när hen försökte flytta det dit.
+
+Återskapade flödet live med Playwright istället för att gissa.
+Rotorsaken till det mesta: `createSeriesFromBook`
+(`BiblePanel.tsx`) anropar samma `createSeries()` som Home-sidans egna
+"ny serie"-formulär - och DEN sätter alltid den globala
+`seriesId`-staten i `SeriesStore`, oavsett varifrån den anropas.
+`App.tsx`s rendering (`book ? Editor : seriesId ? SeriesWorkspace :
+Home`) prioriterar ett öppet manus, så medan man är kvar i sin bok
+märks ingenting - knappen funkar och man stannar i sin egen bok. Men
+stänger man boken efteråt (topmenyns logga, "Manuscripts") finns inget
+öppet manus kvar, och den där kvarglömda `seriesId` tar över: istället
+för startsidan hamnar man i SERIENS egen SeriesWorkspace - och
+eftersom en ny serie namnges precis som boken den skapades från ("Big
+Manuscript"-boken ger en "Big Manuscript"-serie), ser det ut som att
+man fortfarande tittar på sin bok, fast man faktiskt är fast i en helt
+annan vy med Brainstorm/Synopsis/Story Bible/Books-flikar. Det här
+matchar exakt "stuck in the brainstorm/synopsis page" och "my main one
+is not on that page" - manuset ligger inte borttappat, det har bara
+(korrekt) gått med i sin egen serie, utan att användaren märkte det.
+
+**Fix:** `createSeriesFromBook` anropar nu `closeSeries()` i sin
+`finally`-sats efter att allt (serie, bokkoppling, fakta-befordran)
+redan sparats - nollar den globala `seriesId` igen så författaren
+hamnar exakt där hen var: kvar i sin egen bok, med Home nåbar som
+vanligt när boken sen stängs.
+
+**Den andra halvan - "no button to get rid of the untitled book"**
+avslöjade ett genuint, separat hål: när ett manus väl gått med i en
+serie (via vilken väg som helst, t.ex. ett tomt "+ New book in this
+series"-formulär i Series Workspace's Books-flik som skapar ett
+riktigt nytt tomt manus) finns ingen UI-väg att plocka ut det igen -
+`deleteSeries`s egen hjälptext sa redan "Move its books out first" men
+ingen knapp för det fanns någonstans. Ny "Remove from series"-knapp
+per bok i Books-fliken (`SeriesWorkspace.tsx`), anropar `setBookSeries
+(book.id, undefined)` - en funktion som redan stödde att nolla
+`series_id`, bara aldrig anropad så från UI:t. Boken blir fristående
+igen, sina egna fakta orörda, och serien går nu att ta bort när den
+sista boken lämnat (samma spärr som redan fanns, `books.length > 0`).
+
+**Verifiering:** återskapade hela kedjan live i Playwright (skapa tre
+manus → "Create series from this book" på ett → stäng boken → fastnar
+i SeriesWorkspace, bekräftat INNAN fixen; samma flöde landar korrekt
+på Home EFTER fixen) och "Remove from series" (bok försvinner från
+seriens Books-flik, dyker upp som fristående på Home igen, serien
+visar "0 books" och går att ta bort). `tsc --noEmit` rent, `npm run
+build` rent, 1251/1251 tester gröna (ingen regression - inga nya
+unit-test, samma skäl som v1.0.247: logiken sitter i BiblePanel.tsx/
+SeriesWorkspace.tsx som testas via Playwright, inte vitest).
+
 **Ändringslogg v1.0.246 → v1.0.247 (2026-10-31): "Tas unconfirmed fact
 med mellan böcker i en serie?"** Mats frågade. Svaret var nej på ett sätt
 som inte var medvetet: "Send to series" (`promoteBookFact`, både den

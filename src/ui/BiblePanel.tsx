@@ -118,7 +118,7 @@ export function BiblePanel({
     seriesFacts,
     mirrorRelationshipFact
   } = useBookStore();
-  const { createSeries, promoteBookFact } = useSeriesStore();
+  const { createSeries, promoteBookFact, closeSeries } = useSeriesStore();
   const { messages: m } = useLocale();
   const [kind, setKind] = useState<BibleKind>("characters");
   const [creatingSeries, setCreatingSeries] = useState(false);
@@ -203,6 +203,18 @@ export function BiblePanel({
       }
       if (skippedUnconfirmed > 0) window.alert(format(m.bible.seriesSkippedUnconfirmed, { count: String(skippedUnconfirmed) }));
     } finally {
+      // createSeries() above opens the new series in the global Series store
+      // (seriesId), same as the Home "new series" form does - fine there,
+      // since Home has nothing else to show instead. Here the author never
+      // left their book, so leaving that global state set is a trap: the
+      // next time they close THIS book (top bar logo, "Manuscripts"), the
+      // app has no open book to show and falls back to that still-open
+      // series (App.tsx's `book ? Editor : seriesId ? SeriesWorkspace :
+      // Home`) instead of Home - and since the series is named after this
+      // very book, it looks like "the book" rather than a different screen.
+      // Closing it here (promotion is already persisted, nothing pending)
+      // leaves the author exactly where they were: in their book.
+      closeSeries();
       setCreatingSeries(false);
     }
   }

@@ -9,6 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.248] - 2026-11-02
+
+### Fixed
+- "Create series from this book" left the series open in the background even though you never left your book — closing the book afterward (top bar logo, "Manuscripts") would strand you in that series' own workspace instead of Home, confusingly labeled with your book's own title since a new series starts named after it. Fixed by closing the series in the background once it's done.
+- Added "Remove from series" on each book in a series' Books tab — there was no way to move a book back out of a series (by accident or on purpose) anywhere in the UI, which also meant a series could never be deleted once any book joined it.
+
 ## [1.0.247] - 2026-10-31
 
 ### Changed

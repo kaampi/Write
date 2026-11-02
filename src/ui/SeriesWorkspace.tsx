@@ -29,7 +29,7 @@ export function SeriesWorkspace() {
     setSynopsis,
     extractSynopsis
   } = useSeriesStore();
-  const { openBook, newBook } = useBookStore();
+  const { openBook, newBook, setBookSeries } = useBookStore();
   const { messages: m } = useLocale();
   const [newBookTitle, setNewBookTitle] = useState("");
   const [tab, setTab] = useState<SeriesTab>("brainstorm");
@@ -133,7 +133,7 @@ export function SeriesWorkspace() {
           {books.length > 0 ? (
             <ul>
               {books.map((book) => (
-                <li key={book.id}>
+                <li key={book.id} className="book-shelf-row">
                   <button type="button" className="book-card" onClick={() => void openBook(book.id)}>
                     <strong>{book.title}</strong>
                     <span>
@@ -142,6 +142,20 @@ export function SeriesWorkspace() {
                       {count(book.factCount, m.home.facts)}
                     </span>
                   </button>
+                  <div className="book-shelf-row-actions">
+                    <button
+                      type="button"
+                      className="text-button"
+                      title={m.series.removeFromSeriesTitle}
+                      onClick={() => {
+                        if (window.confirm(format(m.series.removeFromSeriesConfirm, { title: book.title }))) {
+                          void setBookSeries(book.id, undefined);
+                        }
+                      }}
+                    >
+                      {m.series.removeFromSeries}
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
