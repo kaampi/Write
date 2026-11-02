@@ -87,6 +87,8 @@ export type BookStoreValue = {
   importLoreProgress: { current: number; total: number } | null;
   /** The open book's series' own locked facts, if it belongs to one — empty for a standalone book. Same data Draft/Recast/export merge in; read-only, never the book's own `facts`. */
   seriesFacts: NarrativeFact[];
+  /** True when `book.series_id` is set but that series couldn't be read (deleted, or never synced here). */
+  seriesMissing: boolean;
   refresh: () => Promise<void>;
   openBook: (id: string) => Promise<void>;
   closeBook: () => void;

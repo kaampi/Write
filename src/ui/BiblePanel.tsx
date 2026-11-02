@@ -116,6 +116,7 @@ export function BiblePanel({
     setChapterId,
     setBookSeries,
     seriesFacts,
+    seriesMissing,
     mirrorRelationshipFact
   } = useBookStore();
   const { createSeries, promoteBookFact, closeSeries } = useSeriesStore();
@@ -439,6 +440,20 @@ export function BiblePanel({
           </button>
         )}
       </div>
+      {!asOfChapter && book.series_id && seriesMissing ? (
+        <div className="banner home-banner" role="status">
+          <p>{m.bible.seriesMissing}</p>
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              if (window.confirm(m.bible.seriesMissingConfirm)) void setBookSeries(book.id, undefined);
+            }}
+          >
+            {m.bible.seriesMissingFix}
+          </button>
+        </div>
+      ) : null}
       {merging ? (
         <div className="bible-merge-toolbar" role="status">
           <span className="quiet">{count(mergeSelection.size, m.bible.mergeSelectedCount)}</span>

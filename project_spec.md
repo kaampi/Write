@@ -11794,6 +11794,67 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.248 → v1.0.249 (2026-11-02): den föräldralösa
+serie-referensen.** Samma läsare svarade efter v1.0.248: det gamla
+manuset syntes fortfarande inte på startsidan, ingen "create a
+series"-knapp (trots att de redan tagit bort de andra två böckerna ur
+serien), och gick inte att ta bort för att importera en backup. Sen
+"Even worse" - plötsligt saknade även de ANDRA böckerna knappen och
+syntes inte på startsidan heller.
+
+Återskapade INTE buggen blint - körde om hela v1.0.248-flödet (skapa
+serie från bok, koppla två till via dropdown, "Remove from series" på
+båda, ladda om sidan) i en ren testmiljö. Funkade helt korrekt, ingen
+korruption. Så detta är inte samma bugg som v1.0.248 fixade - det är
+gammal data som redan var trasig INNAN den fixen, eller en helt annan
+mekanism.
+
+**Grävde i koden istället för att gissa vidare:** `BookStore.tsx`s
+effect som hämtar en öppen boks serie-fakta (`seriesRepo.get(seriesId)`
+för `seriesFacts`) har en catch-hanterare som TYST sväljer ett fel om
+serien inte går att läsa - sätter bara `seriesFacts` till en tom lista,
+exakt som en bok utan serie alls. Ingen varning, inget fel visas
+NÅGONSTANS. Och eftersom `book.series_id` fortfarande är satt (pekar
+bara på nåt som inte går att läsa), gäller båda spärrarna ändå:
+Home.tsx's `!item.series_id`-filter utesluter boken från hyllan, och
+BiblePanel.tsx's `!book.series_id`-villkor döljer "Create series from
+this book". Och eftersom min nya "Remove from series"-knapp (v1.0.248)
+bara finns INUTI en serie man faktiskt kan öppna, finns ingen väg
+tillbaka om serien själv är oläsbar - exakt kedjan läsaren beskrev, och
+troligen en kvarleva från INNAN v1.0.248 fanns (ett tidigare försök att
+skapa/ta bort en serie som lämnat boken med en pekare till ingenting).
+
+Verifierade live: patchade en bok direkt i IndexedDB med
+`series_id: "bogus-nonexistent-series-id"`, laddade om - boken
+försvann från startsidans hylla precis som rapporterat, och
+Story Bible-panelen visade ingenting fel, bara tyst frånvaro av
+"Create series from this book".
+
+**Fix:** ny `seriesMissing`-flagga i `BookStore.tsx` (satt när
+`seriesRepo.get` kastar istället för att bara tystas), surfad i
+`BiblePanel.tsx` som ett tydligt banner ("This book belongs to a
+series that can't be found...") med en "Make this book standalone"-
+knapp som anropar `setBookSeries(book.id, undefined)` - samma
+funktion "Remove from series" redan använder, bara nåbar även när
+serien själv inte går att öppna. Bokens egna fakta rörs inte.
+
+Verifierade fixen med samma patchade-IndexedDB-teknik: banner syns,
+"Create series from this book" förblir dold tills man klickar fixen,
+varpå banner försvinner, knappen dyker upp, och boken är tillbaka på
+startsidans hylla.
+
+**Viktig observation till Mats:** läsaren nämnde att hen funderade på
+att radera appdata och ominstallera för att importera en backup -
+det hade INTE löst detta (orsaken är i den sparade datan, inte
+installationen) och hade riskerat att förlora allt som inte redan
+säkerhetskopierats. Värt att flagga tydligt i svaret: vänta med det,
+uppdatera istället och använd den nya "Make this book standalone"-
+knappen.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1251/1251
+tester gröna (ingen regression, ingen ny unit-test - samma skäl som
+v1.0.247/v1.0.248: UI-logik testad via Playwright, inte vitest).
+
 **Ändringslogg v1.0.247 → v1.0.248 (2026-11-02): serie-UI-buggar en
 läsare hittade.** En läsare på Reddit ("hen") rapporterade fyra saker
 efter att ha testat serie-funktionen: ville klona/modifiera en Story

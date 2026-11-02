@@ -1590,6 +1590,9 @@ export const en = {
     creatingSeriesFromBook: "Creating series…",
     createSeriesFromBookTitle:
       "Creates a new series named after this book, assigns the book to it, and promotes every one of its locked facts up to the series as established canon.",
+    seriesMissing: "This book belongs to a series that can't be found — deleted, or never synced to this install. Your own Story Bible is unaffected, but this book won't show on the home page's standalone shelf until it's either reconnected or made standalone again.",
+    seriesMissingConfirm: "Make this book standalone again? Its own locked facts stay exactly as they are — it just stops pointing at a series that can't be found.",
+    seriesMissingFix: "Make this book standalone",
     mergeSelectedCount: { one: "{count} card selected", other: "{count} cards selected" },
     mergeAction: "Merge ({count})",
     mergeKindMismatch: "These cards are different kinds (a character and a location, say) — merging only works within one kind.",

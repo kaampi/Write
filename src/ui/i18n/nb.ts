@@ -1577,6 +1577,9 @@ export const nb: Messages = {
     creatingSeriesFromBook: "Oppretter serie…",
     createSeriesFromBookTitle:
       "Oppretter en ny serie med samme navn som boken, knytter boken til den, og sender opp hver eneste låste fakta i boken til serien som fastslått kanon.",
+    seriesMissing: "Denne boken tilhører en serie som ikke finnes — slettet, eller aldri synkronisert til denne installasjonen. Bokens egen Story Bible er upåvirket, men boken vises ikke på startsidens frittstående hylle før den enten kobles til igjen eller gjøres frittstående på nytt.",
+    seriesMissingConfirm: "Gjør boken frittstående igjen? Dens egne låste fakta blir værende akkurat som de er — den slutter bare å peke på en serie som ikke finnes.",
+    seriesMissingFix: "Gjør boken frittstående",
     mergeSelectedCount: { one: "{count} kort valgt", other: "{count} kort valgt" },
     mergeAction: "Slå sammen ({count})",
     mergeKindMismatch: "Disse kortene er ulike typer (f.eks. en karakter og et sted) — sammenslåing fungerer bare innenfor samme type.",

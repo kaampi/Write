@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.249] - 2026-11-02
+
+### Fixed
+- A book whose series could no longer be read (deleted, or never synced to this install) was a silent dead end — excluded from the home page's shelf and from "Create series from this book" (both gate on the book simply having a series_id, found or not), with no error shown and no series left to open and remove it from. The Story Bible panel now says so plainly when this happens and offers "Make this book standalone" to clear the stale reference — the book's own facts are untouched either way.
+
 ## [1.0.248] - 2026-11-02
 
 ### Fixed

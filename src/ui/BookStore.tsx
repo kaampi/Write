@@ -399,6 +399,18 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const seriesFactsRef = useRef<NarrativeFact[]>([]);
   /** Same data as `seriesFactsRef`, mirrored into state so Editor.tsx can read it reactively (export, "Send to series" chapter-title lookups elsewhere already use the book itself). */
   const [seriesFacts, setSeriesFacts] = useState<NarrativeFact[]>([]);
+  /**
+   * True when `book.series_id` is set but that series could not be read —
+   * deleted out from under this book, or never synced to this install.
+   * Without this, a book in that state was a silent dead end: excluded
+   * from Home's standalone shelf (series_id is set) and from "Create
+   * series from this book" (same reason), with no series left to open and
+   * use "Remove from series" from, and no indication anything was wrong —
+   * `seriesFacts` just quietly stayed empty, same as a book with no
+   * series at all. BiblePanel surfaces this flag with a way out:
+   * `setBookSeries(book.id, undefined)` to make the book standalone again.
+   */
+  const [seriesMissing, setSeriesMissing] = useState(false);
   const chapterRef = useRef<string | null>(null);
   const surfaceRef = useRef<EditorSurface>("brainstorm");
   const abortRef = useRef<AbortController | null>(null);
@@ -444,6 +456,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     if (!seriesId) {
       seriesFactsRef.current = [];
       setSeriesFacts([]);
+      setSeriesMissing(false);
       return;
     }
     let cancelled = false;
@@ -452,12 +465,14 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         if (!cancelled) {
           seriesFactsRef.current = series.facts;
           setSeriesFacts(series.facts);
+          setSeriesMissing(false);
         }
       },
       () => {
         if (!cancelled) {
           seriesFactsRef.current = [];
           setSeriesFacts([]);
+          setSeriesMissing(true);
         }
       }
     );
@@ -3528,6 +3543,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     developSuggestion,
     importLoreProgress,
     seriesFacts,
+    seriesMissing,
     refresh,
     openBook,
     closeBook,
