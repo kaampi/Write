@@ -3342,6 +3342,68 @@ inspiration. Inte påbörjad.
 
 ---
 
+### 58. "Shelf view" på startsidan — 3D-bokhylla som alternativ till listan
+
+Mats bifogade ett fristående HTML/CSS/JS-prototyp (3D CSS-bokhylla,
+Tailwind CDN + Google Fonts CDN, klick på en bokrygg drar ut boken och
+visar framsidan + ett infokort) och frågade om det kunde platsa på
+Writes startsida. Diskussion, inte påbörjad kodning.
+
+**Varför inte en drop-in:** prototypen laddar Tailwind/Google Fonts
+från CDN vid körning - bryter mot Writes redan etablerade princip att
+aldrig ladda typsnitt över nätet (v1.0.230). Skulle behöva byggas om i
+ren CSS/React med självhostade typsnitt, inte kopieras rakt av.
+
+**Det smalare, faktiska syftet (Mats förtydligande):** inte bläddring
+i boken, bara en vackrare *presentation* av ens manus vid runt 10+
+böcker - kort info + en länk in till redigeraren. Med det syftet
+försvinner det ursprungliga skalningsproblemet (sök, serie-tilldelning,
+radering - funktioner dagens lista har som en fysisk hylla inte har
+naturlig plats för).
+
+**Löst: List view / Shelf view som två växlingsbara lägen**, inte en
+ersättning för listan - listan behåller sök/serie-dropdown/radering,
+hyllan är en ren, vacker ingång ovanpå med kort info + "Open in
+Writer"-länk per bok (prototypens egen "Open in Writer"-knapp var
+redan rätt tänkt).
+
+**Metadata som behöver läggas till för att hyllan ska ha nåt att visa:**
+- **Omslag (cover):** nytt valfritt bildfält per bok. Ingen ny
+  infrastruktur - samma mönster som kapitelbilder/karaktärsporträtt
+  redan använder (`EntityMedia`, data-URL, lokalt sparad). Saknas =
+  generisk platshållare, samma "säkert default"-mönster som resten av
+  schemat.
+- **Bokrygg:** INTE manuell uppladdning (ny skaparuppgift ovanpå
+  skrivandet, ren friktion) - generera procedurellt från titel +
+  bokens befintliga `editor_background`-val (forest/milky-way/
+  triangles osv., redan ett fält per bok) som ryggens färg/mönster.
+  Omslaget blir den enda punkten där man faktiskt investerar tid.
+- **Kort text om boken:** behövs inget nytt fält - `synopsis` finns
+  redan (fritext, används redan av Draft-prompten och
+  serie-extraktionen), trunkerad vid behov.
+- **"Färdig"-år:** saknas helt idag (Mats påpekade det själv). Inte
+  samma sak som `updated_at` (senast redigerad säger inget om när
+  boken faktiskt blev klar - småfix år senare skulle förskjuta
+  datumet felaktigt). Nytt valfritt fält, satt manuellt av författaren
+  som en medveten handling ("Mark as finished"), inte uträknat av
+  appen. Ligger i linje med språket som redan startade hela
+  serie-funktionen ("en bok som jag är färdig med...").
+
+**Diskuterad och avgjord fråga: låser "färdig" boken från redigering?**
+Nej - skulle bryta mot author-alltid-i-kontroll-principen som redan
+genomsyrar appen (ingenting är nånsin tvingande låst). `finished_at`
+ska vara en stämpel, aldrig en spärr - ett stavfel upptäckt efteråt,
+eller en uppföljare som avslöjar en kontinuitetslucka, måste gå att
+rätta.
+
+**Avgjord fråga: "reviderad utgåva"?** Skjuts på framtiden som en
+separat, större fråga - konceptuellt likt hur språkversioner redan
+fungerar (`translation_group_id`, syskon-böcker) fast för utgåvor
+istället för språk, men inte nåt att designa i förväg utan ett
+konkret behov av att skilja utgåva 1 från utgåva 2.
+
+Inte påbörjad - fortsätter imorgon (Mats närmar sig sin veckogräns).
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**
