@@ -5087,13 +5087,19 @@ button:disabled {
   transform: translate(-50%, -50%);
   font-size: 1.05rem;
   line-height: 1;
-  /* --bg, not --paper: the editor canvas sits on --bg (a shade darker,
-     see styles.css's :root), not the panel-surface --paper — using
-     --paper here left a visibly mismatched rectangle behind the symbol,
-     caught by sampling actual rendered pixels rather than eyeballing a
-     screenshot (rgb(20,17,14)=--bg vs rgb(35,30,24)=--paper, confirmed
-     with ImageMagick against a live Playwright screenshot). */
-  background: var(--bg);
+  /* --editor-paper-bg, not --bg: .prose-body (the actual surface this
+     ornament sits on) renders at --editor-paper-bg — --panel by default,
+     a fixed color when a paper preset is active — never the app's own
+     --bg, which is a separate, slightly darker variable one layer further
+     out. Mats (2026-11-03) spotted a faintly darker box behind the
+     symbol; getComputedStyle confirmed it: .prose-body rendered
+     rgb(28,24,20) (--panel/--editor-paper-bg's default) while this rule's
+     old `var(--bg)` resolved to rgb(20,17,14) — a real, visible mismatch,
+     not a rounding artifact. (An earlier comment here claimed --bg was
+     the right match, sampled against --paper instead of the one that
+     actually mattered, --editor-paper-bg — that comparison just didn't
+     catch this.) */
+  background: var(--editor-paper-bg);
   padding: 0 0.6em;
 }
 

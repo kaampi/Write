@@ -11794,6 +11794,39 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.255 → v1.0.256 (2026-11-03): den mörkare rutan
+bakom scenbrytnings-symbolen.** Mats, med en extrem närbild-skärmdump
+av en Vignette-stil scenbrytning: "Varför blir det en aningen mörkare
+bakgrund bakom symbolerna på en HR".
+
+Rotorsak: `.scene-break-*`s `::before`-regel (den som "stansar ett
+hål" i gradientlinjen bakom symbolen, så linjen inte syns rakt genom
+glyfen) hade `background: var(--bg)` - fixat i en TIDIGARE session med
+en kommentar som hävdade pixel-sampling hade bekräftat `--bg` var rätt
+matchning, jämfört mot `--paper`. Men `--paper` var aldrig den
+relevanta kandidaten: den faktiska ytan scenbrytningen ligger på
+(`.prose-body`) har `background: var(--editor-paper-bg)` - en EGEN,
+fjärde variabel (default `var(--panel)`, men override-bar via ett
+sparat "paper"-tema) som varken `--bg` eller `--paper` råkar matcha.
+Den gamla jämförelsen testade fel par.
+
+Verifierade med `getComputedStyle` (inte pixel-sampling av en
+skärmdump - mer exakt): `.prose-body` renderade `rgb(28,24,20)` i mörkt
+tema, medan `::before`s gamla `var(--bg)` löstes till `rgb(20,17,14)` -
+en verklig, mätbar skillnad, inte en avrundningsartefakt. Fix: `--bg` →
+`var(--editor-paper-bg)`. `manuscriptExport.ts`s egen
+`sceneBreakCss()` (HTML/ePub-exportens statiska motsvarighet) rörd
+INTE - den tar redan `pageBg` som parameter och defaultar korrekt till
+`#fff` för den vita export-sidan, ett separat och redan rätt
+designat system.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1254/1254
+tester gröna. Playwright: skapade en bok, satte Scene break till
+Vignette, skrev in en "---"-scenbrytning, läste `getComputedStyle`
+för `.prose-body` och `::before` i både mörkt och ljust tema - exakt
+samma `rgb(...)`-värde i båda temana efter fixen (innan fixen skilde
+de sig åt i båda).
+
 **Ändringslogg v1.0.254 → v1.0.255 (2026-11-03): bok 2 ärver bok 1:s
 typografi i en serie.** Mats, direkt efter att ha undrat varför en ny
 boks skrivkolumn var smalare än sin första bok (svar: `page_size`

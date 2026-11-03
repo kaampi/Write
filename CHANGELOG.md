@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.256] - 2026-11-03
+
+### Fixed
+- A decorated scene break (Settings → Typography → Scene break: Vignette/Fleur/Diamond/Sparkle) showed a faintly mismatched box behind its symbol — it punched its gap using the app's own background color instead of the actual, slightly different color the prose canvas renders at (and a paper preset, if one's chosen, changes further). Fixed in both themes.
+
 ## [1.0.255] - 2026-11-03
 
 ### Changed
