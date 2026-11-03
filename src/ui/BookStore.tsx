@@ -784,6 +784,27 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     [patchBook, persist, repo]
   );
 
+  /**
+   * Shelf view's gear dialog (roadmap-ideas.md #58) — cover/spine
+   * color/height adjustment/display author. Same "works on any book, not
+   * just the open one" shape as setBookSeries, since this is also called
+   * from the Home shelf where nothing is open yet.
+   */
+  const updateShelfSettings = useCallback(
+    async (
+      bookId: string,
+      patch: Partial<Pick<Book, "cover" | "shelf_color" | "shelf_height_adjust" | "shelf_author">>
+    ) => {
+      if (bookRef.current?.id === bookId) {
+        await patchBook((current) => ({ ...current, ...patch }));
+        return;
+      }
+      const loaded = await repo.get(bookId);
+      await persist(touch(loaded, patch));
+    },
+    [patchBook, persist, repo]
+  );
+
   const openBook = useCallback(
     async (id: string) => {
       const loaded = await repo.get(id);
@@ -3558,6 +3579,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     deleteBook,
     patchBook,
     setBookSeries,
+    updateShelfSettings,
     setChapterId,
     selectChapter,
     showSettings,

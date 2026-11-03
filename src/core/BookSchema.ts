@@ -447,6 +447,25 @@ export const BookSchema = z.object({
    * Missing on older saves — default keeps IndexedDB loadable.
    */
   synopsis: z.string().default(""),
+  /**
+   * Home page Shelf view (roadmap-ideas.md #58) — optional, author-set
+   * presentation for the 3D bookshelf: a cover image (same thumb+full-size
+   * pair as chapter start images/entity pictures, `EntityPictureSchema`),
+   * a fixed spine color (unset = the shelf's own deterministic per-title
+   * color), a height adjustment in percent (-10 to +10, unset/0 = the
+   * shelf's shared base height), and a display author name (unset/empty =
+   * the shelf falls back to showing the app's own name). None of these
+   * are writing instructions or world facts — Draft never reads them.
+   * Missing on older saves — the shelf's existing hash-derived look is
+   * unchanged until an author opens the gear dialog and sets one.
+   */
+  cover: EntityPictureSchema.optional(),
+  shelf_color: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
+  shelf_height_adjust: z.number().int().min(-10).max(10).default(0),
+  shelf_author: z.string().default(""),
   chapters: z.array(ChapterSchema),
   facts: z.array(NarrativeFactSchema),
   /**
@@ -550,7 +569,12 @@ export const BookSummarySchema = z.object({
   prose_language: z.string().optional(),
   translation_group_id: z.string().optional(),
   translated_from_book_id: z.string().optional(),
-  series_id: z.string().optional()
+  series_id: z.string().optional(),
+  /** Shelf view (roadmap-ideas.md #58) — see Book.cover/shelf_* for what these mean. */
+  cover_thumb_data_url: z.string().optional(),
+  shelf_color: z.string().optional(),
+  shelf_height_adjust: z.number().optional(),
+  shelf_author: z.string().optional()
 });
 export type BookSummary = z.infer<typeof BookSummarySchema>;
 
@@ -565,7 +589,11 @@ export function summarizeBook(book: Book): BookSummary {
     ...(book.prose_language.trim() ? { prose_language: book.prose_language } : {}),
     ...(book.translation_group_id ? { translation_group_id: book.translation_group_id } : {}),
     ...(book.translated_from_book_id ? { translated_from_book_id: book.translated_from_book_id } : {}),
-    ...(book.series_id ? { series_id: book.series_id } : {})
+    ...(book.series_id ? { series_id: book.series_id } : {}),
+    ...(book.cover ? { cover_thumb_data_url: book.cover.thumbDataUrl } : {}),
+    ...(book.shelf_color ? { shelf_color: book.shelf_color } : {}),
+    ...(book.shelf_height_adjust ? { shelf_height_adjust: book.shelf_height_adjust } : {}),
+    ...(book.shelf_author.trim() ? { shelf_author: book.shelf_author } : {})
   };
 }
 
@@ -600,6 +628,8 @@ export function createBook(title: string): Book {
     brainstorm: "",
     brainstorm_notes: [],
     synopsis: "",
+    shelf_height_adjust: 0,
+    shelf_author: "",
     chapters: [chapter],
     facts: [],
     media: [],

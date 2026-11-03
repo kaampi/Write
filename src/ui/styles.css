@@ -2158,9 +2158,12 @@ button:disabled {
 .cover-front {
   transform: translateX(calc(var(--w) / 2)) rotateY(90deg);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.3rem;
   padding: 0.6rem;
+  overflow: hidden;
   filter: brightness(1.05);
 }
 
@@ -2238,15 +2241,60 @@ button:disabled {
   pointer-events: auto;
 }
 
+.shelf-info-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
 .shelf-info-title {
   font-family: var(--font-prose);
   font-size: 1.3rem;
   font-weight: 500;
 }
 
+.gear-button {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  background: none;
+  border: 1px solid var(--border-soft);
+  border-radius: 50%;
+  color: var(--text-dim);
+}
+
+.gear-button:hover {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.shelf-info-author {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
 .shelf-info-meta {
   color: var(--text-dim);
   font-size: 0.85rem;
+}
+
+.shelf-cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.cover-author {
+  color: var(--on-ink);
+  font-size: 0.7rem;
+  opacity: 0.85;
 }
 
 .shelf-info-siblings {
@@ -2256,6 +2304,44 @@ button:disabled {
   display: flex;
   gap: 0.6rem;
   flex-wrap: wrap;
+}
+
+.shelf-settings-card {
+  width: min(28rem, 100%);
+}
+
+.shelf-settings-body {
+  display: grid;
+  gap: 1rem;
+}
+
+.shelf-settings-field input[type="text"] {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem 0.65rem;
+}
+
+.shelf-settings-swatches {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.shelf-swatch {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+}
+
+.shelf-swatch.is-active {
+  border-color: var(--text);
+}
+
+.shelf-settings-field input[type="range"] {
+  width: 100%;
 }
 
 .shelf-info-actions {

@@ -3402,14 +3402,25 @@ fungerar (`translation_group_id`, syskon-böcker) fast för utgåvor
 istället för språk, men inte nåt att designa i förväg utan ett
 konkret behov av att skilja utgåva 1 från utgåva 2.
 
-**Byggt i v1.0.250, men mindre scope än ovan:** Mats bad specifikt om
-"sektionen Your manuskripts med Search, List view och Shelf view i
-appen" - bara togglen och bläddringen, inte kugghjuls-dialogen för
-omslag/färg/höjd/författare som den tidiga artefakt-prototypen hade.
-Hyllans bokryggar är alltså deterministiska (hash på titel/id för
-bredd/färg), inte lagrade - **cover/bokrygg-färg/"färdig"-år-fälten
-ovan är fortfarande inte tillagda i schemat.** Om/när kugghjuls-dialogen
-ska byggas på riktigt är det detta avsnittets metadata-lista som gäller.
+**Byggt i v1.0.250:** List/Shelf-togglen, Search, bläddringen - exakt
+scopet Mats bad om då ("sektionen Your manuskripts med Search, List
+view och Shelf view i appen"). Hyllans bokryggar var deterministiska
+(hash på titel/id för bredd/färg), inget nytt fält i schemat.
+
+**Byggt i v1.0.251:** kugghjuls-dialogen, sedan Mats direkt frågade
+"Vart är kugghjulet?" efter att ha sett v1.0.250 live. `Book` fick
+`cover` (`EntityPictureSchema`, samma par som `Chapter.startImage`),
+`shelf_color` (hex, fast - inte en CSS-variabel, så ett medvetet val
+ser likadant ut oavsett tema), `shelf_height_adjust` (±10%) och
+`shelf_author`. Bokryggens BREDD är fortfarande deterministisk (hash
+på titel) - det bad Mats aldrig om att kunna sätta, varken i
+artefakten eller här.
+**Det som fortfarande INTE finns:** "färdig"-år-fältet (`finished_at`)
+och procedurell bokrygg-generering från `editor_background` - ersattes
+redan i den tidiga artefakt-designen av ett enklare fast
+färgpalett-val, som är vad som byggdes. Om "färdig"-stämpeln
+efterfrågas är det fortfarande ett eget, separat beslut (se ovan: en
+medveten handling, aldrig en redigeringsspärr).
 
 ## Medvetet nedprioriterat just nu (inte avvisat)
 

@@ -197,6 +197,19 @@ export const nb: Messages = {
     whatDraftSees: "det Draft ser",
     imagesNote: "Bilder er bare visuell referanse — sendes aldri til Draft som tekstkontekst."
   },
+  shelfEdit: {
+    settingsLabel: "Rediger hyllekort",
+    title: "Hyllekort",
+    coverLabel: "Omslag",
+    addCover: "Legg til et omslag",
+    replaceCover: "Bytt ut",
+    removeCover: "Fjern",
+    authorLabel: "Forfatternavn",
+    authorPlaceholder: "kaampi Write",
+    colorLabel: "Ryggfarge",
+    heightLabel: "Høyde",
+    heightValue: "{sign}{percent}%"
+  },
   editor: {
     manuscriptTitle: "Manuskripttittel",
     writing: "Skriving",

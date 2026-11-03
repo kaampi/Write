@@ -34,6 +34,7 @@ export function Home({
     openBook,
     deleteBook,
     setBookSeries,
+    updateShelfSettings,
     importManuscript,
     importMarkdownManuscript,
     importCoreManuscript,
@@ -277,6 +278,7 @@ export function Home({
             groups={groupManuscripts(filteredSummaries)}
             onOpen={(id) => void openBook(id)}
             onDelete={(id) => void deleteBook(id)}
+            onUpdateSettings={(id, patch) => void updateShelfSettings(id, patch)}
           />
         ) : null}
 

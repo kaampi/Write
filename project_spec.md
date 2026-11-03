@@ -11794,6 +11794,66 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.250 → v1.0.251 (2026-11-03): kugghjulet på hyllkortet.**
+Mats, direkt efter att v1.0.250 (List/Shelf-togglen) visats: "Vart är
+kugghjulet?" - prototypens redigeringsdialog (omslag/ryggfärg/höjd/
+författare) var medvetet utelämnad i v1.0.250 eftersom han bara bett om
+Search + List/Shelf, och den skulle kräva ett schematillägg. Frågade om
+det var ett stort jobb, svarade "inte stort, ett halvdag" eftersom det
+mesta var återanvändning av redan etablerade mönster - fick ett "Ja,
+sätt igång".
+
+- `BookSchema.ts`: fyra nya fält på `Book` - `cover`
+  (`EntityPictureSchema.optional()`, exakt samma thumb+full-storlek-par
+  som `Chapter.startImage` redan använder, inte en ny bildform), `shelf_color`
+  (hex, valfri - ett fast ryggfärgsval, inte en CSS-variabel, så den ser
+  likadan ut oavsett ljust/mörkt tema, samma "medvetet temaoberoende"-
+  princip som `editor_background`s texturer redan har), `shelf_height_adjust`
+  (-10 till 10, default 0) och `shelf_author` (sträng, default ""). Alla
+  "missing on older saves"-säkra via Zod-default, samma mönster som
+  resten av schemat - ingen separat migrationskod behövdes.
+  `BookSummarySchema`/`summarizeBook` fick motsvarande valfria
+  passthrough-fält (bara om satta, samma mönster som `prose_language`
+  m.fl.) så Home-hyllan kan rendera dem utan att ladda hela boken.
+- `BookStore.tsx`: ny `updateShelfSettings(bookId, patch)` - exakt samma
+  "funkar på vilken bok som helst, inte bara den öppna" form som
+  `setBookSeries` redan har (anropas från Home-hyllan där inget är
+  öppnat).
+- Ny `ShelfSettingsDialog.tsx` - återanvänder `OverlayCard` (samma
+  modal-komponent som seriens entitetssidor) och `picturesFromFile`/
+  `EntityImageError` (samma bilduppladdning/komprimering som
+  kapitelbilder och entitetsporträtt redan har, inte en ny rå
+  `FileReader`-väg som prototypens egen). Utkasts-state lokalt i
+  dialogen, committas bara vid Save.
+  **Bugg hittad och fixad innan den hann skrivas till disk:** `BookSummary`
+  bär bara en nedskalad `cover_thumb_data_url` (ingen full-upplösning,
+  det vore onödig data att skicka till hela hyllistan). Dialogens
+  initiala "cover"-prop byggdes därför av en låtsas-`EntityPicture` där
+  `imageDataUrl` = samma thumb. Om man öppnade dialogen för en bok som
+  redan hade ett omslag och tryckte Save UTAN att röra omslaget, hade
+  det skrivit tillbaka den låtsade (lågupplösta) bilden som bokens
+  RIKTIGA lagrade omslag - en tyst kvalitetsförlust vid varje oberörd
+  spara. Fixat med en `coverTouched`-flagga: `cover` skickas bara med i
+  patchen när dialogen faktiskt laddat upp eller tagit bort en bild.
+- `BookshelfView.tsx`: bokryggens bredd är fortfarande deterministisk
+  (hash på titel, inte redigerbar - Mats bad aldrig om det), men färg
+  och höjd läser nu `shelf_color`/`shelf_height_adjust` när satta
+  (annars samma hash-färg/delade bas-höjd som innan). Omslagsbild
+  renderas i `cover-front`-ytan istället för titel-text när satt.
+  Kugghjulet sitter i info-kortet (inte på varje bokrygg) - samma plats
+  som i den ursprungliga artefakt-prototypen.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1254/1254
+tester gröna (tre nya i `book-schema.test.ts`: default/migration för de
+fyra nya fälten, round-trip genom `summarizeBook`, och att osatta fält
+inte läcker ut i sammanfattningen). Playwright, hela vägen: skapade två
+riktiga manus, öppnade kugghjulet, laddade upp `favicon.png` som omslag,
+satte författarnamn, valde en ryggfärg, drog höjdreglaget till +8%,
+Save - bekräftade att hyllkortet uppdaterades direkt OCH, viktigast,
+att allt (omslag, författare, färg, höjd) fortfarande fanns kvar efter
+en full sidladdning (en riktig IndexedDB-rundtur genom schemat, inte
+bara state i minnet).
+
 **Ändringslogg v1.0.249 → v1.0.250 (2026-11-03): Hyllvy på startsidan.**
 Mats hade tidigare bett om en Claude Artifact-prototyp som kombinerade
 Write-startsidan med en 3D-bokhylla för manusen, och efter en lång

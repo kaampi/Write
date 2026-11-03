@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.251] - 2026-11-03
+
+### Added
+- Shelf view's book spines now have a gear icon on the info card to set a cover image, display author name, spine color, and height adjustment (±10%) per manuscript — persisted on the book, not just a visual default. Unset books keep today's deterministic look (color/width derived from the title, shared base height).
+
 ## [1.0.250] - 2026-11-03
 
 ### Added

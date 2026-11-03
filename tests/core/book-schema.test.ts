@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addChapter, createBook, discardChapter, discardedChapters, openingSurface, parseBook, removeChapter, restoreChapter, sortedChapters, updateChapter } from "@core/BookSchema";
+import { addChapter, createBook, discardChapter, discardedChapters, openingSurface, parseBook, removeChapter, restoreChapter, sortedChapters, summarizeBook, updateChapter } from "@core/BookSchema";
 
 describe("createBook", () => {
   it("starts with an empty bible, empty scratch, and empty synopsis", () => {
@@ -74,6 +74,53 @@ describe("createBook", () => {
     void _background;
     const parsed = parseBook(without);
     expect(parsed.editor_background).toBe("none");
+  });
+
+  it("defaults shelf settings to unset/zero, and fills them in on older saves that never had them", () => {
+    const book = createBook("Legacy");
+    expect(book.cover).toBeUndefined();
+    expect(book.shelf_color).toBeUndefined();
+    expect(book.shelf_height_adjust).toBe(0);
+    expect(book.shelf_author).toBe("");
+    const { cover: _cover, shelf_color: _color, shelf_height_adjust: _height, shelf_author: _author, ...without } = book;
+    void _cover;
+    void _color;
+    void _height;
+    void _author;
+    const parsed = parseBook(without);
+    expect(parsed.cover).toBeUndefined();
+    expect(parsed.shelf_color).toBeUndefined();
+    expect(parsed.shelf_height_adjust).toBe(0);
+    expect(parsed.shelf_author).toBe("");
+  });
+
+  it("round-trips shelf settings, including summarizeBook's pass-through", () => {
+    const book = {
+      ...createBook("Legacy"),
+      cover: { thumbDataUrl: "data:image/jpeg;base64,thumb", imageDataUrl: "data:image/jpeg;base64,full" },
+      shelf_color: "#c24f30",
+      shelf_height_adjust: -5,
+      shelf_author: "A. N. Author"
+    };
+    const parsed = parseBook(book);
+    expect(parsed.cover?.thumbDataUrl).toBe("data:image/jpeg;base64,thumb");
+    expect(parsed.shelf_color).toBe("#c24f30");
+    expect(parsed.shelf_height_adjust).toBe(-5);
+    expect(parsed.shelf_author).toBe("A. N. Author");
+
+    const summary = summarizeBook(parsed);
+    expect(summary.cover_thumb_data_url).toBe("data:image/jpeg;base64,thumb");
+    expect(summary.shelf_color).toBe("#c24f30");
+    expect(summary.shelf_height_adjust).toBe(-5);
+    expect(summary.shelf_author).toBe("A. N. Author");
+  });
+
+  it("leaves unset shelf settings out of the summary", () => {
+    const summary = summarizeBook(createBook("Legacy"));
+    expect(summary.cover_thumb_data_url).toBeUndefined();
+    expect(summary.shelf_color).toBeUndefined();
+    expect(summary.shelf_height_adjust).toBeUndefined();
+    expect(summary.shelf_author).toBeUndefined();
   });
 });
 

@@ -625,6 +625,19 @@ export const en = {
     whatDraftSees: "what Draft sees",
     imagesNote: "Images are visual reference only — never sent to Draft as text context."
   },
+  shelfEdit: {
+    settingsLabel: "Edit shelf card",
+    title: "Shelf card",
+    coverLabel: "Cover",
+    addCover: "Add a cover",
+    replaceCover: "Replace",
+    removeCover: "Remove",
+    authorLabel: "Author name",
+    authorPlaceholder: "kaampi Write",
+    colorLabel: "Spine color",
+    heightLabel: "Height",
+    heightValue: "{sign}{percent}%"
+  },
   editor: {
     manuscriptTitle: "Manuscript title",
     writing: "Writing",

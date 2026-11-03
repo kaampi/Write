@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import type { BookSummary } from "@core/BookSchema";
 import { count, format, useLocale } from "./i18n";
+import { ShelfSettingsDialog, type ShelfSettingsPatch } from "./ShelfSettingsDialog";
 
 const SPINE_COLORS = ["var(--ink)", "var(--plotline-blue)", "var(--flag)", "var(--sage)", "var(--ai)", "var(--plotline-charcoal)"];
 const BASE_HEIGHT = 230;
@@ -16,14 +17,17 @@ function hashString(value: string): number {
 export function BookshelfView({
   groups,
   onOpen,
-  onDelete
+  onDelete,
+  onUpdateSettings
 }: {
   groups: BookSummary[][];
   onOpen: (id: string) => void;
   onDelete: (id: string) => void;
+  onUpdateSettings: (id: string, patch: ShelfSettingsPatch) => void;
 }) {
   const { messages: m } = useLocale();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const items = groups
     .map((group) => group[0])
@@ -31,7 +35,14 @@ export function BookshelfView({
     .map((primary) => {
       const hash = hashString(primary.id);
       const width = 46 + (hashString(primary.title) % 26);
-      return { primary, width, depth: Math.round(width * 3.3), color: SPINE_COLORS[hash % SPINE_COLORS.length] };
+      const heightAdjust = primary.shelf_height_adjust ?? 0;
+      return {
+        primary,
+        width,
+        depth: Math.round(width * 3.3),
+        height: Math.round(BASE_HEIGHT * (1 + heightAdjust / 100)),
+        color: primary.shelf_color ?? SPINE_COLORS[hash % SPINE_COLORS.length]
+      };
     });
 
   // Shrink-to-fit width is unreliable inside a flex row with absolutely-positioned 3D
@@ -45,6 +56,7 @@ export function BookshelfView({
   const selected = items.find((item) => item.primary.id === selectedId) ?? null;
   const selectedGroup = selected ? groups.find((group) => group[0]?.id === selected.primary.id) : undefined;
   const siblings = selectedGroup ? selectedGroup.slice(1) : [];
+  const editing = editingId ? items.find((item) => item.primary.id === editingId) : undefined;
 
   return (
     <div className="shelf-row">
@@ -54,7 +66,7 @@ export function BookshelfView({
             const active = item.primary.id === selectedId;
             const style = {
               "--w": `${item.width}px`,
-              "--h": `${BASE_HEIGHT}px`,
+              "--h": `${item.height}px`,
               "--d": `${item.depth}px`,
               "--bg": item.color
             } as CSSProperties;
@@ -72,7 +84,14 @@ export function BookshelfView({
                   <span className="spine-title">{item.primary.title}</span>
                 </div>
                 <div className="face cover-front">
-                  <span className="cover-title">{item.primary.title}</span>
+                  {item.primary.cover_thumb_data_url ? (
+                    <img className="shelf-cover-image" src={item.primary.cover_thumb_data_url} alt="" />
+                  ) : (
+                    <>
+                      <span className="cover-title">{item.primary.title}</span>
+                      <span className="cover-author">{item.primary.shelf_author || "kaampi Write"}</span>
+                    </>
+                  )}
                 </div>
                 <div className="face cover-back" />
                 <div className="face pages-top" />
@@ -90,7 +109,23 @@ export function BookshelfView({
       <div className={selected ? "shelf-info-card is-visible" : "shelf-info-card"}>
         {selected ? (
           <>
-            <strong className="shelf-info-title">{selected.primary.title}</strong>
+            <div className="shelf-info-head">
+              <strong className="shelf-info-title">{selected.primary.title}</strong>
+              <button
+                type="button"
+                className="gear-button"
+                aria-label={m.shelfEdit.settingsLabel}
+                onClick={() => setEditingId(selected.primary.id)}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.07 7.07 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.63 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.05.3-.08.62-.08.94s.02.64.07.94L2.75 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.42.33.6.22l2.39-.96c.5.38 1.04.7 1.62.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.58-.24 1.12-.56 1.62-.94l2.39.96c.24.1.5 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.02-1.56ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
+                  />
+                </svg>
+              </button>
+            </div>
+            {selected.primary.shelf_author ? <span className="shelf-info-author">{selected.primary.shelf_author}</span> : null}
             <span className="shelf-info-meta">
               {selected.primary.prose_language ? <span className="book-language-tag">{selected.primary.prose_language}</span> : null}
               {count(selected.primary.chapterCount, m.home.chapters)}
@@ -125,6 +160,18 @@ export function BookshelfView({
           </>
         ) : null}
       </div>
+
+      {editing ? (
+        <ShelfSettingsDialog
+          title={editing.primary.title}
+          cover={editing.primary.cover_thumb_data_url ? { thumbDataUrl: editing.primary.cover_thumb_data_url, imageDataUrl: editing.primary.cover_thumb_data_url } : undefined}
+          shelfColor={editing.primary.shelf_color}
+          shelfHeightAdjust={editing.primary.shelf_height_adjust ?? 0}
+          shelfAuthor={editing.primary.shelf_author ?? ""}
+          onSave={(patch) => onUpdateSettings(editing.primary.id, patch)}
+          onClose={() => setEditingId(null)}
+        />
+      ) : null}
     </div>
   );
 }
