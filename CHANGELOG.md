@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.250] - 2026-11-03
+
+### Added
+- "Your manuscripts" on the home page now has a List view / Shelf view toggle. Shelf view lays the manuscripts out on a 3D bookshelf (spine width and color derived from each title); clicking a spine pops its cover out and opens an info card with its chapter/fact count and Open/Delete actions. List view is unchanged from before.
+
 ## [1.0.249] - 2026-11-02
 
 ### Fixed

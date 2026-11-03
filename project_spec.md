@@ -11794,6 +11794,52 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.249 → v1.0.250 (2026-11-03): Hyllvy på startsidan.**
+Mats hade tidigare bett om en Claude Artifact-prototyp som kombinerade
+Write-startsidan med en 3D-bokhylla för manusen, och efter en lång
+iterativ trimningsrunda på den prototypen (toggle, 3D vs platt,
+bok-justering, skuggriktning, info-korts position) bad han: "Jag skulle
+vilja få in sektionen Your manuskripts med Search, List view och Shelf
+view i appen. Men låt övriga sektioner på nuvarande startsida vara
+orörd." Portade bara den sektionen, inget annat på Home rört.
+
+- Ny `BookshelfView.tsx` - tar `groups` (samma `groupManuscripts()`-grupper
+  som listvyn redan använder), `onOpen`, `onDelete`. En spine per grupp
+  (gruppens primärbok; språksystrar listas som länkar i info-kortet,
+  samma mönster som listvyns `.book-shelf-siblings`). Bredd och färg per
+  bok är deterministiska (hash på titel/id), inte lagrade - fanns inget
+  beslut om att lägga till `cover`/`author`/`color`/`height`-fält på
+  `BookSummary` i den här omgången, så redigeringsdialogen (kugghjul)
+  från prototypen portades INTE, bara sök + List/Shelf-togglen han
+  faktiskt bad om.
+- `Home.tsx`: nytt `shelfMode`-state ("list"|"shelf"), en liten
+  toggle-rad i `<h2>` bredvid "Your manuscripts"-rubriken. Listvyns
+  JSX är orörd - bara villkorad på `shelfMode === "list"` istället för
+  att alltid rendera.
+- CSS: portade 3D-bok-tekniken (spine/cover-front/cover-back/pages-*/
+  book-shadow, `perspective`+`rotateY`+`preserve-3d`) från artefakten,
+  men mot riktiga design-tokens (`--ink`/`--paper`/`--font-prose` m.fl.,
+  temasäkert i både ljust och mörkt läge) istället för artefaktens
+  hårdkodade hex och Google Fonts.
+- **Bugg hittad under Playwright-verifiering, inte i artefakten:** en
+  första ren port av ansiktstransformerna (kant-gångjärnade `rotateY`/
+  `rotateX` per `.face`) lät `.cover-front`/`.pages-edge` sticka ut
+  långt till vänster om själva hyllan redan i vila (inte bara vid
+  popup) - en osynlig DOM-bugg (rätt `getBoundingClientRect` för
+  `.book-spine`-knapparna, fel för deras `.face`-barn). Fixat genom att
+  läsa tillbaka den redan felsökta artefaktens exakta CSS och använda
+  samma "centrerad kub"-konstruktion (varje ansikte centrerat på bokens
+  egen mittpunkt via `left`/`top: 50%` + negativ margin, sedan
+  förskjutet längs en axel) istället för kant-gångjärn - samma teknik
+  som redan godkänts visuellt av Mats i artefakten.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1251/1251
+tester gröna (ingen ny unit-test - logiken är UI, testad med Playwright:
+skapade fem riktiga manus via UI-flödet, togglade List/Shelf, klickade en
+spine och bekräftade att info-kortet tonade in med rätt titel/antal och
+att "Open"/"Delete" fungerar, togglade tillbaka till List view och
+bekräftade att den är oförändrad).
+
 **Ändringslogg v1.0.248 → v1.0.249 (2026-11-02): den föräldralösa
 serie-referensen.** Samma läsare svarade efter v1.0.248: det gamla
 manuset syntes fortfarande inte på startsidan, ingen "create a

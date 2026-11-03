@@ -2016,6 +2016,255 @@ button:disabled {
   color: var(--text-dim);
 }
 
+/* Shelf view (roadmap-ideas.md #58) — a 3D CSS bookshelf alternative to the
+   book-shelf list, toggled per the view-mode buttons in Home.tsx. Each book
+   is a button with six absolutely-positioned `.face` faces (spine, two
+   covers, three page faces) given depth with `perspective`/`rotateY`. */
+
+.shelf-view-toggle {
+  display: inline-flex;
+  gap: 0.3rem;
+  margin-left: 0.8rem;
+}
+
+.shelf-view-toggle button {
+  background: none;
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.shelf-view-toggle button.is-active {
+  background: var(--panel);
+  border-color: var(--border);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.shelf-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.shelf-scene {
+  perspective: 1400px;
+  padding-bottom: 0.5rem;
+}
+
+.shelf-books {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 0 0 0 60px;
+  min-height: calc(230px + 70px);
+  transform-style: preserve-3d;
+}
+
+.shelf-plank-top,
+.shelf-plank-bottom {
+  width: 100%;
+  background: var(--raised);
+  border-top: 1px solid var(--border);
+}
+
+.shelf-plank-top {
+  height: 10px;
+}
+
+.shelf-plank-bottom {
+  height: 16px;
+  box-shadow: var(--shadow);
+}
+
+.book-spine {
+  --w: 54px;
+  --h: 230px;
+  --d: 180px;
+  --bg: var(--ink);
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  flex: 0 0 auto;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transform: rotateY(0deg) translateZ(0);
+  transition: transform 0.35s ease;
+}
+
+.book-spine.is-active {
+  transform: translateZ(150px) translateX(26px) rotateY(-70deg) rotateX(-1deg);
+}
+
+/* Each face is positioned absolute with no top/left set falls back to its
+   hypothetical static-flow position (stacked by prior siblings' height)
+   instead of the parent's corner — load-bearing, do not remove. Each face
+   is built centered on the book's own box center (via left/top: 50% plus a
+   negative margin of half its own size) and then pushed out along one axis
+   by half the box's extent on that axis — a cube built from six centered,
+   rotated planes, not six edge-hinged ones (which let faces bleed outside
+   the book's footprint at rest; see the ported, already-debugged artifact
+   this was built from). */
+.face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 1px;
+  backface-visibility: hidden;
+}
+
+.spine-face {
+  width: var(--w);
+  height: var(--h);
+  background: var(--bg);
+  transform: translateZ(calc(var(--d) / 2));
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0.6rem;
+  box-shadow: inset 0 0 14px rgb(0 0 0 / 0.18);
+}
+
+.spine-title {
+  color: var(--on-ink);
+  font-family: var(--font-prose);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-align: center;
+  padding: 0 0.3rem;
+  writing-mode: vertical-rl;
+  max-height: calc(var(--h) - 1.2rem);
+}
+
+.cover-front,
+.cover-back {
+  width: var(--d);
+  height: var(--h);
+  left: 50%;
+  margin-left: calc(var(--d) / -2);
+  background: var(--bg);
+}
+
+.cover-front {
+  transform: translateX(calc(var(--w) / 2)) rotateY(90deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem;
+  filter: brightness(1.05);
+}
+
+.cover-back {
+  transform: translateX(calc(var(--w) / -2)) rotateY(-90deg);
+  filter: brightness(0.82);
+}
+
+.cover-title {
+  color: var(--on-ink);
+  font-family: var(--font-prose);
+  font-size: 0.85rem;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.pages-top,
+.pages-bottom {
+  width: var(--w);
+  height: var(--d);
+  top: 50%;
+  margin-top: calc(var(--d) / -2);
+  background: var(--paper);
+}
+
+.pages-top {
+  transform: translateY(calc(var(--h) / -2)) rotateX(90deg);
+}
+
+.pages-bottom {
+  transform: translateY(calc(var(--h) / 2)) rotateX(-90deg);
+}
+
+.pages-edge {
+  width: var(--w);
+  height: var(--h);
+  transform: translateZ(calc(var(--d) / -2)) rotateY(180deg);
+  background: var(--paper);
+  filter: brightness(0.9);
+}
+
+.book-shadow {
+  width: var(--w);
+  height: var(--d);
+  top: 50%;
+  margin-top: calc(var(--d) / -2);
+  transform: translateY(calc(var(--h) / 2 + 6px)) rotateX(-90deg);
+  background: rgb(0 0 0 / 0.4);
+  filter: blur(7px);
+  opacity: 0;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.book-spine.is-active .book-shadow {
+  opacity: 0.3;
+  transform: translateY(calc(var(--h) / 2 + 28px)) rotateX(-90deg) scale(1.1);
+}
+
+.shelf-info-card {
+  flex: 1 1 320px;
+  max-width: 420px;
+  margin-top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.shelf-info-card.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.shelf-info-title {
+  font-family: var(--font-prose);
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.shelf-info-meta {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.shelf-info-siblings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.shelf-info-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.4rem;
+}
+
 /* Editor */
 
 .editor {

@@ -3402,7 +3402,14 @@ fungerar (`translation_group_id`, syskon-böcker) fast för utgåvor
 istället för språk, men inte nåt att designa i förväg utan ett
 konkret behov av att skilja utgåva 1 från utgåva 2.
 
-Inte påbörjad - fortsätter imorgon (Mats närmar sig sin veckogräns).
+**Byggt i v1.0.250, men mindre scope än ovan:** Mats bad specifikt om
+"sektionen Your manuskripts med Search, List view och Shelf view i
+appen" - bara togglen och bläddringen, inte kugghjuls-dialogen för
+omslag/färg/höjd/författare som den tidiga artefakt-prototypen hade.
+Hyllans bokryggar är alltså deterministiska (hash på titel/id för
+bredd/färg), inte lagrade - **cover/bokrygg-färg/"färdig"-år-fälten
+ovan är fortfarande inte tillagda i schemat.** Om/när kugghjuls-dialogen
+ska byggas på riktigt är det detta avsnittets metadata-lista som gäller.
 
 ## Medvetet nedprioriterat just nu (inte avvisat)
 

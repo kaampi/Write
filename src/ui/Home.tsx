@@ -9,6 +9,7 @@ import { UpdateCheckDialog } from "./UpdateCheckDialog";
 import { ImportManuscriptCard } from "./ImportManuscriptCard";
 import { ImportCodexBookCard } from "./ImportCodexBookCard";
 import { MascotTip } from "./MascotTip";
+import { BookshelfView } from "./BookshelfView";
 import {
   dismissMascotIntro,
   MASCOT_NAMES,
@@ -43,6 +44,7 @@ export function Home({
   const [title, setTitle] = useState("");
   const [newSeriesTitle, setNewSeriesTitle] = useState("");
   const [search, setSearch] = useState("");
+  const [shelfMode, setShelfMode] = useState<"list" | "shelf">("list");
   const [importOpen, setImportOpen] = useState(false);
   const [importCodexOpen, setImportCodexOpen] = useState(false);
   const [mascot, setMascotValue] = useState(readMascot);
@@ -232,6 +234,26 @@ export function Home({
       <section className="book-shelf" aria-label={m.home.shelf}>
         <h2 className="settings-heading home-heading-lg">
           {seriesSummaries.length > 0 ? m.series.standaloneHeading : m.home.shelfHeading}
+          {standaloneSummaries.length > 0 ? (
+            <span className="shelf-view-toggle" role="group">
+              <button
+                type="button"
+                className={shelfMode === "list" ? "is-active" : ""}
+                aria-pressed={shelfMode === "list"}
+                onClick={() => setShelfMode("list")}
+              >
+                {m.home.listView}
+              </button>
+              <button
+                type="button"
+                className={shelfMode === "shelf" ? "is-active" : ""}
+                aria-pressed={shelfMode === "shelf"}
+                onClick={() => setShelfMode("shelf")}
+              >
+                {m.home.shelfView}
+              </button>
+            </span>
+          ) : null}
         </h2>
 
         {standaloneSummaries.length === 0 ? (
@@ -250,7 +272,15 @@ export function Home({
           </>
         )}
 
-        {filteredSummaries.length > 0 ? (
+        {filteredSummaries.length > 0 && shelfMode === "shelf" ? (
+          <BookshelfView
+            groups={groupManuscripts(filteredSummaries)}
+            onOpen={(id) => void openBook(id)}
+            onDelete={(id) => void deleteBook(id)}
+          />
+        ) : null}
+
+        {filteredSummaries.length > 0 && shelfMode === "list" ? (
           <ul>
             {groupManuscripts(filteredSummaries).map((group) => {
               const [primary, ...siblings] = group;
