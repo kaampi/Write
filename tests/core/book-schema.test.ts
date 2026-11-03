@@ -82,16 +82,26 @@ describe("createBook", () => {
     expect(book.shelf_color).toBeUndefined();
     expect(book.shelf_height_adjust).toBe(0);
     expect(book.shelf_author).toBe("");
-    const { cover: _cover, shelf_color: _color, shelf_height_adjust: _height, shelf_author: _author, ...without } = book;
+    expect(book.shelf_description).toBe("");
+    const {
+      cover: _cover,
+      shelf_color: _color,
+      shelf_height_adjust: _height,
+      shelf_author: _author,
+      shelf_description: _description,
+      ...without
+    } = book;
     void _cover;
     void _color;
     void _height;
     void _author;
+    void _description;
     const parsed = parseBook(without);
     expect(parsed.cover).toBeUndefined();
     expect(parsed.shelf_color).toBeUndefined();
     expect(parsed.shelf_height_adjust).toBe(0);
     expect(parsed.shelf_author).toBe("");
+    expect(parsed.shelf_description).toBe("");
   });
 
   it("round-trips shelf settings, including summarizeBook's pass-through", () => {
@@ -100,19 +110,22 @@ describe("createBook", () => {
       cover: { thumbDataUrl: "data:image/jpeg;base64,thumb", imageDataUrl: "data:image/jpeg;base64,full" },
       shelf_color: "#c24f30",
       shelf_height_adjust: -5,
-      shelf_author: "A. N. Author"
+      shelf_author: "A. N. Author",
+      shelf_description: "A quiet mutiny, told sideways."
     };
     const parsed = parseBook(book);
     expect(parsed.cover?.thumbDataUrl).toBe("data:image/jpeg;base64,thumb");
     expect(parsed.shelf_color).toBe("#c24f30");
     expect(parsed.shelf_height_adjust).toBe(-5);
     expect(parsed.shelf_author).toBe("A. N. Author");
+    expect(parsed.shelf_description).toBe("A quiet mutiny, told sideways.");
 
     const summary = summarizeBook(parsed);
     expect(summary.cover_image_data_url).toBe("data:image/jpeg;base64,full");
     expect(summary.shelf_color).toBe("#c24f30");
     expect(summary.shelf_height_adjust).toBe(-5);
     expect(summary.shelf_author).toBe("A. N. Author");
+    expect(summary.shelf_description).toBe("A quiet mutiny, told sideways.");
   });
 
   it("leaves unset shelf settings out of the summary", () => {
@@ -121,6 +134,7 @@ describe("createBook", () => {
     expect(summary.shelf_color).toBeUndefined();
     expect(summary.shelf_height_adjust).toBeUndefined();
     expect(summary.shelf_author).toBeUndefined();
+    expect(summary.shelf_description).toBeUndefined();
   });
 });
 

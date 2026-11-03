@@ -11794,6 +11794,37 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.252 → v1.0.253 (2026-11-03): tvåkolumns hyllkort.**
+Mats, direkt efter sladigbugg-fixen: "Låt inställninge-dialogen bli
+dubbelt så bred. Låt bild och färgväljare ligga i vänster kolumn,
+Author, Description antalet kapitel och fakta samt open och delete i
+[höger] kolumn" (andra "vänster" i hans meddelande var uppenbart ett
+skrivfel för "höger", utifrån sammanhanget).
+
+- `ShelfSettingsDialog.tsx`: `.shelf-settings-body` blev en tvåkolumns
+  grid (vänster: omslag + ryggfärg; höger: författarnamn, ny
+  Description-ruta, höjd, kapitel/fakta-antal, Open/Delete). Kortets
+  bredd dubblad (28rem → 56rem), med en `@media`-brytpunkt tillbaka
+  till en kolumn under 40rem så dialogen inte blir trång på smal skärm.
+- Nytt fält `Book.shelf_description` - **medvetet INTE en återanvändning
+  av `synopsis`** (som en tidigare roadmap-anteckning föreslagit),
+  eftersom synopsis redan är en skrivkarta Draft och serie-extraktorn
+  läser - en snabb redigering från hyllans kugghjul ska aldrig av
+  misstag ändra vad Draft ser. Samma "missing on older saves"-default
+  som de andra `shelf_*`-fälten.
+- Kapitel/fakta-antal och Open/Delete fanns tidigare bara i info-kortet
+  utanför dialogen - nu även inne i dialogen (dialogen dubblar alltså
+  delvis som bokens snabböversikt). Info-kortet utanför är oförändrat;
+  inget bads om att ta bort det.
+- `updateShelfSettings`s patch-typ utökad med `shelf_description`.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1254/1254
+tester gröna (befintliga shelf-tester utökade med
+`shelf_description`-fallen, ingen ny `it`-rad). Playwright vid
+`deviceScaleFactor: 2`: öppnade kugghjulet, bekräftade visuellt att
+layouten är tvåkolumns som begärt (omslag+färg vänster, resten höger)
+och att dialogen är dubbelt så bred som innan.
+
 **Ändringslogg v1.0.251 → v1.0.252 (2026-11-03): det dimmiga omslaget.**
 Mats, direkt efter att ha laddat upp ett eget bokomslag i det nya
 kugghjulet: "Det känns som om bokomslaget blir dimmigt?" med en

@@ -453,9 +453,13 @@ export const BookSchema = z.object({
    * pair as chapter start images/entity pictures, `EntityPictureSchema`),
    * a fixed spine color (unset = the shelf's own deterministic per-title
    * color), a height adjustment in percent (-10 to +10, unset/0 = the
-   * shelf's shared base height), and a display author name (unset/empty =
-   * the shelf falls back to showing the app's own name). None of these
-   * are writing instructions or world facts — Draft never reads them.
+   * shelf's shared base height), a display author name (unset/empty =
+   * the shelf falls back to showing the app's own name), and a short
+   * card description. A deliberate separate field from `synopsis`, not a
+   * reuse of it — synopsis is a writing map Draft and the series
+   * extractor both read; a quick edit from the shelf's gear dialog
+   * should never silently change what Draft sees. None of these are
+   * writing instructions or world facts — Draft never reads them.
    * Missing on older saves — the shelf's existing hash-derived look is
    * unchanged until an author opens the gear dialog and sets one.
    */
@@ -466,6 +470,7 @@ export const BookSchema = z.object({
     .optional(),
   shelf_height_adjust: z.number().int().min(-10).max(10).default(0),
   shelf_author: z.string().default(""),
+  shelf_description: z.string().default(""),
   chapters: z.array(ChapterSchema),
   facts: z.array(NarrativeFactSchema),
   /**
@@ -582,7 +587,8 @@ export const BookSummarySchema = z.object({
   cover_image_data_url: z.string().optional(),
   shelf_color: z.string().optional(),
   shelf_height_adjust: z.number().optional(),
-  shelf_author: z.string().optional()
+  shelf_author: z.string().optional(),
+  shelf_description: z.string().optional()
 });
 export type BookSummary = z.infer<typeof BookSummarySchema>;
 
@@ -601,7 +607,8 @@ export function summarizeBook(book: Book): BookSummary {
     ...(book.cover ? { cover_image_data_url: book.cover.imageDataUrl } : {}),
     ...(book.shelf_color ? { shelf_color: book.shelf_color } : {}),
     ...(book.shelf_height_adjust ? { shelf_height_adjust: book.shelf_height_adjust } : {}),
-    ...(book.shelf_author.trim() ? { shelf_author: book.shelf_author } : {})
+    ...(book.shelf_author.trim() ? { shelf_author: book.shelf_author } : {}),
+    ...(book.shelf_description.trim() ? { shelf_description: book.shelf_description } : {})
   };
 }
 
@@ -638,6 +645,7 @@ export function createBook(title: string): Book {
     synopsis: "",
     shelf_height_adjust: 0,
     shelf_author: "",
+    shelf_description: "",
     chapters: [chapter],
     facts: [],
     media: [],

@@ -168,6 +168,18 @@ export function BookshelfView({
           shelfColor={editing.primary.shelf_color}
           shelfHeightAdjust={editing.primary.shelf_height_adjust ?? 0}
           shelfAuthor={editing.primary.shelf_author ?? ""}
+          shelfDescription={editing.primary.shelf_description ?? ""}
+          chapterCount={editing.primary.chapterCount}
+          factCount={editing.primary.factCount}
+          onOpen={() => {
+            setEditingId(null);
+            onOpen(editing.primary.id);
+          }}
+          onDelete={() => {
+            setEditingId(null);
+            setSelectedId(null);
+            onDelete(editing.primary.id);
+          }}
           onSave={(patch) => onUpdateSettings(editing.primary.id, patch)}
           onClose={() => setEditingId(null)}
         />

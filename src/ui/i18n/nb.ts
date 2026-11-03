@@ -208,7 +208,9 @@ export const nb: Messages = {
     authorPlaceholder: "kaampi Write",
     colorLabel: "Ryggfarge",
     heightLabel: "Høyde",
-    heightValue: "{sign}{percent}%"
+    heightValue: "{sign}{percent}%",
+    descriptionLabel: "Beskrivelse",
+    descriptionPlaceholder: "En kort linje til hyllekortet…"
   },
   editor: {
     manuscriptTitle: "Manuskripttittel",

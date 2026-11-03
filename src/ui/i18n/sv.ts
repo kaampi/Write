@@ -208,7 +208,9 @@ export const sv: Messages = {
     authorPlaceholder: "kaampi Write",
     colorLabel: "Ryggfärg",
     heightLabel: "Höjd",
-    heightValue: "{sign}{percent}%"
+    heightValue: "{sign}{percent}%",
+    descriptionLabel: "Beskrivning",
+    descriptionPlaceholder: "En kort rad till hyllkortet…"
   },
   editor: {
     manuscriptTitle: "Manustitel",

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.253] - 2026-11-03
+
+### Changed
+- The shelf card dialog is wider and two-column: cover and spine color on the left; author, a new short description field, height, chapter/fact count, and Open/Delete on the right.
+
 ## [1.0.252] - 2026-11-03
 
 ### Fixed

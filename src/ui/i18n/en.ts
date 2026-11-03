@@ -636,7 +636,9 @@ export const en = {
     authorPlaceholder: "kaampi Write",
     colorLabel: "Spine color",
     heightLabel: "Height",
-    heightValue: "{sign}{percent}%"
+    heightValue: "{sign}{percent}%",
+    descriptionLabel: "Description",
+    descriptionPlaceholder: "A short line for the shelf card…"
   },
   editor: {
     manuscriptTitle: "Manuscript title",

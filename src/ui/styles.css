@@ -2307,20 +2307,34 @@ button:disabled {
 }
 
 .shelf-settings-card {
-  width: min(28rem, 100%);
+  width: min(56rem, 100%);
 }
 
 .shelf-settings-body {
   display: grid;
-  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
 }
 
-.shelf-settings-field input[type="text"] {
+.shelf-settings-column {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.shelf-settings-field input[type="text"],
+.shelf-settings-field textarea {
   width: 100%;
   background: var(--paper);
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 0.5rem 0.65rem;
+}
+
+.shelf-settings-field textarea {
+  resize: vertical;
+  font-family: inherit;
 }
 
 .shelf-settings-swatches {
@@ -2342,6 +2356,19 @@ button:disabled {
 
 .shelf-settings-field input[type="range"] {
   width: 100%;
+}
+
+.shelf-settings-meta {
+  display: block;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 40rem) {
+  .shelf-settings-body {
+    grid-template-columns: 1fr;
+  }
 }
 
 .shelf-info-actions {

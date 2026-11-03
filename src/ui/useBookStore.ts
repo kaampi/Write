@@ -106,7 +106,7 @@ export type BookStoreValue = {
   /** Shelf view's gear dialog (roadmap-ideas.md #58) — works on any book, not just the open one. */
   updateShelfSettings: (
     bookId: string,
-    patch: Partial<Pick<Book, "cover" | "shelf_color" | "shelf_height_adjust" | "shelf_author">>
+    patch: Partial<Pick<Book, "cover" | "shelf_color" | "shelf_height_adjust" | "shelf_author" | "shelf_description">>
   ) => Promise<void>;
   importMarkdownManuscript: (title: string, chapters: ImportedChapterCandidate[]) => Promise<void>;
   deleteBook: (id: string) => Promise<void>;

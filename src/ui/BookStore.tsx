@@ -793,7 +793,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const updateShelfSettings = useCallback(
     async (
       bookId: string,
-      patch: Partial<Pick<Book, "cover" | "shelf_color" | "shelf_height_adjust" | "shelf_author">>
+      patch: Partial<Pick<Book, "cover" | "shelf_color" | "shelf_height_adjust" | "shelf_author" | "shelf_description">>
     ) => {
       if (bookRef.current?.id === bookId) {
         await patchBook((current) => ({ ...current, ...patch }));
