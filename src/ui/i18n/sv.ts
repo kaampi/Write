@@ -1595,6 +1595,9 @@ export const sv: Messages = {
     creatingSeriesFromBook: "Skapar serie…",
     createSeriesFromBookTitle:
       "Skapar en ny serie med samma namn som boken, kopplar boken till den, och skickar upp varenda låst fakta i boken till serien som fastslagen canon.",
+    createSeriesFromBookConfirm:
+      'Skapa en serie som heter "{title}", med den här boken som dess första? Varenda låst fakta i boken blir seriens egen canon.',
+    createSeriesFromBookDone: 'Skapade serien "{title}", med den här boken som dess första.',
     seriesMissing: "Den här boken tillhör en serie som inte går att hitta — borttagen, eller aldrig synkad till den här installationen. Bokens egen Story Bible är opåverkad, men boken visas inte på startsidans fristående hylla förrän den antingen återkopplas eller görs fristående igen.",
     seriesMissingConfirm: "Gör boken fristående igen? Dess egna låsta fakta ligger kvar precis som de är — den slutar bara peka på en serie som inte går att hitta.",
     seriesMissingFix: "Gör boken fristående",

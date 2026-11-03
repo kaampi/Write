@@ -11794,6 +11794,34 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.253 → v1.0.254 (2026-11-03): bekräftelser kring
+"Gör till serie".** Mats frågade hur man startar en serie från en redan
+skriven bok, fick instruktioner (Story Bible → "Gör till serie" →
+stäng boken → Series-vyn → nytt manus i serien). Följdes direkt av:
+"När man klickar på Gör till Serie borde man få en fråga om man vill
+skapa en serie med aktuell bok som den första i serien. Om man klickar
+Ja så får men en bekräftelse på att man skapat en serie." - knappen
+gjorde redan allt det (skapade serie, kopplade boken, skickade upp
+alla låsta fakta) men helt tyst, utan vare sig en första "är du
+säker"-fråga eller ett kvitto efteråt.
+
+- `BiblePanel.tsx`s `createSeriesFromBook()`: ny `window.confirm(...)`
+  allra först - avbryter hela funktionen (inget skapas) om författaren
+  klickar Avbryt. Oförändrad logik i övrigt (skapa serie, koppla boken,
+  skicka upp fakta, varna om överhoppade unconfirmed-fakta om sådana
+  finns). Ny `window.alert(...)` sist i `try`-blocket som bekräftar att
+  serien skapades, med dess namn.
+- Tre nya `m.bible.*`-strängar (en/sv/nb): `createSeriesFromBookConfirm`
+  (frågan, med boktiteln insatt), `createSeriesFromBookDone`
+  (bekräftelsen). Ingen schemaändring - rent UI-flöde.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1254/1254
+tester gröna (ingen befintlig automatiserad test rörde den här knappen
+sen tidigare). Playwright: skapade en bok, lyssnade på sidans
+`dialog`-event, klickade "Create series from this book" - fångade
+exakt två dialoger i rätt ordning, en `confirm` med frågan följt av en
+`alert` med bekräftelsen, texterna matchande de nya strängarna.
+
 **Ändringslogg v1.0.252 → v1.0.253 (2026-11-03): tvåkolumns hyllkort.**
 Mats, direkt efter sladigbugg-fixen: "Låt inställninge-dialogen bli
 dubbelt så bred. Låt bild och färgväljare ligga i vänster kolumn,

@@ -186,6 +186,7 @@ export function BiblePanel({
    */
   async function createSeriesFromBook() {
     if (!book) return;
+    if (!window.confirm(format(m.bible.createSeriesFromBookConfirm, { title: book.title }))) return;
     setCreatingSeries(true);
     try {
       const created = await createSeries(book.title);
@@ -203,6 +204,7 @@ export function BiblePanel({
         );
       }
       if (skippedUnconfirmed > 0) window.alert(format(m.bible.seriesSkippedUnconfirmed, { count: String(skippedUnconfirmed) }));
+      window.alert(format(m.bible.createSeriesFromBookDone, { title: created.title }));
     } finally {
       // createSeries() above opens the new series in the global Series store
       // (seriesId), same as the Home "new series" form does - fine there,

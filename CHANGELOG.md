@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.254] - 2026-11-03
+
+### Changed
+- "Create series from this book" now confirms before acting (what it's about to do, with the book as the series' first) and confirms again once the series is actually created, instead of just quietly happening.
+
 ## [1.0.253] - 2026-11-03
 
 ### Changed

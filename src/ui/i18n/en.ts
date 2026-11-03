@@ -1608,6 +1608,9 @@ export const en = {
     creatingSeriesFromBook: "Creating series…",
     createSeriesFromBookTitle:
       "Creates a new series named after this book, assigns the book to it, and promotes every one of its locked facts up to the series as established canon.",
+    createSeriesFromBookConfirm:
+      'Create a series called "{title}", with this book as its first? Every one of its locked facts becomes the series\' own canon.',
+    createSeriesFromBookDone: 'Created the series "{title}", with this book as its first.',
     seriesMissing: "This book belongs to a series that can't be found — deleted, or never synced to this install. Your own Story Bible is unaffected, but this book won't show on the home page's standalone shelf until it's either reconnected or made standalone again.",
     seriesMissingConfirm: "Make this book standalone again? Its own locked facts stay exactly as they are — it just stops pointing at a series that can't be found.",
     seriesMissingFix: "Make this book standalone",
