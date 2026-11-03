@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.252] - 2026-11-03
+
+### Fixed
+- A shelf card's uploaded cover looked hazy on the 3D book face, especially on a high-resolution screen — it was displaying the 256px list thumbnail instead of the full-size image. Shelf view and its settings dialog now use the full-size cover.
+
 ## [1.0.251] - 2026-11-03
 
 ### Added

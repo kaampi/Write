@@ -11794,6 +11794,36 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.251 → v1.0.252 (2026-11-03): det dimmiga omslaget.**
+Mats, direkt efter att ha laddat upp ett eget bokomslag i det nya
+kugghjulet: "Det känns som om bokomslaget blir dimmigt?" med en
+skärmdump av det lilla 3D-omslaget bredvid den skarpa originalbilden.
+
+Rotorsak: `BookSummarySchema`/`summarizeBook` (v1.0.251) exponerade bara
+`book.cover.thumbDataUrl` - samma 256px-kant-nedskalade JPEG som
+listvyer med många små bilder redan använder (entitetsporträtt,
+`THUMB_EDGE` i `entityImage.ts`). Men hyllans 3D-omslagsyta
+(`cover-front`) renderas betydligt större än 256px på skärmen, och på
+en skärm med devicePixelRatio 2+ (vilket Mats testade på) blir en
+256px-källa uppskalad till 500+ fysiska pixlar - synligt suddig. Ingen
+annan vy visar bokomslag i sann miniatyrstorlek idag, så det fanns inget
+skäl att behålla tumnageln här.
+
+Fix: `cover_thumb_data_url` → `cover_image_data_url`, hämtar
+`book.cover.imageDataUrl` (1200px-kanten, samma som kapitelbilder redan
+sparar) istället. `BookshelfView.tsx` och `ShelfSettingsDialog.tsx`s
+förhandsvisning uppdaterade till samma fält. Ingen schemaändring på
+`Book` självt - `cover` har redan både thumb och full sedan v1.0.251,
+bara vilket fält `summarizeBook` exponerar ändrades.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1254/1254
+tester gröna (de tre v1.0.251-testerna för shelf-passthrough
+uppdaterade till det nya fältnamnet). Playwright vid
+`deviceScaleFactor: 2` (för att faktiskt återskapa buggen, inte bara
+dölja den på en vanlig skärm): laddade upp en 512×512 testbild som
+omslag, zoomade in på den renderade `.shelf-cover-image` - skarpa
+kanter, ingen suddighet.
+
 **Ändringslogg v1.0.250 → v1.0.251 (2026-11-03): kugghjulet på hyllkortet.**
 Mats, direkt efter att v1.0.250 (List/Shelf-togglen) visats: "Vart är
 kugghjulet?" - prototypens redigeringsdialog (omslag/ryggfärg/höjd/

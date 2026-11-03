@@ -109,7 +109,7 @@ describe("createBook", () => {
     expect(parsed.shelf_author).toBe("A. N. Author");
 
     const summary = summarizeBook(parsed);
-    expect(summary.cover_thumb_data_url).toBe("data:image/jpeg;base64,thumb");
+    expect(summary.cover_image_data_url).toBe("data:image/jpeg;base64,full");
     expect(summary.shelf_color).toBe("#c24f30");
     expect(summary.shelf_height_adjust).toBe(-5);
     expect(summary.shelf_author).toBe("A. N. Author");
@@ -117,7 +117,7 @@ describe("createBook", () => {
 
   it("leaves unset shelf settings out of the summary", () => {
     const summary = summarizeBook(createBook("Legacy"));
-    expect(summary.cover_thumb_data_url).toBeUndefined();
+    expect(summary.cover_image_data_url).toBeUndefined();
     expect(summary.shelf_color).toBeUndefined();
     expect(summary.shelf_height_adjust).toBeUndefined();
     expect(summary.shelf_author).toBeUndefined();

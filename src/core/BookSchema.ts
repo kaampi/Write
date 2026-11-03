@@ -570,8 +570,16 @@ export const BookSummarySchema = z.object({
   translation_group_id: z.string().optional(),
   translated_from_book_id: z.string().optional(),
   series_id: z.string().optional(),
-  /** Shelf view (roadmap-ideas.md #58) — see Book.cover/shelf_* for what these mean. */
-  cover_thumb_data_url: z.string().optional(),
+  /**
+   * Shelf view (roadmap-ideas.md #58) — see Book.cover/shelf_* for what
+   * these mean. The full-size image, not the thumbnail: the shelf's 3D
+   * cover face is often rendered well past 256px (the thumb's own max
+   * edge) once CSS stretches it to the book's depth, especially at a 2x+
+   * device pixel ratio — the thumb visibly blurs there. Nothing today
+   * shows book covers at true-thumbnail size, so there's no second,
+   * smaller field to carry alongside it.
+   */
+  cover_image_data_url: z.string().optional(),
   shelf_color: z.string().optional(),
   shelf_height_adjust: z.number().optional(),
   shelf_author: z.string().optional()
@@ -590,7 +598,7 @@ export function summarizeBook(book: Book): BookSummary {
     ...(book.translation_group_id ? { translation_group_id: book.translation_group_id } : {}),
     ...(book.translated_from_book_id ? { translated_from_book_id: book.translated_from_book_id } : {}),
     ...(book.series_id ? { series_id: book.series_id } : {}),
-    ...(book.cover ? { cover_thumb_data_url: book.cover.thumbDataUrl } : {}),
+    ...(book.cover ? { cover_image_data_url: book.cover.imageDataUrl } : {}),
     ...(book.shelf_color ? { shelf_color: book.shelf_color } : {}),
     ...(book.shelf_height_adjust ? { shelf_height_adjust: book.shelf_height_adjust } : {}),
     ...(book.shelf_author.trim() ? { shelf_author: book.shelf_author } : {})

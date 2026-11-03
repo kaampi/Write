@@ -39,10 +39,12 @@ export function ShelfSettingsDialog({
   const [imageBusy, setImageBusy] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   /**
-   * `cover` as passed in only ever carries a thumbnail (BookSummary has no
-   * room for the full-size image) — so re-saving it unchanged would
-   * downgrade the real, full-size stored cover to thumb quality. Only
-   * include `cover` in the patch when this dialog actually changed it.
+   * `cover` as passed in is reconstructed from BookSummary's flattened
+   * `cover_image_data_url` (both its thumbDataUrl/imageDataUrl set to the
+   * same full-size image — BookSummary doesn't carry a true thumbnail),
+   * not read straight off the stored Book. Keep the patch from touching
+   * `cover` at all unless this dialog actually changed it, rather than
+   * relying on that reconstruction always matching the original forever.
    */
   const [coverTouched, setCoverTouched] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);

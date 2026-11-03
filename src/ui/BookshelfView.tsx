@@ -84,8 +84,8 @@ export function BookshelfView({
                   <span className="spine-title">{item.primary.title}</span>
                 </div>
                 <div className="face cover-front">
-                  {item.primary.cover_thumb_data_url ? (
-                    <img className="shelf-cover-image" src={item.primary.cover_thumb_data_url} alt="" />
+                  {item.primary.cover_image_data_url ? (
+                    <img className="shelf-cover-image" src={item.primary.cover_image_data_url} alt="" />
                   ) : (
                     <>
                       <span className="cover-title">{item.primary.title}</span>
@@ -164,7 +164,7 @@ export function BookshelfView({
       {editing ? (
         <ShelfSettingsDialog
           title={editing.primary.title}
-          cover={editing.primary.cover_thumb_data_url ? { thumbDataUrl: editing.primary.cover_thumb_data_url, imageDataUrl: editing.primary.cover_thumb_data_url } : undefined}
+          cover={editing.primary.cover_image_data_url ? { thumbDataUrl: editing.primary.cover_image_data_url, imageDataUrl: editing.primary.cover_image_data_url } : undefined}
           shelfColor={editing.primary.shelf_color}
           shelfHeightAdjust={editing.primary.shelf_height_adjust ?? 0}
           shelfAuthor={editing.primary.shelf_author ?? ""}
