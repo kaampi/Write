@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.255] - 2026-11-03
+
+### Changed
+- A new book added to an existing series now inherits Typography (page size/margin, font, weight, colors, drop cap, scene break) and the editor backdrop from the series' own most recently updated book, instead of starting from scratch — so a trilogy stays visually consistent without redoing Settings on every installment. Writing-instruction fields (POV, tense, voice, viewpoint) are never copied; those stay a per-book choice.
+
 ## [1.0.254] - 2026-11-03
 
 ### Changed

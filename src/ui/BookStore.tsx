@@ -843,9 +843,44 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     void refresh();
   }, [persist, refresh]);
 
+  /**
+   * A book added to an existing series (Mats, 2026-11-03: "Kanske ska bok 2
+   * och framåt ärva den förra bokens format och inställningar för
+   * typografi etc.") inherits Typography (page size/margin, font, weight,
+   * colors, drop cap, scene break) plus the editor backdrop from the
+   * series' own most recently updated book — not necessarily its first —
+   * so a trilogy stays visually consistent without the author having to
+   * redo Settings on every new installment. Writing-instruction fields
+   * (pov/tense/voice/viewpoint, polish prompt) are deliberately NOT
+   * copied: those are per-book creative choices, not presentation.
+   * `summaries` is already sorted newest-updated-first (Repository.list()),
+   * so the first match is the series' latest book. Falls back to
+   * createBook's own defaults if the source book can't be loaded, or
+   * there's no earlier book in this series to inherit from — same as today.
+   */
   const newBook = useCallback(
     async (title: string, seriesId?: string) => {
-      const created = { ...createBook(title), ...(seriesId ? { series_id: seriesId } : {}) };
+      let typography: Partial<Book> = {};
+      const latestInSeries = seriesId ? summaries.find((item) => item.series_id === seriesId) : undefined;
+      if (latestInSeries) {
+        try {
+          const source = await repo.get(latestInSeries.id);
+          typography = {
+            drop_cap_lines: source.drop_cap_lines,
+            body_font: source.body_font,
+            body_font_weight: source.body_font_weight,
+            body_color_dark: source.body_color_dark,
+            body_color_light: source.body_color_light,
+            scene_break_style: source.scene_break_style,
+            page_size: source.page_size,
+            page_margin: source.page_margin,
+            editor_background: source.editor_background
+          };
+        } catch {
+          /* fall back to createBook's own defaults */
+        }
+      }
+      const created = { ...createBook(title), ...typography, ...(seriesId ? { series_id: seriesId } : {}) };
       await repo.save(created);
       setSummaries(await repo.list());
       withViewTransition(() => {
@@ -858,7 +893,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(LAST_BOOK_KEY, created.id);
       setError(null);
     },
-    [repo]
+    [repo, summaries]
   );
 
   const newLanguageVersion = useCallback(

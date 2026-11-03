@@ -11794,6 +11794,42 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.254 → v1.0.255 (2026-11-03): bok 2 ärver bok 1:s
+typografi i en serie.** Mats, direkt efter att ha undrat varför en ny
+boks skrivkolumn var smalare än sin första bok (svar: `page_size`
+"6x9" är standard för nya manus, skalar kolumnbredden - ingen bugg, se
+`ProseCanvas.tsx`s `columnMaxWidth`): "Kanske ska bok 2 och framåt
+ärva den förra bokens format och inställningar för typografi etc." Jag
+gav en rekommendation (ja, men bara Typography/presentation-fälten,
+aldrig skrivinstruktioner som pov/tense/voice) och fick ett "Ja, bygg
+det så".
+
+- `BookStore.tsx`s `newBook(title, seriesId)`: när `seriesId` är satt,
+  slår upp seriens SENAST uppdaterade bok (inte nödvändigtvis bok 1 -
+  `summaries` är redan sorterad nyast-uppdaterad-först via
+  `Repository.list()`, så första träffen på `series_id` är rätt bok),
+  laddar hela boken och kopierar `drop_cap_lines`, `body_font`,
+  `body_font_weight`, `body_color_dark`, `body_color_light`,
+  `scene_break_style`, `page_size`, `page_margin` och
+  `editor_background` in i den nya bokens defaults INNAN
+  `createBook()`s egna standardvärden tillämpas. Om källboken inte går
+  att läsa (borttagen mellan listning och hämtning) eller det inte
+  finns nån tidigare bok i serien: faller tillbaka till
+  `createBook()`s vanliga defaults precis som idag, utan att det
+  stoppar bokskapandet.
+  **Medvetet INTE kopierat:** pov/tense/voice/viewpoint (kreativa val
+  per bok, inte presentation) och polish-prompten (en arbetsflödes-
+  inställning, inte typografi).
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1254/1254
+tester gröna (ingen befintlig unit-test anropar `newBook` direkt -
+logiken är store-nivå, redan Playwright-mönstret för den här filen).
+Playwright: skapade Bok 1, satte Page size till "Letter" i Manuscript
+settings (skiljer sig från standarden "6x9"), "Gör till serie", öppnade
+serien, skapade Bok 2 via seriens eget "nytt manus"-fält - läste båda
+böckernas `page_size` direkt ur IndexedDB och bekräftade att Bok 2 fick
+"letter", inte standardens "6x9".
+
 **Ändringslogg v1.0.253 → v1.0.254 (2026-11-03): bekräftelser kring
 "Gör till serie".** Mats frågade hur man startar en serie från en redan
 skriven bok, fick instruktioner (Story Bible → "Gör till serie" →
