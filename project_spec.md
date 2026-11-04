@@ -11794,6 +11794,40 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.271 → v1.0.272 (2026-11-04): rubriken linjerar
+med innehållet under, oavsett skärmbredd.** Mats, med en skärmdump av
+den breda skärmen: "Mycket bra. Jag skulle vilja att textblocket
+linjerar med texten under. Det betyder att den svarta toning också
+måste följa med längre in på bilden vid breda skärmar. Förstår du hur
+jag menar?"
+
+Rotorsak: `.home-hero-banner-overlay`s vänsterpadding var
+viewport-relativ (`min(3.5rem, 8vw)`), medan `.home`s eget innehåll
+(rubriken "Your manuscripts" m.m.) sitter i en `max-width: 90.5rem;
+margin: 0 auto;`-box med `1.5rem` sidopadding. De två råkade sammanfalla
+på ett smalt fönster (båda landar nära ~1.5rem från kanten) men gled
+isär på ett brett, där `.home`s box centreras med riktiga marginaler
+som den fulla bredden (100vw) bannerns överlägg aldrig fick.
+
+Löst med en CSS custom property `--hero-inset: calc(max(0px, (100vw -
+90.5rem) / 2) + 1.5rem)` på `.home-hero-banner-overlay` - exakt samma
+uträkning som `.home`s egen vänsterkant gör implicit via `margin: 0
+auto` + `max-width` + `padding`. `padding-left` bytt till
+`var(--hero-inset)`. Den mörka gradienten (tidigare procentbaserade
+stopp, `38%`/`72%` av hela bannerbredden) bytt till
+längd-baserade stopp räknade FRÅN samma variabel
+(`calc(var(--hero-inset) + 20rem)` / `+ 36rem`) - så tomningen alltid
+täcker textblocket oavsett var det faktiskt hamnar, istället för att
+vara en fast procent av en bredd som inte har med textens position
+att göra.
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna (ren
+CSS). Verifierat live med Playwright på två breda fönster (2200px och
+1024px): `h1`s `boundingBox().x` och `.manuscript-topp h2`s
+`boundingBox().x` identiska i båda (400px respektive 24px) -
+skärmdumparna bekräftar att gradienten täcker texten snyggt i båda
+fallen.
+
 **Ändringslogg v1.0.270 → v1.0.271 (2026-11-04): ny toppbild,
 fast höjd som matchar Explore.** Mats skickade en bredare beskärning
 av samma bibliotek/skrivbord-illustration (2000×499, `154.jpg`) och

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.272] - 2026-11-04
+
+### Fixed
+- The hero banner's headline now lines up horizontally with "Your manuscripts" etc. below it at any window width — it previously used a viewport-relative inset of its own, which only happened to match the page content's inset on a narrow window. The dark gradient's reach is now tied to that same alignment, so it keeps covering the text as it moves right on a wide window instead of staying fixed.
+
 ## [1.0.271] - 2026-11-04
 
 ### Changed

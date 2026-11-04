@@ -903,6 +903,19 @@ button:disabled {
   object-position: right center;
 }
 
+/*
+ * Mats, 2026-11-05: the headline should line up with "Your manuscripts"
+ * etc. below it, not just sit at a viewport-relative inset of its own —
+ * those matched by coincidence on a narrow window (both ~1.5rem from the
+ * edge) but drifted apart on a wide one, where .home's own max-width:
+ * 90.5rem centers it with real side margins the banner (full-bleed,
+ * 100vw) doesn't have. --hero-inset recomputes .home's own left edge —
+ * 1.5rem on a narrow window, growing by half the leftover width past
+ * 90.5rem on a wide one — so the two always agree. The dark gradient's
+ * stops are anchored off the same variable, so the fade keeps covering
+ * the text block (and only grows further right on a wide window because
+ * the text itself did, not because the gradient drifted independently).
+ */
 .home-hero-banner-overlay {
   position: absolute;
   inset: 0;
@@ -911,12 +924,13 @@ button:disabled {
   justify-content: center;
   align-items: flex-start;
   gap: 0.85rem;
-  padding: 2.5rem min(3.5rem, 8vw);
+  --hero-inset: calc(max(0px, (100vw - 90.5rem) / 2) + 1.5rem);
+  padding: 2.5rem min(3.5rem, 8vw) 2.5rem var(--hero-inset);
   background: linear-gradient(
     to right,
-    rgb(10 8 6 / 0.82) 0%,
-    rgb(10 8 6 / 0.55) 38%,
-    rgb(10 8 6 / 0) 72%
+    rgb(10 8 6 / 0.82) 0,
+    rgb(10 8 6 / 0.55) calc(var(--hero-inset) + 20rem),
+    rgb(10 8 6 / 0) calc(var(--hero-inset) + 36rem)
   );
 }
 
