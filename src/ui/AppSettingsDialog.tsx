@@ -15,6 +15,7 @@ import {
 import { ModelSelect } from "./SettingsPanel";
 import { applyPaper, parsePaper, readPaper, PAPERS } from "./paper";
 import { MASCOT_IDS, MASCOT_POSES, readMascot, setMascot, type MascotId } from "./mascot";
+import { readAiFreeMode, setAiFreeMode } from "./aiFreeMode";
 import {
   detectGpuSuggestion,
   isDesktopApp,
@@ -100,6 +101,7 @@ export function AppSettingsDialog({
   }, [historyLimit]);
   const [paper, setPaper] = useState(readPaper);
   const [mascot, setMascotState] = useState<MascotId>(readMascot);
+  const [aiFree, setAiFree] = useState(readAiFreeMode);
 
   const connected = models.length > 0 && !ollamaError;
   const [gpuSuggestion, setGpuSuggestion] = useState<GpuSuggestion | null>(null);
@@ -143,6 +145,18 @@ export function AppSettingsDialog({
           <div className="settings-card-column">
             <section className="settings-block">
               <h2 className="settings-heading">{m.editor.modelsHeading}</h2>
+              <label className="settings-ai-free-toggle">
+                <input
+                  type="checkbox"
+                  checked={aiFree}
+                  onChange={(event) => {
+                    setAiFree(event.target.checked);
+                    setAiFreeMode(event.target.checked);
+                  }}
+                />
+                {m.editor.aiFreeModeLabel}
+              </label>
+              <p className="quiet">{m.editor.aiFreeModeHint}</p>
               <p className={ollamaError ? "banner home-banner" : "quiet"} role={ollamaError ? "status" : undefined}>
                 {ollamaError ? translateError(ollamaError, m) : null}
               </p>

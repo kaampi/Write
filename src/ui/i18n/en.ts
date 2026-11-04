@@ -707,6 +707,10 @@ export const en = {
     proseLanguagePlaceholder: "e.g. English",
     proseLanguageTitle: "The language the sentences are written in. Empty infers from the manuscript. A writing instruction, not canon.",
     modelsHeading: "AI settings",
+    aiFreeModeLabel: "AI-free mode",
+    aiFreeModeHint:
+      "Grays out every tool that needs AI (drafting, rewriting, analysis, interviews…) instead of hiding them. Writing, chapters, the Story Bible and export all work without AI regardless of this setting — this just turns off the AI tools on top, even if a local AI is connected.",
+    aiFreeModeDisabledHint: "Turned off in AI-free mode (Settings).",
     engineLabel: "Engine",
     engineOllama: "Ollama",
     engineOpenAiCompatible: "LM Studio / other local server",

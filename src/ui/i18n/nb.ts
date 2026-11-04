@@ -279,6 +279,10 @@ export const nb: Messages = {
     proseLanguagePlaceholder: "f.eks. engelsk",
     proseLanguageTitle: "Språket setningene skrives på. Tomt gjetter fra manuskriptet. En skriveinstruksjon, ikke kanon.",
     modelsHeading: "AI-innstillinger",
+    aiFreeModeLabel: "AI-fri modus",
+    aiFreeModeHint:
+      "Gråer ut hvert verktøy som krever AI (utkast, omskriving, analyse, intervjuer…) i stedet for å skjule dem. Skriving, kapitler, Story Bible og eksport fungerer alltid uten AI uansett denne innstillingen — denne slår bare av AI-verktøyene på toppen, selv om en lokal AI er tilkoblet.",
+    aiFreeModeDisabledHint: "Slått av i AI-fri modus (Settings).",
     engineLabel: "Motor",
     engineOllama: "Ollama",
     engineOpenAiCompatible: "LM Studio / annen lokal server",

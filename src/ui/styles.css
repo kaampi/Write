@@ -3592,6 +3592,13 @@ button:disabled {
   margin: 0;
 }
 
+.settings-ai-free-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
 /*
  * Pairs a field's own label with its HelpTip "?" button, keeping it
  * inline instead of wrapping underneath, and shrinks the button to the
