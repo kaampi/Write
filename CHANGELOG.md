@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.258] - 2026-11-04
+
+### Fixed
+- Creating a new book from inside a series' own Books tab, then closing that book, landed back on the series workspace instead of the home page — the series stayed open in the background the whole time. Same fix as v1.0.248's "Create series from this book": close the series once the new book is open.
+
 ## [1.0.257] - 2026-11-04
 
 ### Changed

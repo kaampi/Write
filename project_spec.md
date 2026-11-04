@@ -11794,6 +11794,39 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.257 → v1.0.258 (2026-11-04): samma gamla-serie-bugg,
+en till kodväg.** Mats: "Ja, fixa den buggen också" - buggen jag
+rapporterade i förra svaret (hittad av misstag under Playwright-
+testning av v1.0.257, inte fixad då).
+
+Rotorsak identisk med v1.0.248: `App.tsx`s fallback-kedja
+`book ? Editor : seriesId ? SeriesWorkspace : Home` gör att en serie
+som ligger kvar öppen i bakgrunden (`SeriesStore`s `seriesId`) tar över
+så fort boken stängs - oavsett VARFÖR serien råkade vara öppen. v1.0.248
+fixade det för "Gör till serie" (som öppnar en serie som ett
+sidoeffekt-av-att-skapa-den). Den här gången är kodvägen en annan:
+`SeriesWorkspace.tsx`s egen "+ New book in this series"-formulär (Books-
+fliken) - att skapa en bok DÄRIFRÅN lämnade också serien öppen i
+bakgrunden, så att senare stänga den nya boken föll tillbaka till
+serie-vyn istället för startsidan. Dubbelt förvirrande eftersom
+`SeriesWorkspace`s egen `tab`-state alltid återställs till "brainstorm"
+vid ny mount - man hamnade alltså inte ens på Books-fliken man kom
+ifrån, utan på en helt annan flik.
+
+Fix: `submitNewBook()` anropar `closeSeries()` i `.then()`-kedjan efter
+`newBook()`, exakt samma mönster som `createSeriesFromBook` redan
+använder. `closeSeries()` sparar seriens state innan den nollställs
+(`if (current) void persist(current);`), så inget kan gå förlorat -
+och eftersom författaren bara varit på Books-fliken (inte skrivit i
+Brainstorm/Synopsis) finns det uttryckligen inget ohanterat att tappa
+här heller.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1254/1254
+tester gröna. Playwright: återskapade exakt den rapporterade sekvensen
+(bok 1 → gör till serie → öppna serien → Books-flik → skapa bok 2
+därifrån → stäng bok 2) - bekräftade att "Write the prose."-rubriken
+(startsidan) syns och att serie-vyns "Brainstorm"-flik INTE gör det.
+
 **Ändringslogg v1.0.256 → v1.0.257 (2026-11-04): seriers böcker in på
 hyllan, sektionerna byter plats.** Mats testade artefakt-prototypen
 flera rundor (Shelf-vyn direkt under "Create new manuscript", Series

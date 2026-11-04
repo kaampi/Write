@@ -49,10 +49,24 @@ export function SeriesWorkspace() {
 
   const books = booksInSeries(series.id);
 
+  /**
+   * Closes the series in the background once the new book opens, same fix
+   * as BiblePanel.tsx's createSeriesFromBook (v1.0.248) and the same root
+   * cause: App.tsx falls back to `book ? Editor : seriesId ? SeriesWorkspace
+   * : Home`, so a lingering open series stays in that fallback chain even
+   * while a book is open on top of it. Without this, closing the new book
+   * later landed back on this series workspace instead of Home — and not
+   * even on this Books tab, since `tab` state resets to "brainstorm" on
+   * the next mount, making it doubly disorienting. Found via Playwright
+   * testing of a separate change (2026-11-04), fixed on request.
+   */
   function submitNewBook(event: React.SyntheticEvent) {
     event.preventDefault();
     if (!series) return;
-    void newBook(newBookTitle, series.id).then(() => setNewBookTitle(""));
+    void newBook(newBookTitle, series.id).then(() => {
+      setNewBookTitle("");
+      closeSeries();
+    });
   }
 
   return (
