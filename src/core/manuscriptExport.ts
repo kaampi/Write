@@ -28,11 +28,24 @@ export type ParagraphStyle = "spaced" | "indented";
 /** Body text weight (BookSchema's body_font_weight) — "bold" uses the font's own bold-embedded weight for everything but headings, which already render bold regardless and so don't visually separate from bold body text. Only two values because that's what's actually embedded per font (see PublishFont above). */
 export type BodyWeight = "regular" | "bold";
 
-/** Page dimensions, in points, for every format with a real printed page (IDML, PDF, ODT) — BookSchema's page_size. "6x9" is a common trade-paperback trim; the other two are the two paper sizes everything else defaults to. */
+/**
+ * Page dimensions, in points, for every format with a real printed page
+ * (IDML, PDF, ODT) — BookSchema's page_size. "6x9" is a common trade-
+ * paperback trim; "letter"/"a4" are the two paper sizes everything else
+ * defaults to. The four Nordic trade trims (Mats, 2026-11-04) convert
+ * their millimeter dimensions at 1mm = 2.834645669pt — note a5's height
+ * and storpocket's height both land on a4's width (210mm), and that's
+ * not a coincidence: it's the same real-world paper geometry, not a
+ * rounding artifact.
+ */
 export const PAGE_SIZES: Record<Book["page_size"], { width: number; height: number }> = {
   a4: { width: 595.28, height: 841.89 },
   letter: { width: 612, height: 792 },
-  "6x9": { width: 432, height: 648 }
+  "6x9": { width: 432, height: 648 },
+  pocket: { width: 311.81, height: 510.24 },
+  storpocket: { width: 382.68, height: 595.28 },
+  a5: { width: 419.53, height: 595.28 },
+  s5: { width: 467.72, height: 685.98 }
 };
 
 /** Page margin presets, in points, shared by IDML/PDF/ODT — BookSchema's page_margin. "normal" (0.75in) matches IDML's original fixed margin from before this was configurable. */

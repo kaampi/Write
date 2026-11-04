@@ -365,8 +365,11 @@ export const BookSchema = z.object({
    * default rather than a plain paper size, since this app's exports are
    * manuscripts headed toward a book, not office documents. Missing on
    * older saves — "6x9" keeps a sensible default rather than an unset page.
+   * "pocket"/"storpocket"/"a5"/"s5" are the common Nordic trade trims
+   * (Mats, 2026-11-04) — their dimensions live in manuscriptExport.ts's
+   * PAGE_SIZES, same as every size here.
    */
-  page_size: z.enum(["a4", "letter", "6x9"]).default("6x9"),
+  page_size: z.enum(["a4", "letter", "6x9", "pocket", "storpocket", "a5", "s5"]).default("6x9"),
   /**
    * Page margin for the same three formats as page_size, one shared
    * setting rather than per-format — a preset (not a free numeric field)

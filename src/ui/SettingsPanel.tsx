@@ -284,6 +284,10 @@ export function SettingsPanel({
                     <option value="6x9">{m.editor.pageSize6x9}</option>
                     <option value="a4">{m.editor.pageSizeA4}</option>
                     <option value="letter">{m.editor.pageSizeLetter}</option>
+                    <option value="pocket">{m.editor.pageSizePocket}</option>
+                    <option value="storpocket">{m.editor.pageSizeStorpocket}</option>
+                    <option value="a5">{m.editor.pageSizeA5}</option>
+                    <option value="s5">{m.editor.pageSizeS5}</option>
                   </select>
                 </label>
                 <label className="craft-field">

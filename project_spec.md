@@ -11794,6 +11794,42 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.258 → v1.0.259 (2026-11-04): fyra nordiska
+pocket-/trycktrim till Sidstorlek.** Mats, efter artefakt-skissandet
+av Series Timeline: "Det finns ett antal olika 'standardformat' för
+böcker. Idag har vi Letter, A4 och nån till. Kan vi lägga dessa som
+alternativ." - med en lista på fyra mått i mm: Pocket/A-pocket
+(110×180), Storpocket/Författarpocket (135×210), A5 (148×210), S5/
+Mellanformat (165×242).
+
+`BookSchema.ts`s `page_size`-enum utökad från `["a4", "letter", "6x9"]`
+till att också ha `"pocket"`, `"storpocket"`, `"a5"`, `"s5"` (default
+fortfarande `"6x9"`, oförändrat). `manuscriptExport.ts`s `PAGE_SIZES`
+(punkt-dimensioner, samma karta som `a4`/`letter`/`6x9` redan använder
+för IDML/PDF/ODT-export och skrivytans proportionella bredd) fick fyra
+nya rader, omvandlat 1 mm = 2,834645669 pt: pocket 311.81×510.24,
+storpocket 382.68×595.28, a5 419.53×595.28, s5 467.72×685.98 (verifierat
+med ett fristående Python-skript, inte bara räknat i huvudet). Värt att
+notera: a5s höjd och storpockets höjd landar båda på exakt samma tal som
+a4s bredd (595.28) - inte en avrundning, utan samma verkliga pappersgeometri
+(A4 är 210 mm brett, vilket också är A5s och storpockets höjd).
+
+`SettingsPanel.tsx`s Sidstorlek-`<select>` (Typography-sektionen) fick
+fyra nya `<option>`. Nya i18n-nycklar (`pageSizePocket`/
+`pageSizeStorpocket`/`pageSizeA5`/`pageSizeS5`) i alla tre språk - svenska
+med båda namnen Mats gav ("Pocket / A-pocket", "Storpocket /
+Författarpocket"), norska en lätt försvenskad/norskad variant
+("Forfatterpocket", "Mellomformat"), engelska bara måtten utan de
+svenska bokbranschtermerna ("Pocket", "Trade pocket").
+
+`PAGE_SIZES` är `Record<Book["page_size"], ...>` - TypeScript tvingar
+alla sju nycklar att finnas, så `tsc --noEmit` hade stoppat ett missat
+värde. `tsc --noEmit` rent, `npm run build` rent, 1254/1254 tester
+gröna (inga nya - ingen ny logik, bara data). Verifierat live:
+Playwright-skapad bok, öppnat Manuscript settings, läst av alla sju
+`<option>`-texter i rätt ordning, valt A5 och skärmdumpat att fältet
+visar "A5 (148 × 210 mm)" i gränssnittet.
+
 **Ändringslogg v1.0.257 → v1.0.258 (2026-11-04): samma gamla-serie-bugg,
 en till kodväg.** Mats: "Ja, fixa den buggen också" - buggen jag
 rapporterade i förra svaret (hittad av misstag under Playwright-

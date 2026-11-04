@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.259] - 2026-11-04
+
+### Added
+- Four more page size presets for Typography's "Page size" setting, alongside the existing 6×9/A4/US Letter: Pocket (110 × 180 mm), Trade pocket (135 × 210 mm), A5 (148 × 210 mm), and S5 (165 × 242 mm) — common Nordic trade trims, used by IDML/PDF/ODT export and the live editor's proportional writing-column width.
+
 ## [1.0.258] - 2026-11-04
 
 ### Fixed
