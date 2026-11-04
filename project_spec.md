@@ -11794,6 +11794,39 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.270 → v1.0.271 (2026-11-04): ny toppbild,
+fast höjd som matchar Explore.** Mats skickade en bredare beskärning
+av samma bibliotek/skrivbord-illustration (2000×499, `154.jpg`) och
+bad: "Byt ut toppbilden till denna. Låt höjden bli samma som Explore
+har på sin startsida." Följdes upp: "Byt toppbilden och låt den få
+samma höjd som på Explores startsida. Låt bilden vara högerställd och
+kapa den på vänstersida om så krävs."
+
+Bilden ersatte `public/home-hero.jpg` rakt av. `.home-hero-banner-
+image` bytte från `aspect-ratio: 2000/593` (höjden följde bildens
+egen proportion, krympte/växte med fönsterbredden) till en FAST höjd
+`28.5rem` (456px) - "samma höjd" tolkat bokstavligt, en konstant, inte
+en proportion. 456px är uppmätt mot Explores egen skärmdump (2026-11-04,
+tidigare i sessionen): en 540px hög full-fönster-capture minus
+`.app-top-bar`s dokumenterat exakta 84px (samma kommentar som redan
+finns i `styles.css` om att Writes egen toppmeny är avstämd mot
+Explores `.sb-header: height 84px`) = 456px banner. Inte hämtat från
+Explores egen CSS (finns inte i det här repot) - en nära uppskattning,
+dokumenterat som sådan i kommentaren.
+
+`object-position` bytte från `left center` till `right center` -
+"högerställd... kapa på vänstersida om så krävs" - håller drake/
+detektiv/mopedgruppen på bildens högra sida alltid synlig, och kapar
+bokhyllsväggen till vänster först när bredd/höjd-förhållandet inte
+stämmer.
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna (ren
+bild/CSS). Verifierat live med Playwright på två fönsterbredder (1920px
+och 1024px): bannerns `boundingBox().height` är 456px i båda - fast,
+oförändrad av bredden - och skärmdumparna visar att höger sida av
+illustrationen (drake, detektiv, moped) är fullt synlig i båda, med
+vänster bokhylla som kapas först på den smalare bredden.
+
 **Ändringslogg v1.0.269 → v1.0.270 (2026-11-04): manuskriptens
 List view får samma indrag som Series.** Mats, med en skärmdump:
 "Kpt Manuscripts få samma indrag som Series" (tangent-tappat "Kan").

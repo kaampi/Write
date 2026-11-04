@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.271] - 2026-11-04
+
+### Changed
+- Swapped the hero banner image for a wider crop of the same illustration, right-aligned (crops from the left as needed). The banner's height is now a fixed 28.5rem matching kaampi Explore's own start page, instead of scaling with the image's own aspect ratio.
+
 ## [1.0.270] - 2026-11-04
 
 ### Fixed

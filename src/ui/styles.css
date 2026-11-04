@@ -880,13 +880,27 @@ button:disabled {
   overflow: hidden;
 }
 
+/*
+ * Mats, 2026-11-04: swapped to the wider version of the library/desk
+ * illustration, and asked for the banner's height to match kaampi
+ * Explore's own start page. 28.5rem (456px) is measured off Explore's
+ * own screenshot (Explore's nav bar is a documented, exact 84px — see
+ * .app-top-bar's own comment — out of a 540px full-window capture, so
+ * 540 - 84 = 456px of actual banner); not read from Explore's own CSS,
+ * which isn't available here, so treat it as a close estimate rather
+ * than an exact port. A fixed height (not aspect-ratio) so it stays
+ * that height at any window width, cropping the image via object-fit
+ * instead of growing/shrinking with it. object-position: right —
+ * "högerställd... kapa på vänstersida om så krävs" — keeps the
+ * dragon/detective/scooter group on the right fully visible and crops
+ * the bookshelf wall on the left first.
+ */
 .home-hero-banner-image {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 2000 / 593;
+  height: 28.5rem;
   object-fit: cover;
-  object-position: left center;
+  object-position: right center;
 }
 
 .home-hero-banner-overlay {
