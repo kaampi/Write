@@ -487,6 +487,12 @@ body {
   color: var(--text);
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
+  /* The home-page hero banner (.home-hero-banner) breaks out full-bleed
+     with a 100vw width to match kaampi Explore's own edge-to-edge banner
+     — on a page with a vertical scrollbar, 100vw is slightly wider than
+     the visible viewport (it doesn't subtract the scrollbar's own
+     width), which would otherwise add a few pixels of horizontal scroll. */
+  overflow-x: hidden;
 }
 
 [data-theme="light"] body {
@@ -852,11 +858,25 @@ button:disabled {
  * `margin-left` like the base .home-brand has would leave a pale gap down
  * the image's left side.
  */
+/*
+ * Mats, 2026-11-04: "Visst är toppbilden mindre än den på Explore?" —
+ * right: the earlier calc(100% + 3rem) only cancelled .home's own side
+ * padding, so the banner was still capped at .home's max-width (90.5rem)
+ * on anything wider than that, while Explore's own banner runs truly
+ * edge-to-edge regardless of window width. The standard full-bleed
+ * trick (100vw + negative side margins pulled from the viewport center,
+ * not from .home's own box) breaks out of that cap entirely.
+ */
 .home-brand.home-hero-banner {
   position: relative;
   display: block;
-  margin: -4.6875rem -1.5rem 2.5rem;
-  width: calc(100% + 3rem);
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-top: -4.6875rem;
+  margin-bottom: 2.5rem;
   overflow: hidden;
 }
 

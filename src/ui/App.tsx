@@ -7,6 +7,7 @@ import { useBookStore } from "./useBookStore";
 import { SeriesStoreProvider } from "./SeriesStore";
 import { useSeriesStore } from "./useSeriesStore";
 import { AppTopBar } from "./AppTopBar";
+import { startUpdateChecks } from "./updateCheck";
 import { Editor } from "./Editor";
 import { Home } from "./Home";
 import { SeriesWorkspace } from "./SeriesWorkspace";
@@ -52,6 +53,10 @@ function Shell() {
     window.addEventListener("online", retry);
     return () => { window.clearInterval(timer); window.removeEventListener("online", retry); };
   }, []);
+  // Mounted for the app's whole session (unlike Home, which unmounts while
+  // a book or series is open) so the periodic update check keeps running
+  // in the background regardless of which screen is open.
+  useEffect(() => startUpdateChecks(), []);
   return (
     <div className="app-shell">
       <AppTopBar onOpenHomeGuide={() => setHomeGuideOpen(true)} />

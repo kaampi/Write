@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.265] - 2026-11-04
+
+### Added
+- The desktop app now checks for updates on its own, periodically in the background (every 6 hours, plus once at startup) — not only when you click "Check for updates". The hero banner's button says "Update available" on its own once one is found, without needing a click first.
+
+### Fixed
+- The hero banner now runs truly edge-to-edge at any window width — it was previously capped at the home page's own 90.5rem content width, so it read noticeably smaller than kaampi Explore's own full-bleed banner on a wide window.
+
 ## [1.0.264] - 2026-11-04
 
 ### Removed

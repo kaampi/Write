@@ -11794,6 +11794,63 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.264 → v1.0.265 (2026-11-04): periodisk
+uppdateringskoll + riktigt kant-till-kant-banner.** Mats, två separata
+önskemål samma dag:
+1. "Kan man få så att Check for updates ändras till Update available om
+   det finns en ny version? Att appen kolla efter updates med jämna
+   mellanrum?"
+2. Efter att ha sett bannern: "Visst är toppbilden mindre än den på
+   Explore?"
+
+**Periodisk uppdateringskoll.** Ny modul `src/ui/updateCheck.ts`,
+samma pub-sub-mönster som `mascot.ts` men med en delad, localStorage-
+cachad `UpdateStatus` plus en bakgrundskoll: `runUpdateCheck()` (den
+riktiga nätverksanropet via `desktopBridge.ts`s `checkForUpdates`,
+delat mellan samtidiga anrop via en `inFlight`-promise så en
+bakgrundskoll och ett manuellt klick aldrig kör två samtidiga nätverks-
+anrop) och `startUpdateChecks()` (kör en koll direkt, sedan var 6:e
+timme, `window.setInterval`). `App.tsx`s `Shell` - monterad hela
+sessionen, till skillnad från `Home.tsx` som avmonteras när en bok
+eller serie är öppen - startar bakgrundskollen en gång i en `useEffect`
+(samma mönster som den redan befintliga 30-sekunders Core-connection-
+retry-loopen där). `Home.tsx`s hero-banner-knapp prenumererar på det
+delade statuset (`sharedUpdateStatus`) och visar "Update available"
+istället för "Check for updates" så fort `updateAvailable` är sant -
+oavsett om det var bakgrundskollen eller ett tidigare klick som
+upptäckte det. Ett klick på knappen öppnar fortfarande dialogen och kör
+en egen, synlig koll (samma `runUpdateCheck()`, så den också
+uppdaterar det delade cachet). Ny kort i18n-nyckel
+`desktopUpdateAvailableShort: "Update available"` (separat från den
+redan existerande `desktopUpdateAvailable`-formatsträngen med
+`{current}`/`{latest}`-platshållare, som används inne i själva
+dialogen - knappens korta etikett kan inte återanvända den utan att
+bokstavligen rendera olösta platshållare).
+
+**Riktigt kant-till-kant-banner.** v1.0.262s banner bröt bara ut ur
+`.home`s eget padding (`calc(100% + 3rem)`), inte ur dess
+`max-width: 90.5rem` (1448px) - på en bredare skärm än så förblev
+bannern alltså fast vid 1448px medan Explores egen är sant kant-till-
+kant oavsett fönsterbredd, vilket gjorde Writes banner märkbart mindre
+i absoluta pixlar (och därmed lägre, eftersom höjden följer bildens
+`aspect-ratio`). Löst med det klassiska "full-bleed inuti en centrerad
+container"-tricket: `width: 100vw; left: 50%; right: 50%; margin-left:
+-50vw; margin-right: -50vw;` istället för att räkna ut breddet relativt
+`.home`s egen box. `body` fick `overflow-x: hidden` eftersom `100vw`
+inte drar bort scrollbarens egen bredd, vilket annars ger några pixlars
+horisontell scroll på sidor med en vertikal scrollbar.
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna
+(ingen ny pure-logic att testa i `updateCheck.ts` - samma avvägning
+som `mascot.ts`s eget test: localStorage/timer-driven glue-kod
+verifieras med Playwright, inte vitest's DOM-lösa "node"-miljö).
+Verifierat live med Playwright vid 1920px bredd: bannern spänner hela
+viewportbredden (`boundingBox().width === 1920`), ingen horisontell
+scroll (`scrollWidth === clientWidth`). Kunde inte verifiera "Update
+available"-knappetiketten live - att stubba `window.isTauri = true` i
+Playwright kraschar sandlådans webbläsarprocess (samma problem som
+v1.0.263s verifieringsförsök) - verifierat via kodgranskning istället.
+
 **Ändringslogg v1.0.263 → v1.0.264 (2026-11-04): borttagna
 import-korten på startsidan.** Mats, med en skärmdump av de tre
 importkorten: "Vi kan ta bort dessa eftersom de ligger under Files."

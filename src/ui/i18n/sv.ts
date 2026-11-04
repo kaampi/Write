@@ -131,6 +131,7 @@ export const sv: Messages = {
     desktopGpuTier70b: "en stor modell, 70 miljarder parametrar eller mer (4-bit)",
     desktopCheckUpdate: "Kolla efter uppdateringar",
     desktopCheckingUpdate: "Letar efter uppdateringar…",
+    desktopUpdateAvailableShort: "Uppdatering tillgänglig",
     desktopUpdateAvailable: "En ny version finns ({latest}, du har {current}).",
     desktopViewChangelog: "Visa ändringslogg",
     desktopDownloadUpdate: "Ladda ner uppdatering",

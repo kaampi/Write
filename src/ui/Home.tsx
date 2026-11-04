@@ -4,8 +4,9 @@ import { useBookStore } from "./useBookStore";
 import { useSeriesStore } from "./useSeriesStore";
 import { HandbookPanel } from "./HandbookPanel";
 import { count, format, translateError, useLocale } from "./i18n";
-import { checkForUpdates, isDesktopApp, type UpdateStatus } from "./desktopBridge";
+import { isDesktopApp, type UpdateStatus } from "./desktopBridge";
 import { UpdateCheckDialog } from "./UpdateCheckDialog";
+import { readUpdateStatus, runUpdateCheck, subscribeUpdateStatus } from "./updateCheck";
 import { MascotTip } from "./MascotTip";
 import { BookshelfView } from "./BookshelfView";
 import { SeriesDetailModal } from "./SeriesDetailModal";
@@ -64,13 +65,20 @@ export function Home({
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null);
   const [updateChecking, setUpdateChecking] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  // The hero banner's button label reflects this shared, periodically
+  // refreshed status (updateCheck.ts) rather than only the dialog's own
+  // per-click state, so it can say "Update available" on its own — see
+  // App.tsx's Shell, which starts the background check for the app's
+  // whole session.
+  const [sharedUpdateStatus, setSharedUpdateStatus] = useState(readUpdateStatus);
+  useEffect(() => subscribeUpdateStatus(setSharedUpdateStatus), []);
 
-  function runUpdateCheck() {
+  function openUpdateCheck() {
     setUpdateDialogOpen(true);
     setUpdateChecking(true);
     setUpdateError(null);
     setUpdateStatus(null);
-    checkForUpdates()
+    runUpdateCheck()
       .then(setUpdateStatus)
       .catch((err: unknown) => setUpdateError(String(err)))
       .finally(() => setUpdateChecking(false));
@@ -93,8 +101,12 @@ export function Home({
           </h1>
           <p className="lede">{m.home.lede}</p>
           {isDesktopApp() ? (
-            <button type="button" className="home-hero-banner-button" onClick={runUpdateCheck} disabled={updateChecking}>
-              {updateChecking ? m.home.desktopCheckingUpdate : m.home.desktopCheckUpdate}
+            <button type="button" className="home-hero-banner-button" onClick={openUpdateCheck} disabled={updateChecking}>
+              {updateChecking
+                ? m.home.desktopCheckingUpdate
+                : sharedUpdateStatus?.updateAvailable
+                  ? m.home.desktopUpdateAvailableShort
+                  : m.home.desktopCheckUpdate}
             </button>
           ) : null}
         </div>

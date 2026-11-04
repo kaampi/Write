@@ -131,6 +131,7 @@ export const nb: Messages = {
     desktopGpuTier70b: "en stor modell, 70 milliarder parametere eller mer (4-bit)",
     desktopCheckUpdate: "Se etter oppdateringer",
     desktopCheckingUpdate: "Ser etter oppdateringer…",
+    desktopUpdateAvailableShort: "Oppdatering tilgjengelig",
     desktopUpdateAvailable: "En ny versjon finnes ({latest}, du har {current}).",
     desktopViewChangelog: "Vis endringslogg",
     desktopDownloadUpdate: "Last ned oppdatering",

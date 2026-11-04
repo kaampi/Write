@@ -559,6 +559,7 @@ export const en = {
     desktopGpuTier70b: "a large model, 70 billion parameters or more (4-bit)",
     desktopCheckUpdate: "Check for updates",
     desktopCheckingUpdate: "Checking for updates…",
+    desktopUpdateAvailableShort: "Update available",
     desktopUpdateAvailable: "A new version is available ({latest}, you have {current}).",
     desktopViewChangelog: "View changelog",
     desktopDownloadUpdate: "Download update",
