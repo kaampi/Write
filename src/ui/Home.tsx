@@ -297,33 +297,37 @@ export function Home({
       </section>
 
       <section className="series-shelf" aria-label={m.series.heading}>
-        <form className="home-hero-pill series-hero-pill" action="#" onSubmit={submitNewSeries}>
-          <span className="home-hero-label">{m.series.newSeries}</span>
-          <input
-            className="home-hero-input"
-            value={newSeriesTitle}
-            onChange={(event) => setNewSeriesTitle(event.target.value)}
-            placeholder={m.series.newSeriesTitlePlaceholder}
-            autoComplete="off"
-            aria-label={m.series.newSeries}
-          />
-          <button type="submit" className="home-hero-submit" aria-label={m.series.create}>
-            <img src="/icons/pill-arrow.svg" alt="" aria-hidden="true" />
-          </button>
-        </form>
+        {/* Same "_topp" shape as Manuscript_topp: heading + search, one row (no List/Shelf toggle here — Series has no such view to switch). */}
+        <div className="series-topp">
+          <h2 className="settings-heading home-heading-lg">{m.series.heading}</h2>
+          {seriesSummaries.length > 0 ? (
+            <input
+              type="search"
+              className="series-topp-search"
+              value={seriesSearch}
+              onChange={(event) => setSeriesSearch(event.target.value)}
+              placeholder={m.series.searchPlaceholder}
+              aria-label={m.series.searchPlaceholder}
+            />
+          ) : null}
+        </div>
 
-        <h2 className="settings-heading home-heading-lg">{m.series.heading}</h2>
-
-        {seriesSummaries.length > 0 ? (
-          <input
-            type="search"
-            className="book-shelf-search"
-            value={seriesSearch}
-            onChange={(event) => setSeriesSearch(event.target.value)}
-            placeholder={m.series.searchPlaceholder}
-            aria-label={m.series.searchPlaceholder}
-          />
-        ) : null}
+        <div className="home-start">
+          <form className="home-hero-pill" action="#" onSubmit={submitNewSeries}>
+            <span className="home-hero-label">{m.series.newSeries}</span>
+            <input
+              className="home-hero-input"
+              value={newSeriesTitle}
+              onChange={(event) => setNewSeriesTitle(event.target.value)}
+              placeholder={m.series.newSeriesTitlePlaceholder}
+              autoComplete="off"
+              aria-label={m.series.newSeries}
+            />
+            <button type="submit" className="home-hero-submit" aria-label={m.series.create}>
+              <img src="/icons/pill-arrow.svg" alt="" aria-hidden="true" />
+            </button>
+          </form>
+        </div>
 
         {seriesSummaries.length > 0 && filteredSeriesSummaries.length === 0 ? (
           <p className="empty-shelf">{m.series.noSearchResults}</p>

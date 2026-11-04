@@ -1726,20 +1726,34 @@ button:disabled {
   font-size: 0.8rem;
 }
 
-/* Pulled in close under .book-shelf now that it always follows it
-   directly (Mats, 2026-11-04: series moved below the shelf on the page,
-   same message asked it sit close under it). */
+/* Mats, 2026-11-04: a real margin between the Series section and the
+   manuscripts shelf above it, not just the tight 1.5rem it had — same
+   3rem gap .book-shelf itself uses under the hero banner, for the same
+   "clearly its own section" rhythm. */
 .series-shelf {
-  margin-top: 1.5rem;
+  margin-top: 3rem;
 }
 
-/* The "Create series" hero pill reuses .home-hero-pill/-label/-input/-submit
-   as-is (Mats, 2026-11-04: port the artifact's series-section redesign —
-   hero pill on top, "Your series" heading + search + list below, the same
-   shape as the manuscripts section just above it). .series-hero-pill only
-   tweaks the top margin so it doesn't crowd the shelf above it. */
-.series-hero-pill {
-  margin-top: 1.75rem;
+/* Same shape as Manuscript_topp (Mats, 2026-11-04: "ge sektionen för
+   Series samma UI"): heading + search on one row (no List/Shelf toggle
+   here — Series has no such view to switch), "Create series" below it —
+   the hero pill itself reuses plain .home-hero-pill/-label/-input/-submit,
+   wrapped in the same .home-start spacing div the manuscripts pill uses. */
+.series-topp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.series-topp-search {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  width: 16rem;
+  max-width: 60vw;
 }
 
 .series-list {

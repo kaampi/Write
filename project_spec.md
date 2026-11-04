@@ -11794,6 +11794,36 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.268 → v1.0.269 (2026-11-04): Series får samma
+UI som Manuscript_topp.** Mats, direkt efter v1.0.268: "Så ger vi
+sektionen för Series samma UI. Lägg också in en marginal mellan
+Serie-sektionen och bokhyllan med manuskript."
+
+Speglade exakt samma mönster i `Home.tsx`:
+- Ny `<div className="series-topp">`: rubriken "Your series" till
+  vänster, sökfältet (`.series-topp-search` - egen klass, samma
+  rundade/breda stil som `.manuscript-topp-search` men inte bokstavligt
+  samma klass, för att hålla isär Series egna CSS-regler precis som
+  `.series-list`/`.series-row` redan är egna paralleller till
+  `.book-shelf-list`/`.book-card`) till höger - ingen List/Shelf-toggle
+  här, Series har ingen sådan vy att växla.
+- "Create series"-pillret flyttat till att ligga UNDER den raden,
+  inuti en `<div className="home-start">` (återanvänder exakt samma
+  klass/marginal-CSS som manuskriptens eget hero-pill-wrapper fick i
+  v1.0.268 - samma kontext, samma lösning). Den gamla
+  `.series-hero-pill`-modifierarklassen (bara en egen `margin-top` för
+  att inte krocka med hyllan OVANFÖR, från när pillret låg överst) är
+  nu överflödig och borttagen.
+- `.series-shelf`s toppmarginal höjd från 1.5rem till 3rem - samma
+  3rem som `.book-shelf` själv använder under hero-bannern, för samma
+  "tydligt en egen sektion"-känsla.
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna (ren
+UI-omstrukturering). Verifierat live med Playwright: skapade en bok,
+gjorde den till en serie, skärmdump visar "YOUR SERIES" + rundat
+sökfält på en rad, "+ New series" därunder, och ett tydligt mellanrum
+mot bokhyllan ovanför.
+
 **Ändringslogg v1.0.267 → v1.0.268 (2026-11-04): "Manuscript_topp"
 samlar rubrik/toggle/sök på en rad, fallback-kortet bort.** Mats, med
 en skärmdump av fallback-guidekortet: "Den här behövs inte. Det var ju

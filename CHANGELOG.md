@@ -9,6 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.269] - 2026-11-04
+
+### Changed
+- The Series section now matches the manuscripts section's layout: "Your series" and its search field share one row, pill-shaped, with "Create series" sitting under that row instead of above it.
+- More margin between the Series section and the manuscripts shelf above it.
+
 ## [1.0.268] - 2026-11-04
 
 ### Changed
