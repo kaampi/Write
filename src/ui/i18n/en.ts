@@ -1278,7 +1278,6 @@ export const en = {
     nav: "Guide",
     title: "Guide",
     intro: "A short walkthrough — how to get the app talking to a model, and what everything does once it is.",
-    openFromHome: "New here? Read the quickstart",
     closeAction: "Close",
     fromErrorLink: "See the quickstart guide",
     helpFor: "Guide: {topic}",

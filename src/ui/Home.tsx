@@ -113,48 +113,6 @@ export function Home({
         </div>
       </header>
 
-      <section className="home-start" aria-label={m.home.startHeading}>
-        <form className="home-hero-pill" action="#" onSubmit={submitNew}>
-          <span className="home-hero-label">{m.home.newManuscript}</span>
-          <input
-            className="home-hero-input"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder={m.home.titlePlaceholder}
-            autoComplete="off"
-            aria-label={m.home.newManuscript}
-          />
-          <button type="submit" className="home-hero-submit" aria-label={m.home.open}>
-            <img src="/icons/pill-arrow.svg" alt="" aria-hidden="true" />
-          </button>
-        </form>
-        {mascot !== "none" ? (
-          <MascotTip
-            key={mascot}
-            mascot={mascot}
-            name={MASCOT_NAMES[mascot]}
-            text={m.home.guideCardLede}
-            action={{ label: `${m.home.guideCardAction} →`, onClick: onOpenGuide }}
-            onClose={() => setMascot("none")}
-            closeLabel={m.common.close}
-            {...(mascot === "kaamilla" && !mascotIntroSeen
-              ? { intro: { text: m.home.mascotIntroText, actionLabel: m.home.mascotIntroUnderstood, onDismiss: dismissMascotIntro } }
-              : {})}
-          />
-        ) : null}
-        {mascot === "none" ? (
-          <div className="home-start-cards">
-            <button type="button" className="home-start-card" onClick={onOpenGuide}>
-              <span className="home-start-card-copy">
-                <strong>{m.guide.openFromHome}</strong>
-                <span>{m.home.guideCardLede}</span>
-                <span className="home-start-card-action">{m.home.guideCardAction} →</span>
-              </span>
-            </button>
-          </div>
-        ) : null}
-      </section>
-
       {updateDialogOpen ? (
         <UpdateCheckDialog
           checking={updateChecking}
@@ -171,45 +129,78 @@ export function Home({
       ) : null}
 
       <section className="book-shelf" aria-label={m.home.shelf}>
-        <h2 className="settings-heading home-heading-lg">
-          {m.home.shelfHeading}
+        {/* "Manuscript_topp" (Mats, 2026-11-04): heading + List/Shelf toggle + search, one row — search to the right of the Shelf view button, not on its own row below like before. */}
+        <div className="manuscript-topp">
+          <h2 className="settings-heading home-heading-lg">{m.home.shelfHeading}</h2>
           {summaries.length > 0 ? (
-            <span className="shelf-view-toggle" role="group">
-              <button
-                type="button"
-                className={shelfMode === "list" ? "is-active" : ""}
-                aria-pressed={shelfMode === "list"}
-                onClick={() => setShelfMode("list")}
-              >
-                {m.home.listView}
-              </button>
-              <button
-                type="button"
-                className={shelfMode === "shelf" ? "is-active" : ""}
-                aria-pressed={shelfMode === "shelf"}
-                onClick={() => setShelfMode("shelf")}
-              >
-                {m.home.shelfView}
-              </button>
-            </span>
+            <div className="manuscript-topp-controls">
+              <span className="shelf-view-toggle" role="group">
+                <button
+                  type="button"
+                  className={shelfMode === "list" ? "is-active" : ""}
+                  aria-pressed={shelfMode === "list"}
+                  onClick={() => setShelfMode("list")}
+                >
+                  {m.home.listView}
+                </button>
+                <button
+                  type="button"
+                  className={shelfMode === "shelf" ? "is-active" : ""}
+                  aria-pressed={shelfMode === "shelf"}
+                  onClick={() => setShelfMode("shelf")}
+                >
+                  {m.home.shelfView}
+                </button>
+              </span>
+              <input
+                type="search"
+                className="manuscript-topp-search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={m.home.searchPlaceholder}
+                aria-label={m.home.searchPlaceholder}
+              />
+            </div>
           ) : null}
-        </h2>
+        </div>
+
+        {/* "Start a new manuscript" now sits under Manuscript_topp, not above it (Mats, 2026-11-04). */}
+        <div className="home-start">
+          <form className="home-hero-pill" action="#" onSubmit={submitNew}>
+            <span className="home-hero-label">{m.home.newManuscript}</span>
+            <input
+              className="home-hero-input"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder={m.home.titlePlaceholder}
+              autoComplete="off"
+              aria-label={m.home.newManuscript}
+            />
+            <button type="submit" className="home-hero-submit" aria-label={m.home.open}>
+              <img src="/icons/pill-arrow.svg" alt="" aria-hidden="true" />
+            </button>
+          </form>
+          {mascot !== "none" ? (
+            <MascotTip
+              key={mascot}
+              mascot={mascot}
+              name={MASCOT_NAMES[mascot]}
+              text={m.home.guideCardLede}
+              action={{ label: `${m.home.guideCardAction} →`, onClick: onOpenGuide }}
+              onClose={() => setMascot("none")}
+              closeLabel={m.common.close}
+              {...(mascot === "kaamilla" && !mascotIntroSeen
+                ? { intro: { text: m.home.mascotIntroText, actionLabel: m.home.mascotIntroUnderstood, onDismiss: dismissMascotIntro } }
+                : {})}
+            />
+          ) : null}
+        </div>
 
         {summaries.length === 0 ? (
           seriesSummaries.length === 0 ? <p className="empty-shelf">{m.home.emptyShelf}</p> : null
-        ) : (
-          <>
-            <input
-              type="search"
-              className="book-shelf-search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder={m.home.searchPlaceholder}
-              aria-label={m.home.searchPlaceholder}
-            />
-            {filteredSummaries.length === 0 ? <p className="empty-shelf">{m.home.noSearchResults}</p> : null}
-          </>
-        )}
+        ) : filteredSummaries.length === 0 ? (
+          <p className="empty-shelf">{m.home.noSearchResults}</p>
+        ) : null}
 
         {filteredSummaries.length > 0 && shelfMode === "shelf" ? (
           <BookshelfView

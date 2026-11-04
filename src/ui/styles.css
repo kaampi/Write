@@ -1029,8 +1029,16 @@ button:disabled {
   opacity: 0.6;
 }
 
+/*
+ * Mats, 2026-11-04: "Start a new manuscript" moved to sit under
+ * Manuscript_topp (the heading/toggle/search row) instead of above it —
+ * .home-start is now a plain spacing div nested inside .book-shelf, not
+ * its own top-level section under the hero banner, so its own top margin
+ * shrank to match (Manuscript_topp's heading already carries enough
+ * weight on its own; it doesn't need the old banner-to-pill gap too).
+ */
 .home-start {
-  margin: 3.75rem 0 2.2rem;
+  margin: 1.75rem 0 2.2rem;
 }
 
 /* Exact gap Mats measured (2026-10-31): 35px from the pill's bottom edge
@@ -1110,48 +1118,6 @@ button:disabled {
   opacity: 0.8;
 }
 
-.home-start-cards {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 0.9rem;
-}
-
-.home-start-card {
-  display: flex;
-  align-items: flex-start;
-  text-align: left;
-  padding: 1.3rem 1.4rem;
-  border: 1px solid var(--border-soft);
-  border-radius: 8px;
-  background: var(--panel);
-  color: var(--text);
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-
-.home-start-card:hover,
-.home-start-card:focus-visible {
-  border-color: var(--ink);
-}
-
-.home-start-card-copy {
-  display: grid;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.home-start-card-copy > strong {
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-
-.home-start-card-copy > span:not(.home-start-card-action) {
-  color: var(--text-dim);
-  font-size: 0.86rem;
-  line-height: 1.55;
-}
-
 .home-start-card-action {
   display: inline-flex;
   align-items: center;
@@ -1195,12 +1161,6 @@ button:disabled {
   background: transparent;
   padding: 0;
   cursor: pointer;
-}
-
-@media (max-width: 700px) {
-  .home-start-cards {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 /*
@@ -1718,6 +1678,40 @@ button:disabled {
   margin-top: 3rem;
 }
 
+/*
+ * "Manuscript_topp" (Mats, 2026-11-04's own name for this row): the
+ * heading, the List/Shelf toggle, and the search field all on one row —
+ * search to the right of the Shelf view button, not on its own row below
+ * like before. Wraps on a narrow window rather than forcing the heading
+ * to share space with a shrunk search field.
+ */
+.manuscript-topp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.manuscript-topp-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+/* Own class rather than reusing .book-shelf-search (still used by the
+   Series section's own search field below) — that field stays a plain
+   rounded-rect on its own full-width row; this one needs pill-shaped
+   short sides and a fixed width to sit inline next to the toggle. */
+.manuscript-topp-search {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  width: 16rem;
+  max-width: 60vw;
+}
+
 .book-shelf-row-actions {
   display: flex;
   align-items: center;
@@ -2192,7 +2186,6 @@ button:disabled {
 .shelf-view-toggle {
   display: inline-flex;
   gap: 0.3rem;
-  margin-left: 0.8rem;
 }
 
 .shelf-view-toggle button {

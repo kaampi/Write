@@ -849,7 +849,6 @@ export const sv: Messages = {
     nav: "Guide",
     title: "Guide",
     intro: "En kort genomgång — hur du får appen att prata med en modell, och vad allt gör när den väl gör det.",
-    openFromHome: "Ny här? Läs snabbstarten",
     closeAction: "Stäng",
     fromErrorLink: "Se snabbstartsguiden",
     helpFor: "Guide: {topic}",

@@ -9,6 +9,15 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.268] - 2026-11-04
+
+### Changed
+- The "Your manuscripts" heading, the List/Shelf toggle, and the search field now share one row ("Manuscript_topp"), search to the right of the Shelf view button instead of on its own row below — the search field is also pill-shaped now, with a bit more breathing room before it.
+- "Start a new manuscript" now sits under that row instead of above it.
+
+### Removed
+- The "New here? Read the quickstart" fallback card (shown after dismissing or turning off the mascot tip) — the mascot tip already pointed at the Guide, so this was a duplicate.
+
 ## [1.0.267] - 2026-11-04
 
 ### Added

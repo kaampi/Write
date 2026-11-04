@@ -11794,6 +11794,63 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.267 → v1.0.268 (2026-11-04): "Manuscript_topp"
+samlar rubrik/toggle/sök på en rad, fallback-kortet bort.** Mats, med
+en skärmdump av fallback-guidekortet: "Den här behövs inte. Det var ju
+vad guidenkaraktären tipsade om. Låt Search manuscripts ligga till
+höger om Shelf view. Lägg en padding mellan Shelf view och
+inputrutan. Låt input rutan få helt rundade kortsidor. Vi kallar den
+raden för Manusript_topp när jag pratar om UI:t. Lägg Start a new
+manuscript under Manuscript_topp."
+
+Fyra separata ändringar i `Home.tsx`:
+
+1. **Fallback-kortet borttaget.** Det gamla `mascot === "none" ?
+   <div className="home-start-cards">...</div> : null`-blocket (rubrik
+   "New here? Read the quickstart" + samma Guide-länk som maskot-
+   tipset redan visar) var bara synligt när maskoten var avstängd -
+   exakt det läge v1.0.267s nya kryss försätter sidan i. Två rutor som
+   sa samma sak var en för mycket. Borttaget helt, ingen ersättning -
+   Guide nås ändå via toppmenyn.
+2. **"Manuscript_topp".** Rubriken "YOUR MANUSCRIPTS", List/Shelf-
+   togglen och sökfältet - tidigare rubrik+toggle på en rad och
+   sökfältet på en egen rad under - är nu EN rad: `<div
+   className="manuscript-topp">` med rubriken till vänster och en ny
+   `<div className="manuscript-topp-controls">` (toggle + sök) till
+   höger. Sökfältet fick en egen klass `.manuscript-topp-search`
+   (INTE samma som `.book-shelf-search`, som Series-sektionens eget
+   sökfält fortfarande använder oförändrat på sin egen rad) - helt
+   rundade kortsidor (`border-radius: 999px`), fast bredd (16rem,
+   `max-width: 60vw` på smal skärm). Avståndet mellan Shelf view-
+   knappen och sökrutan är `.manuscript-topp-controls`s egen `gap:
+   1.1rem` (padding i flex-mening).
+3. **"Start a new manuscript" flyttad.** Hero-pillret + maskot-tipset
+   (tidigare sin egen `<section className="home-start">` direkt under
+   hero-bannern, FÖRE rubrik/toggle/sök) ligger nu i en vanlig `<div
+   className="home-start">` (återanvänder samma klass/CSS, bara inte
+   längre en egen `<section>`) EFTER Manuscript_topp, inuti samma
+   `<section className="book-shelf">`. `.home-start`s eget
+   toppmarginal sänkt från 3.75rem till 1.75rem - det gamla värdet var
+   avstämt mot avståndet från hero-bannern, inte mot en rubrikrad.
+4. Död CSS borttagen: `.home-start-cards`, `.home-start-card`,
+   `.home-start-card-copy` (+ dess undre regler) och motsvarande
+   media-query - bara använda av det borttagna fallback-kortet.
+   `.home-start-card-action`/`.home-start-card-form` lämnade orörda
+   (delas med `AppSwitcher.tsx`, `CodexConnectDialog.tsx`,
+   `SeriesWorkspace.tsx`, serie-raden och `SeriesDetailModal.tsx`).
+   `.shelf-view-toggle`s gamla `margin-left: 0.8rem` (för att sitta
+   indragen inuti rubrik-`<h2>`) borttagen - onödig nu när den sitter
+   i en egen flex-rad med sin egen `gap`. Oanvänd i18n-nyckel
+   `guide.openFromHome` borttagen i alla tre språk.
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna (ren
+UI-omstrukturering, ingen ny logik). Verifierat live med Playwright:
+skapade en bok, stängde maskot-tipset via dess kryss (v1.0.267),
+bekräftade `.home-start-card`-antal 0 (fallback-kortet kom inte
+tillbaka), skärmdump visar Manuscript_topp-raden med rubrik/toggle/
+rundat sökfält och "Start a new manuscript" därunder, i den ordning
+Mats bad om.
+
 **Ändringslogg v1.0.266 → v1.0.267 (2026-11-04): kryss för att
 stänga maskot-tipset.** Mats: "Sen vill jag ha in ett X för att stänga
 guidentipset uppe i högra hörnet av rutan. Rutan får breddas så att
