@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { entityNoteFor } from "@core/SeriesSchema";
 import { picturesFor, MAX_ENTITY_PICTURES } from "@core/entityMedia";
 import { lockedFacts } from "@core/NarrativeFact";
@@ -6,6 +6,7 @@ import { format, useLocale } from "./i18n";
 import { useSeriesStore } from "./useSeriesStore";
 import { OverlayCard } from "./BiblePanel";
 import { EntityImageError } from "./entityImage";
+import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 
 /**
  * A series entity's own wiki-style page (roadmap discussion: "entitetssidor
@@ -18,6 +19,8 @@ import { EntityImageError } from "./entityImage";
 export function SeriesEntityDetailOverlay({ entityRef, entityLabel, onClose }: { entityRef: string; entityLabel: string; onClose: () => void }) {
   const { series, busy, setEntityHistory, addEntityPicture, removeEntityPicture, extractEntityNote } = useSeriesStore();
   const { messages: m } = useLocale();
+  const [aiFree, setAiFree] = useState(readAiFreeMode);
+  useEffect(() => subscribeAiFreeMode(setAiFree), []);
   const [imageError, setImageError] = useState<string | null>(null);
   const [imageBusy, setImageBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -99,7 +102,8 @@ export function SeriesEntityDetailOverlay({ entityRef, entityLabel, onClose }: {
             <button
               type="button"
               className="primary"
-              disabled={extracting || !note.history.trim()}
+              disabled={extracting || !note.history.trim() || aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
               onClick={() => void extractEntityNote(entityRef, entityLabel)}
             >
               {extracting ? m.series.extracting : m.series.extractFromHistory}

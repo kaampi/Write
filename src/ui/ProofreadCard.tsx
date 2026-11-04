@@ -11,6 +11,7 @@ import {
   type ProofreadStage
 } from "@core/proofread";
 import { format, useLocale } from "./i18n";
+import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 
 export function ProofreadCard({
   book,
@@ -32,6 +33,8 @@ export function ProofreadCard({
   onOpenChapter: (chapterId: string) => void;
 }) {
   const { messages: m } = useLocale();
+  const [aiFree, setAiFree] = useState(readAiFreeMode);
+  useEffect(() => subscribeAiFreeMode(setAiFree), []);
   const viewed = flagStale(job, book);
   const chapters = proseChapters(book);
   const scopedCount = viewed.scopeChapterId ? 1 : chapters.length;
@@ -174,12 +177,24 @@ export function ProofreadCard({
 
         <div className="edit-actions">
           {paused || failed ? (
-            <button type="button" className="primary" onClick={onContinue}>
+            <button
+              type="button"
+              className="primary"
+              onClick={onContinue}
+              disabled={aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+            >
               {m.proofread.continue}
             </button>
           ) : null}
           {done ? (
-            <button type="button" className="primary" onClick={onRunAgain}>
+            <button
+              type="button"
+              className="primary"
+              onClick={onRunAgain}
+              disabled={aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+            >
               {m.proofread.runAgain}
             </button>
           ) : null}

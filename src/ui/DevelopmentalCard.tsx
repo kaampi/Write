@@ -10,6 +10,7 @@ import {
   type DevelopmentalStage
 } from "@core/developmental";
 import { format, useLocale } from "./i18n";
+import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 
 export function DevelopmentalCard({
   book,
@@ -31,6 +32,8 @@ export function DevelopmentalCard({
   onOpenChapter: (chapterId: string) => void;
 }) {
   const { messages: m } = useLocale();
+  const [aiFree, setAiFree] = useState(readAiFreeMode);
+  useEffect(() => subscribeAiFreeMode(setAiFree), []);
   const chapters = proseChapters(book);
   const sceneCount = chapters.reduce((total, chapter) => total + chapterScenes(chapter).length, 0);
   const percent = developmentalPercent(job, sceneCount, chapters.length);
@@ -149,12 +152,24 @@ export function DevelopmentalCard({
 
         <div className="edit-actions">
           {paused || failed ? (
-            <button type="button" className="primary" onClick={onContinue}>
+            <button
+              type="button"
+              className="primary"
+              onClick={onContinue}
+              disabled={aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+            >
               {m.developmental.continue}
             </button>
           ) : null}
           {done ? (
-            <button type="button" className="primary" onClick={onRunAgain}>
+            <button
+              type="button"
+              className="primary"
+              onClick={onRunAgain}
+              disabled={aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+            >
               {m.developmental.runAgain}
             </button>
           ) : null}

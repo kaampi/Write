@@ -139,6 +139,7 @@ import { ProgressCard } from "./ProgressCard";
 import { PromptInspectorCard } from "./PromptInspector";
 import type { FindOccurrence } from "@core/findReplace";
 import { count, format, STORE_ERROR, translateError, type Messages, useLocale } from "./i18n";
+import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 
 /**
  * Line-art replacements for the chapter row's settings/scenes emoji — same
@@ -725,6 +726,8 @@ export function Editor() {
   const [findKey, setFindKey] = useState(0);
   const [findHighlight, setFindHighlight] = useState<FindHighlight | null>(null);
   const [lastJsonBackupAt, setLastJsonBackupAt] = useState(() => readLastJsonBackup(book.id));
+  const [aiFree, setAiFree] = useState(readAiFreeMode);
+  useEffect(() => subscribeAiFreeMode(setAiFree), []);
   const [highlightRare, setHighlightRare] = useState(false);
   const [highlightTics, setHighlightTics] = useState(false);
   const [highlightFacts, setHighlightFacts] = useState(false);
@@ -1301,6 +1304,8 @@ export function Editor() {
               role="menuitem"
               className={askManuscriptOpen ? "app-top-menu-item is-on" : "app-top-menu-item"}
               onClick={openAskManuscript}
+              disabled={aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
             >
               {m.askManuscript.nav}
             </button>
@@ -1309,7 +1314,8 @@ export function Editor() {
               role="menuitem"
               className={proofreadOpen || busy === "proofread" ? "app-top-menu-item is-on" : "app-top-menu-item"}
               onClick={openProofread}
-              disabled={busy !== null && busy !== "proofread"}
+              disabled={(busy !== null && busy !== "proofread") || aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
             >
               {m.editor.proofread}
             </button>
@@ -1318,7 +1324,8 @@ export function Editor() {
               role="menuitem"
               className={developmentalOpen || busy === "developmental" ? "app-top-menu-item is-on" : "app-top-menu-item"}
               onClick={openDevelopmental}
-              disabled={busy !== null && busy !== "developmental"}
+              disabled={(busy !== null && busy !== "developmental") || aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
             >
               {m.developmental.action}
             </button>
@@ -1676,8 +1683,8 @@ export function Editor() {
                       <button
                         type="button"
                         className="chapter-brief-action"
-                        title={m.editor.extractBriefFactsHint}
-                        disabled={busy !== null || !item.brief.trim()}
+                        title={aiFree ? m.editor.aiFreeModeDisabledHint : m.editor.extractBriefFactsHint}
+                        disabled={busy !== null || !item.brief.trim() || aiFree}
                         onClick={() => void store.extractBrief(item.id)}
                       >
                         {busy === "extract-brief" ? m.editor.extracting : m.editor.extractBriefFacts}
@@ -1685,8 +1692,8 @@ export function Editor() {
                       <button
                         type="button"
                         className="chapter-brief-action"
-                        title={m.editor.summarizeChapterHint}
-                        disabled={busy !== null || !item.prose.trim()}
+                        title={aiFree ? m.editor.aiFreeModeDisabledHint : m.editor.summarizeChapterHint}
+                        disabled={busy !== null || !item.prose.trim() || aiFree}
                         onClick={async () => {
                           const suggestion = await store.summarizeChapter(item.id);
                           if (suggestion === undefined) return;
@@ -1835,7 +1842,8 @@ export function Editor() {
                         setBrainstormChatOpen(true);
                         store.startBrainstormChat();
                       }}
-                      disabled={busy !== null}
+                      disabled={busy !== null || aiFree}
+                      title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
                     >
                       {m.editor.brainstormChat}
                     </button>
@@ -1854,7 +1862,7 @@ export function Editor() {
               <BrainstormChatCard
                 history={store.brainstormChatHistory}
                 busy={busy === "brainstorm-chat"}
-                blocked={busy !== null && busy !== "brainstorm-chat"}
+                blocked={(busy !== null && busy !== "brainstorm-chat") || aiFree}
                 error={busy === "brainstorm-chat" ? null : error ? translateError(error, m) : ollamaError ? translateError(ollamaError, m) : null}
                 onAsk={(message) => void store.askBrainstormChat(message)}
                 onAddToNotes={(text) => void store.patchBook((current) => addBrainstormNote(current, { text }))}
@@ -1890,7 +1898,7 @@ export function Editor() {
         ) : onMethod ? (
           <DevelopmentMethodPanel
             developmentMethod={book.development_method}
-            busy={busy === "develop"}
+            busy={busy === "develop" || aiFree}
             suggestion={store.developSuggestion}
             onUseMethod={(id) => void store.setDevelopmentMethod(id)}
             onNoMethod={() => void store.setDevelopmentMethod(null)}
@@ -2131,7 +2139,13 @@ export function Editor() {
                       {m.common.stop}
                     </button>
                   ) : (
-                    <button type="button" className="primary" onClick={() => void store.draftChapter()} disabled={busy !== null}>
+                    <button
+                      type="button"
+                      className="primary"
+                      onClick={() => void store.draftChapter()}
+                      disabled={busy !== null || aiFree}
+                      title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+                    >
                       {m.editor.draft}
                     </button>
                   )}
@@ -2144,7 +2158,7 @@ export function Editor() {
                       <TranslationStatus
                         book={book}
                         chapter={chapter}
-                        busy={busy !== null}
+                        busy={busy !== null || aiFree}
                         loadBook={store.loadBook}
                         onTranslate={() => void store.translateChapter()}
                       />
@@ -2157,14 +2171,19 @@ export function Editor() {
                   ) : (
                     <button
                       type="button"
-                      title={m.editor.polishTitle}
+                      title={aiFree ? m.editor.aiFreeModeDisabledHint : m.editor.polishTitle}
                       onClick={() => void store.polishChapter()}
-                      disabled={busy !== null || !chapter.prose.trim()}
+                      disabled={busy !== null || !chapter.prose.trim() || aiFree}
                     >
                       {m.editor.polish}
                     </button>
                   )}
-                  <button type="button" onClick={() => void store.extractChapter()} disabled={busy !== null}>
+                  <button
+                    type="button"
+                    onClick={() => void store.extractChapter()}
+                    disabled={busy !== null || aiFree}
+                    title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+                  >
                     {busy === "extract" ? m.editor.extracting : m.editor.extract}
                   </button>
                   <StatsButton onOpen={() => setStatsOpen(true)} />
@@ -2175,13 +2194,13 @@ export function Editor() {
                   ) : (
                     <button
                       type="button"
-                      title={m.notes.intro}
+                      title={aiFree ? m.editor.aiFreeModeDisabledHint : m.notes.intro}
                       onClick={() => {
                         void store.analyzeChapter().then((ok) => {
                           if (ok) setNotesOpen(true);
                         });
                       }}
-                      disabled={busy !== null || !chapter.prose.trim()}
+                      disabled={busy !== null || !chapter.prose.trim() || aiFree}
                     >
                       {m.editor.analyze}
                     </button>
@@ -2193,9 +2212,9 @@ export function Editor() {
                   ) : (
                     <button
                       type="button"
-                      title={m.critics.setupLede}
+                      title={aiFree ? m.editor.aiFreeModeDisabledHint : m.critics.setupLede}
                       onClick={() => setCriticsSetupOpen(true)}
-                      disabled={busy !== null || !chapter.prose.trim()}
+                      disabled={busy !== null || !chapter.prose.trim() || aiFree}
                     >
                       {m.editor.critics}
                     </button>
@@ -2208,7 +2227,8 @@ export function Editor() {
                     <button
                       type="button"
                       onClick={() => setAskPassageOpen(true)}
-                      disabled={busy !== null || !chapter.prose.trim()}
+                      disabled={busy !== null || !chapter.prose.trim() || aiFree}
+                      title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
                     >
                       {m.editor.askPassage}
                     </button>
@@ -2276,7 +2296,7 @@ export function Editor() {
                 chapter={chapter}
                 onPatch={(scenes) => void store.patchBook((current) => updateChapter(current, chapter.id, { scenes }))}
                 onMergeWithNext={(sceneId) => store.mergeScene(sceneId)}
-                busy={busy !== null}
+                busy={busy !== null || aiFree}
                 onDraftScene={(sceneId) => void store.draftScene(sceneId)}
                 onRecastScene={(sceneId) => void store.recastScene(sceneId)}
                 onAnalyzeScene={(sceneId) => {
@@ -2409,7 +2429,7 @@ export function Editor() {
           history={store.interviewHistory}
           busy={busy === "interview"}
           extracting={busy === "extract-interview"}
-          blocked={busy !== null && busy !== "interview" && busy !== "extract-interview"}
+          blocked={(busy !== null && busy !== "interview" && busy !== "extract-interview") || aiFree}
           error={busy === "interview" ? null : error ? translateError(error, m) : ollamaError ? translateError(ollamaError, m) : null}
           personalityDraft={store.interviewPersonalityDraft}
           savedPersonality={profileFor(book.profiles, store.interviewEntity.ref).personality}
@@ -2454,7 +2474,7 @@ export function Editor() {
       {askPassageOpen ? (
         <AskAboutPassageCard
           answer={store.askPassageAnswer}
-          busy={busy === "ask-passage"}
+          busy={busy === "ask-passage" || aiFree}
           onAsk={(question) => void store.askAboutPassage({ question })}
           onClose={() => setAskPassageOpen(false)}
         />
@@ -2489,7 +2509,7 @@ export function Editor() {
       {askManuscriptOpen ? (
         <AskManuscriptPanel
           answer={store.askManuscriptAnswer}
-          busy={busy === "ask-manuscript"}
+          busy={busy === "ask-manuscript" || aiFree}
           onAsk={(question) => void store.askManuscript(question)}
           onJumpToChapter={(chapterId) => {
             store.setChapterId(chapterId);
@@ -2653,7 +2673,7 @@ export function Editor() {
       ) : null}
       {importOpen ? (
         <LoreImportCard
-          busy={busy === "import-lore"}
+          busy={busy === "import-lore" || aiFree}
           progress={store.importLoreProgress}
           onImport={(articles) => void store.importLoreArticles(articles)}
           onClose={() => setImportOpen(false)}

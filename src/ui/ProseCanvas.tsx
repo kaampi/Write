@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 import type { Book } from "@core/BookSchema";
 import { PAGE_MARGINS, PAGE_SIZES } from "@core/manuscriptExport";
 import { applyReplace, isNonEmptySpan, selectedText, type TextSpan } from "@core/textSpan";
@@ -196,6 +197,8 @@ export function ProseCanvas({
   pageMargin?: Book["page_margin"];
 }) {
   const { messages: m } = useLocale();
+  const [aiFree, setAiFree] = useState(readAiFreeMode);
+  useEffect(() => subscribeAiFreeMode(setAiFree), []);
   const rewriteTitle = instructTitle ?? m.canvas.rewriteTitle;
   const rewriteHint = instructHint ?? m.canvas.rewriteHint;
   const rewritePlaceholder = instructPlaceholder ?? m.canvas.rewritePlaceholder;
@@ -345,7 +348,7 @@ export function ProseCanvas({
     const area = areaRef.current;
     if (!area) return;
 
-    if (highlightRare && onSuggestAlternatives) {
+    if (highlightRare && onSuggestAlternatives && !aiFree) {
       const offset = offsetFromPoint(area, event.clientX, event.clientY);
       const hit = rareHitAt(value, offset, names, extraSyllables !== undefined ? { extraSyllables } : undefined);
       if (hit) {
@@ -862,17 +865,17 @@ export function ProseCanvas({
           style={{ left: menu.x, top: menu.y }}
           role="menu"
         >
-          <button type="button" role="menuitem" onClick={() => run("extend")}>
+          <button type="button" role="menuitem" onClick={() => run("extend")} disabled={aiFree} title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}>
             {m.canvas.extend}
           </button>
-          <button type="button" role="menuitem" onClick={() => run("elaborate")}>
+          <button type="button" role="menuitem" onClick={() => run("elaborate")} disabled={aiFree} title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}>
             {m.canvas.elaborate}
           </button>
-          <button type="button" role="menuitem" onClick={() => run("instruct")}>
+          <button type="button" role="menuitem" onClick={() => run("instruct")} disabled={aiFree} title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}>
             {rewriteAction}…
           </button>
           {onAskAboutPassage ? (
-            <button type="button" role="menuitem" onClick={() => run("ask")}>
+            <button type="button" role="menuitem" onClick={() => run("ask")} disabled={aiFree} title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}>
               {m.canvas.ask}
             </button>
           ) : null}
@@ -887,7 +890,7 @@ export function ProseCanvas({
             </button>
           ) : null}
           {onIllustrate ? (
-            <button type="button" role="menuitem" onClick={() => run("illustrate")}>
+            <button type="button" role="menuitem" onClick={() => run("illustrate")} disabled={aiFree} title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}>
               {m.canvas.illustrate}
             </button>
           ) : null}
@@ -912,6 +915,8 @@ export function ProseCanvas({
                 setMenu(null);
                 setBeat({ span, instruction: "" });
               }}
+              disabled={aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
             >
               {m.canvas.beat}
             </button>

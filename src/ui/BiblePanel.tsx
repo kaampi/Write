@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { CloseIconButton } from "./CloseIconButton";
+import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 import {
   BIBLE_KIND_ADD_PREDICATES,
   BIBLE_KIND_DEFAULT_PREDICATE,
@@ -121,6 +122,8 @@ export function BiblePanel({
   } = useBookStore();
   const { createSeries, promoteBookFact, closeSeries } = useSeriesStore();
   const { messages: m } = useLocale();
+  const [aiFree, setAiFree] = useState(readAiFreeMode);
+  useEffect(() => subscribeAiFreeMode(setAiFree), []);
   const [kind, setKind] = useState<BibleKind>("characters");
   const [creatingSeries, setCreatingSeries] = useState(false);
   const [query, setQuery] = useState("");
@@ -367,7 +370,13 @@ export function BiblePanel({
         </span>
         <div className="bible-head-tools">
           {asOfChapter || !hasAnyEntities || !onInterview ? null : (
-            <button type="button" className="text-button" onClick={() => setOverlay({ type: "interviewPicker" })}>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => setOverlay({ type: "interviewPicker" })}
+              disabled={aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+            >
               {m.bible.interview}
             </button>
           )}
@@ -1339,6 +1348,8 @@ function EntityOverlay({
   } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { messages: m } = useLocale();
+  const [aiFree, setAiFree] = useState(readAiFreeMode);
+  useEffect(() => subscribeAiFreeMode(setAiFree), []);
 
   return (
     <>
@@ -1361,7 +1372,13 @@ function EntityOverlay({
       actions={
         <>
           {onInterview ? (
-            <button type="button" className="text-button" onClick={onInterview}>
+            <button
+              type="button"
+              className="text-button"
+              onClick={onInterview}
+              disabled={aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+            >
               {m.bible.interview}
             </button>
           ) : null}

@@ -3,6 +3,7 @@ import { useSeriesStore } from "./useSeriesStore";
 import { useBookStore } from "./useBookStore";
 import { count, format, translateError, useLocale } from "./i18n";
 import { SeriesBiblePanel } from "./SeriesBiblePanel";
+import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 
 type SeriesTab = "brainstorm" | "synopsis" | "bible" | "books";
 
@@ -32,6 +33,8 @@ export function SeriesWorkspace() {
   } = useSeriesStore();
   const { openBook, newBook, setBookSeries } = useBookStore();
   const { messages: m } = useLocale();
+  const [aiFree, setAiFree] = useState(readAiFreeMode);
+  useEffect(() => subscribeAiFreeMode(setAiFree), []);
   const [newBookTitle, setNewBookTitle] = useState("");
   // Clicking a book's "Series: …" tag on the shelf calls openSeries(id,
   // bookId) and lands here — read focusBookId once, on mount, so the Books
@@ -149,7 +152,13 @@ export function SeriesWorkspace() {
             rows={16}
           />
           <div className="edit-actions">
-            <button type="button" className="primary" disabled={busy !== null || !series.synopsis.trim()} onClick={() => void extractSynopsis()}>
+            <button
+              type="button"
+              className="primary"
+              disabled={busy !== null || !series.synopsis.trim() || aiFree}
+              title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+              onClick={() => void extractSynopsis()}
+            >
               {busy === "extract-synopsis" ? m.series.extracting : m.series.extractFacts}
             </button>
           </div>

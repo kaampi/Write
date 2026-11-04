@@ -11,6 +11,7 @@ import { readerTuning } from "@core/reader";
 import type { CastMember } from "@core/characterProfile";
 import type { CraftFields } from "@core/craft";
 import { flagEchoes } from "@core/echoDetect";
+import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 import { flagPhraseReuse } from "@core/phraseReuse";
 import { htmlFromProse } from "@core/proseFlow";
 import { flagPovLeaks } from "@core/povLeak";
@@ -103,6 +104,8 @@ export function ProseStatsCard({
   onClose: () => void;
 }) {
   const { messages: m } = useLocale();
+  const [aiFree, setAiFree] = useState(readAiFreeMode);
+  useEffect(() => subscribeAiFreeMode(setAiFree), []);
   const tuning = useMemo(() => readerTuning(readerAge), [readerAge]);
   const stats = useMemo(
     () => analyzeProse(text, entityNameTokens(names), { longSentence: tuning.longSentence }),
@@ -303,7 +306,12 @@ export function ProseStatsCard({
               <p className="quiet">{m.stats.alreadyShort}</p>
             ) : (
               <div className="stats-sentence-actions">
-                <button type="button" onClick={() => void suggestSplit()} disabled={splitBusy}>
+                <button
+                  type="button"
+                  onClick={() => void suggestSplit()}
+                  disabled={splitBusy || aiFree}
+                  title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+                >
                   {splitBusy ? m.stats.looking : m.stats.suggestSplit}
                 </button>
               </div>
@@ -339,7 +347,12 @@ export function ProseStatsCard({
             <blockquote>{packedFlag.text}</blockquote>
             <p className="quiet">{m.stats.packedHint}</p>
             <div className="stats-sentence-actions">
-              <button type="button" onClick={() => void suggestBreak()} disabled={splitBusy}>
+              <button
+                type="button"
+                onClick={() => void suggestBreak()}
+                disabled={splitBusy || aiFree}
+                title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+              >
                 {splitBusy ? m.stats.looking : m.stats.suggestBreak}
               </button>
             </div>
