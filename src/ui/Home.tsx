@@ -45,7 +45,7 @@ export function Home({
   const [title, setTitle] = useState("");
   const [newSeriesTitle, setNewSeriesTitle] = useState("");
   const [search, setSearch] = useState("");
-  const [shelfMode, setShelfMode] = useState<"list" | "shelf">("list");
+  const [shelfMode, setShelfMode] = useState<"list" | "shelf">("shelf");
   const [importOpen, setImportOpen] = useState(false);
   const [importCodexOpen, setImportCodexOpen] = useState(false);
   const [mascot, setMascotValue] = useState(readMascot);
@@ -53,8 +53,17 @@ export function Home({
   const [mascotIntroSeen, setMascotIntroSeen] = useState(readMascotIntroSeen);
   useEffect(() => subscribeMascotIntroSeen(() => setMascotIntroSeen(true)), []);
   const fileRef = useRef<HTMLInputElement>(null);
-  const standaloneSummaries = summaries.filter((item) => !item.series_id);
-  const filteredSummaries = standaloneSummaries.filter((item) => item.title.toLowerCase().includes(search.trim().toLowerCase()));
+  /**
+   * The shelf/list used to exclude any book with a series_id — reaching
+   * one meant opening its series and then the Books tab. Mats, 2026-11-04:
+   * with every book in a series, that left the shelf looking empty and
+   * added two clicks to open any book. Every manuscript shows here now,
+   * series or not; `seriesTitleById` below lets a series member still say
+   * which series it belongs to (a small tag, not a replacement for the
+   * series workspace's own Books list — a book appears in both).
+   */
+  const filteredSummaries = summaries.filter((item) => item.title.toLowerCase().includes(search.trim().toLowerCase()));
+  const seriesTitleById = Object.fromEntries(seriesSummaries.map((seriesSummary) => [seriesSummary.id, seriesSummary.title]));
 
   function submitNewSeries(event: React.SyntheticEvent) {
     event.preventDefault();
@@ -192,50 +201,10 @@ export function Home({
         </p>
       ) : null}
 
-      <section className="series-shelf" aria-label={m.series.heading}>
-        <div className="home-start-card-copy series-shelf-head">
-          <h2 className="settings-heading home-heading-lg">{m.series.heading}</h2>
-          <form className="home-start-card-form series-new-form" onSubmit={submitNewSeries}>
-            <input
-              value={newSeriesTitle}
-              onChange={(event) => setNewSeriesTitle(event.target.value)}
-              placeholder={m.series.newSeriesTitlePlaceholder}
-              autoComplete="off"
-              aria-label={m.series.newSeries}
-            />
-            <button type="submit" className="home-start-card-action">
-              {m.series.create}
-            </button>
-          </form>
-        </div>
-
-        {seriesSummaries.length > 0 ? (
-          <ul className="series-list">
-            {seriesSummaries.map((seriesSummary) => (
-              <li key={seriesSummary.id} className="series-card">
-                <div className="series-card-head">
-                  <div>
-                    <strong>{seriesSummary.title}</strong>
-                    <span className="quiet">
-                      {count(seriesSummary.bookCount, m.series.books)}
-                      <span className="dot">·</span>
-                      {count(seriesSummary.factCount, m.series.facts)}
-                    </span>
-                  </div>
-                  <button type="button" className="home-start-card-action" onClick={() => void openSeries(seriesSummary.id)}>
-                    {m.series.open}
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </section>
-
       <section className="book-shelf" aria-label={m.home.shelf}>
         <h2 className="settings-heading home-heading-lg">
-          {seriesSummaries.length > 0 ? m.series.standaloneHeading : m.home.shelfHeading}
-          {standaloneSummaries.length > 0 ? (
+          {m.home.shelfHeading}
+          {summaries.length > 0 ? (
             <span className="shelf-view-toggle" role="group">
               <button
                 type="button"
@@ -257,7 +226,7 @@ export function Home({
           ) : null}
         </h2>
 
-        {standaloneSummaries.length === 0 ? (
+        {summaries.length === 0 ? (
           seriesSummaries.length === 0 ? <p className="empty-shelf">{m.home.emptyShelf}</p> : null
         ) : (
           <>
@@ -276,6 +245,7 @@ export function Home({
         {filteredSummaries.length > 0 && shelfMode === "shelf" ? (
           <BookshelfView
             groups={groupManuscripts(filteredSummaries)}
+            seriesTitleById={seriesTitleById}
             onOpen={(id) => void openBook(id)}
             onDelete={(id) => void deleteBook(id)}
             onUpdateSettings={(id, patch) => void updateShelfSettings(id, patch)}
@@ -283,10 +253,11 @@ export function Home({
         ) : null}
 
         {filteredSummaries.length > 0 && shelfMode === "list" ? (
-          <ul>
+          <ul className="book-shelf-list">
             {groupManuscripts(filteredSummaries).map((group) => {
               const [primary, ...siblings] = group;
               if (!primary) return null;
+              const primarySeriesTitle = primary.series_id ? seriesTitleById[primary.series_id] : undefined;
               return (
                 <li key={primary.id} className="book-shelf-group">
                   <div className="book-shelf-row">
@@ -294,6 +265,9 @@ export function Home({
                       <strong>{primary.title}</strong>
                       <span>
                         {primary.prose_language ? <span className="book-language-tag">{primary.prose_language}</span> : null}
+                        {primarySeriesTitle ? (
+                          <span className="book-language-tag">{format(m.home.seriesTag, { series: primarySeriesTitle })}</span>
+                        ) : null}
                         {count(primary.chapterCount, m.home.chapters)}
                         <span className="dot">·</span>
                         {count(primary.factCount, m.home.facts)}
@@ -357,6 +331,46 @@ export function Home({
                 </li>
               );
             })}
+          </ul>
+        ) : null}
+      </section>
+
+      <section className="series-shelf" aria-label={m.series.heading}>
+        <div className="home-start-card-copy series-shelf-head">
+          <h2 className="settings-heading home-heading-lg">{m.series.heading}</h2>
+          <form className="home-start-card-form series-new-form" onSubmit={submitNewSeries}>
+            <input
+              value={newSeriesTitle}
+              onChange={(event) => setNewSeriesTitle(event.target.value)}
+              placeholder={m.series.newSeriesTitlePlaceholder}
+              autoComplete="off"
+              aria-label={m.series.newSeries}
+            />
+            <button type="submit" className="home-start-card-action">
+              {m.series.create}
+            </button>
+          </form>
+        </div>
+
+        {seriesSummaries.length > 0 ? (
+          <ul className="series-list">
+            {seriesSummaries.map((seriesSummary) => (
+              <li key={seriesSummary.id} className="series-card">
+                <div className="series-card-head">
+                  <div>
+                    <strong>{seriesSummary.title}</strong>
+                    <span className="quiet">
+                      {count(seriesSummary.bookCount, m.series.books)}
+                      <span className="dot">·</span>
+                      {count(seriesSummary.factCount, m.series.facts)}
+                    </span>
+                  </div>
+                  <button type="button" className="home-start-card-action" onClick={() => void openSeries(seriesSummary.id)}>
+                    {m.series.open}
+                  </button>
+                </div>
+              </li>
+            ))}
           </ul>
         ) : null}
       </section>

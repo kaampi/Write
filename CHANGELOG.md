@@ -9,6 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.257] - 2026-11-04
+
+### Changed
+- Home page reorganized: "Your manuscripts" now sits directly under "Start a new manuscript", with Series moved below it (previously the other way around). Shelf view is now the default (List is still there, in its own scroll box capped at the shelf's own height).
+- Every manuscript shows on the shelf/list now, including ones that belong to a series — previously series members were excluded, which could leave the shelf looking empty with nothing on it but series cards. A series member now carries a small "Series: <name>" tag; it's still also listed in its series' own Books tab, this isn't a replacement for that.
+
 ## [1.0.256] - 2026-11-03
 
 ### Fixed

@@ -1599,8 +1599,11 @@ button:disabled {
   font-size: 0.8rem;
 }
 
+/* Pulled in close under .book-shelf now that it always follows it
+   directly (Mats, 2026-11-04: series moved below the shelf on the page,
+   same message asked it sit close under it). */
 .series-shelf {
-  margin-top: 3rem;
+  margin-top: 1.5rem;
 }
 
 .series-shelf-head {
@@ -1928,6 +1931,16 @@ button:disabled {
   gap: 0.6rem;
 }
 
+/* List view's own scroll box, capped at the Shelf view's own fixed height
+   (.shelf-info-card's own comment derives the 334px) plus a little padding
+   headroom, so switching List/Shelf doesn't change the page's own height
+   (Mats, 2026-11-04). */
+.book-shelf-list {
+  max-height: 346px;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
 .book-shelf li {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -2043,11 +2056,12 @@ button:disabled {
   font-weight: 600;
 }
 
+/* Positioning root for .shelf-info-card (below), which sits outside normal
+   flow so Series can sit close under the shelf instead of the layout
+   reserving space for a card that's only visible some of the time (Mats,
+   2026-11-04, ported from the artifact prototype this was built from). */
 .shelf-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 1.5rem;
+  position: relative;
   margin-top: 1rem;
 }
 
@@ -2222,10 +2236,25 @@ button:disabled {
   transform: translateY(calc(var(--h) / 2 + 28px)) rotateX(-90deg) scale(1.1);
 }
 
+/* Sits BELOW the shelf, left-aligned with it, not beside it — and
+   deliberately out of flow (see .shelf-row above), so when it's open it
+   lays itself over whatever's underneath (Series) instead of pushing it
+   down. top:346px = the shelf's own fixed total height (.shelf-books'
+   230px min book height + 70px headroom = 300px, plus the two plank
+   strips' 10px/16px, plus .shelf-scene's 8px bottom padding = 334px) plus
+   a 12px gap — not book-count-dependent the way the shelf's WIDTH is, so
+   this can be a plain constant. */
 .shelf-info-card {
-  flex: 1 1 320px;
-  max-width: 420px;
-  margin-top: 90px;
+  position: absolute;
+  top: 346px;
+  left: 0;
+  width: 380px;
+  z-index: 5;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.1rem 1.2rem;
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 0.4rem;

@@ -16,11 +16,13 @@ function hashString(value: string): number {
 /** Groups already share one primary per translation family (see groupManuscripts); the shelf shows one spine per group. */
 export function BookshelfView({
   groups,
+  seriesTitleById,
   onOpen,
   onDelete,
   onUpdateSettings
 }: {
   groups: BookSummary[][];
+  seriesTitleById: Record<string, string>;
   onOpen: (id: string) => void;
   onDelete: (id: string) => void;
   onUpdateSettings: (id: string, patch: ShelfSettingsPatch) => void;
@@ -54,6 +56,7 @@ export function BookshelfView({
   const shelfWidth = Math.max(360, 60 + booksWidth + gapsWidth + 60);
 
   const selected = items.find((item) => item.primary.id === selectedId) ?? null;
+  const selectedSeriesTitle = selected?.primary.series_id ? seriesTitleById[selected.primary.series_id] : undefined;
   const selectedGroup = selected ? groups.find((group) => group[0]?.id === selected.primary.id) : undefined;
   const siblings = selectedGroup ? selectedGroup.slice(1) : [];
   const editing = editingId ? items.find((item) => item.primary.id === editingId) : undefined;
@@ -125,6 +128,9 @@ export function BookshelfView({
                 </svg>
               </button>
             </div>
+            {selectedSeriesTitle ? (
+              <span className="book-language-tag">{format(m.home.seriesTag, { series: selectedSeriesTitle })}</span>
+            ) : null}
             {selected.primary.shelf_author ? <span className="shelf-info-author">{selected.primary.shelf_author}</span> : null}
             <span className="shelf-info-meta">
               {selected.primary.prose_language ? <span className="book-language-tag">{selected.primary.prose_language}</span> : null}

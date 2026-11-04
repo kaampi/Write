@@ -3422,6 +3422,20 @@ färgpalett-val, som är vad som byggdes. Om "färdig"-stämpeln
 efterfrågas är det fortfarande ett eget, separat beslut (se ovan: en
 medveten handling, aldrig en redigeringsspärr).
 
+**Byggt i v1.0.257:** hyllan/listan visar nu VARJE manus, inte bara
+fristående - Mats: "Jag har två manuskript jag jobbat med och både
+ingår i en serie... min 'bokhylla' är tom." Den gamla
+"bara fristående på hyllan"-designen (ovan, från den allra första
+v1.0.250-planeringen) är alltså överspelad: en serie-bok listas nu på
+två ställen (hyllan OCH seriens egen Books-flik), med en liten "Series:
+X"-tagg som enda skillnad. Samtidigt bytte sektionerna plats på Home
+(Your manuscripts direkt under "Create new manuscript", Series under
+den) och Shelf blev default-vyn, portat från samma artefakt-rundas
+layoutändringar. Se `project_spec.md`s v1.0.256→v1.0.257-logg för hela
+listan, inklusive en separat bugg som hittades (inte fixad): att skapa
+en bok inifrån en seriens Books-flik och sen stänga den föll tillbaka
+till serie-vyn istället för Home.
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**

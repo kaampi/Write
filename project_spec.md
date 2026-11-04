@@ -11794,6 +11794,75 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.256 → v1.0.257 (2026-11-04): seriers böcker in på
+hyllan, sektionerna byter plats.** Mats testade artefakt-prototypen
+flera rundor (Shelf-vyn direkt under "Create new manuscript", Series
+nedanför, Shelf som default, listvyns egen scrollruta, infokortet
+tajtare mot hyllan och sen flyttat att ligga UNDER hyllan istället för
+bredvid, så det kan lägga sig ovanpå Series), godkände allt, sen: "Jag
+har två manuskript jag jobbat med och både ingår i en serie. Det känns
+lite trist att min 'bokhylla' är tom. Och dessutom behöver jag klicka
+på min serie och sedan books innan jag kommer åt mina böcker. Jag
+föreslår att böckerna visas i bookshelf även om de ingår i en serie."
+Gav en rekommendation (dubbellistning + en liten serietagg, samma
+mönster som språktaggen), fick ett "Ja, uppdatera artefakten" - testat
+och godkänt där (inklusive att skriva ut "Series: X" istället för bara
+"X" i taggen) - sen: "Då kan du lägga in dessa ändringar på main. Låt
+övriga sektioner bortsett från att de byter plats på sidan."
+
+Portat från artefakten till `Home.tsx`/`BookshelfView.tsx`/
+`styles.css`:
+- Sektionsordning bytt: `<section className="book-shelf">` ligger nu
+  FÖRE `<section className="series-shelf">` i JSX (tidigare tvärtom).
+  `.series-shelf`s `margin-top` minskad 3rem → 1.5rem eftersom den nu
+  alltid ligger direkt under hyllan.
+- `shelfMode`s default ändrad `"list"` → `"shelf"`.
+- **Den stora ändringen:** `standaloneSummaries` (som filtrerade bort
+  VARJE bok med `series_id`) borttagen helt - `filteredSummaries`
+  byggs nu på `summaries` rakt av. En ny `seriesTitleById`-lookup
+  (`Object.fromEntries(seriesSummaries.map(s => [s.id, s.title]))`)
+  låter både listvyn och `BookshelfView` slå upp seriens namn från
+  bokens egen `series_id` och visa en `Series: {namn}`-tagg (samma
+  `.book-language-tag`-stil som språktaggen redan använder) - utan att
+  boken försvinner ur sin series egen Books-flik, den listas nu på två
+  ställen med olika syften. Den nu missvisande rubriklogiken
+  (`m.series.standaloneHeading`, "Standalone manuscripts" när en serie
+  fanns) borttagen - rubriken är alltid "Your manuscripts" nu eftersom
+  hyllan aldrig är "bara fristående" längre; den oanvända i18n-nyckeln
+  städad bort ur alla tre språk.
+- Listvyns `<ul>` fick en ny `.book-shelf-list`-klass: `max-height:
+  346px; overflow-y: auto;` - samma härledda tal som infokortets
+  `top`-position (se nedan), så List/Shelf inte ändrar sidans höjd.
+- `.shelf-info-card` (hyllans infokort) flyttad från en flex-syskon-
+  position bredvid hyllan till `position: absolute; top: 346px; left:
+  0;` under `.shelf-row { position: relative; }` - exakt samma princip
+  som artefakt-ändringen: hyllans egen flow-höjd blir bara hyllans
+  egen höjd, Series sitter tätt under den, och kortet lägger sig
+  ovanpå Series när det är öppet istället för att knuffa undan den.
+  346px = hyllans fasta totalhöjd (334px: `.shelf-books`s 300px
+  min-höjd + de två plank-remsorna 10px/16px + scenens 8px
+  bottom-padding) plus en 12px lucka. Kortet saknade tidigare helt
+  egen bakgrund (fungerade som vanlig text bredvid hyllan) - nu
+  nödvändigt med `background: var(--panel); border; border-radius;
+  box-shadow: var(--shadow);` för att läsas som "ovanpå" istället för
+  att Series-texten lyser igenom.
+
+**Sidoeffekt hittad under Playwright-testning, inte åtgärdad (utanför
+scope):** att skapa en bok direkt inifrån en seriens egna Books-flik,
+sen stänga den boken, föll tillbaka till SERIE-vyn istället för Home -
+samma buggklass som v1.0.248 fixade för "Gör till serie", men en annan
+kodväg (seriens `seriesId` i `SeriesStore` rensas aldrig när man
+navigerar in i en serie för att lägga till en bok där). Nämnt för Mats,
+inte fixat denna gång.
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1254/1254
+tester gröna. Playwright: skapade tre riktiga böcker (två i samma
+serie, en fristående) via UI:t - bekräftade visuellt att hyllan visar
+alla tre direkt (default-vy), att Series ligger tätt under med texten
+synlig, att klick på en bok visar infokortet ovanpå Series-sektionen,
+och att listvyn visar "SERIES: THE LANTERN KEEPER"-taggar på rätt
+böcker (ingen tagg på den fristående).
+
 **Ändringslogg v1.0.255 → v1.0.256 (2026-11-03): den mörkare rutan
 bakom scenbrytnings-symbolen.** Mats, med en extrem närbild-skärmdump
 av en Vignette-stil scenbrytning: "Varför blir det en aningen mörkare
