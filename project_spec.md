@@ -11794,6 +11794,37 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.263 → v1.0.264 (2026-11-04): borttagna
+import-korten på startsidan.** Mats, med en skärmdump av de tre
+importkorten: "Vi kan ta bort dessa eftersom de ligger under Files."
+
+Alla tre (Import backup, Import manuscript (text file), Import Codex
+book) fanns sedan tidigare bara på Home - v1.0.261 la till samma tre
+som menyposter i Files-menyn (`AppTopBar.tsx`), med sin egen separata
+state/dialog-rendering där, så Home-sidans kort blev rena dubbletter.
+
+`Home.tsx`: de tre korten borttagna ur `.home-start-cards`. Det fjärde
+kortet där (Guide, bara synligt när `mascot === "none"`) fick behålla
+sin egen villkorliga rendering, men nu villkorar hela
+`.home-start-cards`-wrappern på samma `mascot === "none"` - annars hade
+en tom grid-container legat kvar i DOM:en varje gång maskoten är på
+(standardläget). Death-koden efter: `importOpen`/`importCodexOpen`-
+state, `fileRef`, den dolda fil-inputen, `ImportManuscriptCard`/
+`ImportCodexBookCard`-renderingarna, och `importManuscript`/
+`importMarkdownManuscript`/`importCoreManuscript` ur `useBookStore()`-
+destruktureringen - allt borttaget, inget av det används längre i den
+här filen (bara i `AppTopBar.tsx` nu). Nio nu oanvända i18n-nycklar
+(`importBackup`/`importBackupCardLede`/`importBackupCardAction`/
+`importManuscriptButton`/`importManuscriptCardLede`/
+`importManuscriptCardAction`/`importCodexBook`/
+`importCodexBookCardLede`/`importCodexBookCardAction`) borttagna i
+alla tre språk.
+
+`tsc --noEmit` rent (fångade inga kvarvarande referenser), `npm run
+build` rent, 1262/1262 tester gröna. Verifierat live med Playwright:
+`.home-start-card`-antal 0 på startsidan, Files-menyns tre poster
+fortfarande där oförändrade.
+
 **Ändringslogg v1.0.262 → v1.0.263 (2026-11-04): fetstil bara på
 första meningen, mindre pillboxar.** Mats, direkt efter v1.0.262:
 "Noterade du att Explores 'A world of possibilities.' inte var fet

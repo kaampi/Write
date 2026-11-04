@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.264] - 2026-11-04
+
+### Removed
+- The "Import backup"/"Import manuscript (text file)"/"Import Codex book" cards are gone from the home page — all three are now reached from the "Files" menu in the top bar instead, where they were duplicated.
+
 ## [1.0.263] - 2026-11-04
 
 ### Changed

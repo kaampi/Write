@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { groupManuscripts } from "@core/translation";
 import { useBookStore } from "./useBookStore";
 import { useSeriesStore } from "./useSeriesStore";
@@ -6,8 +6,6 @@ import { HandbookPanel } from "./HandbookPanel";
 import { count, format, translateError, useLocale } from "./i18n";
 import { checkForUpdates, isDesktopApp, type UpdateStatus } from "./desktopBridge";
 import { UpdateCheckDialog } from "./UpdateCheckDialog";
-import { ImportManuscriptCard } from "./ImportManuscriptCard";
-import { ImportCodexBookCard } from "./ImportCodexBookCard";
 import { MascotTip } from "./MascotTip";
 import { BookshelfView } from "./BookshelfView";
 import { SeriesDetailModal } from "./SeriesDetailModal";
@@ -29,18 +27,7 @@ export function Home({
   onOpenGuide: () => void;
   onCloseGuide: () => void;
 }) {
-  const {
-    summaries,
-    newBook,
-    openBook,
-    deleteBook,
-    setBookSeries,
-    updateShelfSettings,
-    importManuscript,
-    importMarkdownManuscript,
-    importCoreManuscript,
-    error
-  } = useBookStore();
+  const { summaries, newBook, openBook, deleteBook, setBookSeries, updateShelfSettings, error } = useBookStore();
   const { summaries: seriesSummaries, createSeries, openSeries, openSeriesPreview } = useSeriesStore();
   const { messages: m } = useLocale();
   const [title, setTitle] = useState("");
@@ -48,13 +35,10 @@ export function Home({
   const [search, setSearch] = useState("");
   const [seriesSearch, setSeriesSearch] = useState("");
   const [shelfMode, setShelfMode] = useState<"list" | "shelf">("shelf");
-  const [importOpen, setImportOpen] = useState(false);
-  const [importCodexOpen, setImportCodexOpen] = useState(false);
   const [mascot, setMascotValue] = useState(readMascot);
   useEffect(() => subscribeMascot(setMascotValue), []);
   const [mascotIntroSeen, setMascotIntroSeen] = useState(readMascotIntroSeen);
   useEffect(() => subscribeMascotIntroSeen(() => setMascotIntroSeen(true)), []);
-  const fileRef = useRef<HTMLInputElement>(null);
   /**
    * The shelf/list used to exclude any book with a series_id — reaching
    * one meant opening its series and then the Books tab. Mats, 2026-11-04:
@@ -143,31 +127,8 @@ export function Home({
               : {})}
           />
         ) : null}
-        <div className="home-start-cards">
-          <button type="button" className="home-start-card" onClick={() => fileRef.current?.click()}>
-            <span className="home-start-card-copy">
-              <strong>{m.home.importBackup}</strong>
-              <span>{m.home.importBackupCardLede}</span>
-              <span className="home-start-card-action">{m.home.importBackupCardAction} →</span>
-            </span>
-          </button>
-          <button type="button" className="home-start-card" onClick={() => setImportOpen(true)}>
-            <span className="home-start-card-copy">
-              <strong>{m.home.importManuscriptButton}</strong>
-              <span>{m.home.importManuscriptCardLede}</span>
-              <span className="home-start-card-action">{m.home.importManuscriptCardAction} →</span>
-            </span>
-          </button>
-          {isDesktopApp() ? (
-            <button type="button" className="home-start-card" onClick={() => setImportCodexOpen(true)}>
-              <span className="home-start-card-copy">
-                <strong>{m.home.importCodexBook}</strong>
-                <span>{m.home.importCodexBookCardLede}</span>
-                <span className="home-start-card-action">{m.home.importCodexBookCardAction} →</span>
-              </span>
-            </button>
-          ) : null}
-          {mascot === "none" ? (
+        {mascot === "none" ? (
+          <div className="home-start-cards">
             <button type="button" className="home-start-card" onClick={onOpenGuide}>
               <span className="home-start-card-copy">
                 <strong>{m.guide.openFromHome}</strong>
@@ -175,19 +136,8 @@ export function Home({
                 <span className="home-start-card-action">{m.home.guideCardAction} →</span>
               </span>
             </button>
-          ) : null}
-        </div>
-        <input
-          ref={fileRef}
-          className="setup-file"
-          type="file"
-          accept="application/json,.json"
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            event.target.value = "";
-            if (file) void importManuscript(file);
-          }}
-        />
+          </div>
+        ) : null}
       </section>
 
       {updateDialogOpen ? (
@@ -415,23 +365,6 @@ export function Home({
         </div>
       ) : null}
 
-      {importOpen ? (
-        <ImportManuscriptCard
-          onClose={() => setImportOpen(false)}
-          onImport={(importedTitle, chapters) => {
-            void importMarkdownManuscript(importedTitle, chapters);
-            setImportOpen(false);
-          }}
-        />
-      ) : null}
-
-      {importCodexOpen ? (
-        <ImportCodexBookCard
-          localIds={new Set(summaries.map((item) => item.id))}
-          onImport={importCoreManuscript}
-          onClose={() => setImportCodexOpen(false)}
-        />
-      ) : null}
     </div>
   );
 }
