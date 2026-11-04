@@ -15,6 +15,7 @@ import {
   MASCOT_NAMES,
   readMascot,
   readMascotIntroSeen,
+  setMascot,
   subscribeMascot,
   subscribeMascotIntroSeen
 } from "./mascot";
@@ -134,6 +135,8 @@ export function Home({
             name={MASCOT_NAMES[mascot]}
             text={m.home.guideCardLede}
             action={{ label: `${m.home.guideCardAction} →`, onClick: onOpenGuide }}
+            onClose={() => setMascot("none")}
+            closeLabel={m.common.close}
             {...(mascot === "kaamilla" && !mascotIntroSeen
               ? { intro: { text: m.home.mascotIntroText, actionLabel: m.home.mascotIntroUnderstood, onDismiss: dismissMascotIntro } }
               : {})}

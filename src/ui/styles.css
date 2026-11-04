@@ -1320,6 +1320,41 @@ button:disabled {
   overflow: hidden;
 }
 
+/*
+ * Mats, 2026-11-04: an × to dismiss the mascot tip for good (Home.tsx
+ * wires it to setMascot("none") — the same one-time "OK, I get it" as
+ * picking None in Settings, just reachable without leaving the page).
+ * Extra right padding/width keep the × clear of the text instead of
+ * shrinking the existing text column to make room for it.
+ */
+.mascot-bubble.has-close {
+  padding-right: 1.9rem;
+  max-width: 25.25rem;
+}
+
+.mascot-bubble-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.55rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #ad9d8c;
+  cursor: pointer;
+}
+
+.mascot-bubble-close:hover,
+.mascot-bubble-close:focus-visible {
+  color: #2a2218;
+}
+
 .mascot-bubble.has-action .mascot-bubble-content {
   max-height: calc(1.45em * 4 + 2.8rem);
   overflow: hidden;

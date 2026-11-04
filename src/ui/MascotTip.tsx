@@ -22,26 +22,46 @@ import { pickMascotPose, type MascotId } from "./mascot";
  * `key={mascot}` (Home.tsx does) so switching characters in Settings
  * re-mounts this and re-rolls, rather than keeping the old character's
  * pose string around.
+ *
+ * `onClose`, when given, adds a small × in the main bubble's own top-right
+ * corner (Mats, 2026-11-04: "ett sätt att säga OK, jag fattar") — a
+ * quieter, always-available alternative to turning the assistant off in
+ * Settings. The bubble gets its own `has-close` modifier (extra right
+ * padding/width, not shared with `has-action`'s button row) so the × never
+ * sits over the text.
  */
 export function MascotTip({
   mascot,
   name,
   text,
   action,
-  intro
+  intro,
+  onClose,
+  closeLabel
 }: {
   mascot: Exclude<MascotId, "none">;
   name: string;
   text: string;
   action?: { label: string; onClick: () => void };
   intro?: { text: string; actionLabel: string; onDismiss: () => void };
+  onClose?: () => void;
+  closeLabel?: string;
 }) {
   const [pose] = useState(() => pickMascotPose(mascot));
   return (
     <div className="mascot-tip">
       <img className="mascot-tip-avatar" src={pose} alt={name} />
       <div className="mascot-tip-bubbles">
-        <div className={action ? "mascot-bubble has-action" : "mascot-bubble has-point"}>
+        <div
+          className={[action ? "mascot-bubble has-action" : "mascot-bubble has-point", onClose ? "has-close" : ""]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {onClose ? (
+            <button type="button" className="mascot-bubble-close" onClick={onClose} aria-label={closeLabel}>
+              ×
+            </button>
+          ) : null}
           <div className="mascot-bubble-content">
             <span>{text}</span>
             {action ? (

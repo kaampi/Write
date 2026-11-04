@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.267] - 2026-11-04
+
+### Added
+- The home page's mascot tip ("Not sure where to start?") has a small × in its top-right corner to dismiss it for good — the same as picking "None" in Settings, just reachable without leaving the page. The bubble is a bit wider so the × never sits over the text, and dismissing it also retires the one-time "This is Kaamilla…" bubble beside it.
+
 ## [1.0.266] - 2026-11-04
 
 ### Fixed

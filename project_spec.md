@@ -11794,6 +11794,46 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.266 → v1.0.267 (2026-11-04): kryss för att
+stänga maskot-tipset.** Mats: "Sen vill jag ha in ett X för att stänga
+guidentipset uppe i högra hörnet av rutan. Rutan får breddas så att
+X:et inte inkräktar på texten. Om man klickar på tipset kommer det
+inte tillbaka nästa gång man kommer till startsidan. Ett sätt att säga
+OK, jag fattar. Krysset stänger och rutan om att man kan byta
+tips-karaktär."
+
+Insåg att "stängs för gott" redan har en befintlig mekanism: `mascot`-
+inställningen "None" döljer redan hela `<MascotTip>` (Home.tsx:s
+`mascot !== "none"`-villkor) och `setMascot()` river redan ner
+intro-bubblan automatiskt som en bieffekt (`dismissMascotIntro()`
+anropas inne i `setMascot`, dokumenterat i dess egen kommentar sedan
+tidigare). Krysset behöver alltså bara anropa `setMascot("none")` -
+exakt samma väg som att gå till Settings och välja "None" för
+assistenten, bara nåbar utan att lämna sidan - så båda bubblorna
+försvinner med ett enda anrop, precis som Mats bad om ("krysset
+stänger... rutan om tips-karaktär").
+
+`MascotTip.tsx`: nya props `onClose?`/`closeLabel?`. När satta
+renderas en `×`-knapp (`.mascot-bubble-close`, absolut positionerad
+uppe till höger) i huvudbubblan, och bubblan får en `has-close`-
+modifierarklass. `Home.tsx` kopplar `onClose={() => setMascot("none")}`,
+`closeLabel={m.common.close}` (återanvänder den redan generiska
+"Close"-strängen, ingen ny i18n-nyckel behövdes).
+
+**Breddning:** `.mascot-bubble.has-close` lägger till
+`padding-right: 1.9rem` och höjer `max-width` från 23.75rem till
+25.25rem (exakt samma 1.5rem som den extra paddingen) - textens egen
+bredd krymper alltså inte för att göra plats åt krysset, bubblan bara
+växer lika mycket som krysset tar.
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna
+(ren UI-koppling till redan existerande `setMascot`-logik, ingen ny
+domänlogik). Verifierat live med Playwright: krysset syns i hörnet
+utan att inkräkta på text eller "Open the Guide →"-knappen, ett klick
+tar bort BÅDA bubblorna samtidigt, och en sidomladdning efteråt visar
+att tipset fortfarande är borta (localStorage-persisterat via
+`mascot`-inställningen, samma som att manuellt stänga av assistenten).
+
 **Ändringslogg v1.0.265 → v1.0.266 (2026-11-04): dimmigt omslag
 och bortfärgat hyllplan.** Mats, med en skärmdump av ett eget
 bokomslag på hyllan: "Omslaget är dimmigt. Och vad hände med själva
