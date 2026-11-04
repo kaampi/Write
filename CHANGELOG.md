@@ -9,6 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.266] - 2026-11-04
+
+### Fixed
+- The shelf plank is wood-colored again (matching the Claude-artifact sketch it was ported from) instead of the theme-neutral panel color it had faded to.
+- Removed a `brightness(1.05)` filter on the shelf's 3D cover face that was washing out photographic covers — the artifact this was ported from never had it.
+
 ## [1.0.265] - 2026-11-04
 
 ### Added

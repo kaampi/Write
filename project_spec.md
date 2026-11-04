@@ -11794,6 +11794,41 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.265 → v1.0.266 (2026-11-04): dimmigt omslag
+och bortfärgat hyllplan.** Mats, med en skärmdump av ett eget
+bokomslag på hyllan: "Omslaget är dimmigt. Och vad hände med själva
+bokhyllan? Den var träfärgad i Artefakten."
+
+Två separata CSS-regressioner mot artefakten, båda i
+`BookshelfView.tsx`s 3D-hylla:
+
+1. **Hyllplanken.** `.shelf-plank-top`/`.shelf-plank-bottom` använde
+   `background: var(--raised); border-top: 1px solid var(--border)` -
+   temaneutralt, följer ljust/mörkt tema som resten av panelen.
+   Artefakten hade aldrig det - dess plank använde fasta varma
+   träfärgs-gradienter (`#d8b98c → #b9925f` överst, `#b9925f →
+   #96733f` underst) plus skuggor, medvetet temaoberoende precis som
+   `shelf_color`/`editor_background`s andra fasta paletter redan är.
+   Återställt till exakt artefaktens gradienter/skuggor.
+2. **Det dimmiga omslaget.** Skilt från v1.0.252s omslags-bugg (som
+   var en upplösningsfråga - 256px-tumnagel uppskalad). Den här gången:
+   `.cover-front` hade `filter: brightness(1.05)` som artefakten ALDRIG
+   hade (bara `.cover-back`, "insidan" av ryggen, mörkas med
+   `brightness(0.82)` där - `.cover-front` är helt filterfri i
+   artefakten). En ljus 5%-höjning över ett foto-omslag med mycket
+   mörka partier (som Mats skärmdump - en stjärnhimmel/nebulosa) läser
+   som en vitaktig slöja, inte en highlight. Borttagen, ersatt med en
+   `inset box-shadow` (matchar artefaktens egen `inset 0 0 16px
+   rgba(0,0,0,0.16)` på `.cover-front`) för djup istället.
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna
+(ren CSS, ingen logik att testa). Verifierat live med Playwright vid
+`deviceScaleFactor: 2` (samma metod som v1.0.252s egen verifiering):
+genererade en lila nebulosa-liknande testbild med text, laddade upp
+som omslag via hyllkortets kugghjul, zoomade in på den renderade
+`.cover-front` - skarp text, inget vitaktigt skimmer. Plankens
+träfärg bekräftad i samma skärmdump.
+
 **Ändringslogg v1.0.264 → v1.0.265 (2026-11-04): periodisk
 uppdateringskoll + riktigt kant-till-kant-banner.** Mats, två separata
 önskemål samma dag:
