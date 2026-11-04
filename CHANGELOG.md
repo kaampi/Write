@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.261] - 2026-11-04
+
+### Added
+- The top-bar "Manuscripts" menu is now "Files", and also offers "Import a backup…", "Import a text file…", and "Import a Codex book…" (desktop only) directly — previously only reachable from the home page's own import cards.
+- The Series section on the home page is redesigned: a "Create series" hero pill (matching "Start a new manuscript"), a "Your series" heading with its own search field, and a scrollable list of rows instead of a card grid.
+- "Open series →" now opens a Series detail modal over the home page instead of jumping straight into the full series workspace: a cover carousel with word count/estimated page count/cumulative locked-fact count per book, a Series Timeline (the series' own books, reorderable with up/down buttons, flagged "Reordered" when a book's position differs from when it was written), and the series' synopsis — with buttons to open the selected book directly or open the full series workspace for editing.
+- The Series Timeline's book order is for your own reading/reference only — it does not change what Draft sees when writing a book; cross-book fact visibility by story order remains a separate, undesigned question.
+
 ## [1.0.260] - 2026-11-04
 
 ### Added

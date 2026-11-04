@@ -13,6 +13,7 @@ import { ensureBrainstormNotes, NOTE_COLORS } from "./brainstormNotes";
 import { parsePlotlineColor, PLOTLINE_COLORS } from "./plotlineColors";
 import { ProofreadJobSchema } from "./proofreadSchema";
 import { DevelopmentalJobSchema } from "./developmentalSchema";
+import { countWords } from "./proseStats";
 import { SceneMetaSchema } from "./bookScene";
 import { ProseFormattingRangeSchema } from "./proseFormatting";
 import { PlaceholderSchema } from "./placeholders";
@@ -573,7 +574,10 @@ export const BookSummarySchema = z.object({
   title: z.string().min(1),
   chapterCount: z.number().int().nonnegative(),
   factCount: z.number().int().nonnegative(),
+  /** Whole-manuscript word count (sum of every chapter's prose, same count as writingGoal.ts's manuscriptWordCount) — carried on the summary so the Series detail view can show it per book without loading each full Book. */
+  wordCount: z.number().int().nonnegative(),
   updated_at: z.string().min(1),
+  created_at: z.string().min(1),
   prose_language: z.string().optional(),
   translation_group_id: z.string().optional(),
   translated_from_book_id: z.string().optional(),
@@ -602,7 +606,9 @@ export function summarizeBook(book: Book): BookSummary {
     chapterCount: sortedChapters(book).length,
     factCount: book.facts.filter((fact) => fact.superseded_by === undefined && fact.status === "locked")
       .length,
+    wordCount: sortedChapters(book).reduce((sum, chapter) => sum + countWords(chapter.prose), 0),
     updated_at: book.updated_at,
+    created_at: book.created_at,
     ...(book.prose_language.trim() ? { prose_language: book.prose_language } : {}),
     ...(book.translation_group_id ? { translation_group_id: book.translation_group_id } : {}),
     ...(book.translated_from_book_id ? { translated_from_book_id: book.translated_from_book_id } : {}),

@@ -10,6 +10,7 @@ import { ImportManuscriptCard } from "./ImportManuscriptCard";
 import { ImportCodexBookCard } from "./ImportCodexBookCard";
 import { MascotTip } from "./MascotTip";
 import { BookshelfView } from "./BookshelfView";
+import { SeriesDetailModal } from "./SeriesDetailModal";
 import {
   dismissMascotIntro,
   MASCOT_NAMES,
@@ -40,11 +41,12 @@ export function Home({
     importCoreManuscript,
     error
   } = useBookStore();
-  const { summaries: seriesSummaries, createSeries, openSeries } = useSeriesStore();
+  const { summaries: seriesSummaries, createSeries, openSeries, openSeriesPreview } = useSeriesStore();
   const { messages: m } = useLocale();
   const [title, setTitle] = useState("");
   const [newSeriesTitle, setNewSeriesTitle] = useState("");
   const [search, setSearch] = useState("");
+  const [seriesSearch, setSeriesSearch] = useState("");
   const [shelfMode, setShelfMode] = useState<"list" | "shelf">("shelf");
   const [importOpen, setImportOpen] = useState(false);
   const [importCodexOpen, setImportCodexOpen] = useState(false);
@@ -64,6 +66,9 @@ export function Home({
    */
   const filteredSummaries = summaries.filter((item) => item.title.toLowerCase().includes(search.trim().toLowerCase()));
   const seriesTitleById = Object.fromEntries(seriesSummaries.map((seriesSummary) => [seriesSummary.id, seriesSummary.title]));
+  const filteredSeriesSummaries = seriesSummaries.filter((item) =>
+    item.title.toLowerCase().includes(seriesSearch.trim().toLowerCase())
+  );
 
   function submitNewSeries(event: React.SyntheticEvent) {
     event.preventDefault();
@@ -337,44 +342,60 @@ export function Home({
       </section>
 
       <section className="series-shelf" aria-label={m.series.heading}>
-        <div className="home-start-card-copy series-shelf-head">
-          <h2 className="settings-heading home-heading-lg">{m.series.heading}</h2>
-          <form className="home-start-card-form series-new-form" onSubmit={submitNewSeries}>
-            <input
-              value={newSeriesTitle}
-              onChange={(event) => setNewSeriesTitle(event.target.value)}
-              placeholder={m.series.newSeriesTitlePlaceholder}
-              autoComplete="off"
-              aria-label={m.series.newSeries}
-            />
-            <button type="submit" className="home-start-card-action">
-              {m.series.create}
-            </button>
-          </form>
-        </div>
+        <form className="home-hero-pill series-hero-pill" action="#" onSubmit={submitNewSeries}>
+          <span className="home-hero-label">{m.series.newSeries}</span>
+          <input
+            className="home-hero-input"
+            value={newSeriesTitle}
+            onChange={(event) => setNewSeriesTitle(event.target.value)}
+            placeholder={m.series.newSeriesTitlePlaceholder}
+            autoComplete="off"
+            aria-label={m.series.newSeries}
+          />
+          <button type="submit" className="home-hero-submit" aria-label={m.series.create}>
+            <img src="/icons/pill-arrow.svg" alt="" aria-hidden="true" />
+          </button>
+        </form>
+
+        <h2 className="settings-heading home-heading-lg">{m.series.heading}</h2>
 
         {seriesSummaries.length > 0 ? (
+          <input
+            type="search"
+            className="book-shelf-search"
+            value={seriesSearch}
+            onChange={(event) => setSeriesSearch(event.target.value)}
+            placeholder={m.series.searchPlaceholder}
+            aria-label={m.series.searchPlaceholder}
+          />
+        ) : null}
+
+        {seriesSummaries.length > 0 && filteredSeriesSummaries.length === 0 ? (
+          <p className="empty-shelf">{m.series.noSearchResults}</p>
+        ) : null}
+
+        {filteredSeriesSummaries.length > 0 ? (
           <ul className="series-list">
-            {seriesSummaries.map((seriesSummary) => (
-              <li key={seriesSummary.id} className="series-card">
-                <div className="series-card-head">
-                  <div>
-                    <strong>{seriesSummary.title}</strong>
-                    <span className="quiet">
-                      {count(seriesSummary.bookCount, m.series.books)}
-                      <span className="dot">·</span>
-                      {count(seriesSummary.factCount, m.series.facts)}
-                    </span>
-                  </div>
-                  <button type="button" className="home-start-card-action" onClick={() => void openSeries(seriesSummary.id)}>
-                    {m.series.open}
-                  </button>
+            {filteredSeriesSummaries.map((seriesSummary) => (
+              <li key={seriesSummary.id} className="series-row">
+                <div>
+                  <strong>{seriesSummary.title}</strong>
+                  <span className="quiet">
+                    {count(seriesSummary.bookCount, m.series.books)}
+                    <span className="dot">·</span>
+                    {count(seriesSummary.factCount, m.series.facts)}
+                  </span>
                 </div>
+                <button type="button" className="home-start-card-action" onClick={() => void openSeriesPreview(seriesSummary.id)}>
+                  {m.series.open}
+                </button>
               </li>
             ))}
           </ul>
         ) : null}
       </section>
+
+      <SeriesDetailModal />
 
       {guideOpen ? (
         <div

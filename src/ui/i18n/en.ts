@@ -462,10 +462,13 @@ export const en = {
     darkTitle: "Use a dark page"
   },
   appBar: {
-    nav: "Manuscripts",
+    nav: "Files",
     newManuscript: "New manuscript…",
     viewAll: "View all manuscripts",
-    goHome: "Go to all manuscripts"
+    goHome: "Go to all manuscripts",
+    importBackupItem: "Import a backup…",
+    importManuscriptItem: "Import a text file…",
+    importCodexItem: "Import a Codex book…"
   },
   companionApps: {
     nav: "Your creative apps",
@@ -573,7 +576,7 @@ export const en = {
     desktopUpdateCheckFailed: "Couldn't check for updates: {error}"
   },
   series: {
-    heading: "Series",
+    heading: "Your series",
     newSeries: "+ New series",
     newSeriesTitlePlaceholder: "Series title",
     create: "Create",
@@ -623,7 +626,22 @@ export const en = {
     historyHint: "For you — never sent to Draft as-is. Only what you extract from it below becomes canon.",
     extractFromHistory: "Extract facts from this text",
     whatDraftSees: "what Draft sees",
-    imagesNote: "Images are visual reference only — never sent to Draft as text context."
+    imagesNote: "Images are visual reference only — never sent to Draft as text context.",
+    searchPlaceholder: "Search series…",
+    noSearchResults: "No series match your search.",
+    previousBook: "Previous book",
+    nextBook: "Next book",
+    detailWords: "{words} words, ~{pages} pages",
+    detailFacts: "{own} / {cumulative} locked facts",
+    timelineLabel: "Series timeline",
+    timelineLede: "The order these books happen in the story — not the order you wrote them. A reading aid for you; it doesn't change what Draft sees yet.",
+    timelineReordered: "Reordered",
+    timelineMoveEarlier: "Move earlier",
+    timelineMoveLater: "Move later",
+    synopsisHeading: "Synopsis",
+    detailNoSynopsis: "No synopsis yet — write one in the series workspace.",
+    detailOpenBook: "Open this book",
+    detailOpenWorkspace: "Open series workspace →"
   },
   shelfEdit: {
     settingsLabel: "Edit shelf card",

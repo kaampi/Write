@@ -20,6 +20,13 @@ export type SeriesStoreValue = {
   /** The book passed to the `openSeries` call that's currently open, or null for an ordinary open — SeriesWorkspace reads this once, on mount, to choose its initial tab and which row to scroll to/highlight. */
   focusBookId: string | null;
   closeSeries: () => void;
+  /** A series loaded for the Series detail modal (cover carousel, metadata, Series Timeline) — separate from `series`/`seriesId` on purpose, since those drive App.tsx's full-page routing and the modal opens over Home instead. */
+  previewSeries: Series | null;
+  previewError: string | null;
+  openSeriesPreview: (id: string) => Promise<void>;
+  closeSeriesPreview: () => void;
+  /** Moves a book one step in the series' Timeline (`book_order`) — operates on `previewSeries`, the only place the Timeline UI lives. */
+  moveBookOrder: (bookId: string, direction: "up" | "down") => Promise<void>;
   renameSeries: (title: string) => Promise<void>;
   deleteSeries: (id: string) => Promise<void>;
   /** Every book summary whose `series_id` matches, in no particular order — the caller sorts if it needs to. */

@@ -11794,6 +11794,120 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.260 → v1.0.261 (2026-11-04): Series-sektionen och
+serie-detaljmodalen portas till riktig kod, plus "Files"-menyn.** Mats,
+direkt efter att ha sett macOS-bygget för v1.0.260: "Vi portar allt till
+riktig kod OCH vi DÖper om Manuscripts i toppmenyn till Files och lägger
+också in de tre import-alternativen (backup, text file och Codex)."
+
+"Allt" syftade på artefakt-skisserna från tidigare samma dag: den
+omdesignade Series-sektionen (hero-pill + "YOUR SERIES" + sök + lista),
+serie-detaljmodalen (omslags-karusell + metadata + synopsis), och Series
+Timeline (bokordning med upp/ner-knappar + "Reordered"-flagga). Innan
+kodning: frågade uttryckligen om "allt" även skulle inkludera den
+riktiga cross-book fakta-gatingen vi diskuterat (vilka fakta en bok
+"ser" baserat på bokordning) - Mats svarade nej, bara UI + bokordning,
+fakta-gatingen förblir en separat, odesignad fråga. Det beslutet styr
+hela denna ändringslogg: ingenting här rör `visibility.ts`,
+`generateProse.ts` eller `mergeInheritedFacts`.
+
+**Ny data:**
+- `BookSchema.ts`s `BookSummarySchema` fick två nya obligatoriska fält:
+  `wordCount` (hela manusets ordräkning, samma beräkning som
+  `writingGoal.ts`s `manuscriptWordCount` men inline i `summarizeBook`
+  för att undvika ett cirkulärt importberoende) och `created_at`
+  (redan på `Book` sedan tidigare, bara inte vidarebefordrat till
+  sammanfattningen). Båda behövdes av serie-detaljmodalen och fanns
+  inte tidigare på `BookSummary`. Säkert att göra obligatoriska
+  (inte valfria) eftersom `BookSummary` aldrig persisteras eller
+  parsas från lagring - `BookRepository.list()` räknar om den från
+  varje fullständig `Book`-rad varje gång, så det finns ingen gammal
+  data att migrera.
+- `SeriesSchema.ts` fick `book_order: string[]` - seriens egna bok-id:n
+  i författarens egen berättelseordning. Tomt tills författaren faktiskt
+  sorterar om; annars faller allt tillbaka på bokens `created_at`-ordning.
+  Dokumenterat uttryckligen i schemat att fältet INTE styr fakta-synlighet.
+- Ny kärnmodul `src/core/seriesTimeline.ts` - exakt samma mönster som
+  `timeline.ts`s kapitel-nivå (`rawEntries`/`timelineEntries`/
+  `moveStoryTimeOrder`), en nivå upp: `effectiveBookOrder` (bok_order
+  justerat mot verkligheten - filtrerar bort borttagna böcker, lägger
+  till nya i `created_at`-ordning), `seriesTimelineEntries` (position +
+  `outOfOrder`-flagga: skiljer sig bokens nuvarande position från dess
+  `created_at`-position), `moveSeriesBookOrder` (byter plats med
+  grannen, returnerar en komplett ny `book_order`-array). Till skillnad
+  från artefaktens tillfälliga UI-state (som bara flaggade boken man
+  faktiskt klickat på, för att undvika kaskad-flaggor vid en enda swap)
+  flaggar den riktiga, persisterade versionen ärligt varje bok vars
+  position skiljer sig från skapelseordning - en kaskad vid en stor
+  flytt är korrekt information här, inte brus. 8 nya tester i
+  `tests/core/series-timeline.test.ts`.
+
+**Nytt i gränssnittet:**
+- `SeriesStore.tsx`/`useSeriesStore.ts` fick `moveBookOrder` samt ett
+  helt separat `previewSeries`/`previewError`/`openSeriesPreview`/
+  `closeSeriesPreview` par - medvetet frikopplat från `series`/`seriesId`
+  (som styr `App.tsx`s helsides-routing `seriesId ? SeriesWorkspace :
+  Home`). Hade modalen återanvänt `seriesId` hade den öppnade serien
+  bytt ut Home mot hela arbetsytan bakom modalen istället för att visas
+  ovanpå den.
+- Ny komponent `SeriesDetailModal.tsx`, nollprops (läser `previewSeries`
+  direkt från store:n, samma mönster som `HandbookPanel`). Omslags-
+  karusell med föregående/nästa, "X ord, ~Y sidor" (275 ord/sida,
+  samma platta konstant artefakten använde - inte kopplat till bokens
+  egen Sidstorlek-inställning), "X / Y låsta fakta" (X = den visade
+  bokens egna, Y = kumulativ summa genom och med dess position i
+  Timeline-ordningen). Series Timeline-listan med upp/ner-knappar och
+  "Reordered"-badge. Höger spalt: seriens egen synopsis (inte per bok -
+  artefaktens mock hade per-bok "blurb" men riktiga `Book` har inget
+  sådant fält, så detta skiljer sig medvetet från skissen). Två
+  handlingsknappar: "Open this book" (öppnar vald bok direkt i
+  Editor) och "Open series workspace →" (stänger modalen, anropar
+  riktiga `openSeries` för full Brainstorm/Synopsis/Story
+  Bible/Books-redigering).
+- `Home.tsx`s Series-sektion omskriven: hero-pill ("+ New series",
+  återanvänder `.home-hero-pill` rakt av - samma klass som "Start a new
+  manuscript") överst, sedan rubrik "Your series" + sökfält + en
+  rullningsbar lista (`.series-list`/`.series-row`, samma mönster som
+  manuskriptens egen lista, maxhöjd 346px). "Open series →" anropar nu
+  `openSeriesPreview` istället för `openSeries` direkt.
+- `en.ts`/`sv.ts`/`nb.ts`: `series.heading` ändrat från "Series"/
+  "Serier" till "Your series"/"Dina serier"/"Dine serier" (matchar
+  "Your manuscripts"-mönstret). Ny textsträng för sök, karusell-
+  pilarnas aria-labels, metadata-format, Timeline-rubrik/text/flagga/
+  knappar, synopsis-rubrik, tomt-synopsis-text, och de två
+  handlingsknapparna.
+- Gammal, nu oanvänd CSS (`.series-shelf-head`, `.series-new-form`,
+  `.series-card`, `.series-card-head`) borttagen, ersatt med
+  `.series-hero-pill`/`.series-row` och ett helt nytt CSS-block för
+  `.series-detail-*` (samma `min(80vh, 44rem)`-mönster som
+  `.edit-card.settings-card` redan använder för stora modaler, så
+  kolumnerna skrollar var för sig istället för att hela kortet
+  skrollar som ett block).
+
+**Files-menyn:** `appBar.nav` bytt från "Manuscripts"/"Manuskript"/
+"Manuskripter" till "Files"/"Filer"/"Filer" i alla tre språk.
+`AppTopBar.tsx` fick egen `importOpen`/`importCodexOpen`-state och en
+egen dold fil-input (samma `ImportManuscriptCard`/`ImportCodexBookCard`-
+komponenter och `store.importManuscript`/`importMarkdownManuscript`/
+`importCoreManuscript`-anrop som `Home.tsx` redan hade) - nödvändigt
+eftersom `AppTopBar` alltid är monterad (Editor/SeriesWorkspace/Home),
+medan `Home.tsx`s egna importkort bara finns när man faktiskt är på
+Home. Tre nya menyposter i dropdown-panelen: "Import a backup…",
+"Import a text file…", och (bara i `isDesktopApp()`, samma villkor som
+Home.tsx:s Codex-kort) "Import a Codex book…". Home-sidans egna
+importkort rördes INTE - båda vägarna finns nu parallellt, enligt
+"lägger också in" (lägg till, inte ersätt).
+
+**Verifiering:** `tsc --noEmit` rent, `npm run build` rent, 1262/1262
+tester gröna (8 nya för `seriesTimeline.ts`). Playwright, hela vägen:
+skapade två böcker i en serie, verifierade Files-menyns tre nya poster
+(Codex-posten korrekt dold i webbläsarläge), öppnade den omdesignade
+Series-sektionen, klickade "Open series →", verifierade modalens
+karusell/metadata/Timeline/synopsis, flyttade en bok i Timeline-listan
+och verifierade att båda böckerna fick "Reordered"-flaggan (korrekt,
+ärligt beteende - se ovan om varför det skiljer sig från artefaktens
+anti-kaskad-logik).
+
 **Ändringslogg v1.0.259 → v1.0.260 (2026-11-04): serie-taggen på hyllan
 är nu klickbar.** Mats, efter att ha sett "Series: …"-taggen i
 hyllans infokort (v1.0.257): "Om man klickar på ett manuskript i

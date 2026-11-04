@@ -1606,48 +1606,45 @@ button:disabled {
   margin-top: 1.5rem;
 }
 
-.series-shelf-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.series-new-form {
-  min-width: 260px;
+/* The "Create series" hero pill reuses .home-hero-pill/-label/-input/-submit
+   as-is (Mats, 2026-11-04: port the artifact's series-section redesign —
+   hero pill on top, "Your series" heading + search + list below, the same
+   shape as the manuscripts section just above it). .series-hero-pill only
+   tweaks the top margin so it doesn't crowd the shelf above it. */
+.series-hero-pill {
+  margin-top: 1.75rem;
 }
 
 .series-list {
   list-style: none;
   margin: 1rem 0 0;
-  padding: 0;
-  display: grid;
-  gap: 0.6rem;
+  padding-right: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 346px;
+  overflow-y: auto;
 }
 
-.series-card {
+.series-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
   background: var(--panel);
   border: 1px solid var(--border-soft);
   border-radius: 6px;
-  padding: 0.9rem 1.1rem;
+  padding: 0.9rem 1rem;
 }
 
-.series-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.series-card-head strong {
+.series-row strong {
   font-family: var(--font-prose);
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 500;
   display: block;
 }
 
-.series-card-head .quiet {
+.series-row .quiet {
   font-size: 0.85rem;
 }
 
@@ -8461,3 +8458,275 @@ button.illustration-genre-item:focus-visible {
 .core-compare-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
 .core-restore-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
 @media (max-width: 540px) { .core-compare-columns { grid-template-columns: 1fr; } }
+
+/*
+ * Series detail modal (Mats, 2026-11-04) — ports the Claude-artifact
+ * sketch of a series' cover carousel + metadata + Series Timeline +
+ * synopsis, opened from a series row's "Open series →" on Home
+ * (SeriesDetailModal.tsx, driven by SeriesStore's `previewSeries`, kept
+ * deliberately separate from the `series`/`seriesId` pair that drives
+ * App.tsx's full-page SeriesWorkspace routing — see that file's doc
+ * comment). Same large-modal shape as .edit-card.settings-card: a
+ * definite height, not max-height, so the two columns below the head can
+ * each scroll their own overflow instead of the whole card scrolling as
+ * one block.
+ */
+.edit-card.series-detail-card {
+  width: min(54rem, 100%);
+  height: min(80vh, 44rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.series-detail-title {
+  font-family: var(--font-prose);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.series-detail-columns {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  gap: 1.75rem;
+}
+
+.series-detail-left {
+  flex: 0 0 15rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.series-detail-right {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.series-detail-cover-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.series-detail-nav {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--raised);
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.series-detail-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.series-detail-cover {
+  flex: 1 1 auto;
+  aspect-ratio: 3 / 4;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.series-detail-cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.series-detail-cover-placeholder {
+  color: var(--on-ink);
+  font-family: var(--font-prose);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.series-detail-book-title {
+  font-family: var(--font-prose);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 0.4rem;
+}
+
+.series-detail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+.series-detail-timeline-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 0.25rem;
+}
+
+.series-detail-timeline-lede {
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--text-faint);
+  margin: 0 0 0.7rem;
+}
+
+.series-detail-timeline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.25rem 0.25rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.series-detail-timeline-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--raised);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 0.4rem 0.45rem 0.4rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+.series-detail-timeline-list li.is-current {
+  border-color: var(--ink);
+  background: var(--wash);
+  font-weight: 600;
+}
+
+.series-detail-timeline-row {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.series-detail-timeline-position {
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  width: 0.9rem;
+}
+
+.series-detail-timeline-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.series-detail-timeline-flag {
+  flex: 0 0 auto;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--flag);
+  background: var(--wash);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  white-space: nowrap;
+}
+
+.series-detail-timeline-nav {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.series-detail-timeline-nav button {
+  width: 1.2rem;
+  height: 0.9rem;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text-dim);
+  font-size: 0.6rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.series-detail-timeline-nav button:first-child {
+  border-radius: 4px 4px 0 0;
+}
+
+.series-detail-timeline-nav button:last-child {
+  border-radius: 0 0 4px 4px;
+  border-top: none;
+}
+
+.series-detail-timeline-nav button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.series-detail-synopsis-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0 0 0.6rem;
+}
+
+.series-detail-synopsis {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text);
+  margin: 0 0 1rem;
+  white-space: pre-wrap;
+}
+
+.series-detail-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}

@@ -8,6 +8,9 @@ import { CodexConnectDialog } from "./CodexConnectDialog";
 import { coreAutoClaim, coreConnection, type CoreConnection } from "@persistence/CoreDesktopTransport";
 import { AppSettingsDialog } from "./AppSettingsDialog";
 import { AppSwitcher } from "./AppSwitcher";
+import { isDesktopApp } from "./desktopBridge";
+import { ImportManuscriptCard } from "./ImportManuscriptCard";
+import { ImportCodexBookCard } from "./ImportCodexBookCard";
 
 const RECENT_LIMIT = 10;
 
@@ -19,7 +22,10 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
   const [codexConnectOpen, setCodexConnectOpen] = useState(false);
   const [codexStatus, setCodexStatus] = useState<CoreConnection | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importCodexOpen, setImportCodexOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -117,8 +123,55 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
                 </button>
               </>
             ) : null}
+            <div className="app-top-menu-divider" />
+            <button
+              type="button"
+              role="menuitem"
+              className="app-top-menu-item"
+              onClick={() => {
+                setMenuOpen(false);
+                fileRef.current?.click();
+              }}
+            >
+              {m.appBar.importBackupItem}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className="app-top-menu-item"
+              onClick={() => {
+                setMenuOpen(false);
+                setImportOpen(true);
+              }}
+            >
+              {m.appBar.importManuscriptItem}
+            </button>
+            {isDesktopApp() ? (
+              <button
+                type="button"
+                role="menuitem"
+                className="app-top-menu-item"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setImportCodexOpen(true);
+                }}
+              >
+                {m.appBar.importCodexItem}
+              </button>
+            ) : null}
           </div>
         ) : null}
+        <input
+          ref={fileRef}
+          className="setup-file"
+          type="file"
+          accept="application/json,.json"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) void store.importManuscript(file);
+          }}
+        />
       </div>
 
       <button
@@ -187,6 +240,22 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
           onResetPrimer={store.resetWritingPrimer}
           onHistoryLimit={store.setHistoryLimit}
           onClose={() => setSettingsOpen(false)}
+        />
+      ) : null}
+      {importOpen ? (
+        <ImportManuscriptCard
+          onClose={() => setImportOpen(false)}
+          onImport={(importedTitle, chapters) => {
+            void store.importMarkdownManuscript(importedTitle, chapters);
+            setImportOpen(false);
+          }}
+        />
+      ) : null}
+      {importCodexOpen ? (
+        <ImportCodexBookCard
+          localIds={new Set(store.summaries.map((item) => item.id))}
+          onImport={store.importCoreManuscript}
+          onClose={() => setImportCodexOpen(false)}
         />
       ) : null}
     </header>

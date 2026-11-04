@@ -45,6 +45,18 @@ export const SeriesSchema = z.object({
   entity_notes: z.array(SeriesEntityNoteSchema).default([]),
   /** Reference images per entity — same shape and rules as a book's own `media`: visual only, never fed to Draft. */
   media: z.array(EntityMediaSchema).default([]),
+  /**
+   * The series' own book ids, in author-set story-time order — not
+   * publish/creation order (a prequel can come first here even though it
+   * was written and `created_at`-stamped second). Empty until the author
+   * actually reorders (seriesTimeline.ts's `moveSeriesBookOrder`); until
+   * then, every book's natural position is its `created_at` order, and
+   * `effectiveBookOrder` falls back to that. Display/UI only (the Series
+   * Timeline sketch and its "Reordered" flag) — does not gate which facts
+   * a book inherits; see project_spec.md's 2026-11-04 fact-inheritance
+   * discussion for why that's a separate, still-undesigned question.
+   */
+  book_order: z.array(z.string()).default([]),
   created_at: z.string().min(1),
   updated_at: z.string().min(1)
 });
@@ -75,6 +87,7 @@ export function createSeries(title: string): Series {
     facts: [],
     entity_notes: [],
     media: [],
+    book_order: [],
     created_at: timestamp,
     updated_at: timestamp
   };

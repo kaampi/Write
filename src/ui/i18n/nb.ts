@@ -34,10 +34,13 @@ export const nb: Messages = {
     darkTitle: "Bruk en mørk side"
   },
   appBar: {
-    nav: "Manuskripter",
+    nav: "Filer",
     newManuscript: "Nytt manuskript…",
     viewAll: "Vis alle manuskripter",
-    goHome: "Gå til alle manuskripter"
+    goHome: "Gå til alle manuskripter",
+    importBackupItem: "Importer en backup…",
+    importManuscriptItem: "Importer en tekstfil…",
+    importCodexItem: "Importer en Codex-bok…"
   },
   companionApps: {
     nav: "Dine kreative apper",
@@ -145,7 +148,7 @@ export const nb: Messages = {
     desktopUpdateCheckFailed: "Kunne ikke se etter oppdateringer: {error}"
   },
   series: {
-    heading: "Serier",
+    heading: "Dine serier",
     newSeries: "+ Ny serie",
     newSeriesTitlePlaceholder: "Seriens tittel",
     create: "Opprett",
@@ -195,7 +198,22 @@ export const nb: Messages = {
     historyHint: "For deg — sendes aldri til Draft som den er. Bare det du henter ut fra den nedenfor blir kanon.",
     extractFromHistory: "Hent ut fakta fra denne teksten",
     whatDraftSees: "det Draft ser",
-    imagesNote: "Bilder er bare visuell referanse — sendes aldri til Draft som tekstkontekst."
+    imagesNote: "Bilder er bare visuell referanse — sendes aldri til Draft som tekstkontekst.",
+    searchPlaceholder: "Søk serier…",
+    noSearchResults: "Ingen serier matcher søket ditt.",
+    previousBook: "Forrige bok",
+    nextBook: "Neste bok",
+    detailWords: "{words} ord, ~{pages} sider",
+    detailFacts: "{own} / {cumulative} låste fakta",
+    timelineLabel: "Serietidslinje",
+    timelineLede: "Rekkefølgen bøkene skjer i historien — ikke rekkefølgen du skrev dem i. En lesehjelp for deg; endrer ikke hva Draft ser ennå.",
+    timelineReordered: "Omordnet",
+    timelineMoveEarlier: "Flytt tidligere",
+    timelineMoveLater: "Flytt senere",
+    synopsisHeading: "Synopsis",
+    detailNoSynopsis: "Ingen synopsis ennå — skriv en i seriens arbeidsflate.",
+    detailOpenBook: "Åpne denne boken",
+    detailOpenWorkspace: "Åpne seriens arbeidsflate →"
   },
   shelfEdit: {
     settingsLabel: "Rediger hyllekort",

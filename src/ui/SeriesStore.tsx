@@ -23,6 +23,7 @@ import { slugify } from "@core/ids";
 import type { FactDraft } from "@core/NarrativeFact";
 import type { CorePredicate } from "@core/predicates";
 import { crossBookConsistencyIssues, type BookFactSet, type ConsistencyIssue } from "@core/seriesConsistency";
+import { moveSeriesBookOrder } from "@core/seriesTimeline";
 import { SeriesNotFoundError, SeriesRepository } from "@persistence/SeriesRepository";
 import { BookRepository } from "@persistence/Repository";
 import { coreSharingOutbox } from "@persistence/CoreSharingRuntime";
@@ -61,6 +62,15 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
   const [consistencyIssues, setConsistencyIssues] = useState<ConsistencyIssue[] | null>(null);
   const [consistencyChecking, setConsistencyChecking] = useState(false);
   const [focusBookId, setFocusBookId] = useState<string | null>(null);
+  // A separate "preview" slot from `series`/`seriesId`, deliberately: that
+  // pair drives App.tsx's `seriesId ? SeriesWorkspace : Home` routing, so
+  // setting it to show the Series detail modal (cover carousel + Timeline,
+  // opened from Home's series list) would silently swap Home out for the
+  // full-page workspace underneath the modal. previewSeries loads the same
+  // way but never touches routing — closing it just clears this slot.
+  const [previewSeries, setPreviewSeries] = useState<Series | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const previewSeriesRef = useRef<Series | null>(null);
   const seriesRef = useRef<Series | null>(null);
   const saveTimer = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -123,6 +133,26 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
     },
     [repo]
   );
+
+  const openSeriesPreview = useCallback(
+    async (id: string) => {
+      try {
+        const loaded = await repo.get(id);
+        previewSeriesRef.current = loaded;
+        setPreviewSeries(loaded);
+        setPreviewError(null);
+      } catch (err) {
+        setPreviewError(err instanceof SeriesNotFoundError ? "series-not-found" : "series-unreadable");
+      }
+    },
+    [repo]
+  );
+
+  const closeSeriesPreview = useCallback(() => {
+    previewSeriesRef.current = null;
+    setPreviewSeries(null);
+    setPreviewError(null);
+  }, []);
 
   const closeSeries = useCallback(() => {
     abortRef.current?.abort();
@@ -409,6 +439,21 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
     [mutateFacts]
   );
 
+  const moveBookOrder = useCallback(
+    async (bookId: string, direction: "up" | "down") => {
+      const current = previewSeriesRef.current;
+      if (!current) return;
+      const books = bookSummaries.filter((book) => book.series_id === current.id);
+      const nextOrder = moveSeriesBookOrder(current, bookId, direction, books);
+      if (nextOrder === current.book_order) return;
+      const next = touchSeries(current, { book_order: nextOrder });
+      await persist(next);
+      previewSeriesRef.current = next;
+      setPreviewSeries(next);
+    },
+    [persist, bookSummaries]
+  );
+
   const promoteBookFact = useCallback(
     async (draft: FactDraft, source: { book_id: string; book_title: string; chapter_title?: string }) => {
       const current = seriesRef.current;
@@ -433,6 +478,11 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
     openSeries,
     focusBookId,
     closeSeries,
+    previewSeries,
+    previewError,
+    openSeriesPreview,
+    closeSeriesPreview,
+    moveBookOrder,
     renameSeries,
     deleteSeries,
     booksInSeries,

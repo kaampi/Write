@@ -34,10 +34,13 @@ export const sv: Messages = {
     darkTitle: "Använd en mörk sida"
   },
   appBar: {
-    nav: "Manuskript",
+    nav: "Filer",
     newManuscript: "Nytt manuskript…",
     viewAll: "Visa alla manuskript",
-    goHome: "Gå till alla manuskript"
+    goHome: "Gå till alla manuskript",
+    importBackupItem: "Importera en backup…",
+    importManuscriptItem: "Importera en textfil…",
+    importCodexItem: "Importera en Codex-bok…"
   },
   companionApps: {
     nav: "Dina kreativa appar",
@@ -145,7 +148,7 @@ export const sv: Messages = {
     desktopUpdateCheckFailed: "Kunde inte kolla efter uppdateringar: {error}"
   },
   series: {
-    heading: "Serier",
+    heading: "Dina serier",
     newSeries: "+ Ny serie",
     newSeriesTitlePlaceholder: "Seriens titel",
     create: "Skapa",
@@ -195,7 +198,22 @@ export const sv: Messages = {
     historyHint: "För dig — skickas aldrig till Draft som den är. Bara det du extraherar ur den nedan blir kanon.",
     extractFromHistory: "Extrahera fakta ur den här texten",
     whatDraftSees: "det här ser Draft",
-    imagesNote: "Bilder är bara visuell referens — skickas aldrig till Draft som textkontext."
+    imagesNote: "Bilder är bara visuell referens — skickas aldrig till Draft som textkontext.",
+    searchPlaceholder: "Sök serier…",
+    noSearchResults: "Inga serier matchar din sökning.",
+    previousBook: "Föregående bok",
+    nextBook: "Nästa bok",
+    detailWords: "{words} ord, ~{pages} sidor",
+    detailFacts: "{own} / {cumulative} låsta fakta",
+    timelineLabel: "Serietidslinje",
+    timelineLede: "Ordningen böckerna händer i berättelsen — inte ordningen du skrev dem i. En läshjälp för dig; ändrar inte vad Draft ser ännu.",
+    timelineReordered: "Omordnad",
+    timelineMoveEarlier: "Flytta tidigare",
+    timelineMoveLater: "Flytta senare",
+    synopsisHeading: "Synopsis",
+    detailNoSynopsis: "Ingen synopsis än — skriv en i serie-arbetsytan.",
+    detailOpenBook: "Öppna den här boken",
+    detailOpenWorkspace: "Öppna serie-arbetsytan →"
   },
   shelfEdit: {
     settingsLabel: "Redigera hyllkort",
