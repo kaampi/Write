@@ -103,7 +103,7 @@ export function Home({
         <img className="home-hero-banner-image" src="/home-hero.jpg" alt="" aria-hidden="true" />
         <div className="home-hero-banner-overlay">
           <h1>
-            {m.home.headline}
+            <strong>{m.home.headline}</strong>
             <br />
             {m.home.truth}
           </h1>

@@ -11794,6 +11794,45 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.262 → v1.0.263 (2026-11-04): fetstil bara på
+första meningen, mindre pillboxar.** Mats, direkt efter v1.0.262:
+"Noterade du att Explores 'A world of possibilities.' inte var fet
+stil? Och har du med 'Check for updates'?" samt "Sedan var det
+snyggare pillboxes för att skapa manuskript och serie i artefakten.
+Den var lite mindre. Kan du fixa den så?"
+
+Två separata fixar:
+1. **Fetstil-split.** `Home.tsx`s `<h1>` fick `<strong>` bara runt
+   `m.home.headline` ("Write the prose."), inte hela rubriken. Ny CSS-
+   regel `.home-brand.home-hero-banner h1 { font-weight: 400 }` +
+   `...h1 strong { font-weight: 700 }` - exakt samma split som Explores
+   skärmdump visade ("A familiar face." fet, "A world of
+   possibilities." normal, på samma rad/storlek).
+2. **"Check for updates"-verifiering.** Redan med sedan v1.0.262
+   (`isDesktopApp() ? <button className="home-hero-banner-button">`),
+   bara inte synlig i webbläsarförhandsvisningen eftersom
+   `isDesktopApp()` kollar `window.isTauri`. Försökte verifiera live
+   genom att stubba `window.isTauri = true` i Playwright - kraschade
+   sandlådans webbläsarprocess varje gång (troligen för att den råa
+   stubben returnerar `{}` för alla `invoke`-anrop urskillningslöst,
+   vilket får nån startup-effekt att gå in i en tight retry-loop).
+   Verifierat via kodgranskning istället, inte en skärmdump.
+3. **Mindre pillboxar.** `.home-hero-pill` gick från Mats egna exakta
+   Affinity-mått (2026-10-31: pill 1400×150px, input 890×69px, pil-
+   ikon 70×55px, alla fasta höjder) till artefaktens kompaktare,
+   padding-styrda storlek (`padding: 0.625rem 0.625rem 0.625rem
+   1.75rem`, ingen fast höjd på pillret eller input - formen följer
+   sitt eget innehåll istället). Pilikonen (`/icons/pill-arrow.svg`,
+   fyller hela `.home-hero-submit`-knappen) krymptes proportionerligt
+   med knappen, 56×44 → samma 1.27:1-förhållande som innan, bara 0.8×
+   skalat. Påverkar BÅDA pillren (`.home-hero-pill` delas av "Start a
+   new manuscript" och "Create series", enligt Mats "för att skapa
+   manuskript och serie").
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna
+(ingen ny logik). Verifierat live med Playwright: båda pillren märkbart
+mindre, rubrikens fetstil-split syns tydligt i skärmdumpen.
+
 **Ändringslogg v1.0.261 → v1.0.262 (2026-11-04): startsidans
 hjältebanner, i stil med Explore.** Mats skickade två bilder: en
 skärmdump av kaampi Explores startsida (bred bild, mörktoning från

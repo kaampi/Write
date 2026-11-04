@@ -9,6 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.263] - 2026-11-04
+
+### Changed
+- The hero banner's headline now only bolds its first sentence ("Write the prose." bold, "The Story Bible holds truth." regular weight), matching kaampi Explore's own headline treatment.
+- The "Start a new manuscript" and "Create series" pills are smaller, matching the Claude-artifact redesign's more compact sizing (no more fixed 150px pill / 69px input height — both now size to their own padding).
+
 ## [1.0.262] - 2026-11-04
 
 ### Changed
