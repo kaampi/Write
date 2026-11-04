@@ -2608,6 +2608,7 @@ button:disabled {
 
 .shelf-settings-swatches {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 

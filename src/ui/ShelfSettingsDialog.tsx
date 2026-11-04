@@ -4,7 +4,12 @@ import { EntityImageError, picturesFromFile } from "./entityImage";
 import { count, useLocale, format } from "./i18n";
 import { OverlayCard } from "./BiblePanel";
 
-export const SHELF_COLOR_SWATCHES = ["#c24f30", "#3f6a91", "#a36b1c", "#3f7466", "#6e4e86", "#4a4036"];
+/**
+ * The four kaampi apps' own brand colors first (Codex, Explore, Comic,
+ * Write — in that order, as given), then three more from the same set
+ * (Mats, 2026-11-04).
+ */
+export const SHELF_COLOR_SWATCHES = ["#BD9300", "#84676A", "#67846A", "#677084", "#295370", "#561517", "#BF3ADF"];
 
 export type ShelfSettingsPatch = {
   cover?: EntityPicture | undefined;

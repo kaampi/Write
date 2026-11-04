@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.277] - 2026-11-04
+
+### Changed
+- Replaced the shelf card's spine color swatches with the four kaampi apps' own brand colors (Codex, Explore, Comic, Write) plus three more, seven in total (was six).
+
 ## [1.0.276] - 2026-11-04
 
 ### Added

@@ -11794,6 +11794,28 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.276 → v1.0.277 (2026-11-04): hyllkortets
+spinnfärger byter till kaampi-appens egna märkesfärger.** Mats gav
+sju hexkoder med namn: "BD9300 (Codex), 84676A (Explore), 67846A
+(Comic), 677084 (Write), 295370, 561517, BF3ADF."
+
+`SHELF_COLOR_SWATCHES` i `ShelfSettingsDialog.tsx` bytte från sex
+generiska färger (`#c24f30` osv.) till dessa sju, i given ordning -
+de fyra kaampi-apparnas egna färger (Codex, Explore, Comic, Write)
+följt av tre till ur samma uppsättning. `.shelf-settings-swatches`
+fick `flex-wrap: wrap` som en enkel säkerhetsmarginal när antalet gick
+från sex till sju (cirklarna är små, 1.8rem, ryms gott och väl i
+dialogens kolumn även utan radbrytning, men kostar inget att göra
+layouten robust mot ett ännu större urval senare).
+
+Verifierat live: öppnade kugghjulsdialogen, läste av alla sju
+swatchernas `getComputedStyle().backgroundColor` och jämförde mot de
+givna hexkoderna - exakt träff på alla sju, radbryter snyggt till en
+andra rad av fem+två.
+
+`tsc --noEmit` rent, `npm run build` rent, 1270/1270 tester gröna
+(ren färgbyte, inget test var knutet till de gamla färgvärdena).
+
 **Ändringslogg v1.0.275 → v1.0.276 (2026-11-04): dra-och-släpp-
 sortering av manuskript, synkad mellan Shelf view och List view.**
 Mats: "Skulle man kunna sortera böckerna genom att hålla ner
