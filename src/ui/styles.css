@@ -1756,10 +1756,16 @@ button:disabled {
   max-width: 60vw;
 }
 
+/* padding-left is explicit on purpose (Mats, 2026-11-04 asked to give
+   .book-shelf-list this same 2.5rem indent) — it used to come from the
+   browser's own default <ul> padding (40px, never zeroed here the way
+   .book-shelf ul's own padding:0 already does), an accident that
+   happened to look intentional; now it actually is, and both lists
+   share the same value instead of one of them leaning on a UA default. */
 .series-list {
   list-style: none;
   margin: 1rem 0 0;
-  padding-right: 0.3rem;
+  padding: 0 0.3rem 0 2.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -2073,10 +2079,16 @@ button:disabled {
    (.shelf-info-card's own comment derives the 334px) plus a little padding
    headroom, so switching List/Shelf doesn't change the page's own height
    (Mats, 2026-11-04). */
-.book-shelf-list {
+/* Same 2.5rem left indent as .series-list (Mats, 2026-11-04: "Kpt
+   Manuscripts få samma indrag som Series"). Selector is `.book-shelf
+   ul.book-shelf-list`, not just `.book-shelf-list`, to out-specify
+   `.book-shelf ul`'s own `padding: 0` reset above — two single-class
+   selectors would tie on specificity and that earlier, two-part
+   (class+type) selector would keep winning regardless of source order. */
+.book-shelf ul.book-shelf-list {
   max-height: 346px;
   overflow-y: auto;
-  padding-right: 0.3rem;
+  padding: 0 0.3rem 0 2.5rem;
 }
 
 .book-shelf li {

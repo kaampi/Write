@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.270] - 2026-11-04
+
+### Fixed
+- Manuscripts' List view rows now have the same left indent as the Series list's rows — the series list's indent turned out to be an unintentional browser default (never explicitly zeroed), now made explicit and matched on both.
+
 ## [1.0.269] - 2026-11-04
 
 ### Changed

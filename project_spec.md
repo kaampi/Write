@@ -11794,6 +11794,34 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.269 → v1.0.270 (2026-11-04): manuskriptens
+List view får samma indrag som Series.** Mats, med en skärmdump:
+"Kpt Manuscripts få samma indrag som Series" (tangent-tappat "Kan").
+
+Mätte upp skillnaden med Playwright innan jag rörde något: pillrets
+`x`-position var identisk (24px) i båda sektionerna, men
+`.series-row`s `x` var 64px mot `.book-shelf-group`s 24px - en
+40px-skillnad. Rotorsak, inte en medveten design: `.series-list` satte
+aldrig `padding-left` själv, så webbläsarens egen `<ul>`-standard
+(40px) slank igenom - `.book-shelf ul` däremot nollställer
+padding explicit (`padding: 0`) och fick därför aldrig det, en
+tillfällighet som råkade se ut som en avsiktlig indragsskillnad.
+
+Mats ville ha dem lika, inte bort - så `.series-list` fick
+`padding-left` gjord uttrycklig (`2.5rem`, samma 40px, bara inte
+längre beroende av UA-standarden) och `.book-shelf-list` fick samma
+värde. Andra försöket: `.book-shelf-list { padding: 0 ... 2.5rem }`
+som egen enkel klass (specificitet 0,1,0) förlorade mot `.book-shelf
+ul`s `padding: 0` (klass+typ, 0,1,1) oavsett källkodsordning - mätte
+om med Playwright efter första fixen, såg att `.book-shelf-group`s
+`x` fortfarande var 24px. Löst genom att höja selektorn till
+`.book-shelf ul.book-shelf-list` (0,2,1), som slår `.book-shelf ul`.
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna (ren
+CSS). Verifierat med Playwright `boundingBox()`-koordinater, inte bara
+en skärmdump: manuskriptkortens `x` är nu 64px, exakt samma som
+serieraderna.
+
 **Ändringslogg v1.0.268 → v1.0.269 (2026-11-04): Series får samma
 UI som Manuscript_topp.** Mats, direkt efter v1.0.268: "Så ger vi
 sektionen för Series samma UI. Lägg också in en marginal mellan
