@@ -62,8 +62,7 @@ export const nb: Messages = {
   home: {
     headline: "Skriv prosaen.",
     truth: "Story Bible holder sanning.",
-    lede:
-      "Et lokalt manuskriptverktøy. Gi boken en tittel, vek fram fortellingen i Brainstorm, og løft en Synopsis når den er klar. Modellen tar fram utkast til kapitlene — du bestemmer.",
+    lede: "Et lokalt manuskriptverktøy der du bestemmer.",
     newManuscript: "Start nytt manuskript",
     newManuscriptCardLede: "Gi det en tittel, la deretter historien vokse i Brainstorm — modellen skriver utkast til kapitlene, du bestemmer.",
     titlePlaceholder: "Tittel",

@@ -62,8 +62,7 @@ export const sv: Messages = {
   home: {
     headline: "Skriv prosan.",
     truth: "Story Bible håller sanning.",
-    lede:
-      "Ett lokalt manusverktyg. Ge boken en titel, väx fram berättelsen i Brainstorm, och lyft en Synopsis när den är redo. Modellen tar fram utkast till kapitlen — du bestämmer.",
+    lede: "Ett lokalt manusverktyg där du bestämmer.",
     newManuscript: "Starta nytt manus",
     newManuscriptCardLede: "Ge det en titel, väx sedan historien i Brainstorm — modellen skriver utkast till kapitlen, du bestämmer.",
     titlePlaceholder: "Titel",

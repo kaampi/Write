@@ -9,6 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.262] - 2026-11-04
+
+### Changed
+- The home page's header is now a full-width hero banner (matching kaampi Explore's own start page): a wide illustration with a dark left-to-right gradient, the headline/lede and (in the desktop app) the "Check for updates" button overlaid on top in bold white type.
+- The home page's lede is shorter: "A local manuscript tool where you decide."
+
 ## [1.0.261] - 2026-11-04
 
 ### Added

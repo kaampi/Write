@@ -490,8 +490,7 @@ export const en = {
   home: {
     headline: "Write the prose.",
     truth: "The Story Bible holds truth.",
-    lede:
-      "A local manuscript tool. Title the book, grow the story in Brainstorm, and lift a Synopsis when it is ready. The model drafts the chapters — you decide.",
+    lede: "A local manuscript tool where you decide.",
     newManuscript: "Start a new manuscript",
     newManuscriptCardLede: "Title it, then grow the story in Brainstorm — the model drafts the chapters, you decide.",
     titlePlaceholder: "Title",

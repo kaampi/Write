@@ -11794,6 +11794,52 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.261 → v1.0.262 (2026-11-04): startsidans
+hjältebanner, i stil med Explore.** Mats skickade två bilder: en
+skärmdump av kaampi Explores startsida (bred bild, mörktoning från
+vänster, fet rubrik "A familiar face. A world of possibilities." +
+"Every story has more to discover." + en krämvit "Check for updates"-
+pillerknapp ovanpå bilden) och en ny illustration (författare vid skrivbord,
+bokhylla, ett collage av berättelsefigurer som stiger upp ur
+laptopskärmen) tänkt som Writes egen bannerbild. Önskemål: "Kolla font
+och upplägg för Explore för att få det likadant" - samma mörktoning,
+samma typsnitt/vikt, samma layout, med Writes egen text: "Write the
+prose. The Story Bible holds truth. A local manuscript tool where you
+decide." plus "Check for updates".
+
+Bilden (`149.jpg`, 2000×593) sparad som `public/home-hero.jpg`.
+`Home.tsx`s header skrivs om: `<img>` + en absolut positionerad
+`.home-hero-banner-overlay` ovanpå (gradient `rgb(10 8 6 / 0.82)` →
+transparent, vänster till höger - samma mörka ton som Explores egen,
+uppskattad från skärmdumpen eftersom Explores CSS inte finns i det här
+repot). Rubriken bytte typsnitt från `var(--font-prose)` (Writes vanliga
+serif-rubrikstil) till `var(--font-ui)` i fetstil (700) - Explores egen
+rubrik är tydligt sans-serif, till skillnad från resten av Writes mer
+bokliga typografi; en medveten avvikelse bara för den här bannern, inte
+en ändring av hur appen ser ut i övrigt. `m.home.lede` förkortades i
+alla tre språk till en rad, enligt den nya texten Mats gav.
+
+`.home-brand` (basklassen, delad med `SeriesWorkspace.tsx`s egen
+tillbaka-knapp-rad) rördes inte - en ny sammansatt klass
+`.home-brand.home-hero-banner` bryter ut ur `.home`s eget padding med
+negativa marginaler så bilden går ända ut till kantenhen istället för
+att ligga indragen som resten av sidans innehåll, utan att påverka
+SeriesWorkspace som bara använder `.home-brand` ensam. Gammal
+`.home-heading-row`/`.home-heading-actions`-CSS (använd bara av den
+gamla rubrikraden) borttagen - ingen annan skärm använde dem.
+"Check for updates"-knappen fick en egen `.home-hero-banner-button`
+(krämvit piller, mörk text) istället för att återanvända
+`.home-guide-button`, eftersom den klassen delas med
+`AppSettingsDialog.tsx` och `UpdateCheckDialog.tsx` och inte skulle
+kunna ändras utan att påverka dem.
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna (ingen
+ny logik - bara markup/CSS/i18n-text). Verifierat live med Playwright
+i 1400px bredd, 2x skärmupplösning: bannern sträcker sig kant till kant,
+rubriken läsbar i vitt mot mörktoningen, layouten matchar Explores
+skärmdump. "Check for updates"-knappen syns inte i webbläsarläge (samma
+`isDesktopApp()`-villkor som innan), bara i själva desktop-appen.
+
 **Ändringslogg v1.0.260 → v1.0.261 (2026-11-04): Series-sektionen och
 serie-detaljmodalen portas till riktig kod, plus "Files"-menyn.** Mats,
 direkt efter att ha sett macOS-bygget för v1.0.260: "Vi portar allt till

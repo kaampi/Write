@@ -99,22 +99,21 @@ export function Home({
 
   return (
     <div className="home">
-      <header className="home-brand">
-        <div className="home-heading-row">
+      <header className="home-brand home-hero-banner">
+        <img className="home-hero-banner-image" src="/home-hero.jpg" alt="" aria-hidden="true" />
+        <div className="home-hero-banner-overlay">
           <h1>
             {m.home.headline}
             <br />
             {m.home.truth}
           </h1>
+          <p className="lede">{m.home.lede}</p>
           {isDesktopApp() ? (
-            <div className="home-heading-actions">
-              <button type="button" className="home-guide-button" onClick={runUpdateCheck} disabled={updateChecking}>
-                {updateChecking ? m.home.desktopCheckingUpdate : m.home.desktopCheckUpdate}
-              </button>
-            </div>
+            <button type="button" className="home-hero-banner-button" onClick={runUpdateCheck} disabled={updateChecking}>
+              {updateChecking ? m.home.desktopCheckingUpdate : m.home.desktopCheckUpdate}
+            </button>
           ) : null}
         </div>
-        <p className="lede">{m.home.lede}</p>
       </header>
 
       <section className="home-start" aria-label={m.home.startHeading}>

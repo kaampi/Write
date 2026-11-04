@@ -834,10 +834,102 @@ button:disabled {
 
 /* Inset relative to the pill/cards below, which span the full width
    (Mats: the heading and the mascot are "inskjuten" - indented - while
-   Import backup/Import manuscript share the pill's own edge). */
+   Import backup/Import manuscript share the pill's own edge). SeriesWorkspace.tsx
+   also uses .home-brand on its own (back-button + title row) — only
+   .home-hero-banner below, Home.tsx's own, turns it into the banner. */
 .home-brand {
   display: block;
   margin-left: 2.5rem;
+}
+
+/*
+ * The Home-page hero banner (Mats, 2026-11-04: match kaampi Explore's own
+ * start page — a wide image with a left-to-right dark gradient, the
+ * headline/lede/button overlaid on top in white, sans-serif, bold). Breaks
+ * out of .home's own top/side padding with negative margins so the image
+ * runs to .home's own edges (and beyond, into the header's full width)
+ * instead of sitting inset like the rest of the page's content — a plain
+ * `margin-left` like the base .home-brand has would leave a pale gap down
+ * the image's left side.
+ */
+.home-brand.home-hero-banner {
+  position: relative;
+  display: block;
+  margin: -4.6875rem -1.5rem 2.5rem;
+  width: calc(100% + 3rem);
+  overflow: hidden;
+}
+
+.home-hero-banner-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2000 / 593;
+  object-fit: cover;
+  object-position: left center;
+}
+
+.home-hero-banner-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 2.5rem min(3.5rem, 8vw);
+  background: linear-gradient(
+    to right,
+    rgb(10 8 6 / 0.82) 0%,
+    rgb(10 8 6 / 0.55) 38%,
+    rgb(10 8 6 / 0) 72%
+  );
+}
+
+.home-brand.home-hero-banner h1 {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3.4vw, 2.4rem);
+  line-height: 1.2;
+  margin: 0;
+  max-width: 30rem;
+  color: #fffdf8;
+}
+
+.home-hero-banner-overlay .lede {
+  color: #f0ebe2;
+  max-width: 26rem;
+  margin: 0;
+}
+
+.home-hero-banner-button {
+  margin-top: 0.3rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 1.4rem;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: #2a2218;
+  background: #fffdf8;
+  cursor: pointer;
+}
+
+.home-hero-banner-button:hover,
+.home-hero-banner-button:focus-visible {
+  background: #f0ebe2;
+}
+
+.home-hero-banner-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 40rem) {
+  .home-hero-banner-overlay {
+    padding: 1.5rem;
+    background: linear-gradient(to right, rgb(10 8 6 / 0.85) 0%, rgb(10 8 6 / 0.7) 60%, rgb(10 8 6 / 0.4) 100%);
+  }
 }
 
 .home-connect {
@@ -877,27 +969,6 @@ button:disabled {
 .home-connect-desktop .home-guide-button {
   padding: 0.6rem 1.2rem;
   font-size: 0.9rem;
-}
-
-.home-heading-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.home-heading-row h1 {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.home-heading-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.6rem;
-  flex: 0 0 auto;
 }
 
 .home-guide-button {
