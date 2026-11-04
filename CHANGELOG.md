@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.274] - 2026-11-04
+
+### Changed
+- Shelf covers now get a small contrast/saturation lift (not a stored-data change — applied on render). A detailed photographic cover (film grain, starfields) loses a fair amount of local contrast when the browser scales it down to shelf-thumbnail size; this compensates for that visually, so dark covers read closer to how they look at full size.
+
 ## [1.0.273] - 2026-11-04
 
 ### Fixed

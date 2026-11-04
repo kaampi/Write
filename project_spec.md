@@ -11794,6 +11794,57 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.273 → v1.0.274 (2026-11-04): hittade orsaken
+till "mjölkfilmen" genom att faktiskt testa Mats egen bild, inte en
+syntetisk ersättning.** Mats skickade bildfilen själv - "The Weight
+of the Course", ett omslag med ett mörkt stjärnfält, en dubbelexponerad
+ansiktssilhuett och fin kornighet/nebulosa-textur - efter att förra
+rundans alla syntetiska tester (brus, plasma-moln) inte lyckades
+återskapa klagomålet.
+
+Körde hela den riktiga pipelinen med Mats egen bild: skapade ett
+testmanuskript, laddade upp bilden genom det riktiga hyllkortet,
+jämförde dialogens platta förhandsgranskning mot hyllans 3D-roterade
+aktiva läge. Första ögonkastet (helsideskärmdump) såg verkligen
+blekare ut i det roterade läget - men isolerade mätningar motbevisade
+3D-transformen som orsak: en fristående testsida med appens exakta
+`.cover-front`-CSS (samma `translateZ`/`rotateY`/`perspective`,
+`overflow`, `box-shadow`, `backface-visibility`) visade IDENTISK
+medelljusstyrka (59,65 vs 59,36 på en mörk himmelsruta) mellan platt
+och roterad rendering - ingen av de fyra variablerna som testades
+(overflow, backface-visibility, box-shadow, will-change) gjorde någon
+mätbar skillnad. Helsidesskärmdumpens intryck var en optisk illusion
+av den mindre storleken och den mörka omgivningen, inte en faktisk
+pixelskillnad.
+
+Den riktiga orsaken hittades genom att mäta lokal kontrast
+(standardavvikelse) istället för bara medelljusstyrka: käll-JPG:en
+hade en standardavvikelse på 6,05 i en mörk stjärnhimmel-ruta, men
+EFTER att ha gått igenom appens rendering (både platt och roterat,
+lika mycket i båda) sjönk den till ~2,5 - mer än halverad. Inte vår
+JPEG-encoding (`entityImage.ts`s `jpegFromBitmap`, verifierad byte-
+identisk med/utan `imageSmoothingQuality: high`, och i det här fallet
+skedde ingen nedskalning alls eftersom bilden redan var under
+1200px-gränsen) - utan webbläsarens egen nedskalning av en detaljerad/
+kornig bild till hyllans små visningsyta (~211×298 CSS-pixlar),
+samma typ av mjuk nedskalning som alla webbläsare gör, bara extra
+märkbar på fint stjärnkorn och nebulosa-textur jämfört med en djärv
+illustration.
+
+Löst med en perceptuell kompensation, inte en "bugfix" av något
+trasigt: `.shelf-cover-image` fick `filter: contrast(1.1)
+saturate(1.08)` - lyfter lokal kontrast tillbaka mot originalets nivå
+utan att röra lagrad data. Mätt: samma rutas standardavvikelse gick
+från 2,46 till 3,79 (+54%), medelljusstyrkan sjönk från 59,4 till
+53,5 (djupare svärta, närmare originalets 60,8/6,05-par). Skärmdump
+efter fixen jämförd sida vid sida med originalet - synligt skarpare
+stjärnor, djupare svärta i rymden, mindre "mjölkig".
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna
+(ren CSS). Ingen kodbugg hittades - det här är en ärlig, mätbar
+förbättring av en genuin optisk begränsning (nedskalning av detaljrik
+bild till en liten yta), inte en lösning på ett dolt fel i pipelinen.
+
 **Ändringslogg v1.0.272 → v1.0.273 (2026-11-04): hyllkortets
 beskrivning syns äntligen, och en utredning av det "dimmiga"
 omslaget som inte hittade någon kodfel.** Mats: "Två saker. Omslaget

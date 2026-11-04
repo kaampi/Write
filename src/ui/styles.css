@@ -2540,6 +2540,15 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+/*
+ * Shrinking a detailed/grainy photographic cover (stars, film grain) down to
+ * shelf-thumbnail size softens it well below what the same JPEG looks like
+ * at full size — plain browser downscaling, confirmed by measuring pixel
+ * contrast before/after (not our JPEG encode, not the 3D transform: both
+ * tested in isolation and came back unchanged). A small contrast/saturation
+ * lift compensates for that perceptually, without touching the stored data
+ * (Mats, 2026-11-04: "Omslaget är fortfarande blekt, som en mjölkfilm").
+ */
 .shelf-cover-image {
   width: 100%;
   height: 100%;
@@ -2547,6 +2556,7 @@ button:disabled {
   position: absolute;
   top: 0;
   left: 0;
+  filter: contrast(1.1) saturate(1.08);
 }
 
 .cover-author {
