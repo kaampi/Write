@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.276] - 2026-11-04
+
+### Added
+- Drag a manuscript to reorder "Your manuscripts" — works in both Shelf view and List view, and the two stay in sync with each other. A manuscript never dragged keeps falling in by newest-edited-first, same as before.
+
 ## [1.0.275] - 2026-11-04
 
 ### Fixed

@@ -11794,6 +11794,56 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.275 → v1.0.276 (2026-11-04): dra-och-släpp-
+sortering av manuskript, synkad mellan Shelf view och List view.**
+Mats: "Skulle man kunna sortera böckerna genom att hålla ner
+muspekaren och dra boken till sin plats?" Svarade med ett kort
+designförslag (samma `book_order`-mönster som redan finns för Series
+Timeline) och frågade om det skulle gälla bara Shelf view eller båda
+vyerna. Mats: "Ja båda vyerna."
+
+Ny modul `shelfOrder.ts` - samma localStorage-pub/sub-form som
+`mascot.ts`, men lagrar bara en ordnad lista av
+översättningsgruppernas PRIMARY-id:n (`group[0].id` från
+`groupManuscripts`), inte något på själva `Book`-objektet eller dess
+`updated_at` (v1.0.275 gjorde precis klart att hyllinställningar inte
+ska röra den tidsstämpeln - samma princip gäller här: ordningen är
+ren lokal visningsstate, inte manusinnehåll). En grupp som aldrig
+dragits finns helt enkelt inte i listan och faller in där den
+newest-first-ordningen redan skulle lägga den; `applyShelfOrder`
+lägger de manuellt placerade grupperna först i sparad ordning, sen
+resten i sin befintliga inbördes ordning.
+
+`Home.tsx` grupperar och applicerar ordningen EN gång
+(`manuscriptGroups`), delad av både `BookshelfView` (Shelf view) och
+listans egen `<ul>` (List view) - samma källa, så en drag-omflyttning
+i endera vyn speglas direkt i den andra utan någon synk-logik att
+hålla reda på. HTML5 drag-and-drop (`draggable`, `onDragStart`/
+`onDragOver`/`onDrop`) på `.book-spine`-knapparna respektive
+`.book-shelf-group`-raderna; släpper man på en annan bok hamnar den
+draget boken direkt före den, släpper man i tomrummet efter sista
+boken (bakgrunden på `.shelf-books` eller `<ul>`:en) hamnar den sist.
+
+`nextShelfOrder`/`applyShelfOrder` är rena funktioner (ingen
+localStorage-beroende, mönstret från `parseMascot` vs `setMascot`) -
+nya `tests/ui/shelf-order.test.ts` med 8 tester: flytta-före-mål,
+flytta-till-slut, släppa-på-sig-själv-oförändrad, okänt mål-id ger
+null istället för att tyst tappa boken, ingen sparad ordning lämnar
+grupperna orörda (samma referens), nya böcker som aldrig dragits
+läggs efter de manuellt ordnade med sin inbördes ordning bevarad, och
+ett borttaget sparat id ignoreras tyst.
+
+Verifierat live med Playwright (riktiga `DragEvent`/`DataTransfer`-
+dispatchar, eftersom syntetisk musrörelse inte triggar HTML5:s
+drag-and-drop-API i en headless browser): skapade tre manuskript
+(AAA/BBB/CCC), drog CCC till före AAA i List view - ordningen
+speglades omedelbart i Shelf view också (samma `BBB, CCC, AAA`).
+Testade även drag inom Shelf view självt, och drop i tomrummet efter
+sista boken flyttar till sist.
+
+`tsc --noEmit` rent, `npm run build` rent, 1270/1270 tester gröna (8
+nya).
+
 **Ändringslogg v1.0.274 → v1.0.275 (2026-11-04): redigering av
 hyllkortet flyttar inte längre boken till toppen av listan.** Mats:
 "Jag har noterat att när man redigerar en boks info ifrån shelf så

@@ -20,7 +20,8 @@ export function BookshelfView({
   onOpen,
   onDelete,
   onUpdateSettings,
-  onOpenSeries
+  onOpenSeries,
+  onReorder
 }: {
   groups: BookSummary[][];
   seriesTitleById: Record<string, string>;
@@ -29,6 +30,8 @@ export function BookshelfView({
   onUpdateSettings: (id: string, patch: ShelfSettingsPatch) => void;
   /** The selected book's "Series: …" tag opens the series workspace focused on that exact book, rather than just the series in general. */
   onOpenSeries: (seriesId: string, bookId: string) => void;
+  /** Drag a spine onto another (or past the last one, with `null`) to reorder the shelf (Mats, 2026-11-04). */
+  onReorder: (draggedId: string, targetId: string | null) => void;
 }) {
   const { messages: m } = useLocale();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -68,7 +71,15 @@ export function BookshelfView({
   return (
     <div className="shelf-row">
       <div className="shelf-scene" style={{ width: shelfWidth }}>
-        <div className="shelf-books">
+        <div
+          className="shelf-books"
+          onDragOver={(event) => event.preventDefault()}
+          onDrop={(event) => {
+            event.preventDefault();
+            if (event.target !== event.currentTarget) return;
+            onReorder(event.dataTransfer.getData("text/plain"), null);
+          }}
+        >
           {items.map((item) => {
             const active = item.primary.id === selectedId;
             const style = {
@@ -85,6 +96,17 @@ export function BookshelfView({
                 style={style}
                 aria-pressed={active}
                 title={item.primary.title}
+                draggable
+                onDragStart={(event) => {
+                  event.dataTransfer.setData("text/plain", item.primary.id);
+                  event.dataTransfer.effectAllowed = "move";
+                }}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onReorder(event.dataTransfer.getData("text/plain"), item.primary.id);
+                }}
                 onClick={() => setSelectedId(active ? null : item.primary.id)}
               >
                 <div className="face spine-face">

@@ -10,6 +10,7 @@ import { readUpdateStatus, runUpdateCheck, subscribeUpdateStatus } from "./updat
 import { MascotTip } from "./MascotTip";
 import { BookshelfView } from "./BookshelfView";
 import { SeriesDetailModal } from "./SeriesDetailModal";
+import { applyShelfOrder, readShelfOrder, reorderShelf, subscribeShelfOrder } from "./shelfOrder";
 import {
   dismissMascotIntro,
   MASCOT_NAMES,
@@ -55,6 +56,21 @@ export function Home({
   const filteredSeriesSummaries = seriesSummaries.filter((item) =>
     item.title.toLowerCase().includes(seriesSearch.trim().toLowerCase())
   );
+
+  /**
+   * Shared between Shelf view and List view, so a drag in either one keeps
+   * both in sync (Mats, 2026-11-04: "Ja båda vyerna") — grouped once here,
+   * manual order applied once here, rather than each view doing its own
+   * groupManuscripts()+ordering and risking drift between them.
+   */
+  const [shelfOrder, setShelfOrder] = useState(readShelfOrder);
+  useEffect(() => subscribeShelfOrder(setShelfOrder), []);
+  const manuscriptGroups = applyShelfOrder(groupManuscripts(filteredSummaries), shelfOrder);
+  const manuscriptIds = manuscriptGroups.map((group) => group[0]!.id);
+  function dropManuscript(draggedId: string, targetId: string | null) {
+    if (draggedId === targetId) return;
+    reorderShelf(manuscriptIds, draggedId, targetId);
+  }
 
   function submitNewSeries(event: React.SyntheticEvent) {
     event.preventDefault();
@@ -204,23 +220,45 @@ export function Home({
 
         {filteredSummaries.length > 0 && shelfMode === "shelf" ? (
           <BookshelfView
-            groups={groupManuscripts(filteredSummaries)}
+            groups={manuscriptGroups}
             seriesTitleById={seriesTitleById}
             onOpen={(id) => void openBook(id)}
             onDelete={(id) => void deleteBook(id)}
             onUpdateSettings={(id, patch) => void updateShelfSettings(id, patch)}
             onOpenSeries={(seriesId, bookId) => void openSeries(seriesId, bookId)}
+            onReorder={dropManuscript}
           />
         ) : null}
 
         {filteredSummaries.length > 0 && shelfMode === "list" ? (
-          <ul className="book-shelf-list">
-            {groupManuscripts(filteredSummaries).map((group) => {
+          <ul
+            className="book-shelf-list"
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault();
+              if (event.target !== event.currentTarget) return;
+              dropManuscript(event.dataTransfer.getData("text/plain"), null);
+            }}
+          >
+            {manuscriptGroups.map((group) => {
               const [primary, ...siblings] = group;
               if (!primary) return null;
               const primarySeriesTitle = primary.series_id ? seriesTitleById[primary.series_id] : undefined;
               return (
-                <li key={primary.id} className="book-shelf-group">
+                <li
+                  key={primary.id}
+                  className="book-shelf-group"
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.setData("text/plain", primary.id);
+                    event.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    dropManuscript(event.dataTransfer.getData("text/plain"), primary.id);
+                  }}
+                >
                   <div className="book-shelf-row">
                     <button type="button" className="book-card" onClick={() => void openBook(primary.id)}>
                       <strong>{primary.title}</strong>
