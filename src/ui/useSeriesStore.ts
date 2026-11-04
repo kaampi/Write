@@ -15,7 +15,10 @@ export type SeriesStoreValue = {
   error: string | null;
   refresh: () => Promise<void>;
   createSeries: (title: string) => Promise<Series>;
-  openSeries: (id: string) => Promise<void>;
+  /** `bookId`, when given, is the book the caller wants the Series workspace to land on and highlight (its Books tab opens by default instead of Brainstorm) — set by clicking a book's "Series: …" tag on the shelf. Omit for the ordinary "Open series" entry point. */
+  openSeries: (id: string, bookId?: string) => Promise<void>;
+  /** The book passed to the `openSeries` call that's currently open, or null for an ordinary open — SeriesWorkspace reads this once, on mount, to choose its initial tab and which row to scroll to/highlight. */
+  focusBookId: string | null;
   closeSeries: () => void;
   renameSeries: (title: string) => Promise<void>;
   deleteSeries: (id: string) => Promise<void>;

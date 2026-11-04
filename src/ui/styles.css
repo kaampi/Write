@@ -1998,6 +1998,15 @@ button:disabled {
   align-items: center;
 }
 
+/* Briefly marks the book a "Series: …" tag click (BookshelfView.tsx) was
+   pointed at, after openSeries(id, bookId) lands the Series workspace on
+   this row's Books tab — SeriesWorkspace.tsx clears it again ~2s later. */
+.book-shelf-row.is-focused {
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 2px var(--flag);
+  transition: box-shadow 0.3s ease;
+}
+
 .book-shelf-siblings {
   list-style: none;
   margin: 0.5rem 0 0;
@@ -2027,6 +2036,22 @@ button:disabled {
   text-transform: uppercase;
   letter-spacing: 0.02em;
   color: var(--text-dim);
+}
+
+/* The shelf info card's "Series: …" tag is a real <button> (opens the
+   series workspace on that exact book) rather than plain text like the
+   language tag it's styled after — resets the button chrome back to
+   .book-language-tag's own look, plus a hover/focus cue so it still reads
+   as clickable. */
+.book-language-tag-button {
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.book-language-tag-button:hover,
+.book-language-tag-button:focus-visible {
+  border-color: var(--flag);
+  color: var(--flag);
 }
 
 /* Shelf view (roadmap-ideas.md #58) — a 3D CSS bookshelf alternative to the

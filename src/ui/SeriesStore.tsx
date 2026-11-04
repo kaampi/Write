@@ -60,6 +60,7 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
   const [error, setError] = useState<string | null>(null);
   const [consistencyIssues, setConsistencyIssues] = useState<ConsistencyIssue[] | null>(null);
   const [consistencyChecking, setConsistencyChecking] = useState(false);
+  const [focusBookId, setFocusBookId] = useState<string | null>(null);
   const seriesRef = useRef<Series | null>(null);
   const saveTimer = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -107,7 +108,7 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
   );
 
   const openSeries = useCallback(
-    async (id: string) => {
+    async (id: string, bookId?: string) => {
       try {
         const loaded = await repo.get(id);
         seriesRef.current = loaded;
@@ -115,6 +116,7 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
         setSeriesId(id);
         setError(null);
         setConsistencyIssues(null);
+        setFocusBookId(bookId ?? null);
       } catch (err) {
         setError(err instanceof SeriesNotFoundError ? "series-not-found" : "series-unreadable");
       }
@@ -136,6 +138,7 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
     setSeries(null);
     setSeriesId(null);
     setConsistencyIssues(null);
+    setFocusBookId(null);
   }, [persist]);
 
   const renameSeries = useCallback(
@@ -428,6 +431,7 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
     refresh,
     createSeries,
     openSeries,
+    focusBookId,
     closeSeries,
     renameSeries,
     deleteSeries,

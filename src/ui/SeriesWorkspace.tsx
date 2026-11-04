@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSeriesStore } from "./useSeriesStore";
 import { useBookStore } from "./useBookStore";
 import { count, format, translateError, useLocale } from "./i18n";
@@ -27,12 +27,30 @@ export function SeriesWorkspace() {
     setBrainstorm,
     liftBrainstormToSynopsis,
     setSynopsis,
-    extractSynopsis
+    extractSynopsis,
+    focusBookId
   } = useSeriesStore();
   const { openBook, newBook, setBookSeries } = useBookStore();
   const { messages: m } = useLocale();
   const [newBookTitle, setNewBookTitle] = useState("");
-  const [tab, setTab] = useState<SeriesTab>("brainstorm");
+  // Clicking a book's "Series: …" tag on the shelf calls openSeries(id,
+  // bookId) and lands here — read focusBookId once, on mount, so the Books
+  // tab opens pre-selected and scrolled to that book instead of the usual
+  // Brainstorm default. Lazy useState initializers run exactly once per
+  // mount, which is exactly when this should be read: SeriesWorkspace
+  // unmounts whenever the series closes (App.tsx's book ? Editor : seriesId
+  // ? SeriesWorkspace : Home), so a later openSeries always gets a fresh mount.
+  const [tab, setTab] = useState<SeriesTab>(() => (focusBookId ? "books" : "brainstorm"));
+  const [highlightedBookId, setHighlightedBookId] = useState<string | null>(() => focusBookId);
+  const highlightedRowRef = useRef<HTMLLIElement | null>(null);
+
+  useEffect(() => {
+    if (!highlightedBookId) return;
+    highlightedRowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const timer = window.setTimeout(() => setHighlightedBookId(null), 2200);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once for the book this mount was focused on, not on every highlightedBookId change (which this effect itself causes by clearing it)
+  }, []);
 
   if (!series) {
     return (
@@ -147,7 +165,11 @@ export function SeriesWorkspace() {
           {books.length > 0 ? (
             <ul>
               {books.map((book) => (
-                <li key={book.id} className="book-shelf-row">
+                <li
+                  key={book.id}
+                  className={book.id === highlightedBookId ? "book-shelf-row is-focused" : "book-shelf-row"}
+                  ref={book.id === highlightedBookId ? highlightedRowRef : undefined}
+                >
                   <button type="button" className="book-card" onClick={() => void openBook(book.id)}>
                     <strong>{book.title}</strong>
                     <span>

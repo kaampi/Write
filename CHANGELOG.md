@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.260] - 2026-11-04
+
+### Added
+- A book's "Series: …" tag on the shelf's info card is now a button — clicking it opens that series' workspace straight on the Books tab (instead of the default Brainstorm tab), with the book you clicked from briefly highlighted and scrolled into view.
+
 ## [1.0.259] - 2026-11-04
 
 ### Added

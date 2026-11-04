@@ -11794,6 +11794,50 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.259 → v1.0.260 (2026-11-04): serie-taggen på hyllan
+är nu klickbar.** Mats, efter att ha sett "Series: …"-taggen i
+hyllans infokort (v1.0.257): "Om man klickar på ett manuskript i
+Bookshelf och den tillhör en serie så har den en 'tagg'. Om man
+klickar på den så borde serie-dialogen öppnas med rätt bok vald."
+
+Det finns ingen riktig "serie-dialog" i appen idag (bara skissad i
+Claude-artefakten) - den riktiga motsvarigheten är `SeriesWorkspace`,
+en helsidesvy som alltid öppnade på Brainstorm-fliken oavsett varifrån
+man kom, med `Books`-fliken som bara en av flera. Ingen koppling fanns
+mellan "vilken bok klickade jag från" och vad som visades där.
+
+Löst med ett nytt, litet stycke state i `SeriesStore`/`useSeriesStore`:
+`focusBookId`, satt av en ny valfri andra parameter på `openSeries(id,
+bookId?)`. `BookshelfView.tsx`s serie-tagg (tidigare en ren `<span>`)
+är nu en `<button className="book-language-tag book-language-tag-button">`
+som anropar `onOpenSeries(selectedSeriesId, selected.primary.id)` - en
+ny prop trädd genom `Home.tsx` till `openSeries` från `useSeriesStore`.
+`SeriesWorkspace.tsx` läser `focusBookId` en gång, i en lazy
+`useState`-initializer (körs exakt en gång per mount - och
+`SeriesWorkspace` monteras alltid på nytt när en serie öppnas, enligt
+`App.tsx`s `book ? Editor : seriesId ? SeriesWorkspace : Home`): om
+satt väljs `Books` som startflik istället för `Brainstorm`, och
+`highlightedBookId` sätts till samma id. Books-listans `<li>` för den
+boken får klassen `is-focused` (`styles.css`: `box-shadow: inset 0 0 0
+2px var(--flag)`, samma guldfärg som flaggan i Series Timeline-
+artefakten) och en `ref` som en `useEffect` använder för
+`scrollIntoView({ behavior: "smooth", block: "center" })` - sedan
+rensas highlighten efter 2,2 sekunder med `setTimeout`.
+
+Listvyns (List view) motsvarande tagg i `Home.tsx` rördes INTE - den
+sitter nästlad inuti `book-card`-knappen som redan öppnar boken själv,
+så en egen klickbar tagg där hade krävt att plocka ut den ur knappen
+(ogiltig `<button>`-i-`<button>`-nästling) och `stopPropagation`.
+Lämnat som en framtida utökning om det efterfrågas - scopad till
+Bookshelf (hyllvyn) precis som Mats bad om.
+
+`tsc --noEmit` rent, `npm run build` rent, 1254/1254 tester gröna
+(inga nya - ren UI-koppling, ingen ny domänlogik att testa). Verifierat
+live med Playwright: skapad bok → "Create series from this book" →
+stängt boken → valt dess spine på hyllan → klickat serie-taggen i
+infokortet → hamnat direkt på Books-fliken (inte Brainstorm) med en
+synlig guldram runt boken → ramen borta igen efter ~3 sekunder.
+
 **Ändringslogg v1.0.258 → v1.0.259 (2026-11-04): fyra nordiska
 pocket-/trycktrim till Sidstorlek.** Mats, efter artefakt-skissandet
 av Series Timeline: "Det finns ett antal olika 'standardformat' för

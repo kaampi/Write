@@ -249,6 +249,7 @@ export function Home({
             onOpen={(id) => void openBook(id)}
             onDelete={(id) => void deleteBook(id)}
             onUpdateSettings={(id, patch) => void updateShelfSettings(id, patch)}
+            onOpenSeries={(seriesId, bookId) => void openSeries(seriesId, bookId)}
           />
         ) : null}
 
