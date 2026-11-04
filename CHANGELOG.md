@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.275] - 2026-11-04
+
+### Fixed
+- Editing a book's shelf card (cover, spine color, author, description) no longer bumps it to the top of "Your manuscripts" — it was going through the same "the manuscript changed" timestamp as actual writing, which sorts the list.
+
 ## [1.0.274] - 2026-11-04
 
 ### Changed

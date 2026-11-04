@@ -11794,6 +11794,33 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.274 → v1.0.275 (2026-11-04): redigering av
+hyllkortet flyttar inte längre boken till toppen av listan.** Mats:
+"Jag har noterat att när man redigerar en boks info ifrån shelf så
+hamnar boken automatiskt på första plats."
+
+Rotorsak: `updateShelfSettings` i `BookStore.tsx` gick via samma
+`touch()`/`patchBook`-väg som all riktig manusredigering (skriva text,
+ändra struktur) - och `touch()` stämplar alltid `updated_at` till nu.
+`summaries` (listan "Your manuscripts" bygger på) är sorterad nyast-
+redigerad-först (`Repository.list()`), så varje gång man bara bytte
+omslag, spinnfärg, författarnamn eller beskrivning via kugghjuls-
+dialogen hoppade boken till första plats - som om man precis skrivit
+i den, trots att inget manusinnehåll rörts.
+
+Löst genom att `updateShelfSettings` inte längre går via `touch()`
+alls - den slår ihop patchen direkt (`{ ...current, ...patch }`,
+`updated_at` orört) i båda sina grenar (boken öppen respektive inte
+öppen), sparar och uppdaterar `summaries` precis som förut, bara utan
+att röra tidsstämpeln. Verifierat live med Playwright: skapade två
+böcker ("AAA First Book", sen "ZZZ Second Book"), bekräftade
+ursprunglig ordning (ZZZ, AAA - nyast-redigerad-först), redigerade
+sen den ÄLDRE bokens (AAA) hyllbeskrivning via kugghjulet och sparade
+- ordningen i List view var identisk efteråt (ZZZ, AAA), boken hoppade
+inte.
+
+`tsc --noEmit` rent, `npm run build` rent, 1262/1262 tester gröna.
+
 **Ändringslogg v1.0.273 → v1.0.274 (2026-11-04): hittade orsaken
 till "mjölkfilmen" genom att faktiskt testa Mats egen bild, inte en
 syntetisk ersättning.** Mats skickade bildfilen själv - "The Weight

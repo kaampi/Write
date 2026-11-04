@@ -789,6 +789,13 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
    * color/height adjustment/display author. Same "works on any book, not
    * just the open one" shape as setBookSeries, since this is also called
    * from the Home shelf where nothing is open yet.
+   *
+   * Deliberately does NOT go through `touch`/`patchBook` (both bump
+   * `updated_at`, which `summaries` is sorted by) — shelf display settings
+   * aren't manuscript content, so editing them shouldn't reorder "Your
+   * manuscripts" out from under the author (Mats, 2026-11-04: "när man
+   * redigerar en boks info ifrån shelf så hamnar boken automatiskt på
+   * första plats").
    */
   const updateShelfSettings = useCallback(
     async (
@@ -796,13 +803,16 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       patch: Partial<Pick<Book, "cover" | "shelf_color" | "shelf_height_adjust" | "shelf_author" | "shelf_description">>
     ) => {
       if (bookRef.current?.id === bookId) {
-        await patchBook((current) => ({ ...current, ...patch }));
+        const next = { ...bookRef.current, ...patch };
+        bookRef.current = next;
+        setBook(next);
+        await persist(next);
         return;
       }
       const loaded = await repo.get(bookId);
-      await persist(touch(loaded, patch));
+      await persist({ ...loaded, ...patch });
     },
-    [patchBook, persist, repo]
+    [persist, repo]
   );
 
   const openBook = useCallback(
