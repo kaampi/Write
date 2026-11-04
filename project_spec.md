@@ -11794,6 +11794,65 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.272 → v1.0.273 (2026-11-04): hyllkortets
+beskrivning syns äntligen, och en utredning av det "dimmiga"
+omslaget som inte hittade någon kodfel.** Mats: "Två saker. Omslaget
+är fortfarande blekt, som en mjölkfilm över bilden som är klar i
+original. Jag har lagt in en beskrivande text men det syns inte."
+(med en skärmdump av hyllans infokort för "The Weight of the
+Course").
+
+Beskrivningen (del 2) var ett rent visningsfel: `shelf_description`
+sparades korrekt hela vägen (`ShelfSettingsDialog.tsx` → `BookStore
+.tsx`s `updateShelfSettings` → `BookSchema.ts`s `summarizeBook`), men
+`BookshelfView.tsx`s infokort renderade bara `shelf_author` - fältet
+fanns aldrig med i JSX:en. Lagt till en `<p className="shelf-info-
+description">` mellan författarraden och metaraden (kapitel/fakta),
+ny CSS-klass i samma stil som `.shelf-info-meta` men utan kursiv
+(läses som en kort text, inte en attribuering). Verifierat live:
+skapade ett testmanuskript, satte beskrivning + omslag via det
+riktiga hyllkortet, sparade, och "A sweeping tale of courage and the
+stars." syns nu direkt under författarraden.
+
+Omslagets blekhet (del 1) fick en grundligare utredning eftersom
+samma klagomål redan åtgärdats en gång (v1.0.266, borttagning av
+`filter: brightness(1.05)` på `.cover-front`). Gick igenom hela
+kedjan på nytt utan att hitta något: ingen `filter`/`opacity` kvar
+någonstans på `.cover-front`/`.face`/`.book-spine`/`.shelf-books`
+(grep bekräftade), `cover_image_data_url` använder den fulla
+1200px-bilden (inte 256px-tumnageln), `entityImage.ts`s
+`jpegFromBitmap` har ingen vit/transparent bakgrundsfyllning som
+skulle kunna tvätta ur bilden. Testade tre konkreta teorier
+empiriskt med Playwright snarare än att gissa:
+
+1. JPEG-kvalitet 0.82 vid nedskalning - en syntetisk kornig bild
+   komprimerad vid quality 82 visade ingen dramatisk försämring.
+2. Canvas `imageSmoothingQuality` ('low' vs 'high' vid nedskalning
+   4000px→1200px) - byte-identiska JPEG-filer i den här Chromium-
+   versionen, alltså ingen skillnad alls.
+3. CSS 3D-transformens kompositering (`rotateY`/`perspective` på det
+   aktiva bokomslaget) - byggde en isolerad testsida med exakt samma
+   `.cover-front`-CSS som appen, jämförde samma testbild platt mot
+   3D-roterad; ingen tydlig suddighet i den roterade versionen.
+
+Körde sedan hela den riktiga pipelinen end-to-end (riktig bok skapad
+i UI:t, riktig bild uppladdad genom hyllkortets "Add a cover", boken
+vald så omslaget roterar fram i 3D) - omslaget renderades skarpt med
+synlig kornighet, inte blekt, med min testbild. Ingen av de fyra
+testerna reproducerade "mjölkfilmen". Snarare än att gissa på en
+spekulativ CSS-ändring utan belägg (sessionens etablerade princip:
+mäta innan man påstår att något är fixat) rapporterades detta ärligt
+till Mats tillsammans med en förfrågan om den faktiska bildfilen, för
+att kunna testa den exakta bilden som visar problemet - möjliga
+återstående teorier är en inbäddad ICC-färgprofil (t.ex. Adobe
+RGB/ProPhoto) som `createImageBitmap` hanterar annorlunda än
+originalvisaren, eller att appen Mats kör inte faktiskt är uppdaterad
+till en version efter v1.0.266.
+
+Endast beskrivningsfixen skeppades i denna version - omslagsfrågan
+kvarstår öppen. `tsc --noEmit` rent, `npm run build` rent, 1262/1262
+tester gröna.
+
 **Ändringslogg v1.0.271 → v1.0.272 (2026-11-04): rubriken linjerar
 med innehållet under, oavsett skärmbredd.** Mats, med en skärmdump av
 den breda skärmen: "Mycket bra. Jag skulle vilja att textblocket

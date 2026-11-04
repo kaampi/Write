@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.273] - 2026-11-04
+
+### Fixed
+- The shelf card's description (set via the gear icon's "Description" field) now actually shows up on the shelf — it was being saved correctly all along, but nothing in the info card ever rendered it.
+
 ## [1.0.272] - 2026-11-04
 
 ### Fixed

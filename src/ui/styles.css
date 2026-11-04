@@ -2528,6 +2528,13 @@ button:disabled {
   font-style: italic;
 }
 
+.shelf-info-description {
+  color: var(--text);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
 .shelf-info-meta {
   color: var(--text-dim);
   font-size: 0.85rem;

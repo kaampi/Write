@@ -142,6 +142,7 @@ export function BookshelfView({
               </button>
             ) : null}
             {selected.primary.shelf_author ? <span className="shelf-info-author">{selected.primary.shelf_author}</span> : null}
+            {selected.primary.shelf_description ? <p className="shelf-info-description">{selected.primary.shelf_description}</p> : null}
             <span className="shelf-info-meta">
               {selected.primary.prose_language ? <span className="book-language-tag">{selected.primary.prose_language}</span> : null}
               {count(selected.primary.chapterCount, m.home.chapters)}
