@@ -452,6 +452,17 @@ export const BookSchema = z.object({
    */
   synopsis: z.string().default(""),
   /**
+   * Bold/Italic/Underline ranges over `synopsis`'s own character offsets —
+   * same display-only mechanism as `Chapter.formatting` (see that field's
+   * own comment), just for the book-level synopsis instead of one
+   * chapter's prose. Missing/empty on older saves and a synopsis with no
+   * formatting applied (Mats, 2026-11-05: noticed Synopsis used the same
+   * rich-text editor as chapter prose but Ctrl+B/I/U silently did nothing
+   * there — the formatting storage/toggle wiring had just never been
+   * connected for this one surface).
+   */
+  synopsis_formatting: z.array(ProseFormattingRangeSchema).optional(),
+  /**
    * Home page Shelf view (roadmap-ideas.md #58) — optional, author-set
    * presentation for the 3D bookshelf: a cover image (same thumb+full-size
    * pair as chapter start images/entity pictures, `EntityPictureSchema`),

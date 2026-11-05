@@ -1872,7 +1872,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       const isInsertion = args.mode === "extend" || args.mode === "beat";
       const editStart = isInsertion ? spanEnd : spanStart;
       const editEnd = spanEnd;
-      const sourceFormatting = args.target === "prose" ? (chapter?.formatting ?? []) : [];
+      const sourceFormatting =
+        args.target === "prose" ? (chapter?.formatting ?? []) : args.target === "synopsis" ? (current.synopsis_formatting ?? []) : [];
       const formattingFor = (next: string) =>
         shiftFormattingRanges(sourceFormatting, editStart, editEnd, next.length - source.length + (editEnd - editStart));
       const sourcePlaceholders = args.target === "prose" ? (chapter?.placeholders ?? []) : [];
@@ -1884,7 +1885,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
 
       const write = (next: string) => {
         if (args.target === "synopsis") {
-          setBook((prev) => (prev ? { ...prev, synopsis: next } : prev));
+          setBook((prev) => (prev ? { ...prev, synopsis: next, synopsis_formatting: formattingFor(next) } : prev));
           return;
         }
         if (args.target === "brainstorm") {
@@ -1914,7 +1915,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       };
 
       const persistAssembled = async (latest: Book, assembled: string) => {
-        if (args.target === "synopsis") await flushSave(touch(latest, { synopsis: assembled }));
+        if (args.target === "synopsis") await flushSave(touch(latest, { synopsis: assembled, synopsis_formatting: formattingFor(assembled) }));
         else if (args.target === "brainstorm") {
           const patched = applyAssembledBrainstorm(latest, assembled);
           await flushSave(touch(latest, { brainstorm: patched.brainstorm, brainstorm_notes: patched.brainstorm_notes }));

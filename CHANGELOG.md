@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.282] - 2026-11-05
+
+### Fixed
+- Bold/italic/underline (Ctrl+B/I/U and the formatting toolbar) now actually work in Synopsis. It used the same rich-text editor as chapter prose, but the formatting-storage wiring had never been connected for this one field, so styling silently did nothing.
+
 ## [1.0.281] - 2026-11-05
 
 ### Added

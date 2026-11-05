@@ -1924,6 +1924,14 @@ export function Editor() {
             <ProseCanvas
               value={book.synopsis}
               onChange={(next) => void store.patchBook((current) => ({ ...current, synopsis: next }))}
+              formatting={book.synopsis_formatting ?? []}
+              onFormatChange={(next) => void store.patchBook((current) => ({ ...current, synopsis_formatting: next }))}
+              onToggleFormat={(span, style) =>
+                void store.patchBook((current) => ({
+                  ...current,
+                  synopsis_formatting: toggleFormatting(current.synopsis_formatting ?? [], span, style)
+                }))
+              }
               placeholder={m.editor.synopsisPlaceholder}
               disabled={busy !== null}
               highlightRare={highlightRare}

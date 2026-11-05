@@ -11794,6 +11794,43 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.281 → v1.0.282 (2026-11-05): fet/kursiv/
+understruken fungerar äntligen i Synopsis.** Mats: "Är det fel att
+man i synopsis ska kunna ge stil på text (fet, kursiv,
+understruken)."
+
+Synopsis använder redan samma `ProseCanvas`-komponent som
+kapitelprosan - samma komponent som redan har fullt fungerande
+Ctrl+B/I/U och en formateringsverktygsrad. Men `ProseCanvas` gatar
+den funktionaliteten bakom tre proppar (`formatting`/`onFormatChange`/
+`onToggleFormat`) som bara skickades in för kapitelprosans egen
+instans i `Editor.tsx` - Synopsis-instansen saknade alla tre helt.
+Inget designval, bara ledningsdragning som aldrig blev klar.
+
+Löst genom att spegla kapitelprosans mönster exakt: nytt
+`synopsis_formatting: ProseFormattingRangeSchema[]`-fält på `Book`
+(syskon till `Chapter.formatting`), de tre propparna kopplade till
+`store.patchBook` i Synopsis-vyn, och `rewriteSpan`s AI-redigeringar
+(Extend/Elaborate/Instruct på `target: "synopsis"`) fick samma
+`shiftFormattingRanges`-hantering som kapitelprosan redan har, så ett
+AI-omskrivet textstycke inte förskjuter befintlig formatering fel.
+Två tysta, append-only vägar in till synopsis (`liftFragmentToSynopsis`,
+`sendStagedNotesToSynopsis`, båda lägger bara till text i slutet)
+behövde ingen ändring - befintliga offsets förblir giltiga.
+
+Verifierat live med Playwright - inte bara en skärmdump: skrev text i
+Synopsis, dubbelklickade exakt på ordet "bold" (via en `TreeWalker`+
+`Range.getBoundingClientRect()` för att träffa rätt pixel, eftersom
+Playwrights `getByText().dblclick()` annars missade ordet och
+kollapsade markeringen), Ctrl+B → `<b>bold</b>` i DOM:en. Upprepade
+med "italic"/Ctrl+I. Laddade om sidan helt - båda formateringarna låg
+kvar efter omladdning, bekräftar att `synopsis_formatting` faktiskt
+sparas och läses tillbaka korrekt, inte bara en UI-tillfällighet.
+
+`tsc --noEmit` rent, `npm run build` rent, 1276/1276 tester gröna (ren
+tillägg av ett nytt, valfritt schemafält plus ledningsdragning - inget
+befintligt beteende ändrat).
+
 **Ändringslogg v1.0.280 → v1.0.281 (2026-11-05): två roadmap-idéer
 (#55, #52) - persistent lagring och en krok-bedömning av kapitel 1.**
 Mats frågade om det fanns oadresserade idéer kvar i
