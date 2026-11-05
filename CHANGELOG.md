@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.291] - 2026-11-05
+
+### Fixed
+- The shelf card cover preview no longer crops any part of the uploaded image away. It now uses `object-fit: contain` instead of `cover` — the live shelf's own 3D cover face already crops to a different, randomized aspect ratio per book, so a fixed-ratio preview that also cropped could never truly match it anyway; showing the whole image is more honest.
+
 ## [1.0.290] - 2026-11-05
 
 ### Changed

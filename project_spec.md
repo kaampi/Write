@@ -11794,6 +11794,56 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.290 → v1.0.291 (2026-11-05): omslags-
+förhandsvisningen beskär inte längre bort delar av bilden.** Mats,
+med samma skärmdump som innan: "Det är nåt som händer när man laddar
+upp filen. Ser du skillnaden på den uppladdade och orginalet?" —
+jämförelsen visade att ljusstrimman upptill och titeltexten nedtill
+saknades i appens förhandsvisning men fanns i originalfilen.
+
+Rotorsak: `.shelf-cover-frame`s `object-fit: cover` (från v1.0.289,
+2:3-rutan) fyller rutan genom att beskära det som inte får plats —
+precis designat beteende för `cover`, men missvisande här eftersom
+hyllans egen 3D-omslagsframsida redan beskär till en ANNAN,
+slumpmässig proportion per bok (bredden kommer från
+`hashString(title) % ...`, se `BookshelfView.tsx`) — ingen fast
+proportion i redigeringsdialogen skulle någonsin exakt matcha det
+faktiska resultatet på hyllan ändå. Bytt till `object-fit: contain`:
+hela bilden syns alltid, med luft runt om när proportionerna inte
+stämmer exakt mot 2:3-rutan, istället för att antyda en beskärning
+dialogen inte kan garantera stämmer med verkligheten.
+
+Separat verifierade jag att själva uppladdnings-/komprimerings-
+pipelinen (`entityImage.ts`s `picturesFromFile`, canvas-baserad
+omskalning till max 1200px + JPEG-kvalitet 0.82) INTE beskär — bara
+skalar proportionerligt. Körde exakt samma kod i en headless
+Chromium mot en syntetisk testbild: pixelvärden identiska före/efter,
+även efter JPEG-ombkomprimering (medelvärdes-differens 2.57 vs 2.65
+på ett mörkt bandtest — försumbart brus).
+
+**En andra, separat upptäckt under samma genomgång, inte löst än:**
+Mats pekade sedan på en skillnad i KONTRAST, inte beskärning — "Men
+om du jämför kontrasten mellan bilderna borde du se en skillnad...
+att den uppladdade ser mjölkig ut." Beskurna, matchande ögon-regioner
+från samma skärmdump (vänster = appens visning, höger = originalet i
+Windows Photos) mätta direkt: standardavvikelsen (kontrast) ungefär
+HALVERAD i appens version genomgående i alla tre färgkanaler (R:
+14.7 mot 21.4, G: 9.3 mot 17.7, B: 7.6 mot 15.3) — en verklig,
+mätbar skillnad, inte inbillning. Samma syntetiska sRGB-testbild som
+ovan visade dock inget kontrasttapp alls genom pipelinen, och
+`createImageBitmap`s `colorSpaceConversion: 'none'` kontra standard
+gav identiskt resultat på en bild UTAN inbäddad färgprofil — så
+hypotesen (en inbäddad färgprofil i Mats egen, sannolikt AI-
+genererade, bildfil som canvas-pipelinen hanterar annorlunda än OS:ets
+egen bildvisare) kunde inte verifieras utan den faktiska filen, som
+inte går att nå från den här molnsessionen. Bad Mats bifoga
+originalfilen i chatten för vidare felsökning — **inte löst, väntar
+på filen.**
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna för
+`object-fit: contain`-fixen (ingen ny testtäckning — ren CSS-ändring).
+Kontrast-frågan har inget kodändring att testa än.
+
 **Ändringslogg v1.0.289 → v1.0.290 (2026-11-05): Shelf card-dialogen
 30% smalare, Height flyttad under Spine color.** Direkt uppföljning på
 omslags-fixen ovan — när omslaget slutade sträcka ut sig över hela

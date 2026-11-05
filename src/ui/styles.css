@@ -4641,6 +4641,19 @@ button:disabled {
  * BookshelfView's depth/height — not a new shape invented for this
  * dialog) and a fixed, moderate pixel width instead of 100% keeps the
  * preview book-sized regardless of how wide the dialog's column is.
+ *
+ * object-fit: contain, not cover (same day, a follow-up screenshot: "Det
+ * är nåt som händer när man laddar upp filen. Ser du skillnaden på den
+ * uppladdade och orginalet?" — cover was silently cropping off the top
+ * and bottom of a tall source image to fill this box). The upload
+ * pipeline itself never crops (entityImage.ts's picturesFromFile only
+ * scales, confirmed by reading it) — this was purely a display crop,
+ * but a misleading one: the live shelf's own 3D cover-front face crops
+ * to a DIFFERENT, randomized aspect ratio per book (its width comes from
+ * hashString(title) % ..., see BookshelfView), so no fixed aspect ratio
+ * here could ever truly match the live result anyway — showing the
+ * whole image, letterboxed, is honest about that instead of implying a
+ * crop this dialog can't actually guarantee.
  */
 .shelf-cover-frame {
   position: relative;
@@ -4657,7 +4670,7 @@ button:disabled {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .shelf-cover-add {
