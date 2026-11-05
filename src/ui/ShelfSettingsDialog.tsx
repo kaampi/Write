@@ -85,8 +85,8 @@ export function ShelfSettingsDialog({
             <h3 className="bible-field-label">{m.shelfEdit.coverLabel}</h3>
             <div className="chapter-start-image">
               {draftCover ? (
-                <div className="chapter-start-image-frame">
-                  <img src={draftCover.imageDataUrl} alt="" className="chapter-start-image-picture" />
+                <div className="shelf-cover-frame">
+                  <img src={draftCover.imageDataUrl} alt="" className="shelf-cover-picture" />
                   <div className="chapter-start-image-actions">
                     <button type="button" className="text-button" disabled={imageBusy} onClick={() => fileRef.current?.click()}>
                       {imageBusy ? "…" : m.shelfEdit.replaceCover}
@@ -105,7 +105,7 @@ export function ShelfSettingsDialog({
                   </div>
                 </div>
               ) : (
-                <button type="button" className="chapter-start-image-add" disabled={imageBusy} onClick={() => fileRef.current?.click()}>
+                <button type="button" className="shelf-cover-add" disabled={imageBusy} onClick={() => fileRef.current?.click()}>
                   {imageBusy ? "…" : m.shelfEdit.addCover}
                 </button>
               )}

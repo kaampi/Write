@@ -4619,6 +4619,62 @@ button:disabled {
   color: #ffb4a8;
 }
 
+/*
+ * Shelf card's own cover preview (ShelfSettingsDialog) — split off from
+ * .chapter-start-image-frame/-picture/-add rather than reused as-is,
+ * because that pair was sized for a wide landscape chapter illustration
+ * (width:100%, max-height:26rem) stretched across THIS dialog's own very
+ * wide column (.shelf-settings-card is min(112rem, 100%), two columns),
+ * which cropped a portrait book-cover photo down to a thin unrecognizable
+ * sliver — object-fit:cover filling a box far wider than the source
+ * image's own aspect ratio (Mats, 2026-11-05, screenshot: "Rutan för
+ * inställningar om boken är bred men bilden kapas. Vi måste få det
+ * snyggare"). 2:3 matches a standard book-cover proportion (also roughly
+ * what the shelf's own 3D cover-front face already looks like, see
+ * BookshelfView's depth/height — not a new shape invented for this
+ * dialog) and a fixed, moderate pixel width instead of 100% keeps the
+ * preview book-sized regardless of how wide the dialog's column is.
+ */
+.shelf-cover-frame {
+  position: relative;
+  width: 15rem;
+  max-width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-soft);
+  background: var(--paper-dim, var(--border-soft));
+}
+
+.shelf-cover-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shelf-cover-add {
+  width: 15rem;
+  max-width: 100%;
+  aspect-ratio: 2 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  border: 1px dashed var(--border-soft);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.shelf-cover-add:hover {
+  border-color: var(--ink);
+  color: var(--text);
+}
+
 .continuity-warning {
   margin: 0.6rem 0;
 }

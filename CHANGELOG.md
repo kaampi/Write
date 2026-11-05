@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.289] - 2026-11-05
+
+### Fixed
+- The cover preview in the shelf card dialog (Shelf view's gear icon) no longer crops a portrait cover photo down to a thin sliver. It reused a wide landscape-shaped image box built for chapter illustrations, stretched across this dialog's own very wide column — now has its own 2:3 book-cover-shaped frame at a fixed, moderate size instead.
+
 ## [1.0.288] - 2026-11-05
 
 ### Fixed

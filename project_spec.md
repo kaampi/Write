@@ -11794,6 +11794,44 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.288 → v1.0.289 (2026-11-05): omslagsbilden i
+Shelf card-dialogen kapades till en smal rand.** Mats, med en
+skärmdump: "Rutan för inställningar om boken är bred men bilden
+kapas. Vi måste få det snyggare" — skärmdumpen visade ett stående
+porträttfoto (ett öga, en bit hår, ett rymdskepp i bakgrunden) kapat
+ner till en tunn vågrät strimma.
+
+Rotorsak: `ShelfSettingsDialog.tsx` återanvände
+`.chapter-start-image-frame`/`.chapter-start-image-picture` rakt av —
+samma CSS som används för kapitlets startbild. Den klassen är byggd
+för en bred, liggande kapitelillustration (`width:100%;
+max-height:26rem`), inte för ett stående bokomslag. Den här dialogens
+egen vänsterkolumn är dessutom mycket bred (`.shelf-settings-card` är
+`min(112rem, 100%)` i en tvåkolumnslayout) — `object-fit:cover` fyllde
+alltså en extremt bred, kort låda med ett smalt, högt foto, vilket
+kapade bort nästan hela bilden för att täcka lådans bredd.
+
+Löst med en egen uppsättning klasser specifikt för omslaget
+(`.shelf-cover-frame`/`.shelf-cover-picture`/`.shelf-cover-add`),
+avsiktligt INTE bara en justering av de delade `.chapter-start-image-*`-
+reglerna (som fortfarande behöver sin liggande form för kapitel-
+illustrationer) — en fast bredd (15rem) med `aspect-ratio: 2/3`
+(klassisk bokomslagsproportion, ungefär samma som hyllans egen 3D-
+omslagsframsida redan har via sina `--d`/`--h`-variabler, inte en ny
+form uppfunnen för tillfället). `object-fit: cover` behålls, men fyller
+nu en låda som faktiskt liknar ett bokomslag istället för en bred
+remsa.
+
+Verifierat live med Playwright: genererade en 500×800 stående
+testbild (ImageMagick, `portrait.jpg`), laddade upp den i dialogen,
+mätte `.shelf-cover-frame`s faktiska `boundingBox()` — bredd/höjd-
+förhållandet landade på exakt 0.6667 (= 2/3), och skärmdumpen visar
+hela bilden proportionerligt istället för en kapad strimma.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna
+(ingen ny testtäckning — ren CSS/layout-fix, redan täckt av den
+visuella Playwright-verifieringen ovan).
+
 **Ändringslogg v1.0.287 → v1.0.288 (2026-11-05): drag-och-släpp på
 hyllan fixad i skrivbordsappen, infokortet flyttat till höger om
 hyllan.** Två separata buggrapporter/önskemål i samma genomgång.
