@@ -492,6 +492,7 @@ export const nb: Messages = {
     removeNoteConfirm: "Kast denne lappen?",
     noteLabel: "Brainstorm-lapp",
     reorderNotes: "Dra for å flytte lappen",
+    resizeNote: "Dra for å skalere lappen",
     noteColor: "Lappens farge",
     noteColors: {
       paper: "Papir",

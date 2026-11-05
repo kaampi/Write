@@ -11794,6 +11794,47 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.282 → v1.0.283 (2026-11-05): Brainstorm-lappar
+går att skala om i bredd.** Mats: "På brainstorm så är korten ibland
+för små, texterna skjuter iväg så kortet blir längre än skärmen.
+Skulle man kunna skala om kortet själv? I bredd tänker jag."
+
+Lapparna (`.idea-note` i `BrainstormBoard.tsx`) är fritt
+positionerade (`position: absolute`, x/y sparat per lapp) men hade en
+HÅRT kodad bredd (`NOTE_WIDTH = 248`) - ingen höjdgräns alls, så en
+lång idé bara växte nedåt tills kortet blev längre än skärmen, precis
+som Mats beskrev.
+
+Löst med ett nytt `width`-fält på `BrainstormNote` (både den riktiga
+zod-schemat i `BookSchema.ts` och en parallell handskriven typ i
+`brainstormNotes.ts` - två källor för samma form, båda behövde
+uppdateras), och ett nytt grepp på kortets högerkant
+(`.idea-note-resize`, en tunn 6px osynlig remsa som tonar in vid
+hover/drag - samma mönster som den redan befintliga
+`.rail-resize-handle` för sidopanelerna) som drar bredden via
+pekarhändelser, klampad mellan 200px och 640px. Samma `onPatch`/
+`updateBrainstormNote`-väg som redan finns för färg/position.
+
+Felsökning värd att notera: ett första test (via Playwright,
+vänsterdrag för att testa minimigränsen) visade att bredden inte
+rörde sig alls - verkade som en bugg i vänsterled specifikt. Spårade
+med tillfälliga `console.log` i `onPointerDown`-hanteraren och såg att
+den aldrig ens anropades. Rotorsaken var inte koden utan testets egna
+koordinater: lappen hade råkat hamna med sin högerkant precis under/
+bakom "To synopsis"-kolumnen, som då fångade pekarhändelsen istället
+för greppet. Flyttade testlappen till öppen yta på brädet - fungerade
+perfekt i båda riktningarna, klampning bekräftad (200px minimum,
+640px maximum). Ett bra påminnelse-exempel på att inte anta att en
+mätning avslöjar en kodbugg förrän testets egna förutsättningar är
+kontrollerade.
+
+Verifierat live: skapade en lapp, drog greppet 150px åt höger (248→
+398px, exakt deltat), laddade om sidan - bredden låg kvar (bekräftar
+att det sparas i IndexedDB, inte bara lokal UI-state).
+
+`tsc --noEmit` rent, `npm run build` rent, 1276/1276 tester gröna (ren
+tillägg, inget befintligt beteende ändrat).
+
 **Ändringslogg v1.0.281 → v1.0.282 (2026-11-05): fet/kursiv/
 understruken fungerar äntligen i Synopsis.** Mats: "Är det fel att
 man i synopsis ska kunna ge stil på text (fet, kursiv,

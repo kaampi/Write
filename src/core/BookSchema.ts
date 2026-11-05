@@ -267,7 +267,16 @@ export const BrainstormNoteSchema = z.object({
   x: z.number(),
   y: z.number(),
   color: z.enum(NOTE_COLORS).default("paper"),
-  send_index: z.number().int().nonnegative().optional()
+  send_index: z.number().int().nonnegative().optional(),
+  /**
+   * Card width in pixels, author-resized by dragging its right edge.
+   * Missing = the board's default width (`NOTE_WIDTH` in
+   * BrainstormBoard.tsx). A long note otherwise only grows taller, never
+   * wider, and can end up longer than the screen (Mats, 2026-11-05:
+   * "texterna skjuter iväg så kortet blir längre än skärmen... Skulle man
+   * kunna skala om kortet själv? I bredd tänker jag.").
+   */
+  width: z.number().positive().optional()
 });
 
 export const BookSchema = z.object({

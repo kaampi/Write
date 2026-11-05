@@ -20,6 +20,8 @@ import { ChapterBriefCopy } from "./ChapterBriefCopy";
 import { useLocale } from "./i18n";
 
 const NOTE_WIDTH = 248;
+const NOTE_MIN_WIDTH = 200;
+const NOTE_MAX_WIDTH = 640;
 const DRAG_THRESHOLD = 6;
 
 type Drag = {
@@ -94,7 +96,49 @@ export function BrainstormBoard({
   const noteCount = useRef(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
+  const [resize, setResize] = useState<{ id: string; width: number } | null>(null);
   const notes = ensureBrainstormNotes(book).brainstorm_notes;
+
+  /** Drags the card's right edge to resize it — width only, per Mats (2026-11-05): "Skulle man kunna skala om kortet själv? I bredd tänker jag." */
+  function startResize(event: React.PointerEvent, note: BrainstormNote) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const startWidth = note.width ?? NOTE_WIDTH;
+    const startX = event.clientX;
+    let live = startWidth;
+    const pointerId = event.pointerId;
+    const handle = event.currentTarget as HTMLElement;
+
+    function onMove(moveEvent: PointerEvent) {
+      if (moveEvent.pointerId !== pointerId) return;
+      live = Math.max(NOTE_MIN_WIDTH, Math.min(NOTE_MAX_WIDTH, startWidth + (moveEvent.clientX - startX)));
+      setResize({ id: note.id, width: live });
+    }
+
+    function onUp(upEvent: PointerEvent) {
+      if (upEvent.pointerId !== pointerId) return;
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      try {
+        handle.releasePointerCapture(pointerId);
+      } catch {
+        /* synthetic events */
+      }
+      onPatch((current) => updateBrainstormNote(current, note.id, { width: live }));
+      setResize(null);
+    }
+
+    try {
+      handle.setPointerCapture(pointerId);
+    } catch {
+      /* synthetic events */
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+  }
 
   function leaveNote() {
     const active = document.activeElement;
@@ -266,7 +310,7 @@ export function BrainstormBoard({
     if (drag.from === "send") return rest;
     return queued;
   })();
-  const spaceWidth = Math.max(640, ...free.map((note) => note.x + NOTE_WIDTH + 48));
+  const spaceWidth = Math.max(640, ...free.map((note) => note.x + (note.width ?? NOTE_WIDTH) + 48));
   const spaceHeight = Math.max(480, ...free.map((note) => note.y + 220));
   const selected = notes.find((note) => note.id === selectedId);
   const canSend = queued.some((note) => note.text.trim() || liveNoteText(note).trim());
@@ -297,6 +341,7 @@ export function BrainstormBoard({
     const isSelected = note.id === selected?.id;
     const color = parseNoteColor(note.color);
     const isGhost = drag?.id === note.id && (drag.overSend || drag.from === "send");
+    const width = resize?.id === note.id ? resize.width : (note.width ?? NOTE_WIDTH);
     return (
       <article
         key={note.id}
@@ -312,7 +357,7 @@ export function BrainstormBoard({
         ]
           .filter(Boolean)
           .join(" ")}
-        style={opts.send ? undefined : { left: note.x, top: note.y, width: NOTE_WIDTH }}
+        style={opts.send ? undefined : { left: note.x, top: note.y, width }}
         onPointerDown={() => {
           if (!opts.send) onPatch((current) => bringBrainstormNoteForward(current, note.id));
           setSelectedId(note.id);
@@ -380,6 +425,14 @@ export function BrainstormBoard({
           className="idea-note-copy"
           onCommit={(text) => onPatch((current) => updateBrainstormNote(current, note.id, { text }))}
         />
+        {opts.send || opts.slot ? null : (
+          <button
+            type="button"
+            className="idea-note-resize"
+            aria-label={m.editor.resizeNote}
+            onPointerDown={(event) => startResize(event, note)}
+          />
+        )}
       </article>
     );
   }

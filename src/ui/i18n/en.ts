@@ -920,6 +920,7 @@ export const en = {
     removeNoteConfirm: "Throw away this note?",
     noteLabel: "Brainstorm note",
     reorderNotes: "Drag to move this note",
+    resizeNote: "Drag to resize this note",
     noteColor: "Note colour",
     noteColors: {
       paper: "Paper",

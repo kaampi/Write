@@ -12,6 +12,8 @@ export type BrainstormNote = {
   color: NoteColor;
   /** Set when the note sits in the send column. Missing = free board. */
   send_index?: number | undefined;
+  /** Card width in pixels, author-resized. Missing = the board's default width (NOTE_WIDTH in BrainstormBoard.tsx). */
+  width?: number | undefined;
 };
 
 export function parseNoteColor(value: unknown): NoteColor {
@@ -172,7 +174,7 @@ export function addBrainstormNote<T extends ScratchBook>(book: T, note?: Partial
 export function updateBrainstormNote<T extends ScratchBook>(
   book: T,
   noteId: string,
-  patch: Partial<Pick<BrainstormNote, "text" | "x" | "y" | "color">>
+  patch: Partial<Pick<BrainstormNote, "text" | "x" | "y" | "color" | "width">>
 ): T {
   const current = ensureBrainstormNotes(book);
   return withBrainstormNotes(

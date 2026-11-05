@@ -4262,6 +4262,33 @@ button:disabled {
   min-height: 5.5rem;
 }
 
+/*
+ * Width-only resize grip on the card's right edge — same thin-strip,
+ * hover-tinted shape as `.rail-resize-handle` (col-resize cursor, a
+ * transparent hit target that only tints on hover/drag), just scoped to
+ * one card instead of a whole side panel (Mats, 2026-11-05: "texterna
+ * skjuter iväg så kortet blir längre än skärmen... Skulle man kunna skala
+ * om kortet själv? I bredd tänker jag.").
+ */
+.idea-note-resize {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.idea-note-resize:hover,
+.idea-note-resize:focus-visible {
+  background: var(--accent, #c96a43);
+  opacity: 0.5;
+}
+
 .idea-note.is-ghost {
   visibility: hidden;
 }

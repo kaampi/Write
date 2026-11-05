@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.283] - 2026-11-05
+
+### Added
+- Brainstorm cards can now be resized by width — drag the thin grip on a card's right edge. A long idea that used to shoot the card taller than the screen can now be made wider instead, so it wraps into fewer lines.
+
 ## [1.0.282] - 2026-11-05
 
 ### Fixed
