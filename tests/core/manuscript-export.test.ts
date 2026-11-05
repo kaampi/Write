@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { PDFDocument } from "pdf-lib";
 import { describe, expect, it } from "vitest";
-import { addChapter, createBook, updateChapter } from "@core/BookSchema";
+import { addChapter, createBook, updateChapter, type Book } from "@core/BookSchema";
 import { packManuscriptBackup } from "@core/manuscriptBackup";
 import {
   buildManuscriptExport,
@@ -1153,6 +1153,68 @@ describe("scene break", () => {
       const loaded = await PDFDocument.load(bytes);
       expect(loaded.getPageCount()).toBeGreaterThan(0);
     }
+  });
+
+  describe("width and spacing", () => {
+    function bookWithScale(
+      width: Book["scene_break_width"],
+      spacing: Book["scene_break_spacing"],
+      style: Book["scene_break_style"] = "plain"
+    ) {
+      let book = { ...createBook("Night Keys"), scene_break_style: style, scene_break_width: width, scene_break_spacing: spacing };
+      book = updateChapter(book, book.chapters[0]!.id, {
+        title: "The quay",
+        prose: "Emma locked the door.\n---\nShe waited for the tide."
+      });
+      return book;
+    }
+
+    it("defaults to today's exact plain numbers when unset", () => {
+      const doc = buildManuscriptExport(bookWithScale("default", "default"));
+      expect(doc.sceneBreakWidth).toBe("default");
+      expect(doc.sceneBreakSpacing).toBe("default");
+      const html = formatExportHtml(doc);
+      expect(html).toContain('style="height:1px;width:56px;margin:21px auto;background:#ccc;font-size:0;line-height:0;color:transparent">---</p>');
+    });
+
+    it("scales the plain inline rule's px width/margin in HTML", () => {
+      const wide = formatExportHtml(buildManuscriptExport(bookWithScale("wide", "loose")));
+      expect(wide).toContain('width:84px;margin:38px auto');
+      const narrow = formatExportHtml(buildManuscriptExport(bookWithScale("narrow", "tight")));
+      expect(narrow).toContain('width:36px;margin:13px auto');
+    });
+
+    it("scales a decorated style's .scene-break CSS rem width/em margin in HTML/ePub", () => {
+      const wideDoc = buildManuscriptExport(bookWithScale("wide", "loose", "vignette"));
+      const wideHtml = formatExportHtml(wideDoc);
+      expect(wideHtml).toContain("width:21rem");
+      expect(wideHtml).toContain("margin:2.34em auto");
+      const wideEpub = new TextDecoder().decode(packEpub(wideDoc));
+      expect(wideEpub).toContain("width:21rem");
+
+      const narrowDoc = buildManuscriptExport(bookWithScale("narrow", "tight", "diamond"));
+      const narrowHtml = formatExportHtml(narrowDoc);
+      expect(narrowHtml).toContain("width:5.2rem");
+      expect(narrowHtml).toContain("margin:0.78em auto");
+    });
+
+    it("produces a measurably different PDF for a wide/loose plain break than the default", async () => {
+      const defaultBytes = await packPdf(buildManuscriptExport(bookWithScale("default", "default")));
+      const wideBytes = await packPdf(buildManuscriptExport(bookWithScale("wide", "loose")));
+      expect(wideBytes).not.toEqual(defaultBytes);
+      const loaded = await PDFDocument.load(wideBytes);
+      expect(loaded.getPageCount()).toBeGreaterThan(0);
+    });
+
+    it("leaves RTF/ODT/IDML's plain symbol-only rendering unaffected by width/spacing", () => {
+      const defaultRtf = formatExportRtf(buildManuscriptExport(bookWithScale("default", "default", "vignette")));
+      const wideRtf = formatExportRtf(buildManuscriptExport(bookWithScale("wide", "loose", "vignette")));
+      expect(wideRtf).toBe(defaultRtf);
+
+      const defaultOdt = new TextDecoder().decode(packOdt(buildManuscriptExport(bookWithScale("default", "default", "vignette"))));
+      const wideOdt = new TextDecoder().decode(packOdt(buildManuscriptExport(bookWithScale("wide", "loose", "vignette"))));
+      expect(wideOdt).toBe(defaultOdt);
+    });
   });
 });
 

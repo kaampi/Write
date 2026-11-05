@@ -11794,6 +11794,75 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.285 → v1.0.286 (2026-11-05): valbar bredd och
+mellanrum på scenbrytare, i en egen Settings-sektion.** Mats: "Jag har
+en funderoing kring våra snygga HR. Det finns två förbättringsmöjligheter.
+Säg till om någon känns görbar. 1. Valbar bredd på linjen 2. Valbart
+mellanrum ovanför och under linjen" — följt av "Ja vi gör det. Låt
+dessa inställningar bli snyggt och pedagogiskt inlagda i Settings. Om
+det krävs så läg HR i en egen sektion."
+
+Två nya BookSchema-fält, `scene_break_width`
+("narrow"/"default"/"wide") och `scene_break_spacing`
+("tight"/"default"/"loose") — skalfaktorer ovanpå varje stils egna
+bredd-/marginaltal (0.65/1/1.5 respektive 0.6/1/1.8), inte absoluta
+ersättningsvärden. Valet var medvetet: stilarna har redan olika
+grundbredd (plain 3.5rem, vinjett/fleur/sparkle 14rem, diamant 8rem,
+ingen av dem delar marginal), så en delad absolut bredd hade suddat ut
+den skillnaden — en skalning behåller den istället, oavsett vilket
+bredd-/mellanrumsval som är aktivt.
+
+Trätt genom precis samma `scene-break-${style}`-mönster som
+`scene_break_style` redan hade: nya CSS-klasser
+`scene-break-width-narrow`/`-wide` och
+`scene-break-spacing-tight`/`-loose` sätter CSS-variablerna
+`--scene-break-width-scale`/`--scene-break-margin-scale` på `.prose`,
+konsumerade via `calc()` i `.prose-hr`s `width`/`margin`-regler
+(`var(--x, 1)` ger skalfaktor 1 när klassen saknas, dvs. för
+"default" — ingen klass läggs till då, samma utelämna-för-default-
+konvention som `scene_break_style` redan hade för "plain").
+
+Genomsökte `manuscriptExport.ts` för att se hur många av de fem
+exportformaten som faktiskt behövde ändras: bara HTML/ePub
+(`sceneBreakCss`/`sceneBreakHtml`) och PDF
+(`PdfWriter.sceneBreak()`/`PdfWriter.prose()`) ritar en riktig linje
+med bredd/marginal. RTF, ODT och IDML anropar alla bara
+`sceneBreakSymbol(style)` — ett vanligt, centrerat tecken, ingen
+linjegeometri alls — så de lämnades helt orörda (ett redan accepterat
+troskapsgap i befintlig kod, samma som för `scene_break_style` självt).
+
+En första körning av `tsc --noEmit` small på ett missat `*/` mitt i en
+ny JSDoc-kommentar (texten råkade innehålla "width-*/.scene-break-
+spacing-*", vilket stängde kommentarblocket för tidigt) — omformulerad
+för att undvika sekvensen. En andra bugg: `1.3 * 1.8` i JavaScript blir
+`2.3400000000000003`, inte `2.34` — skulle ha läckt ut som brus i den
+exporterade CSS-texten om det inte fångats; `sceneBreakCss()` avrundar
+nu till två decimaler.
+
+Settings fick en helt ny, egen sektion "Scene break" (bruten ut ur den
+allmänna Typography-rutnätet, som Mats bad om) med tre fält — Style
+(det gamla valet, omdöpt från "Scene break" till bara "Style" nu när
+det har syskon i en egen sektion), Width och Spacing — samt en egen
+tillagd detalj, inte uttryckligen efterfrågad men ett rimligt svar på
+"snyggt och pedagogiskt": en levande förhandsvisning av den faktiska
+HR-linjen högst upp i sektionen, som återanvänder exakt samma
+`.prose`/`.prose-hr`/`scene-break-*`-klasser som den riktiga
+skrivytan (en ny `.scene-break-preview`-CSS-regel skalar bara ner
+`.prose`s redskapsmått — full bredd, 60/80px padding, min-height:100%
+— till en liten platt remsa, utan att röra själva HR-renderingen).
+
+Verifierat live med Playwright, med pixelexakta mätningar: vinjett +
+Wide + Loose gav `width:336` (14rem×16×1.5), Narrow + Tight gav
+`width:145.59375` (14rem×16×0.65) — matchade exakt mellan Settings-
+förhandsvisningen och den riktiga skrivytan, screenshot för screenshot.
+Nya enhetstester i `manuscript-export.test.ts` täcker skalningen i
+HTML:s inline-stil (plain) och `.scene-break`-CSS (dekorerade stilar),
+avrundningen, en annorlunda PDF, och att RTF/ODT förblir byte-för-byte
+identiska oavsett bredd/mellanrum-val.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna (5
+nya).
+
 **Ändringslogg v1.0.284 → v1.0.285 (2026-11-05): Ctrl+högerklick når
 nu OS:ets egen stavningskontrollsmeny.** Direkt uppföljning på
 stavningskontroll-växeln ovan. Mats: "Om man har felstavning och

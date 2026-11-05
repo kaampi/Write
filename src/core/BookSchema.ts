@@ -364,6 +364,22 @@ export const BookSchema = z.object({
    */
   scene_break_style: z.enum(["plain", "vignette", "diamond", "fleur", "sparkle"]).default("plain"),
   /**
+   * Scale factors on top of scene_break_style's own per-ornament width/
+   * spacing — "narrow"/"wide" and "tight"/"loose" multiply each style's
+   * existing numbers rather than replacing them with one shared absolute
+   * value, so a narrowed diamond and a narrowed vignette stay proportioned
+   * the same relative to each other as the defaults already are. Only
+   * applies where a scene break actually draws a line with real width/
+   * margin — the live editor, HTML/ePub, and PDF. RTF/ODT/IDML already
+   * collapse every style to a single centered symbol with no line
+   * geometry at all (see SCENE_BREAK_ORNAMENTS' own comment in
+   * manuscriptExport.ts), so width/spacing have nothing to scale there.
+   * Mats, 2026-11-05: "Valbar bredd på linjen" / "Valbart mellanrum
+   * ovanför och under linjen."
+   */
+  scene_break_width: z.enum(["narrow", "default", "wide"]).default("default"),
+  scene_break_spacing: z.enum(["tight", "default", "loose"]).default("default"),
+  /**
    * Page size for every format with a real printed page — IDML, PDF, and
    * ODT (RTF and HTML/ePub have no fixed page geometry to set). The
    * fourth piece of Typography, same manuscript-wide/live-editor-plus-
@@ -664,6 +680,8 @@ export function createBook(title: string): Book {
     body_color_dark: "#f3eadc",
     body_color_light: "#2a2218",
     scene_break_style: "plain",
+    scene_break_width: "default",
+    scene_break_spacing: "default",
     page_size: "6x9",
     page_margin: "normal",
     editor_background: "none",

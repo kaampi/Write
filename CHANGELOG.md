@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.286] - 2026-11-05
+
+### Added
+- Selectable width and spacing for scene breaks (Settings → Scene break), on top of the existing style choice — a scale on each ornament's own numbers, so a narrowed diamond and a narrowed vignette stay proportioned the same relative to each other. Shows live in the editor, with a live preview of the current style/width/spacing right in Settings, and carries into Publish's HTML, ePub, and PDF exports. RTF, ODT, and IDML are unaffected: they already render every scene break as a plain centered symbol with no line geometry to scale. Scene break now has its own dedicated Settings section instead of living in the general Typography grid.
+
 ## [1.0.285] - 2026-11-05
 
 ### Added

@@ -113,6 +113,8 @@ export function ProseCanvas({
   onCreateScene,
   dropCapLines = 0,
   sceneBreakStyle,
+  sceneBreakWidth,
+  sceneBreakSpacing,
   bodyFontStack,
   bodyFontWeight,
   bodyColorDark,
@@ -184,6 +186,9 @@ export function ProseCanvas({
   dropCapLines?: number;
   /** Decorative style for a `---` scene-break paragraph (Settings → Typography → Scene break). Omitted/"plain" renders today's unadorned short rule. Chapter prose only; Synopsis and Brainstorm never pass this. */
   sceneBreakStyle?: Book["scene_break_style"];
+  /** Scale on the scene break's own width/spacing, on top of sceneBreakStyle (Settings → Typography → Scene break). Omitted/"default" keeps today's numbers. Chapter prose only. */
+  sceneBreakWidth?: Book["scene_break_width"];
+  sceneBreakSpacing?: Book["scene_break_spacing"];
   /** CSS font-family stack for the manuscript's chosen body typeface (Settings → Typography → Font). Omitted keeps the app's own default prose font — Synopsis and Brainstorm never pass this, only chapter prose does. */
   bodyFontStack?: string;
   /** Body text weight (Settings → Typography → Weight). Omitted keeps the normal weight — Synopsis and Brainstorm never pass this, only chapter prose does. */
@@ -712,7 +717,9 @@ export function ProseCanvas({
         className={[
           "prose",
           dropCapLines > 0 ? "has-drop-cap" : "",
-          sceneBreakStyle && sceneBreakStyle !== "plain" ? `scene-break-${sceneBreakStyle}` : ""
+          sceneBreakStyle && sceneBreakStyle !== "plain" ? `scene-break-${sceneBreakStyle}` : "",
+          sceneBreakWidth && sceneBreakWidth !== "default" ? `scene-break-width-${sceneBreakWidth}` : "",
+          sceneBreakSpacing && sceneBreakSpacing !== "default" ? `scene-break-spacing-${sceneBreakSpacing}` : ""
         ]
           .filter(Boolean)
           .join(" ")}

@@ -275,6 +275,7 @@ export const sv: Messages = {
     proofreadHeading: "Korrekturläsning",
     generalHeading: "Allmänt",
     typographyHeading: "Typografi",
+    sceneBreakHeading: "Scenbrytare",
     illustrationsHeading: "Illustrationer",
     proseLanguage: "Prosans språk",
     proseLanguagePlaceholder: "t.ex. engelska",
@@ -343,7 +344,7 @@ export const sv: Messages = {
       "En stor begynnelsebokstav på varje kapitels första stycke, som sträcker sig över valt antal rader. Visas direkt i skrivytan och följer med till Publish-export (HTML, ePub, RTF, ODT; PDF inte än).",
     dropCapOff: "Av",
     dropCapLines: "{n} rader",
-    sceneBreakLabel: "Scenbrytare",
+    sceneBreakLabel: "Stil",
     sceneBreakLede:
       "Dekoration för en scenbrytare (ett eget `---`-stycke) — en uttonande linje med en centrerad symbol istället för en enkel kort linje. Visas direkt i skrivytan och följer med till Publish-export, med förenklade varianter i format som inte klarar en riktig uttoning (ODT, RTF) eller själva symbolen (PDF ritar en form istället för tecknet).",
     sceneBreakPlain: "Enkel (dagens korta linje)",
@@ -351,6 +352,18 @@ export const sv: Messages = {
     sceneBreakDiamond: "Minimalistisk diamant (❖)",
     sceneBreakFleur: "Fransk elegans (⚜)",
     sceneBreakSparkle: "Glimmer / stjärna (✦)",
+    sceneBreakWidthLabel: "Bredd",
+    sceneBreakWidthLede:
+      "Hur bred scenbrytarens linje blir, som en skalning ovanpå den valda stilens egen bredd — en smalare diamant och en smalare vinjett behåller samma proportioner mot varandra som de alltid haft. Visas direkt i skrivytan och följer med till Publish-exporterna HTML, ePub och PDF (RTF, ODT och IDML ritar scenbrytare som en enkel centrerad symbol utan någon linje alls, så bredden har inget att skala där).",
+    sceneBreakWidthNarrow: "Smal",
+    sceneBreakWidthDefault: "Standard",
+    sceneBreakWidthWide: "Bred",
+    sceneBreakSpacingLabel: "Mellanrum",
+    sceneBreakSpacingLede:
+      "Utrymmet ovanför och under scenbrytarens linje, som en skalning ovanpå den valda stilens egna mellanrum. Visas direkt i skrivytan och följer med till Publish-exporterna HTML, ePub och PDF (RTF, ODT och IDML påverkas inte, av samma skäl som Bredd ovan).",
+    sceneBreakSpacingTight: "Snäv",
+    sceneBreakSpacingDefault: "Standard",
+    sceneBreakSpacingLoose: "Rymlig",
     pageSizeLabel: "Sidstorlek",
     pageSizeLede:
       "Sidmåtten för varje exportformat med en riktig tryckt sida — IDML, PDF och ODT (RTF och HTML/ePub flödar fritt utan fast sida). Skalar också ungefär skrivytans egen bredd efter samma proportioner — ingen riktig sidindelning, skrivytan rullar fortfarande som en enda sammanhängande kolumn; riktig sida-för-sida-layout sker i Publish-exporterna och, för IDML, till slut i InDesign eller Affinity.",

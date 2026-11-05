@@ -703,6 +703,7 @@ export const en = {
     proofreadHeading: "Proofreading",
     generalHeading: "General",
     typographyHeading: "Typography",
+    sceneBreakHeading: "Scene break",
     illustrationsHeading: "Illustrations",
     proseLanguage: "Prose language",
     proseLanguagePlaceholder: "e.g. English",
@@ -771,7 +772,7 @@ export const en = {
       'A large opening letter for each chapter\'s first paragraph, spanning the chosen number of lines — sometimes called an "anfang". Shows live in the editor and carries into Publish exports (HTML, ePub, RTF, ODT; PDF not yet).',
     dropCapOff: "Off",
     dropCapLines: "{n} lines",
-    sceneBreakLabel: "Scene break",
+    sceneBreakLabel: "Style",
     sceneBreakLede:
       "Decoration for a scene break (a `---` paragraph on its own) — a fading rule with a centered ornament instead of a plain short line. Shows live in the editor and carries into Publish exports, with simpler versions in formats that can't do a true fade (ODT, RTF) or the ornament itself (PDF uses a drawn shape instead of the character).",
     sceneBreakPlain: "Plain (today's short rule)",
@@ -779,6 +780,18 @@ export const en = {
     sceneBreakDiamond: "Minimalist diamond (❖)",
     sceneBreakFleur: "French elegance (⚜)",
     sceneBreakSparkle: "Glimmer / star (✦)",
+    sceneBreakWidthLabel: "Width",
+    sceneBreakWidthLede:
+      "How wide the scene-break line draws, as a scale on top of the chosen style's own width — a narrowed diamond and a narrowed vignette stay proportioned the same relative to each other. Shows live in the editor and carries into Publish's HTML, ePub, and PDF exports (RTF, ODT, and IDML render scene breaks as a plain centered symbol with no line at all, so width has nothing to apply to there).",
+    sceneBreakWidthNarrow: "Narrow",
+    sceneBreakWidthDefault: "Default",
+    sceneBreakWidthWide: "Wide",
+    sceneBreakSpacingLabel: "Spacing",
+    sceneBreakSpacingLede:
+      "The gap above and below the scene-break line, as a scale on top of the chosen style's own spacing. Shows live in the editor and carries into Publish's HTML, ePub, and PDF exports (RTF, ODT, and IDML aren't affected, for the same reason as Width above).",
+    sceneBreakSpacingTight: "Tight",
+    sceneBreakSpacingDefault: "Default",
+    sceneBreakSpacingLoose: "Loose",
     pageSizeLabel: "Page size",
     pageSizeLede:
       "The page dimensions for every export format with a real printed page — IDML, PDF, and ODT (RTF and HTML/ePub reflow with no fixed page). Also roughly scales the editor's own writing column width to match — not true pagination, the editor still scrolls as one continuous column; real page-by-page layout happens in Publish's exports and, for IDML, ultimately in InDesign or Affinity.",

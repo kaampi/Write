@@ -5331,14 +5331,41 @@ button:disabled {
   height: 1px;
   /* rem, not em: `font-size: 0` below means an em value on THIS element
      resolves against its own (zero) font-size, collapsing to 0 — the line
-     had no width and no vertical spacing at all until this was caught. */
-  margin: 1.1rem auto;
-  width: 3.5rem;
+     had no width and no vertical spacing at all until this was caught.
+     scene_break_width/scene_break_spacing (BookSchema) scale these two
+     numbers via --scene-break-width-scale/--scene-break-margin-scale,
+     set on .prose itself below so they inherit down to every style's own
+     width rule, not just this base one. */
+  margin: calc(1.1rem * var(--scene-break-margin-scale, 1)) auto;
+  width: calc(3.5rem * var(--scene-break-width-scale, 1));
   font-size: 0;
   line-height: 0;
   color: transparent;
   background: var(--border);
   overflow: hidden;
+}
+
+/* Mats, 2026-11-05: "Valbar bredd på linjen" / "Valbart mellanrum ovanför
+   och under linjen" — scale factors, not absolute replacements, so a
+   narrowed diamond and a narrowed vignette stay proportioned to each
+   other the same way the defaults already are (see BookSchema.ts's own
+   comment on scene_break_width/scene_break_spacing). manuscriptExport.ts
+   hand-duplicates these same two numbers for HTML/ePub/PDF — same
+   established duplication as dropCapCss's own multiplier. */
+.scene-break-width-narrow {
+  --scene-break-width-scale: 0.65;
+}
+
+.scene-break-width-wide {
+  --scene-break-width-scale: 1.5;
+}
+
+.scene-break-spacing-tight {
+  --scene-break-margin-scale: 0.6;
+}
+
+.scene-break-spacing-loose {
+  --scene-break-margin-scale: 1.8;
 }
 
 /*
@@ -5358,7 +5385,7 @@ button:disabled {
 .scene-break-fleur .prose-hr,
 .scene-break-diamond .prose-hr,
 .scene-break-sparkle .prose-hr {
-  width: 14rem;
+  width: calc(14rem * var(--scene-break-width-scale, 1));
   overflow: visible;
 }
 
@@ -5381,7 +5408,7 @@ button:disabled {
 }
 
 .scene-break-diamond .prose-hr {
-  width: 8rem;
+  width: calc(8rem * var(--scene-break-width-scale, 1));
   background: linear-gradient(to right, transparent, #8f8f8f, transparent);
 }
 
@@ -5423,6 +5450,31 @@ button:disabled {
      catch this.) */
   background: var(--editor-paper-bg);
   padding: 0 0.6em;
+}
+
+/*
+ * Settings → Scene break's live preview. Reuses the real .prose-hr/
+ * .scene-break-* rendering (the same classes ProseCanvas puts on the live
+ * editor's .prose, see Editor.tsx) rather than a hand-drawn mockup, so it
+ * never drifts from what the chosen style/width/spacing actually look
+ * like in the manuscript. Overrides .prose's own editor-sized box
+ * (full-width, 60/80px padding, min-height:100%) down to a small flat
+ * strip — two classes on one element outrank .prose's single-class rule,
+ * so no !important needed. ::before's background pinned to --panel
+ * (the settings card's own background) rather than inheriting --editor-
+ * paper-bg, which can be a paper-preset color that wouldn't match this
+ * card at all (see .scene-break-vignette .prose-hr::before's own comment
+ * on why that variable matters).
+ */
+.scene-break-preview.prose {
+  width: auto;
+  min-height: 0;
+  padding: 1.4rem 0;
+  background: transparent;
+}
+
+.scene-break-preview .prose-hr::before {
+  background: var(--panel);
 }
 
 .prose p + p,

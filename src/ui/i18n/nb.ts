@@ -275,6 +275,7 @@ export const nb: Messages = {
     proofreadHeading: "Korrekturlesing",
     generalHeading: "Generelt",
     typographyHeading: "Typografi",
+    sceneBreakHeading: "Scenebrudd",
     illustrationsHeading: "Illustrasjoner",
     proseLanguage: "Prosaens språk",
     proseLanguagePlaceholder: "f.eks. engelsk",
@@ -343,7 +344,7 @@ export const nb: Messages = {
       "En stor forbokstav på hvert kapittels første avsnitt, som strekker seg over valgt antall linjer. Vises direkte i skriveflaten og følger med til Publish-eksport (HTML, ePub, RTF, ODT; PDF ikke ennå).",
     dropCapOff: "Av",
     dropCapLines: "{n} linjer",
-    sceneBreakLabel: "Scenebrudd",
+    sceneBreakLabel: "Stil",
     sceneBreakLede:
       "Dekorasjon for et scenebrudd (et eget `---`-avsnitt) — en uttonende linje med et sentrert symbol istedenfor en enkel kort linje. Vises direkte i skriveflaten og følger med til Publish-eksport, med forenklede varianter i formater som ikke klarer en ekte uttoning (ODT, RTF) eller selve symbolet (PDF tegner en form istedenfor tegnet).",
     sceneBreakPlain: "Enkel (dagens korte linje)",
@@ -351,6 +352,18 @@ export const nb: Messages = {
     sceneBreakDiamond: "Minimalistisk diamant (❖)",
     sceneBreakFleur: "Fransk eleganse (⚜)",
     sceneBreakSparkle: "Glimmer / stjerne (✦)",
+    sceneBreakWidthLabel: "Bredde",
+    sceneBreakWidthLede:
+      "Hvor bred scenebruddets linje blir, som en skalering på toppen av den valgte stilens egen bredde — en smalere diamant og en smalere vignett holder samme proporsjoner mot hverandre som de alltid har hatt. Vises direkte i skriveflaten og følger med til Publish-eksportene HTML, ePub og PDF (RTF, ODT og IDML tegner scenebrudd som et enkelt sentrert symbol uten linje i det hele tatt, så bredden har ingenting å skalere der).",
+    sceneBreakWidthNarrow: "Smal",
+    sceneBreakWidthDefault: "Standard",
+    sceneBreakWidthWide: "Bred",
+    sceneBreakSpacingLabel: "Mellomrom",
+    sceneBreakSpacingLede:
+      "Rommet over og under scenebruddets linje, som en skalering på toppen av den valgte stilens eget mellomrom. Vises direkte i skriveflaten og følger med til Publish-eksportene HTML, ePub og PDF (RTF, ODT og IDML påvirkes ikke, av samme grunn som Bredde ovenfor).",
+    sceneBreakSpacingTight: "Trang",
+    sceneBreakSpacingDefault: "Standard",
+    sceneBreakSpacingLoose: "Luftig",
     pageSizeLabel: "Sidestørrelse",
     pageSizeLede:
       "Sidemålene for hvert eksportformat med en ekte trykt side — IDML, PDF og ODT (RTF og HTML/ePub flyter fritt uten fast side). Skalerer også omtrent skriveflatens egen bredde etter samme proporsjoner — ikke ekte sideinndeling, skriveflaten ruller fortsatt som én sammenhengende kolonne; ekte side-for-side-layout skjer i Publish-eksportene og, for IDML, til slutt i InDesign eller Affinity.",

@@ -251,28 +251,6 @@ export function SettingsPanel({
                 </label>
                 <label className="craft-field">
                   <span className="field-label-row">
-                    {m.editor.sceneBreakLabel}
-                    <HelpTip
-                      body={m.editor.sceneBreakLede}
-                      ariaLabel={format(m.common.infoAbout, { field: m.editor.sceneBreakLabel })}
-                    />
-                  </span>
-                  <select
-                    value={book.scene_break_style}
-                    onChange={(event) =>
-                      onPatch((current) => ({ ...current, scene_break_style: event.target.value as Book["scene_break_style"] }))
-                    }
-                    aria-label={m.editor.sceneBreakLabel}
-                  >
-                    <option value="plain">{m.editor.sceneBreakPlain}</option>
-                    <option value="vignette">{m.editor.sceneBreakVignette}</option>
-                    <option value="diamond">{m.editor.sceneBreakDiamond}</option>
-                    <option value="fleur">{m.editor.sceneBreakFleur}</option>
-                    <option value="sparkle">{m.editor.sceneBreakSparkle}</option>
-                  </select>
-                </label>
-                <label className="craft-field">
-                  <span className="field-label-row">
                     {m.editor.pageSizeLabel}
                     <HelpTip body={m.editor.pageSizeLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.pageSizeLabel })} />
                   </span>
@@ -329,6 +307,88 @@ export function SettingsPanel({
                     <option value="school">{m.editor.editorBackgroundSchool}</option>
                     <option value="pine">{m.editor.editorBackgroundPine}</option>
                     <option value="leaves">{m.editor.editorBackgroundLeaves}</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+
+            <section className="settings-block">
+              <h2 className="settings-heading">{m.editor.sceneBreakHeading}</h2>
+              <div
+                className={[
+                  "scene-break-preview",
+                  "prose",
+                  book.scene_break_style !== "plain" ? `scene-break-${book.scene_break_style}` : "",
+                  book.scene_break_width !== "default" ? `scene-break-width-${book.scene_break_width}` : "",
+                  book.scene_break_spacing !== "default" ? `scene-break-spacing-${book.scene_break_spacing}` : ""
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                aria-hidden="true"
+              >
+                <p className="prose-hr">---</p>
+              </div>
+              <div className="craft-fields">
+                <label className="craft-field">
+                  <span className="field-label-row">
+                    {m.editor.sceneBreakLabel}
+                    <HelpTip
+                      body={m.editor.sceneBreakLede}
+                      ariaLabel={format(m.common.infoAbout, { field: m.editor.sceneBreakLabel })}
+                    />
+                  </span>
+                  <select
+                    value={book.scene_break_style}
+                    onChange={(event) =>
+                      onPatch((current) => ({ ...current, scene_break_style: event.target.value as Book["scene_break_style"] }))
+                    }
+                    aria-label={m.editor.sceneBreakLabel}
+                  >
+                    <option value="plain">{m.editor.sceneBreakPlain}</option>
+                    <option value="vignette">{m.editor.sceneBreakVignette}</option>
+                    <option value="diamond">{m.editor.sceneBreakDiamond}</option>
+                    <option value="fleur">{m.editor.sceneBreakFleur}</option>
+                    <option value="sparkle">{m.editor.sceneBreakSparkle}</option>
+                  </select>
+                </label>
+                <label className="craft-field">
+                  <span className="field-label-row">
+                    {m.editor.sceneBreakWidthLabel}
+                    <HelpTip
+                      body={m.editor.sceneBreakWidthLede}
+                      ariaLabel={format(m.common.infoAbout, { field: m.editor.sceneBreakWidthLabel })}
+                    />
+                  </span>
+                  <select
+                    value={book.scene_break_width}
+                    onChange={(event) =>
+                      onPatch((current) => ({ ...current, scene_break_width: event.target.value as Book["scene_break_width"] }))
+                    }
+                    aria-label={m.editor.sceneBreakWidthLabel}
+                  >
+                    <option value="narrow">{m.editor.sceneBreakWidthNarrow}</option>
+                    <option value="default">{m.editor.sceneBreakWidthDefault}</option>
+                    <option value="wide">{m.editor.sceneBreakWidthWide}</option>
+                  </select>
+                </label>
+                <label className="craft-field">
+                  <span className="field-label-row">
+                    {m.editor.sceneBreakSpacingLabel}
+                    <HelpTip
+                      body={m.editor.sceneBreakSpacingLede}
+                      ariaLabel={format(m.common.infoAbout, { field: m.editor.sceneBreakSpacingLabel })}
+                    />
+                  </span>
+                  <select
+                    value={book.scene_break_spacing}
+                    onChange={(event) =>
+                      onPatch((current) => ({ ...current, scene_break_spacing: event.target.value as Book["scene_break_spacing"] }))
+                    }
+                    aria-label={m.editor.sceneBreakSpacingLabel}
+                  >
+                    <option value="tight">{m.editor.sceneBreakSpacingTight}</option>
+                    <option value="default">{m.editor.sceneBreakSpacingDefault}</option>
+                    <option value="loose">{m.editor.sceneBreakSpacingLoose}</option>
                   </select>
                 </label>
               </div>

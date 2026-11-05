@@ -2058,6 +2058,8 @@ export function Editor() {
               }
               dropCapLines={book.drop_cap_lines}
               sceneBreakStyle={book.scene_break_style}
+              sceneBreakWidth={book.scene_break_width}
+              sceneBreakSpacing={book.scene_break_spacing}
               pageSize={book.page_size}
               pageMargin={book.page_margin}
               bodyFontStack={publishFontById(book.body_font).stack}

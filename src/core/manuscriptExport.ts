@@ -102,6 +102,9 @@ export type ManuscriptExport = {
   dropCapLines: number;
   /** Decorative scene-break ornament (BookSchema's scene_break_style) — "plain" keeps today's unadorned rule. */
   sceneBreakStyle: Book["scene_break_style"];
+  /** Scale on scene_break_style's own width/spacing (BookSchema's scene_break_width/scene_break_spacing) — only HTML/ePub and PDF draw a real line to scale; RTF/ODT/IDML render a plain centered symbol regardless. */
+  sceneBreakWidth: Book["scene_break_width"];
+  sceneBreakSpacing: Book["scene_break_spacing"];
   /** Page width/height in points (BookSchema's page_size, looked up via PAGE_SIZES) — used by IDML, PDF, and ODT, the three formats with a real printed page. */
   pageWidth: number;
   pageHeight: number;
@@ -139,6 +142,8 @@ export function buildManuscriptExport(book: Book, note = "", exportedAt = new Da
     ...(book.reader_age !== undefined ? { readerAge: book.reader_age } : {}),
     dropCapLines: book.drop_cap_lines,
     sceneBreakStyle: book.scene_break_style,
+    sceneBreakWidth: book.scene_break_width,
+    sceneBreakSpacing: book.scene_break_spacing,
     pageWidth: PAGE_SIZES[book.page_size].width,
     pageHeight: PAGE_SIZES[book.page_size].height,
     margin: PAGE_MARGINS[book.page_margin],
@@ -266,23 +271,50 @@ function dropCapCss(lines: number): string {
  * own, for the same reason: two different static CSS bases, nothing to
  * share a constant against at runtime).
  */
-const SCENE_BREAK_ORNAMENTS: Record<Exclude<Book["scene_break_style"], "plain">, { char: string; line: string; symbol: string; width: string }> = {
-  vignette: { char: "❦", line: "#9c7a52", symbol: "#8a6640", width: "14rem" },
-  fleur: { char: "⚜", line: "#c9a227", symbol: "#b8923f", width: "14rem" },
-  diamond: { char: "❖", line: "#8f8f8f", symbol: "#7a7a7a", width: "8rem" },
-  sparkle: { char: "✦", line: "#a8a8a8", symbol: "#adadad", width: "14rem" }
+const SCENE_BREAK_ORNAMENTS: Record<Exclude<Book["scene_break_style"], "plain">, { char: string; line: string; symbol: string; width: number }> = {
+  vignette: { char: "❦", line: "#9c7a52", symbol: "#8a6640", width: 14 },
+  fleur: { char: "⚜", line: "#c9a227", symbol: "#b8923f", width: 14 },
+  diamond: { char: "❖", line: "#8f8f8f", symbol: "#7a7a7a", width: 8 },
+  sparkle: { char: "✦", line: "#a8a8a8", symbol: "#adadad", width: 14 }
 };
 
+/**
+ * scene_break_width/scene_break_spacing scale factors — styles.css hand-
+ * duplicates these same two numbers for the live editor (its own
+ * width/spacing CSS custom-property rules), same established duplication
+ * dropCapCss's multiplier already has against styles.css.
+ */
+const SCENE_BREAK_WIDTH_SCALE: Record<Book["scene_break_width"], number> = { narrow: 0.65, default: 1, wide: 1.5 };
+const SCENE_BREAK_SPACING_SCALE: Record<Book["scene_break_spacing"], number> = { tight: 0.6, default: 1, loose: 1.8 };
+
 /** HTML/ePub CSS for one document's chosen scene-break style — "plain" needs none (the default short rule is inline on the paragraph itself, see sceneBreakHtml). `pageBg` punches a gap in the line behind the symbol; both exports render on a plain white page, unlike the live editor's themed --bg. */
-function sceneBreakCss(style: Book["scene_break_style"], pageBg = "#fff"): string {
+function sceneBreakCss(
+  style: Book["scene_break_style"],
+  widthScale: Book["scene_break_width"],
+  spacingScale: Book["scene_break_spacing"],
+  pageBg = "#fff"
+): string {
   if (style === "plain") return "";
   const o = SCENE_BREAK_ORNAMENTS[style];
-  return `.scene-break{display:block;position:relative;height:1px;margin:1.3em auto;width:${o.width};background:linear-gradient(to right,transparent,${o.line},transparent)}.scene-break::before{content:"${o.char}";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:1.05em;line-height:1;color:${o.symbol};background:${pageBg};padding:0 0.6em}`;
+  // Rounded to 2dp: floating-point products of these scale factors (e.g. 1.3 * 1.8) can land a
+  // few ulps off a clean decimal — fine for rendering, but it leaked as noise like
+  // "2.3400000000000003em" into the exported CSS text itself.
+  const width = Math.round(o.width * SCENE_BREAK_WIDTH_SCALE[widthScale] * 100) / 100;
+  const margin = Math.round(1.3 * SCENE_BREAK_SPACING_SCALE[spacingScale] * 100) / 100;
+  return `.scene-break{display:block;position:relative;height:1px;margin:${margin}em auto;width:${width}rem;background:linear-gradient(to right,transparent,${o.line},transparent)}.scene-break::before{content:"${o.char}";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:1.05em;line-height:1;color:${o.symbol};background:${pageBg};padding:0 0.6em}`;
 }
 
 /** The scene-break paragraph itself (shared by formatExportHtml and packEpub). "plain" keeps the exact markup/look this always had — a short solid rule, no symbol — everything else gets the decorated .scene-break class sceneBreakCss() styles. px, not em: this element also sets its own font-size to 0 (to hide the literal "---" text it still contains, same trick styles.css's .prose-hr already uses), so an em value here would resolve against that zero and collapse to 0 width/margin — caught the same way, against actual rendered pixels, not by inspecting the CSS alone (Playwright reported a 0-width box until this was fixed). */
-function sceneBreakHtml(style: Book["scene_break_style"]): string {
-  if (style === "plain") return `<p style="height:1px;width:56px;margin:21px auto;background:#ccc;font-size:0;line-height:0;color:transparent">---</p>`;
+function sceneBreakHtml(
+  style: Book["scene_break_style"],
+  widthScale: Book["scene_break_width"],
+  spacingScale: Book["scene_break_spacing"]
+): string {
+  if (style === "plain") {
+    const width = Math.round(56 * SCENE_BREAK_WIDTH_SCALE[widthScale]);
+    const margin = Math.round(21 * SCENE_BREAK_SPACING_SCALE[spacingScale]);
+    return `<p style="height:1px;width:${width}px;margin:${margin}px auto;background:#ccc;font-size:0;line-height:0;color:transparent">---</p>`;
+  }
   return `<p class="scene-break"><span aria-hidden="true"> </span></p>`;
 }
 
@@ -374,12 +406,14 @@ function htmlParagraphs(
   formatting: ProseFormattingRange[],
   paragraphStyle: ParagraphStyle,
   dropCap: boolean,
-  sceneBreakStyle: Book["scene_break_style"]
+  sceneBreakStyle: Book["scene_break_style"],
+  sceneBreakWidth: Book["scene_break_width"],
+  sceneBreakSpacing: Book["scene_break_spacing"]
 ): string {
   if (paragraphStyle === "indented") {
     return splitFlowParagraphsWithOffsets(text)
       .map((paragraph, index) => {
-        if (HR_BLOCK.test(paragraph.text)) return sceneBreakHtml(sceneBreakStyle);
+        if (HR_BLOCK.test(paragraph.text)) return sceneBreakHtml(sceneBreakStyle, sceneBreakWidth, sceneBreakSpacing);
         const classes = [index === 0 ? "first" : "", index === 0 && dropCap ? "drop-cap" : ""].filter(Boolean);
         const body = formattedRuns(paragraph.text, paragraph.start, formatting).map(htmlRun).join("");
         return `<p${classes.length > 0 ? ` class="${classes.join(" ")}"` : ""}>${body}</p>`;
@@ -392,7 +426,7 @@ function htmlParagraphs(
   return lines
     .map((line) => {
       if (!line.text) return "<p><br/></p>";
-      if (HR_BLOCK.test(line.text)) return sceneBreakHtml(sceneBreakStyle);
+      if (HR_BLOCK.test(line.text)) return sceneBreakHtml(sceneBreakStyle, sceneBreakWidth, sceneBreakSpacing);
       const cls = dropCapUsed ? "" : ' class="drop-cap"';
       dropCapUsed = true;
       const body = formattedRuns(line.text, line.start, formatting).map(htmlRun).join("");
@@ -422,7 +456,17 @@ export function formatExportHtml(
     if (chapter.startImageDataUrl) body.push(`<img class="chapter-image" src="${chapter.startImageDataUrl}" alt=""/>`);
     if (chapter.voice) body.push(`<p class="meta">Voice: ${xmlEscape(chapter.voice)}</p>`);
     if (chapter.prose) {
-      body.push(htmlParagraphs(chapter.rawProse, chapter.formatting, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
+      body.push(
+        htmlParagraphs(
+          chapter.rawProse,
+          chapter.formatting,
+          paragraphStyle,
+          doc.dropCapLines > 0,
+          doc.sceneBreakStyle,
+          doc.sceneBreakWidth,
+          doc.sceneBreakSpacing
+        )
+      );
     }
   }
   if (doc.bible.length > 0) {
@@ -445,7 +489,7 @@ export function formatExportHtml(
 <head>
 <meta charset="utf-8"/>
 <title>${xmlEscape(doc.title)}</title>
-<style>${HTML_EXPORT_CSS_BASE}${INDENTED_PARAGRAPHS_CSS}${dropCapCss(doc.dropCapLines)}${sceneBreakCss(doc.sceneBreakStyle)}${htmlFontCss(font, bodyWeight, bodyColor)}</style>
+<style>${HTML_EXPORT_CSS_BASE}${INDENTED_PARAGRAPHS_CSS}${dropCapCss(doc.dropCapLines)}${sceneBreakCss(doc.sceneBreakStyle, doc.sceneBreakWidth, doc.sceneBreakSpacing)}${htmlFontCss(font, bodyWeight, bodyColor)}</style>
 </head>
 <body${bodyClasses.length > 0 ? ` class="${bodyClasses.join(" ")}"` : ""}>
 ${body.join("\n")}
@@ -596,7 +640,17 @@ export function packEpub(
     }
     if (chapter.voice) parts.push(`<p class="meta">Voice: ${xmlEscape(chapter.voice)}</p>`);
     if (chapter.prose) {
-      parts.push(htmlParagraphs(chapter.rawProse, chapter.formatting, paragraphStyle, doc.dropCapLines > 0, doc.sceneBreakStyle));
+      parts.push(
+        htmlParagraphs(
+          chapter.rawProse,
+          chapter.formatting,
+          paragraphStyle,
+          doc.dropCapLines > 0,
+          doc.sceneBreakStyle,
+          doc.sceneBreakWidth,
+          doc.sceneBreakSpacing
+        )
+      );
     }
     const bodyClasses = [paragraphStyle === "indented" ? "indented" : "", doc.dropCapLines > 0 ? "has-drop-cap" : ""].filter(
       Boolean
@@ -691,7 +745,7 @@ ${navList}
     { name: "OEBPS/nav.xhtml", data: utf8(nav) },
     {
       name: "OEBPS/styles/stylesheet.css",
-      data: utf8(EPUB_CSS_BASE + INDENTED_PARAGRAPHS_CSS + dropCapCss(doc.dropCapLines) + sceneBreakCss(doc.sceneBreakStyle) + epubFontCss(font, bodyWeight, bodyColor))
+      data: utf8(EPUB_CSS_BASE + INDENTED_PARAGRAPHS_CSS + dropCapCss(doc.dropCapLines) + sceneBreakCss(doc.sceneBreakStyle, doc.sceneBreakWidth, doc.sceneBreakSpacing) + epubFontCss(font, bodyWeight, bodyColor))
     },
     ...images.map((image) => ({ name: `OEBPS/images/${image.name}`, data: image.data })),
     ...(font?.embed
@@ -919,6 +973,8 @@ class PdfWriter {
     formatting: ProseFormattingRange[],
     paragraphStyle: ParagraphStyle,
     sceneBreakStyle: Book["scene_break_style"],
+    sceneBreakWidth: Book["scene_break_width"],
+    sceneBreakSpacing: Book["scene_break_spacing"],
     size = 11
   ): void {
     if (paragraphStyle === "spaced") {
@@ -929,7 +985,7 @@ class PdfWriter {
           continue;
         }
         if (HR_BLOCK.test(raw.text)) {
-          this.sceneBreak(sceneBreakStyle);
+          this.sceneBreak(sceneBreakStyle, sceneBreakWidth, sceneBreakSpacing);
           continue;
         }
         for (const line of wrapTextLinesWithOffsets(raw.text, this.body, size, this.maxWidth)) {
@@ -945,7 +1001,7 @@ class PdfWriter {
     const indent = 20;
     splitFlowParagraphsWithOffsets(text).forEach((paragraph, index) => {
       if (HR_BLOCK.test(paragraph.text)) {
-        this.sceneBreak(sceneBreakStyle);
+        this.sceneBreak(sceneBreakStyle, sceneBreakWidth, sceneBreakSpacing);
         return;
       }
       wrapTextLinesWithOffsets(paragraph.text, font, size, this.maxWidth).forEach((line, lineIndex) => {
@@ -958,13 +1014,13 @@ class PdfWriter {
   }
 
   /** Draws one scene-break ornament centered on the page and advances past it. "plain" is a short solid rule, no symbol — everything else fades a wider rule toward both edges (drawFadingRule) with drawOrnament() centered in the gap. */
-  sceneBreak(style: Book["scene_break_style"]): void {
-    const rowHeight = 28;
+  sceneBreak(style: Book["scene_break_style"], widthScale: Book["scene_break_width"], spacingScale: Book["scene_break_spacing"]): void {
+    const rowHeight = 28 * SCENE_BREAK_SPACING_SCALE[spacingScale];
     this.ensureSpace(rowHeight);
     const centerX = this.margin + this.maxWidth / 2;
     const lineY = this.y - rowHeight / 2;
     if (style === "plain") {
-      const half = 25;
+      const half = 25 * SCENE_BREAK_WIDTH_SCALE[widthScale];
       this.page.drawLine({ start: { x: centerX - half, y: lineY }, end: { x: centerX + half, y: lineY }, thickness: 0.75, color: rgb(0.75, 0.75, 0.75) });
       this.y -= rowHeight;
       return;
@@ -972,7 +1028,7 @@ class PdfWriter {
     const spec = SCENE_BREAK_ORNAMENTS[style];
     const lineColor = pdfRgb(spec.line);
     const symbolColor = pdfRgb(spec.symbol);
-    const half = style === "diamond" ? 55 : 95;
+    const half = (style === "diamond" ? 55 : 95) * SCENE_BREAK_WIDTH_SCALE[widthScale];
     const gap = 10;
     drawFadingRule(this.page, centerX - half, centerX - gap, lineY, lineColor, "left");
     drawFadingRule(this.page, centerX + gap, centerX + half, lineY, lineColor, "right");
@@ -1072,7 +1128,9 @@ export async function packPdf(
       writer.image(image);
     }
     if (chapter.voice) writer.lines(`Voice: ${chapter.voice}`, { size: 9, meta: true });
-    if (chapter.prose) writer.prose(chapter.rawProse, chapter.formatting, paragraphStyle, doc.sceneBreakStyle);
+    if (chapter.prose) {
+      writer.prose(chapter.rawProse, chapter.formatting, paragraphStyle, doc.sceneBreakStyle, doc.sceneBreakWidth, doc.sceneBreakSpacing);
+    }
   }
 
   if (doc.bible.length > 0) {
