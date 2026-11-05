@@ -11794,6 +11794,70 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.280 → v1.0.281 (2026-11-05): två roadmap-idéer
+(#55, #52) - persistent lagring och en krok-bedömning av kapitel 1.**
+Mats frågade om det fanns oadresserade idéer kvar i
+`roadmap-ideas.md`. Gick igenom filen och listade allt utan ✅ som
+inte var medvetet struket/nedprioriterat - #27 (mobilanpassning), #28
+(import-adapterarkitektur), #36 (lokal bildgenerering), #46
+(förstasidan känns som en webbsida), #49 (IDML/InDesign), #52
+(öppningskrok), #55 (`persist()`), #56 (Codex över LAN), samt #37
+(namnbyte, obeslutat) och en känd men ej fixad bugg under #58 (bok
+skapad inifrån en series Books-flik faller tillbaka till serievyn vid
+stängning, inte Home). Rekommenderade #55 som ett gratis första steg
+och #52 som huvudnumret (redan väldesignad i roadmapen), #28 som en
+egen, större session för sig. Mats: "Då börjar vi med 55 och 52."
+
+**#55 - `navigator.storage.persist()`.** Ett enda `useEffect` i
+`App.tsx`s `Shell` (redan monterad hela sessionen, samma plats som
+`startUpdateChecks()`), fire-and-forget, inget UI, ingen
+beroendekedja - exakt det roadmapen bad om. IndexedDB räknas annars
+som "evictable" tills detta uttryckligen begärs.
+
+**#52 - öppningskrok-bedömning.** Ny, separat AI-läsning av ENDAST
+kapitel 1:s första scen, vid sidan av den vanliga scen-läsningen som
+redan finns i `developmental.ts`/`developmentalRun.ts` - inte en
+utökning av den generiska scenbedömningen (`advance_plot`/
+`reveal_character` osv.), eftersom frågan är specifik: väcker
+öppningen en konkret obesvarad fråga som driver läsaren framåt? Bara
+kapitel 1 behöver bära hela kroken själv (senare kapitel kan luta sig
+mot föregående kapitels cliffhanger) - roadmapens egen motivering för
+att ge just kapitel 1 ett eget, strängare kriterium.
+
+Ny `OpeningHookReadSchema` (`hasHook: boolean`, `issue: "none"|
+"no_question"|"backstory_dump"|"reveals_too_much"`, `note: string`) på
+`DevelopmentalJobSchema`. Nytt `OPENING_HOOK_SYSTEM`/
+`openingHookUserPrompt`/`parseOpeningHookRead` i `developmental.ts`.
+`developmentalRun.ts`s `runScenes` gör det extra anropet direkt efter
+den vanliga scen-läsningen, men ENDAST när scenen är hela
+manuskriptets första scen (`chapters[0]`s första scen, inte bara
+`sequence_index === 0` - robust mot kasserade kapitel) och bara om
+`job.openingHook` ännu inte är satt (så en återupptagen körning aldrig
+frågar två gånger). En känd, medveten begränsning: en jobb som redan
+hunnit markera kapitel 1:s scen 1 som klar INNAN den här funktionen
+fanns hoppar över hook-läsningen helt vid återupptagning (samma
+`sceneDone`-koll som redan skyddar mot omläsning av själva scenen) -
+påverkar bara ett jobb pausat före den här versionen, inte en ny körning.
+
+Visas i `DevelopmentalCard.tsx` som en egen "Opening hook"-sektion
+före sammanfattningen - grön/tyst text om kroken sitter, annars en
+banner med vilken av de tre bristerna och en länk till kapitel 1.
+
+**Verifiering:** 9 nya tester i `developmental.test.ts` (28 totalt i
+filen) - prompt-innehåll, parsning (välformad, okänt enum-värde,
+icke-boolean `hasHook`, oparserbar text), och en full pipeline-
+integrationstest som bekräftar att hook-anropet görs EXAKT en gång,
+bara för kapitel 1:s scen, aldrig för kapitel 2 ("The harbour" dyker
+aldrig upp i en `"Chapter 1's opening scene"`-prompt). Levande
+Playwright-kontroll: laddade exempelboken, öppnade Developmental
+analysis - föranalys-dialogen renderar felfritt, ingen krasch. Själva
+AI-körningen kunde inte köras live i sandlådan (ingen lokal modell
+ansluten) - flaggat ärligt istället för att låtsas verifiera den
+delen.
+
+`tsc --noEmit` rent, `npm run build` rent, 1276/1276 tester gröna (9
+nya).
+
 **Ändringslogg v1.0.279 → v1.0.280 (2026-11-05): meningsdelaren
 slutade slå ihop hela dialogväxlingar till "en mening".** Mats
 klistrade in ett helt stycke växlande dialog ur den nya exempelboken

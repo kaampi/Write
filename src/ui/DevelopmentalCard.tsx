@@ -117,6 +117,21 @@ export function DevelopmentalCard({
           </>
         ) : null}
 
+        {done && job.openingHook ? (
+          <div className="stats-sentence">
+            <p className="chapter-craft-label">{m.developmental.openingHookLabel}</p>
+            <p className={job.openingHook.hasHook ? "quiet" : "banner home-banner"} role={job.openingHook.hasHook ? undefined : "status"}>
+              {job.openingHook.hasHook ? m.developmental.openingHookGood : m.developmental.openingHookIssues[job.openingHook.issue]}
+            </p>
+            {job.openingHook.note ? <p className="quiet">{job.openingHook.note}</p> : null}
+            {!job.openingHook.hasHook && chapters[0] ? (
+              <button type="button" className="stats-long-pick" onClick={() => onOpenChapter(chapters[0]!.id)}>
+                {chapterLabel(chapters[0].id, book, m)}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
         {done && job.report ? (
           <>
             <div className="stats-sentence">

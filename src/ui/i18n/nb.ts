@@ -1486,6 +1486,14 @@ export const nb: Messages = {
     continue: "Fortsett",
     runAgain: "Kjør igjen",
     emptyResults: "Ingen rapport ennå.",
+    openingHookLabel: "Krok i åpningen",
+    openingHookGood: "Kapittel 1 kroker leseren — et konkret ubesvart spørsmål eller en uvanlig hendelse drar dem videre.",
+    openingHookIssues: {
+      none: "Kapittel 1 kroker ikke leseren tydelig.",
+      no_question: "Kapittel 1 reiser ingenting uløst — ingenting drar leseren til neste side.",
+      backstory_dump: "Kapittel 1 åpner med å forklare historie/bakgrunn i stedet for å starte historiens faktiske nåtidige handling.",
+      reveals_too_much: "Kapittel 1 avslører mysteriet eller innsatsen før de rekker å fungere som et spørsmål."
+    },
     summaryLabel: "Sammendrag",
     concernsLabel: "Verdt et blikk",
     clickHint: "Klikk på et kapittel for å åpne det.",

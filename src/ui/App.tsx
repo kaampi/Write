@@ -57,6 +57,19 @@ function Shell() {
   // a book or series is open) so the periodic update check keeps running
   // in the background regardless of which screen is open.
   useEffect(() => startUpdateChecks(), []);
+  /**
+   * Without this, IndexedDB storage counts as "best effort"/evictable, and
+   * a browser under extreme disk pressure is allowed to clear it — the
+   * manuscript data itself, not just a cache. Unlikely in practice (and
+   * the quota itself is already disk-space-bound, not a small fixed
+   * limit), but a single cheap, fire-and-forget call at startup is enough
+   * to ask for persistent storage; no UI, nothing to wait on, and browsers
+   * without the API (or that refuse the request) just keep today's
+   * behavior (roadmap-ideas.md #55).
+   */
+  useEffect(() => {
+    void navigator.storage?.persist?.().catch(() => {});
+  }, []);
   return (
     <div className="app-shell">
       <AppTopBar onOpenHomeGuide={() => setHomeGuideOpen(true)} />

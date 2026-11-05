@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.281] - 2026-11-05
+
+### Added
+- Developmental analysis now also judges chapter 1's opening scene specifically: does it hook the reader with a concrete unanswered question, or does it open on a backstory dump, give away the stakes too early, or just not raise anything unresolved at all? Shown as its own "Opening hook" section in the report.
+
+### Changed
+- The app now requests persistent browser storage at startup, so manuscript data in IndexedDB isn't eligible for automatic eviction under extreme disk pressure.
+
 ## [1.0.280] - 2026-11-05
 
 ### Fixed

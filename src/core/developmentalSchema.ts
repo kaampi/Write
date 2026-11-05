@@ -34,6 +34,25 @@ export const SceneReadSchema = z.object({
 });
 export type SceneRead = z.infer<typeof SceneReadSchema>;
 
+/**
+ * Chapter 1's own opening-hook read (roadmap-ideas.md #52) — a dedicated
+ * pass over chapter 1's first scene only, separate from the generic
+ * scene-function read above. Not "advance_plot"/"reveal_character" etc.:
+ * the specific question is whether the opening actually establishes an
+ * unanswered question that pulls the reader forward, since (per the
+ * roadmap's own reasoning) only chapter 1 has to carry its whole hook
+ * alone — every later chapter can lean on the previous one's own ending.
+ */
+export const OPENING_HOOK_ISSUES = ["none", "no_question", "backstory_dump", "reveals_too_much"] as const;
+export type OpeningHookIssue = (typeof OPENING_HOOK_ISSUES)[number];
+
+export const OpeningHookReadSchema = z.object({
+  hasHook: z.boolean(),
+  issue: z.enum(OPENING_HOOK_ISSUES),
+  note: z.string()
+});
+export type OpeningHookRead = z.infer<typeof OpeningHookReadSchema>;
+
 export const PACING_ASSESSMENTS = ["too_slow", "right_pace", "too_fast"] as const;
 export type PacingAssessment = (typeof PACING_ASSESSMENTS)[number];
 
@@ -81,6 +100,8 @@ export const DevelopmentalJobSchema = z.object({
   chapterDone: z.array(z.string()).default([]),
   sceneReads: z.array(SceneReadSchema).default([]),
   chapterReads: z.array(ChapterReadSchema).default([]),
+  /** Set once, the first time chapter 1's first scene is read — never re-run after that, same as every other scene/chapter read. */
+  openingHook: OpeningHookReadSchema.optional(),
   report: DevelopmentalReportSchema.optional(),
   detail: z.string().default("")
 });

@@ -4,11 +4,14 @@ import { plotlinesForChapter } from "./plotlines";
 import { proseChapters } from "./proofread";
 import {
   CHAPTER_SYNTHESIS_SYSTEM,
+  OPENING_HOOK_SYSTEM,
   REPORT_SYSTEM,
   SCENE_READ_SYSTEM,
   chapterSynthesisUserPrompt,
+  openingHookUserPrompt,
   parseChapterSynthesis,
   parseDevelopmentalReport,
+  parseOpeningHookRead,
   parseSceneRead,
   reportUserPrompt,
   sceneReadUserPrompt,
@@ -37,8 +40,12 @@ async function runScenes(job: DevelopmentalJob, io: DevelopmentalIO, signal: Abo
   if (current.stage !== "scene") return current;
   current = touchDevelopmental(current, { stage: "scene", status: "running" });
   const book = io.getBook();
-  for (const chapter of proseChapters(book)) {
-    for (const scene of chapterScenes(chapter)) {
+  const chapters = proseChapters(book);
+  const firstChapterId = chapters[0]?.id;
+  for (const chapter of chapters) {
+    const scenes = chapterScenes(chapter);
+    const firstSceneId = chapter.id === firstChapterId ? scenes[0]?.id : undefined;
+    for (const scene of scenes) {
       throwIfAborted(signal);
       if (current.sceneDone.includes(scene.id)) continue;
       current = touchDevelopmental(current, { detail: `scene:${chapter.sequence_index + 1}:${scene.sequence_index + 1}` });
@@ -50,6 +57,26 @@ async function runScenes(job: DevelopmentalJob, io: DevelopmentalIO, signal: Abo
         : current.sceneReads;
       current = touchDevelopmental(current, { sceneReads, sceneDone: [...current.sceneDone, scene.id] });
       await io.save(current);
+
+      /*
+       * Chapter 1's opening hook (roadmap-ideas.md #52) — a second,
+       * separate read of the same scene, only for the manuscript's very
+       * first live scene. Piggybacks on this scene's own done-tracking
+       * (`sceneDone` above already guards re-runs on resume) and only
+       * fires once more, guarded by `openingHook` itself being unset, so
+       * continuing a paused job never re-asks it.
+       */
+      if (scene.id === firstSceneId && !current.openingHook) {
+        throwIfAborted(signal);
+        current = touchDevelopmental(current, { detail: "opening-hook" });
+        await io.save(current);
+        const hookRaw = await io.complete(OPENING_HOOK_SYSTEM, openingHookUserPrompt(book, scene), signal);
+        const openingHook = parseOpeningHookRead(hookRaw) ?? undefined;
+        if (openingHook) {
+          current = touchDevelopmental(current, { openingHook });
+          await io.save(current);
+        }
+      }
     }
   }
   return touchDevelopmental(current, { stage: "chapter" });

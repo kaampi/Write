@@ -1486,6 +1486,14 @@ export const sv: Messages = {
     continue: "Fortsätt",
     runAgain: "Kör igen",
     emptyResults: "Ingen rapport än.",
+    openingHookLabel: "Krok i öppningen",
+    openingHookGood: "Kapitel 1 krokar läsaren — en konkret obesvarad fråga eller en ovanlig händelse drar dem vidare.",
+    openingHookIssues: {
+      none: "Kapitel 1 krokar inte läsaren tydligt.",
+      no_question: "Kapitel 1 väcker inget olöst — inget drar läsaren till nästa sida.",
+      backstory_dump: "Kapitel 1 öppnar med att förklara historia/bakgrund istället för att starta berättelsens faktiska nutida handling.",
+      reveals_too_much: "Kapitel 1 avslöjar mysteriet eller insatserna innan de hinner fungera som en fråga."
+    },
     summaryLabel: "Sammanfattning",
     concernsLabel: "Värt en titt",
     clickHint: "Klicka på ett kapitel för att öppna det.",

@@ -7,6 +7,7 @@ import { recoverJsonObject } from "./extractFacts";
 import { newId, nowIso } from "./ids";
 import {
   DEVELOPMENTAL_STAGES,
+  OPENING_HOOK_ISSUES,
   PACING_ASSESSMENTS,
   SCENE_FUNCTIONS,
   TENSION_DELTAS,
@@ -15,6 +16,8 @@ import {
   type DevelopmentalConcern,
   type DevelopmentalJob,
   type DevelopmentalReport,
+  type OpeningHookIssue,
+  type OpeningHookRead,
   type PacingAssessment,
   type SceneFunction,
   type SceneRead,
@@ -28,6 +31,7 @@ export {
   type DevelopmentalConcern,
   type DevelopmentalJob,
   type DevelopmentalReport,
+  type OpeningHookRead,
   type SceneRead
 };
 export type { DevelopmentalStage, DevelopmentalStatus } from "./developmentalSchema";
@@ -100,6 +104,32 @@ export function parseSceneRead(raw: string): { function: SceneFunction; tension:
   const tension = typeof rec.tension === "string" && (TENSION_DELTAS as readonly string[]).includes(rec.tension) ? (rec.tension as TensionDelta) : "flat";
   const note = typeof rec.note === "string" ? rec.note.trim() : "";
   return { function: fn, tension, note };
+}
+
+export const OPENING_HOOK_SYSTEM = `You read the opening scene of a novel — chapter 1's first scene only — judging one specific thing: does it hook the reader?
+Return JSON only: {"hasHook":true|false,"issue":"none"|"no_question"|"backstory_dump"|"reveals_too_much","note":"..."}
+A hook means the opening establishes a concrete unanswered question or an out-of-the-ordinary event that makes a reader want to keep going — not just competent prose. Chapter 1 has to carry this alone; it cannot lean on a previous chapter's cliffhanger the way chapter 2 onward can. Set "hasHook" to whether it does. "issue" names the single biggest reason if it doesn't: "no_question" (nothing unresolved is raised at all), "backstory_dump" (the opening explains history/context instead of starting the story's actual present-tense action), "reveals_too_much" (the mystery or stakes are given away before they can function as a question), or "none" if hasHook is true. "note" is one or two sentences grounding the verdict in what the scene actually does.`;
+
+export function openingHookUserPrompt(book: Book, scene: BookScene): string {
+  return [`Manuscript: ${book.title}`, `Chapter 1's opening scene:\n${scene.prose.trim()}`].join("\n\n");
+}
+
+export function parseOpeningHookRead(raw: string): OpeningHookRead | null {
+  let payload: unknown;
+  try {
+    payload = recoverJsonObject(raw);
+  } catch {
+    return null;
+  }
+  if (!payload || typeof payload !== "object") return null;
+  const rec = payload as Record<string, unknown>;
+  const hasHook = rec.hasHook === true;
+  const issue =
+    typeof rec.issue === "string" && (OPENING_HOOK_ISSUES as readonly string[]).includes(rec.issue)
+      ? (rec.issue as OpeningHookIssue)
+      : "none";
+  const note = typeof rec.note === "string" ? rec.note.trim() : "";
+  return { hasHook, issue, note };
 }
 
 export const CHAPTER_SYNTHESIS_SYSTEM = `You synthesize a chapter's role in a novel's overall structure from the scene-by-scene reads already made for it and the threads tagged to this chapter — not from the chapter's raw prose.

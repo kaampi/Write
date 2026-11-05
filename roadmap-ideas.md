@@ -2914,7 +2914,7 @@ som referens, inte en punkt med en tänkt lösning.
 
 ---
 
-### 55. Begär `navigator.storage.persist()` vid start — billig defensiv åtgärd
+### 55. Begär `navigator.storage.persist()` vid start — billig defensiv åtgärd ✅ byggd (v1.0.281)
 Uppstod i ett sidospår om hur stor IndexedDB kan bli (svar: i praktiken
 styrt av ledigt diskutrymme, inte en liten fast gräns — gott om
 utrymme för textbaserade manus). Appen anropar idag aldrig
@@ -2924,7 +2924,7 @@ lagringen räknas som "evictable" (ej garanterat beständig) tills den
 uttryckligen begärs som persistent. Osannolikt i praktiken för en
 vanlig användare, men billigt att åtgärda: ett anrop vid appstart
 (t.ex. i `App.tsx` eller `BookStoreProvider`), inget UI, ingen
-beroendekedja. Inte brådskande, inte byggd än.
+beroendekedja. Byggd i `App.tsx`s `Shell` (v1.0.281).
 
 ---
 
@@ -2956,7 +2956,7 @@ AI-prompt. Insikterna, destillerade för framtida bruk:
   härnäst" fungerar på vilken bok som helst och känns därför som
   ingenting alls.
 
-### 52. Developmental: bedöm öppningsscenens krok specifikt
+### 52. Developmental: bedöm öppningsscenens krok specifikt ✅ byggd (v1.0.281)
 Idén som uppstod ur diskussionen: inget i Analyze eller Developmental
 bedömer idag specifikt OM kapitel 1:s första scen faktiskt etablerar
 en obesvarad fråga som driver läsaren framåt — `show_vs_tell` (Analyze)
@@ -2969,7 +2969,13 @@ en bedömning av om öppningen faktiskt kroker. Tänkt plats: Developmental
 kapitel 1 — ett kapitel-1-specifikt kriterium hör inte hemma i Analyze,
 som kör identiskt på varje kapitel. Flagga specifikt: saknas en
 obesvarad fråga/out-of-whack-händelse, finns en backstory-dump, eller
-avslöjas för mycket för tidigt. Inte påbörjad.
+avslöjas för mycket för tidigt.
+
+**Byggt (v1.0.281):** exakt som tänkt — eget `OPENING_HOOK_SYSTEM`-
+anrop i `developmentalRun.ts`s scenläsning, kört bara på manuskriptets
+första scen, resultatet (`hasHook`/`issue`/`note`) visas som en egen
+"Opening hook"-sektion i rapporten (`DevelopmentalCard.tsx`), före
+sammanfattningen.
 
 **Varför just kapitel 1 (Mats tillägg):** från kapitel 2 och framåt
 kan en del av kroken redan komma från föregående kapitels slut (en

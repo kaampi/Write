@@ -1499,6 +1499,14 @@ export const en = {
     continue: "Continue",
     runAgain: "Run again",
     emptyResults: "No report yet.",
+    openingHookLabel: "Opening hook",
+    openingHookGood: "Chapter 1 hooks the reader — a concrete unanswered question or an out-of-the-ordinary event pulls them forward.",
+    openingHookIssues: {
+      none: "Chapter 1 doesn't clearly hook the reader.",
+      no_question: "Chapter 1 doesn't raise anything unresolved — nothing pulls the reader to the next page.",
+      backstory_dump: "Chapter 1 opens on explaining history or context instead of starting the story's actual present-tense action.",
+      reveals_too_much: "Chapter 1 gives away the mystery or stakes before they get to function as a question."
+    },
     summaryLabel: "Summary",
     concernsLabel: "Worth a look",
     clickHint: "Click a chapter to open it.",

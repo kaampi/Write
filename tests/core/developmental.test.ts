@@ -3,13 +3,16 @@ import { addChapter, createBook, updateChapter, type Book } from "@core/BookSche
 import { addPlotline, toggleChapterPlotline } from "@core/plotlines";
 import {
   CHAPTER_SYNTHESIS_SYSTEM,
+  OPENING_HOOK_SYSTEM,
   REPORT_SYSTEM,
   SCENE_READ_SYSTEM,
   chapterSynthesisUserPrompt,
   developmentalPercent,
   hasAnyTaggedThread,
+  openingHookUserPrompt,
   parseChapterSynthesis,
   parseDevelopmentalReport,
+  parseOpeningHookRead,
   parseSceneRead,
   reportUserPrompt,
   sceneReadUserPrompt,
@@ -204,6 +207,32 @@ describe("system prompts", () => {
     expect(SCENE_READ_SYSTEM).toMatch(/JSON only/);
     expect(CHAPTER_SYNTHESIS_SYSTEM).toMatch(/JSON only/);
     expect(REPORT_SYSTEM).toMatch(/JSON only/);
+    expect(OPENING_HOOK_SYSTEM).toMatch(/JSON only/);
+  });
+});
+
+describe("openingHookUserPrompt / parseOpeningHookRead", () => {
+  it("includes the manuscript title and the scene's own prose", () => {
+    const { book, first } = twoChapters();
+    const chapter = book.chapters.find((item) => item.id === first)!;
+    const scene = chapterScenes(chapter)[0]!;
+    const prompt = openingHookUserPrompt(book, scene);
+    expect(prompt).toContain("Night Keys");
+    expect(prompt).toContain("Emma locked the quay door");
+  });
+
+  it("parses a well-formed response", () => {
+    const parsed = parseOpeningHookRead('{"hasHook":false,"issue":"backstory_dump","note":"Opens on three paragraphs of family history."}');
+    expect(parsed).toEqual({ hasHook: false, issue: "backstory_dump", note: "Opens on three paragraphs of family history." });
+  });
+
+  it("falls back to issue none for an unknown enum value, and hasHook false for a non-boolean", () => {
+    const parsed = parseOpeningHookRead('{"hasHook":"yes","issue":"nonsense","note":""}');
+    expect(parsed).toEqual({ hasHook: false, issue: "none", note: "" });
+  });
+
+  it("returns null for unparseable output", () => {
+    expect(parseOpeningHookRead("not json at all")).toBeNull();
   });
 });
 
@@ -278,6 +307,35 @@ describe("runDevelopmental", () => {
     // chapter-synthesis and the final report (which also names the chapter) may
     // mention "The lock" afterward.
     expect(calls.some((prompt) => prompt.includes("Scene text") && prompt.includes("The lock"))).toBe(false);
+  });
+
+  it("reads chapter 1's opening hook once, alongside its scene read, and never for chapter 2", async () => {
+    const { book } = twoChapters();
+    let latest = book;
+    const prompts: string[] = [];
+    const job = startDevelopmentalJob();
+
+    const result = await runDevelopmental(
+      job,
+      {
+        complete: async (system, user) => {
+          prompts.push(user);
+          if (system === OPENING_HOOK_SYSTEM) return '{"hasHook":false,"issue":"no_question","note":"Nothing unresolved is raised."}';
+          if (user.includes("Scene text")) return '{"function":"advance_plot","tension":"rises","note":""}';
+          if (user.includes("Scene reads")) return '{"pacing":"right_pace","tension":"rises","threads":[],"note":""}';
+          return '{"summary":"A steady two-chapter opening.","concerns":[]}';
+        },
+        getBook: () => latest,
+        save: async (next) => {
+          latest = { ...latest, developmental: next };
+        }
+      },
+      new AbortController().signal
+    );
+
+    expect(result.openingHook).toEqual({ hasHook: false, issue: "no_question", note: "Nothing unresolved is raised." });
+    expect(prompts.filter((prompt) => prompt.includes("Chapter 1's opening scene"))).toHaveLength(1);
+    expect(prompts.some((prompt) => prompt.includes("Chapter 1's opening scene") && prompt.includes("The harbour"))).toBe(false);
   });
 
   it("throws AbortError before it writes a later stage", async () => {
