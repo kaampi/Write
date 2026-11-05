@@ -1099,79 +1099,363 @@ export const sv: Messages = {
       },
       "map-of-storybook-ai": {
         heading: "En karta över kaampi Write",
-        body: "UTFORSKA\n💡 Brainstorm · 💬 Intervjua världen\nHär får idéer vara osäkra.\n↓\nPLANERA\n📖 Synopsis · 🗂 Kapitelbriefs · 🎬 Scener · 🧵 Trådar · 🕒 Timeline\nHär formar du berättelsen.\n↓\nETABLERA\n📚 Story Bible · 🔎 Extrahera fakta · ✓ Granska · 🔒 Lås\nHär bestämmer du vad som ska betraktas som etablerat.\n↓\nSKRIV\n✍️ Kapitel — Skriv utkast · Skriv en beat · Förläng · Brodera ut · Skriv om\n↓\nGRANSKA\n🔎 Analysera · ✨ Polish · 💬 Fråga manuset · 🗨 Fråga om en passage · ✓ Kontinuitet · ✓ Korrekturläs · 🧭 Developmental analysis\n↓\nFÄRDIGSTÄLL\n🖼 Bilder · 🌐 Språkversioner · 📤 Publicera · 💾 Säkerhetskopiera\n\nDet är en karta.\nInte en obligatorisk ordning."
+        body: "Verktygen i kaampi Write faller ungefär inom sex steg — Utforska, Planera, Etablera, Skriv, Granska, Färdigställ. Kartan nedan går från vänster till höger eftersom det är lättast att visa på en sida, inte eftersom varje bok verkligen går igenom den i den ordningen.",
+        steps: [
+          {
+            heading: "Utforska – här får idéer vara osäkra",
+            body: "Brainstorm och Intervjua världen. Ingenting här är kanon ännu; det är en plats att pröva en idé högt innan du bestämmer om den alls hör till berättelsen."
+          },
+          {
+            heading: "Planera – här formar du berättelsen",
+            body: "Synopsis, Kapitelbriefs, Scener, Trådar, Timeline. De ger berättelsen en riktning och en form — så lös eller så detaljerad du vill."
+          },
+          {
+            heading: "Etablera – här bestämmer du vad som räknas som sant",
+            body: "Story Bible, Extrahera fakta, Granska, Lås. Det här är det enda steget som faktiskt binder något — ett faktum börjar bara begränsa senare skrivande när du har låst det här."
+          },
+          {
+            heading: "Skriv – här blir det prosa",
+            body: "Kapitel — Skriv utkast, Skriv en beat, Förläng, Brodera ut, Skriv om. Allt uppströms (Planera, Etablera) finns för att mata det här steget; det här är det enda steget ingen bok hoppar över."
+          },
+          {
+            heading: "Granska – här kontrollerar du vad du har skrivit",
+            body: "Analysera, Polish, Fråga manuset, Fråga om en passage, Kontinuitet, Korrekturläs, Developmental analysis. Olika verktyg här ställer olika frågor — en kapitelnivå-kontroll av hantverket är en annan uppgift än en kontroll av hela bokens tempo."
+          },
+          {
+            heading: "Färdigställ – att få ut boken",
+            body: "Bilder, Språkversioner, Publicera, Säkerhetskopiera. Det sista steget, nått när ett kapitel — eller hela boken — är redo att lämna kaampi Write."
+          }
+        ],
+        tip: "Det är en karta, inte en obligatorisk ordning. Många kapitel går rakt från Skriv till Skriv igen, och hoppar helt över Planera och Granska tills mycket senare — eller aldrig."
       },
       "no-required-workflow": {
         heading: "Du behöver inte använda allt",
-        body: "kaampi Write kan användas på många olika sätt.\nDet finns inget obligatoriskt arbetsflöde.\n\nDu kan exempelvis arbeta så här:\n\nJag vill bara börja skriva\nKapitel → Skriv → Nästa kapitel. Planera först när du behöver det.\n\nJag vill planera berättelsen\nBrainstorm → Synopsis → Kapitelbriefs → Kapitel\n\nJag vill arbeta mycket strukturerat\nSynopsis → Berättelsemetod → Trådar → Kapitelbriefs → Scener → Timeline → Kapitel\n\nJag har redan ett manus\nLägg in befintlig text → Analysera → Story Bible → Bearbeta → Publicera\n\nJag kommer från ett annat skrivverktyg\nTa med manus och lore → Importera → Granska → Fortsätt skriva\n\nDu väljer själv hur mycket struktur du behöver."
+        body: "kaampi Write kan användas på många olika sätt. Det finns inget obligatoriskt arbetsflöde — de fem exemplen nedan är utgångspunkter, inte en meny du måste välja exakt en från.",
+        steps: [
+          {
+            heading: "Jag vill bara börja skriva",
+            body: "Kapitel → Skriv → Nästa kapitel. Planera senare, bara när du faktiskt behöver det — ingenting hindrar dig från att lägga till en Synopsis eller ett Story Bible-faktum mitt i kapitel 12."
+          },
+          {
+            heading: "Jag vill planera berättelsen",
+            body: "Brainstorm → Synopsis → Kapitelbriefs → Kapitel. Forma berättelsen innan du skriver den scen för scen, utan att behöva binda dig till en namngiven berättelsemetod."
+          },
+          {
+            heading: "Jag vill arbeta mycket strukturerat",
+            body: "Synopsis → Berättelsemetod → Trådar → Kapitelbriefs → Scener → Timeline → Kapitel. Alla planeringsverktyg kaampi Write har, använda tillsammans, innan det första ordet prosa."
+          },
+          {
+            heading: "Jag har redan ett manus",
+            body: "Lägg in befintlig text → Analysera → Story Bible → Bearbeta → Publicera. Att börja med färdig eller delvis skriven prosa istället för ett tomt dokument ändrar inte vilka verktyg som finns tillgängliga för dig."
+          },
+          {
+            heading: "Jag kommer från ett annat skrivverktyg",
+            body: "Ta med manus och lore → Importera → Granska → Fortsätt skriva. Samma väg som ovan, bara med material byggt någon annanstans som startpunkt."
+          }
+        ],
+        tip: "Du väljer själv hur mycket struktur du behöver — och svaret får ändras mellan böcker, eller mellan kapitel i samma bok."
       },
       "three-workflows": {
         heading: "Tre kompletta arbetsflöden",
-        body: "Jag skriver intuitivt\nNytt manus → Kapitel 1 → Skriv → Kapitel 2 → Skriv\nNär berättelsen växer: Extrahera fakta → Story Bible\nSenare: Analysera → Polish → Korrekturläs → Publicera\nDu behöver aldrig skapa en detaljerad plan.\n\nJag vill planera först\nBrainstorm → Synopsis → Kapitelbriefs → Skriv kapitel → Story Bible → Analysera → Polish → Korrekturläs → Publicera\nDet ger struktur utan att kräva en dramaturgisk modell.\n\nJag vill planera mycket\nBrainstorm → Snowflake → Synopsis → Tre akter / Save the Cat / Hjältens resa → Trådar → Kapitelbriefs → Scener → Timeline → Skriv → Story Bible + kontinuitet → Analysera → Developmental analysis → Polish → Korrekturläs → Publicera\nDet är ett mer strukturerat sätt att arbeta.\nDet är inte mer rätt än de andra."
+        body: "Tre sätt att använda kaampi Write från början till slut, från lösast till mest strukturerat. Inget av de tre är mer rätt än de andra — de är olika avvägningar mellan hastighet och stöttning.",
+        steps: [
+          {
+            heading: "Jag skriver intuitivt",
+            body: "Nytt manus → Kapitel 1 → Skriv → Kapitel 2 → Skriv. När berättelsen växer: Extrahera fakta → Story Bible, för att hålla kontinuiteten utan att planera i förväg. Senare: Analysera → Polish → Korrekturläs → Publicera. Du behöver aldrig skapa en detaljerad plan någonstans på den här vägen."
+          },
+          {
+            heading: "Jag vill planera först",
+            body: "Brainstorm → Synopsis → Kapitelbriefs → Skriv kapitel → Story Bible → Analysera → Polish → Korrekturläs → Publicera. Det ger berättelsen en verklig riktning innan du skriver ett ord prosa, utan att kräva en namngiven dramatisk struktur."
+          },
+          {
+            heading: "Jag vill planera mycket",
+            body: "Brainstorm → Snowflake → Synopsis → Tre akter / Save the Cat / Hjältens resa → Trådar → Kapitelbriefs → Scener → Timeline → Skriv → Story Bible + kontinuitet → Analysera → Developmental analysis → Polish → Korrekturläs → Publicera. Alla verktyg, i ungefär den ordning de är mest användbara — det mest strukturerade av de tre, byggt för författare som vill ha stöttningen på plats innan de skriver."
+          }
+        ]
       },
       "which-tool-do-i-need": {
         heading: "Vilket verktyg behöver jag?",
-        body: "”Jag vet inte vad berättelsen handlar om.” → Brainstorm\n”Jag har en idé men får inte ihop en hel berättelse.” → Snowflake\n”Jag har många idéer men ingen helhet.” → Synopsis\n”Jag behöver en enkel dramatisk struktur.” → Tre akter\n”Jag vill arbeta med fler tydliga beats.” → Save the Cat\n”Berättelsen handlar om huvudpersonens förändringsresa.” → Hjältens resa\n”Jag vet inte riktigt vem min karaktär är ännu.” → Intervjua världen\n”Jag vill prova idéer om karaktären utan att påverka boken.” → Intervjua världen\n”Jag behöver komma ihåg vad som faktiskt gäller.” → Story Bible\n”Jag tappar bort vad kapitlet ska göra.” → Kapitelbrief\n”Kapitlet har blivit för komplicerat.” → Scener\n”Jag tappar bort olika handlingar och relationer.” → Trådar\n”Jag tappar bort när saker händer.” → Timeline\n”Jag har fastnat mitt i en scen.” → Skriv en beat, Förläng eller Brodera ut\n”Det här kapitlet behöver läsas precis som ett tidigare gjorde, ord för ord.” → Bifogad kontext\n”Jag klippte bort något bra men är inte redo att förlora det för gott.” → Darlings\n”En liten fråga skulle bryta mitt flyt om jag stannade upp för den just nu.” → Platshållare\n”Jag vet inte om kapitlet fungerar.” → Analysera\n”Jag vill att AI stramar upp själva prosan, inte bara pekar ut saker.” → Polish\n”Jag vill ha ärlig, kritisk feedback på en specifik fråga.” → Fråga om kapitlet / Fråga om en passage\n”Jag hittar inte tillbaka till något i mitt långa manus.” → Fråga manuset\n”Jag vill veta om bokens tempo och trådar faktiskt håller ihop.” → Developmental analysis\n”Berättelsen är klar och jag vill ha en sista radgranskning innan någon läser den.” → Korrekturläs\n”Jag behöver boken på ett annat språk också.” → Språkversioner\n”Jag vill ge någon boken att läsa.” → Publicera"
+        body: "Ett symtombaserat register — hitta vad du känner dig fast på nedan, och se vilket verktyg som faktiskt löser det.",
+        steps: [
+          {
+            heading: "Hitta berättelsen",
+            body: "”Jag vet inte vad berättelsen handlar om.” → Brainstorm. ”Jag har en idé men får inte ihop en hel berättelse.” → Snowflake. ”Jag har många idéer men ingen helhet.” → Synopsis. ”Jag vet inte riktigt vem min karaktär är ännu.” → Intervjua världen. ”Jag vill prova idéer om karaktären utan att påverka boken.” → Intervjua världen."
+          },
+          {
+            heading: "Forma strukturen",
+            body: "”Jag behöver en enkel dramatisk struktur.” → Tre akter. ”Jag vill arbeta med fler tydliga beats.” → Save the Cat. ”Berättelsen handlar om huvudpersonens förändringsresa.” → Hjältens resa."
+          },
+          {
+            heading: "Hålla koll under skrivandet",
+            body: "”Jag behöver komma ihåg vad som faktiskt gäller.” → Story Bible. ”Jag tappar bort vad kapitlet ska göra.” → Kapitelbrief. ”Kapitlet har blivit för komplicerat.” → Scener. ”Jag tappar bort olika handlingar och relationer.” → Trådar. ”Jag tappar bort när saker händer.” → Timeline."
+          },
+          {
+            heading: "Ta sig vidare mitt i en scen",
+            body: "”Jag har fastnat mitt i en scen.” → Skriv en beat, Förläng eller Brodera ut. ”Det här kapitlet behöver läsas precis som ett tidigare gjorde, ord för ord.” → Bifogad kontext. ”Jag klippte bort något bra men är inte redo att förlora det för gott.” → Darlings. ”En liten fråga skulle bryta mitt flyt om jag stannade upp för den just nu.” → Platshållare."
+          },
+          {
+            heading: "Granska det du skrivit",
+            body: "”Jag vet inte om kapitlet fungerar.” → Analysera. ”Jag vill att AI stramar upp själva prosan, inte bara pekar ut saker.” → Polish. ”Jag vill ha ärlig, kritisk feedback på en specifik fråga.” → Fråga om kapitlet / Fråga om en passage. ”Jag hittar inte tillbaka till något i mitt långa manus.” → Fråga manuset. ”Jag vill veta om bokens tempo och trådar faktiskt håller ihop.” → Developmental analysis."
+          },
+          {
+            heading: "Färdigställa",
+            body: "”Berättelsen är klar och jag vill ha en sista radgranskning innan någon läser den.” → Korrekturläs. ”Jag behöver boken på ett annat språk också.” → Språkversioner. ”Jag vill ge någon boken att läsa.” → Publicera."
+          }
+        ]
       },
       "most-important-principle": {
         heading: "Den viktigaste principen",
-        body: "kaampi Write innehåller många funktioner eftersom olika författare arbetar på olika sätt.\nDet betyder inte att alla funktioner måste användas.\n\nBörja med berättelsen.\nNär du stöter på ett problem, välj det verktyg som hjälper med just det problemet.\n\nUtforska när du behöver idéer.\nPlanera när du behöver riktning.\nLås fakta när något ska bli etablerat.\nSkriv när du vet tillräckligt för att fortsätta.\nGranska när du vill förstå vad du har skrivit.\n\nOch framför allt:\nVerktygen ska anpassa sig efter ditt sätt att skriva – inte tvärtom."
+        body: "kaampi Write innehåller många funktioner eftersom olika författare arbetar på olika sätt. Det betyder inte att alla funktioner måste användas — att inte använda de flesta av dem är ett helt normalt sätt att skriva en bok här.",
+        steps: [
+          {
+            heading: "Börja med berättelsen, inte verktygen",
+            body: "När du stöter på ett problem, välj det verktyg som hjälper med just det problemet — gå aldrig igenom funktionslistan för att hitta något att använda."
+          },
+          {
+            heading: "Ett verktyg per steg",
+            body: "Utforska när du behöver idéer. Planera när du behöver riktning. Lås fakta när något ska bli etablerat. Skriv när du vet tillräckligt för att fortsätta. Granska när du vill förstå vad du har skrivit."
+          }
+        ],
+        tip: "Verktygen ska anpassa sig efter ditt sätt att skriva – inte tvärtom. Om en funktion inte löser ett problem du faktiskt har missar du ingenting genom att hoppa över den."
       },
       "brainstorm-free": {
         heading: "Brainstorm – tänk fritt",
-        body: "Brainstorm är ditt privata kladdblock.\nHär behöver ingenting vara bestämt.\n\nSkriv exempelvis:\n”Tänk om kvinnan på tåget egentligen känner Eriks far?”\neller:\n”Kanske är fyrtornet inte övergivet?”\neller:\n”Skulle berättelsen fungera bättre om brodern fortfarande lever?”\n\nEn lapp per idé.\nFlytta runt dem och experimentera.\n\nBrainstorm påverkar inte automatiskt berättelsen\nDet här är viktigt. En idé i Brainstorm blir inte automatiskt en del av berättelsen och ska inte börja styra vanliga kapitelutkast.\nNär du bestämmer att en idé ska gå vidare drar du den till Till synopsis.\nDu bestämmer alltså vilka idéer som lämnar kladdbordet."
+        body: "Brainstorm är ditt privata kladdblock. Ingenting du lägger här behöver vara bestämt ännu — det är en plats att pröva en idé högt innan du vet om den hör till berättelsen.",
+        steps: [
+          {
+            heading: "Skriv en lapp per idé",
+            body: "”Tänk om kvinnan på tåget egentligen känner Eriks far?” ”Kanske är fyrtornet inte övergivet?” ”Skulle berättelsen fungera bättre om brodern fortfarande lever?” Var och en får sin egen lapp, så att du kan flytta runt dem och jämföra sida vid sida."
+          },
+          {
+            heading: "Brainstorm påverkar inte automatiskt berättelsen",
+            body: "Det här är den viktiga delen. En idé som ligger i Brainstorm blir inte automatiskt en del av berättelsen, och den ska inte i tysthet börja styra vanliga kapitelutkast bara för att den existerar."
+          },
+          {
+            heading: "Du bestämmer vilka idéer som lämnar kladdbordet",
+            body: "När du bestämmer att en idé ska gå vidare drar du den till Till synopsis. Tills du gör det är den precis vad den är — ett kanske."
+          }
+        ]
       },
       "synopsis-short": {
         heading: "Synopsis – berättelsen i kortform",
-        body: "Synopsis beskriver berättelsen som helhet. Här samlar du:\n• vilka som är viktiga\n• vad som händer\n• vilka större konflikter som finns\n• vart berättelsen är på väg\n\nExempel\nBrainstorm: ”Tänk om kvinnan på tåget känner Eriks far?”\nNär du bestämmer dig för att använda idén kan den utvecklas till:\n”Under resan möter Erik en kvinna som visar sig känna till omständigheterna kring hans fars försvinnande.”\nDet hör hemma i Synopsis.\n\nTänk:\nBrainstorm = kanske\nSynopsis = berättelsens plan\nKapitelbrief = kapitlets uppgift\nManus = själva berättelsen"
+        body: "Synopsis beskriver berättelsen som helhet — inte ett enskilt kapitel, utan formen på hela berättelsen.",
+        steps: [
+          {
+            heading: "Vad som hör hemma i en Synopsis",
+            body: "Vilka som är viktiga, vad som händer, vilka större konflikter som finns, och vart berättelsen är på väg. Inte scen-för-scen-detalj — den överblick en främling skulle behöva för att förstå vad boken handlar om."
+          },
+          {
+            heading: "Från en Brainstorm-lapp till en Synopsis-rad",
+            body: "Brainstorm: ”Tänk om kvinnan på tåget känner Eriks far?” När du bestämmer dig för att använda idén kan den utvecklas till: ”Under resan möter Erik en kvinna som visar sig känna till omständigheterna kring hans fars försvinnande.” Den meningen hör hemma i Synopsis — den är inte längre ett kanske."
+          },
+          {
+            heading: "Hur planeringsverktygen förhåller sig till varandra",
+            body: "Brainstorm = kanske. Synopsis = berättelsens plan. Kapitelbrief = ett kapitels uppgift. Manus = själva berättelsen, som den faktiskt är skriven."
+          }
+        ]
       },
       "chapter-briefs": {
         heading: "Kapitelbriefs",
-        body: "En kapitelbrief beskriver vad ett kapitel ska åstadkomma.\nDen behöver inte vara välskriven.\nDen är en instruktion till dig själv och till AI när du använder skrivhjälpen.\n\nExempel\n”Erik möter kvinnan i restaurangvagnen. Hon antyder att hon kände hans far men vägrar berätta hur. Kapitlet slutar med att hon lämnar ett fotografi på bordet.”\n\nBriefen är inte själva berättelsen.\nDen beskriver vad berättelsen ska göra.\n\nSynopsis = hela berättelsen\nBrief = ett kapitel\nManus = det läsaren får"
+        body: "En kapitelbrief beskriver vad ett kapitel ska åstadkomma. Den behöver inte vara välskriven — den är en instruktion till dig själv, och till AI när du använder skrivhjälpen.",
+        steps: [
+          {
+            heading: "Hur en brief kan se ut",
+            body: "”Erik möter kvinnan i restaurangvagnen. Hon antyder att hon kände hans far men vägrar berätta hur. Kapitlet slutar med att hon lämnar ett fotografi på bordet.” Osminkad, funktionell, skriven för att vara användbar snarare än vacker."
+          },
+          {
+            heading: "Briefen är inte själva berättelsen",
+            body: "Den beskriver vad berättelsen ska göra i det här kapitlet — inte hur det formuleras, inte exakt dialog, inte prosan. Skrivverktygen omvandlar briefen till det faktiska kapitlet."
+          },
+          {
+            heading: "Hur det hör ihop med Synopsis och manuset",
+            body: "Synopsis = hela berättelsen. Brief = ett kapitel. Manus = det läsaren faktiskt får."
+          }
+        ]
       },
       "chapter-summary": {
         heading: "Kapitelsammanfattning",
-        body: "Bredvid Kapitelbrief finns ett andra fält, Kapitelsammanfattning — en kort notis om vad som faktiskt händer i kapitlet, när det väl är skrivet. Skriv den för hand, eller klicka på ”Sammanfatta kapitel” för att få den genererad från texten.\n\nBrief = vad kapitlet ska göra, skriven innan\nSammanfattning = vad kapitlet faktiskt gjorde, skriven efteråt\n\nNär ett kapitel har en sammanfattning flödar tidigare kapitels sammanfattningar in i Utkast, Förläng, Utveckla och Beat för senare kapitel — i berättelsens tidsordning, inte bara kapitelordning — så att modellen kan hålla reda på vad som redan har hänt utan att behöva varje tidigare kapitels fulla text i prompten. Ett kapitel ingen sammanfattat ännu lämnas helt enkelt utanför den kontexten; inget krävs, inget går sönder."
+        body: "Bredvid Kapitelbrief finns ett andra fält, Kapitelsammanfattning — en kort notis om vad som faktiskt hände i kapitlet, när det väl är skrivet.",
+        steps: [
+          {
+            heading: "Före och efter",
+            body: "Brief = vad kapitlet ska göra, skriven innan du skriver utkastet. Sammanfattning = vad kapitlet faktiskt gjorde, skriven efteråt."
+          },
+          {
+            heading: "Att skriva sammanfattningen",
+            body: "Skriv den för hand, eller klicka på ”Sammanfatta kapitel” för att få den genererad direkt från texten du just skrev."
+          },
+          {
+            heading: "Varför sammanfattningar spelar roll för senare kapitel",
+            body: "När ett kapitel har en sammanfattning flödar tidigare kapitels sammanfattningar in i Utkast, Förläng, Utveckla och Beat för senare kapitel — i berättelsens tidsordning, inte bara kapitelordning — så att modellen kan hålla reda på vad som redan har hänt utan att behöva varje tidigare kapitels fulla text trängd in i prompten."
+          },
+          {
+            heading: "Inget krävs",
+            body: "Ett kapitel ingen sammanfattat ännu lämnas helt enkelt utanför den kontexten. Inget går sönder — det betyder bara att kapitlets händelser inte finns tillgängliga som bakgrund för senare kapitel förrän du lägger till en sammanfattning."
+          }
+        ]
       },
       "development-methods": {
         heading: "Berättelsemetoder",
-        body: "kaampi Write innehåller flera metoder som kan hjälpa dig utveckla eller strukturera berättelsen.\nDe är helt frivilliga.\nDu kan alltid välja:\nIngen metod – skriv fritt"
+        body: "kaampi Write innehåller flera metoder som kan hjälpa dig utveckla eller strukturera berättelsen. De är helt frivilliga — du kan alltid välja Ingen metod, och skriva fritt istället.",
+        steps: [
+          {
+            heading: "Vad metoderna är till för",
+            body: "Snowflake, Tre akter, Save the Cat och Hjältens resa erbjuder varje ett eget sätt att tänka på en berättelse — några fokuserar på att utveckla innehåll, andra på att strukturera det. Kapitlen som följer går igenom var och en."
+          }
+        ]
       },
       "snowflake-method": {
         heading: "Snowflake",
-        body: "Snowflake passar när du har en idé men ännu inte en hel berättelse.\nDen hjälper dig utveckla innehållet steg för steg.\n\nEn mening\n”En journalist återvänder till sin hemö för att undersöka sin fars tjugo år gamla försvinnande.”\n↓\nEtt stycke\nUtveckla grundidén med konflikt, utveckling och riktning.\n↓\nFull synopsis\nBygg vidare tills du har en sammanhängande beskrivning av berättelsen.\n↓\nSkicka till Synopsis\n\nDu kan skriva själv eller använda AI som stöd under processen.\n\nSnowflake hjälper framför allt till att besvara:\n”Vad är det egentligen för berättelse jag håller på att skriva?”"
+        body: "Snowflake passar när du har en idé men ännu inte en hel berättelse. Den hjälper dig utveckla innehållet steg för steg, där varje omgång lägger till mer detalj än den förra.",
+        steps: [
+          {
+            heading: "En mening",
+            body: "”En journalist återvänder till sin hemö för att undersöka sin fars tjugo år gamla försvinnande.” Hela berättelsen, komprimerad till sin kärna."
+          },
+          {
+            heading: "Ett stycke",
+            body: "Utveckla grundidén med konflikt, utveckling och riktning — fortfarande kort, men inte längre en enda rad."
+          },
+          {
+            heading: "Full synopsis",
+            body: "Bygg vidare tills du har en sammanhängande beskrivning av hela berättelsen, och skicka den sedan till Synopsis."
+          },
+          {
+            heading: "Skriv själv, eller med AI",
+            body: "Varje steg kan göras för hand eller med AI som stöd — metoden kräver inte specifikt det ena eller det andra."
+          }
+        ],
+        tip: "Snowflake hjälper framför allt till att besvara en fråga: ”Vad är det egentligen för berättelse jag håller på att skriva?”"
       },
       "three-act": {
         heading: "Tre akter",
-        body: "Tre akter passar när du vill ha en enkel dramatisk stomme.\nkaampi Write använder centrala vändpunkter som:\n• Upptakt\n• Utlösande händelse\n• Steget in i andra akten\n• Mittpunkt\n• Allt är förlorat\n• Klimax\n• Upplösning\n\nDessa blir Trådar som du kan koppla till berättelsens kapitel.\n\nExempel\nUtlösande händelse: ”Nora hittar ett brev från sin försvunne far.” (Kapitel 3)\nSenare — Mittpunkt: ”Nora upptäcker att brevet skrevs efter datumet då hennes far påstås ha försvunnit.” (Kapitel 12)\n\nMetoden hjälper dig se berättelsens större rörelse.\nDen skriver inte berättelsen åt dig."
+        body: "Tre akter passar när du vill ha en enkel dramatisk stomme för berättelsen, utan en lång lista namngivna beats att hålla reda på.",
+        steps: [
+          {
+            heading: "Vändpunkterna",
+            body: "kaampi Write använder centrala vändpunkter: Upptakt, Utlösande händelse, Steget in i andra akten, Mittpunkt, Allt är förlorat, Klimax, Upplösning."
+          },
+          {
+            heading: "De blir Trådar",
+            body: "Varje vändpunkt blir en Tråd du kan koppla till specifika kapitel i berättelsen."
+          },
+          {
+            heading: "Exempel från verkligheten",
+            body: "Utlösande händelse: ”Nora hittar ett brev från sin försvunne far.” (Kapitel 3). Senare — Mittpunkt: ”Nora upptäcker att brevet skrevs efter datumet då hennes far påstås ha försvunnit.” (Kapitel 12)."
+          }
+        ],
+        tip: "Metoden hjälper dig se berättelsens större rörelse. Den skriver inte berättelsen åt dig."
       },
       "save-the-cat": {
         heading: "Save the Cat",
-        body: "Save the Cat ger fler hållpunkter än Tre akter. Bland annat:\n• Öppningsbild\n• Temat sägs\n• Upptakt\n• Katalysator\n• Tvekan\n• Steget in i andra akten\n• B-berättelsen\n• Löftet infrias\n• Mittpunkt\n• Motståndet trycker på\n• Allt är förlorat\n• Själens mörka natt\n• Steget in i tredje akten\n• Final\n• Slutbild\n\nDessa skapas som Trådar.\nDu bestämmer sedan hur – och om – de passar din berättelse.\n\nEventuella procentangivelser är riktmärken, inte regler för exakt var något måste inträffa.\nAnvänd metoden som karta, inte som facit."
+        body: "Save the Cat ger fler hållpunkter än Tre akter — en finare karta över samma typ av resa.",
+        steps: [
+          {
+            heading: "De femton hållpunkterna",
+            body: "Öppningsbild, Temat sägs, Upptakt, Katalysator, Tvekan, Steget in i andra akten, B-berättelsen, Löftet infrias, Mittpunkt, Motståndet trycker på, Allt är förlorat, Själens mörka natt, Steget in i tredje akten, Final, Slutbild."
+          },
+          {
+            heading: "Skapas som Trådar",
+            body: "Varje hållpunkt blir en Tråd. Du bestämmer sedan hur – och om – den faktiskt passar din berättelse."
+          }
+        ],
+        tip: "Eventuella procentangivelser metoden nämner är riktmärken, inte regler för exakt var något måste inträffa. Använd den som karta, inte som facit."
       },
       "heros-journey": {
         heading: "Hjältens resa",
-        body: "Hjältens resa passar berättelser där huvudpersonens förändring står i centrum.\nkaampi Write använder tolv steg:\n1. Vardagsvärlden\n2. Kallelsen\n3. Att avvisa kallelsen\n4. Att möta mentorn\n5. Att korsa tröskeln\n6. Prövningar, allierade och fiender\n7. Närmande till den inre grottan\n8. Den stora prövningen\n9. Belöningen\n10. Vägen tillbaka\n11. Återuppståndelsen\n12. Återkomsten med elixiret\n\nÄven dessa skapas som Trådar.\n\n”Resan” behöver inte vara bokstavlig. En karaktär kan lämna sin trygga värld genom att flytta, börja en relation, förlora sitt arbete, upptäcka en hemlighet eller fatta ett beslut som förändrar livet."
+        body: "Hjältens resa passar berättelser där huvudpersonens förändring är själva ämnet för boken.",
+        steps: [
+          {
+            heading: "De tolv stegen",
+            body: "Vardagsvärlden, Kallelsen, Att avvisa kallelsen, Att möta mentorn, Att korsa tröskeln, Prövningar/allierade/fiender, Närmande till den inre grottan, Den stora prövningen, Belöningen, Vägen tillbaka, Återuppståndelsen, Återkomsten med elixiret."
+          },
+          {
+            heading: "Även dessa skapas som Trådar",
+            body: "Varje steg blir en Tråd du kan koppla till ett kapitel, precis som med de andra metoderna."
+          },
+          {
+            heading: "Resan behöver inte vara bokstavlig",
+            body: "En karaktär kan lämna sin trygga värld genom att flytta, börja en relation, förlora sitt arbete, upptäcka en hemlighet eller fatta ett beslut som förändrar livet — inget uppdrag eller magi krävs."
+          }
+        ]
       },
       "method-differences": {
         heading: "Skillnaden mellan metoderna",
-        body: "Snowflake\nIdé → En mening → Ett stycke → Full synopsis → Synopsis\nSnowflake utvecklar berättelsens innehåll.\n\nTre akter / Save the Cat / Hjältens resa\nMetod → Beats och vändpunkter → Trådar → Kapitel\nDe hjälper dig strukturera berättelsens utveckling.\n\nDu kan byta metod senare. Det du redan har skrivit i Synopsis eller skapat som Trådar raderas inte bara för att du väljer en annan metod eller återgår till fritt skrivande."
+        body: "De fyra berättelsemetoderna delar sig i två olika uppgifter, och det hjälper att veta vilken du faktiskt behöver.",
+        steps: [
+          {
+            heading: "Snowflake utvecklar innehåll",
+            body: "Idé → En mening → Ett stycke → Full synopsis → Synopsis. Snowflake handlar om att räkna ut vad berättelsen egentligen är."
+          },
+          {
+            heading: "De tre beat-metoderna strukturerar utveckling",
+            body: "Tre akter / Save the Cat / Hjältens resa: Metod → Beats och vändpunkter → Trådar → Kapitel. De hjälper dig ordna en berättelse du redan har ett visst grepp om."
+          },
+          {
+            heading: "Att byta metod senare är säkert",
+            body: "Det du redan har skrivit i Synopsis, eller redan skapat som Trådar, raderas inte bara för att du väljer en annan metod, eller bestämmer dig för att återgå till fritt skrivande."
+          }
+        ]
       },
       scenes: {
         heading: "Scener",
-        body: "När ett kapitel blir långt eller komplicerat kan det vara lättare att dela upp det i Scener.\n\nKapitel 8 – Fyrtornet\nScen 1: Nora anländer till ön.\nScen 2: Hon bryter sig in i fyrtornet.\nScen 3: Hon hittar fotografierna.\nScen 4: Någon låser dörren utifrån.\n\nTänk:\nBrief = kapitlets uppdrag\nScener = vägen genom kapitlet\n\nDu behöver inte använda Scener för enkla kapitel där du redan har överblicken.\n\nTvå sätt att dela av en: Scener-panelens ”Split into two…” väljer ett stycke att bryta vid, eller markera exakt den text som ska bli sin egen scen och välj ”Create scene” i markeringsmenyn."
+        body: "När ett kapitel blir långt eller komplicerat kan det hjälpa att dela upp det i Scener — mindre, namngivna beats inuti samma kapitel.",
+        steps: [
+          {
+            heading: "Exempel från verkligheten",
+            body: "Kapitel 8 – Fyrtornet. Scen 1: Nora anländer till ön. Scen 2: Hon bryter sig in i fyrtornet. Scen 3: Hon hittar fotografierna. Scen 4: Någon låser dörren utifrån."
+          },
+          {
+            heading: "Hur Scener förhåller sig till briefen",
+            body: "Brief = kapitlets uppdrag. Scener = vägen genom kapitlet — stegen som tar det från början till slut."
+          },
+          {
+            heading: "Två sätt att dela av en",
+            body: "I Scener-panelen väljer ”Split into two…” ett stycke att bryta vid. Eller markera exakt den text som ska bli sin egen scen och välj ”Create scene” i markeringsmenyn."
+          }
+        ],
+        tip: "Du behöver inte Scener för enkla kapitel där du redan har överblicken i huvudet."
       },
       plotlines: {
         heading: "Trådar",
-        body: "Trådar hjälper dig följa sådant som utvecklas genom berättelsen. Det kan vara:\n• huvudkonflikten\n• en relation\n• ett mysterium\n• en hemlighet\n• en rivalitet\n• en karaktärsförändring\n• dramaturgiska beats\n\nExempel\n🔴 Faderns försvinnande\n🟡 Nora och Elias\n🔵 Fyrtornets historia\n\nDu kan se hur dessa förekommer genom kapitlen. Om en viktig sidohandling plötsligt försvinner under tio kapitel blir det lättare att upptäcka."
+        body: "Trådar hjälper dig följa saker som utvecklas gradvis genom berättelsen, snarare än saker som händer i ett enda kapitel.",
+        steps: [
+          {
+            heading: "Vad du kan följa med en Tråd",
+            body: "Huvudkonflikten, en relation, ett mysterium, en hemlighet, en rivalitet, en karaktärsförändring, eller en uppsättning dramaturgiska beats från en berättelsemetod."
+          },
+          {
+            heading: "Exempel från verkligheten",
+            body: "🔴 Faderns försvinnande. 🟡 Nora och Elias. 🔵 Fyrtornets historia. Varje färg markerar en egen tråd du kan följa genom kapitlen."
+          }
+        ],
+        tip: "Du kan se hur dessa löper genom kapitlen. Om en viktig sidohandling plötsligt försvinner under tio kapitel blir det lätt att upptäcka — färgen bara slutar dyka upp."
       },
       timeline: {
         heading: "Timeline",
-        body: "Timeline svarar på frågan: När händer detta?\nDen blir särskilt användbar när kapitelordningen inte är samma sak som berättelsens kronologi.\n\nKapitelordning\nKapitel 1 – 2026: Nora återvänder.\nKapitel 2 – 2006: Fadern försvinner.\nKapitel 3 – 2026: Nora hittar brevet.\nKapitel 4 – 1998: Fadern träffar Elias.\n\nKronologisk ordning\n1998 → 2006 → 2026\n\nTimeline hjälper dig hålla reda på skillnaden."
+        body: "Timeline svarar på en fråga: när händer detta? Den blir särskilt användbar när kapitelordningen inte är samma sak som berättelsens faktiska kronologi.",
+        steps: [
+          {
+            heading: "Kapitelordning",
+            body: "Kapitel 1 – 2026: Nora återvänder. Kapitel 2 – 2006: Fadern försvinner. Kapitel 3 – 2026: Nora hittar brevet. Kapitel 4 – 1998: Fadern träffar Elias."
+          },
+          {
+            heading: "Kronologisk ordning",
+            body: "1998 → 2006 → 2026. Samma fyra kapitel, omordnade efter när händelserna faktiskt skedde snarare än när läsaren möter dem."
+          }
+        ],
+        tip: "Timeline hjälper dig hålla reda på skillnaden mellan de två ordningarna, så att ett tidshopp förblir medvetet snarare än förvirrande."
       },
       "scenes-plotlines-timeline": {
         heading: "Scener, Trådar och Timeline",
-        body: "De svarar på tre olika frågor.\n\nScener: Vad händer?\nTrådar: Vad utvecklas?\nTimeline: När händer det?\n\nSamma händelse kan därför finnas i alla tre utan att verktygen gör samma sak."
+        body: "De tre verktygen kan se lika ut vid en första blick, men de svarar på tre olika frågor.",
+        steps: [
+          {
+            heading: "Tre olika frågor",
+            body: "Scener: vad händer? Trådar: vad utvecklas? Timeline: när händer det?"
+          }
+        ],
+        tip: "Samma händelse kan finnas i alla tre utan att verktygen gör samma sak — en scen kan driva en tråd framåt och samtidigt sitta på en bestämd punkt på timeline, allt på en gång."
       },
       "story-bible-memory": {
         heading: "Story Bible – berättelsens minne",

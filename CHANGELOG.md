@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.294] - 2026-11-05
+
+### Changed
+- Rewrote the Guide's "How You Can Work" (5 chapters: A map of kaampi Write, You don't need to use everything, Three complete workflows, Which tool do I need?, The most important principle) and "Plan the Story" (14 chapters: Brainstorm, Synopsis, Chapter briefs, Chapter summary, Development methods, Snowflake, Three-Act Structure, Save the Cat, Hero's Journey, The difference between the methods, Scenes, Plotlines, Timeline, Scenes/Plotlines/Timeline) categories into the fuller, stepped style, matching kaampi Explore's own Guide. All three languages. 19 of ~78 chapters now in the new style.
+
 ## [1.0.293] - 2026-11-05
 
 ### Changed

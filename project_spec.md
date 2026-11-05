@@ -11794,6 +11794,58 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.293 → v1.0.294 (2026-11-05): "How you can work" och
+"Plan the story" omskrivna — tredje omgången av flerstegsjobbet.**
+Mats: "Då kan du ta How you can work och Plan the story i nästa
+körning" — bekräftade att nästa två kategorier skulle köras
+tillsammans, inte var för sig.
+
+19 kapitel omskrivna från täta paragrafer (eller, i `which-tool-do-i-
+need`s fall, en flat lista med 25 rader) till `steps`-strukturen:
+kategorin "How You Can Work" (`map-of-storybook-ai`,
+`no-required-workflow`, `three-workflows`, `which-tool-do-i-need`,
+`most-important-principle`) och kategorin "Plan the Story"
+(`brainstorm-free`, `synopsis-short`, `chapter-briefs`,
+`chapter-summary`, `development-methods`, `snowflake-method`,
+`three-act`, `save-the-cat`, `heros-journey`, `method-differences`,
+`scenes`, `plotlines`, `timeline`, `scenes-plotlines-timeline`).
+
+`which-tool-do-i-need`s tidigare platta "om X → använd Y"-lista
+grupperades om till sex rubricerade underavsnitt (Hitta berättelsen /
+Forma strukturen / Hålla koll under skrivandet / Ta sig vidare mitt i
+en scen / Granska det du skrivit / Färdigställa) — samma gruppering
+som redan skissades i den ursprungliga Artifact-mockupen Mats
+godkände, nu återanvänd i den riktiga implementationen.
+
+Ingen ny fakta uppfunnen. UI-strängar verifierade mot koden innan de
+användes i texten: `sendToSynopsisAction`/`sendToSynopsis` ("Send to
+Synopsis"/"Send to synopsis"), `splitHere` ("Split into two…"),
+`createScene` ("Create scene"), `noneAction` ("No method — write
+freely") — alla kontrollerade i `en.ts` innan de skrevs in i
+guide-texten, inte gissade.
+
+Skrivet och översatt för hand på alla tre språk i samma commit. Den
+norska texten dubbelkollades extra noga mot ordet "fortellermetode"
+(inte "berättelsemetode") efter buggen i förra omgången — ingen
+ny läcka hittades vid sökning.
+
+Verifierat live med Playwright: "A map of kaampi Write",
+"Which tool do I need?" och "Scenes, Plotlines, and Timeline"
+öppnade och lästa i engelska versionen (inklusive Previous/Next-
+paginering), plus en separat körning på svenska som bekräftade
+"Vilket verktyg behöver jag?" och "Trådar" med korrekt rubrikgruppering,
+tips-rutor och färgade emoji-exempel.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna
+(ingen ny testtäckning — rent innehåll/text, täckt av den visuella
+Playwright-verifieringen).
+
+**Kvarstår, kommande omgångar:** resterande 6 kategorier (55 kapitel)
+i samma stil — Story Bible & World (15), Writing (10), Revise the
+Manuscript (8), Images/Publishing & Backup (5), Writing Tips (14),
+Help & Troubleshooting (3) — en eller flera kategorier per
+commit/push enligt Mats egen plan.
+
 **Ändringslogg v1.0.292 → v1.0.293 (2026-11-05): Guidens "Getting
 Started"-kapitel omskrivna — andra omgången av flerstegsjobbet.**
 Mats: "Ska vi börja fylla guiden med innehåll?" — bekräftade att

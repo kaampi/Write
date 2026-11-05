@@ -190,79 +190,363 @@ const handbookSections: Record<
   },
   "map-of-storybook-ai": {
     heading: "A map of kaampi Write",
-    body: "EXPLORE\n💡 Brainstorm · 💬 Interview the world\nHere ideas get to be uncertain.\n↓\nPLAN\n📖 Synopsis · 🗂 Chapter briefs · 🎬 Scenes · 🧵 Plotlines · 🕒 Timeline\nHere you shape the story.\n↓\nESTABLISH\n📚 Story Bible · 🔎 Extract facts · ✓ Review · 🔒 Lock\nHere you decide what counts as established.\n↓\nWRITE\n✍️ Chapters — Draft · Write a beat · Extend · Elaborate · Rewrite\n↓\nREVIEW\n🔎 Analyze · ✨ Polish · 💬 Ask Manuscript · 🗨 Ask about a passage · ✓ Continuity · ✓ Proofread · 🧭 Developmental analysis\n↓\nFINISH\n🖼 Images · 🌐 Language versions · 📤 Publish · 💾 Backup\n\nIt's a map.\nNot a required order."
+    body: "kaampi Write's tools fall into six rough stages — Explore, Plan, Establish, Write, Review, Finish. The map below moves left to right because that's the easiest way to show it on a page, not because every book actually travels it in that order.",
+    steps: [
+      {
+        heading: "Explore — where ideas get to be uncertain",
+        body: "Brainstorm and Interview the world. Nothing here is canon yet; it's a place to try an idea out loud before deciding whether it belongs in the story at all."
+      },
+      {
+        heading: "Plan — where you shape the story",
+        body: "Synopsis, Chapter briefs, Scenes, Plotlines, Timeline. These give the story a direction and a shape — as loose or as detailed as you want."
+      },
+      {
+        heading: "Establish — where you decide what counts as true",
+        body: "Story Bible, Extract facts, Review, Lock. This is the one stage that actually commits something — a fact only constrains later writing once you've locked it here."
+      },
+      {
+        heading: "Write — where the prose happens",
+        body: "Chapters — Draft, Write a beat, Extend, Elaborate, Rewrite. Everything upstream (Plan, Establish) exists to feed this stage; this is the one stage no book skips."
+      },
+      {
+        heading: "Review — where you check what you've written",
+        body: "Analyze, Polish, Ask Manuscript, Ask about a passage, Continuity, Proofread, Developmental analysis. Different tools here ask different questions — a chapter-level craft check is a different job than a whole-book pacing check."
+      },
+      {
+        heading: "Finish — getting the book out",
+        body: "Images, Language versions, Publish, Backup. The last stage, reached whenever a chapter — or the whole book — is ready to leave kaampi Write."
+      }
+    ],
+    tip: "It's a map, not a required order. Plenty of chapters go straight from Write back to Write, skipping Plan and Review entirely until much later — or never."
   },
   "no-required-workflow": {
     heading: "You don't need to use everything",
-    body: "kaampi Write can be used in many different ways.\nThere is no required workflow.\n\nYou could, for example, work like this:\n\nI just want to start writing\nChapter → Write → Next chapter. Plan later, when you need to.\n\nI want to plan the story\nBrainstorm → Synopsis → Chapter briefs → Chapters\n\nI want to work in a very structured way\nSynopsis → Development method → Plotlines → Chapter briefs → Scenes → Timeline → Chapters\n\nI already have a manuscript\nBring in the existing text → Analyze → Story Bible → Revise → Publish\n\nI'm coming from another writing tool\nBring your manuscript and lore → Import → Review → Keep writing\n\nYou decide how much structure you need."
+    body: "kaampi Write can be used in many different ways. There is no required workflow — the five examples below are starting points, not a menu you have to pick exactly one from.",
+    steps: [
+      {
+        heading: "I just want to start writing",
+        body: "Chapter → Write → Next chapter. Plan later, only when you actually need to — nothing stops you from adding a Synopsis or a Story Bible fact in the middle of chapter 12."
+      },
+      {
+        heading: "I want to plan the story",
+        body: "Brainstorm → Synopsis → Chapter briefs → Chapters. Shape the story before writing it scene by scene, without committing to a named development method."
+      },
+      {
+        heading: "I want to work in a very structured way",
+        body: "Synopsis → Development method → Plotlines → Chapter briefs → Scenes → Timeline → Chapters. Every planning tool kaampi Write has, used together, before the first word of prose."
+      },
+      {
+        heading: "I already have a manuscript",
+        body: "Bring in the existing text → Analyze → Story Bible → Revise → Publish. Nothing about starting with finished or partial prose instead of a blank page changes which tools are available to you."
+      },
+      {
+        heading: "I'm coming from another writing tool",
+        body: "Bring your manuscript and lore → Import → Review → Keep writing. The same path as above, just starting from material built somewhere else."
+      }
+    ],
+    tip: "You decide how much structure you need — and that answer is allowed to change between books, or between chapters of the same book."
   },
   "three-workflows": {
     heading: "Three complete workflows",
-    body: "I write intuitively\nNew manuscript → Chapter 1 → Write → Chapter 2 → Write\nAs the story grows: Extract facts → Story Bible\nLater: Analyze → Polish → Proofread → Publish\nYou never have to create a detailed plan.\n\nI want to plan first\nBrainstorm → Synopsis → Chapter briefs → Write chapters → Story Bible → Analyze → Polish → Proofread → Publish\nThis gives structure without requiring a dramatic model.\n\nI want to plan a lot\nBrainstorm → Snowflake → Synopsis → Three-Act Structure / Save the Cat / Hero's Journey → Plotlines → Chapter briefs → Scenes → Timeline → Write → Story Bible + continuity → Analyze → Developmental analysis → Polish → Proofread → Publish\nThis is a more structured way of working.\nIt is not more correct than the others."
+    body: "Three ways of using kaampi Write start to finish, from loosest to most structured. None of the three is more correct than the others — they're different trade-offs between speed and scaffolding.",
+    steps: [
+      {
+        heading: "I write intuitively",
+        body: "New manuscript → Chapter 1 → Write → Chapter 2 → Write. As the story grows: Extract facts → Story Bible, to keep continuity without planning ahead. Later: Analyze → Polish → Proofread → Publish. You never have to create a detailed plan at any point in this path."
+      },
+      {
+        heading: "I want to plan first",
+        body: "Brainstorm → Synopsis → Chapter briefs → Write chapters → Story Bible → Analyze → Polish → Proofread → Publish. This gives the story real direction before you write a word of prose, without requiring a named dramatic structure."
+      },
+      {
+        heading: "I want to plan a lot",
+        body: "Brainstorm → Snowflake → Synopsis → Three-Act Structure / Save the Cat / Hero's Journey → Plotlines → Chapter briefs → Scenes → Timeline → Write → Story Bible + continuity → Analyze → Developmental analysis → Polish → Proofread → Publish. Every tool, in roughly the order it's most useful — the most structured of the three, built for authors who want the scaffolding up before they write."
+      }
+    ]
   },
   "which-tool-do-i-need": {
     heading: "Which tool do I need?",
-    body: "\"I don't know what the story is about.\" → Brainstorm\n\"I have an idea but can't pull it into a whole story.\" → Snowflake\n\"I have many ideas but no whole.\" → Synopsis\n\"I need a simple dramatic structure.\" → Three-Act Structure\n\"I want more clear beats to work with.\" → Save the Cat\n\"The story is about the protagonist's transformation.\" → Hero's Journey\n\"I don't quite know who my character is yet.\" → Interview the world\n\"I want to try ideas about the character without affecting the book.\" → Interview the world\n\"I need to remember what's actually true.\" → Story Bible\n\"I keep losing track of what the chapter should do.\" → Chapter brief\n\"The chapter has gotten too complicated.\" → Scenes\n\"I keep losing track of different plots and relationships.\" → Plotlines\n\"I keep losing track of when things happen.\" → Timeline\n\"I'm stuck in the middle of a scene.\" → Write a beat, Extend, or Elaborate\n\"This chapter needs to read exactly like an earlier one did, word for word.\" → Attached context\n\"I cut something good but I'm not ready to lose it for good.\" → Darlings\n\"A small question would break my flow if I stopped to answer it right now.\" → Placeholders\n\"I don't know if the chapter works.\" → Analyze\n\"I want AI to tighten the prose itself, not just point things out.\" → Polish\n\"I want honest, critical feedback on a specific question.\" → Ask about chapter / Ask about a passage\n\"I can't find something again in my long manuscript.\" → Ask Manuscript\n\"I want to know if the book's pacing and threads actually hold together.\" → Developmental analysis\n\"The story is done and I want a final line-by-line check before anyone reads it.\" → Proofread\n\"I need this book in another language too.\" → Language versions\n\"I want to give someone the book to read.\" → Publish"
+    body: "A symptom-first index — find what you're feeling stuck on below, and see which tool actually addresses it.",
+    steps: [
+      {
+        heading: "Finding the story",
+        body: "\"I don't know what the story is about.\" → Brainstorm. \"I have an idea but can't pull it into a whole story.\" → Snowflake. \"I have many ideas but no whole.\" → Synopsis. \"I don't quite know who my character is yet.\" → Interview the world. \"I want to try ideas about the character without affecting the book.\" → Interview the world."
+      },
+      {
+        heading: "Shaping the structure",
+        body: "\"I need a simple dramatic structure.\" → Three-Act Structure. \"I want more clear beats to work with.\" → Save the Cat. \"The story is about the protagonist's transformation.\" → Hero's Journey."
+      },
+      {
+        heading: "Keeping track as you write",
+        body: "\"I need to remember what's actually true.\" → Story Bible. \"I keep losing track of what the chapter should do.\" → Chapter brief. \"The chapter has gotten too complicated.\" → Scenes. \"I keep losing track of different plots and relationships.\" → Plotlines. \"I keep losing track of when things happen.\" → Timeline."
+      },
+      {
+        heading: "Getting unstuck mid-scene",
+        body: "\"I'm stuck in the middle of a scene.\" → Write a beat, Extend, or Elaborate. \"This chapter needs to read exactly like an earlier one did, word for word.\" → Attached context. \"I cut something good but I'm not ready to lose it for good.\" → Darlings. \"A small question would break my flow if I stopped to answer it right now.\" → Placeholders."
+      },
+      {
+        heading: "Reviewing what you wrote",
+        body: "\"I don't know if the chapter works.\" → Analyze. \"I want AI to tighten the prose itself, not just point things out.\" → Polish. \"I want honest, critical feedback on a specific question.\" → Ask about chapter / Ask about a passage. \"I can't find something again in my long manuscript.\" → Ask Manuscript. \"I want to know if the book's pacing and threads actually hold together.\" → Developmental analysis."
+      },
+      {
+        heading: "Finishing",
+        body: "\"The story is done and I want a final line-by-line check before anyone reads it.\" → Proofread. \"I need this book in another language too.\" → Language versions. \"I want to give someone the book to read.\" → Publish."
+      }
+    ]
   },
   "most-important-principle": {
     heading: "The most important principle",
-    body: "kaampi Write contains many features because different authors work in different ways.\nThat doesn't mean every feature has to be used.\n\nStart with the story.\nWhen you hit a problem, choose the tool that helps with that specific problem.\n\nExplore when you need ideas.\nPlan when you need direction.\nLock facts when something should become established.\nWrite when you know enough to continue.\nReview when you want to understand what you've written.\n\nAnd above all:\nThe tools should adapt to how you write — not the other way around."
+    body: "kaampi Write contains many features because different authors work in different ways. That doesn't mean every feature has to be used — not using most of them is a completely normal way to write a book here.",
+    steps: [
+      {
+        heading: "Start with the story, not the tools",
+        body: "When you hit a problem, choose the tool that helps with that specific problem — never work through the feature list looking for something to use."
+      },
+      {
+        heading: "One tool per stage",
+        body: "Explore when you need ideas. Plan when you need direction. Lock facts when something should become established. Write when you know enough to continue. Review when you want to understand what you've written."
+      }
+    ],
+    tip: "The tools should adapt to how you write — not the other way around. If a feature isn't solving a problem you actually have, you're not missing anything by skipping it."
   },
   "brainstorm-free": {
     heading: "Brainstorm – think freely",
-    body: "Brainstorm is your private scratchpad.\nNothing here needs to be decided yet.\n\nWrite things like:\n\"What if the woman on the train actually knows Erik's father?\"\nor:\n\"Maybe the lighthouse isn't abandoned?\"\nor:\n\"Would the story work better if the brother were still alive?\"\n\nOne note per idea.\nMove them around and experiment.\n\nBrainstorm doesn't automatically affect the story\nThis is important. An idea in Brainstorm doesn't automatically become part of the story, and shouldn't start steering ordinary chapter drafts.\nWhen you decide an idea should move forward, drag it to Send to Synopsis.\nYou decide which ideas leave the corkboard."
+    body: "Brainstorm is your private scratchpad. Nothing you put here needs to be decided yet — it's a place to try an idea out loud before you know if it belongs in the story.",
+    steps: [
+      {
+        heading: "Write one note per idea",
+        body: "\"What if the woman on the train actually knows Erik's father?\" \"Maybe the lighthouse isn't abandoned?\" \"Would the story work better if the brother were still alive?\" Each goes on its own note, so you can move them around and compare them side by side."
+      },
+      {
+        heading: "Brainstorm doesn't automatically affect the story",
+        body: "This is the important part. An idea sitting in Brainstorm doesn't automatically become part of the story, and it shouldn't start quietly steering ordinary chapter drafts just because it exists."
+      },
+      {
+        heading: "You decide which ideas leave the corkboard",
+        body: "When you decide an idea should move forward, drag it onto Send to Synopsis. Until you do that, it stays exactly what it is — a maybe."
+      }
+    ]
   },
   "synopsis-short": {
     heading: "Synopsis – the story in short form",
-    body: "Synopsis describes the story as a whole. Here you gather:\n• who matters\n• what happens\n• what the major conflicts are\n• where the story is headed\n\nExample\nBrainstorm: \"What if the woman on the train knows Erik's father?\"\nOnce you decide to use the idea, it can develop into:\n\"During the journey, Erik meets a woman who turns out to know the circumstances of his father's disappearance.\"\nThat belongs in Synopsis.\n\nThink of it as:\nBrainstorm = maybe\nSynopsis = the story's plan\nChapter brief = the chapter's job\nManuscript = the story itself"
+    body: "Synopsis describes the story as a whole — not any single chapter, but the shape of the entire thing.",
+    steps: [
+      {
+        heading: "What belongs in a Synopsis",
+        body: "Who matters, what happens, what the major conflicts are, and where the story is headed. Not scene-by-scene detail — the overview a stranger would need to understand what this book is about."
+      },
+      {
+        heading: "From a Brainstorm note to a Synopsis line",
+        body: "Brainstorm: \"What if the woman on the train knows Erik's father?\" Once you decide to use the idea, it can develop into: \"During the journey, Erik meets a woman who turns out to know the circumstances of his father's disappearance.\" That sentence belongs in Synopsis — it's no longer a maybe."
+      },
+      {
+        heading: "How the planning tools relate",
+        body: "Brainstorm = maybe. Synopsis = the story's plan. Chapter brief = one chapter's job. Manuscript = the story itself, as actually written."
+      }
+    ]
   },
   "chapter-briefs": {
     heading: "Chapter briefs",
-    body: "A chapter brief describes what a chapter needs to accomplish.\nIt doesn't need to be well written.\nIt's an instruction to yourself, and to the AI when you use the writing tools.\n\nExample\n\"Erik meets the woman in the dining car. She hints that she knew his father but refuses to say how. The chapter ends with her leaving a photograph on the table.\"\n\nThe brief is not the story itself.\nIt describes what the story should do.\n\nSynopsis = the whole story\nBrief = one chapter\nManuscript = what the reader gets"
+    body: "A chapter brief describes what a chapter needs to accomplish. It doesn't need to be well written — it's an instruction to yourself, and to the AI when you use the writing tools.",
+    steps: [
+      {
+        heading: "What a brief looks like",
+        body: "\"Erik meets the woman in the dining car. She hints that she knew his father but refuses to say how. The chapter ends with her leaving a photograph on the table.\" Rough, functional, written to be useful rather than beautiful."
+      },
+      {
+        heading: "The brief is not the story itself",
+        body: "It describes what the story should do in this chapter — not how it's phrased, not the exact dialogue, not the prose. The writing tools turn the brief into the actual chapter."
+      },
+      {
+        heading: "How it fits with Synopsis and the manuscript",
+        body: "Synopsis = the whole story. Brief = one chapter. Manuscript = what the reader actually gets."
+      }
+    ]
   },
   "chapter-summary": {
     heading: "Chapter summary",
-    body: "Next to Chapter brief sits a second field, Chapter summary — a short note on what actually happens in the chapter, once it's written. Write it by hand, or click \"Summarize chapter\" to have it generated from the prose.\n\nBrief = what the chapter should do, written before\nSummary = what the chapter actually did, written after\n\nOnce a chapter has a summary, earlier chapters' summaries feed Draft, Extend, Elaborate, and Beat for later chapters — in story-time order, not just chapter order — so the model can keep track of what's already happened without needing every earlier chapter's full prose in the prompt. A chapter nobody has summarized yet is simply left out of that context; nothing is required, nothing breaks."
+    body: "Next to Chapter brief sits a second field, Chapter summary — a short note on what actually happened in the chapter, once it's written.",
+    steps: [
+      {
+        heading: "Before and after",
+        body: "Brief = what the chapter should do, written before you draft it. Summary = what the chapter actually did, written after."
+      },
+      {
+        heading: "Writing the summary",
+        body: "Write it by hand, or click \"Summarize chapter\" to have it generated straight from the prose you just wrote."
+      },
+      {
+        heading: "Why summaries matter for later chapters",
+        body: "Once a chapter has a summary, earlier chapters' summaries feed Draft, Extend, Elaborate, and Beat for later chapters — in story-time order, not just chapter order — so the model can keep track of what's already happened without needing every earlier chapter's full prose crammed into the prompt."
+      },
+      {
+        heading: "Nothing is required",
+        body: "A chapter nobody has summarized yet is simply left out of that context. Nothing breaks — it just means that chapter's events aren't available as background for later ones until you add a summary."
+      }
+    ]
   },
   "development-methods": {
     heading: "Development methods",
-    body: "kaampi Write includes several methods that can help you develop or structure the story.\nThey are entirely optional.\nYou can always choose:\nNo method — write freely"
+    body: "kaampi Write includes several methods that can help you develop or structure the story. They are entirely optional — you can always choose No method, and just write freely instead.",
+    steps: [
+      {
+        heading: "What the methods are for",
+        body: "Snowflake, Three-Act Structure, Save the Cat, and Hero's Journey each offer a different way of thinking about a story — some focus on developing content, others on structuring it. The following chapters cover each one."
+      }
+    ]
   },
   "snowflake-method": {
     heading: "Snowflake",
-    body: "Snowflake works well when you have an idea but not yet a whole story.\nIt helps you develop the content step by step.\n\nOne sentence\n\"A journalist returns to her home island to investigate her father's twenty-year-old disappearance.\"\n↓\nOne paragraph\nDevelop the core idea with conflict, development, and direction.\n↓\nFull synopsis\nKeep building until you have a coherent description of the story.\n↓\nSend to Synopsis\n\nYou can write it yourself or use AI as support along the way.\n\nSnowflake mainly helps answer:\n\"What is this story I'm actually writing?\""
+    body: "Snowflake works well when you have an idea but not yet a whole story. It helps you develop the content step by step, each pass adding more detail than the last.",
+    steps: [
+      {
+        heading: "One sentence",
+        body: "\"A journalist returns to her home island to investigate her father's twenty-year-old disappearance.\" The whole story, compressed to its core."
+      },
+      {
+        heading: "One paragraph",
+        body: "Develop that core idea with conflict, development, and direction — still short, but no longer a single line."
+      },
+      {
+        heading: "Full synopsis",
+        body: "Keep building until you have a coherent description of the whole story, then send it to Synopsis."
+      },
+      {
+        heading: "Write it yourself, or with AI",
+        body: "Every step can be done by hand or with AI as support — the method doesn't require either approach specifically."
+      }
+    ],
+    tip: "Snowflake mainly helps answer one question: \"What is this story I'm actually writing?\""
   },
   "three-act": {
     heading: "Three-Act Structure",
-    body: "Three-Act Structure works well when you want a simple dramatic backbone.\nkaampi Write uses key turning points such as:\n• Setup\n• Inciting incident\n• Break into two\n• Midpoint\n• All is lost\n• Climax\n• Resolution\n\nThese become Plotlines you can attach to the story's chapters.\n\nExample\nInciting incident: \"Nora finds a letter from her missing father.\" (Chapter 3)\nLater — Midpoint: \"Nora discovers the letter was written after the date her father is said to have disappeared.\" (Chapter 12)\n\nThe method helps you see the story's larger movement.\nIt doesn't write the story for you."
+    body: "Three-Act Structure works well when you want a simple dramatic backbone for the story, without a long list of named beats to track.",
+    steps: [
+      {
+        heading: "The turning points",
+        body: "kaampi Write uses key turning points: Setup, Inciting incident, Break into two, Midpoint, All is lost, Climax, Resolution."
+      },
+      {
+        heading: "These become Plotlines",
+        body: "Each turning point becomes a Plotline you can attach to specific chapters in the story."
+      },
+      {
+        heading: "Worked example",
+        body: "Inciting incident: \"Nora finds a letter from her missing father.\" (Chapter 3). Later — Midpoint: \"Nora discovers the letter was written after the date her father is said to have disappeared.\" (Chapter 12)."
+      }
+    ],
+    tip: "The method helps you see the story's larger movement. It doesn't write the story for you."
   },
   "save-the-cat": {
     heading: "Save the Cat",
-    body: "Save the Cat offers more beats than Three-Act Structure, including:\n• Opening image\n• Theme stated\n• Setup\n• Catalyst\n• Debate\n• Break into two\n• B story\n• Fun and games\n• Midpoint\n• Bad guys close in\n• All is lost\n• Dark night of the soul\n• Break into three\n• Finale\n• Final image\n\nThese are created as Plotlines.\nYou then decide how — and whether — they fit your story.\n\nAny percentage markers are landmarks, not rules for exactly where something must happen.\nUse the method as a map, not an answer key."
+    body: "Save the Cat offers more beats than Three-Act Structure — a finer-grained map of the same kind of journey.",
+    steps: [
+      {
+        heading: "The fifteen beats",
+        body: "Opening image, Theme stated, Setup, Catalyst, Debate, Break into two, B story, Fun and games, Midpoint, Bad guys close in, All is lost, Dark night of the soul, Break into three, Finale, Final image."
+      },
+      {
+        heading: "Created as Plotlines",
+        body: "Each beat becomes a Plotline. You then decide how — and whether — it actually fits your story."
+      }
+    ],
+    tip: "Any percentage markers the method mentions are landmarks, not rules for exactly where something must happen. Use it as a map, not an answer key."
   },
   "heros-journey": {
     heading: "Hero's Journey",
-    body: "Hero's Journey works well for stories where the protagonist's transformation is central.\nkaampi Write uses twelve steps:\n1. Ordinary World\n2. Call to Adventure\n3. Refusal of the Call\n4. Meeting the Mentor\n5. Crossing the Threshold\n6. Tests, Allies, Enemies\n7. Approach to the Inmost Cave\n8. The Ordeal\n9. Reward\n10. The Road Back\n11. Resurrection\n12. Return with the Elixir\n\nThese, too, are created as Plotlines.\n\nThe \"journey\" doesn't have to be literal. A character can leave their safe world by moving, starting a relationship, losing their job, discovering a secret, or making a decision that changes their life."
+    body: "Hero's Journey works well for stories where the protagonist's transformation is the real subject of the book.",
+    steps: [
+      {
+        heading: "The twelve steps",
+        body: "Ordinary World, Call to Adventure, Refusal of the Call, Meeting the Mentor, Crossing the Threshold, Tests/Allies/Enemies, Approach to the Inmost Cave, The Ordeal, Reward, The Road Back, Resurrection, Return with the Elixir."
+      },
+      {
+        heading: "These too are created as Plotlines",
+        body: "Each step becomes a Plotline you can attach to a chapter, same as with the other methods."
+      },
+      {
+        heading: "The journey doesn't have to be literal",
+        body: "A character can leave their safe world by moving, starting a relationship, losing their job, discovering a secret, or making a decision that changes their life — no quest or magic required."
+      }
+    ]
   },
   "method-differences": {
     heading: "The difference between the methods",
-    body: "Snowflake\nIdea → One sentence → One paragraph → Full synopsis → Synopsis\nSnowflake develops the story's content.\n\nThree-Act Structure / Save the Cat / Hero's Journey\nMethod → Beats and turning points → Plotlines → Chapters\nThese help you structure the story's development.\n\nYou can switch methods later. What you've already written in Synopsis, or created as Plotlines, isn't deleted just because you choose a different method or go back to writing freely."
+    body: "The four development methods split into two different jobs, and it helps to know which one you actually need.",
+    steps: [
+      {
+        heading: "Snowflake develops content",
+        body: "Idea → One sentence → One paragraph → Full synopsis → Synopsis. Snowflake is about working out what the story even is."
+      },
+      {
+        heading: "The three beat-methods structure development",
+        body: "Three-Act Structure / Save the Cat / Hero's Journey: Method → Beats and turning points → Plotlines → Chapters. These help you arrange a story you already have some grip on."
+      },
+      {
+        heading: "Switching methods later is safe",
+        body: "What you've already written in Synopsis, or already created as Plotlines, isn't deleted just because you choose a different method, or decide to go back to writing freely."
+      }
+    ]
   },
   scenes: {
     heading: "Scenes",
-    body: "When a chapter gets long or complicated, it can help to split it into Scenes.\n\nChapter 8 – The Lighthouse\nScene 1: Nora arrives on the island.\nScene 2: She breaks into the lighthouse.\nScene 3: She finds the photographs.\nScene 4: Someone locks the door from outside.\n\nThink of it as:\nBrief = the chapter's job\nScenes = the path through the chapter\n\nYou don't need to use Scenes for simple chapters where you already have the overview.\n\nTwo ways to split one off: the Scenes panel's \"Split into two…\" picks a paragraph to break at, or mark the exact text that should become its own scene and choose \"Create scene\" from the selection menu."
+    body: "When a chapter gets long or complicated, it can help to split it into Scenes — smaller, named beats inside the same chapter.",
+    steps: [
+      {
+        heading: "Worked example",
+        body: "Chapter 8 – The Lighthouse. Scene 1: Nora arrives on the island. Scene 2: She breaks into the lighthouse. Scene 3: She finds the photographs. Scene 4: Someone locks the door from outside."
+      },
+      {
+        heading: "How Scenes relates to the brief",
+        body: "Brief = the chapter's job. Scenes = the path through the chapter — the steps that get it from start to finish."
+      },
+      {
+        heading: "Two ways to split one off",
+        body: "In the Scenes panel, \"Split into two…\" picks a paragraph to break at. Or mark the exact text that should become its own scene and choose \"Create scene\" from the selection menu."
+      }
+    ],
+    tip: "You don't need Scenes for simple chapters where you already have the overview in your head."
   },
   plotlines: {
     heading: "Plotlines",
-    body: "Plotlines help you follow things that develop through the story. It could be:\n• the main conflict\n• a relationship\n• a mystery\n• a secret\n• a rivalry\n• a character's change\n• dramatic beats\n\nExample\n🔴 The father's disappearance\n🟡 Nora and Elias\n🔵 The lighthouse's history\n\nYou can see how these run through the chapters. If an important subplot suddenly vanishes for ten chapters, it becomes easy to spot."
+    body: "Plotlines help you follow things that develop gradually through the story, rather than things that happen in a single chapter.",
+    steps: [
+      {
+        heading: "What you can track with a Plotline",
+        body: "The main conflict, a relationship, a mystery, a secret, a rivalry, a character's change, or a set of dramatic beats from a development method."
+      },
+      {
+        heading: "Worked example",
+        body: "🔴 The father's disappearance. 🟡 Nora and Elias. 🔵 The lighthouse's history. Each color marks a separate thread you can follow across chapters."
+      }
+    ],
+    tip: "You can see how these run through the chapters. If an important subplot suddenly vanishes for ten chapters, it becomes easy to spot — the color just stops appearing."
   },
   timeline: {
     heading: "Timeline",
-    body: "Timeline answers the question: When does this happen?\nIt becomes especially useful when chapter order isn't the same as the story's chronology.\n\nChapter order\nChapter 1 – 2026: Nora returns.\nChapter 2 – 2006: The father disappears.\nChapter 3 – 2026: Nora finds the letter.\nChapter 4 – 1998: The father meets Elias.\n\nChronological order\n1998 → 2006 → 2026\n\nTimeline helps you keep track of the difference."
+    body: "Timeline answers one question: when does this happen? It becomes especially useful when chapter order isn't the same as the story's actual chronology.",
+    steps: [
+      {
+        heading: "Chapter order",
+        body: "Chapter 1 – 2026: Nora returns. Chapter 2 – 2006: The father disappears. Chapter 3 – 2026: Nora finds the letter. Chapter 4 – 1998: The father meets Elias."
+      },
+      {
+        heading: "Chronological order",
+        body: "1998 → 2006 → 2026. The same four chapters, reordered by when the events actually happened rather than when the reader encounters them."
+      }
+    ],
+    tip: "Timeline helps you keep track of the difference between the two orderings, so a time jump stays intentional rather than confusing."
   },
   "scenes-plotlines-timeline": {
     heading: "Scenes, Plotlines, and Timeline",
-    body: "They answer three different questions.\n\nScenes: What happens?\nPlotlines: What develops?\nTimeline: When does it happen?\n\nThe same event can therefore live in all three without the tools doing the same job."
+    body: "These three tools can look similar at a glance, but they answer three different questions.",
+    steps: [
+      {
+        heading: "Three separate questions",
+        body: "Scenes: what happens? Plotlines: what develops? Timeline: when does it happen?"
+      }
+    ],
+    tip: "The same event can live in all three without the tools doing the same job — a scene can advance a plotline and sit at a specific point on the timeline, all at once."
   },
   "story-bible-memory": {
     heading: "Story Bible – the story's memory",
