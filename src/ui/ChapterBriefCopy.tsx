@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { readSpellcheckEnabled, subscribeSpellcheckEnabled } from "./spellcheck";
 
 export function ChapterBriefCopy({
   id,
@@ -16,6 +17,8 @@ export function ChapterBriefCopy({
   onCommit: (next: string) => void;
 }) {
   const ref = useRef<HTMLParagraphElement>(null);
+  const [spellcheckEnabled, setSpellcheckEnabled] = useState(readSpellcheckEnabled);
+  useEffect(() => subscribeSpellcheckEnabled(setSpellcheckEnabled), []);
   useEffect(() => {
     const node = ref.current;
     if (!node || document.activeElement === node) return;
@@ -31,6 +34,7 @@ export function ChapterBriefCopy({
       aria-multiline="true"
       aria-label={label}
       data-placeholder={placeholder}
+      spellCheck={spellcheckEnabled}
       onBlur={() => {
         const next = ref.current?.innerText ?? "";
         if (next !== value) onCommit(next);

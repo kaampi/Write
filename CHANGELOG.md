@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.284] - 2026-11-05
+
+### Added
+- A "Spell check" toggle in Settings → Editor. The red underlines in the desktop app are the operating system's own native spell check (via the webview), not something kaampi Write runs itself — this toggle just tells the window not to ask for it.
+
 ## [1.0.283] - 2026-11-05
 
 ### Added

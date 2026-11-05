@@ -3609,7 +3609,8 @@ button:disabled {
   margin: 0;
 }
 
-.settings-ai-free-toggle {
+.settings-ai-free-toggle,
+.settings-spellcheck-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;

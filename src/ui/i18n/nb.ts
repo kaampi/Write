@@ -325,6 +325,9 @@ export const nb: Messages = {
       gray: "Myk grå",
       dark: "Mørk"
     },
+    spellcheckLabel: "Stavekontroll",
+    spellcheckHint:
+      "De røde understrekningene i skrivebordsappen er operativsystemets egen stavekontroll, ikke noe appen selv kjører — å slå den av her sier bare fra til vinduet at det ikke skal be om den. Gjelder hele appen, ikke bare dette manuset.",
     mascotLabel: "Maskot",
     mascotLede:
       "En følgesvenn som dukker opp med tips innimellom, som å peke ut Guiden på en ny startskjerm. Velg en nedenfor, eller la den stå av — du kan endre dette når som helst. Gjelder hele appen, ikke bare dette manuset.",

@@ -11794,6 +11794,46 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.283 → v1.0.284 (2026-11-05): av/på för
+webbmotorns stavningskontroll.** Mats: "En sak jag skulle vilja titta
+på är stavningskontrollen i Tauri som jag misstänker kommer från
+webbmotorn? Det blir röda streck under orden... Man borde kunna slå
+av dessa och välja språk för stavningskontrollen. Om den alls ska
+vara kvar."
+
+Bekräftade misstanken: `ProseCanvas.tsx` satte `spellCheck`
+hårdkodat (bar prop-shorthand, alltid `true`) på kapitelprosans/
+synopsis-ytan - det är rakt av webbmotorns (WebView2/Chromium på
+Windows, WKWebView på macOS, WebKitGTK på Linux) egen inbyggda
+understrykning, triggad av HTML-attributet `spellcheck`. kaampi Write
+kör ingen egen stavningskontroll.
+
+Förklarade begränsningen innan något byggdes: språkval är INTE fritt
+valbart av appen - webbmotorerna läser bara av `lang`-attributet som
+en hänvisning, och kräver att OS:et redan har det språkets ordlista
+installerad; vi kan varken bunta ordlistor eller garantera stöd.
+Tre alternativ lades fram (bara av/på; av/på + följ `prose_language`;
+av/på + eget manuellt språkval). Mats: "Bara av/på-växel, inget
+språkval."
+
+Ny `spellcheck.ts` - samma localStorage-pub/sub-form som `mascot.ts`/
+`aiFreeMode.ts`, standard PÅ (bevarar allt tidigare beteende
+oförändrat om man aldrig rör inställningen). Läses direkt i BÅDA
+komponenterna som faktiskt renderar redigerbar text - `ProseCanvas.tsx`
+(kapitelprosa, synopsis) och `ChapterBriefCopy.tsx` (briefs,
+brainstorm-lappar, send-kön) - samma självbärande läs-mönster som
+`aiFree` redan använder i `ProseCanvas.tsx`, istället för att trä en
+ny prop genom alla anropsställen (5 st i 3 filer). Ny växel i Settings
+→ Editor, under pappersvalet.
+
+Verifierat live med Playwright: kontrollerade det faktiska DOM-
+attributet (`getAttribute('spellcheck')`), inte bara UI-utseendet -
+`"true"` innan växeln, `"false"` efter. Laddade om sidan - läget låg
+kvar. Kontrollerade även brief-ytan separat - samma resultat.
+
+`tsc --noEmit` rent, `npm run build` rent, 1276/1276 tester gröna (ren
+tillägg, standardläget oförändrat).
+
 **Ändringslogg v1.0.282 → v1.0.283 (2026-11-05): Brainstorm-lappar
 går att skala om i bredd.** Mats: "På brainstorm så är korten ibland
 för små, texterna skjuter iväg så kortet blir längre än skärmen.

@@ -753,6 +753,9 @@ export const en = {
       gray: "Soft gray",
       dark: "Dark"
     },
+    spellcheckLabel: "Spell check",
+    spellcheckHint:
+      "The desktop app's red underlines are the operating system's own spell check, not something this app runs itself — turning it off here just tells the window not to ask for it. Applies to the whole app, not just this manuscript.",
     mascotLabel: "Mascot",
     mascotLede:
       "A companion who shows up with tips here and there, like pointing out the Guide on a new Home screen. Pick one below, or leave it off — you can change this at any time. Applies to the whole app, not just this manuscript.",

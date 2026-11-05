@@ -16,6 +16,7 @@ import { ModelSelect } from "./SettingsPanel";
 import { applyPaper, parsePaper, readPaper, PAPERS } from "./paper";
 import { MASCOT_IDS, MASCOT_POSES, readMascot, setMascot, type MascotId } from "./mascot";
 import { readAiFreeMode, setAiFreeMode } from "./aiFreeMode";
+import { readSpellcheckEnabled, setSpellcheckEnabled } from "./spellcheck";
 import {
   detectGpuSuggestion,
   isDesktopApp,
@@ -102,6 +103,7 @@ export function AppSettingsDialog({
   const [paper, setPaper] = useState(readPaper);
   const [mascot, setMascotState] = useState<MascotId>(readMascot);
   const [aiFree, setAiFree] = useState(readAiFreeMode);
+  const [spellcheckEnabled, setSpellcheckEnabledState] = useState(readSpellcheckEnabled);
 
   const connected = models.length > 0 && !ollamaError;
   const [gpuSuggestion, setGpuSuggestion] = useState<GpuSuggestion | null>(null);
@@ -316,6 +318,18 @@ export function AppSettingsDialog({
                   </select>
                 </label>
               </div>
+              <label className="settings-spellcheck-toggle">
+                <input
+                  type="checkbox"
+                  checked={spellcheckEnabled}
+                  onChange={(event) => {
+                    setSpellcheckEnabledState(event.target.checked);
+                    setSpellcheckEnabled(event.target.checked);
+                  }}
+                />
+                {m.editor.spellcheckLabel}
+              </label>
+              <p className="quiet">{m.editor.spellcheckHint}</p>
             </section>
 
             <section className="settings-block">

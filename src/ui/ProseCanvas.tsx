@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
+import { readSpellcheckEnabled, subscribeSpellcheckEnabled } from "./spellcheck";
 import type { Book } from "@core/BookSchema";
 import { PAGE_MARGINS, PAGE_SIZES } from "@core/manuscriptExport";
 import { applyReplace, isNonEmptySpan, selectedText, type TextSpan } from "@core/textSpan";
@@ -199,6 +200,8 @@ export function ProseCanvas({
   const { messages: m } = useLocale();
   const [aiFree, setAiFree] = useState(readAiFreeMode);
   useEffect(() => subscribeAiFreeMode(setAiFree), []);
+  const [spellcheckEnabled, setSpellcheckEnabled] = useState(readSpellcheckEnabled);
+  useEffect(() => subscribeSpellcheckEnabled(setSpellcheckEnabled), []);
   const rewriteTitle = instructTitle ?? m.canvas.rewriteTitle;
   const rewriteHint = instructHint ?? m.canvas.rewriteHint;
   const rewritePlaceholder = instructPlaceholder ?? m.canvas.rewritePlaceholder;
@@ -719,7 +722,7 @@ export function ProseCanvas({
         data-placeholder={placeholder ?? ""}
         data-empty={value.trim() ? "false" : "true"}
         suppressContentEditableWarning
-        spellCheck
+        spellCheck={spellcheckEnabled}
         onInput={emitProse}
         onContextMenu={onContextMenu}
         onMouseMove={(event) => {

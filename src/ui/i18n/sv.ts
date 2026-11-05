@@ -325,6 +325,9 @@ export const sv: Messages = {
       gray: "Mjuk grå",
       dark: "Mörk"
     },
+    spellcheckLabel: "Stavningskontroll",
+    spellcheckHint:
+      "De röda understrykningarna i skrivbordsappen är operativsystemets egen stavningskontroll, inte något appen själv kör — att stänga av den här talar bara om för fönstret att inte fråga efter den. Gäller hela appen, inte bara det här manuset.",
     mascotLabel: "Maskot",
     mascotLede:
       "En följeslagare som dyker upp med tips då och då, som att peka ut Guiden på en ny startsida. Välj en nedan, eller låt den vara av — du kan ändra dig när som helst. Gäller hela appen, inte bara det här manuset.",
