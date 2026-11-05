@@ -1925,7 +1925,10 @@ i samma commit som uppdateringskollen faktiskt shippades.
 
 ---
 
-### 36. Lokal bildgenerering — skicka illustrationsprompten till en lokal bild-AI istället för urklipp
+### 36. ~~Lokal bildgenerering — skicka illustrationsprompten till en lokal bild-AI istället för urklipp~~ ❌ struken
+
+**Struken (2026-11-05).** Mats: "Vi kan stryka #36 från to-do." Ingen
+anledning angiven. Behållen nedan som historik, inte som öppen idé.
 
 **Bakgrund.** Mats: "Skulle man kunna ställa in så att man kan skapa
 bilder lokalt om man har ett kort som klarar det? Så att den prompt
@@ -1968,7 +1971,12 @@ idé" efter en inledande diskussion — inget konkret förslag
 
 ---
 
-### 37. Namnbyte till WrighterAI (eller WrajterAI) — checklista, inget beslut än
+### 37. ~~Namnbyte till WrighterAI (eller WrajterAI) — checklista, inget beslut än~~ ❌ struken
+
+**Struken (2026-11-05).** Mats: "Även #37 eftersom appen heter kaampi
+Write nu." Namnbytet skedde, bara inte till något av de två namn den
+här checklistan utreder — frågan är inte längre öppen. Behållen nedan
+som historik, inte som öppen idé.
 
 **Bakgrund.** Mats: "jag funderar på om jag ska döpa om appen till
 WrighterAI eller WrajterAI. Det är svårt att hitta en dän för
