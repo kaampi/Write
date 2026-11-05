@@ -11794,6 +11794,70 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.287 → v1.0.288 (2026-11-05): drag-och-släpp på
+hyllan fixad i skrivbordsappen, infokortet flyttat till höger om
+hyllan.** Två separata buggrapporter/önskemål i samma genomgång.
+
+**1. Drag-och-släpp för att sortera om böckerna.** Mats: "Visst skulle
+man kunna flytta ordningen på böckerna i bokhyllan? Jag får inte till
+det" — följt av, efter en första förklaring: "I skrivbordsappen får
+jag en liten rund ikon med ett snnett streck och jag kan inte flytta."
+Den "förbjudet"-markören är den klassiska signaturen för att webbläsar-
+motorns drag-events aldrig når fram korrekt. `shelfOrder.ts`/
+`BookshelfView.tsx`s egen drag-och-släpp-kod (byggd 2026-11-04) var
+redan korrekt — testad och grön — men Tauri fångar som standard upp
+OS-nivåns drag-och-släpp (`dragDropEnabled`, standard `true`), vilket
+är känt att krocka med sidans egen HTML5-drag-och-släpp i Windows
+WebView2 specifikt. Sökte igenom hela kodbasen efter någon som
+faktiskt använder Tauris OS-nivå-händelse (`DragDropEvent` eller
+liknande) — ingen gjorde det — så avstängning var riskfri. Löst med
+`"dragDropEnabled": false` i `src-tauri/tauri.conf.json`s fönster-
+konfiguration.
+
+**2. Infokortet bredvid hyllan, inte under.** Mats: "Sedan ser jag att
+det blir bättre med kortet på höger sida om bokhyllan. Om man har så
+många böcker att inte kortet ryms på sidan om bokhyllan DÅ får det
+hamna under." Kortet var tidigare absolut-positionerat under hyllan,
+medvetet urkopplat ur det vanliga flödet (se den gamla kommentaren i
+`styles.css`) specifikt för att INTE knuffa ner Series när det visades
+— det la sig ovanpå istället. Ersatt med ett enkelt `.shelf-row { display:
+flex; flex-wrap: wrap; }`-mönster: hyllan och kortet är nu två flex-
+objekt i samma rad, så webbläsaren själv avgör om kortet får plats
+bredvid eller måste radbrytas ner, baserat på faktisk tillgänglig
+bredd (fönsterstorlek m.m.) — inte en gissad book-count-tröskel eller
+en media query. Konsekvens, medvetet accepterad: kortet knuffar nu ner
+Series när det visas (vare sig det hamnar bredvid eller under hyllan),
+istället för att lägga sig ovanpå som förut — naturligt för normalt
+flöde, inte längre en overlay.
+
+Samtidigt förenklat: kortet renderas nu bara i DOM:en när en bok är
+vald (`{selected ? <div className="shelf-info-card">...} : null}`)
+istället för att alltid finnas kvar med `opacity:0`/en `is-visible`-
+klass som växlades. Det kostar den gamla infasnings-/glidanimationen
+(ingen smidig övergång längre, kortet dyker bara upp) men gör layout-
+beräkningen korrekt-per-konstruktion: ett dolt kort tar bokstavligen
+noll plats i `.shelf-row`s radbrytnings-beräkning istället för att
+reservera en osynlig plats. En separat kommentar i `styles.css` (för
+`.book-shelf-list`s `max-height: 346px`, som tidigare pekade på
+kortets egen kommentar för sin 334px-härledning) gjordes självständig
+— den höjden kommer bara från hyllan själv (böcker + hyllplan), inte
+från kortet, och ska inte bli föråldrad bara för att kortets egen
+positioneringskommentar skrevs om.
+
+Verifierat live med Playwright i två lägen: få böcker i ett brett
+fönster (kortet hamnar bredvid hyllan, samma y-koordinat, x direkt
+efter hyllans högerkant plus mellanrum) och tio böcker i ett smalt
+900px-fönster (kortet radbryts ner under hyllan, vänsterkant i linje
+med hyllan) — båda bekräftade med faktiska `boundingBox()`-mätningar,
+inte bara skärmdumpar.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna
+(ingen ny testtäckning för själva drag-och-släpp-fixen — den är en
+Tauri/WebView2-specifik körtidsegenskap som inte går att fånga i
+Playwright mot webbläsarversionen; verifierad genom kodgenomsökning
+och känd Tauri-begränsning istället, väntar på Mats egen bekräftelse
+i skrivbordsappen).
+
 **Ändringslogg v1.0.286 → v1.0.287 (2026-11-05): Codex-adress —
 första, avgränsade steget mot roadmap-punkt #56 (Codex över LAN).**
 Mats, om #56: "Punkt 56 är ju lite intressant men där är kanske att

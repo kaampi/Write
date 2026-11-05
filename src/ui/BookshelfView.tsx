@@ -135,70 +135,68 @@ export function BookshelfView({
         <div className="shelf-plank-bottom" />
       </div>
 
-      <div className={selected ? "shelf-info-card is-visible" : "shelf-info-card"}>
-        {selected ? (
-          <>
-            <div className="shelf-info-head">
-              <strong className="shelf-info-title">{selected.primary.title}</strong>
-              <button
-                type="button"
-                className="gear-button"
-                aria-label={m.shelfEdit.settingsLabel}
-                onClick={() => setEditingId(selected.primary.id)}
-              >
-                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.07 7.07 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.63 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.05.3-.08.62-.08.94s.02.64.07.94L2.75 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.42.33.6.22l2.39-.96c.5.38 1.04.7 1.62.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.58-.24 1.12-.56 1.62-.94l2.39.96c.24.1.5 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.02-1.56ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
-                  />
-                </svg>
-              </button>
-            </div>
-            {selectedSeriesTitle && selectedSeriesId ? (
-              <button
-                type="button"
-                className="book-language-tag book-language-tag-button"
-                onClick={() => onOpenSeries(selectedSeriesId, selected.primary.id)}
-              >
-                {format(m.home.seriesTag, { series: selectedSeriesTitle })}
-              </button>
-            ) : null}
-            {selected.primary.shelf_author ? <span className="shelf-info-author">{selected.primary.shelf_author}</span> : null}
-            {selected.primary.shelf_description ? <p className="shelf-info-description">{selected.primary.shelf_description}</p> : null}
-            <span className="shelf-info-meta">
-              {selected.primary.prose_language ? <span className="book-language-tag">{selected.primary.prose_language}</span> : null}
-              {count(selected.primary.chapterCount, m.home.chapters)}
-              <span className="dot">·</span>
-              {count(selected.primary.factCount, m.home.facts)}
-            </span>
-            {siblings.length > 0 ? (
-              <ul className="shelf-info-siblings">
-                {siblings.map((sibling) => (
-                  <li key={sibling.id}>
-                    <button type="button" className="text-button" onClick={() => onOpen(sibling.id)}>
-                      {sibling.prose_language || m.home.languageVersionUnset}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            <div className="shelf-info-actions">
-              <button type="button" className="primary" onClick={() => onOpen(selected.primary.id)}>
-                {m.home.shelfOpen}
-              </button>
-              <button
-                type="button"
-                className="text-button danger"
-                onClick={() => {
-                  if (window.confirm(format(m.home.deleteConfirm, { title: selected.primary.title }))) onDelete(selected.primary.id);
-                }}
-              >
-                {m.home.delete}
-              </button>
-            </div>
-          </>
-        ) : null}
-      </div>
+      {selected ? (
+        <div className="shelf-info-card">
+          <div className="shelf-info-head">
+            <strong className="shelf-info-title">{selected.primary.title}</strong>
+            <button
+              type="button"
+              className="gear-button"
+              aria-label={m.shelfEdit.settingsLabel}
+              onClick={() => setEditingId(selected.primary.id)}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.07 7.07 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.63 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.05.3-.08.62-.08.94s.02.64.07.94L2.75 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.42.33.6.22l2.39-.96c.5.38 1.04.7 1.62.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.58-.24 1.12-.56 1.62-.94l2.39.96c.24.1.5 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.02-1.56ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
+                />
+              </svg>
+            </button>
+          </div>
+          {selectedSeriesTitle && selectedSeriesId ? (
+            <button
+              type="button"
+              className="book-language-tag book-language-tag-button"
+              onClick={() => onOpenSeries(selectedSeriesId, selected.primary.id)}
+            >
+              {format(m.home.seriesTag, { series: selectedSeriesTitle })}
+            </button>
+          ) : null}
+          {selected.primary.shelf_author ? <span className="shelf-info-author">{selected.primary.shelf_author}</span> : null}
+          {selected.primary.shelf_description ? <p className="shelf-info-description">{selected.primary.shelf_description}</p> : null}
+          <span className="shelf-info-meta">
+            {selected.primary.prose_language ? <span className="book-language-tag">{selected.primary.prose_language}</span> : null}
+            {count(selected.primary.chapterCount, m.home.chapters)}
+            <span className="dot">·</span>
+            {count(selected.primary.factCount, m.home.facts)}
+          </span>
+          {siblings.length > 0 ? (
+            <ul className="shelf-info-siblings">
+              {siblings.map((sibling) => (
+                <li key={sibling.id}>
+                  <button type="button" className="text-button" onClick={() => onOpen(sibling.id)}>
+                    {sibling.prose_language || m.home.languageVersionUnset}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <div className="shelf-info-actions">
+            <button type="button" className="primary" onClick={() => onOpen(selected.primary.id)}>
+              {m.home.shelfOpen}
+            </button>
+            <button
+              type="button"
+              className="text-button danger"
+              onClick={() => {
+                if (window.confirm(format(m.home.deleteConfirm, { title: selected.primary.title }))) onDelete(selected.primary.id);
+              }}
+            >
+              {m.home.delete}
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {editing ? (
         <ShelfSettingsDialog

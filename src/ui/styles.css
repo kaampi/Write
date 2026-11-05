@@ -2104,9 +2104,13 @@ button:disabled {
 }
 
 /* List view's own scroll box, capped at the Shelf view's own fixed height
-   (.shelf-info-card's own comment derives the 334px) plus a little padding
-   headroom, so switching List/Shelf doesn't change the page's own height
-   (Mats, 2026-11-04). */
+   (.shelf-books' 230px min book height + 70px headroom = 300px, plus the
+   two plank strips' 10px/16px, plus .shelf-scene's 8px bottom padding =
+   334px) plus a little padding headroom, so switching List/Shelf doesn't
+   change the page's own height (Mats, 2026-11-04). Independent of
+   .shelf-info-card's own size/position — this derives purely from the
+   shelf itself (books + planks), which the card sitting beside or below
+   it doesn't change. */
 /* Same 2.5rem left indent as .series-list (Mats, 2026-11-04: "Kpt
    Manuscripts få samma indrag som Series"). Selector is `.book-shelf
    ul.book-shelf-list`, not just `.book-shelf-list`, to out-specify
@@ -2259,16 +2263,30 @@ button:disabled {
   font-weight: 600;
 }
 
-/* Positioning root for .shelf-info-card (below), which sits outside normal
-   flow so Series can sit close under the shelf instead of the layout
-   reserving space for a card that's only visible some of the time (Mats,
-   2026-11-04, ported from the artifact prototype this was built from). */
+/*
+ * .shelf-info-card (below) sits beside the shelf by default and wraps
+ * below it only when the row runs out of horizontal room (Mats,
+ * 2026-11-05: "det blir bättre med kortet på höger sida om bokhyllan. Om
+ * man har så många böcker att inte kortet ryms på sidan om bokhyllan DÅ
+ * får det hamna under") — plain flex-wrap, not a media query or a
+ * book-count threshold, so it adapts to the actual available width
+ * (window size, sidebar state) rather than guessing at one. Superseded
+ * the earlier design (card absolutely positioned below the shelf, out of
+ * flow so it overlaid Series instead of pushing it down) — now that the
+ * card sits in normal flow, showing it pushes Series down like any other
+ * content; that's an accepted, intended consequence of this layout, not
+ * a defect.
+ */
 .shelf-row {
-  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem;
   margin-top: 1rem;
 }
 
 .shelf-scene {
+  flex: 0 0 auto;
   perspective: 1400px;
   padding-bottom: 0.5rem;
 }
@@ -2459,20 +2477,17 @@ button:disabled {
   transform: translateY(calc(var(--h) / 2 + 28px)) rotateX(-90deg) scale(1.1);
 }
 
-/* Sits BELOW the shelf, left-aligned with it, not beside it — and
-   deliberately out of flow (see .shelf-row above), so when it's open it
-   lays itself over whatever's underneath (Series) instead of pushing it
-   down. top:346px = the shelf's own fixed total height (.shelf-books'
-   230px min book height + 70px headroom = 300px, plus the two plank
-   strips' 10px/16px, plus .shelf-scene's 8px bottom padding = 334px) plus
-   a 12px gap — not book-count-dependent the way the shelf's WIDTH is, so
-   this can be a plain constant. */
+/* Beside the shelf by default; .shelf-row's flex-wrap sends it below
+   automatically once the row is too narrow to fit both (see .shelf-row's
+   own comment). Only rendered at all when a book is selected (JSX), not
+   toggled by a class, so it takes zero layout space — and zero width in
+   .shelf-row's wrap calculation — the rest of the time; that trades away
+   the old fade/slide-in transition for a simpler, correct-by-construction
+   "not there until needed" instead of a permanently-reserved invisible
+   slot. */
 .shelf-info-card {
-  position: absolute;
-  top: 346px;
-  left: 0;
+  flex: 0 0 380px;
   width: 380px;
-  z-index: 5;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -2481,16 +2496,6 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  opacity: 0;
-  transform: translateX(-8px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  pointer-events: none;
-}
-
-.shelf-info-card.is-visible {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
 }
 
 .shelf-info-head {

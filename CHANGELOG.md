@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.288] - 2026-11-05
+
+### Fixed
+- Drag-to-reorder on the bookshelf (Shelf view's "Your manuscripts") no longer shows a "not allowed" cursor and refuses to drop, in the desktop app. Tauri's own native OS drag-drop handling was intercepting the page's drag events in the Windows WebView2 webview; turned it off (`dragDropEnabled: false`) since nothing in the app relies on it.
+
+### Changed
+- The selected-book info card on the Shelf view now sits beside the shelf instead of always below it, wrapping below only when there isn't room (narrow window, or enough books that the shelf itself is wide). Showing it now pushes "Your series" down like any other content, instead of overlaying it.
+
 ## [1.0.287] - 2026-11-05
 
 ### Added
