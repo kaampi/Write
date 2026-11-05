@@ -9,6 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.278] - 2026-11-05
+
+### Added
+- **AI-free mode** (Settings → AI settings): a toggle, independent of whether a local AI is actually connected, that grays out every AI-triggering control across the editor and Story Bible panels — drafting, rewriting, analysis, interviews, extraction, proofreading, developmental editing, and more — without hiding them. Writing, chapters, the Story Bible's manual fields, and export all keep working regardless.
+- **Bundled sample manuscript**: "Load sample manuscript…" in the Files menu creates a new manuscript from Arthur Conan Doyle's *The Hound of the Baskervilles* (public domain) — all 15 chapters as original text, each with a brief and summary, plus a book synopsis — so a new author has something real to explore the app on.
+
 ## [1.0.277] - 2026-11-04
 
 ### Changed

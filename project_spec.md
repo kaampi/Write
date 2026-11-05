@@ -11794,6 +11794,96 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.277 → v1.0.278 (2026-11-05): AI-fritt läge och
+en bundlad exempelbok.** Två separata samtal som landade i samma
+rond.
+
+**AI-fritt läge.** Startade med en observation: Mats, efter att ha
+fått bekräftat att kaampi Write faktiskt går att skriva i helt utan
+AI-anslutning ("ollamaError visas bara när man försöker använda en
+AI-funktion, inget hindrar en från att skapa manuskript och skriva
+utan AI"): "Det är lite intressant... appen är faktiskt rätt bra även
+utan AI. Något man skulle ta med när man marknadsför appen." Följdes
+av: "Jag tänker om man ska kunna ställa appen i AI-fritt läge så att
+man inte ser de verktyg som kräver AI. Eller snarare man ser menyval
+men de är gråade och inaktiverade. Kan det vara en bra grej och om ja,
+är det svårt att får till?"
+
+Research (en fork) innan något byggdes: alla AI-anrop går redan genom
+bara två filer (`BookStore.tsx`/`SeriesStore.tsx`), en samlad
+"AI ej ansluten"-signal fanns redan, och knapparna följer redan ett
+etablerat `disabled={busy !== null}`-mönster 19+ gånger - bedömt som
+"medelstort", inte svårt arkitektoniskt, bara brett (40-60+ enskilda
+knappar). Mats: "Innan vi bygger det ska vi också fundera på vart man
+switchar över till AI-fritt läge. Under Settings antar jag? Och man
+borde kunna ha AI-fritt läge även om man har en lokal AI installerad."
+Föreslog Settings → AI settings-sektionen, en egen explicit växel
+oberoende av anslutningsstatus. Mats: "Låter rätt. Vi kör på."
+
+Byggt i två steg: egen grund (`aiFreeMode.ts`, samma localStorage-
+pub/sub-form som `mascot.ts`; kryssruta överst i AI settings-
+sektionen, helt oberoende av `ollamaError`/`connected`), sen en
+bakgrundsagent som gick igenom varenda `setBusy(...)`-anrop i
+`BookStore.tsx`/`SeriesStore.tsx` för att få fram den sanna listan av
+AI-handlingar (draft/recast/translate/analyze/polish/extract/critics/
+illustrate/ask-manuscript/ask-passage/interview/extract-*/summarize/
+import-lore/develop/proofread/developmental, plus rewriteSpans
+extend/elaborate/instruct/beat, plus SeriesStores extract-synopsis/
+extract-entity-note) och vävde in `aiFree` i 12 filers disabled-
+villkor (Editor.tsx, ProseCanvas.tsx, ProseStatsCard.tsx,
+BiblePanel.tsx, DevelopmentalCard.tsx, ProofreadCard.tsx,
+SeriesWorkspace.tsx, SeriesEntityDetailOverlay.tsx m.fl.) - medvetet
+INTE rört navigation, Find/Replace, spara/öppna/radera, omslag/
+spinnfärg, eller HandbookPanels "Connect a local AI"-knapp (öppnar
+bara en guide, anropar ingen AI).
+
+**Exempelbok.** Mats: "Skulle det vara möjligt att läsa in en bok som
+är fri (t ex Baskervilles hund) och lägga in den som en exempelbok i
+Appen, där du kopierar in kapitlen, skriver drafts och synopsis."
+Tre klargörande frågor innan bygget: bundlad med appen (för alla
+användare) vs. bara lokalt hos Mats - "Bundlad med appen"; alla 15
+kapitel eller ett urval - "Alla 15 kapitel, full text"; och om
+"drafts" betydde att köra AI-verktygen på texten eller bara lägga in
+originaltexten - "Bara originaltexten som prosa." Mats rättade sig
+själv strax efter: "Sorry menade briefs" - han ville ha `brief`-
+fältet ifyllt per kapitel (inte AI-körda utkast).
+
+En andra bakgrundsagent hämtade "The Hound of the Baskervilles" av
+Arthur Conan Doyle (allmän egendom, 1901-02) från Project Gutenberg
+(ebook-id 2852, `gutenberg.org/ebooks/2852.txt.utf-8`, hittat via
+Gutendex API, `curl` rakt av - INTE WebFetch, som hade kunnat
+parafrasera originaltexten genom en LLM-sammanfattning) - städade bort
+Gutenbergs licenshuvud/fot, delade upp i exakt 15 kapitel, skrev ett
+framåtblickande `brief` och ett bakåtblickande `summary` per kapitel
+för hand, plus en bok-synopsis. Sparat som en 342kB statisk JSON-fil
+(`public/sample-manuscripts/hound-of-the-baskervilles.json`) - inte
+buntad i JS-chunken, hämtas on-demand. Ny `loadSampleManuscript()` i
+`BookStore.tsx` speglar `importManuscript`s mönster (skapa Book+
+kapitel, spara, uppdatera summaries, öppna), nytt "Load sample
+manuscript…"-menyval i Files-menyn.
+
+Två bakgrundsagenter kördes parallellt i samma arbetskatalog (utan
+worktree-isolering), vilket lämnade trädet i tillfälligt inkonsekventa
+mellanlägen flera gånger (t.ex. en komponent som använde `aiFree`
+innan hooken som deklarerar den hunnit läggas till). Hanterat med
+mellanliggande, icke-versionsnumrerade commits bara när `tsc --noEmit`
+faktiskt gick rent vid det tillfället (väntade in rena lägen med en
+bakgrundsbevakning istället för att gissa), snarare än att pusha
+trasig kod för att tillfredsställa ett commit-hook-krav.
+
+Verifierat live med Playwright, oberoende av båda agenternas egna
+rapporter: laddade exempelboken - 15 kapitelrader i sidomenyn,
+sidinnehållet innehåller både "Baskervilles" och "Sherlock Holmes",
+kapitel 1 visar den riktiga öppningsraden och ett ifyllt brief i
+sidopanelen. Slog sen på AI-fritt läge i Settings - "Draft"-knappen
+gick från aktiv (`isDisabled() === false`) till inaktiv
+(`=== true`), likaså "Extract facts", medan "Stats" (ingen AI-
+funktion) förblev aktiv.
+
+`tsc --noEmit` rent, `npm run build` rent (bekräftat att JSON-filen
+kopieras till `dist/sample-manuscripts/` som statisk tillgång, inte
+buntas in i JS:en), 1270/1270 tester gröna.
+
 **Ändringslogg v1.0.276 → v1.0.277 (2026-11-04): hyllkortets
 spinnfärger byter till kaampi-appens egna märkesfärger.** Mats gav
 sju hexkoder med namn: "BD9300 (Codex), 84676A (Explore), 67846A
