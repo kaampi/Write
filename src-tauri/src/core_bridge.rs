@@ -3,6 +3,33 @@ use serde_json::Value;
 
 const CORE_URL: &str = "http://127.0.0.1:43127";
 
+/// Resolves the Codex address to actually talk to: the saved default
+/// (same machine) when the caller passes an empty string — which is what
+/// every existing call site did before this setting existed, so a Write
+/// install nobody has touched keeps working identically — or a validated
+/// override when Settings → kaampi Write Codex has one configured (Codex
+/// over LAN, roadmap-ideas.md #56's narrowed first step: point Write at a
+/// Codex instance on another machine, no auto-discovery). Deliberately
+/// strict (http(s):// + a host, nothing else) rather than passing the
+/// string through unchecked: this value is interpolated straight into
+/// `format!()` URLs below, same trust boundary `valid_project_id` already
+/// guards for IDs.
+fn resolve_core_url(core_url: &str) -> Result<String, String> {
+    let trimmed = core_url.trim();
+    if trimmed.is_empty() {
+        return Ok(CORE_URL.to_string());
+    }
+    let rest = trimmed
+        .strip_prefix("http://")
+        .or_else(|| trimmed.strip_prefix("https://"))
+        .ok_or_else(|| "Codex address must start with http:// or https://".to_string())?;
+    let host = rest.split('/').next().unwrap_or("");
+    if host.is_empty() || host.contains(char::is_whitespace) {
+        return Err("Codex address is missing a host".to_string());
+    }
+    Ok(trimmed.trim_end_matches('/').to_string())
+}
+
 #[derive(Serialize)]
 pub struct CoreConnection {
     pub paired: bool,
@@ -50,8 +77,8 @@ fn bootstrap_path() -> Result<std::path::PathBuf, String> {
     Ok(std::path::Path::new(&home).join(".storycore").join("core.db.bootstrap.json"))
 }
 
-fn check_identity(token: &str) -> Result<(), String> {
-    let identity: Value = ureq::get(&format!("{CORE_URL}/v1/identity"))
+fn check_identity(core_url: &str, token: &str) -> Result<(), String> {
+    let identity: Value = ureq::get(&format!("{core_url}/v1/identity"))
         .header("Authorization", format!("Bearer {token}"))
         .call()
         .map_err(|_| "Cannot authenticate with local Core".to_string())?
@@ -69,12 +96,12 @@ fn check_identity(token: &str) -> Result<(), String> {
 /// Manager, the Secret Service on Linux, or Keychain on macOS), never
 /// returned to the webview.
 #[tauri::command]
-pub async fn core_pair(token: String) -> Result<(), String> {
+pub async fn core_pair(token: String, core_url: String) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || {
         if token.len() != 64 || !token.bytes().all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase()) {
             return Err("Invalid Core credential".to_string());
         }
-        check_identity(&token)?;
+        check_identity(&resolve_core_url(&core_url)?, &token)?;
         #[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
         { credential()?.set_password(&token).map_err(|_| "Could not save the Core credential".to_string()) }
         #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
@@ -102,7 +129,11 @@ pub async fn core_auto_claim() -> Result<(), String> {
                 .filter(|candidate| candidate.len() == 64 && candidate.bytes().all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase()))
                 .ok_or_else(|| "No unclaimed Storybook credential in the pairing file".to_string())?
                 .to_string();
-            check_identity(&token)?;
+            // Always the local default, never the configured Codex-over-LAN
+            // address: the bootstrap file this reads only ever exists next
+            // to a Codex running on THIS machine (bootstrap_path() above),
+            // so a remote override here would check the wrong server.
+            check_identity(CORE_URL, &token)?;
             credential()?.set_password(&token).map_err(|_| "Could not save the Core credential".to_string())?;
             // Already paired successfully at this point - a failure to
             // update the file below just means it stays claimable again,
@@ -119,20 +150,26 @@ pub async fn core_auto_claim() -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn core_connection() -> CoreConnection {
-    tauri::async_runtime::spawn_blocking(|| match saved_token() {
-        Ok(token) => CoreConnection { paired: true, reachable: check_identity(&token).is_ok() },
-        Err(_) => CoreConnection { paired: false, reachable: false },
+pub async fn core_connection(core_url: String) -> CoreConnection {
+    tauri::async_runtime::spawn_blocking(move || {
+        let Ok(resolved) = resolve_core_url(&core_url) else {
+            return CoreConnection { paired: false, reachable: false };
+        };
+        match saved_token() {
+            Ok(token) => CoreConnection { paired: true, reachable: check_identity(&resolved, &token).is_ok() },
+            Err(_) => CoreConnection { paired: false, reachable: false },
+        }
     }).await.unwrap_or(CoreConnection { paired: false, reachable: false })
 }
 
 /// Read the server's actual grant set after a restored Core or lost local queue.
 #[tauri::command]
-pub async fn core_shared_access(project_id: String) -> Result<Value, String> {
+pub async fn core_shared_access(project_id: String, core_url: String) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
         if !valid_project_id(&project_id) { return Err("Invalid manuscript ID".to_string()); }
+        let core_url = resolve_core_url(&core_url)?;
         let token = saved_token()?;
-        ureq::get(&format!("{CORE_URL}/v1/shared-manuscripts/{project_id}/access"))
+        ureq::get(&format!("{core_url}/v1/shared-manuscripts/{project_id}/access"))
             .header("Authorization", format!("Bearer {token}"))
             .call()
             .map_err(|_| "Cannot read Core manuscript access".to_string())?
@@ -143,12 +180,13 @@ pub async fn core_shared_access(project_id: String) -> Result<Value, String> {
 }
 
 #[tauri::command]
-pub async fn core_save_private(book: Value) -> Result<(), String> {
+pub async fn core_save_private(book: Value, core_url: String) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || {
         let id = book.get("id").and_then(Value::as_str).ok_or_else(|| "Missing manuscript ID".to_string())?;
         if !valid_project_id(id) { return Err("Invalid manuscript ID".to_string()); }
+        let core_url = resolve_core_url(&core_url)?;
         let token = saved_token()?;
-        ureq::put(&format!("{CORE_URL}/v1/private-manuscripts/{id}"))
+        ureq::put(&format!("{core_url}/v1/private-manuscripts/{id}"))
             .header("Authorization", format!("Bearer {token}"))
             .send_json(serde_json::json!({ "book": book }))
             .map_err(|_| "Core did not accept the private manuscript".to_string())?;
@@ -161,10 +199,11 @@ pub async fn core_save_private(book: Value) -> Result<(), String> {
 /// a machine that doesn't know any of these project IDs yet (unlike
 /// core_private_versions below, which needs one).
 #[tauri::command]
-pub async fn core_private_manuscripts() -> Result<Value, String> {
-    tauri::async_runtime::spawn_blocking(|| {
+pub async fn core_private_manuscripts(core_url: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let core_url = resolve_core_url(&core_url)?;
         let token = saved_token()?;
-        ureq::get(&format!("{CORE_URL}/v1/private-manuscripts"))
+        ureq::get(&format!("{core_url}/v1/private-manuscripts"))
             .header("Authorization", format!("Bearer {token}"))
             .call()
             .map_err(|_| "Cannot list private Core manuscripts".to_string())?
@@ -175,11 +214,12 @@ pub async fn core_private_manuscripts() -> Result<Value, String> {
 }
 
 #[tauri::command]
-pub async fn core_private_versions(project_id: String) -> Result<Value, String> {
+pub async fn core_private_versions(project_id: String, core_url: String) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
         if !valid_project_id(&project_id) { return Err("Invalid manuscript ID".to_string()); }
+        let core_url = resolve_core_url(&core_url)?;
         let token = saved_token()?;
-        ureq::get(&format!("{CORE_URL}/v1/private-manuscripts/{project_id}/versions"))
+        ureq::get(&format!("{core_url}/v1/private-manuscripts/{project_id}/versions"))
             .header("Authorization", format!("Bearer {token}"))
             .call()
             .map_err(|_| "Cannot list private Core versions".to_string())?
@@ -190,11 +230,12 @@ pub async fn core_private_versions(project_id: String) -> Result<Value, String> 
 }
 
 #[tauri::command]
-pub async fn core_private_revision(revision_id: String) -> Result<Value, String> {
+pub async fn core_private_revision(revision_id: String, core_url: String) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
         if !valid_project_id(&revision_id) { return Err("Invalid revision ID".to_string()); }
+        let core_url = resolve_core_url(&core_url)?;
         let token = saved_token()?;
-        ureq::get(&format!("{CORE_URL}/v1/revisions/{revision_id}"))
+        ureq::get(&format!("{core_url}/v1/revisions/{revision_id}"))
             .header("Authorization", format!("Bearer {token}"))
             .call()
             .map_err(|_| "Cannot read private Core revision".to_string())?
@@ -205,13 +246,14 @@ pub async fn core_private_revision(revision_id: String) -> Result<Value, String>
 }
 
 #[tauri::command]
-pub async fn core_publish_shared(publication: Value) -> Result<(), String> {
+pub async fn core_publish_shared(publication: Value, core_url: String) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || {
         let id = publication.get("projectId").and_then(Value::as_str)
             .ok_or_else(|| "Missing manuscript ID".to_string())?;
         if !valid_project_id(id) { return Err("Invalid manuscript ID".to_string()); }
+        let core_url = resolve_core_url(&core_url)?;
         let token = saved_token()?;
-        ureq::put(&format!("{CORE_URL}/v1/shared-manuscripts/{id}"))
+        ureq::put(&format!("{core_url}/v1/shared-manuscripts/{id}"))
             .header("Authorization", format!("Bearer {token}"))
             .send_json(&publication)
             .map_err(|_| "Core did not accept the manuscript publication".to_string())?;
@@ -220,11 +262,12 @@ pub async fn core_publish_shared(publication: Value) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn core_revoke_shared(project_id: String) -> Result<(), String> {
+pub async fn core_revoke_shared(project_id: String, core_url: String) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || {
         if !valid_project_id(&project_id) { return Err("Invalid manuscript ID".to_string()); }
+        let core_url = resolve_core_url(&core_url)?;
         let token = saved_token()?;
-        ureq::delete(&format!("{CORE_URL}/v1/shared-manuscripts/{project_id}"))
+        ureq::delete(&format!("{core_url}/v1/shared-manuscripts/{project_id}"))
             .header("Authorization", format!("Bearer {token}"))
             .call()
             .map_err(|_| "Core did not confirm revoked sharing".to_string())?;
@@ -234,7 +277,7 @@ pub async fn core_revoke_shared(project_id: String) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-    use super::valid_project_id;
+    use super::{resolve_core_url, valid_project_id, CORE_URL};
 
     #[test]
     fn paths_accept_only_local_book_ids() {
@@ -242,5 +285,26 @@ mod tests {
         assert!(!valid_project_id("../other"));
         assert!(!valid_project_id("book?reader=comic"));
         assert!(!valid_project_id(""));
+    }
+
+    #[test]
+    fn core_url_defaults_to_the_local_address_when_unset() {
+        assert_eq!(resolve_core_url("").unwrap(), CORE_URL);
+        assert_eq!(resolve_core_url("   ").unwrap(), CORE_URL);
+    }
+
+    #[test]
+    fn core_url_accepts_a_lan_address_and_trims_a_trailing_slash() {
+        assert_eq!(resolve_core_url("http://192.168.1.50:43127").unwrap(), "http://192.168.1.50:43127");
+        assert_eq!(resolve_core_url("http://192.168.1.50:43127/").unwrap(), "http://192.168.1.50:43127");
+        assert_eq!(resolve_core_url("https://codex.local:43127").unwrap(), "https://codex.local:43127");
+    }
+
+    #[test]
+    fn core_url_rejects_anything_without_a_valid_scheme_and_host() {
+        assert!(resolve_core_url("192.168.1.50:43127").is_err());
+        assert!(resolve_core_url("ftp://192.168.1.50").is_err());
+        assert!(resolve_core_url("http://").is_err());
+        assert!(resolve_core_url("http:// 192.168.1.50").is_err());
     }
 }

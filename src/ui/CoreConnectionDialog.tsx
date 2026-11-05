@@ -4,7 +4,7 @@ import { CloseIconButton } from "./CloseIconButton";
 import { sortedChapters, type Book } from "@core/BookSchema";
 import { prepareCoreBookRestore, type CoreBookRevision } from "@core/coreRevisionRestore";
 import type { CoreShareReader } from "@persistence/CoreManuscriptPublication";
-import { coreAutoClaim, coreConnection, corePrivateRevision, corePrivateVersions, coreSharedAccess, pairCore, type CoreConnection, type CorePrivateVersions } from "@persistence/CoreDesktopTransport";
+import { coreAutoClaim, coreConnection, corePrivateRevision, corePrivateVersions, coreSharedAccess, getCoreUrl, pairCore, setCoreUrl, type CoreConnection, type CorePrivateVersions } from "@persistence/CoreDesktopTransport";
 import { coreSharingOutbox, coreSnapshotOutbox, flushCoreSharing, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
 import { useLocale } from "./i18n";
 
@@ -29,7 +29,10 @@ const copy = {
     auto: "Save private versions automatically", autoHint: "After local saves, kaampi Codex makes a new version at most about every ten minutes. Offline changes stay queued as the latest copy. Turning this off stops future checkpoints; an already queued one still syncs.",
     lastSnapshot: "Last confirmed private version",
     subtitle: "kaampi Codex is an optional local helper: it can back up this manuscript and share parts of it with your other kaampi apps.", tabSharing: "Sharing", tabVersions: "Versions",
-    shareHeading: "Show this manuscript in"
+    shareHeading: "Show this manuscript in",
+    addressLabel: "Codex address", addressPlaceholder: "This computer (default)",
+    addressHint: "Leave empty to use this computer's own Codex. To reach a Codex running on another computer on your local network instead, enter its address here, e.g. http://192.168.1.50:43127 — then pair below with a key from that computer. The connection runs over plain HTTP, so only do this on a network you trust: the pairing key travels in clear text on it.",
+    addressSaved: "Saved — pair below to connect to it."
   },
   sv: {
     title: "kaampi Write Codex", close: "Stäng",
@@ -51,7 +54,10 @@ const copy = {
     auto: "Spara privata versioner automatiskt", autoHint: "Efter lokal sparning skapar kaampi Codex en ny version högst ungefär var tionde minut. Vid avbrott köas den senaste kopian. Avstängning stoppar framtida checkpoints; en redan köad kopia synkas fortfarande.",
     lastSnapshot: "Senaste bekräftade privata version",
     subtitle: "kaampi Codex är en valfri lokal hjälptjänst: den kan säkerhetskopiera det här manuset och dela delar av det med dina andra kaampi-appar.", tabSharing: "Delning", tabVersions: "Versioner",
-    shareHeading: "Visa manuskriptet i"
+    shareHeading: "Visa manuskriptet i",
+    addressLabel: "Codex-adress", addressPlaceholder: "Den här datorn (standard)",
+    addressHint: "Lämna tomt för att använda den här datorns egen Codex. För att istället nå en Codex som körs på en annan dator i ditt lokala nätverk, ange dess adress här, t.ex. http://192.168.1.50:43127 — parkoppla sedan nedan med en nyckel från den datorn. Anslutningen går över vanlig HTTP, så gör det bara på ett nätverk du litar på: parkopplingsnyckeln skickas i klartext på det.",
+    addressSaved: "Sparad — parkoppla nedan för att ansluta till den."
   },
   nb: {
     title: "kaampi Write Codex", close: "Lukk",
@@ -73,7 +79,10 @@ const copy = {
     auto: "Lagre private versjoner automatisk", autoHint: "Etter lokal lagring lager kaampi Codex en ny versjon høyst omtrent hvert tiende minutt. Ved avbrudd legges den nyeste kopien i kø. Avslåing stopper fremtidige checkpoints; en allerede kølagt kopi synkroniseres fortsatt.",
     lastSnapshot: "Siste bekreftede private versjon",
     subtitle: "kaampi Codex er en valgfri lokal hjelpetjeneste: den kan sikkerhetskopiere dette manuset og dele deler av det med dine andre kaampi-apper.", tabSharing: "Deling", tabVersions: "Versjoner",
-    shareHeading: "Vis dette manuset i"
+    shareHeading: "Vis dette manuset i",
+    addressLabel: "Codex-adresse", addressPlaceholder: "Denne datamaskinen (standard)",
+    addressHint: "La stå tomt for å bruke denne datamaskinens egen Codex. For i stedet å nå en Codex som kjører på en annen datamaskin i ditt lokale nettverk, skriv inn adressen her, f.eks. http://192.168.1.50:43127 — par deretter under med en nøkkel fra den datamaskinen. Tilkoblingen går over vanlig HTTP, så gjør dette bare på et nettverk du stoler på: paringsnøkkelen sendes i klartekst på det.",
+    addressSaved: "Lagret — par under for å koble til den."
   }
 };
 
@@ -92,6 +101,7 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
   const [inspection, setInspection] = useState<{ book: Book; source: CoreBookRevision; mode: "view" | "compare" } | null>(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState("");
+  const [address, setAddress] = useState(() => getCoreUrl());
   const [working, setWorking] = useState(false);
   const [error, setError] = useState("");
   const [tab, setTab] = useState<"sharing" | "versions">("sharing");
@@ -211,6 +221,19 @@ export function CoreConnectionDialog({ bookId, currentBook, onCheckpoint, onRest
           <p role="status">{!desktop ? m.unavailable : connection.reachable ? m.connected : connection.paired ? m.offline : m.disconnected}</p>
           {desktop && !connection.paired ? (
             <form onSubmit={event => { event.preventDefault(); void run(async () => { await pairCore(token.trim()); setToken(""); await Promise.allSettled([flushCoreSharing(), flushCoreSnapshots()]); }); }}>
+              <label>
+                {m.addressLabel}
+                <input
+                  type="text"
+                  autoComplete="off"
+                  placeholder={m.addressPlaceholder}
+                  value={address}
+                  onChange={event => { setAddress(event.target.value); setCoreUrl(event.target.value); }}
+                  disabled={working}
+                />
+              </label>
+              <p className="quiet">{m.addressHint}</p>
+              {address.trim() ? <p role="status">{m.addressSaved}</p> : null}
               <label>{m.token}<input type="password" autoComplete="off" value={token} onChange={event => setToken(event.target.value)} disabled={working} /></label>
               <button type="submit" disabled={working || !token.trim()}>{working ? m.pairing : m.pair}</button>
             </form>

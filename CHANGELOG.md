@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.287] - 2026-11-05
+
+### Added
+- A "Codex address" field when pairing with kaampi Codex, alongside the pairing key — leave it empty to use this computer's own Codex (unchanged default), or point it at a Codex running on another computer on the local network (e.g. `http://192.168.1.50:43127`). The first, narrowed step toward Codex over LAN: not automatic discovery, just the ability to connect to a Codex elsewhere on the network. The connection runs over plain HTTP, so this is meant for a trusted home/office network, not the open internet — the pairing key travels in clear text on it. Requires a matching Codex release with `CORE_HOST` support.
+
 ## [1.0.286] - 2026-11-05
 
 ### Added

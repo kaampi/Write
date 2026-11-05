@@ -3159,7 +3159,27 @@ materialet) snarare än att bygga ut en hel skrivkurs på en gång.
 
 ---
 
-### 56. Codex över LAN — jobba mot samma manus från flera datorer i samma nätverk
+### 56. Codex över LAN — jobba mot samma manus från flera datorer i samma nätverk ⚠️ första steget byggt (Write v1.0.287, Codex CORE_HOST)
+
+**Första steget byggt (2026-11-05).** Mats: "Punkt 56 är ju lite
+intressant men där är kanske att kunna köra mot en lokal AI-server väl
+så intressant som första steg..." → "Hur stort jobb är det att få
+Codex som en nätverkstjänst?" → "Och med din sjuka kompetens så är
+det fixat på 5 minuter :) Vi kör igång." Byggt: Codex' bindningsadress
+är nu konfigurerbar (`CORE_HOST`, standard oförändrat `127.0.0.1`),
+och Write har ett nytt "Codex address"-fält vid parkoppling — man kan
+alltså nu peka en Write-installation mot en Codex på en annan dator i
+samma nätverk. Detaljer i project_spec.md (v1.0.286 → v1.0.287).
+
+**Kvarstår av den här punkten, inte påbörjat:** auto-upptäckt/mDNS
+(användaren måste veta och skriva in IP-adressen själv), brandväggs-
+UX (ingen av de dialoger `docs/running.md` redan dokumenterar för
+SmartScreen/Gatekeeper har motsvarighet här än), ett "byt Codex efter
+redan parkopplad"-flöde, och löftestexten ("lämnar aldrig din dator")
+som ännu inte uppdaterats — stämmer fortfarande exakt så länge ingen
+aktivt pekat mot en annan dator, men bör skärpas till samma typ av
+tydlighet som uppdateringskoll-löftet redan fick (se punkt om
+installer/uppdaterare ovan).
 
 **Bakgrund (Mats, 2026-10-29):** har Write installerat på en
 kontorsdator och en laptop, båda med sin egen lokala Codex-instans.

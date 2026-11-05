@@ -4,6 +4,25 @@ import { parseBook, type Book } from "@core/BookSchema";
 import type { CoreBookRevision } from "@core/coreRevisionRestore";
 import type { CoreSharingTransport } from "./CoreSharingOutbox";
 
+const CORE_URL_KEY = "storybook-ai.core-url";
+
+/**
+ * Codex over LAN (roadmap-ideas.md #56's narrowed first step): empty means
+ * "this machine's own Codex", kaampi Write's behavior since before this
+ * setting existed. A non-empty value points every call below at a Codex
+ * instance on another machine instead — core_bridge.rs validates and
+ * resolves it on the Rust side (resolve_core_url), this is just storage.
+ */
+export function getCoreUrl(): string {
+  return localStorage.getItem(CORE_URL_KEY) ?? "";
+}
+
+export function setCoreUrl(url: string): void {
+  const trimmed = url.trim();
+  if (trimmed) localStorage.setItem(CORE_URL_KEY, trimmed);
+  else localStorage.removeItem(CORE_URL_KEY);
+}
+
 export type CoreConnection = { paired: boolean; reachable: boolean };
 export type CoreSharedAccess = { projectId: string; exists: boolean; readers: ("sandbox" | "comic")[] };
 export type CorePrivateVersions = {
@@ -16,22 +35,22 @@ export type CorePrivateManuscript = { projectId: string; title: string; revision
 export const coreDesktopTransport: CoreSharingTransport = {
   async publish(publication: CoreManuscriptPublication) {
     if (!isTauri()) throw new Error("Core desktop connection is unavailable in this browser");
-    await invoke("core_publish_shared", { publication });
+    await invoke("core_publish_shared", { publication, coreUrl: getCoreUrl() });
   },
   async revoke(bookId: string) {
     if (!isTauri()) throw new Error("Core desktop connection is unavailable in this browser");
-    await invoke("core_revoke_shared", { projectId: bookId });
+    await invoke("core_revoke_shared", { projectId: bookId, coreUrl: getCoreUrl() });
   }
 };
 
 export async function coreConnection(): Promise<CoreConnection> {
   if (!isTauri()) return { paired: false, reachable: false };
-  return invoke<CoreConnection>("core_connection");
+  return invoke<CoreConnection>("core_connection", { coreUrl: getCoreUrl() });
 }
 
 export async function coreSharedAccess(projectId: string): Promise<CoreSharedAccess> {
   if (!isTauri()) throw new Error("Core sharing access requires the desktop app");
-  const value = await invoke<CoreSharedAccess>("core_shared_access", { projectId });
+  const value = await invoke<CoreSharedAccess>("core_shared_access", { projectId, coreUrl: getCoreUrl() });
   if (value.projectId !== projectId || typeof value.exists !== "boolean" || !Array.isArray(value.readers) ||
       value.readers.some(reader => reader !== "sandbox" && reader !== "comic")) {
     throw new Error("Invalid Core sharing access response");
@@ -41,7 +60,7 @@ export async function coreSharedAccess(projectId: string): Promise<CoreSharedAcc
 
 export async function saveCorePrivateBook(book: Book): Promise<void> {
   if (!isTauri()) throw new Error("Core private snapshots require the desktop app");
-  await invoke("core_save_private", { book: parseBook(book) });
+  await invoke("core_save_private", { book: parseBook(book), coreUrl: getCoreUrl() });
 }
 
 /**
@@ -51,7 +70,7 @@ export async function saveCorePrivateBook(book: Book): Promise<void> {
  */
 export async function corePrivateManuscripts(): Promise<CorePrivateManuscript[]> {
   if (!isTauri()) throw new Error("Core private manuscripts require the desktop app");
-  const value = await invoke<CorePrivateManuscript[]>("core_private_manuscripts");
+  const value = await invoke<CorePrivateManuscript[]>("core_private_manuscripts", { coreUrl: getCoreUrl() });
   if (
     !Array.isArray(value) ||
     value.some(
@@ -70,7 +89,7 @@ export async function corePrivateManuscripts(): Promise<CorePrivateManuscript[]>
 
 export async function corePrivateVersions(projectId: string): Promise<CorePrivateVersions> {
   if (!isTauri()) throw new Error("Core versions require the desktop app");
-  const value = await invoke<CorePrivateVersions>("core_private_versions", { projectId });
+  const value = await invoke<CorePrivateVersions>("core_private_versions", { projectId, coreUrl: getCoreUrl() });
   if (!value || !Array.isArray(value.revisions) ||
       (value.workspace && (value.workspace.kind !== "private-snapshot" || value.workspace.owner_app !== "storybook" || value.workspace.project_id !== projectId)) ||
       value.revisions.some(rev => typeof rev.id !== "string" || !Number.isSafeInteger(rev.number) || rev.workspace_id !== value.workspace?.id)) {
@@ -82,7 +101,7 @@ export async function corePrivateVersions(projectId: string): Promise<CorePrivat
 /** The owner-only revision body is validated by prepareCoreBookRestore before display or import. */
 export async function corePrivateRevision(revisionId: string): Promise<CoreBookRevision["revision"]> {
   if (!isTauri()) throw new Error("Core versions require the desktop app");
-  const value = await invoke<CoreBookRevision["revision"]>("core_private_revision", { revisionId });
+  const value = await invoke<CoreBookRevision["revision"]>("core_private_revision", { revisionId, coreUrl: getCoreUrl() });
   if (!value || value.id !== revisionId || typeof value.workspace_id !== "string" || typeof value.deleted !== "boolean") {
     throw new Error("Invalid Core revision response");
   }
@@ -92,7 +111,7 @@ export async function corePrivateRevision(revisionId: string): Promise<CoreBookR
 /** The token is only handled transiently during pairing; never persist it in IndexedDB/localStorage. */
 export async function pairCore(token: string): Promise<void> {
   if (!isTauri()) throw new Error("Core pairing requires the desktop app");
-  await invoke("core_pair", { token });
+  await invoke("core_pair", { token, coreUrl: getCoreUrl() });
 }
 
 /** Tries to pair from a freshly installed Core's own first-run file (same machine, no key to copy). Resolves to false, never throws, when there's nothing to claim. */

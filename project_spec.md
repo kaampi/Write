@@ -11794,6 +11794,88 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.286 → v1.0.287 (2026-11-05): Codex-adress —
+första, avgränsade steget mot roadmap-punkt #56 (Codex över LAN).**
+Mats, om #56: "Punkt 56 är ju lite intressant men där är kanske att
+kunna köra mot en lokal AI-server väl så intressant som första steg..."
+— en missuppfattning jag rättade (att köra mot en AI-*modell*server på
+annan dator redan fanns, Settings → Models → Server address) men som
+ledde till rätt fråga: "Hur stort jobb är det att få Codex som en
+nätverkstjänst?" Efter en uppskattning (en dags jobb, kanske mindre,
+om man avgränsar bort auto-upptäckt/mDNS och återanvänder den redan
+byggda manuella parkopplingen): "Och med din sjuka kompetens så är det
+fixat på 5 minuter :) Vi kör igång."
+
+Två repon, samma mönster som `CORE_PORT`/`CORE_DB_PATH` redan
+använder i Codex:
+
+**Codex (`kaampi/Codex`, separat repo, kopplades in för tillfället):**
+`packages/service/server.mjs`s `server.listen(port, '127.0.0.1', ...)`
+blev `server.listen(port, host, ...)` där `host = process.env.CORE_HOST
+?? '127.0.0.1'` — standard oförändrad, ett medvetet opt-in för den som
+vill lyssna mot nätverket. Ingen ny autentiseringslogik behövdes:
+Bearer-token-kontrollen i `core.mjs` gäller redan oavsett anropets
+ursprung (verifierat genom att läsa `createCoreServer`). Nytt test i
+`bootstrap.test.mjs` startar servern två gånger (standard respektive
+`CORE_HOST=0.0.0.0`) och läser den faktiska "Core listening on
+X:port"-raden ur stdout för att bekräfta att värdet faktiskt styr
+bindningen, inte bara att miljövariabeln läses. 23/23 tester gröna i
+`packages/service`, 8/8 i rot-vitest.
+
+**Write (`core_bridge.rs`):** `CORE_URL`-konstanten användes på exakt
+åtta ställen (bekräftat via genomläsning, inte gissat) — alla fick en
+ny `core_url: String`-parameter, upplöst via en ny `resolve_core_url`-
+funktion: tom sträng ger exakt samma lokala standardadress som innan
+(`http://127.0.0.1:43127`, så en orörd installation beter sig
+identiskt), en satt adress valideras strikt (måste börja med
+`http://`/`https://`, ha ett host-namn utan blanksteg) innan den
+interpoleras rakt in i `format!()`-URL:er — samma förtroendegräns som
+`valid_project_id` redan vaktar för manus-ID:n. `core_auto_claim`
+(läser parkopplingsfilen från lokal disk) lämnades medvetet orörd och
+pekar alltid mot den lokala standardadressen — den filen finns bara
+där Codex faktiskt installerats, en fjärrkonfiguration där vore fel
+server att fråga. Fyra nya Rust-tester för `resolve_core_url` (tomt →
+standard, giltig LAN-adress, avslutande snedstreck trimmas, ogiltigt
+schema/host avvisas). `cargo test core_bridge`: 4/4 gröna,
+`cargo build --lib` rent.
+
+Frontend (`CoreDesktopTransport.ts`): nya `getCoreUrl`/`setCoreUrl`,
+en enkel `localStorage`-nyckel (`storybook-ai.core-url`) — ingen
+hemlighet, bara en adress, så ingen anledning att gå via OS:ets
+credential-lagring som själva parkopplingsnyckeln redan använder.
+Alla nio relevanta `invoke()`-anrop fick `coreUrl: getCoreUrl()`
+tillagt; `core_auto_claim` lämnad orörd av samma skäl som Rust-sidan
+ovan.
+
+Settings-UI (`CoreConnectionDialog.tsx`): ett nytt "Codex address"-
+fält ovanför parkopplingsnyckeln, synligt bara i det opardade läget
+(att byta adress efter parkoppling skulle kräva en omparkoppling ändå,
+eftersom den sparade nyckeln hör till en specifik Codex — inget
+"byt Codex"-flöde byggt för denna avgränsade första version). Tydlig
+text om att anslutningen går över klartext-HTTP och bara bör användas
+på ett nätverk man litar på, på alla tre språk.
+
+Verifierat live med Playwright: `window.isTauri=true` +
+`window.__TAURI_INTERNALS__.invoke`-stub (samma mönster som tidigare
+Codex-importtester), skrev in en LAN-adress i fältet, bekräftade att
+den sparades i `localStorage` och att både `core_pair`- och det
+efterföljande `core_connection`-anropets faktiska payload bar
+`coreUrl: "http://192.168.1.50:43127"` — inte bara att UI:t ser rätt
+ut, att värdet faktiskt når Tauri-bryggan.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna i
+Write (ingen ny vitest-täckning här — `localStorage` kräver en
+webbläsarmiljö `vite.config.ts`s `environment: "node"` inte ger utan
+extra scaffolding utanför den här avgränsade uppgiften; täckt istället
+av Rust-testerna för valideringslogiken och Playwright-verifieringen
+av den faktiska tråden fram till `invoke()`).
+
+**Kvarstår av #56, inte påbörjat:** auto-upptäckt/mDNS, brandväggs-
+UX, ett "byt Codex efter parkoppling"-flöde, och löftestexten ("lämnar
+aldrig din dator") som fortfarande säger exakt det — stämmer bara så
+länge ingen faktiskt pekar mot en annan dator, vilket nu är möjligt
+men kräver ett aktivt val i två steg (adress + parkopplingsnyckel).
+
 **Ändringslogg v1.0.285 → v1.0.286 (2026-11-05): valbar bredd och
 mellanrum på scenbrytare, i en egen Settings-sektion.** Mats: "Jag har
 en funderoing kring våra snygga HR. Det finns två förbättringsmöjligheter.
