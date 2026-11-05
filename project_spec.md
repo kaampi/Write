@@ -11794,6 +11794,46 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.279 → v1.0.280 (2026-11-05): meningsdelaren
+slutade slå ihop hela dialogväxlingar till "en mening".** Mats
+klistrade in ett helt stycke växlande dialog ur den nya exempelboken
+(Holmes/Watson-deduktionsscenen) och frågade: "Varför säger stats att
+detta är en mening?"
+
+Rotorsak i `proseStats.ts`s `splitSentences`: när en meningsgräns
+landar precis vid ett avslutande citattecken (`…overlooked?” “I am
+afraid…` - den normala platsen mellan två repliker) var `inQuote`-
+flaggan inaktuell. Huvudloopen sätter bara `inQuote = false` när den
+SJÄLV passerar `”`-tecknet i sin egen iteration - men koden som letar
+efter nästa riktiga ord (`next`) hoppar förbi avslutande citattecken i
+en egen inre while-loop UTAN att uppdatera `inQuote`, och gör sen
+`i = j - 1` för att hoppa förbi dem i huvudloopen också. Resultatet:
+`inQuote` lästes som `true` exakt vid varje replikskifte, och
+villkoret `if (inQuote && next) continue;` struntade i gränsen - hela
+den långa utväxlingen blev en enda "mening".
+
+Löst genom att den inre loopen nu minns om den faktiskt passerade ett
+avslutande citattecken (`closedQuote`), och använder `inQuote &&
+!closedQuote && next` istället - en gräns som ligger precis vid en
+citatstängning får alltså bryta oavsett den inaktuella flaggan, och
+`inQuote` sätts explicit till `false` när det händer (så efterföljande
+tecken i huvudloopen har rätt tillstånd). En mening som fortsätter
+INUTI ett och samma, aldrig stängda citat ("Wait. I need to think.”")
+fortsätter medvetet räknas som en enhet - det är inte buggen som
+rapporterades, bara den ärvda design-avvägningen.
+
+Ny test (`tests/core/prose-stats.test.ts`) med fyra repliker i rad -
+förväntar fyra separata meningar, inte en. Körde också precis Mats
+egen inklistrade text genom funktionen direkt (ett engångs-scratch-
+test, borttaget efter) - 6 meningar istället för 1 (det femte, långa
+Holmes-replikblocket med flera interna punkter förblir medvetet en
+enhet, se ovan). Verifierat live: laddade exempelboken, öppnade
+kapitel 1:s Stats - "89 sentences" med en spridd stapel-graf, inte en
+enda extrem outlier.
+
+`tsc --noEmit` rent, `npm run build` rent, 1271/1271 tester gröna (en
+ny).
+
 **Ändringslogg v1.0.278 → v1.0.279 (2026-11-05): "bokinfo"-rutan är
 äntligen den storlek dess egen CSS alltid bett om.** Mats, efter att
 ha sett den nya exempelboken: "Snyggt :) Vi måste göra

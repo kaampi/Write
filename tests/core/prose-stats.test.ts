@@ -29,6 +29,29 @@ describe("splitSentences", () => {
   it("splits on a real stop", () => {
     expect(splitSentences("She stopped. He ran.")).toHaveLength(2);
   });
+
+  /**
+   * Mats, 2026-11-05, with a long run of alternating dialogue from the
+   * bundled Hound of the Baskervilles sample: Stats called the whole
+   * exchange one sentence. Each "...?” “..." boundary sat right at a
+   * closing smart-quote, which left `inQuote` reading stale/true there
+   * (see splitSentences' own `closedQuote` comment) and swallowed every
+   * break in the block.
+   */
+  it("splits back-to-back quoted dialogue lines, not just one giant sentence", () => {
+    const sentences = splitSentences(
+      '“I trust that there is nothing of consequence which I have overlooked?” ' +
+        '“I am afraid, my dear Watson, that most of your conclusions were erroneous.” ' +
+        '“Then I was right.” ' +
+        '“To that extent.”'
+    );
+    expect(sentences).toEqual([
+      "“I trust that there is nothing of consequence which I have overlooked?”",
+      "“I am afraid, my dear Watson, that most of your conclusions were erroneous.”",
+      "“Then I was right.”",
+      "“To that extent.”"
+    ]);
+  });
 });
 
 describe("analyzeProse", () => {

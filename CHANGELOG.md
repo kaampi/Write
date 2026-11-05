@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.280] - 2026-11-05
+
+### Fixed
+- Stats' sentence splitter no longer merges a whole run of back-to-back quoted dialogue lines into a single "sentence". A sentence boundary that lands right at a closing quote mark (the normal case between two speakers' lines) was being treated as still inside an open quote.
+
 ## [1.0.279] - 2026-11-05
 
 ### Fixed

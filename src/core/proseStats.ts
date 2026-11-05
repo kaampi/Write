@@ -279,15 +279,31 @@ export function splitSentences(text: string): string[] {
     if (ch === "." && isAbbreviation(source, i)) continue;
 
     let j = i + 1;
-    while (j < source.length && /["”'’]/.test(source[j] ?? "")) j += 1;
+    let closedQuote = false;
+    while (j < source.length && /["”'’]/.test(source[j] ?? "")) {
+      if (source[j] === "”" || source[j] === '"') closedQuote = true;
+      j += 1;
+    }
     while (j < source.length && source[j] === " ") j += 1;
     const next = source[j];
     if (next && /[a-z]/.test(next)) continue;
-    if (inQuote && next) continue;
+    /*
+     * `inQuote` reflects state as of the LAST quote-mark the main loop
+     * itself stepped over - which is stale right here if the character(s)
+     * right after this punctuation close the quote (consumed by the
+     * lookahead above, not yet seen by the main loop). Without
+     * `!closedQuote`, back-to-back quoted lines - `"Foo?” “Bar."` - never
+     * broke apart: every sentence boundary sat right at a closing quote,
+     * so `inQuote` always read true there and swallowed the whole
+     * exchange into one giant "sentence" (Mats, 2026-11-05, with a block
+     * of alternating dialogue Stats called one sentence).
+     */
+    if (inQuote && !closedQuote && next) continue;
 
     const piece = source.slice(start, j).trim();
     if (piece) out.push(piece);
     start = j;
+    if (closedQuote) inQuote = false;
     i = j - 1;
   }
 
