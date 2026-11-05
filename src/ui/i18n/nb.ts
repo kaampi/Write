@@ -1007,19 +1007,95 @@ export const nb: Messages = {
     sections: {
       "connect-local-ai": {
         heading: "Koble til en lokal AI",
-        body: "kaampi Write jobber med en lokal AI-modell.\nDet betyr at AI-funksjonene bruker modellen du selv har koblet til kaampi Write.\nFor å bruke funksjoner som utkast, omskriving, analyse og intervjuer trenger du derfor først en fungerende lokal AI-tilkobling.\n\nFølg hurtigstarten for å:\n1. Installere en lokal AI-løsning.\n2. Velge en modell.\n3. Koble den til kaampi Write.\n\nNår tilkoblingen fungerer kan du begynne å skrive."
+        body: "kaampi Write snakker aldri med en skybasert AI-tjeneste. Utkast, omskriving, analyse og intervjuer kjører mot en modell du selv installerer og kjører på din egen datamaskin — ingenting å abonnere på, ingen API-nøkkelfelt noe sted i appen, ingenting som forlater maskinen din.",
+        steps: [
+          {
+            heading: "Hvorfor en lokal modell, ikke en skybasert",
+            body: "Dette er ingen manglende funksjon — det er hele poenget med kaampi Write. Manuset ditt er din eiendom og skal aldri måtte forlate datamaskinen din for å være nyttig. Å kjøre modellen lokalt er det som gjør løftet bokstavelig talt sant, ikke bare en policy: det finnes ingen server i andre enden av tilkoblingen å sende teksten din til i det hele tatt."
+          },
+          {
+            heading: "1. Installer en lokal AI-motor",
+            body: "En motor er programmet som faktisk kjører en modell på datamaskinen din; kaampi Write snakker med motoren, og motoren snakker med modellen. Har du ingen fra før, anbefaler vi Ollama — gratis, fra ollama.com, og enklest å få i gang. Foretrekker du noe annet, fungerer LM Studio og andre lokale servere også."
+          },
+          {
+            heading: "2. Velg en modell",
+            body: "Modellen er det som faktisk skriver og resonnerer sammen med deg — motoren fra steg 1 bare kjører den. Vi anbefaler én tilpasset skjønnlitteratur, for eksempel fluffy/l3-8b-stheno-v3.2 (søk på «stheno» i Ollama). Ellers fungerer enhver vanlig chat-modell fint — llama3 eller mistral, for eksempel."
+          },
+          {
+            heading: "3. Koble den til kaampi Write",
+            body: "Bruker du Ollama? Ingenting å stille inn — kaampi Write finner den automatisk på datamaskinen din. Bruker du LM Studio eller en annen server i stedet? Åpne Settings → Models, velg den under Engine, og lim inn serveradressen den viser deg."
+          },
+          {
+            heading: "Hvis ingenting skjer når du skriver utkast",
+            body: "kaampi Write når ikke den lokale serveren din. Sørg for at motoren fra steg 1 faktisk kjører, og at en chat-modell er installert i den. Settings → Models viser hvilken motor og adresse den prøver å bruke — de må stemme med det som faktisk kjører på datamaskinen din."
+          }
+        ]
       },
       "connection-presets": {
         heading: "Tilkoblingssnarveier",
-        body: "Bytter du mellom mer enn én lokal server — Ollama for hverdagsskriving, LM Studio for en annen modell, en testmaskin på et annet nettverk? Settings → Models lar deg lagre en Engine og Server address som en navngitt rute, i stedet for å skrive inn adressen på nytt hver gang du bytter. Klikk på en rute for å bruke den igjen; hver av dem utvides for å vise og redigere sine egne innstillinger, med en Update-knapp for endringer og en slett-knapp for å fjerne den. Det som er aktivt akkurat nå, forblir alltid synlig og redigerbart, lagret som en rute eller ikke."
+        body: "En snarvei er en lagret vei tilbake til én bestemt motor og serveradresse — nyttig så snart du jevnlig snakker med mer enn én.",
+        steps: [
+          {
+            heading: "Hvem dette er for",
+            body: "Bruker du bare én lokal server noensinne, trenger du trolig aldri dette — Settings → Models husker allerede den ene tilkoblingen din. Snarveier begynner å lønne seg først når du bytter mellom mer enn én: Ollama for hverdagsskriving, LM Studio for en annen modell, en testmaskin på nettverket ditt."
+          },
+          {
+            heading: "Lagre en tilkobling som en rute",
+            body: "Settings → Models lar deg lagre en Engine og Server address som en navngitt rute, i stedet for å skrive inn adressen på nytt hver gang du bytter mellom dem. Klikk på en rute for å gjøre den til den aktive tilkoblingen igjen."
+          },
+          {
+            heading: "Rediger eller fjern en rute",
+            body: "Hver rute utvides for å vise og redigere sine egne innstillinger — en Update-knapp lagrer endringer på akkurat den ruten, og en slett-knapp fjerner den. Å redigere en rute endrer bare den lagrede snarveien; det rører ikke den aktive tilkoblingen akkurat nå med mindre du også klikker på den."
+          },
+          {
+            heading: "Det som er aktivt, forblir alltid synlig",
+            body: "Hvilken motor og adresse kaampi Write faktisk bruker akkurat nå, vises og forblir redigerbart enten den tilfeldigvis er lagret som en rute eller ikke. Å lagre en rute er bare en bekvemmelighet for å finne tilbake senere — det kreves aldri for å bruke en tilkobling."
+          }
+        ]
       },
       "first-book": {
         heading: "Opprett din første bok",
-        body: "Opprett et nytt manus og gi det et navn.\nDu trenger ikke opprette en Synopsis, Story Bible eller en detaljert plan før du begynner.\n\nDu kan gå rett til:\nKapitler → Kapittel 1 → Begynn å skrive\n\nSkriv selv i editoren akkurat som i et vanlig skriveprogram.\nVil du ha hjelp kan du bruke AI-verktøyene."
+        body: "Et navn er alt kaampi Write faktisk trenger fra deg for å begynne — alt annet er valgfritt, og ingenting trenger å skje i en bestemt rekkefølge.",
+        steps: [
+          {
+            heading: "1. Gi den et navn",
+            body: "Skriv en tittel og trykk Enter, eller klikk på pilen ved siden av feltet. Det er hele forberedelsen — du trenger ingen Synopsis, ingen Story Bible, ingen fortellermetode eller noen form for disposisjon før du begynner."
+          },
+          {
+            heading: "2. Gå rett til siden",
+            body: "Et nytt manus åpnes med ett tomt kapittel som allerede venter. Kapitler → Kapittel 1 → begynn å skrive, akkurat som å åpne et tomt dokument i et vanlig skriveprogram — klikk inn på siden og skriv."
+          },
+          {
+            heading: "3. Ordene dine lagres underveis",
+            body: "kaampi Write lagrer det du skriver automatisk, et kort øyeblikk etter at du har sluttet å skrive — ingen Lagre-knapp å huske på, og ingenting å miste om du lukker fanen eller appen."
+          },
+          {
+            heading: "Ta i bruk AI bare når du vil",
+            body: "Å skrive alt for hånd er en fullverdig, normal måte å bruke kaampi Write på. AI-verktøyene (Skriv utkast, Forleng, Utbrodér og resten) ligger under siden når du bestemmer deg for at du vil ha hjelp med et bestemt kapittel — aldri et krav for å få ord på siden."
+          }
+        ]
       },
       "first-chapter": {
         heading: "Ditt første kapittel",
-        body: "Et kapittel består i bunn og grunn av to ting:\n\nKapittelbrief\nHva kapittelet skal oppnå.\n\nManus\nTeksten leseren faktisk kommer til å lese.\n\nEn brief kan for eksempel være:\n”Erik ankommer den gamle jernbanestasjonen. Der møter han en kvinne som virker å kjenne faren hans. Hun nekter å forklare hvordan, og legger igjen et gammelt fotografi på bordet.”\n\nSelve kapittelet er så historien som vokser frem fra dette.\nDu kan skrive kapittelet selv eller bruke Skriv utkast for å få et første utkast å jobbe videre med."
+        body: "Et kapittel er i bunn og grunn to atskilte ting som bor på to atskilte steder: en brief som beskriver hva det skal oppnå, og selve manuset — ordene en leser faktisk kommer til å se.",
+        steps: [
+          {
+            heading: "Briefen er en instruksjon, ikke prosa",
+            body: "Briefen ligger over siden og beskriver hva kapittelet skal oppnå — for deg, og for AI-verktøyene hvis du bruker dem. Den trenger aldri å være velskrevet; det er et notat til deg selv, ikke en del av historien. For eksempel: «Erik ankommer den gamle jernbanestasjonen. Der møter han en kvinne som virker å kjenne faren hans. Hun nekter å forklare hvordan, og legger igjen et gammelt fotografi på bordet.»"
+          },
+          {
+            heading: "Manuset er det som vokser frem fra den",
+            body: "Under briefen er selve siden — kapittelets faktiske tekst, delen en leser vil se. Det er historien som vokser frem fra det briefen beskrev, skrevet i så mye eller så lite detalj som briefen ga deg."
+          },
+          {
+            heading: "Skriv det selv, eller la Skriv utkast begynne",
+            body: "Du kan skrive kapittelet for hånd ut fra briefen, akkurat som du ville skrevet ut fra hvilken som helst disposisjon. Eller trykk Skriv utkast for å få en hel første runde fra modellen, bygget på briefen pluss alt annet som allerede er etablert om historien — noe å lese, beholde eller skrive om, ikke en endelig versjon."
+          },
+          {
+            heading: "En brief er ikke et sammendrag",
+            body: "Briefen beskriver hva som skal skje, skrevet før kapittelet finnes. Når kapittelet først er skrevet, registrerer et eget felt — Summary — hva som faktisk skjedde, i etterkant. De to peker motsatt vei langs samme kapittel; Summary får sitt eget kapittel lenger ut i denne guiden."
+          }
+        ]
       },
       "map-of-storybook-ai": {
         heading: "Et kart over kaampi Write",

@@ -98,19 +98,95 @@ const handbookSections: Record<
 > = {
   "connect-local-ai": {
     heading: "Connect a local AI",
-    body: "kaampi Write works with a local AI model.\nThat means the AI features use the model you have connected to kaampi Write yourself.\nTo use features like drafting, rewriting, analysis, and interviews, you first need a working local AI connection.\n\nFollow the quickstart to:\n1. Install a local AI solution.\n2. Choose a model.\n3. Connect it to kaampi Write.\n\nOnce the connection works, you can start writing."
+    body: "kaampi Write never talks to a cloud AI service. Drafting, rewriting, analysis, and interviews all run against a model you install and run yourself, on your own computer — nothing to subscribe to, no API key field anywhere in the app, nothing that leaves your machine.",
+    steps: [
+      {
+        heading: "Why a local model, not a cloud one",
+        body: "This isn't a missing feature — it's the whole point of kaampi Write. Your manuscript is your property, and it should never have to leave your computer to be useful. Running the model locally is what makes that promise literally true, not just a policy: there is no server on the other end of the connection to send your text to in the first place."
+      },
+      {
+        heading: "1. Install a local AI engine",
+        body: "An engine is the program that actually runs a model on your computer; kaampi Write talks to it, and it talks to the model. If you don't already have one, we recommend Ollama — free, from ollama.com, and the simplest to get running. Prefer something else? LM Studio and other local servers work too."
+      },
+      {
+        heading: "2. Choose a model",
+        body: "The model is what actually writes and reasons with you — the engine from step 1 just runs it. We recommend one tuned for fiction, for example fluffy/l3-8b-stheno-v3.2 (search \"stheno\" in Ollama). Otherwise, any general chat model works fine — llama3 or mistral, for instance."
+      },
+      {
+        heading: "3. Connect it to kaampi Write",
+        body: "Using Ollama? Nothing to configure — kaampi Write finds it automatically on your computer. Using LM Studio or another server instead? Open Settings → Models, choose it under Engine, and paste the server address it shows you."
+      },
+      {
+        heading: "If nothing happens when you draft",
+        body: "kaampi Write can't reach your local server. Make sure the engine from step 1 is actually running, and that a chat model is installed in it. Settings → Models shows the engine and address it's trying to use — they need to match what's actually running on your computer."
+      }
+    ]
   },
   "connection-presets": {
     heading: "Connection presets",
-    body: "Switch between more than one local server — Ollama for everyday writing, LM Studio for a different model, a test rig on another machine? Settings → Models lets you save an Engine and Server address as a named tile, instead of retyping the address each time you switch. Click a tile to use it again; each one expands to show and edit its own settings, with an Update button for changes and a delete button to remove it. Whatever is live right now always stays visible and editable too, saved as a tile or not."
+    body: "A preset is a saved shortcut back to one particular engine and server address — useful the moment you regularly talk to more than one.",
+    steps: [
+      {
+        heading: "Who this is for",
+        body: "If you only ever use one local server, you'll likely never need this — Settings → Models already remembers your one connection. Presets start earning their keep once you switch between more than one: Ollama for everyday writing, LM Studio for a different model, a test rig on another machine on your network."
+      },
+      {
+        heading: "Save a connection as a tile",
+        body: "Settings → Models lets you save an Engine and Server address as a named tile, instead of retyping the address every time you switch between them. Click a tile to make it the live connection again."
+      },
+      {
+        heading: "Edit or remove a tile",
+        body: "Each tile expands to show and edit its own settings — an Update button saves changes to that tile, and a delete button removes it. Editing a tile only changes the saved shortcut; it doesn't touch whatever connection is live right now unless you also click it."
+      },
+      {
+        heading: "What's live always stays visible",
+        body: "Whatever engine and address kaampi Write is actually using right now shows and stays editable whether or not it happens to be saved as a tile. Saving a tile is purely a convenience for getting back to it later — it's never required to use a connection."
+      }
+    ]
   },
   "first-book": {
     heading: "Create your first book",
-    body: "Create a new manuscript and give it a name.\nYou don't need to create a Synopsis, Story Bible, or a detailed plan before you start.\n\nYou can go straight to:\nChapters → Chapter 1 → Start writing\n\nWrite in the editor just like in an ordinary word processor.\nWant help? Use the AI tools."
+    body: "A title is all kaampi Write actually needs from you to start — everything else is optional, and nothing has to happen in a particular order.",
+    steps: [
+      {
+        heading: "1. Give it a name",
+        body: "Type a title and press Enter, or click the arrow next to the field. That's the entire setup — you don't need a Synopsis, a Story Bible, a development method, or any kind of outline before you start."
+      },
+      {
+        heading: "2. Go straight to the page",
+        body: "A new manuscript opens with one empty chapter already waiting. Chapters → Chapter 1 → start writing, the same as opening a blank document in an ordinary word processor — click into the page and type."
+      },
+      {
+        heading: "3. Your words are saved as you go",
+        body: "kaampi Write saves what you write automatically, a short moment after you stop typing — there's no Save button to remember, and nothing to lose if you close the tab or the app."
+      },
+      {
+        heading: "Reach for AI only when you want it",
+        body: "Writing the whole thing by hand is a complete, normal way to use kaampi Write. The AI tools (Draft, Extend, Elaborate, and the rest) sit below the page whenever you decide you want a hand with a particular chapter — never a requirement to get words on the page."
+      }
+    ]
   },
   "first-chapter": {
     heading: "Your first chapter",
-    body: "A chapter is, at its core, two things:\n\nChapter brief\nWhat the chapter needs to accomplish.\n\nManuscript\nThe text the reader will actually read.\n\nA brief might be, for example:\n\"Erik arrives at the old railway station. There he meets a woman who seems to know his father. She refuses to explain how, and leaves an old photograph on the table.\"\n\nThe chapter itself is then the story that grows out of that.\nYou can write the chapter yourself, or use Draft to get a first pass to work from."
+    body: "A chapter is, at its core, two separate things that live in two separate places: a brief describing what it needs to do, and the manuscript itself — the words a reader will actually see.",
+    steps: [
+      {
+        heading: "The brief is an instruction, not prose",
+        body: "The brief sits above the page and describes what the chapter needs to accomplish — for you, and for the AI tools if you use them. It never has to be well written; it's a note to yourself, not part of the story. For example: \"Erik arrives at the old railway station. There he meets a woman who seems to know his father. She refuses to explain how, and leaves an old photograph on the table.\""
+      },
+      {
+        heading: "The manuscript is what grows from it",
+        body: "Below the brief is the page itself — the actual text of the chapter, the part a reader will see. It's the story that grows out of whatever the brief described, written in as much or as little detail as the brief gave you."
+      },
+      {
+        heading: "Write it yourself, or let Draft start it",
+        body: "You can write the chapter by hand from the brief, exactly as you'd write from any outline. Or press Draft to get a full first pass from the model, built from the brief plus everything else already established about the story — something to read, keep, or rewrite, not a final version."
+      },
+      {
+        heading: "A brief isn't a summary",
+        body: "The brief describes what should happen, written before the chapter exists. Once the chapter is actually written, a separate field — Summary — records what did happen, after the fact. The two point in opposite directions along the same chapter; Summary gets its own chapter later in this guide."
+      }
+    ]
   },
   "map-of-storybook-ai": {
     heading: "A map of kaampi Write",

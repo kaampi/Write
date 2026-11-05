@@ -11794,6 +11794,48 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.292 → v1.0.293 (2026-11-05): Guidens "Getting
+Started"-kapitel omskrivna — andra omgången av flerstegsjobbet.**
+Mats: "Ska vi börja fylla guiden med innehåll?" — bekräftade att
+innehållsjobbet nu kör igång, kategori för kategori enligt den
+tidigare överenskomna planen.
+
+Första kategorin: fyra kapitel (`connect-local-ai`,
+`connection-presets`, `first-book`, `first-chapter`) omskrivna från en
+enda tät paragraf vardera till `steps`-strukturen (samma `HandbookStep`-
+typ som redan fanns för "write-with-ai", nu använd på fler ställen) —
+4-5 namngivna underavsnitt per kapitel, vart och ett med sitt eget
+"varför", inte bara "vad". Exempel: `connect-local-ai` fick ett eget
+avsnitt om VARFÖR en lokal modell (inte bara HUR man ansluter en),
+grundat i appens redan existerande integritetslöfte; `first-book` fick
+ett nytt, verifierat påstående om att kaampi Write sparar automatiskt
+medan du skriver (kontrollerat mot `BookStore.tsx`s debounce-sparning
+innan det skrevs, inte gissat).
+
+Ingen ny fakta uppfunnen — allt härstammar antingen från den redan
+existerande guide-texten (bara djupare strukturerad) eller verifierat
+direkt mot koden (`ChapterSchema`s fält `brief`/`summary`/`prose`,
+bekräftar att "ett kapitel är i grunden brief + manus"-ramen i
+`first-chapter` stämmer ordagrant med datamodellen).
+
+Skrivet och översatt för hand på alla tre språk (engelska, svenska,
+norska) i samma commit — ingen maskinöversättning, samma
+djup/struktur i alla tre. En bugg fångad under skrivandet: ett
+svenskt ord ("berättelsemetode") smög sig in i den norska texten av
+misstag, rättad till "fortellermetode" innan commit.
+
+Verifierat live med Playwright: alla fyra omskrivna kapitel öppnade
+och lästa i engelska versionen (skärmdump av varje), plus en separat
+körning på svenska som bekräftade att språkbytet, kategori-rubrikerna
+och det omskrivna innehållet alla visas korrekt tillsammans.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna
+(ingen ny testtäckning — rent innehåll/text, täckt av den visuella
+Playwright-verifieringen).
+
+**Kvarstår, kommande omgångar:** resterande 8 kategorier (74 kapitel)
+i samma stil, en kategori per commit/push enligt Mats egen plan.
+
 **Ändringslogg v1.0.291 → v1.0.292 (2026-11-05): Guiden omgjord till
 modal, i Explores layout — första omgången av ett flerstegsjobb.**
 Mats: "Kan du kolla på hur Expore har sin Guide. Jag vill att Write

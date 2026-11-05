@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.293] - 2026-11-05
+
+### Changed
+- Rewrote the Guide's "Getting Started" chapters (Connect a local AI, Connection presets, Create your first book, Your first chapter) into the fuller, stepped style — each now explains the why behind a step, not just the step itself, matching kaampi Explore's own Guide. All three languages. First of several chapter-by-chapter rewrites across the Guide's 9 categories.
+
 ## [1.0.292] - 2026-11-05
 
 ### Changed
