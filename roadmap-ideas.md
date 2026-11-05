@@ -1103,6 +1103,59 @@ och lorebook-poster som stödjer spel-data (t.ex. "Statistics: Speed
 projektet när SandboxAI:s egen konkurrensbild tas upp där, inte som
 en StoryBook AI-konkurrent.
 
+**Tillägg (2026-11-05): fyra till verktyg bedömda — Scrivener,
+SudoWrite, NovelAI, Hemingway.** Mats: "Om vi skulle ta och titta på
+28 så måste vi fundera på vilka importer vi ska ha... Vet inte exakt
+vilka som är värda att bygga importer för och vilka som ens går att
+bygga import för," med två egna datapunkter: NovelAI exporterar
+`.story`/`.scenario`-JSON (settings, memory, author's note, lorebook,
+AI modules; `.story` behåller retry-historik/färgkodning, `.scenario`
+plattas till en enda textnod), och SudoWrite kan exportera CSV för
+story bible samt DOCX för manuset. Research (webbsök, ingen kod)
+bekräftade och fyllde i:
+
+- **SudoWrite — lättast, rekommenderas först av de fyra.** Tre
+  separata CSV-exporter, inte en: Outline (kapitelnamn+sammanfattning,
+  två kolumner), Characters (en rad per karaktär, en kolumn per
+  egenskap - default+egna fält, så schemat varierar per användare),
+  Worldbuilding (samma rad/kolumn-upplägg, tillagt maj 2025).
+  Manuset separat som DOCX. Exakta kolumnrubriker okända utan ett
+  riktigt exempel, men formen är enkel tabelldata - rakt mappningsbar
+  mot samma faktaplockningspipeline som Importera lore redan använder.
+- **Scrivener — störst värde, större teknisk insats.** Den vanliga
+  Compile-exporten (RTF/DOCX/MD/TXT) är bara plattad prosa, inget
+  strukturerat kvar. Den verkliga möjligheten är `.scriv`-projektet
+  självt: en XML-fil (`.scrivx`) som beskriver hela Binder-trädet
+  (kapitel, en "Research"-mapp med karaktärs-/platsanteckningar som
+  egna dokument), varje dokuments text som en separat RTF-fil under
+  `Files/Data/<UUID>/`. Oofficiellt men parsat av tredjepart förut (en
+  Rust-crate, "inkhaven"). Skulle ge riktig struktur utan att gå vägen
+  om en lossy compile - men ett odokumenterat format som kan ändras
+  mellan Scrivener-versioner, kräver en RTF-parser. Mats har själv
+  tidigare pekat ut Scrivener-författare som StoryBook AI:s
+  kärnmålgrupp (2026-10-14-anteckningen ovan: "Du har rena
+  författare (Scrivener)") - talar för att prioritera högre än ren
+  teknisk enkelhet skulle antyda.
+- **NovelAI — går inte att committa till än.** Ingen dokumenterad
+  JSON-schema för `.story`/`.scenario` hittades, bara
+  beteendebeskrivningar. Lorebook-exporten (separat `.json`/
+  `.lorebook`, även PNG-inbäddad) låter mappningsbar (nyckelord≈
+  triggerord, posttext≈faktavärde) men kan inte byggas blint mot -
+  samma princip som Campfire-utredningen: vänta på en riktig
+  exempelfil.
+- **Hemingway — struken, inte värt en egen adapter.** Ren
+  läsbarhets-redigerare (DOCX/MD/HTML/PDF-export), inget story bible,
+  ingen kapitel-/karaktärsstruktur alls. Täcks redan helt av den
+  generella textimporten.
+
+**Reviderad byggordning** (lägger till på den tidigare ordningen ovan,
+där steg 1 redan är skeppat): SillyTavern Lorebook → SillyTavern
+Character Cards → **SudoWrite CSV** (nytt, billigast av tillägget) →
+**Scrivener `.scriv`** (nytt, eget större delprojekt, inte en snabb
+adapter) → Campfire (fortsatt lågprioriterad, se ovan) → Authoric AI/
+NovelAI (väntar på exempeldata) → övriga efter efterfrågan. Hemingway
+borttaget från listan helt.
+
 ### 29. ~~Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok~~ ❌ struken
 
 **Struken (2026-10-13).** Mats: det här täcks nu av ett eget, redan
