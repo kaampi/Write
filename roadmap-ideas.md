@@ -3569,6 +3569,68 @@ listan, inklusive en separat bugg som hittades (inte fixad): att skapa
 en bok inifrån en seriens Books-flik och sen stänga den föll tillbaka
 till serie-vyn istället för Home.
 
+## Idéer från konkurrensjämförelse (Novel Maestro, 2026-11-05)
+
+Mats delade länken till novelmaestro.com/features och frågade "Har vi
+några smarta idéer här?" — uttryckligen en spaningsfråga, inget
+byggbeslut. Genomgång av deras egen funktionssida (inget
+källkodsgranskat, inget självupplevt — till skillnad från
+StelaWare-analysen ovan).
+
+**Vad det är:** ett webbaserat "developmental editor"-verktyg — inte
+en skrivmiljö i sig, utan ett analysverktyg man importerar ett
+färdigskrivet (eller pågående) manus till. Läser hela manuset över
+flera pass mot "1 400+ berättarregler" och 100+ genrer, och ger
+tillbaka strukturerad kritik, uppgifter och exportbara rapporter.
+
+**Funktion för funktion, mot vad Write redan har:**
+- **De 14 diagnostikverktygen** (Character Arcs, Continuity Check,
+  Setup & Payoffs, Narrative Pulse, Cause & Effect, Thread Browser
+  m.fl.) täcks i stort redan av Continuity 2.0 (punkt 10), Plotlines/
+  scen-matrisen (punkt 11), setup/payoff-spårningen (punkt 12) och
+  hel-manus developmental-analysen (punkt 14). Ingen ny lucka här.
+- **Ask Maestro** ↔ vår Ask Manuscript / Ask about chapter / Interview
+  the world. Samma idé, redan byggt.
+- **Scene-based editor med inline-panel** ↔ vår egen prosa-editor med
+  Story Bible-sidopanelen. Samma grundform.
+
+**Tre idéer som är genuint en annan vinkel än det vi har, värda att
+notera:**
+
+1. **Beta Readers — simulerade LÄSARE, inte kritiker.** Sex fasta
+   personor (Avid Genre Reader, Book Club Member, Close Reader,
+   First-Time Reader, Character Empath, Pacing Hawk) ger reception/
+   upplevelse-feedback, inte hantverkskritik. Skiljer sig från våra
+   Critics (punkt 50, flera kritiker-personas) genom VAD de bedömer:
+   Critics säger "det här är ett hantverksfel", en Beta Reader-persona
+   skulle säga "det här är vad en vanlig läsare känner/tänker här" —
+   kompletterande, inte överlappande.
+2. **Scene Ledger — en rad per scen, flaggar scener som inte
+   förändrar något.** En tvingande tabell: vad vinner/kostar den här
+   scenen. Vi har scen-matrisen (Plotlines, punkt 11) men inte den
+   specifika "ändrar den här scenen faktiskt något"-linsen som ett
+   eget, separat verktyg.
+3. **My Tasks — kritik-fynd blir spårade uppgifter med automatisk
+   omverifiering.** Varje fynd (ursprungscitat, rekommendation,
+   passage-länk) blir ett kort på en Kanban-tavla; när scenen ändras
+   läser verktyget om den och markerar kortet som verifierat. Vi har
+   inget idag som sluter den loopen — Critics/Proofread/Developmental
+   är engångsrapporter, inte ett spårat revisionsarbete över tid.
+
+**En fjärde, mindre idé:** **Publishing assets** — genererad blurb,
+synopsis och query letter med längd-guidning, redo att exportera. Vi
+genererar inte säljtext/pitch-material alls idag; litet och konkret
+om det efterfrågas.
+
+**Bedömning:** inget av det här är ett akut gap — Write täcker redan
+det mesta av kärnanalysen, bara med andra namn. De tre förstnämnda är
+dock äkta, inte bara omformulerade versioner av befintliga verktyg,
+och värda att hålla kvar som idéer snarare än avfärda direkt. Inget
+byggbeslut från den här genomgången — Mats bad uttryckligen bara om en
+spaning.
+
+---
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**
