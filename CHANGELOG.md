@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.285] - 2026-11-05
+
+### Added
+- Ctrl+right-click in the editor now falls through to the operating system's own context menu — the only way to reach its native spell-check suggestions, since a plain right-click always opens one of kaampi Write's own menus.
+
 ## [1.0.284] - 2026-11-05
 
 ### Added

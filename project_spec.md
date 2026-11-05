@@ -11794,6 +11794,39 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.284 → v1.0.285 (2026-11-05): Ctrl+högerklick når
+nu OS:ets egen stavningskontrollsmeny.** Direkt uppföljning på
+stavningskontroll-växeln ovan. Mats: "Om man har felstavning och
+högerklickar på ett ord får man ju 'vår' högerklicksmeny
+[tangent-tappat 'vpr']. Skulle man kunna ha att CTRL+högerklick
+triggar felstavningsmenyn?"
+
+Rotorsak: `ProseCanvas.tsx`s `onContextMenu` anropar
+`event.preventDefault()` i nästan alla sina grenar (sällsynt-ord-
+förslag, omskrivningsmenyn på en markering, beat/platshållar-menyn) -
+ett vanligt högerklick blockerar alltså ALLTID webbläsarens egen meny,
+som annars hade visat OS:ets stavningsförslag på ett felstavat ord.
+
+Löst med en tidig retur högst upp i funktionen: `if (event.ctrlKey)
+return;` - håller man Ctrl nedtryckt vid högerklicket faller appen
+igenom till webbmotorns egen meny istället för att visa någon av
+kaampi Writes egna.
+
+Verifierat live med Playwright, med en genuin blindgränd dokumenterad
+på vägen: Playwrights `page.mouse.click(..., { modifiers: ['Control']
+})` sätter INTE `ctrlKey` korrekt på den genererade `contextmenu`-
+händelsen i den här miljön (bekräftat med en rå `addEventListener`-
+lyssnare: `ctrlKey=false` trots `modifiers`-flaggan) - en Playwright-
+begränsning för högerklick+modifierare, inte en kodbugg. Löst genom
+att istället använda `page.keyboard.down('Control')` före och
+`.up('Control')` efter själva klicket, vilket gav `ctrlKey=true`
+korrekt. Med det bekräftat: vanligt högerklick visar fortfarande
+kaampi Writes egen `.selection-menu` (count 1), Ctrl+högerklick visar
+den INTE (count 0) - webbläsarens egen meny tar över istället.
+
+`tsc --noEmit` rent, `npm run build` rent, 1276/1276 tester gröna (ren
+villkorsändring, inget nytt beteende för icke-Ctrl-fallet).
+
 **Ändringslogg v1.0.283 → v1.0.284 (2026-11-05): av/på för
 webbmotorns stavningskontroll.** Mats: "En sak jag skulle vilja titta
 på är stavningskontrollen i Tauri som jag misstänker kommer från

@@ -348,6 +348,16 @@ export function ProseCanvas({
 
   function onContextMenu(event: React.MouseEvent<HTMLDivElement>) {
     if (disabled) return;
+    /*
+     * Ctrl+right-click falls through to the browser/webview's own context
+     * menu instead of ours — the only way to reach the OS's native
+     * spell-check suggestions on a misspelled word, since a plain
+     * right-click always lands one of kaampi Write's own menus below
+     * (Mats, 2026-11-05: "Om man har felstavning och högerklickar på ett
+     * ord får man ju 'vår' högerklicksmeny. Skulle man kunna ha att
+     * CTRL+högerklick triggar felstavningsmenyn?").
+     */
+    if (event.ctrlKey) return;
     const area = areaRef.current;
     if (!area) return;
 
