@@ -1148,13 +1148,59 @@ bekräftade och fyllde i:
   ingen kapitel-/karaktärsstruktur alls. Täcks redan helt av den
   generella textimporten.
 
+**Tillägg (2026-11-05): Plottr och Obsidian, plus Campfire omvärderad
+mot kaampi Explore.** Mats: "Jag hittade några fler alternativ för
+import (kanske) Plottr, Obsidian. Sedan tror jag att många författare
+sitter med Scrivener... Och Campfire verkar vara bra på Story Bibles.
+Men kanske det ändå är Explore." Research (webbsök, ingen kod):
+
+- **Plottr.** `.pltr` är ren JSON (bekräftat på en verklig 698kB-fil
+  från en tredjepartsimplementation - ingen officiell schema-
+  dokumentation finns). Karaktärer/platser/plotlines mappar naturligt
+  mot Story Bible-kategorierna. Samma fallgrop som Campfire: scen-
+  synopser lagras som Slate.js-rikatext-JSON, inte vanlig text -
+  kräver en egen konverterare. Export finns även till Scrivener/Word,
+  men mer lossy än att parsa `.pltr` direkt. **Bedömning: möjligt men
+  behöver en riktig exempelfil** innan det går att bygga tillförlitligt
+  - samma försiktighet som redan gäller NovelAI, av samma skäl (inget
+  officiellt schema att luta sig mot). Stark målgruppsöverlapp - ren
+  outlining-app för romanförfattare, ofta använd tillsammans med
+  Scrivener.
+- **Obsidian.** Bara en mapp `.md`-filer + en `.obsidian`-konfigmapp,
+  inget universellt schema. Författare strukturerar story bibles på
+  olika sätt (en mapp per karaktärstyp, YAML-frontmatter för korta
+  fält, `[[wikilänkar]]` mellan anteckningar) men inget är
+  standardiserat - utom via vissa plugins (StoryLine mest konsekvent:
+  projektfil + scener/karaktärer/platser-undermappar, allt
+  Markdown+YAML). **Bedömning: ingen ren adapter är rätt ansats** -
+  bättre att tänka "importera en mapp Markdown-filer med YAML-
+  frontmatter" generiskt, snarare än bygga mot en specifik struktur,
+  om man inte riktar in sig på just StoryLine-pluginet. Eftersom
+  `LoreImportCard` redan delar inklistrad/uppladdad text på Markdown-
+  rubriker (byggsteg 1, v0.99.61) är en Obsidian-mapp troligen redan
+  rätt väl täckt av den - bara YAML-frontmatter-tolkning (strippa/läsa
+  nyckel-värde-par före själva brödtexten) skulle behöva läggas till,
+  ingen ny adapterarkitektur. Billig vinst om/när det prioriteras.
+  Målgrupp: stark överlapp, men en mindre, mer teknisk delmängd av
+  samma litterära skara (de som bygger sina egna verktyg) jämfört med
+  Scrivener/Plottr-användare.
+- **Campfire omprövad.** Mats observerade själv att Campfires styrka
+  (Story Bibles, relationsgrafer, statistik) kanske passar bättre som
+  importmål för kaampi Explore än för Write - vilket bekräftar den
+  redan dragna slutsatsen ovan (2026-10-14: "en Campfire-användare som
+  främst är där för att SPELA sin värld... landar troligen naturligare
+  i SandboxAI") rakt av, eftersom "SandboxAI → kaampi Explore" bytt
+  namn sen dess (bekräftat i `project_spec.md`). Ingen ny slutsats,
+  bara en oberoende bekräftelse av samma positionering.
+
 **Reviderad byggordning** (lägger till på den tidigare ordningen ovan,
 där steg 1 redan är skeppat): SillyTavern Lorebook → SillyTavern
-Character Cards → **SudoWrite CSV** (nytt, billigast av tillägget) →
-**Scrivener `.scriv`** (nytt, eget större delprojekt, inte en snabb
-adapter) → Campfire (fortsatt lågprioriterad, se ovan) → Authoric AI/
-NovelAI (väntar på exempeldata) → övriga efter efterfrågan. Hemingway
-borttaget från listan helt.
+Character Cards → **SudoWrite CSV** (billigast av tilläggen) →
+**Obsidian YAML-frontmatter** (billig vinst ovanpå befintlig Markdown-
+splittring) → **Scrivener `.scriv`** (eget större delprojekt) →
+Plottr/NovelAI (båda väntar på en riktig exempelfil) → övriga efter
+efterfrågan. Campfire hör hemma i kaampi Explores egen roadmap, inte
+här. Hemingway borttaget från listan helt.
 
 ### 29. ~~Serier — flagga att en bok tillhör en serie, ärv Story Bible från föregående bok~~ ❌ struken
 
