@@ -2585,7 +2585,14 @@ button:disabled {
  * Dubbelt så brett och 50% högre." Was 56rem/~34.1rem-tall-by-content
  * (measured 545.5625px at the time); doubled width, and min-height set to
  * 1.5x that measured height so the dialog itself grows even though its
- * content doesn't need the extra room.
+ * content doesn't need the extra room. That 112rem turned out too wide
+ * once the cover preview got its own fixed, moderate size instead of
+ * stretching to fill the column (see .shelf-cover-frame) — Mats, same
+ * day: "Bredden på dialogrutan alltså" / "minska bredden med 30%".
+ * 112 * 0.7 = 78.4rem. Height field also moved from the right column to
+ * sit under Spine color in the left one (Mats: "Lägg height under spine
+ * color"), so both columns now hold a more even amount of content at
+ * the narrower width.
  *
  * `.edit-card.shelf-settings-card`, not just `.shelf-settings-card`, to
  * out-specify `.bible-card`'s own `width`/`max-height` (this card is
@@ -2596,7 +2603,7 @@ button:disabled {
  * indent fix elsewhere in this file).
  */
 .edit-card.shelf-settings-card {
-  width: min(112rem, 100%);
+  width: min(78.4rem, 100%);
   min-height: 51.25rem;
   max-height: min(92vh, 60rem);
 }

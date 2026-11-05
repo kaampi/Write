@@ -153,6 +153,19 @@ export function ShelfSettingsDialog({
               ))}
             </div>
           </section>
+
+          <section className="shelf-settings-field">
+            <h3 className="bible-field-label">
+              {m.shelfEdit.heightLabel} — {format(m.shelfEdit.heightValue, { sign: draftHeight > 0 ? "+" : "", percent: draftHeight })}
+            </h3>
+            <input
+              type="range"
+              min={-10}
+              max={10}
+              value={draftHeight}
+              onChange={(event) => setDraftHeight(Number(event.target.value))}
+            />
+          </section>
         </div>
 
         <div className="shelf-settings-column">
@@ -173,19 +186,6 @@ export function ShelfSettingsDialog({
               value={draftDescription}
               placeholder={m.shelfEdit.descriptionPlaceholder}
               onChange={(event) => setDraftDescription(event.target.value)}
-            />
-          </section>
-
-          <section className="shelf-settings-field">
-            <h3 className="bible-field-label">
-              {m.shelfEdit.heightLabel} — {format(m.shelfEdit.heightValue, { sign: draftHeight > 0 ? "+" : "", percent: draftHeight })}
-            </h3>
-            <input
-              type="range"
-              min={-10}
-              max={10}
-              value={draftHeight}
-              onChange={(event) => setDraftHeight(Number(event.target.value))}
             />
           </section>
 

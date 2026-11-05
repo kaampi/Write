@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.290] - 2026-11-05
+
+### Changed
+- The shelf card dialog is 30% narrower (112rem → 78.4rem), and Height now sits under Spine color in the left column instead of under Description on the right — a better balance now that the cover preview no longer stretches to fill the column.
+
 ## [1.0.289] - 2026-11-05
 
 ### Fixed

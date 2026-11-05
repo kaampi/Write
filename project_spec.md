@@ -11794,6 +11794,32 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.289 → v1.0.290 (2026-11-05): Shelf card-dialogen
+30% smalare, Height flyttad under Spine color.** Direkt uppföljning på
+omslags-fixen ovan — när omslaget slutade sträcka ut sig över hela
+vänsterkolumnen blev den tidigare, dubblerade dialogbredden (112rem,
+se den egna loggraden för den ändringen) onödigt bred igen, nu åt
+andra hållet. Mats: "Lägg height under spine color. minska bredden
+med 30%" följt av en förtydligande fråga/svar om det var dialogrutans
+bredd som avsågs: "Bredden på dialogrutan alltså."
+
+Två små ändringar, samma commit: `.edit-card.shelf-settings-card`s
+bredd `112rem → 78.4rem` (112 × 0.7, ren räkning, ingen ny härledning
+behövdes), och Height-fältets JSX flyttat från högerkolumnen (där det
+låg mellan Description och chapter/fact-metan) till vänsterkolumnen,
+direkt under Spine color — ingen CSS-ändring för själva flytten,
+bara omordning av elementen i samma `.shelf-settings-column`-grid.
+
+Verifierat live med Playwright: `.edit-card.shelf-settings-card`s
+faktiska `boundingBox()`-bredd mättes till 1254.39px, exakt 78.4rem
+(16px/rem × 78.4 = 1254.4) givet 1400px-fönstret i testet; skärmdump
+bekräftar Height nu sitter direkt under Spine color-cirklarna i
+vänsterkolumnen.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna
+(ingen ny testtäckning — ren layout/CSS-ändring, täckt av Playwright-
+mätningen ovan).
+
 **Ändringslogg v1.0.288 → v1.0.289 (2026-11-05): omslagsbilden i
 Shelf card-dialogen kapades till en smal rand.** Mats, med en
 skärmdump: "Rutan för inställningar om boken är bred men bilden
