@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.279] - 2026-11-05
+
+### Fixed
+- The shelf card dialog ("bokinfo") is now twice as wide and 50% taller as intended. It had always rendered at a narrower, shorter size than its own CSS asked for — a specificity tie it was silently losing to a shared dialog class defined later in the stylesheet.
+
 ## [1.0.278] - 2026-11-05
 
 ### Added

@@ -2575,8 +2575,25 @@ button:disabled {
   flex-wrap: wrap;
 }
 
-.shelf-settings-card {
-  width: min(56rem, 100%);
+/*
+ * Mats, 2026-11-05: "Vi måste göra redigeringsfönstret för bokinfo större.
+ * Dubbelt så brett och 50% högre." Was 56rem/~34.1rem-tall-by-content
+ * (measured 545.5625px at the time); doubled width, and min-height set to
+ * 1.5x that measured height so the dialog itself grows even though its
+ * content doesn't need the extra room.
+ *
+ * `.edit-card.shelf-settings-card`, not just `.shelf-settings-card`, to
+ * out-specify `.bible-card`'s own `width`/`max-height` (this card is
+ * rendered as `edit-card bible-card shelf-settings-card` by the shared
+ * OverlayCard) — two single-class selectors tie on specificity and
+ * `.bible-card`, defined later in this file, would keep winning regardless
+ * of source order otherwise (same gotcha as the book-shelf/series-list
+ * indent fix elsewhere in this file).
+ */
+.edit-card.shelf-settings-card {
+  width: min(112rem, 100%);
+  min-height: 51.25rem;
+  max-height: min(92vh, 60rem);
 }
 
 .shelf-settings-body {

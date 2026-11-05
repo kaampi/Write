@@ -11794,6 +11794,45 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.278 → v1.0.279 (2026-11-05): "bokinfo"-rutan är
+äntligen den storlek dess egen CSS alltid bett om.** Mats, efter att
+ha sett den nya exempelboken: "Snyggt :) Vi måste göra
+redigeringsfönstret för bokingo större. Dubbelt så brett och 50%
+högre" (tangent-tappat "bokinfo" - Shelf card-dialogen).
+
+Mätte upp den faktiska storleken med Playwright innan jag rörde
+något: 448×545,5625px. Dubblade/1.5x:ade `.shelf-settings-card`s
+egna `width`/nytt `min-height` (112rem/51.25rem) - och såg att
+dialogen INTE växte alls vid första försöket, fortfarande 448px bred.
+Rotorsaken var inte min nya kod utan en LATENT bugg som funnits hela
+tiden: `OverlayCard` (delad av bland annat denna dialog) renderar
+klassen som `"edit-card bible-card shelf-settings-card"` - och
+`.bible-card` (`width: min(28rem, 100%); max-height: min(82vh,
+42rem)`, definierad senare i `styles.css`) har EXAKT samma
+specificitet (0,1,0) som `.shelf-settings-card` och vinner enligt
+källkodsordning, oavsett vilka värden `.shelf-settings-card` själv
+satte. Dialogen har alltså ALDRIG visat den 56rem-bredd dess egen
+regel bad om - bara `.bible-card`s 28rem, hela tiden, osynkat med
+innehållet.
+
+Samma mönster som indragsbuggen tidigare i sessionen: löst genom att
+höja selektorn till `.edit-card.shelf-settings-card` (0,2,0), som
+slår `.bible-card` oavsett källkodsordning. Satte även `max-height:
+min(92vh, 60rem)` eftersom `.bible-card`s egna `max-height: 42rem`
+annars skulle klippt den nya, högre dialogen.
+
+Verifierat med Playwright `boundingBox()`: 1792×820px (112rem×~51.25rem
+vid 16px rotteckensnitt) - exakt dubbel bredd och ~1.5x höjd mot den
+ursprungligen AVSEDDA (aldrig tidigare faktiskt renderade) 56rem/
+545,5625px-storleken. Innehållet (omslag, spinnfärg, författarnamn,
+beskrivning) fyller inte den nya, mycket större ytan - mycket tomrum
+syns i skärmdumpen. Flaggat ärligt till Mats snarare än att på eget
+bevåg också börja skala om fälten, eftersom bara fönstrets storlek
+efterfrågades.
+
+`tsc --noEmit` rent, `npm run build` rent, 1270/1270 tester gröna (ren
+CSS).
+
 **Ändringslogg v1.0.277 → v1.0.278 (2026-11-05): AI-fritt läge och
 en bundlad exempelbok.** Två separata samtal som landade i samma
 rond.
