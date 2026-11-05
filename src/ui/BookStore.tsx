@@ -1211,9 +1211,22 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     withViewTransition(() => setSurface("guide"), 160);
   }, []);
 
-  const showHandbook = useCallback(() => {
-    withViewTransition(() => setSurface("handbook"), 160);
-  }, []);
+  /**
+   * The Handbook is a modal now (Mats, 2026-11-05: wants it to match kaampi
+   * Explore's own Guide — a modal with a chapter register, not a page you
+   * navigate away to), not an EditorSurface — it opens over whatever
+   * surface is already showing and closes back to exactly that, from
+   * Home, a series workspace, or any Editor surface alike. `"handbook"`
+   * stays a legal EditorSurface value purely for backward compatibility
+   * with already-saved "last position" data and `openingSurface`'s own
+   * blank-book default (BookSchema.ts) — Editor.tsx's own effect catches
+   * that value and redirects to a real surface underneath while opening
+   * this modal, so old saved state and a fresh book both still land
+   * somewhere sensible instead of a surface nothing renders for.
+   */
+  const [handbookOpen, setHandbookOpen] = useState(false);
+  const openHandbook = useCallback(() => setHandbookOpen(true), []);
+  const closeHandbook = useCallback(() => setHandbookOpen(false), []);
 
   const dismissModelAside = useCallback(() => setModelAsides([]), []);
 
@@ -3687,7 +3700,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     showPlotlines,
     showMethod,
     showGuide,
-    showHandbook,
+    handbookOpen,
+    openHandbook,
+    closeHandbook,
     convertMarkersToFormatting,
     smartenManuscriptQuotes,
     dismissModelAside,

@@ -437,7 +437,9 @@ export const en = {
     save: "Save",
     copy: "Copy",
     copied: "Copied",
-    infoAbout: "More about {field}"
+    infoAbout: "More about {field}",
+    previous: "Previous",
+    next: "Next"
   },
   busy: {
     title: "Working",

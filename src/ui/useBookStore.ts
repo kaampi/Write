@@ -123,7 +123,10 @@ export type BookStoreValue = {
   showPlotlines: () => void;
   showMethod: () => void;
   showGuide: () => void;
-  showHandbook: () => void;
+  /** Whether the Handbook modal (HandbookPanel) is open — see BookStore.tsx's own comment on openHandbook/closeHandbook for why this replaced the old showHandbook surface-setter. */
+  handbookOpen: boolean;
+  openHandbook: () => void;
+  closeHandbook: () => void;
   convertMarkersToFormatting: (rules: MarkerConversionRule[]) => Promise<{ totalConversions: number; chaptersChanged: number }>;
   smartenManuscriptQuotes: () => Promise<{ chaptersChanged: number }>;
   dismissModelAside: () => void;

@@ -11794,6 +11794,94 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.291 → v1.0.292 (2026-11-05): Guiden omgjord till
+modal, i Explores layout — första omgången av ett flerstegsjobb.**
+Mats: "Kan du kolla på hur Expore har sin Guide. Jag vill att Write
+får en likadan både visuellt och upplägget. Innehållet måste vara
+superpedagogiskt och texterna får inte vra korthuggna utan lättlätta..
+Börja med att titta på hur Explores Guide ser ut. Ändra ingenting i
+Explore" — följt av en mockup som Artifact (se den separata loggen om
+den, om den finns, annars: en fristående HTML-sida som replikerade
+Explores exakta layout men med Writes egna riktiga färger/typsnitt och
+riktigt Handbook-innehåll, för att validera struktur innan allt
+innehåll skrevs om). Mats: "Det där känns bra" → "Vi kör på din plan.
+Skicka i omgångar" — bekräftat: bygg och pusha i etapper, inte en enda
+stor leverans i slutet.
+
+**Viktig upptäckt innan bygget:** top-nav-knappen som faktiskt heter
+"Guide" öppnade inte `GuidePanel.tsx` (en mindre, fortsatt sid-baserad
+komponent bakom appens "?"-ikoner, oförändrad av det här) utan
+`HandbookPanel.tsx` — en separat, mycket större komponent (78 kapitel,
+9 kategorier) som redan hade en hel del pedagogiskt innehåll, bara i
+fel layout (flikar överst, alla kapitel i en kategori i en enda lång
+scroll, ingen modal).
+
+**Den här omgången: ren layout/struktur, inget innehåll omskrivet
+än.** Samma 78 kapitel, samma texter — bara chrome:t bytt.
+
+**Arkitekturändring, inte bara CSS:** Handbook var tidigare en
+`EditorSurface` (`setSurface("handbook")`), vilket ersatte hela
+redigeringsytan med en sida. En modal kan inte fungera så — den ska
+ligga OVANPÅ det du redan gjorde och stänga tillbaka till exakt det.
+Löst genom att lyfta ett `handbookOpen`-booleskt tillstånd till
+`BookStore.tsx` (`openHandbook`/`closeHandbook`, ersätter den gamla
+`showHandbook`), med EN modal-instans monterad en gång i `App.tsx`s
+`Shell`, oavsett om Hem, en serie-arbetsyta eller en bok med Editor
+visas. `AppTopBar.tsx`s Guide-knapp, `Home.tsx`s guide-kort och
+Editor.tsx:s gamla "no-model"-felsida pekar nu alla på samma
+`store.openHandbook()` istället för tre olika vägar som förut (en
+sidan-swap, en annan Home-specifik overlay-wrapper med egen
+stängknapp).
+
+**Bakåtkompatibilitet, medvetet bevarad:** `EditorSurface` behåller
+`"handbook"` som ett giltigt värde i typen — `BookSchema.ts`s
+`openingSurface()` returnerar fortfarande "handbook" för en helt ny,
+tom bok (oförändrad logik), och gamla sparade "senaste position"-data
+kan fortfarande råka innehålla strängen "handbook" från innan modal-
+omläggningen. Istället för att städa bort det värdet helt (risk att
+en gammal bok hamnar på en yta ingenting renderar för) fångar en ny
+`useEffect` i `Editor.tsx` upp `surface === "handbook"`, öppnar modalen
+och omdirigerar den underliggande ytan till kapitel-redigeraren
+(`store.setChapterId(chapter.id)`) — både en ny tom bok och en gammal
+bok med sparad "handbook"-position landar nu på en riktig, fungerande
+yta UNDER en automatiskt öppnad Guide-modal, istället för en tom eller
+trasig vy.
+
+**CSS:** nya `.handbook-modal-*`-klasser, medvetet INTE en återanvändning
+av `.guide-page`/`.guide-tabs`/`.guide-block`/`.guide-sections` — de
+klasserna ägs fortfarande av `GuidePanel.tsx` (når via "Se
+snabbstartsguiden" på ett no-model-fel), som förblir en sida, inte en
+modal. Två oberoende klassuppsättningar, ingen krock. `.handbook-body`/
+`.handbook-steps`/`.handbook-step`/`.handbook-tip` (innehållsnivå, inte
+sidlayout) återanvänds oförändrade inuti den nya modalens innehålls-
+yta.
+
+Tog bort `Home.tsx`s gamla, enklare overlay-wrapper (`.guide-overlay-
+card`) helt — onödig nu när `HandbookPanel.tsx` själv är en fullständig
+modal med egen header/stängknapp.
+
+Lade till två nya, generella i18n-nycklar (`common.previous`/
+`common.next`) för Föregående/Nästa-knapparna, på alla tre språk —
+fanns inte sen innan, den gamla sid-layouten hade ingen sidnumrering.
+
+Verifierat live med Playwright, flera flöden: Hem-kortets "Öppna
+guiden"-knapp, en helt ny tom bok som automatiskt öppnar modalen
+(bekräftar bakåtkompatibilitets-omdirigeringen fungerar — stänger man
+den hamnar man på en riktig, fungerande Kapitel 1, inte en trasig
+yta), öppna på nytt via top-nav-knappen, Föregående/Nästa-sidnumrering
+(uppdaterar både innehåll och aktiv markering i registret), kategori-
+hopfällning, och mobilbredd (ingen horisontell scroll, staplar
+korrekt).
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna
+(ingen ny testtäckning för själva modal-omläggningen — ren UI/layout-
+ändring, täckt av Playwright-verifieringen ovan).
+
+**Kvarstår, kommande omgångar:** skriva om alla 78 kapitlens text till
+den djupare, mer pedagogiska stilen (bara 1 av 78, "write-with-ai",
+hade redan den strukturen sen innan) — kategori för kategori, egen
+commit/push per färdig kategori, enligt Mats egen plan.
+
 **Ändringslogg v1.0.290 → v1.0.291 (2026-11-05): omslags-
 förhandsvisningen beskär inte längre bort delar av bilden.** Mats,
 med samma skärmdump som innan: "Det är nåt som händer när man laddar

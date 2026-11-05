@@ -121,7 +121,6 @@ import { collectDarlings } from "@core/darlings";
 import { ScenesPanel } from "./ScenesPanel";
 import { GuidePanel, GuideHelpButton, HelpTip, type GuideSectionId } from "./GuidePanel";
 import { LanguageSwitcher, TranslationStatus } from "./LanguageVersions";
-import { HandbookPanel } from "./HandbookPanel";
 import { DevelopmentMethodPanel } from "./DevelopmentMethodPanel";
 import { ChapterBriefCopy } from "./ChapterBriefCopy";
 import { DispositionBoard } from "./DispositionBoard";
@@ -650,7 +649,21 @@ export function Editor() {
   const onPlotlines = surface === "plotlines";
   const onMethod = surface === "method";
   const onGuide = surface === "guide";
+  /**
+   * "handbook" is a legal EditorSurface (BookSchema.ts) purely for backward
+   * compatibility — a blank book's openingSurface() still returns it, and
+   * an old saved "last position" can still carry it from before the
+   * Handbook became a modal (Mats, 2026-11-05: match kaampi Explore's own
+   * Guide). Landing on it now just opens the modal and redirects the
+   * underlying surface to the chapter editor, same as any other surface
+   * swap — never renders inline here.
+   */
   const onHandbook = surface === "handbook";
+  useEffect(() => {
+    if (!onHandbook) return;
+    store.openHandbook();
+    store.setChapterId(chapter.id);
+  }, [onHandbook, chapter.id]);
   const [guideAnchor, setGuideAnchor] = useState<GuideSectionId | null>(null);
   const openGuide = (anchor?: GuideSectionId) => {
     setGuideAnchor(anchor ?? null);
@@ -1912,8 +1925,6 @@ export function Editor() {
           />
         ) : onGuide ? (
           <GuidePanel scrollTo={guideAnchor} />
-        ) : onHandbook ? (
-          <HandbookPanel />
         ) : onSynopsis ? (
           <main
             className={`manuscript manuscript-inset${manuscriptBackgroundClassName(book.editor_background)}`}

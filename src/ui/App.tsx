@@ -1,4 +1,4 @@
-import React, { Component, Fragment, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
+import React, { Component, Fragment, useEffect, type ErrorInfo, type ReactNode } from "react";
 import { isTauri } from "@tauri-apps/api/core";
 import { coreConnection } from "@persistence/CoreDesktopTransport";
 import { flushCoreSharing, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
@@ -11,6 +11,7 @@ import { startUpdateChecks } from "./updateCheck";
 import { Editor } from "./Editor";
 import { Home } from "./Home";
 import { SeriesWorkspace } from "./SeriesWorkspace";
+import { HandbookPanel } from "./HandbookPanel";
 import { LocaleProvider, getMessages } from "./i18n";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { message: string | null; retry: number }> {
@@ -42,9 +43,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { message: string
 }
 
 function Shell() {
-  const { book } = useBookStore();
+  const { book, handbookOpen, closeHandbook } = useBookStore();
   const { seriesId } = useSeriesStore();
-  const [homeGuideOpen, setHomeGuideOpen] = useState(false);
   useEffect(() => {
     if (!isTauri()) return;
     const retry = () => { void coreConnection().then(status => status.reachable ? Promise.allSettled([flushCoreSharing(), flushCoreSnapshots()]) : undefined).catch(() => {}); };
@@ -72,18 +72,9 @@ function Shell() {
   }, []);
   return (
     <div className="app-shell">
-      <AppTopBar onOpenHomeGuide={() => setHomeGuideOpen(true)} />
-      {book ? (
-        <Editor />
-      ) : seriesId ? (
-        <SeriesWorkspace />
-      ) : (
-        <Home
-          guideOpen={homeGuideOpen}
-          onOpenGuide={() => setHomeGuideOpen(true)}
-          onCloseGuide={() => setHomeGuideOpen(false)}
-        />
-      )}
+      <AppTopBar />
+      {book ? <Editor /> : seriesId ? <SeriesWorkspace /> : <Home />}
+      {handbookOpen ? <HandbookPanel onClose={closeHandbook} /> : null}
     </div>
   );
 }

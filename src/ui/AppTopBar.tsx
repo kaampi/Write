@@ -14,7 +14,7 @@ import { ImportCodexBookCard } from "./ImportCodexBookCard";
 
 const RECENT_LIMIT = 10;
 
-export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) {
+export function AppTopBar() {
   const store = useBookStore();
   const { messages: m } = useLocale();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -188,10 +188,7 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
       <button
         type="button"
         className="text-button"
-        onClick={() => {
-          if (store.book) store.showHandbook();
-          else onOpenHomeGuide();
-        }}
+        onClick={() => store.openHandbook()}
       >
         {m.guide.nav}
       </button>

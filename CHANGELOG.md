@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.292] - 2026-11-05
+
+### Changed
+- The Guide (top nav) is now a modal, matching kaampi Explore's own Guide: a collapsible register of chapters on the left, grouped by category, with one chapter shown at a time on the right and Previous/Next paging — instead of a full page with every chapter in a category listed at once. It opens over whatever you were doing (a chapter, Home, anywhere) and closes back to exactly that, rather than replacing the screen. Content is unchanged in this step — same chapters, same text — only the layout changed. Chapter-by-chapter rewrites into a fuller, more pedagogical style follow in later updates.
+
 ## [1.0.291] - 2026-11-05
 
 ### Fixed

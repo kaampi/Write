@@ -9,7 +9,9 @@ export const sv: Messages = {
     save: "Spara",
     copy: "Kopiera",
     copied: "Kopierat",
-    infoAbout: "Mer om {field}"
+    infoAbout: "Mer om {field}",
+    previous: "Föregående",
+    next: "Nästa"
   },
   busy: {
     title: "Arbetar",

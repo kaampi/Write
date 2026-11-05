@@ -9,7 +9,9 @@ export const nb: Messages = {
     save: "Lagre",
     copy: "Kopier",
     copied: "Kopiert",
-    infoAbout: "Mer om {field}"
+    infoAbout: "Mer om {field}",
+    previous: "Forrige",
+    next: "Neste"
   },
   busy: {
     title: "Arbeider",

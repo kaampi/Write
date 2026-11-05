@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { groupManuscripts } from "@core/translation";
 import { useBookStore } from "./useBookStore";
 import { useSeriesStore } from "./useSeriesStore";
-import { HandbookPanel } from "./HandbookPanel";
 import { count, format, translateError, useLocale } from "./i18n";
 import { isDesktopApp, type UpdateStatus } from "./desktopBridge";
 import { UpdateCheckDialog } from "./UpdateCheckDialog";
@@ -21,16 +20,8 @@ import {
   subscribeMascotIntroSeen
 } from "./mascot";
 
-export function Home({
-  guideOpen,
-  onOpenGuide,
-  onCloseGuide
-}: {
-  guideOpen: boolean;
-  onOpenGuide: () => void;
-  onCloseGuide: () => void;
-}) {
-  const { summaries, newBook, openBook, deleteBook, setBookSeries, updateShelfSettings, error } = useBookStore();
+export function Home() {
+  const { summaries, newBook, openBook, deleteBook, setBookSeries, updateShelfSettings, error, openHandbook } = useBookStore();
   const { summaries: seriesSummaries, createSeries, openSeries, openSeriesPreview } = useSeriesStore();
   const { messages: m } = useLocale();
   const [title, setTitle] = useState("");
@@ -202,7 +193,7 @@ export function Home({
               mascot={mascot}
               name={MASCOT_NAMES[mascot]}
               text={m.home.guideCardLede}
-              action={{ label: `${m.home.guideCardAction} →`, onClick: onOpenGuide }}
+              action={{ label: `${m.home.guideCardAction} →`, onClick: openHandbook }}
               onClose={() => setMascot("none")}
               closeLabel={m.common.close}
               {...(mascot === "kaamilla" && !mascotIntroSeen
@@ -393,25 +384,6 @@ export function Home({
       </section>
 
       <SeriesDetailModal />
-
-      {guideOpen ? (
-        <div
-          className="edit-overlay"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) onCloseGuide();
-          }}
-        >
-          <div className="edit-card guide-overlay-card">
-            <div className="edit-actions guide-overlay-close">
-              <button type="button" className="text-button" onClick={onCloseGuide}>
-                {m.guide.closeAction}
-              </button>
-            </div>
-            <HandbookPanel />
-          </div>
-        </div>
-      ) : null}
 
     </div>
   );
