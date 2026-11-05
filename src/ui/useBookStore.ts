@@ -93,6 +93,8 @@ export type BookStoreValue = {
   openBook: (id: string) => Promise<void>;
   closeBook: () => void;
   newBook: (title: string, seriesId?: string) => Promise<void>;
+  /** "Load sample manuscript" (Files menu) — Arthur Conan Doyle's public-domain "The Hound of the Baskervilles", bundled as a static asset. */
+  loadSampleManuscript: () => Promise<void>;
   newLanguageVersion: (targetLanguage: string) => Promise<void>;
   /** Loads another manuscript by id without opening it — used by the language switcher/stale check (roadmap-ideas.md #43). */
   loadBook: (id: string) => Promise<Book>;

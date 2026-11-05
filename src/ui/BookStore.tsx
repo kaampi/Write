@@ -906,6 +906,56 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     [repo, summaries]
   );
 
+  /**
+   * "Load sample manuscript" (Files menu) — Arthur Conan Doyle's "The
+   * Hound of the Baskervilles" (public domain, 1901-02), bundled as a
+   * static asset so a brand-new author has something real to explore the
+   * app's features on without having to write anything first (Mats,
+   * 2026-11-04: "läser in en bok som är fri... lägger in den som en
+   * exempelbok"). The original text as chapter prose, hand-written
+   * brief/summary per chapter — not AI-generated (Mats: "Bara
+   * originaltexten som prosa").
+   */
+  const loadSampleManuscript = useCallback(async () => {
+    const response = await fetch("/sample-manuscripts/hound-of-the-baskervilles.json");
+    if (!response.ok) {
+      setError(STORE_ERROR.sampleManuscriptUnavailable);
+      return;
+    }
+    const data = (await response.json()) as {
+      title: string;
+      shelf_author: string;
+      prose_language: string;
+      synopsis: string;
+      chapters: { title: string; brief: string; summary: string; prose: string }[];
+    };
+    const created = createBook(data.title);
+    const chapters = data.chapters.map((candidate, index) => ({
+      ...createChapter(index, candidate.title),
+      brief: candidate.brief,
+      summary: candidate.summary,
+      prose: candidate.prose
+    }));
+    const book: Book = {
+      ...created,
+      shelf_author: data.shelf_author,
+      prose_language: data.prose_language,
+      synopsis: data.synopsis,
+      chapters
+    };
+    await repo.save(book);
+    setSummaries(await repo.list());
+    withViewTransition(() => {
+      setBook(book);
+      setChapterIdState(sortedChapters(book)[0]?.id ?? null);
+      setSurface(openingSurface(book));
+      setChapterFeedback(null);
+      setCriticFeedback(null);
+    });
+    localStorage.setItem(LAST_BOOK_KEY, book.id);
+    setError(null);
+  }, [repo]);
+
   const newLanguageVersion = useCallback(
     async (targetLanguage: string) => {
       const current = bookRef.current;
@@ -3614,6 +3664,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     openBook,
     closeBook,
     newBook,
+    loadSampleManuscript,
     newLanguageVersion,
     loadBook,
     checkpointBook,

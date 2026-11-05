@@ -146,6 +146,17 @@ export function AppTopBar({ onOpenHomeGuide }: { onOpenHomeGuide: () => void }) 
             >
               {m.appBar.importManuscriptItem}
             </button>
+            <button
+              type="button"
+              role="menuitem"
+              className="app-top-menu-item"
+              onClick={() => {
+                setMenuOpen(false);
+                void store.loadSampleManuscript();
+              }}
+            >
+              {m.appBar.loadSampleManuscriptItem}
+            </button>
             {isDesktopApp() ? (
               <button
                 type="button"

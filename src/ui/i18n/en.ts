@@ -468,6 +468,7 @@ export const en = {
     goHome: "Go to all manuscripts",
     importBackupItem: "Import a backup…",
     importManuscriptItem: "Import a text file…",
+    loadSampleManuscriptItem: "Load sample manuscript…",
     importCodexItem: "Import a Codex book…"
   },
   companionApps: {
@@ -2113,6 +2114,7 @@ export const en = {
     noModel: "No local model found. Start Ollama or your local server, then reload.",
     notJson: "That file is not JSON.",
     backupUnreadable: "Could not read that backup.",
+    sampleManuscriptUnavailable: "Could not load the sample manuscript.",
     shelfUnreadable: "Could not read the shelf.",
     recastEmpty: "Write or draft some prose before recasting the camera.",
     extractEmpty: "Write or draft some prose before extracting facts.",

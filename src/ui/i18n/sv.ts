@@ -40,6 +40,7 @@ export const sv: Messages = {
     goHome: "Gå till alla manuskript",
     importBackupItem: "Importera en backup…",
     importManuscriptItem: "Importera en textfil…",
+    loadSampleManuscriptItem: "Läs in exempelmanuskript…",
     importCodexItem: "Importera en Codex-bok…"
   },
   companionApps: {
@@ -2100,6 +2101,7 @@ export const sv: Messages = {
     noModel: "Ingen lokal modell hittades. Starta Ollama eller din lokala server och ladda om.",
     notJson: "Den filen är inte JSON.",
     backupUnreadable: "Kunde inte läsa den säkerhetskopian.",
+    sampleManuscriptUnavailable: "Kunde inte läsa in exempelmanuskriptet.",
     shelfUnreadable: "Kunde inte läsa hyllan.",
     recastEmpty: "Skriv eller ta fram lite prosa innan du omskriver.",
     extractEmpty: "Skriv eller ta fram lite prosa innan du extraherar fakta.",
