@@ -11794,6 +11794,55 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.294 → v1.0.295 (2026-11-06): "Story Bible & World"
+och "Writing" omskrivna — fjärde omgången av flerstegsjobbet.**
+Mats: "Ta nästa två kapitel" — bekräftade (i linje med mönstret från
+förra omgången) att de två nästkommande kategorierna, inte bara enstaka
+kapitel, skulle köras tillsammans igen.
+
+43 kapitel omskrivna från täta paragrafer till `steps`-strukturen:
+kategorin "Story Bible & World" i sin helhet, 15 kapitel
+(`story-bible-memory`, `what-is-canon`, `aliases-and-exclusions`,
+`merge-story-bible-cards`, `edit-vs-update`, `interview-world`,
+`interview-sandbox`, `interview-to-story`, `brainstorm-vs-interview`,
+`three-levels-of-information`, `extract-facts`,
+`moving-from-other-tool`, `import-lore`, `lore-relevance-filter`,
+`already-have-manuscript`), och kategorin "Writing", 9 av 10 kapitel
+(`attached-context`, `smallest-tool`, `ai-not-autopilot`, `darlings`,
+`placeholders`, `pov-tense-voice`, `reader`, `author-voice`,
+`smart-quotes`) — `write-with-ai` lämnades orörd eftersom det redan var
+skrivet i `steps`-formatet sedan tidigare (det ursprungliga pilotkapitlet
+för hela den här stilen).
+
+`interview-to-story` var det hittills mest tekniskt sammansatta kapitlet
+att skriva om — det förklarar hur en låst fakta gäller från kapitlets
+första sida även om den blir sann först senare, och hur man i stället
+kan koppla faktan till en specifik scen. Innehållet delades upp i sex
+tydliga steg (från rad i intervjun → lås/låt bli → gäller från sidan ett
+→ koppla till scen → bara vid scenvis Draft) istället för en enda lång
+väggtext, för att göra den tekniska nyansen lättare att följa.
+
+Ingen ny fakta uppfunnen — allt härstammar från den redan existerande
+guide-texten, bara djupare strukturerad. Skrivet och översatt för hand
+på alla tre språk i samma commit. Extra sökning efter
+språkläckor (svenska ord i norskan och vice versa) kördes över hela det
+omskrivna avsnittet i båda filerna — inga hittades den här gången.
+
+Verifierat live med Playwright på alla tre språk: "From interview to
+story" (engelska), "Från intervju till berättelse" (svenska) och
+"Darlings – drep dine kjæledyr, behold likene" (norska) öppnade och
+lästa, inklusive kategori-rubriker, undergrupperade steg, tips-rutor
+och Previous/Next-paginering.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna
+(ingen ny testtäckning — rent innehåll/text, täckt av den visuella
+Playwright-verifieringen).
+
+**Kvarstår, kommande omgångar:** resterande 4 kategorier (35 kapitel) i
+samma stil — Revise the Manuscript (8), Images/Publishing & Backup (5),
+Writing Tips (14), Help & Troubleshooting (3) — en eller flera
+kategorier per commit/push enligt Mats egen plan.
+
 **Ändringslogg v1.0.293 → v1.0.294 (2026-11-05): "How you can work" och
 "Plan the story" omskrivna — tredje omgången av flerstegsjobbet.**
 Mats: "Då kan du ta How you can work och Plan the story i nästa

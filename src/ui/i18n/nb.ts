@@ -1459,63 +1459,251 @@ export const nb: Messages = {
       },
       "story-bible-memory": {
         heading: "Story Bible – historiens hukommelse",
-        body: "Story Bible samler informasjon historien trenger å huske. Det kan være:\n• personer\n• steder\n• relasjoner\n• grupper\n• gjenstander\n• hendelser\n• regler og begreper i verdenen\n\nAnta at manuset sier:\n”Nora gikk opp trappen til fyrtårnet. Hun hadde ikke vært der siden faren forsvant for tjue år siden.”\n\nkaampi Write kan identifisere mulige fakta. Eksempel:\n”Nora har en far.”\n”Noras far forsvant for tjue år siden.”\n”Nora har vært ved fyrtårnet tidligere.”\n\nDu gjennomgår forslagene. Først når du bestemmer at noe skal låses, blir det etablert informasjon kaampi Write kan forholde seg til."
+        body: "Story Bible samler informasjon historien trenger å huske, slik at den kan skille mellom hva som faktisk er sant i verdenen og hva som bare var en forbigående detalj.",
+        steps: [
+          {
+            heading: "Hva Story Bible holder",
+            body: "Personer, steder, relasjoner, grupper, gjenstander, hendelser, og regler og begreper i verdenen — alt senere kapitler trenger å forbli konsekvente med."
+          },
+          {
+            heading: "Fra manustekst til mulige fakta",
+            body: "Anta at manuset sier: ”Nora gikk opp trappen til fyrtårnet. Hun hadde ikke vært der siden faren forsvant for tjue år siden.” kaampi Write kan identifisere mulige fakta fra det: ”Nora har en far.” ”Noras far forsvant for tjue år siden.” ”Nora har vært ved fyrtårnet tidligere.”"
+          },
+          {
+            heading: "Du bestemmer hva som blir etablert",
+            body: "Du gjennomgår forslagene. Først når du bestemmer at noe skal låses, blir det etablert informasjon kaampi Write kan forholde seg til — et forslag som ligger ugjennomgått endrer ennå ingenting."
+          }
+        ]
       },
       "what-is-canon": {
         heading: "Hva betyr kanon?",
-        body: "Kanon er det du har bestemt skal regnes som sant i historien.\nIkke all tekst trenger å bli kanon.\n\nHvis AI skriver:\n”Nora dro det røde skjerfet tettere rundt halsen.”\ntrenger du ikke lagre fargen på skjerfet bare fordi den tilfeldigvis dukket opp i teksten.\n\nMen hvis skjerfet senere blir viktig, kan informasjonen være verdt å låse.\n\nStory Bible skal huske det som trenger å være konsekvent. Den trenger ikke bli en database over hver detalj i hver setning."
+        body: "Kanon er det du har bestemt skal regnes som sant i historien. Ikke all tekst trenger å bli kanon — det meste skal det ikke.",
+        steps: [
+          {
+            heading: "En detalj trenger ikke lagres bare fordi den ble skrevet",
+            body: "Hvis AI skriver: ”Nora dro det røde skjerfet tettere rundt halsen,” trenger du ikke lagre fargen på skjerfet bare fordi den tilfeldigvis dukket opp i teksten."
+          },
+          {
+            heading: "Med mindre det senere blir viktig",
+            body: "Blir skjerfet senere viktig — si at det dukker opp igjen i kapittel 20 — kan informasjonen være verdt å låse på det punktet."
+          }
+        ],
+        tip: "Story Bible skal huske det som trenger å være konsekvent. Den trenger ikke bli en database over hver detalj i hver setning."
       },
       "aliases-and-exclusions": {
         heading: "Alias og unntaksfraser",
-        body: "En karakter, et sted eller en gjenstand dukker ikke alltid opp i teksten under kortets eget navn. Åpne et Story Bible-kort, og du kan gi det alias — kallenavn, titler, alter egoer — slik at en omtale under noen av dem fortsatt telles. En karakter som heter ”Emma” på kortet sitt, men kalles ”Em” gjennom hele manuset, gjenkjennes uansett — i Omtaler-sporeren, og i lore-relevansfilteret hvis du bruker et.\n\nDet motsatte problemet skjer også: et navn som også er et vanlig ord. En karakter som heter Rose gjør at hver omtale av en rosehage, en rosebusk eller roser på et bord ser ut som en omtale av henne. Unntaksfraser retter opp det — legg til ”rosehage” som et unntak på Roses kort, så slutter nettopp den frasen å telle som en omtale av henne, mens ”Rose smilte” fortsatt gjør det."
+        body: "En karakter, et sted eller en gjenstand dukker ikke alltid opp i teksten under kortets eget navn — to verktøy håndterer de to måtene det kan gå galt.",
+        steps: [
+          {
+            heading: "Alias fanger andre navn på samme ting",
+            body: "Åpne et Story Bible-kort, og du kan gi det alias — kallenavn, titler, alter egoer — slik at en omtale under noen av dem fortsatt telles. En karakter som heter ”Emma” på kortet sitt, men kalles ”Em” gjennom hele manuset, gjenkjennes uansett — i Omtaler-sporeren, og i lore-relevansfilteret hvis du bruker et."
+          },
+          {
+            heading: "Unntaksfraser fanger falske treff",
+            body: "Det motsatte problemet skjer også: et navn som også er et vanlig ord. En karakter som heter Rose gjør at hver omtale av en rosehage, en rosebusk eller roser på et bord ser ut som en omtale av henne. Unntaksfraser retter opp det — legg til ”rosehage” som et unntak på Roses kort, så slutter nettopp den frasen å telle som en omtale av henne, mens ”Rose smilte” fortsatt gjør det."
+          }
+        ]
       },
       "merge-story-bible-cards": {
         heading: "Slå sammen Story Bible-kort",
-        body: "Noen ganger viser det seg at to Story Bible-kort er samme ting — du opprettet ”Kael” tidlig, og mye senere innser du at ”Kapteinen” som dukket opp nå og da, også er Kael. ”Slå sammen kort…” i Story Bible-panelet håndterer det: velg to eller flere kort av samme slag og slå dem sammen til ett.\n\nIngenting slettes. Hver fakta flyttes over til det sammenslåtte kortet; der de to kortene var uenige, velger du hvilken verdi som vinner; hvert gamle navn blir et alias på det sammenslåtte kortet, slik at en senere omtale av begge fortsatt løses riktig. Det finnes også et valg for å erstatte de gamle navnene med det nye direkte i manusteksten.\n\nDen samme sammenslåingen fungerer også den andre veien — et ventende forslag fra Hent ut fakta kan slås sammen direkte mot et eksisterende kort i gjennomgangskøen, i stedet for å låses som et nytt kort først og slås sammen etterpå."
+        body: "Noen ganger viser det seg at to Story Bible-kort er samme ting — du opprettet ”Kael” tidlig, og mye senere innser du at ”Kapteinen” som dukket opp nå og da, også er Kael.",
+        steps: [
+          {
+            heading: "Hvordan sammenslåing fungerer",
+            body: "”Slå sammen kort…” i Story Bible-panelet håndterer det: velg to eller flere kort av samme slag og slå dem sammen til ett. Ingenting slettes — hver fakta flyttes over til det sammenslåtte kortet; der de to kortene var uenige, velger du hvilken verdi som vinner; hvert gamle navn blir et alias på det sammenslåtte kortet, slik at en senere omtale av begge fortsatt løses riktig."
+          },
+          {
+            heading: "Oppdater manusteksten også",
+            body: "Det finnes også et valg for å erstatte de gamle navnene med det nye direkte i manusteksten, hvis du vil at begge navnene skal forsvinne fra prosaen, ikke bare samles på kortet."
+          },
+          {
+            heading: "Sammenslåing fungerer fra gjennomgangskøen også",
+            body: "Den samme sammenslåingen fungerer også den andre veien — et ventende forslag fra Hent ut fakta kan slås sammen direkte mot et eksisterende kort i gjennomgangskøen, i stedet for å låses som et nytt kort først og slås sammen etterpå."
+          }
+        ]
       },
       "edit-vs-update": {
         heading: "Rediger vs. Oppdater en fakta",
-        body: "En låst fakta kan endres på to forskjellige måter, og de betyr forskjellige ting.\n\nRediger retter en feil — fakta var alltid slik, du skrev den bare ned feil. Ingen historikk, intet ”fra og med”-kapittel; den blir ganske enkelt korrekt.\n\nOppdater registrerer en reell endring i historien — fakta var sann, og fra et visst kapittel endres den til noe annet. ”Noras hår var svart” (etablert i kapittel 1), ”Noras hår er nå grått” (Oppdater, forankret til kapittel 14, etter hendelsene som eldet henne). Den tidligere verdien forblir synlig i Historikk i stedet for å bli overskrevet, siden begge var sanne — bare på forskjellige punkter i historien.\n\nIdentitetsfakta (navn, art, den typen ting) får bare Rediger — det er sjelden en historiegrunn til at noens navn skal endres midt i boken på samme måte som hårfarge eller bosted kan gjøre."
+        body: "En låst fakta kan endres på to forskjellige måter, og de betyr forskjellige ting — hvilken du velger avgjør om historien har én sann verdi eller to, på ulike tidspunkt.",
+        steps: [
+          {
+            heading: "Rediger retter en feil",
+            body: "Fakta var alltid slik, du skrev den bare ned feil. Ingen historikk, intet ”fra og med”-kapittel; den blir ganske enkelt korrekt."
+          },
+          {
+            heading: "Oppdater registrerer en reell endring",
+            body: "Fakta var sann, og fra et visst kapittel endres den til noe annet. ”Noras hår var svart” (etablert i kapittel 1), ”Noras hår er nå grått” (Oppdater, forankret til kapittel 14, etter hendelsene som eldet henne). Den tidligere verdien forblir synlig i Historikk i stedet for å bli overskrevet, siden begge var sanne — bare på forskjellige punkter i historien."
+          },
+          {
+            heading: "Identitetsfakta tar bare Rediger",
+            body: "Fakta som navn eller art får bare Rediger — det er sjelden en historiegrunn til at noens navn skal endres midt i boken på samme måte som hårfarge eller bosted kan gjøre."
+          }
+        ]
       },
       "interview-world": {
         heading: "Intervju verdenen",
-        body: "Story Bible trenger ikke bare brukes til å lagre det du allerede vet. Du kan også bruke Intervju verdenen for å oppdage mer.\n\nI stedet for å fylle ut lange skjemaer kan du utforske en karakter gjennom samtale.\n\nAnta at du vet:\n”Nora Berg. 38 år. Journalist. Vokste opp på øya. Faren forsvant da hun var atten.”\n\nSpør for eksempel:\n”Hvorfor ble du journalist?”\n”Hva husker du fra dagen faren din forsvant?”\n”Hvem stoler du minst på?”\n”Hva ville du aldri innrømme for Elias?”\n”Hva er du mest redd for å oppdage?”\n\nIntervjuet kan hjelpe deg å finne personlighet, motiv, bakgrunn, relasjoner og konflikter."
+        body: "Story Bible trenger ikke bare brukes til å lagre det du allerede vet. Du kan også bruke Intervju verdenen for å oppdage mer — utforske en karakter gjennom samtale i stedet for å fylle ut lange skjemaer.",
+        steps: [
+          {
+            heading: "Ta utgangspunkt i det du allerede vet",
+            body: "Anta at du vet: ”Nora Berg. 38 år. Journalist. Vokste opp på øya. Faren forsvant da hun var atten.”"
+          },
+          {
+            heading: "Spør karakteren direkte",
+            body: "”Hvorfor ble du journalist?” ”Hva husker du fra dagen faren din forsvant?” ”Hvem stoler du minst på?” ”Hva ville du aldri innrømme for Elias?” ”Hva er du mest redd for å oppdage?”"
+          }
+        ],
+        tip: "Intervjuet kan hjelpe deg å finne personlighet, motiv, bakgrunn, relasjoner og konflikter — ofte raskere enn å bestemme alt det på forhånd."
       },
       "interview-sandbox": {
         heading: "Intervjuet er en sandkasse",
-        body: "Dette er svært viktig: det som sies under intervjuet påvirker ikke hvordan boken skrives. AI får dikte opp og eksperimentere under samtalen.\n\nAnta at Nora sier:\n”Faren min pleide å ta meg med til fyrtårnet da jeg var liten.”\nDet betyr ikke at kaampi Write heretter kan bruke dette som etablert informasjon når et kapittel skrives.\nDu må først velge å gjøre informasjonen til et faktum.\n\nArbeidsflyten er:\nIntervju → AI sier noe interessant → Trekk ut fakta → Gjennomgå → Lås fakta → Story Bible → Nå kan informasjonen påvirke fremtidig AI-skriving\n\nTenk:\nIntervju ≠ kanon\nLåste fakta = kanon\n\nDet gjør at du kan stille ville spørsmål og prøve idéer uten å risikere at de begynner å påvirke historien."
+        body: "Dette er svært viktig: det som sies under intervjuet påvirker ikke hvordan boken skrives. AI får dikte opp og eksperimentere under samtalen.",
+        steps: [
+          {
+            heading: "Et svar i intervjuet er ikke automatisk sant",
+            body: "Anta at Nora sier: ”Faren min pleide å ta meg med til fyrtårnet da jeg var liten.” Det betyr ikke at kaampi Write heretter kan bruke dette som etablert informasjon når et kapittel skrives. Du må først velge å gjøre informasjonen til et faktum."
+          },
+          {
+            heading: "Veien fra en linje i intervjuet til kanon",
+            body: "Intervju → AI sier noe interessant → Trekk ut fakta → Gjennomgå → Lås fakta → Story Bible → nå kan informasjonen påvirke fremtidig AI-skriving."
+          }
+        ],
+        tip: "Intervju ≠ kanon. Låste fakta = kanon. Det gjør at du kan stille ville spørsmål og prøve idéer uten å risikere at de begynner å påvirke historien."
       },
       "interview-to-story": {
         heading: "Fra intervju til historie",
-        body: "Under intervjuet sier Nora kanskje:\n”Moren min løy alltid om hva som skjedde med pappa. Jeg lærte tidlig at voksne forteller den versjonen av sannheten som passer dem.”\n\nDu synes idéen er interessant. Etter intervjuet kan kaampi Write hjelpe deg å identifisere mulige fakta:\n”Noras mor holdt tilbake informasjon om farens forsvinning.”\n\nNå velger du.\nLås faktumet — da blir informasjonen en etablert del av Story Bible.\nIkke lås det — da forblir det bare noe som ble utforsket under intervjuet, og skal ikke behandles som etablert informasjon når boken skrives.\n\nNår et faktum først blir sant senere i kapittelet\nEn viktig detalj: et faktum som låses til et kapittel gjelder fra kapittelets første side. Draft kan altså bruke faktumet allerede der — selv om det egentlig først blir sant senere i kapittelet.\n\nEksempel: hovedpersonen møter en gammel venn, Marcus, i kapittel 6. Kapittelet åpner som en vanlig gjenforening. Først et stykke ut innser hovedpersonen at Marcus i hemmelighet har arbeidet mot ham hele tiden — Marcus er antagonisten. Plukker du ut «Marcus er antagonisten» fra Intervjuet og låser det til kapittel 6, har Draft tilgang til avsløringen allerede når den innledende gjenforeningen skal skrives som om ingen ennå vet hva Marcus egentlig driver med.\n\nLås faktumet til en bestemt scene i stedet\nSkal faktumet først bli tilgjengelig når avsløringen skjer, kan du koble det til scenen der det skjer.\n\nDel først kapittel 6 i scener (Scener → Del i to…) på punktet der avsløringen skjer, slik at gjenforeningen og avsløringen blir egne scener. Når du deretter plukker ut faktumet fra Intervjuet, viser velgeren «Fra og med» kapittelets scener — velg avsløringens scene i stedet for «Hele kapittelet». Nå får Draft tilgang til faktumet først fra og med den scenen.\n\nSkriver du scene for scene (Scener → Draft), kan du dermed skrive gjenforeningen uten at Draft ennå har tilgang til faktumet. Når du når frem til avsløringens scene, får Draft tilgang til det, og det gjelder deretter for resten av kapittelet.\n\nViktig: dette fungerer bare ved scenevis Draft\nScenekoblingen påvirker bare Draft når du skriver én scene om gangen. Kjører du Draft for hele kapittelet, får Draft tilgang til alle fakta som hører til kapittelet, uansett hvilken scene de er koblet til.\n\nForetrekker du å skrive hele kapitler i ett strekk, gjelder derfor den enklere løsningen fortsatt: vent med å låse faktumet til du har skrevet forbi vendepunktet, eller skriv kapittelet i to omganger og lås faktumet først før den andre omgangen."
+        body: "En idé fra intervjuet blir ikke en del av historien før du låser den — og når du gjør det, er det verdt å forstå nøyaktig når den begynner å gjelde i manuset.",
+        steps: [
+          {
+            heading: "Fra en interessant linje til et mulig faktum",
+            body: "Under intervjuet sier Nora kanskje: ”Moren min løy alltid om hva som skjedde med pappa. Jeg lærte tidlig at voksne forteller den versjonen av sannheten som passer dem.” Du synes idéen er interessant. Etter intervjuet kan kaampi Write hjelpe deg å identifisere mulige fakta: ”Noras mor holdt tilbake informasjon om farens forsvinning.”"
+          },
+          {
+            heading: "Lås den, eller la den bli stående som utforskning",
+            body: "Lås faktumet og det blir en etablert del av Story Bible. Ikke lås det, og det forblir bare noe som ble utforsket under intervjuet — det skal ikke behandles som etablert informasjon når boken skrives."
+          },
+          {
+            heading: "Et faktum kan gjelde fra kapittelets første side, selv om det blir sant senere",
+            body: "Et faktum som låses til et kapittel gjelder fra kapittelets første side. Draft kan altså bruke faktumet allerede der — selv om det egentlig først blir sant senere i kapittelet. Eksempel: hovedpersonen møter en gammel venn, Marcus, i kapittel 6. Kapittelet åpner som en vanlig gjenforening. Først et stykke ut innser hovedpersonen at Marcus i hemmelighet har arbeidet mot ham hele tiden — Marcus er antagonisten. Plukker du ut «Marcus er antagonisten» fra Intervjuet og låser det til kapittel 6, har Draft tilgang til avsløringen allerede når den innledende gjenforeningen skal skrives som om ingen ennå vet hva Marcus egentlig driver med."
+          },
+          {
+            heading: "Lås faktumet til en bestemt scene i stedet",
+            body: "Skal faktumet først bli tilgjengelig når avsløringen skjer, kan du koble det til scenen der det skjer. Del først kapittel 6 i scener (Scener → Del i to…) på punktet der avsløringen skjer, slik at gjenforeningen og avsløringen blir egne scener. Når du deretter plukker ut faktumet fra Intervjuet, viser velgeren «Fra og med» kapittelets scener — velg avsløringens scene i stedet for «Hele kapittelet». Nå får Draft tilgang til faktumet først fra og med den scenen."
+          },
+          {
+            heading: "Dette fungerer bare ved scenevis Draft",
+            body: "Scenekoblingen påvirker bare Draft når du skriver én scene om gangen (Scener → Draft). Kjører du Draft for hele kapittelet i ett strekk, får Draft tilgang til alle fakta som hører til kapittelet, uansett hvilken scene de er koblet til. Foretrekker du å skrive hele kapitler i ett strekk, gjelder derfor den enklere løsningen fortsatt: vent med å låse faktumet til du har skrevet forbi vendepunktet, eller skriv kapittelet i to omganger og lås faktumet først før den andre omgangen."
+          }
+        ]
       },
       "brainstorm-vs-interview": {
         heading: "Brainstorm og intervju",
-        body: "De er to ulike måter å utforske historien på.\n\nBrainstorm — du ser på historien utenfra:\n”Tenk om Noras mor vet mer om forsvinningen?”\n\nIntervju — du undersøker historien innenfra:\n”Nora, tror du moren din vet hva som skjedde med faren din?”\n\nIngen av dem trenger automatisk å forandre historien. De er steder der du får lov til å tenke."
+        body: "De er to ulike måter å utforske historien på, og ingen av dem trenger automatisk å forandre den — begge er steder der du får lov til å tenke.",
+        steps: [
+          {
+            heading: "Brainstorm ser utenfra",
+            body: "”Tenk om Noras mor vet mer om forsvinningen?” — et spørsmål om historien, stilt utenfra."
+          },
+          {
+            heading: "Intervju ser innenfra",
+            body: "”Nora, tror du moren din vet hva som skjedde med faren din?” — samme type spørsmål, men stilt direkte til karakteren, i hennes egen stemme."
+          }
+        ]
       },
       "three-levels-of-information": {
         heading: "Tre nivåer av informasjon",
-        body: "En nyttig mental modell er:\n\nUtforsk\nBrainstorm og intervjuer. ”Tenk om…?” Her får idéene være usikre.\n↓\nPlanlegg\nSynopsis, briefer, Scener og Tråder. ”Dette tenker jeg skal skje.” Her former du historien.\n↓\nEtabler\nLåste fakta i Story Bible. ”Dette er sant i historiens verden.” Her finnes informasjon kaampi Write kan forholde seg til når historien skrives."
+        body: "En nyttig mental modell for hvor usikker eller fastsatt en bit historieinformasjon er, på et gitt tidspunkt.",
+        steps: [
+          {
+            heading: "Utforsk",
+            body: "Brainstorm og intervjuer. ”Tenk om…?” Her får idéene være usikre."
+          },
+          {
+            heading: "Planlegg",
+            body: "Synopsis, briefer, Scener og Tråder. ”Dette tenker jeg skal skje.” Her former du historien."
+          },
+          {
+            heading: "Etabler",
+            body: "Låste fakta i Story Bible. ”Dette er sant i historiens verden.” Her finnes informasjon kaampi Write kan forholde seg til når historien skrives."
+          }
+        ]
       },
       "extract-facts": {
         heading: "Trekk ut fakta fra manuset",
-        body: "Du trenger ikke fylle Story Bible manuelt mens du skriver. Når et kapittel inneholder informasjon som er verdt å huske, kan kaampi Write hjelpe deg å trekke ut mulige fakta.\n\nArbeidsflyten er:\nKapittel → Trekk ut fakta → Forslag → Gjennomgå → Godkjenn og lås → Story Bible\n\nAI foreslår. Du bestemmer."
+        body: "Du trenger ikke fylle Story Bible manuelt mens du skriver. Når et kapittel inneholder informasjon som er verdt å huske, kan kaampi Write hjelpe deg å trekke ut mulige fakta direkte fra prosaen.",
+        steps: [
+          {
+            heading: "Arbeidsflyten",
+            body: "Kapittel → Trekk ut fakta → Forslag → Gjennomgå → Godkjenn og lås → Story Bible."
+          }
+        ],
+        tip: "AI foreslår. Du bestemmer — ingenting legges til i Story Bible uten din godkjenning."
       },
       "moving-from-other-tool": {
         heading: "Flytte fra et annet skriveverktøy",
-        body: "Har du allerede jobbet med historien et annet sted, trenger du ikke begynne på nytt. Du har kanskje allerede:\n• et manus\n• karakterbeskrivelser\n• steder\n• verdensbygging\n• lore\n• organisasjoner\n• gjenstander\n• historikk\n• regler for verdenen\n\nkaampi Write kan hjelpe deg å ta med materialet."
+        body: "Har du allerede jobbet med historien et annet sted, trenger du ikke begynne på nytt.",
+        steps: [
+          {
+            heading: "Hva du kanskje allerede har",
+            body: "Et manus, karakterbeskrivelser, steder, verdensbygging, lore, organisasjoner, gjenstander, historikk, regler for verdenen — alt som er bygget opp i et annet verktøy før du kom hit."
+          },
+          {
+            heading: "kaampi Write kan hjelpe deg å ta det med",
+            body: "Kapitlene som følger går gjennom de spesifikke verktøyene for det: importere et manus, importere lore, og begynne ut fra materiale du allerede har."
+          }
+        ]
       },
       "import-lore": {
         heading: "Importer lore",
-        body: "Åpne: Story Bible → Importer lore\n\nLim inn en artikkel eller tekst fra ditt eksisterende materiale. Det kan for eksempel være:\n”Fyrtårnet ble bygget i 1892 på øyas nordspiss. Tårnet har vært ubemannet siden 1987. Lokalbefolkningen unngår stedet etter mørkets frembrudd.”\n\nkaampi Writes lokale AI leser teksten og foreslår fakta. Du gjennomgår deretter forslagene.\n\nOriginalteksten lagres ikke som en del av boken. Det er faktaene du velger å godkjenne som føres videre.\n\nDagens lore-import jobber med én artikkel eller tekst om gangen."
+        body: "Åpne: Story Bible → Importer lore.",
+        steps: [
+          {
+            heading: "Lim inn eksisterende materiale",
+            body: "Lim inn en artikkel eller tekst fra ditt eksisterende materiale. Det kan for eksempel være: ”Fyrtårnet ble bygget i 1892 på øyas nordspiss. Tårnet har vært ubemannet siden 1987. Lokalbefolkningen unngår stedet etter mørkets frembrudd.”"
+          },
+          {
+            heading: "AI leser og foreslår fakta",
+            body: "kaampi Writes lokale AI leser teksten og foreslår fakta. Du gjennomgår deretter forslagene, akkurat som med Trekk ut fakta."
+          },
+          {
+            heading: "Bare de godkjente faktaene føres videre",
+            body: "Originalteksten lagres ikke som en del av boken. Det er faktaene du velger å godkjenne som føres videre til Story Bible."
+          }
+        ],
+        tip: "Dagens lore-import jobber med én artikkel eller tekst om gangen."
       },
       "lore-relevance-filter": {
         heading: "Hold en stor importert Story Bible relevant",
-        body: "Fakta som manuset selv har etablert — skrevet i et kapittel, eller godkjent fra et intervju — tas alltid med i Skriv utkast. De er historiens eget minne, og det finnes ingen trygg måte å utelate dem på. Importert lore (Importer lore) er annerledes: det er bakgrunnsinformasjon, bare nyttig når kapittelet som skrives faktisk handler om det. Med en stor importert verden kan det svelle prompten kraftig å ta med hver eneste slik fakta i hvert Skriv utkast-kall — og begrave den håndfullen som faktisk er relevant for akkurat det kapittelet.\n\nInnstillinger → Vis bare relevant lore for Skriv utkast (avslått som standard) endrer det: en importert lore-fakta tas bare med hvis dens eget navn nevnes i kapittelet, eller — for en Hendelse, som et historisk slag eller en sponsoravtale — hvis en deltaker eller stedet nevnes i stedet, selv om selve hendelsen aldri nevnes ved navn.\n\nHvis filteret noen gang gjetter feil på en bestemt fakta, fest den: den samme syklus-knappen i Story Bible som allerede brukes til å overstyre en fakta sin posisjon i story-tiden, betyr nå også «ta alltid med denne, uansett»."
+        body: "To typer Story Bible-fakta oppfører seg forskjellig når det gjelder hva Draft faktisk trenger å se.",
+        steps: [
+          {
+            heading: "Manusfakta tas alltid med",
+            body: "Fakta som manuset selv har etablert — skrevet i et kapittel, eller godkjent fra et intervju — tas alltid med i Skriv utkast. De er historiens eget minne, og det finnes ingen trygg måte å utelate dem på."
+          },
+          {
+            heading: "Importert lore er annerledes",
+            body: "Importert lore (Importer lore) er bakgrunnsinformasjon, bare nyttig når kapittelet som skrives faktisk handler om det. Med en stor importert verden kan det svelle prompten kraftig å ta med hver eneste slik fakta i hvert Skriv utkast-kall — og begrave den håndfullen som faktisk er relevant for akkurat det kapittelet."
+          },
+          {
+            heading: "Relevansfilteret",
+            body: "Innstillinger → Vis bare relevant lore for Skriv utkast (avslått som standard) endrer det: en importert lore-fakta tas bare med hvis dens eget navn nevnes i kapittelet, eller — for en Hendelse, som et historisk slag eller en sponsoravtale — hvis en deltaker eller stedet nevnes i stedet, selv om selve hendelsen aldri nevnes ved navn."
+          },
+          {
+            heading: "Fest en fakta filteret gjetter feil på",
+            body: "Hvis filteret noen gang gjetter feil på en bestemt fakta, fest den: den samme syklus-knappen i Story Bible som allerede brukes til å overstyre en fakta sin posisjon i story-tiden, betyr nå også «ta alltid med denne, uansett»."
+          }
+        ]
       },
       "already-have-manuscript": {
         heading: "Du har allerede et manus",
-        body: "Har du allerede skrevet deler av eller hele historien, trenger du ikke begynne med Brainstorm eller en fortellermetode. Begynn med teksten du har.\n\nEn mulig arbeidsflyt er:\nEksisterende manus → Kapitler → Trekk ut fakta → Story Bible → Analyser og bearbeid → Fortsett å skrive\n\nBrainstorm, Synopsis og fortellermetoder er hjelpemidler. De er ikke obligatoriske steg."
+        body: "Har du allerede skrevet deler av eller hele historien, trenger du ikke begynne med Brainstorm eller en fortellermetode. Begynn med teksten du har.",
+        steps: [
+          {
+            heading: "En mulig arbeidsflyt",
+            body: "Eksisterende manus → Kapitler → Trekk ut fakta → Story Bible → Analyser og bearbeid → Fortsett å skrive."
+          }
+        ],
+        tip: "Brainstorm, Synopsis og fortellermetoder er hjelpemidler. De er ikke obligatoriske steg."
       },
       "write-with-ai": {
         heading: "Skriv sammen med AI",
@@ -1541,39 +1729,123 @@ export const nb: Messages = {
       },
       "attached-context": {
         heading: "Vedlagt kontekst",
-        body: "Story Bible holder fakta, men ikke alltid de nøyaktige ordene et sted, en gjenstand eller en karakter først ble beskrevet med — og noen ganger er det nettopp det som teller. Kapittelinnstillinger → Vedlagt kontekst lar et kapittel feste et tidligere kapittel, eller bare en av scenene dets, som ekstra referansemateriale for Skriv utkast og Recast.\n\nI motsetning til Story Bible-fakta sendes det som festes som sin faktiske prosa, ikke et sammendrag — nyttig når fyrtårnet, for eksempel, trenger å leses nøyaktig som det først ble malt opp i kapittel 2, ikke bare som Story Bible-fakta ”et forlatt fyrtårn på nordspissen”. Et omtrentlig anslag over kostnaden i tokens vises ved siden av det som festes, slik at du ser hva det legger til prompten."
+        body: "Story Bible holder fakta, men ikke alltid de nøyaktige ordene et sted, en gjenstand eller en karakter først ble beskrevet med — og noen ganger er det nettopp det som teller.",
+        steps: [
+          {
+            heading: "Fest et tidligere kapittel, eller bare en scene",
+            body: "Kapittelinnstillinger → Vedlagt kontekst lar et kapittel feste et tidligere kapittel, eller bare en av scenene dets, som ekstra referansemateriale for Skriv utkast og Recast."
+          },
+          {
+            heading: "Faktisk prosa, ikke et sammendrag",
+            body: "I motsetning til Story Bible-fakta sendes det som festes som sin faktiske prosa — nyttig når fyrtårnet, for eksempel, trenger å leses nøyaktig som det først ble malt opp i kapittel 2, ikke bare som Story Bible-fakta ”et forlatt fyrtårn på nordspissen”."
+          },
+          {
+            heading: "Å vite hva det koster",
+            body: "Et omtrentlig anslag over kostnaden i tokens vises ved siden av det som festes, slik at du ser hva det legger til prompten."
+          }
+        ]
       },
       "smallest-tool": {
         heading: "Velg det minste verktøyet",
-        body: "Helt tomt kapittel → Skriv utkast\nEn mindre hendelse mangler → Skriv en beat\nPassasjen er for tynn → Utdyp\nJeg trenger å komme videre → Forleng\nJeg vet hva jeg vil forandre → Skriv om\nJeg vil vite om kapittelet fungerer → Analyser\n\nDet gir deg mer kontroll enn å generere om store mengder tekst."
+        body: "Skriveverktøyene skalerer nedover like godt som oppover — å matche verktøyet mot størrelsen på det faktiske behovet gir deg mer kontroll enn å generere om store mengder tekst.",
+        steps: [
+          {
+            heading: "Match verktøyet mot problemet",
+            body: "Helt tomt kapittel → Skriv utkast. En mindre hendelse mangler → Skriv en beat. Passasjen er for tynn → Utdyp. Jeg trenger å komme videre → Forleng. Jeg vet hva jeg vil forandre → Skriv om. Jeg vil vite om kapittelet fungerer → Analyser."
+          }
+        ]
       },
       "ai-not-autopilot": {
         heading: "AI er ikke autopilot",
-        body: "kaampi Write er ikke bygget rundt: ”Skriv boken min.”\n\nTanken er heller:\nDu bestemmer retningen.\n↓\nAI hjelper der du vil ha hjelp.\n↓\nDu leser resultatet.\n↓\nDu endrer, beholder eller forkaster det.\n↓\nHistorien utvikler seg.\n\nDu kan skrive flere kapitler helt uten AI. Du kan bruke AI bare når du sitter fast. Eller lage råutkast som du deretter skriver kraftig om. Alt dette er normale måter å bruke kaampi Write på."
+        body: "kaampi Write er ikke bygget rundt ”Skriv boken min.” Det er bygget rundt en løkke der du beholder kontrollen over hvert steg.",
+        steps: [
+          {
+            heading: "Løkken",
+            body: "Du bestemmer retningen. AI hjelper der du vil ha hjelp. Du leser resultatet. Du endrer, beholder eller forkaster det. Historien utvikler seg."
+          },
+          {
+            heading: "Det finnes ingen eneste korrekte mengde AI å bruke",
+            body: "Du kan skrive flere kapitler helt uten AI. Du kan bruke AI bare når du sitter fast. Eller lage råutkast som du deretter skriver kraftig om. Alt dette er normale måter å bruke kaampi Write på."
+          }
+        ]
       },
       darlings: {
         heading: "Darlings — drep dine kjæledyr, behold likene",
-        body: "En passasje kan være feil for akkurat dette utkastet uten å være verdt å miste for godt. Marker den og velg ”Cut to Darlings” fra høyreklikk-menyen, så løftes den ut av kapittelet uten å slettes — den havner i en felles hylle, ”N darlings kept”, delt av hele boken.\n\nDerfra kan du gjenopprette den til sin opprinnelige plass, eller forkaste den for godt når du er sikker. Både en klipping og en gjenoppretting får sin egen rad i kapittelets Historikk, så det alltid finnes et spor av hva som flyttet hvor."
+        body: "En passasje kan være feil for akkurat dette utkastet uten å være verdt å miste for godt.",
+        steps: [
+          {
+            heading: "Å klippe uten å slette",
+            body: "Marker passasjen og velg ”Cut to Darlings” fra høyreklikk-menyen, så løftes den ut av kapittelet uten å slettes — den havner i en felles hylle, ”N darlings kept”, delt av hele boken."
+          },
+          {
+            heading: "Gjenopprett den, eller la den gå",
+            body: "Fra hyllen kan du gjenopprette en darling til sin opprinnelige plass, eller forkaste den for godt når du er sikker på at du ikke trenger den. Både en klipping og en gjenoppretting får sin egen rad i kapittelets Historikk, så det alltid finnes et spor av hva som flyttet hvor."
+          }
+        ]
       },
       placeholders: {
         heading: "Plassholdere",
-        body: "Et spørsmål midt i skrivingen trenger ikke bryte flyten. Høyreklikk der det dukker opp — ”hva het egentlig etternavnet til denne karakteren?” — og slipp en plassholder-notis, fortsett så å skrive. En liten nål markerer hvor den sitter i teksten; klikk på den når som helst for å lese notisen, redigere den eller merke den som løst.\n\nEt kapittel med en åpen plassholder får en liten prikk i kapittellisten, og et kompakt ”N plassholdere å komme tilbake til”-panel lister opp hver åpne i boken med en direktelenke til kapittelet. Korrekturlesing sjekker også om noen fortsatt er åpen før den kjøres, i tilfelle en er glemt."
+        body: "Et spørsmål midt i skrivingen trenger ikke bryte flyten.",
+        steps: [
+          {
+            heading: "Slipp en notis og fortsett",
+            body: "Høyreklikk der spørsmålet dukker opp — ”hva het egentlig etternavnet til denne karakteren?” — og slipp en plassholder-notis, fortsett så å skrive. En liten nål markerer hvor den sitter i teksten; klikk på den når som helst for å lese notisen, redigere den eller merke den som løst."
+          },
+          {
+            heading: "Finne åpne plassholdere senere",
+            body: "Et kapittel med en åpen plassholder får en liten prikk i kapittellisten, og et kompakt ”N plassholdere å komme tilbake til”-panel lister opp hver åpne i boken med en direktelenke til kapittelet."
+          }
+        ],
+        tip: "Korrekturlesing sjekker også om noen fortsatt er åpen før den kjøres, i tilfelle en er glemt."
       },
       "pov-tense-voice": {
         heading: "Perspektiv, tid og fortellerstemme",
-        body: "kaampi Write kan få informasjon om hvordan historien skal fortelles. Det kan for eksempel dreie seg om:\n• perspektiv\n• tid (tempus)\n• synsvinkel\n• fortellerstemme\n\nEnkeltkapitler kan ved behov avvike fra bokens grunninnstillinger. Det kan være nyttig hvis hoveddelen av romanen fortelles i tredjeperson, men et bestemt kapittel trenger en annen synsvinkel.\n\nHvis du bruker AI til større omskrivinger etter en slik endring, bør du alltid lese resultatet nøye.\n\nPerspektiv handler om mer enn å bytte pronomen."
+        body: "kaampi Write kan få informasjon om hvordan historien skal fortelles.",
+        steps: [
+          {
+            heading: "Hva dette dekker",
+            body: "Perspektiv, tid (tempus), synsvinkel og fortellerstemme."
+          },
+          {
+            heading: "Enkeltkapitler kan avvike",
+            body: "Enkeltkapitler kan ved behov avvike fra bokens grunninnstillinger. Det kan være nyttig hvis hoveddelen av romanen fortelles i tredjeperson, men et bestemt kapittel trenger en annen synsvinkel."
+          }
+        ],
+        tip: "Perspektiv handler om mer enn å bytte pronomen. Hvis du bruker AI til større omskrivinger etter en slik endring, bør du alltid lese resultatet nøye."
       },
       reader: {
         heading: "Leser",
-        body: "Du kan angi hvilken type leser historien retter seg mot. Det kan hjelpe AI å tilpasse for eksempel ordvalg og setningsbygning når den skriver sammen med deg.\n\nDet er skrivestøtte. Det er ikke en automatisk vurdering av hvilken alder den ferdige boken passer for."
+        body: "Du kan angi hvilken type leser historien retter seg mot. Det kan hjelpe AI å tilpasse for eksempel ordvalg og setningsbygning når den skriver sammen med deg.",
+        steps: [
+          {
+            heading: "Skrivestøtte, ikke en vurdering",
+            body: "Det er skrivestøtte. Det er ikke en automatisk vurdering av hvilken alder den ferdige boken passer for — det bestemmer du fortsatt selv."
+          }
+        ]
       },
       "author-voice": {
         heading: "Forfatterstemme",
-        body: "To forfattere kan beskrive den samme hendelsen på helt ulike måter. Forfatterstemmen hjelper AI å forstå hvordan du vil at prosaen skal føles. Det kan dreie seg om:\n• setningslengde\n• mengden miljøbeskrivelse\n• dialog\n• rytme\n• direkte eller tilbakeholdent språk\n• andre stilistiske trekk\n\nDet er veiledning for AI. Ikke regler for hvordan du må skrive. Din egen tekst har alltid siste ord."
+        body: "To forfattere kan beskrive den samme hendelsen på helt ulike måter. Forfatterstemmen hjelper AI å forstå hvordan du vil at prosaen skal føles.",
+        steps: [
+          {
+            heading: "Hva det kan dreie seg om",
+            body: "Setningslengde, mengden miljøbeskrivelse, dialog, rytme, direkte eller tilbakeholdent språk, og andre stilistiske trekk."
+          },
+          {
+            heading: "Veiledning, ikke en regel",
+            body: "Det er veiledning for AI. Ikke regler for hvordan du må skrive. Din egen tekst har alltid siste ord."
+          }
+        ]
       },
       "smart-quotes": {
         heading: "Smarte anførselstegn",
-        body: "Et rett \" du skriver i kapittelredigeringen blir automatisk et ekte åpnende eller lukkende, kurvet anførselstegn, avhengig av hva som kommer rett før — ingenting å tenke på, ingenting å slå på.\n\nHar du allerede tekst med rette anførselstegn — limt inn, eller importert fra et annet sted? Tools → Convert markers → ”Smarten quotes in whole manuscript” konverterer hvert ett som allerede finnes i manuset på samme måte, i ett eneste sveip."
+        body: "Et rett \" du skriver i kapittelredigeringen blir automatisk et ekte åpnende eller lukkende, kurvet anførselstegn, avhengig av hva som kommer rett før — ingenting å tenke på, ingenting å slå på.",
+        steps: [
+          {
+            heading: "Konverter eksisterende tekst",
+            body: "Har du allerede tekst med rette anførselstegn — limt inn, eller importert fra et annet sted? Tools → Convert markers → ”Smarten quotes in whole manuscript” konverterer hvert ett som allerede finnes i manuset på samme måte, i ett eneste sveip."
+          }
+        ]
       },
       "analyze-chapter": {
         heading: "Analyser et kapittel",

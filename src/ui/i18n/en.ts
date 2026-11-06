@@ -550,63 +550,251 @@ const handbookSections: Record<
   },
   "story-bible-memory": {
     heading: "Story Bible – the story's memory",
-    body: "Story Bible gathers information the story needs to remember. It could be:\n• people\n• places\n• relationships\n• groups\n• objects\n• events\n• rules and concepts in the world\n\nSuppose the manuscript says:\n\"Nora walked up the stairs to the lighthouse. She hadn't been there since her father disappeared twenty years ago.\"\n\nkaampi Write can identify possible facts. For example:\n\"Nora has a father.\"\n\"Nora's father disappeared twenty years ago.\"\n\"Nora has been to the lighthouse before.\"\n\nYou review the suggestions. Only once you decide something should be locked does it become established information kaampi Write can rely on."
+    body: "Story Bible gathers information the story needs to remember, so it can tell the difference between what's actually true in the world and what was just a passing detail.",
+    steps: [
+      {
+        heading: "What Story Bible holds",
+        body: "People, places, relationships, groups, objects, events, and rules or concepts in the world — anything later chapters need to stay consistent with."
+      },
+      {
+        heading: "From manuscript text to possible facts",
+        body: "Suppose the manuscript says: \"Nora walked up the stairs to the lighthouse. She hadn't been there since her father disappeared twenty years ago.\" kaampi Write can identify possible facts from that: \"Nora has a father.\" \"Nora's father disappeared twenty years ago.\" \"Nora has been to the lighthouse before.\""
+      },
+      {
+        heading: "You decide what becomes established",
+        body: "You review the suggestions. Only once you decide something should be locked does it become established information kaampi Write can rely on — a suggestion sitting unreviewed changes nothing yet."
+      }
+    ]
   },
   "what-is-canon": {
     heading: "What does canon mean?",
-    body: "Canon is whatever you've decided should be treated as true in the story.\nNot all text needs to become canon.\n\nIf the AI writes:\n\"Nora pulled the red scarf tighter around her neck.\"\nyou don't need to save the scarf's color just because it happened to appear in the text.\n\nBut if the scarf later becomes important, the information may be worth locking.\n\nStory Bible should remember what needs to stay consistent. It doesn't need to become a database of every detail in every sentence."
+    body: "Canon is whatever you've decided should be treated as true in the story. Not all text needs to become canon — most of it shouldn't.",
+    steps: [
+      {
+        heading: "A detail doesn't need saving just because it was written",
+        body: "If the AI writes: \"Nora pulled the red scarf tighter around her neck,\" you don't need to save the scarf's color just because it happened to appear in the text."
+      },
+      {
+        heading: "Unless it later becomes important",
+        body: "If the scarf later becomes important — say it turns up again in chapter 20 — the information may be worth locking at that point."
+      }
+    ],
+    tip: "Story Bible should remember what needs to stay consistent. It doesn't need to become a database of every detail in every sentence."
   },
   "aliases-and-exclusions": {
     heading: "Aliases and exclusion phrases",
-    body: "A character, place, or object doesn't always show up in the text under its card's own name. Open a Story Bible card and you can give it aliases — nicknames, titles, alter egos — so a mention under any of them still counts. A character named \"Emma\" on her card, but called \"Em\" throughout the manuscript, is recognized either way — in the Mentions tracker, and in the lore-relevance filter if you use one.\n\nThe opposite problem also happens: a name that's also an ordinary word. A character named Rose means every mention of a rose garden, a rose bush, or roses on a table looks like a sighting of her. Exclusion phrases fix that — add \"rose garden\" as an exclusion on Rose's card, and that specific phrase stops counting as a mention of her, while \"Rose smiled\" still does."
+    body: "A character, place, or object doesn't always show up in the text under its card's own name — two tools handle the two ways that can go wrong.",
+    steps: [
+      {
+        heading: "Aliases catch other names for the same thing",
+        body: "Open a Story Bible card and you can give it aliases — nicknames, titles, alter egos — so a mention under any of them still counts. A character named \"Emma\" on her card, but called \"Em\" throughout the manuscript, is recognized either way — in the Mentions tracker, and in the lore-relevance filter if you use one."
+      },
+      {
+        heading: "Exclusion phrases catch false positives",
+        body: "The opposite problem also happens: a name that's also an ordinary word. A character named Rose means every mention of a rose garden, a rose bush, or roses on a table looks like a sighting of her. Exclusion phrases fix that — add \"rose garden\" as an exclusion on Rose's card, and that specific phrase stops counting as a mention of her, while \"Rose smiled\" still does."
+      }
+    ]
   },
   "merge-story-bible-cards": {
     heading: "Merge Story Bible cards",
-    body: "Sometimes two Story Bible cards turn out to be the same thing — you created \"Kael\" early on, and much later realize \"the Captain\" who kept showing up is Kael too. \"Merge cards…\" in the Story Bible panel handles this: pick two or more cards of the same kind and merge them into one.\n\nNothing is deleted. Every fact moves onto the merged card; where the two cards disagreed, you choose which value wins; each old name becomes an alias of the merged card, so a later mention of either still resolves correctly. There's also an option to replace the old names with the new one in the manuscript text itself.\n\nThe same merging also works the other way — a pending suggestion from Extract facts can be merged straight onto an existing card from the review queue, instead of locking it as a new card first and merging afterward."
+    body: "Sometimes two Story Bible cards turn out to be the same thing — you created \"Kael\" early on, and much later realize \"the Captain\" who kept showing up is Kael too.",
+    steps: [
+      {
+        heading: "How merging works",
+        body: "\"Merge cards…\" in the Story Bible panel handles this: pick two or more cards of the same kind and merge them into one. Nothing is deleted — every fact moves onto the merged card; where the two cards disagreed, you choose which value wins; each old name becomes an alias of the merged card, so a later mention of either still resolves correctly."
+      },
+      {
+        heading: "Updating the manuscript text too",
+        body: "There's also an option to replace the old names with the new one in the manuscript text itself, if you want the two names gone from the prose as well as unified on the card."
+      },
+      {
+        heading: "Merging works from the review queue too",
+        body: "The same merging also works the other way — a pending suggestion from Extract facts can be merged straight onto an existing card from the review queue, instead of locking it as a new card first and merging afterward."
+      }
+    ]
   },
   "edit-vs-update": {
     heading: "Edit vs. Update a fact",
-    body: "A locked fact has two different ways to change it, and they mean different things.\n\nEdit corrects a mistake — the fact was always this way, you just wrote it down wrong. No history, no \"as of\" chapter; it simply becomes correct.\n\nUpdate records a real change in the story — the fact was true, and from some chapter onward it changes to something else. \"Nora's hair was black\" (established in chapter 1), \"Nora's hair is now gray\" (Update, anchored to chapter 14, after the events that aged her). The earlier value stays visible in History instead of being overwritten, since both were true — just at different points in the story.\n\nIdentity facts (name, species, that kind of thing) only ever get Edit — there's rarely a story reason for someone's name to change mid-book the way their hair color or where they live might."
+    body: "A locked fact has two different ways to change it, and they mean different things — which one you pick decides whether the story has one true value or two, at different times.",
+    steps: [
+      {
+        heading: "Edit corrects a mistake",
+        body: "The fact was always this way, you just wrote it down wrong. No history, no \"as of\" chapter; it simply becomes correct."
+      },
+      {
+        heading: "Update records a real change",
+        body: "The fact was true, and from some chapter onward it changes to something else. \"Nora's hair was black\" (established in chapter 1), \"Nora's hair is now gray\" (Update, anchored to chapter 14, after the events that aged her). The earlier value stays visible in History instead of being overwritten, since both were true — just at different points in the story."
+      },
+      {
+        heading: "Identity facts only ever take Edit",
+        body: "Facts like name or species only ever get Edit — there's rarely a story reason for someone's name to change mid-book the way their hair color or where they live might."
+      }
+    ]
   },
   "interview-world": {
     heading: "Interview the world",
-    body: "Story Bible doesn't just have to be used to store what you already know. You can also use Interview the world to discover more.\n\nInstead of filling out long forms, you can explore a character through conversation.\n\nSuppose you know:\n\"Nora Berg. 38. Journalist. Grew up on the island. Her father disappeared when she was eighteen.\"\n\nAsk things like:\n\"Why did you become a journalist?\"\n\"What do you remember from the day your father disappeared?\"\n\"Who do you trust the least?\"\n\"What would you never admit to Elias?\"\n\"What are you most afraid of discovering?\"\n\nThe interview can help you find personality, motive, background, relationships, and conflicts."
+    body: "Story Bible doesn't just have to be used to store what you already know. You can also use Interview the world to discover more — exploring a character through conversation instead of filling out long forms.",
+    steps: [
+      {
+        heading: "Starting from what you already know",
+        body: "Suppose you know: \"Nora Berg. 38. Journalist. Grew up on the island. Her father disappeared when she was eighteen.\""
+      },
+      {
+        heading: "Ask the character directly",
+        body: "\"Why did you become a journalist?\" \"What do you remember from the day your father disappeared?\" \"Who do you trust the least?\" \"What would you never admit to Elias?\" \"What are you most afraid of discovering?\""
+      }
+    ],
+    tip: "The interview can help you find personality, motive, background, relationships, and conflicts — often faster than deciding them all up front."
   },
   "interview-sandbox": {
     heading: "The interview is a sandbox",
-    body: "This is very important: what's said during the interview doesn't affect how the book is written. The AI is free to invent and experiment during the conversation.\n\nSuppose Nora says:\n\"My father used to take me to the lighthouse when I was little.\"\nThat doesn't mean kaampi Write is now free to use this as established information when a chapter is written.\nYou first have to choose to turn the information into a fact.\n\nThe workflow is:\nInterview → AI says something interesting → Extract facts → Review → Lock facts → Story Bible → Now the information can affect future AI writing\n\nThink of it as:\nInterview ≠ canon\nLocked facts = canon\n\nThat lets you ask wild questions and try out ideas without risking them starting to affect the story."
+    body: "This is very important: what's said during the interview doesn't affect how the book is written. The AI is free to invent and experiment during the conversation.",
+    steps: [
+      {
+        heading: "An answer in the interview isn't automatically true",
+        body: "Suppose Nora says: \"My father used to take me to the lighthouse when I was little.\" That doesn't mean kaampi Write is now free to use this as established information when a chapter is written. You first have to choose to turn the information into a fact."
+      },
+      {
+        heading: "The path from a line in the interview to canon",
+        body: "Interview → AI says something interesting → Extract facts → Review → Lock facts → Story Bible → now the information can affect future AI writing."
+      }
+    ],
+    tip: "Interview ≠ canon. Locked facts = canon. That lets you ask wild questions and try out ideas without risking them starting to affect the story."
   },
   "interview-to-story": {
     heading: "From interview to story",
-    body: "During the interview, Nora might say:\n\"My mother always lied about what happened to Dad. I learned early that adults tell whichever version of the truth suits them.\"\n\nYou find the idea interesting. After the interview, kaampi Write can help you identify possible facts:\n\"Nora's mother withheld information about the father's disappearance.\"\n\nNow you choose.\nLock the fact — then it becomes an established part of Story Bible.\nDon't lock it — then it stays something explored during the interview, and shouldn't be treated as established information when the book is written.\n\nWhen a fact only becomes true later in the chapter\nOne important detail: a fact locked to a chapter applies from the chapter's first page. Draft can use the fact right there — even if it's actually only true later in the chapter.\n\nExample: your protagonist meets an old friend, Marcus, in chapter 6. The chapter opens as an ordinary reunion. Only partway through does the protagonist realize Marcus is the one who's secretly been working against him — Marcus is the antagonist. If you extract \"Marcus is the antagonist\" from the Interview and lock it to chapter 6, Draft has access to the reveal already when it writes the opening reunion, as if nobody yet knows what Marcus is really up to.\n\nLock the fact to a specific scene instead\nIf the fact should only become available once the reveal happens, you can link it to the scene where it happens.\n\nFirst split chapter 6 into scenes (Scenes → Split into two…) at the point where the reveal happens, so the reunion and the reveal become separate scenes. When you then extract the fact from the Interview, the \"As of\" picker shows that chapter's scenes — pick the reveal's scene instead of \"Whole chapter\". Draft now only gets access to the fact from that scene onward.\n\nIf you draft scene by scene (Scenes → Draft), you can write the reunion without Draft having access to the fact yet. Once you reach the reveal's scene, Draft gets access to it, and it then applies for the rest of the chapter.\n\nImportant: this only works with scene-by-scene Draft\nThe scene link only affects Draft when you write one scene at a time. Run Draft for the whole chapter, and Draft has access to every fact attributed to the chapter, whichever scene it's linked to.\n\nIf you prefer drafting whole chapters in one pass, the simpler workaround still applies: hold off locking the fact until you've written past the turn, or draft the chapter in two passes and lock the fact only before the second."
+    body: "An idea from the interview doesn't become part of the story until you lock it — and once you do, exactly when it takes effect in the manuscript is worth understanding.",
+    steps: [
+      {
+        heading: "From an interesting line to a possible fact",
+        body: "During the interview, Nora might say: \"My mother always lied about what happened to Dad. I learned early that adults tell whichever version of the truth suits them.\" You find the idea interesting. After the interview, kaampi Write can help you identify possible facts: \"Nora's mother withheld information about the father's disappearance.\""
+      },
+      {
+        heading: "Lock it, or leave it as exploration",
+        body: "Lock the fact and it becomes an established part of Story Bible. Don't lock it, and it stays something explored during the interview — it shouldn't be treated as established information when the book is written."
+      },
+      {
+        heading: "A fact can apply from a chapter's first page, even if it's only true later",
+        body: "A fact locked to a chapter applies from the chapter's first page. Draft can use the fact right there — even if it's actually only true later in the chapter. Example: your protagonist meets an old friend, Marcus, in chapter 6. The chapter opens as an ordinary reunion. Only partway through does the protagonist realize Marcus has secretly been working against him — Marcus is the antagonist. If you extract \"Marcus is the antagonist\" from the Interview and lock it to chapter 6, Draft has access to the reveal already when it writes the opening reunion, as if nobody yet knows what Marcus is really up to."
+      },
+      {
+        heading: "Lock the fact to a specific scene instead",
+        body: "If the fact should only become available once the reveal happens, link it to the scene where it happens. First split chapter 6 into scenes (Scenes → Split into two…) at the point where the reveal happens, so the reunion and the reveal become separate scenes. When you then extract the fact from the Interview, the \"As of\" picker shows that chapter's scenes — pick the reveal's scene instead of \"Whole chapter\". Draft now only gets access to the fact from that scene onward."
+      },
+      {
+        heading: "This only works with scene-by-scene Draft",
+        body: "The scene link only affects Draft when you write one scene at a time (Scenes → Draft). Run Draft for the whole chapter in one pass, and Draft has access to every fact attributed to the chapter, whichever scene it's linked to. If you prefer drafting whole chapters in one pass, the simpler workaround still applies: hold off locking the fact until you've written past the turn, or draft the chapter in two passes and lock the fact only before the second."
+      }
+    ]
   },
   "brainstorm-vs-interview": {
     heading: "Brainstorm and interview",
-    body: "They are two different ways of exploring the story.\n\nBrainstorm — you look at the story from the outside:\n\"What if Nora's mother knows more about the disappearance?\"\n\nInterview — you examine the story from within:\n\"Nora, do you think your mother knows what happened to your father?\"\n\nNeither has to automatically change the story. They're places where you get to think."
+    body: "They are two different ways of exploring the story, and neither has to automatically change it — both are places where you get to think.",
+    steps: [
+      {
+        heading: "Brainstorm looks from the outside",
+        body: "\"What if Nora's mother knows more about the disappearance?\" — a question about the story, asked from outside it."
+      },
+      {
+        heading: "Interview looks from within",
+        body: "\"Nora, do you think your mother knows what happened to your father?\" — the same kind of question, but asked to the character directly, in her own voice."
+      }
+    ]
   },
   "three-levels-of-information": {
     heading: "Three levels of information",
-    body: "A useful mental model:\n\nExplore\nBrainstorm and interviews. \"What if…?\" Here ideas get to be uncertain.\n↓\nPlan\nSynopsis, briefs, Scenes, and Plotlines. \"This is what I think will happen.\" Here you shape the story.\n↓\nEstablish\nLocked facts in Story Bible. \"This is true in the story's world.\" Here is information kaampi Write can rely on when the story is written."
+    body: "A useful mental model for how uncertain or settled a piece of story information is, at any given moment.",
+    steps: [
+      {
+        heading: "Explore",
+        body: "Brainstorm and interviews. \"What if…?\" Here ideas get to be uncertain."
+      },
+      {
+        heading: "Plan",
+        body: "Synopsis, briefs, Scenes, and Plotlines. \"This is what I think will happen.\" Here you shape the story."
+      },
+      {
+        heading: "Establish",
+        body: "Locked facts in Story Bible. \"This is true in the story's world.\" Here is information kaampi Write can rely on when the story is written."
+      }
+    ]
   },
   "extract-facts": {
     heading: "Extract facts from the manuscript",
-    body: "You don't have to fill Story Bible by hand as you write. When a chapter contains information worth remembering, kaampi Write can help you extract possible facts.\n\nThe workflow is:\nChapter → Extract facts → Suggestions → Review → Approve and lock → Story Bible\n\nAI suggests. You decide."
+    body: "You don't have to fill Story Bible by hand as you write. When a chapter contains information worth remembering, kaampi Write can help you extract possible facts straight from the prose.",
+    steps: [
+      {
+        heading: "The workflow",
+        body: "Chapter → Extract facts → Suggestions → Review → Approve and lock → Story Bible."
+      }
+    ],
+    tip: "AI suggests. You decide — nothing gets added to Story Bible without your approval."
   },
   "moving-from-other-tool": {
     heading: "Moving from another writing tool",
-    body: "If you've already worked on the story elsewhere, you don't need to start over. You might already have:\n• a manuscript\n• character descriptions\n• places\n• worldbuilding\n• lore\n• organizations\n• objects\n• history\n• rules of the world\n\nkaampi Write can help you bring the material with you."
+    body: "If you've already worked on the story elsewhere, you don't need to start over.",
+    steps: [
+      {
+        heading: "What you might already have",
+        body: "A manuscript, character descriptions, places, worldbuilding, lore, organizations, objects, history, rules of the world — anything built up in another tool before you came here."
+      },
+      {
+        heading: "kaampi Write can help you bring it with you",
+        body: "The chapters that follow cover the specific tools for that: importing a manuscript, importing lore, and starting from material you already have."
+      }
+    ]
   },
   "import-lore": {
     heading: "Import lore",
-    body: "Open: Story Bible → Import lore\n\nPaste an article or text from your existing material. It could be, for example:\n\"The lighthouse was built in 1892 on the island's northern point. It has been unmanned since 1987. The locals avoid the place after dark.\"\n\nkaampi Write's local AI reads the text and suggests facts. You then review the suggestions.\n\nThe original text isn't saved as part of the book. It's the facts you choose to approve that carry forward.\n\nThe current lore import works with one article or text at a time."
+    body: "Open: Story Bible → Import lore.",
+    steps: [
+      {
+        heading: "Paste existing material",
+        body: "Paste an article or text from your existing material. It could be, for example: \"The lighthouse was built in 1892 on the island's northern point. It has been unmanned since 1987. The locals avoid the place after dark.\""
+      },
+      {
+        heading: "AI reads it and suggests facts",
+        body: "kaampi Write's local AI reads the text and suggests facts. You then review the suggestions, exactly as with Extract facts."
+      },
+      {
+        heading: "Only the approved facts carry forward",
+        body: "The original text isn't saved as part of the book. It's the facts you choose to approve that carry forward into Story Bible."
+      }
+    ],
+    tip: "The current lore import works with one article or text at a time."
   },
   "lore-relevance-filter": {
     heading: "Keeping a large imported Story Bible relevant",
-    body: "Facts the manuscript itself has established — written in a chapter, or approved from an interview — always show up in Draft. They're the story's own memory, and there's no safe way to leave them out. Imported lore (Import lore) is different: it's background information, useful only when the chapter being drafted actually touches it. With a large imported setting, keeping every one of those facts in every Draft prompt can make the prompt huge and bury the handful that actually matter to the chapter at hand.\n\nSettings → Only show relevant lore for Draft (off by default) changes that: an imported lore fact only shows up if its own name is mentioned in the chapter, or — for an Event, such as a historical battle or a sponsorship deal — if one of its participants or its location is mentioned instead, even if the event itself is never named.\n\nIf the filter ever guesses wrong about a specific fact, pin it: the same cycle button in Story Bible already used to override a fact's story-time position now also means \"always include this one, regardless.\""
+    body: "Two kinds of Story Bible facts behave differently when it comes to what Draft actually needs to see.",
+    steps: [
+      {
+        heading: "Manuscript facts always show up",
+        body: "Facts the manuscript itself has established — written in a chapter, or approved from an interview — always show up in Draft. They're the story's own memory, and there's no safe way to leave them out."
+      },
+      {
+        heading: "Imported lore is different",
+        body: "Imported lore (Import lore) is background information, useful only when the chapter being drafted actually touches it. With a large imported setting, keeping every one of those facts in every Draft prompt can make the prompt huge and bury the handful that actually matter to the chapter at hand."
+      },
+      {
+        heading: "The relevance filter",
+        body: "Settings → Only show relevant lore for Draft (off by default) changes that: an imported lore fact only shows up if its own name is mentioned in the chapter, or — for an Event, such as a historical battle or a sponsorship deal — if one of its participants or its location is mentioned instead, even if the event itself is never named."
+      },
+      {
+        heading: "Pin a fact the filter gets wrong",
+        body: "If the filter ever guesses wrong about a specific fact, pin it: the same cycle button in Story Bible already used to override a fact's story-time position now also means \"always include this one, regardless.\""
+      }
+    ]
   },
   "already-have-manuscript": {
     heading: "You already have a manuscript",
-    body: "If you've already written part of, or all of, the story, you don't need to start with Brainstorm or a development method. Start with the text you have.\n\nOne possible workflow:\nExisting manuscript → Chapters → Extract facts → Story Bible → Analyze and revise → Keep writing\n\nBrainstorm, Synopsis, and development methods are aids. They aren't required steps."
+    body: "If you've already written part of, or all of, the story, you don't need to start with Brainstorm or a development method. Start with the text you have.",
+    steps: [
+      {
+        heading: "One possible workflow",
+        body: "Existing manuscript → Chapters → Extract facts → Story Bible → Analyze and revise → Keep writing."
+      }
+    ],
+    tip: "Brainstorm, Synopsis, and development methods are aids. They aren't required steps."
   },
   "write-with-ai": {
     heading: "Write together with AI",
@@ -632,39 +820,123 @@ const handbookSections: Record<
   },
   "attached-context": {
     heading: "Attached context",
-    body: "Story Bible holds the facts, but not always the exact words a place, object, or character was first described in — and sometimes that's what matters. Chapter settings → Attached context lets a chapter pin an earlier chapter, or just one of its scenes, as extra reference material for Draft and Recast.\n\nUnlike Story Bible facts, what's pinned is sent as its actual prose, not a summary — useful when the lighthouse, say, needs to read exactly as it was first painted in chapter 2, not just as the Story Bible fact \"an abandoned lighthouse on the northern point.\" A rough token-cost estimate shows next to whatever's pinned, so you can see what it's adding to the prompt."
+    body: "Story Bible holds the facts, but not always the exact words a place, object, or character was first described in — and sometimes that's what matters.",
+    steps: [
+      {
+        heading: "Pin an earlier chapter, or just a scene",
+        body: "Chapter settings → Attached context lets a chapter pin an earlier chapter, or just one of its scenes, as extra reference material for Draft and Recast."
+      },
+      {
+        heading: "Actual prose, not a summary",
+        body: "Unlike Story Bible facts, what's pinned is sent as its actual prose — useful when the lighthouse, say, needs to read exactly as it was first painted in chapter 2, not just as the Story Bible fact \"an abandoned lighthouse on the northern point.\""
+      },
+      {
+        heading: "Knowing what it costs",
+        body: "A rough token-cost estimate shows next to whatever's pinned, so you can see what it's adding to the prompt."
+      }
+    ]
   },
   "smallest-tool": {
     heading: "Choose the smallest tool",
-    body: "Completely empty chapter → Draft\nA smaller event is missing → Write a beat\nThe passage is too thin → Elaborate\nI need to move forward → Extend\nI know what I want to change → Rewrite\nI want to know if the chapter works → Analyze\n\nThis gives you more control than regenerating large amounts of text."
+    body: "The writing tools scale down as well as up — matching the tool to the size of the actual gap gives you more control than regenerating large amounts of text.",
+    steps: [
+      {
+        heading: "Match the tool to the problem",
+        body: "Completely empty chapter → Draft. A smaller event is missing → Write a beat. The passage is too thin → Elaborate. I need to move forward → Extend. I know what I want to change → Rewrite. I want to know if the chapter works → Analyze."
+      }
+    ]
   },
   "ai-not-autopilot": {
     heading: "AI is not autopilot",
-    body: "kaampi Write isn't built around: \"Write my book.\"\n\nThe idea is instead:\nYou decide the direction.\n↓\nAI helps where you want help.\n↓\nYou read the result.\n↓\nYou change, keep, or discard it.\n↓\nThe story develops.\n\nYou can write several chapters entirely without AI. You can use AI only when you get stuck. Or generate rough drafts that you then rewrite heavily. All of these are normal ways to use kaampi Write."
+    body: "kaampi Write isn't built around \"Write my book.\" It's built around a loop where you stay in control of every step.",
+    steps: [
+      {
+        heading: "The loop",
+        body: "You decide the direction. AI helps where you want help. You read the result. You change, keep, or discard it. The story develops."
+      },
+      {
+        heading: "There's no one correct amount of AI to use",
+        body: "You can write several chapters entirely without AI. You can use AI only when you get stuck. Or generate rough drafts that you then rewrite heavily. All of these are normal ways to use kaampi Write."
+      }
+    ]
   },
   darlings: {
     heading: "Darlings — kill your darlings, keep the bodies",
-    body: "A passage can be wrong for this draft without being worth losing for good. Select it and choose \"Cut to Darlings\" from the right-click menu, and it's pulled out of the chapter without being deleted — it lands in a \"N darlings kept\" tray shared across the whole book.\n\nFrom there, restore it to its original spot, or discard it for good once you're sure. A cut or a restore gets its own row in the chapter's History too, so there's always a record of what moved where."
+    body: "A passage can be wrong for this draft without being worth losing for good.",
+    steps: [
+      {
+        heading: "Cutting without deleting",
+        body: "Select the passage and choose \"Cut to Darlings\" from the right-click menu, and it's pulled out of the chapter without being deleted — it lands in a \"N darlings kept\" tray shared across the whole book."
+      },
+      {
+        heading: "Restore it, or let it go",
+        body: "From the tray, restore a darling to its original spot, or discard it for good once you're sure you won't need it. A cut or a restore gets its own row in the chapter's History too, so there's always a record of what moved where."
+      }
+    ]
   },
   placeholders: {
     heading: "Placeholders",
-    body: "A question mid-draft doesn't have to break your flow. Right-click where it comes up — \"what was this character's last name again?\" — and drop a placeholder note, then keep writing. A small pin marks where it sits in the text; click it any time to read the note, edit it, or mark it resolved.\n\nA chapter with an open placeholder gets a small dot in the chapter list, and a compact \"N placeholders to come back to\" panel lists every open one in the book with a jump straight to its chapter. Proofread also checks for any still open before it runs, in case one's been forgotten."
+    body: "A question mid-draft doesn't have to break your flow.",
+    steps: [
+      {
+        heading: "Drop a note and keep going",
+        body: "Right-click where the question comes up — \"what was this character's last name again?\" — and drop a placeholder note, then keep writing. A small pin marks where it sits in the text; click it any time to read the note, edit it, or mark it resolved."
+      },
+      {
+        heading: "Finding open placeholders later",
+        body: "A chapter with an open placeholder gets a small dot in the chapter list, and a compact \"N placeholders to come back to\" panel lists every open one in the book with a jump straight to its chapter."
+      }
+    ],
+    tip: "Proofread also checks for any still open before it runs, in case one's been forgotten."
   },
   "pov-tense-voice": {
     heading: "Point of view, tense, and narrative voice",
-    body: "kaampi Write can be given information about how the story should be told. This can include:\n• point of view\n• tense\n• viewpoint\n• narrative voice\n\nIndividual chapters can, when needed, deviate from the book's overall settings. That can be useful if most of the novel is told in third person but one particular chapter needs a different viewpoint.\n\nIf you use AI for larger rewrites after such a change, always read the result carefully.\n\nPoint of view is about more than swapping pronouns."
+    body: "kaampi Write can be given information about how the story should be told.",
+    steps: [
+      {
+        heading: "What this covers",
+        body: "Point of view, tense, viewpoint, and narrative voice."
+      },
+      {
+        heading: "Individual chapters can deviate",
+        body: "Individual chapters can, when needed, deviate from the book's overall settings. That can be useful if most of the novel is told in third person but one particular chapter needs a different viewpoint."
+      }
+    ],
+    tip: "Point of view is about more than swapping pronouns. If you use AI for larger rewrites after such a change, always read the result carefully."
   },
   reader: {
     heading: "Reader",
-    body: "You can specify what kind of reader the story is aimed at. This can help AI adapt, for example, word choice and sentence structure when it writes together with you.\n\nIt's writing support. It is not an automatic rating of what age the finished book is suitable for."
+    body: "You can specify what kind of reader the story is aimed at. This can help AI adapt, for example, word choice and sentence structure when it writes together with you.",
+    steps: [
+      {
+        heading: "Writing support, not a rating",
+        body: "It's writing support. It is not an automatic rating of what age the finished book is suitable for — you still decide that yourself."
+      }
+    ]
   },
   "author-voice": {
     heading: "Author voice",
-    body: "Two authors can describe the same event in completely different ways. Author voice helps AI understand how you want the prose to feel. It can involve:\n• sentence length\n• amount of setting description\n• dialogue\n• rhythm\n• direct or restrained language\n• other stylistic traits\n\nIt's guidance for AI. Not rules for how you must write. Your own text always has the final word."
+    body: "Two authors can describe the same event in completely different ways. Author voice helps AI understand how you want the prose to feel.",
+    steps: [
+      {
+        heading: "What it can involve",
+        body: "Sentence length, amount of setting description, dialogue, rhythm, direct or restrained language, and other stylistic traits."
+      },
+      {
+        heading: "Guidance, not a rule",
+        body: "It's guidance for AI. Not rules for how you must write. Your own text always has the final word."
+      }
+    ]
   },
   "smart-quotes": {
     heading: "Smart quotes",
-    body: "A straight \" typed in the chapter editor becomes a real opening or closing curly quote automatically, based on what comes right before it — nothing to think about, nothing to switch on.\n\nAlready have text with straight quotes — pasted in, or imported from elsewhere? Tools → Convert markers → \"Smarten quotes in whole manuscript\" converts every one already in the manuscript the same way, in a single pass."
+    body: "A straight \" typed in the chapter editor becomes a real opening or closing curly quote automatically, based on what comes right before it — nothing to think about, nothing to switch on.",
+    steps: [
+      {
+        heading: "Converting existing text",
+        body: "Already have text with straight quotes — pasted in, or imported from elsewhere? Tools → Convert markers → \"Smarten quotes in whole manuscript\" converts every one already in the manuscript the same way, in a single pass."
+      }
+    ]
   },
   "analyze-chapter": {
     heading: "Analyze a chapter",

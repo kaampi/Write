@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.295] - 2026-11-06
+
+### Changed
+- Rewrote the Guide's "Story Bible & World" (15 chapters: Story Bible, What does canon mean?, Aliases and exclusion phrases, Merge Story Bible cards, Edit vs. Update a fact, Interview the world, The interview is a sandbox, From interview to story, Brainstorm and interview, Three levels of information, Extract facts, Moving from another writing tool, Import lore, Keeping a large imported Story Bible relevant, You already have a manuscript) and "Writing" (9 of 10 chapters, excluding the already-stepped "Write together with AI": Attached context, Choose the smallest tool, AI is not autopilot, Darlings, Placeholders, Point of view/tense/narrative voice, Reader, Author voice, Smart quotes) categories into the fuller, stepped style, matching kaampi Explore's own Guide. All three languages. 43 of ~78 chapters now in the new style.
+
 ## [1.0.294] - 2026-11-05
 
 ### Changed
