@@ -940,123 +940,457 @@ const handbookSections: Record<
   },
   "analyze-chapter": {
     heading: "Analyze a chapter",
-    body: "Analyze reviews the text without rewriting it for you. The point is to help you notice things you might want to look into yourself.\n\nThink of the analysis as an extra reader.\nNot: \"This is how you should write.\"\nBut: \"Here's something you might want to look at.\"\n\nYou decide whether the observation is relevant."
+    body: "Analyze reviews the text without rewriting it for you. The point is to help you notice things you might want to look into yourself.",
+    steps: [
+      {
+        heading: "Think of it as an extra reader",
+        body: "Not: \"This is how you should write.\" But: \"Here's something you might want to look at.\""
+      },
+      {
+        heading: "You decide what's relevant",
+        body: "Analyze only points things out — you decide whether each observation is actually worth acting on."
+      }
+    ]
   },
   polish: {
     heading: "Polish",
-    body: "Where Analyze only points things out, Polish rewrites. It runs a cleanup pass over the whole chapter — cutting exposition inserts, emotion-naming (\"she felt a pang of regret\"), vague statements, purple prose, and tightening dialogue — then shows the original and the rewrite side by side, with word-level highlighting, before anything is kept.\n\nAccept or discard. Nothing touches the chapter until you say so. If Polish's default instincts don't match your voice — maybe you want more emotion-naming kept, not less — Settings → Polish lets you edit the instructions it gives the model, per manuscript."
+    body: "Where Analyze only points things out, Polish rewrites.",
+    steps: [
+      {
+        heading: "What it cleans up",
+        body: "It runs a cleanup pass over the whole chapter — cutting exposition inserts, emotion-naming (\"she felt a pang of regret\"), vague statements, purple prose, and tightening dialogue."
+      },
+      {
+        heading: "Compare before you commit",
+        body: "It then shows the original and the rewrite side by side, with word-level highlighting, before anything is kept. Accept or discard — nothing touches the chapter until you say so."
+      },
+      {
+        heading: "Adjust it to your voice",
+        body: "If Polish's default instincts don't match your voice — maybe you want more emotion-naming kept, not less — Settings → Polish lets you edit the instructions it gives the model, per manuscript."
+      }
+    ]
   },
   continuity: {
     heading: "Continuity",
-    body: "The longer a manuscript gets, the harder it is to remember everything. A person might end up with different eye colors. A place might suddenly change. A character might seem to know information they shouldn't know yet.\n\nHere, Story Bible and the story's continuity tools help you compare what you're writing against what's already established.\n\nWho knows what?\nContinuity isn't only about physical details. It's also about information. The reader might know a secret. That doesn't mean every character does.\n\nThis becomes especially important in mysteries, thrillers, multiple viewpoints, and stories where information is revealed gradually."
+    body: "The longer a manuscript gets, the harder it is to remember everything. A person might end up with different eye colors. A place might suddenly change. A character might seem to know information they shouldn't know yet.",
+    steps: [
+      {
+        heading: "Comparing against what's established",
+        body: "Here, Story Bible and the story's continuity tools help you compare what you're writing against what's already established."
+      },
+      {
+        heading: "Who knows what?",
+        body: "Continuity isn't only about physical details. It's also about information. The reader might know a secret. That doesn't mean every character does."
+      }
+    ],
+    tip: "This becomes especially important in mysteries, thrillers, multiple viewpoints, and stories where information is revealed gradually."
   },
   "ask-manuscript": {
     heading: "Ask Manuscript",
-    body: "Once the book has grown long, you can use Ask Manuscript to examine your own story.\n\nExample:\n\"When does Erik first meet the woman on the train?\"\n\"In which chapters is the lighthouse mentioned?\"\n\"What does Lena know about Erik's father?\"\n\"When does the reader learn the photograph is from 1932?\"\n\nYou can also ask:\n\"Which chapters are mostly about the relationship between Nora and Elias?\"\nor:\n\"Where is the key mentioned before it becomes important later?\"\n\nThe answer is a tool for you. It doesn't automatically become canon, and shouldn't by itself change the chapters."
+    body: "Once the book has grown long, you can use Ask Manuscript to examine your own story.",
+    steps: [
+      {
+        heading: "Factual questions about what's already written",
+        body: "\"When does Erik first meet the woman on the train?\" \"In which chapters is the lighthouse mentioned?\" \"What does Lena know about Erik's father?\" \"When does the reader learn the photograph is from 1932?\""
+      },
+      {
+        heading: "Broader questions too",
+        body: "\"Which chapters are mostly about the relationship between Nora and Elias?\" Or: \"Where is the key mentioned before it becomes important later?\""
+      }
+    ],
+    tip: "The answer is a tool for you. It doesn't automatically become canon, and shouldn't by itself change the chapters."
   },
   "ask-about-passage": {
     heading: "Ask about a chapter or a passage",
-    body: "Analyze checks fixed categories. Ask Manuscript answers factual questions about what's already written. Neither can answer something like: \"Does this build toward a strong ending?\" or \"Is this argument believable, or does it feel forced?\" — Ask about chapter / Ask about a passage is for exactly that kind of question: your own, about the writing's craft, with an honest — and critical, if asked — answer.\n\nTwo ways to use it:\n\"Ask about chapter…\" (next to Analyze) — ask about the whole chapter.\nMark a passage in the text, then choose \"Ask…\" from its menu — ask about just that passage, with the surrounding text as context.\n\nExample:\n\"Does the ending make you want to read the next chapter?\"\n\"Is this scene showing too much, too fast?\"\n\nThe answer is just a read. Nothing is changed or saved — same as Ask Manuscript."
+    body: "Analyze checks fixed categories. Ask Manuscript answers factual questions about what's already written. Neither can answer something like: \"Does this build toward a strong ending?\" or \"Is this argument believable, or does it feel forced?\" — Ask about chapter / Ask about a passage is for exactly that kind of question.",
+    steps: [
+      {
+        heading: "Two ways to use it",
+        body: "\"Ask about chapter…\" (next to Analyze) asks about the whole chapter. Mark a passage in the text, then choose \"Ask…\" from its menu, to ask about just that passage, with the surrounding text as context."
+      },
+      {
+        heading: "What kind of question it's for",
+        body: "\"Does the ending make you want to read the next chapter?\" \"Is this scene showing too much, too fast?\" Your own question about craft, with an honest — and critical, if asked — answer."
+      }
+    ],
+    tip: "The answer is just a read. Nothing is changed or saved — same as Ask Manuscript."
   },
   history: {
     heading: "History",
-    body: "AI-assisted writing often means experimenting. A rewrite might turn out better. Or you might discover the old version actually worked better.\n\nWhen earlier versions are available, History can help you compare and go back.\n\nThink: Try → Read → Keep or revert\n\nYou don't have to accept a change just because AI made it."
+    body: "AI-assisted writing often means experimenting. A rewrite might turn out better. Or you might discover the old version actually worked better.",
+    steps: [
+      {
+        heading: "Comparing and going back",
+        body: "When earlier versions are available, History can help you compare and go back. Think: Try → Read → Keep or revert."
+      }
+    ],
+    tip: "You don't have to accept a change just because AI made it."
   },
   proofread: {
     heading: "Proofread",
-    body: "Proofreading fits later in the process.\n\nEarlier, the question might have been: \"How can the scene develop?\"\nNow the question becomes: \"Is there something here that needs fixing or checking?\"\n\nIt's rarely worth polishing every sentence if you still plan to rewrite whole chapters. Work from large to small:\nThe story → Continuity → The chapters → Developmental analysis → Polish → Proofreading → Your own final read\n\nProofread runs seven checks across the whole manuscript in one pass — grammar, repeated scenes, style and mood consistency between chapters, an age-appropriateness report, continuity, setups and payoffs, and a fact check against Story Bible — and warns first if an open placeholder note is still waiting, in case it's been forgotten along the way.\n\nAI can find things. The author decides what works."
+    body: "Proofreading fits later in the process. Earlier, the question might have been: \"How can the scene develop?\" Now the question becomes: \"Is there something here that needs fixing or checking?\"",
+    steps: [
+      {
+        heading: "Work from large to small",
+        body: "It's rarely worth polishing every sentence if you still plan to rewrite whole chapters. The story → Continuity → The chapters → Developmental analysis → Polish → Proofreading → Your own final read."
+      },
+      {
+        heading: "Seven checks in one pass",
+        body: "Proofread runs seven checks across the whole manuscript at once — grammar, repeated scenes, style and mood consistency between chapters, an age-appropriateness report, continuity, setups and payoffs, and a fact check against Story Bible."
+      },
+      {
+        heading: "A reminder before it starts",
+        body: "It warns first if an open placeholder note is still waiting, in case it's been forgotten along the way."
+      }
+    ],
+    tip: "AI can find things. The author decides what works."
   },
   "developmental-analysis": {
     heading: "Developmental analysis",
-    body: "Proofread reads line by line. Developmental analysis reads the shape of the whole book instead: does tension actually rise as the story goes on, does the middle sag, which Plotlines threads get resolved and which quietly stall for ten chapters.\n\nIt works in three stages — scene by scene, then chapter by chapter, then one final report — never the whole manuscript in a single pass, so it stays manageable even for a long book. A manually started run, not something that happens automatically; it's grounded in whatever Plotlines tags and Timeline positions the manuscript already has, but works without either — just a coarser read, and it says so before starting.\n\nThe only thing you ever see is the final report: a prose summary, plus a clickable list of specific chapters worth a look. The scene-by-scene and chapter-by-chapter readings underneath stay internal working data — the same \"never raw data, always synthesized\" principle as everywhere else AI reviews your writing."
+    body: "Proofread reads line by line. Developmental analysis reads the shape of the whole book instead: does tension actually rise as the story goes on, does the middle sag, which Plotlines threads get resolved and which quietly stall for ten chapters.",
+    steps: [
+      {
+        heading: "Three stages, never the whole book at once",
+        body: "It works in three stages — scene by scene, then chapter by chapter, then one final report — never the whole manuscript in a single pass, so it stays manageable even for a long book."
+      },
+      {
+        heading: "Grounded in Plotlines and Timeline, but not dependent on them",
+        body: "A manually started run, not something that happens automatically. It's grounded in whatever Plotlines tags and Timeline positions the manuscript already has, but works without either — just a coarser read, and it says so before starting."
+      },
+      {
+        heading: "What you actually see",
+        body: "The only thing you ever see is the final report: a prose summary, plus a clickable list of specific chapters worth a look. The scene-by-scene and chapter-by-chapter readings underneath stay internal working data — the same \"never raw data, always synthesized\" principle as everywhere else AI reviews your writing."
+      }
+    ]
   },
   "images-illustrations": {
     heading: "Images and illustrations",
-    body: "kaampi Write can help you work with images in two different ways.\n\nYour own images\nYou can add images to the story. Useful for illustrated stories, children's books, or projects where images are part of the reading experience.\n\nIllustration prompts\nYou can also use text from the story as the basis for an image description.\n\nExample — manuscript: \"Erik stood alone on the platform. Fog lay thick over the tracks, and the station clock had stopped at 3:17.\"\nkaampi Write can help you turn the passage into an illustration prompt based on the subject and the project's chosen visual style. The story text itself isn't changed."
+    body: "kaampi Write can help you work with images in two different ways.",
+    steps: [
+      {
+        heading: "Your own images",
+        body: "You can add images to the story. Useful for illustrated stories, children's books, or projects where images are part of the reading experience."
+      },
+      {
+        heading: "Illustration prompts",
+        body: "You can also use text from the story as the basis for an image description. Example — manuscript: \"Erik stood alone on the platform. Fog lay thick over the tracks, and the station clock had stopped at 3:17.\" kaampi Write can help you turn the passage into an illustration prompt based on the subject and the project's chosen visual style. The story text itself isn't changed."
+      }
+    ]
   },
   typography: {
     heading: "Typography",
-    body: "Settings → Typography shapes how the prose actually looks, live in the editor and carried into every Publish export — so what you see while writing is what the reader gets.\n\nFont — a choice of thirteen typefaces, serif and sans serif, each shown in its own face so you can tell them apart before picking one.\nWeight — Regular or Bold, for prose that sits heavier on the page.\nColor — one shade for dark theme, one for light, so it stays legible and intentional in both.\nDrop cap — off, or 2–5 lines, for a chapter's opening letter.\nScene break — the plain short rule, or one of four named ornaments (a classic book vignette, a minimalist diamond, French elegance, or a glimmering star) for a `---` paragraph.\n\nNone of this is required. The defaults are a reasonable starting point; Typography is there for when the look of the page starts to matter as much as the words on it."
+    body: "Settings → Typography shapes how the prose actually looks, live in the editor and carried into every Publish export — so what you see while writing is what the reader gets.",
+    steps: [
+      {
+        heading: "Font and weight",
+        body: "Font — a choice of thirteen typefaces, serif and sans serif, each shown in its own face so you can tell them apart before picking one. Weight — Regular or Bold, for prose that sits heavier on the page."
+      },
+      {
+        heading: "Color",
+        body: "One shade for dark theme, one for light, so it stays legible and intentional in both."
+      },
+      {
+        heading: "Drop cap and scene break",
+        body: "Drop cap — off, or 2–5 lines, for a chapter's opening letter. Scene break — the plain short rule, or one of four named ornaments (a classic book vignette, a minimalist diamond, French elegance, or a glimmering star) for a `---` paragraph."
+      }
+    ],
+    tip: "None of this is required. The defaults are a reasonable starting point; Typography is there for when the look of the page starts to matter as much as the words on it."
   },
   "language-versions": {
     heading: "Language versions of a manuscript",
-    body: "A finished — or still-growing — manuscript can spin off a separate, linked edition in another language, from the language switcher next to the manuscript title (\"New language version…\"). Its chapters are pre-created empty, each linked to its source counterpart.\n\nTranslate each one from the chapter editor (\"Translate chapter\") — it carries over the source chapter's prose along with the manuscript's Story Bible and Voice, so names and terms stay consistent across the translation, not just within it.\n\nIf you go back and change the source chapter later, the translated chapter flags it (\"Source changed since this was translated\"), with a same-language diff showing exactly what moved, and a \"Re-translate chapter\" action. The manuscript shelf groups a source manuscript together with its language versions, instead of listing them as unrelated books.\n\nSettings → AI settings has a third model choice for this, Translate, alongside Writing and Review."
+    body: "A finished — or still-growing — manuscript can spin off a separate, linked edition in another language.",
+    steps: [
+      {
+        heading: "Starting a language version",
+        body: "From the language switcher next to the manuscript title (\"New language version…\"). Its chapters are pre-created empty, each linked to its source counterpart."
+      },
+      {
+        heading: "Translating a chapter",
+        body: "Translate each one from the chapter editor (\"Translate chapter\") — it carries over the source chapter's prose along with the manuscript's Story Bible and Voice, so names and terms stay consistent across the translation, not just within it."
+      },
+      {
+        heading: "When the source chapter changes later",
+        body: "The translated chapter flags it (\"Source changed since this was translated\"), with a same-language diff showing exactly what moved, and a \"Re-translate chapter\" action. The manuscript shelf groups a source manuscript together with its language versions, instead of listing them as unrelated books."
+      }
+    ],
+    tip: "Settings → AI settings has a third model choice for this, Translate, alongside Writing and Review."
   },
   publish: {
     heading: "Publish",
-    body: "When the story is ready to leave the workspace, use Publish.\n\nThink of the difference:\nThe kaampi Write project = your workshop\nThe published copy = what the reader gets\n\nBrainstorm, working notes, and other planning don't need to follow into the published story. Choose the format that fits how the text will be used, and continue working with the result from there when needed.\n\nParagraph style offers two conventions: the familiar blank line between paragraphs, or an indented, no-blank-line classic book style with the chapter's opening paragraph left flush, as in print."
+    body: "When the story is ready to leave the workspace, use Publish.",
+    steps: [
+      {
+        heading: "Workshop vs. finished copy",
+        body: "The kaampi Write project is your workshop. The published copy is what the reader gets. Brainstorm, working notes, and other planning don't need to follow into the published story."
+      },
+      {
+        heading: "Choosing a paragraph style",
+        body: "Paragraph style offers two conventions: the familiar blank line between paragraphs, or an indented, no-blank-line classic book style with the chapter's opening paragraph left flush, as in print."
+      }
+    ],
+    tip: "Choose the format that fits how the text will be used, and continue working with the result from there when needed."
   },
   backup: {
     heading: "Backup",
-    body: "Publishing and backing up aren't the same thing.\n\nA published book is for the reader. A kaampi Write backup is for restoring the project itself. It can therefore contain information that isn't in the published version.\n\nSave backups regularly, especially before major changes.\n\nImport backup is used for kaampi Write's own backups. That's not the same as importing a manuscript or lore from another writing program.\n\n\"Export for other apps\" is a third, different thing again — not a backup, and not a reading copy either. It writes a snapshot in a shared format for a sibling app (such as kaampi Comic) to import: locked, visible Story Bible facts and chapters, grouped by kind. Unlocked, flagged, or hidden-from-the-model facts never go into it, the same visibility rule Draft itself follows."
+    body: "Publishing and backing up aren't the same thing.",
+    steps: [
+      {
+        heading: "A published book vs. a backup",
+        body: "A published book is for the reader. A kaampi Write backup is for restoring the project itself. It can therefore contain information that isn't in the published version."
+      },
+      {
+        heading: "Import backup is not manuscript import",
+        body: "Import backup is used for kaampi Write's own backups. That's not the same as importing a manuscript or lore from another writing program."
+      },
+      {
+        heading: "Export for other apps",
+        body: "A third, different thing again — not a backup, and not a reading copy either. It writes a snapshot in a shared format for a sibling app (such as kaampi Comic) to import: locked, visible Story Bible facts and chapters, grouped by kind. Unlocked, flagged, or hidden-from-the-model facts never go into it, the same visibility rule Draft itself follows."
+      }
+    ],
+    tip: "Save backups regularly, especially before major changes."
   },
   "network-ai-server": {
     heading: "An AI server on another computer on the network",
-    body: "Have a powerful computer or server on the same network, and want to write in kaampi Write from a different machine — a laptop, say? That works, but needs settings in three places: in kaampi Write, on the server machine, and its firewall.\n\nPick the engine that matches what's running there\nOpen Settings → Models. Whether the other machine runs Ollama or LM Studio, choose that same engine here — both have a server address field.\n\nEnter the other computer's network address\nIn the Server address field: http://[the other computer's network IP]:[port] — for example http://192.168.1.50:11434 for Ollama, or http://192.168.1.50:1234 for LM Studio. Leave it empty to use this computer's own default instead. Don't add /v1 at the end — kaampi Write adds that itself. Find that computer's network address with ipconfig (Windows) or ifconfig/ip addr (Mac/Linux), run on that same machine.\n\nLet the server listen on the network, not just itself\nIf the other machine runs Ollama: start it with the environment variable OLLAMA_HOST=0.0.0.0 so it listens broadly, and OLLAMA_ORIGINS set to the address kaampi Write is actually running from (or OLLAMA_ORIGINS=* to allow any address) — otherwise it refuses the browser's request even once the connection itself works.\nIf it runs LM Studio: the Developer tab → Server settings → turn on “Serve on Local Network” and “Enable CORS”.\n\nThe server machine's firewall\nIt must allow inbound connections on that port (11434 for Ollama, usually 1234 for LM Studio) from the rest of the network — otherwise the request never gets through, even with everything above set correctly.\n\nEach computer also keeps its own separate shelf of manuscripts — only the AI connection is shared, not what you've written. To keep working on the same book from both machines, use Backup/Restore to move it across."
+    body: "Have a powerful computer or server on the same network, and want to write in kaampi Write from a different machine — a laptop, say? That works, but needs settings in three places: in kaampi Write, on the server machine, and its firewall.",
+    steps: [
+      {
+        heading: "Pick the engine that matches what's running there",
+        body: "Open Settings → Models. Whether the other machine runs Ollama or LM Studio, choose that same engine here — both have a server address field."
+      },
+      {
+        heading: "Enter the other computer's network address",
+        body: "In the Server address field: http://[the other computer's network IP]:[port] — for example http://192.168.1.50:11434 for Ollama, or http://192.168.1.50:1234 for LM Studio. Leave it empty to use this computer's own default instead. Don't add /v1 at the end — kaampi Write adds that itself. Find that computer's network address with ipconfig (Windows) or ifconfig/ip addr (Mac/Linux), run on that same machine."
+      },
+      {
+        heading: "Let the server listen on the network, not just itself",
+        body: "If the other machine runs Ollama: start it with the environment variable OLLAMA_HOST=0.0.0.0 so it listens broadly, and OLLAMA_ORIGINS set to the address kaampi Write is actually running from (or OLLAMA_ORIGINS=* to allow any address) — otherwise it refuses the browser's request even once the connection itself works. If it runs LM Studio: the Developer tab → Server settings → turn on \"Serve on Local Network\" and \"Enable CORS\"."
+      },
+      {
+        heading: "The server machine's firewall",
+        body: "It must allow inbound connections on that port (11434 for Ollama, usually 1234 for LM Studio) from the rest of the network — otherwise the request never gets through, even with everything above set correctly."
+      }
+    ],
+    tip: "Each computer also keeps its own separate shelf of manuscripts — only the AI connection is shared, not what you've written. To keep working on the same book from both machines, use Backup/Restore to move it across."
   },
   "ai-writing-wrong-things": {
     heading: "If AI starts writing the wrong things",
-    body: "First, think about what information the model actually received.\n\nThe chapter brief is outdated\nCheck whether the brief still describes the chapter you want to write.\n\nSynopsis hasn't kept up with the story's development\nThe story may have changed since you planned it.\n\nThe idea only exists in Brainstorm\nBrainstorm is an exploratory space. An idea there shouldn't automatically be treated as part of the story.\n\nThe information only comes from an interview\nThe same principle applies here. What was said during the interview doesn't affect how the book is written unless you've chosen to lock the information as a fact.\n\nImportant information is missing from Story Bible\nIf something needs to stay consistent, it may need to be established and locked as a fact.\n\nYour instruction is too broad\nInstead of: \"Rewrite the scene to make it better.\"\ntry: \"Make the dialogue between Nora and Elias more guarded. They suspect each other but neither wants to show it yet.\"\n\nThe clearer the problem is, the easier it becomes to choose the right tool."
+    body: "First, think about what information the model actually received.",
+    steps: [
+      {
+        heading: "The chapter brief is outdated",
+        body: "Check whether the brief still describes the chapter you want to write."
+      },
+      {
+        heading: "Synopsis hasn't kept up with the story's development",
+        body: "The story may have changed since you planned it."
+      },
+      {
+        heading: "The idea only exists in Brainstorm, or only came from an interview",
+        body: "Brainstorm is an exploratory space. An idea there shouldn't automatically be treated as part of the story. The same principle applies to an interview — what was said doesn't affect how the book is written unless you've chosen to lock the information as a fact."
+      },
+      {
+        heading: "Important information is missing from Story Bible",
+        body: "If something needs to stay consistent, it may need to be established and locked as a fact."
+      },
+      {
+        heading: "Your instruction is too broad",
+        body: "Instead of: \"Rewrite the scene to make it better,\" try: \"Make the dialogue between Nora and Elias more guarded. They suspect each other but neither wants to show it yet.\""
+      }
+    ],
+    tip: "The clearer the problem is, the easier it becomes to choose the right tool."
   },
   "marker-conversion-no-match": {
     heading: "\"Convert markers to formatting\" says nothing was found",
-    body: "If this is about quotation marks specifically: you probably don't need Convert markers for that at all anymore. See Smart quotes (Writing) — a straight \" already turns curly as you type, and \"Smarten quotes in whole manuscript\" converts a whole imported or pasted-in manuscript in one pass, straight quotes included.\n\nFor anything else Convert markers handles — *asterisks* for italic, custom pairs of your own — \"nothing found\" usually means the character you typed into the field isn't quite the same character as the one in your manuscript. Easy to happen with punctuation that comes in more than one look-alike form.\n\nSafest fix: open the chapter, select one of the actual marker characters in your text, copy it (Ctrl/Cmd+C), and paste it into the Opening or Closing marker field instead of retyping it on the keyboard. That guarantees an exact match."
+    body: "Two different causes, depending on what you're trying to convert.",
+    steps: [
+      {
+        heading: "If this is about quotation marks specifically",
+        body: "You probably don't need Convert markers for that at all anymore. See Smart quotes (Writing) — a straight \" already turns curly as you type, and \"Smarten quotes in whole manuscript\" converts a whole imported or pasted-in manuscript in one pass, straight quotes included."
+      },
+      {
+        heading: "For anything else Convert markers handles",
+        body: "*Asterisks* for italic, custom pairs of your own — \"nothing found\" usually means the character you typed into the field isn't quite the same character as the one in your manuscript. Easy to happen with punctuation that comes in more than one look-alike form."
+      },
+      {
+        heading: "The safest fix",
+        body: "Open the chapter, select one of the actual marker characters in your text, copy it (Ctrl/Cmd+C), and paste it into the Opening or Closing marker field instead of retyping it on the keyboard. That guarantees an exact match."
+      }
+    ]
   },
   "routine-short-often": {
     heading: "Write little, but often",
-    body: "Finding time to write can be the hardest part. Small changes to your routine can make a big difference — here are five tips to help you build good habits, find focus, and keep going when you get stuck.\n\nYou don't need several free hours to get something written. Short, regular writing sessions can be more effective than waiting for the perfect moment.\n\nTry it: set aside 15–30 minutes a few days a week. Focus on writing, not on how much you manage to produce."
+    body: "Finding time to write can be the hardest part. Small changes to your routine can make a big difference — this chapter and the four after it offer five tips to help you build good habits, find focus, and keep going when you get stuck.",
+    steps: [
+      {
+        heading: "Short sessions can beat waiting for the perfect moment",
+        body: "You don't need several free hours to get something written. Short, regular writing sessions can be more effective than waiting for the perfect moment."
+      }
+    ],
+    tip: "Try it: set aside 15–30 minutes a few days a week. Focus on writing, not on how much you manage to produce."
   },
   "routine-draft-then-edit": {
     heading: "Write first, edit later",
-    body: "It's hard to be creative and critical at the same time. If you keep stopping to fix wording, you risk losing both focus and the story's direction.\n\nSo let the first draft be just that — a draft. You can improve the language later.\n\nTry it: write a scene without going back to change anything. Read it through and edit only once the scene is done."
+    body: "It's hard to be creative and critical at the same time. If you keep stopping to fix wording, you risk losing both focus and the story's direction.",
+    steps: [
+      {
+        heading: "Let the first draft be a draft",
+        body: "You can improve the language later — the first pass only needs to get the story down."
+      }
+    ],
+    tip: "Try it: write a scene without going back to change anything. Read it through and edit only once the scene is done."
   },
   "routine-set-time-place": {
     heading: "Decide when and where you'll write",
-    body: "It's easy to put off something that has no set time. A concrete plan makes it easier to actually sit down and write.\n\nSwap \"I'll try to write more\" for \"Saturday after breakfast, I write for 30 minutes.\"\n\nTry it: pick a time and place that fits your everyday life. Ideally, tie the writing to something you already do regularly."
+    body: "It's easy to put off something that has no set time. A concrete plan makes it easier to actually sit down and write.",
+    steps: [
+      {
+        heading: "Replace intention with a plan",
+        body: "Swap \"I'll try to write more\" for \"Saturday after breakfast, I write for 30 minutes.\""
+      }
+    ],
+    tip: "Try it: pick a time and place that fits your everyday life. Ideally, tie the writing to something you already do regularly."
   },
   "routine-pause-when-stuck": {
     heading: "Take a break when you get stuck",
-    body: "Sometimes staring longer at the same sentence or scene doesn't help. Doing something else for a while can give you a new perspective.\n\nGo for a walk, do the dishes, or do something that doesn't demand all your attention. When you come back, the problem can feel easier to solve.\n\nTry it: write down what you're stuck on before you take the break. That makes it easier to pick back up when you return."
+    body: "Sometimes staring longer at the same sentence or scene doesn't help. Doing something else for a while can give you a new perspective.",
+    steps: [
+      {
+        heading: "Step away on purpose",
+        body: "Go for a walk, do the dishes, or do something that doesn't demand all your attention. When you come back, the problem can feel easier to solve."
+      }
+    ],
+    tip: "Try it: write down what you're stuck on before you take the break. That makes it easier to pick back up when you return."
   },
   "routine-read-widely": {
     heading: "Read to grow your writing",
-    body: "Reading different authors and genres gives you a better feel for language, dialogue, pacing, and story structure.\n\nYou don't need to analyze every book. But sometimes it's worth thinking about why a scene works especially well.\n\nTry it: next time a book grips you, stop and ask yourself — what did the author do to catch my interest?"
+    body: "Reading different authors and genres gives you a better feel for language, dialogue, pacing, and story structure.",
+    steps: [
+      {
+        heading: "You don't need to analyze every book",
+        body: "But sometimes it's worth thinking about why a scene works especially well."
+      }
+    ],
+    tip: "Try it: next time a book grips you, stop and ask yourself — what did the author do to catch my interest?"
   },
   "opening-raise-a-question": {
     heading: "Raise a question in the reader's mind",
-    body: "The first few pages help a reader decide whether the story is worth continuing with. Here are four ways to write an opening that sparks curiosity.\n\nA strong opening doesn't have to start with drama. But something should catch the reader's interest.\n\nIt could be an unexpected event, strange behavior, or something that doesn't quite add up.\n\nOnce the reader starts wondering what happened, why it happened, or what's coming next, there's a reason to keep reading.\n\nAsk yourself: what question do I want the reader carrying with them after page one?"
+    body: "The first few pages help a reader decide whether the story is worth continuing with — this chapter and the three after it cover four ways to write an opening that sparks curiosity.",
+    steps: [
+      {
+        heading: "A strong opening doesn't need drama",
+        body: "But something should catch the reader's interest. It could be an unexpected event, strange behavior, or something that doesn't quite add up."
+      },
+      {
+        heading: "Wondering is what keeps a reader going",
+        body: "Once the reader starts wondering what happened, why it happened, or what's coming next, there's a reason to keep reading."
+      }
+    ],
+    tip: "Ask yourself: what question do I want the reader carrying with them after page one?"
   },
   "opening-wait-on-backstory": {
     heading: "Hold off on the backstory",
-    body: "You don't need to explain everything about the protagonist or the world right away.\n\nToo much background information up front can slow the story down before the reader has had a chance to get invested.\n\nShow only what's needed to understand the situation, and let the rest of the information arrive when it becomes relevant.\n\nAsk yourself: does the reader really need to know this already?"
+    body: "You don't need to explain everything about the protagonist or the world right away.",
+    steps: [
+      {
+        heading: "Too much background slows the opening down",
+        body: "Too much background information up front can slow the story down before the reader has had a chance to get invested."
+      },
+      {
+        heading: "Show only what's needed, for now",
+        body: "Show only what's needed to understand the situation, and let the rest of the information arrive when it becomes relevant."
+      }
+    ],
+    tip: "Ask yourself: does the reader really need to know this already?"
   },
   "opening-let-details-show": {
     heading: "Let the details do the telling",
-    body: "You don't always have to state a person's traits outright. A character often comes across as more alive through what they do, say, or notice.\n\nInstead of writing that someone is controlling, you could, for example, show them straightening the objects on a table before a difficult conversation.\n\nA well-chosen detail can say more than a long explanation.\n\nAsk yourself: can I show this trait through an action or a detail?"
+    body: "You don't always have to state a person's traits outright. A character often comes across as more alive through what they do, say, or notice.",
+    steps: [
+      {
+        heading: "Show the trait through action",
+        body: "Instead of writing that someone is controlling, you could, for example, show them straightening the objects on a table before a difficult conversation."
+      }
+    ],
+    tip: "A well-chosen detail can say more than a long explanation. Ask yourself: can I show this trait through an action or a detail?"
   },
   "opening-save-the-surprises": {
     heading: "Save the surprises",
-    body: "It can be tempting to open with the story's most dramatic event to hook the reader right away.\n\nBut if you reveal too much too early, later twists risk losing their impact.\n\nA prologue or a flashback can work very well, as long as it offers more than just a preview of what's about to happen.\n\nAsk yourself: does my opening spark curiosity, or does it reveal something that would have been more exciting to discover later?"
+    body: "It can be tempting to open with the story's most dramatic event to hook the reader right away.",
+    steps: [
+      {
+        heading: "Revealing too much too early costs you later",
+        body: "If you reveal too much too early, later twists risk losing their impact."
+      },
+      {
+        heading: "A prologue or flashback can still work",
+        body: "As long as it offers more than just a preview of what's about to happen."
+      }
+    ],
+    tip: "Ask yourself: does my opening spark curiosity, or does it reveal something that would have been more exciting to discover later?"
   },
   "voice-overexplaining": {
     heading: "Give your text a voice of its own",
-    body: "AI tools can help you write and revise text. But the result still needs to feel like your story.\n\nWhen you use Draft, Recast, or Polish, it can help to look out for a few recurring patterns.\n\nIs the text over-explaining?\nSometimes the narrator states outright what an event means, or what the reader should feel.\n\nLet the action, the dialogue, and the characters' choices speak for themselves. The reader doesn't need everything spelled out."
+    body: "AI tools can help you write and revise text. But the result still needs to feel like your story. When you use Draft, Recast, or Polish, it can help to look out for a few recurring patterns — this chapter and the three after it cover four of them.",
+    steps: [
+      {
+        heading: "Is the text over-explaining?",
+        body: "Sometimes the narrator states outright what an event means, or what the reader should feel."
+      },
+      {
+        heading: "Let the story speak for itself",
+        body: "Let the action, the dialogue, and the characters' choices speak for themselves. The reader doesn't need everything spelled out."
+      }
+    ]
   },
   "voice-too-predictable": {
     heading: "Is the story too predictable?",
-    body: "If every event leads straight into the next, a story can start to feel too neatly arranged.\n\nConsider whether the characters have goals of their own, whether conflicts exist alongside the main plot, and whether something could develop in an unexpected but believable way."
+    body: "If every event leads straight into the next, a story can start to feel too neatly arranged.",
+    steps: [
+      {
+        heading: "Questions worth asking",
+        body: "Consider whether the characters have goals of their own, whether conflicts exist alongside the main plot, and whether something could develop in an unexpected but believable way."
+      }
+    ]
   },
   "voice-varied-emotion": {
     heading: "Are emotions described the same way every time?",
-    body: "A knot in the stomach, a racing heart, or shaking hands can all work well. But describe every emotion through a bodily reaction, and the language quickly starts to feel repetitive.\n\nVary between actions, thoughts, dialogue, physical reactions, and naming the feeling directly."
+    body: "A knot in the stomach, a racing heart, or shaking hands can all work well. But describe every emotion through a bodily reaction, and the language quickly starts to feel repetitive.",
+    steps: [
+      {
+        heading: "Vary the approach",
+        body: "Vary between actions, thoughts, dialogue, physical reactions, and naming the feeling directly."
+      }
+    ]
   },
   "voice-straight-timeline": {
     heading: "Does everything follow a straight timeline?",
-    body: "A story doesn't always have to follow events in the exact order they happened.\n\nFlashbacks, time jumps, and shifts in perspective can sometimes build tension or give an event new meaning.\n\nBut use them when they strengthen the story — not just for the sake of variety.\n\nKeep in mind: none of this is a rule for how a story must be written. Treat it as questions to ask yourself while revising. What matters most is that the language, structure, and narrative voice fit your own story."
+    body: "A story doesn't always have to follow events in the exact order they happened.",
+    steps: [
+      {
+        heading: "Flashbacks and time jumps can add meaning",
+        body: "Flashbacks, time jumps, and shifts in perspective can sometimes build tension or give an event new meaning."
+      },
+      {
+        heading: "Use them deliberately",
+        body: "Use them when they strengthen the story — not just for the sake of variety."
+      }
+    ],
+    tip: "None of this is a rule for how a story must be written. Treat it as questions to ask yourself while revising. What matters most is that the language, structure, and narrative voice fit your own story."
   },
   "writing-tips-sources": {
     heading: "Sources and further reading",
-    body: "These tips draw on the following research and writing on habits, creativity, language development, and craft.\n\nWriting habits and creativity\nBoice, R. (1990). Procrastination, busyness and bingeing. Behaviour Research and Therapy, 27(6), 605–611.\nKellogg, R. T. (1996). A model of working memory in writing. Memory & Cognition, 24(3), 318–329.\nGollwitzer, P. M. (1999). Implementation intentions: Strong effects of simple plans. American Psychologist, 54(7), 493–503.\nSio, U. N. & Ormerod, T. C. (2009). Does incubation enhance problem solving? Psychological Bulletin, 135(1), 94–120.\nKrashen, S. (2004). The Power of Reading: Insights from the Research. Libraries Unlimited.\n\nCraft and AI-generated text\nEphron, H. The Importance of a Strong Opening Scene. Writer's Digest.\nStoryScope. Research from the University of Maryland and Google DeepMind on recurring patterns in AI-generated text (arxiv.org/html/2604.03136v6).\n\nThese are practical suggestions, not hard rules. Adapt them to your own writing."
+    body: "These tips draw on the following research and writing on habits, creativity, language development, and craft.",
+    steps: [
+      {
+        heading: "Writing habits and creativity",
+        body: "Boice, R. (1990). Procrastination, busyness and bingeing. Behaviour Research and Therapy, 27(6), 605–611. Kellogg, R. T. (1996). A model of working memory in writing. Memory & Cognition, 24(3), 318–329. Gollwitzer, P. M. (1999). Implementation intentions: Strong effects of simple plans. American Psychologist, 54(7), 493–503. Sio, U. N. & Ormerod, T. C. (2009). Does incubation enhance problem solving? Psychological Bulletin, 135(1), 94–120. Krashen, S. (2004). The Power of Reading: Insights from the Research. Libraries Unlimited."
+      },
+      {
+        heading: "Craft and AI-generated text",
+        body: "Ephron, H. The Importance of a Strong Opening Scene. Writer's Digest. StoryScope. Research from the University of Maryland and Google DeepMind on recurring patterns in AI-generated text (arxiv.org/html/2604.03136v6)."
+      }
+    ],
+    tip: "These are practical suggestions, not hard rules. Adapt them to your own writing."
   }
 };
 

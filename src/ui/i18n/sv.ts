@@ -1849,123 +1849,457 @@ export const sv: Messages = {
       },
       "analyze-chapter": {
         heading: "Analysera ett kapitel",
-        body: "Analysera granskar texten utan att skriva om den åt dig. Syftet är att hjälpa dig upptäcka sådant du själv kanske vill undersöka närmare.\n\nTänk på analysen som en extra läsare.\nInte: ”Så här ska du skriva.”\nUtan: ”Här finns något du kanske vill titta på.”\n\nDu bestämmer om synpunkten är relevant."
+        body: "Analysera granskar texten utan att skriva om den åt dig. Syftet är att hjälpa dig upptäcka sådant du själv kanske vill undersöka närmare.",
+        steps: [
+          {
+            heading: "Tänk på det som en extra läsare",
+            body: "Inte: ”Så här ska du skriva.” Utan: ”Här finns något du kanske vill titta på.”"
+          },
+          {
+            heading: "Du bestämmer vad som är relevant",
+            body: "Analysera bara pekar ut saker — du bestämmer om varje synpunkt faktiskt är värd att agera på."
+          }
+        ]
       },
       polish: {
         heading: "Polish",
-        body: "Där Analysera bara pekar ut saker, skriver Polish om. Den kör en städpassage över hela kapitlet — stryker inskjutna förklaringar, känslo-namngivning (”hon kände en stöt av ånger”), vaga påståenden, lila prosa, och stramar upp dialog — och visar sedan originalet och omskrivningen sida vid sida, med ordnivå-markering, innan något behålls.\n\nAcceptera eller förkasta. Inget rör kapitlet förrän du säger till. Om Polishs standardinstinkter inte matchar din röst — kanske du vill behålla mer känslo-namngivning, inte mindre — kan du redigera instruktionerna den ger modellen i Settings → Polish, per manus."
+        body: "Där Analysera bara pekar ut saker, skriver Polish om.",
+        steps: [
+          {
+            heading: "Vad den städar upp",
+            body: "Den kör en städpassage över hela kapitlet — stryker inskjutna förklaringar, känslo-namngivning (”hon kände en stöt av ånger”), vaga påståenden, lila prosa, och stramar upp dialog."
+          },
+          {
+            heading: "Jämför innan du bestämmer dig",
+            body: "Den visar sedan originalet och omskrivningen sida vid sida, med ordnivå-markering, innan något behålls. Acceptera eller förkasta — inget rör kapitlet förrän du säger till."
+          },
+          {
+            heading: "Anpassa den efter din röst",
+            body: "Om Polishs standardinstinkter inte matchar din röst — kanske du vill behålla mer känslo-namngivning, inte mindre — kan du redigera instruktionerna den ger modellen i Settings → Polish, per manus."
+          }
+        ]
       },
       continuity: {
         heading: "Kontinuitet",
-        body: "Ju längre manuset blir, desto svårare blir det att minnas allt. En person kan få olika ögonfärg. En plats kan plötsligt förändras. En karaktär kan verka känna till information som hen ännu inte borde känna till.\n\nHär hjälper Story Bible och berättelsens kontinuitetsverktyg dig att jämföra det du skriver med sådant som redan etablerats.\n\nVem vet vad?\nKontinuitet handlar inte bara om fysiska detaljer. Det handlar också om information. Läsaren kanske känner till en hemlighet. Det betyder inte att alla karaktärer gör det.\n\nDet blir särskilt viktigt i mysterier, thrillers, flera perspektiv och berättelser där information avslöjas stegvis."
+        body: "Ju längre manuset blir, desto svårare blir det att minnas allt. En person kan få olika ögonfärg. En plats kan plötsligt förändras. En karaktär kan verka känna till information som hen ännu inte borde känna till.",
+        steps: [
+          {
+            heading: "Jämföra mot det som redan är etablerat",
+            body: "Här hjälper Story Bible och berättelsens kontinuitetsverktyg dig att jämföra det du skriver med sådant som redan etablerats."
+          },
+          {
+            heading: "Vem vet vad?",
+            body: "Kontinuitet handlar inte bara om fysiska detaljer. Det handlar också om information. Läsaren kanske känner till en hemlighet. Det betyder inte att alla karaktärer gör det."
+          }
+        ],
+        tip: "Det blir särskilt viktigt i mysterier, thrillers, flera perspektiv och berättelser där information avslöjas stegvis."
       },
       "ask-manuscript": {
         heading: "Fråga manuset",
-        body: "När boken blivit lång kan du använda Fråga manuset för att undersöka din egen berättelse.\n\nExempel:\n”När träffar Erik kvinnan på tåget första gången?”\n”I vilka kapitel nämns fyrtornet?”\n”Vad vet Lena om Eriks far?”\n”När får läsaren veta att fotografiet är från 1932?”\n\nDu kan också fråga:\n”Vilka kapitel handlar mest om relationen mellan Nora och Elias?”\neller:\n”Var nämns nyckeln innan den blir viktig senare?”\n\nSvaret är ett hjälpmedel för dig. Det blir inte automatiskt kanon och ska inte i sig förändra kapitlen."
+        body: "När boken blivit lång kan du använda Fråga manuset för att undersöka din egen berättelse.",
+        steps: [
+          {
+            heading: "Faktafrågor om det som redan är skrivet",
+            body: "”När träffar Erik kvinnan på tåget första gången?” ”I vilka kapitel nämns fyrtornet?” ”Vad vet Lena om Eriks far?” ”När får läsaren veta att fotografiet är från 1932?”"
+          },
+          {
+            heading: "Bredare frågor också",
+            body: "”Vilka kapitel handlar mest om relationen mellan Nora och Elias?” eller: ”Var nämns nyckeln innan den blir viktig senare?”"
+          }
+        ],
+        tip: "Svaret är ett hjälpmedel för dig. Det blir inte automatiskt kanon och ska inte i sig förändra kapitlen."
       },
       "ask-about-passage": {
         heading: "Fråga om ett kapitel eller en passage",
-        body: "Analysera kollar fasta kategorier. Fråga manuset svarar på faktafrågor om det som redan är skrivet. Ingen av dem kan svara på något i stil med: ”Bygger det här upp mot ett starkt slut?” eller ”Känns det här argumentet trovärdigt, eller konstruerat?” — Fråga om kapitlet / Fråga om en passage är till för just den typen av fråga: din egen, om hantverket, med ett ärligt — och kritiskt, om du ber om det — svar.\n\nTvå sätt att använda det:\n”Fråga om kapitlet…” (bredvid Analysera) — fråga om hela kapitlet.\nMarkera en passage i texten, välj sedan ”Fråga…” i dess meny — fråga bara om den passagen, med den omgivande texten som sammanhang.\n\nExempel:\n”Får slutet dig att vilja läsa nästa kapitel?”\n”Visar den här scenen för mycket, för fort?”\n\nSvaret är bara till för att läsas. Inget ändras eller sparas — precis som Fråga manuset."
+        body: "Analysera kollar fasta kategorier. Fråga manuset svarar på faktafrågor om det som redan är skrivet. Ingen av dem kan svara på något i stil med: ”Bygger det här upp mot ett starkt slut?” eller ”Känns det här argumentet trovärdigt, eller konstruerat?” — Fråga om kapitlet / Fråga om en passage är till för just den typen av fråga.",
+        steps: [
+          {
+            heading: "Två sätt att använda det",
+            body: "”Fråga om kapitlet…” (bredvid Analysera) frågar om hela kapitlet. Markera en passage i texten, välj sedan ”Fråga…” i dess meny, för att bara fråga om den passagen, med den omgivande texten som sammanhang."
+          },
+          {
+            heading: "Vilken typ av fråga det är till för",
+            body: "”Får slutet dig att vilja läsa nästa kapitel?” ”Visar den här scenen för mycket, för fort?” Din egen fråga om hantverket, med ett ärligt — och kritiskt, om du ber om det — svar."
+          }
+        ],
+        tip: "Svaret är bara till för att läsas. Inget ändras eller sparas — precis som Fråga manuset."
       },
       history: {
         heading: "Historik",
-        body: "AI-assisterat skrivande innebär ofta experiment. En omskrivning kanske blir bättre. Eller så upptäcker du att den gamla versionen fungerade bättre.\n\nNär tidigare versioner finns tillgängliga kan Historik hjälpa dig jämföra och gå tillbaka.\n\nTänk: Prova → Läs → Behåll eller återgå\n\nDu behöver inte acceptera en förändring bara för att AI skapade den."
+        body: "AI-assisterat skrivande innebär ofta experiment. En omskrivning kanske blir bättre. Eller så upptäcker du att den gamla versionen fungerade bättre.",
+        steps: [
+          {
+            heading: "Jämföra och gå tillbaka",
+            body: "När tidigare versioner finns tillgängliga kan Historik hjälpa dig jämföra och gå tillbaka. Tänk: Prova → Läs → Behåll eller återgå."
+          }
+        ],
+        tip: "Du behöver inte acceptera en förändring bara för att AI skapade den."
       },
       proofread: {
         heading: "Korrekturläs",
-        body: "Korrekturläsning passar senare i processen.\n\nTidigare kanske frågan var: ”Hur kan scenen utvecklas?”\nNu blir frågan: ”Finns det något här som behöver rättas eller kontrolleras?”\n\nDet är sällan meningsfullt att finslipa varje mening om du fortfarande tänker skriva om hela kapitel. Arbeta gärna från stort till smått:\nBerättelsen → Kontinuiteten → Kapitlen → Developmental analysis → Polish → Korrekturläsningen → Din egen slutläsning\n\nKorrekturläs kör sju kontroller över hela manuset i ett svep — grammatik, upprepade scener, stil- och stämningskonsekvens mellan kapitel, en åldersrapport, kontinuitet, upplägg och betalningar, samt en faktakontroll mot Story Bible — och varnar först om det finns en öppen platshållar-notis som fortfarande väntar, ifall den glömts bort på vägen.\n\nAI kan hitta saker. Författaren avgör vad som fungerar."
+        body: "Korrekturläsning passar senare i processen. Tidigare kanske frågan var: ”Hur kan scenen utvecklas?” Nu blir frågan: ”Finns det något här som behöver rättas eller kontrolleras?”",
+        steps: [
+          {
+            heading: "Arbeta från stort till smått",
+            body: "Det är sällan meningsfullt att finslipa varje mening om du fortfarande tänker skriva om hela kapitel. Berättelsen → Kontinuiteten → Kapitlen → Developmental analysis → Polish → Korrekturläsningen → Din egen slutläsning."
+          },
+          {
+            heading: "Sju kontroller i ett svep",
+            body: "Korrekturläs kör sju kontroller över hela manuset samtidigt — grammatik, upprepade scener, stil- och stämningskonsekvens mellan kapitel, en åldersrapport, kontinuitet, upplägg och betalningar, samt en faktakontroll mot Story Bible."
+          },
+          {
+            heading: "En påminnelse innan den startar",
+            body: "Den varnar först om det finns en öppen platshållar-notis som fortfarande väntar, ifall den glömts bort på vägen."
+          }
+        ],
+        tip: "AI kan hitta saker. Författaren avgör vad som fungerar."
       },
       "developmental-analysis": {
         heading: "Developmental analysis",
-        body: "Korrekturläs läser rad för rad. Developmental analysis läser hela bokens form istället: stiger spänningen verkligen allt eftersom berättelsen går vidare, sjunker mitten ihop, vilka Trådar betalas faktiskt av och vilka tystnar i tio kapitel.\n\nDen arbetar i tre steg — scen för scen, sedan kapitel för kapitel, sedan en slutlig rapport — aldrig hela manuset i ett enda svep, så den förblir hanterbar även för en lång bok. En manuellt startad körning, inget som sker automatiskt; den grundar sig i vilka Tråd-taggar och Timeline-positioner manuset redan har, men fungerar även utan — bara en grövre läsning, och den säger det innan den startar.\n\nDet enda du någonsin ser är slutrapporten: en sammanfattning i löpande text, plus en klickbar lista över specifika kapitel värda en titt. Scen-för-scen- och kapitel-för-kapitel-läsningarna under förblir intern arbetsdata — samma ”aldrig rådata, alltid syntetiserat”-princip som överallt annars där AI granskar ditt skrivande."
+        body: "Korrekturläs läser rad för rad. Developmental analysis läser hela bokens form istället: stiger spänningen verkligen allt eftersom berättelsen går vidare, sjunker mitten ihop, vilka Trådar betalas faktiskt av och vilka tystnar i tio kapitel.",
+        steps: [
+          {
+            heading: "Tre steg, aldrig hela boken på en gång",
+            body: "Den arbetar i tre steg — scen för scen, sedan kapitel för kapitel, sedan en slutlig rapport — aldrig hela manuset i ett enda svep, så den förblir hanterbar även för en lång bok."
+          },
+          {
+            heading: "Grundad i Trådar och Timeline, men inte beroende av dem",
+            body: "En manuellt startad körning, inget som sker automatiskt. Den grundar sig i vilka Tråd-taggar och Timeline-positioner manuset redan har, men fungerar även utan — bara en grövre läsning, och den säger det innan den startar."
+          },
+          {
+            heading: "Vad du faktiskt ser",
+            body: "Det enda du någonsin ser är slutrapporten: en sammanfattning i löpande text, plus en klickbar lista över specifika kapitel värda en titt. Scen-för-scen- och kapitel-för-kapitel-läsningarna under förblir intern arbetsdata — samma ”aldrig rådata, alltid syntetiserat”-princip som överallt annars där AI granskar ditt skrivande."
+          }
+        ]
       },
       "images-illustrations": {
         heading: "Bilder och illustrationer",
-        body: "kaampi Write kan hjälpa dig arbeta med bilder på två olika sätt.\n\nEgna bilder\nDu kan lägga till bilder till berättelsen. Det kan vara användbart för illustrerade berättelser, barnböcker eller projekt där bilder är en del av läsupplevelsen.\n\nIllustrationsprompter\nDu kan också använda text ur berättelsen som grund för en bildbeskrivning.\n\nExempel — manus: ”Erik stod ensam på perrongen. Dimman låg tät över spåren och stationsklockan hade stannat på 03:17.”\nkaampi Write kan hjälpa dig omvandla passagen till en illustrationsprompt baserad på motivet och projektets valda visuella stil. Själva berättelsetexten ändras inte."
+        body: "kaampi Write kan hjälpa dig arbeta med bilder på två olika sätt.",
+        steps: [
+          {
+            heading: "Egna bilder",
+            body: "Du kan lägga till bilder till berättelsen. Det kan vara användbart för illustrerade berättelser, barnböcker eller projekt där bilder är en del av läsupplevelsen."
+          },
+          {
+            heading: "Illustrationsprompter",
+            body: "Du kan också använda text ur berättelsen som grund för en bildbeskrivning. Exempel — manus: ”Erik stod ensam på perrongen. Dimman låg tät över spåren och stationsklockan hade stannat på 03:17.” kaampi Write kan hjälpa dig omvandla passagen till en illustrationsprompt baserad på motivet och projektets valda visuella stil. Själva berättelsetexten ändras inte."
+          }
+        ]
       },
       typography: {
         heading: "Typografi",
-        body: "Settings → Typography formar hur prosan faktiskt ser ut, live i editorn och med i varje Publish-export — så det du ser medan du skriver är det läsaren får.\n\nFont — ett val mellan tretton typsnitt, serif och sans serif, var och en visad i sitt eget typsnitt så du kan skilja dem åt innan du väljer.\nWeight — Regular eller Bold, för prosa som ligger tyngre på sidan.\nColor — en nyans för mörkt tema, en för ljust, så den förblir läsbar och medveten i båda.\nDrop cap — av, eller 2–5 rader, för kapitlets öppnande bokstav.\nScene break — den vanliga korta linjen, eller en av fyra namngivna ornament (en klassisk bokvinjett, en minimalistisk diamant, fransk elegans eller en glittrande stjärna) för ett `---`-stycke.\n\nInget av detta krävs. Standardvärdena är en rimlig utgångspunkt; Typography finns där för när sidans utseende börjar betyda lika mycket som orden på den."
+        body: "Settings → Typography formar hur prosan faktiskt ser ut, live i editorn och med i varje Publish-export — så det du ser medan du skriver är det läsaren får.",
+        steps: [
+          {
+            heading: "Typsnitt och vikt",
+            body: "Font — ett val mellan tretton typsnitt, serif och sans serif, var och en visad i sitt eget typsnitt så du kan skilja dem åt innan du väljer. Weight — Regular eller Bold, för prosa som ligger tyngre på sidan."
+          },
+          {
+            heading: "Färg",
+            body: "En nyans för mörkt tema, en för ljust, så den förblir läsbar och medveten i båda."
+          },
+          {
+            heading: "Drop cap och scenbrytning",
+            body: "Drop cap — av, eller 2–5 rader, för kapitlets öppnande bokstav. Scene break — den vanliga korta linjen, eller en av fyra namngivna ornament (en klassisk bokvinjett, en minimalistisk diamant, fransk elegans eller en glittrande stjärna) för ett `---`-stycke."
+          }
+        ],
+        tip: "Inget av detta krävs. Standardvärdena är en rimlig utgångspunkt; Typography finns där för när sidans utseende börjar betyda lika mycket som orden på den."
       },
       "language-versions": {
         heading: "Språkversioner av ett manus",
-        body: "Ett färdigt — eller fortfarande växande — manus kan spinna av en separat, länkad utgåva på ett annat språk, från språkväxlaren bredvid manustiteln (”New language version…”). Dess kapitel skapas tomma i förväg, var och en länkad till sin motsvarighet i källan.\n\nÖversätt vart och ett från kapitelredigeraren (”Translate chapter”) — den för med sig källkapitlets prosa tillsammans med manusets Story Bible och Röst, så namn och termer förblir konsekventa genom hela översättningen, inte bara inom den.\n\nÄndrar du källkapitlet senare flaggar det översatta kapitlet det (”Source changed since this was translated”), med en diff på samma språk som visar exakt vad som ändrats, och en ”Re-translate chapter”-åtgärd. Manushyllan grupperar ett källmanus tillsammans med sina språkversioner, istället för att lista dem som orelaterade böcker.\n\nSettings → AI settings har ett tredje modellval för detta, Translate, vid sidan av Writing och Review."
+        body: "Ett färdigt — eller fortfarande växande — manus kan spinna av en separat, länkad utgåva på ett annat språk.",
+        steps: [
+          {
+            heading: "Starta en språkversion",
+            body: "Från språkväxlaren bredvid manustiteln (”New language version…”). Dess kapitel skapas tomma i förväg, var och en länkad till sin motsvarighet i källan."
+          },
+          {
+            heading: "Att översätta ett kapitel",
+            body: "Översätt vart och ett från kapitelredigeraren (”Translate chapter”) — den för med sig källkapitlets prosa tillsammans med manusets Story Bible och Röst, så namn och termer förblir konsekventa genom hela översättningen, inte bara inom den."
+          },
+          {
+            heading: "När källkapitlet ändras senare",
+            body: "Det översatta kapitlet flaggar det (”Source changed since this was translated”), med en diff på samma språk som visar exakt vad som ändrats, och en ”Re-translate chapter”-åtgärd. Manushyllan grupperar ett källmanus tillsammans med sina språkversioner, istället för att lista dem som orelaterade böcker."
+          }
+        ],
+        tip: "Settings → AI settings har ett tredje modellval för detta, Translate, vid sidan av Writing och Review."
       },
       publish: {
         heading: "Publicera",
-        body: "När berättelsen är redo att lämna arbetsytan använder du Publicera.\n\nTänk på skillnaden:\nkaampi Write-projektet = din verkstad\nPubliceringen = det läsaren får\n\nBrainstorm, arbetsanteckningar och annan planering behöver alltså inte följa med i den publicerade berättelsen. Välj det format som passar hur texten ska användas och arbeta sedan vidare med resultatet där det behövs.\n\nParagraph style erbjuder två konventioner: den invanda tomma raden mellan stycken, eller en indragen stil utan tom rad i klassisk bokstil, med kapitlets öppnande stycke satt utan indrag, som i tryck."
+        body: "När berättelsen är redo att lämna arbetsytan använder du Publicera.",
+        steps: [
+          {
+            heading: "Verkstad kontra färdig kopia",
+            body: "kaampi Write-projektet är din verkstad. Publiceringen är det läsaren får. Brainstorm, arbetsanteckningar och annan planering behöver alltså inte följa med i den publicerade berättelsen."
+          },
+          {
+            heading: "Att välja en styckestil",
+            body: "Paragraph style erbjuder två konventioner: den invanda tomma raden mellan stycken, eller en indragen stil utan tom rad i klassisk bokstil, med kapitlets öppnande stycke satt utan indrag, som i tryck."
+          }
+        ],
+        tip: "Välj det format som passar hur texten ska användas, och arbeta sedan vidare med resultatet där det behövs."
       },
       backup: {
         heading: "Säkerhetskopiera",
-        body: "Publicering och säkerhetskopiering är inte samma sak.\n\nEn publicerad bok är till för läsaren. En kaampi Write-säkerhetskopia är till för att kunna återställa själva projektet. Den kan därför innehålla information som inte finns i den publicerade versionen.\n\nSpara säkerhetskopior regelbundet, särskilt innan större förändringar.\n\nImportera backup används för kaampi Write:s egna säkerhetskopior. Det är inte samma sak som att importera ett manus eller lore från ett annat skrivprogram.\n\n”Export for other apps” är en tredje, annorlunda sak — varken en säkerhetskopia eller en läskopia. Den skriver en ögonblicksbild i ett delat format för ett syskonprogram (som kaampi Comic) att importera: låsta, synliga Story Bible-fakta och kapitel, grupperade efter sort. Olåsta, flaggade eller dolda-för-AI-fakta finns aldrig med — samma synlighetsregel som Skriv utkast själv följer."
+        body: "Publicering och säkerhetskopiering är inte samma sak.",
+        steps: [
+          {
+            heading: "En publicerad bok kontra en säkerhetskopia",
+            body: "En publicerad bok är till för läsaren. En kaampi Write-säkerhetskopia är till för att kunna återställa själva projektet. Den kan därför innehålla information som inte finns i den publicerade versionen."
+          },
+          {
+            heading: "Importera backup är inte manusimport",
+            body: "Importera backup används för kaampi Write:s egna säkerhetskopior. Det är inte samma sak som att importera ett manus eller lore från ett annat skrivprogram."
+          },
+          {
+            heading: "Export for other apps",
+            body: "En tredje, annorlunda sak — varken en säkerhetskopia eller en läskopia. Den skriver en ögonblicksbild i ett delat format för ett syskonprogram (som kaampi Comic) att importera: låsta, synliga Story Bible-fakta och kapitel, grupperade efter sort. Olåsta, flaggade eller dolda-för-AI-fakta finns aldrig med — samma synlighetsregel som Skriv utkast själv följer."
+          }
+        ],
+        tip: "Spara säkerhetskopior regelbundet, särskilt innan större förändringar."
       },
       "network-ai-server": {
         heading: "En AI-server på en annan dator i nätverket",
-        body: "Har du en kraftfull dator eller server på samma nätverk, och vill skriva på kaampi Write från en annan dator — en bärbar, till exempel? Det går, men kräver inställningar på tre ställen: i kaampi Write, på serverdatorn, och i dess brandvägg.\n\nVälj motorn som matchar det som körs där\nÖppna Inställningar → Modeller. Oavsett om den andra datorn kör Ollama eller LM Studio, välj samma motor här — båda har nu ett fält för serveradress.\n\nSkriv in den andra datorns nätverksadress\nI fältet Serveradress: http://[den andra datorns nätverks-IP]:[port] — till exempel http://192.168.1.50:11434 för Ollama, eller http://192.168.1.50:1234 för LM Studio. Lämna tomt för att använda den här datorns egen standard istället. Lägg inte till /v1 på slutet, kaampi Write gör det själv. Hitta den andra datorns nätverksadress med ipconfig (Windows) eller ifconfig/ip addr (Mac/Linux) på just den datorn.\n\nLåt servern lyssna på nätverket, inte bara sig själv\nKör den andra datorn Ollama: starta den med miljövariabeln OLLAMA_HOST=0.0.0.0 så den lyssnar brett, och OLLAMA_ORIGINS satt till adressen kaampi Write faktiskt körs ifrån (eller OLLAMA_ORIGINS=* för att tillåta vilken adress som helst) — annars nekar den webbläsarens anrop även om själva anslutningen fungerar.\nKör den LM Studio: fliken Developer → Server-inställningarna → slå på ”Serve on Local Network” och ”Enable CORS”.\n\nBrandväggen på serverdatorn\nDen måste tillåta inkommande anslutningar på porten (11434 för Ollama, oftast 1234 för LM Studio) från resten av nätverket — annars släpps anropet aldrig igenom, även om allt ovan är rätt.\n\nVarje dator har för övrigt sitt eget bibliotek av manus — bara AI-anslutningen delas, inte det du skrivit. Vill du fortsätta på samma bok från båda datorerna, använd Backup/Återställ för att flytta den."
+        body: "Har du en kraftfull dator eller server på samma nätverk, och vill skriva på kaampi Write från en annan dator — en bärbar, till exempel? Det går, men kräver inställningar på tre ställen: i kaampi Write, på serverdatorn, och i dess brandvägg.",
+        steps: [
+          {
+            heading: "Välj motorn som matchar det som körs där",
+            body: "Öppna Inställningar → Modeller. Oavsett om den andra datorn kör Ollama eller LM Studio, välj samma motor här — båda har nu ett fält för serveradress."
+          },
+          {
+            heading: "Skriv in den andra datorns nätverksadress",
+            body: "I fältet Serveradress: http://[den andra datorns nätverks-IP]:[port] — till exempel http://192.168.1.50:11434 för Ollama, eller http://192.168.1.50:1234 för LM Studio. Lämna tomt för att använda den här datorns egen standard istället. Lägg inte till /v1 på slutet, kaampi Write gör det själv. Hitta den andra datorns nätverksadress med ipconfig (Windows) eller ifconfig/ip addr (Mac/Linux) på just den datorn."
+          },
+          {
+            heading: "Låt servern lyssna på nätverket, inte bara sig själv",
+            body: "Kör den andra datorn Ollama: starta den med miljövariabeln OLLAMA_HOST=0.0.0.0 så den lyssnar brett, och OLLAMA_ORIGINS satt till adressen kaampi Write faktiskt körs ifrån (eller OLLAMA_ORIGINS=* för att tillåta vilken adress som helst) — annars nekar den webbläsarens anrop även om själva anslutningen fungerar. Kör den LM Studio: fliken Developer → Server-inställningarna → slå på ”Serve on Local Network” och ”Enable CORS”."
+          },
+          {
+            heading: "Brandväggen på serverdatorn",
+            body: "Den måste tillåta inkommande anslutningar på porten (11434 för Ollama, oftast 1234 för LM Studio) från resten av nätverket — annars släpps anropet aldrig igenom, även om allt ovan är rätt."
+          }
+        ],
+        tip: "Varje dator har för övrigt sitt eget bibliotek av manus — bara AI-anslutningen delas, inte det du skrivit. Vill du fortsätta på samma bok från båda datorerna, använd Backup/Återställ för att flytta den."
       },
       "ai-writing-wrong-things": {
         heading: "Om AI börjar skriva fel saker",
-        body: "Fundera först på vilken information modellen faktiskt har fått.\n\nKapitelbriefen är gammal\nKontrollera om briefen fortfarande beskriver kapitlet du vill skriva.\n\nSynopsis har inte följt med berättelsens utveckling\nBerättelsen kanske har förändrats sedan du planerade den.\n\nIdén finns bara i Brainstorm\nBrainstorm är ett utforskande område. En idé där ska inte automatiskt behandlas som en del av berättelsen.\n\nInformationen kommer bara från en intervju\nSamma princip gäller här. Det som sades under intervjun påverkar inte hur boken skrivs om du inte har valt att låsa informationen som fakta.\n\nViktig information saknas i Story Bible\nOm något måste vara konsekvent kan det behöva etableras och låsas som fakta.\n\nDin instruktion är för bred\nIstället för: ”Skriv om scenen så att den blir bättre.”\nprova: ”Gör dialogen mellan Nora och Elias mer reserverad. De misstänker varandra men ingen vill visa det ännu.”\n\nJu tydligare problemet är, desto lättare blir det att välja rätt verktyg."
+        body: "Fundera först på vilken information modellen faktiskt har fått.",
+        steps: [
+          {
+            heading: "Kapitelbriefen är gammal",
+            body: "Kontrollera om briefen fortfarande beskriver kapitlet du vill skriva."
+          },
+          {
+            heading: "Synopsis har inte följt med berättelsens utveckling",
+            body: "Berättelsen kanske har förändrats sedan du planerade den."
+          },
+          {
+            heading: "Idén finns bara i Brainstorm, eller kommer bara från en intervju",
+            body: "Brainstorm är ett utforskande område. En idé där ska inte automatiskt behandlas som en del av berättelsen. Samma princip gäller en intervju — det som sades påverkar inte hur boken skrivs om du inte har valt att låsa informationen som fakta."
+          },
+          {
+            heading: "Viktig information saknas i Story Bible",
+            body: "Om något måste vara konsekvent kan det behöva etableras och låsas som fakta."
+          },
+          {
+            heading: "Din instruktion är för bred",
+            body: "Istället för: ”Skriv om scenen så att den blir bättre,” prova: ”Gör dialogen mellan Nora och Elias mer reserverad. De misstänker varandra men ingen vill visa det ännu.”"
+          }
+        ],
+        tip: "Ju tydligare problemet är, desto lättare blir det att välja rätt verktyg."
       },
       "marker-conversion-no-match": {
         heading: "”Convert markers to formatting” hittar inga markeringar",
-        body: "Om det här gäller citattecken specifikt: du behöver nog inte Convert markers för det alls längre. Se Smarta citattecken (Skriva) — ett rakt \" blir redan kurvigt medan du skriver, och ”Smarten quotes in whole manuscript” konverterar ett helt importerat eller inklistrat manus i ett svep, raka citattecken inkluderat.\n\nFör allt annat Convert markers hanterar — *asterisker* för kursiv, egna par du satt upp — betyder ”inget hittades” oftast att tecknet du skrev in i fältet inte är exakt samma tecken som finns i manuset. Lätt hänt med skiljetecken som finns i mer än en likadan-ut-seende form.\n\nSäkraste lösningen: öppna kapitlet, markera ett av de riktiga tecknen i din text, kopiera det (Ctrl/Cmd+C), och klistra in det i fältet för öppnings- eller avslutningstecken istället för att skriva om det på tangentbordet. Då är det garanterat exakt rätt tecken."
+        body: "Två olika orsaker, beroende på vad du försöker konvertera.",
+        steps: [
+          {
+            heading: "Om det här gäller citattecken specifikt",
+            body: "Du behöver nog inte Convert markers för det alls längre. Se Smarta citattecken (Skriva) — ett rakt \" blir redan kurvigt medan du skriver, och ”Smarten quotes in whole manuscript” konverterar ett helt importerat eller inklistrat manus i ett svep, raka citattecken inkluderat."
+          },
+          {
+            heading: "För allt annat Convert markers hanterar",
+            body: "*Asterisker* för kursiv, egna par du satt upp — ”inget hittades” betyder oftast att tecknet du skrev in i fältet inte är exakt samma tecken som finns i manuset. Lätt hänt med skiljetecken som finns i mer än en likadan-ut-seende form."
+          },
+          {
+            heading: "Den säkraste lösningen",
+            body: "Öppna kapitlet, markera ett av de riktiga tecknen i din text, kopiera det (Ctrl/Cmd+C), och klistra in det i fältet för öppnings- eller avslutningstecken istället för att skriva om det på tangentbordet. Då är det garanterat exakt rätt tecken."
+          }
+        ]
       },
       "routine-short-often": {
         heading: "Skriv lite, men ofta",
-        body: "Det svåraste med att skriva är ibland att komma igång. Här är fem tips som hjälper dig att skapa goda vanor, hitta fokus och komma vidare när du kör fast.\n\nDu behöver inte flera lediga timmar för att få något skrivet. Korta, regelbundna skrivpass kan vara mer effektiva än att vänta på det perfekta tillfället.\n\nProva själv: Avsätt 15–30 minuter några dagar i veckan. Fokusera på att skriva, inte på hur mycket du hinner producera."
+        body: "Det svåraste med att skriva är ibland att komma igång. Små förändringar i rutinen kan göra stor skillnad — det här kapitlet och de fyra efter ger fem tips som hjälper dig skapa goda vanor, hitta fokus och komma vidare när du kör fast.",
+        steps: [
+          {
+            heading: "Korta pass kan slå väntan på rätt tillfälle",
+            body: "Du behöver inte flera lediga timmar för att få något skrivet. Korta, regelbundna skrivpass kan vara mer effektiva än att vänta på det perfekta tillfället."
+          }
+        ],
+        tip: "Prova själv: Avsätt 15–30 minuter några dagar i veckan. Fokusera på att skriva, inte på hur mycket du hinner producera."
       },
       "routine-draft-then-edit": {
         heading: "Skriv först, redigera sedan",
-        body: "Det är svårt att vara kreativ och kritisk samtidigt. Om du hela tiden stannar för att rätta formuleringar riskerar du att tappa både fokus och berättelsens riktning.\n\nLåt därför det första utkastet vara just ett utkast. Du kan förbättra språket senare.\n\nProva själv: Skriv en scen utan att gå tillbaka och ändra. Läs igenom och redigera först när scenen är klar."
+        body: "Det är svårt att vara kreativ och kritisk samtidigt. Om du hela tiden stannar för att rätta formuleringar riskerar du att tappa både fokus och berättelsens riktning.",
+        steps: [
+          {
+            heading: "Låt första utkastet vara ett utkast",
+            body: "Du kan förbättra språket senare — första passet behöver bara få ner berättelsen."
+          }
+        ],
+        tip: "Prova själv: Skriv en scen utan att gå tillbaka och ändra. Läs igenom och redigera först när scenen är klar."
       },
       "routine-set-time-place": {
         heading: "Bestäm när och var du ska skriva",
-        body: "Det är lätt att skjuta upp något som inte har en bestämd tid. En konkret plan gör det enklare att faktiskt sätta sig och skriva.\n\nByt ut \"Jag ska försöka skriva mer\" mot \"På lördag efter frukost skriver jag i 30 minuter\".\n\nProva själv: Välj en tid och en plats som fungerar i din vardag. Koppla gärna skrivandet till något du redan gör regelbundet."
+        body: "Det är lätt att skjuta upp något som inte har en bestämd tid. En konkret plan gör det enklare att faktiskt sätta sig och skriva.",
+        steps: [
+          {
+            heading: "Byt avsikt mot en plan",
+            body: "Byt ut \"Jag ska försöka skriva mer\" mot \"På lördag efter frukost skriver jag i 30 minuter\"."
+          }
+        ],
+        tip: "Prova själv: Välj en tid och en plats som fungerar i din vardag. Koppla gärna skrivandet till något du redan gör regelbundet."
       },
       "routine-pause-when-stuck": {
         heading: "Ta en paus när du kör fast",
-        body: "Ibland hjälper det inte att stirra längre på samma mening eller scen. Att göra något annat en stund kan ge dig nya perspektiv.\n\nTa en promenad, diska eller gör något som inte kräver all din uppmärksamhet. När du återvänder kan problemet kännas lättare att lösa.\n\nProva själv: Skriv ned vad du har fastnat på innan du tar paus. Då blir det enklare att fortsätta när du kommer tillbaka."
+        body: "Ibland hjälper det inte att stirra längre på samma mening eller scen. Att göra något annat en stund kan ge dig nya perspektiv.",
+        steps: [
+          {
+            heading: "Kliv bort med avsikt",
+            body: "Ta en promenad, diska eller gör något som inte kräver all din uppmärksamhet. När du återvänder kan problemet kännas lättare att lösa."
+          }
+        ],
+        tip: "Prova själv: Skriv ned vad du har fastnat på innan du tar paus. Då blir det enklare att fortsätta när du kommer tillbaka."
       },
       "routine-read-widely": {
         heading: "Läs för att utveckla ditt skrivande",
-        body: "Genom att läsa olika författare och genrer får du en bättre känsla för språk, dialog, tempo och berättelsestruktur.\n\nDu behöver inte analysera varje bok. Men ibland kan det vara värdefullt att fundera över varför en scen fungerar särskilt bra.\n\nProva själv: Nästa gång en bok fångar dig, stanna upp och fråga dig: Vad gjorde författaren för att väcka mitt intresse?"
+        body: "Genom att läsa olika författare och genrer får du en bättre känsla för språk, dialog, tempo och berättelsestruktur.",
+        steps: [
+          {
+            heading: "Du behöver inte analysera varje bok",
+            body: "Men ibland kan det vara värdefullt att fundera över varför en scen fungerar särskilt bra."
+          }
+        ],
+        tip: "Prova själv: Nästa gång en bok fångar dig, stanna upp och fråga dig: Vad gjorde författaren för att väcka mitt intresse?"
       },
       "opening-raise-a-question": {
         heading: "Väck en fråga hos läsaren",
-        body: "De första sidorna hjälper läsaren att avgöra om berättelsen är värd att fortsätta med. Här är fyra sätt att skapa en inledning som väcker nyfikenhet.\n\nEn bra öppning behöver inte börja med dramatik. Men något bör väcka läsarens intresse.\n\nDet kan vara en oväntad händelse, ett märkligt beteende eller något som inte verkar stämma.\n\nNär läsaren börjar undra vad som har hänt, varför det händer eller vad som kommer att ske, finns det en anledning att läsa vidare.\n\nFråga dig: Vilken fråga vill jag att läsaren ska bära med sig efter första sidan?"
+        body: "De första sidorna hjälper läsaren att avgöra om berättelsen är värd att fortsätta med — det här kapitlet och de tre efter går igenom fyra sätt att skapa en inledning som väcker nyfikenhet.",
+        steps: [
+          {
+            heading: "En bra öppning behöver inte dramatik",
+            body: "Men något bör väcka läsarens intresse. Det kan vara en oväntad händelse, ett märkligt beteende eller något som inte verkar stämma."
+          },
+          {
+            heading: "Att undra är det som håller läsaren kvar",
+            body: "När läsaren börjar undra vad som har hänt, varför det händer eller vad som kommer att ske, finns det en anledning att läsa vidare."
+          }
+        ],
+        tip: "Fråga dig: Vilken fråga vill jag att läsaren ska bära med sig efter första sidan?"
       },
       "opening-wait-on-backstory": {
         heading: "Vänta med bakgrundshistorien",
-        body: "Du behöver inte berätta allt om huvudpersonen eller världen direkt.\n\nFör mycket bakgrundsinformation i början kan bromsa berättelsen innan läsaren hunnit bli engagerad.\n\nVisa i stället det som behövs för att förstå situationen. Låt resten av informationen komma när den blir relevant.\n\nFråga dig: Behöver läsaren verkligen veta det här redan nu?"
+        body: "Du behöver inte berätta allt om huvudpersonen eller världen direkt.",
+        steps: [
+          {
+            heading: "För mycket bakgrund bromsar öppningen",
+            body: "För mycket bakgrundsinformation i början kan bromsa berättelsen innan läsaren hunnit bli engagerad."
+          },
+          {
+            heading: "Visa bara det som behövs, för tillfället",
+            body: "Visa i stället det som behövs för att förstå situationen. Låt resten av informationen komma när den blir relevant."
+          }
+        ],
+        tip: "Fråga dig: Behöver läsaren verkligen veta det här redan nu?"
       },
       "opening-let-details-show": {
         heading: "Låt detaljerna berätta",
-        body: "Du behöver inte alltid beskriva en persons egenskaper rakt ut. Ofta blir karaktären mer levande genom vad personen gör, säger eller lägger märke till.\n\nI stället för att skriva att en person är kontrollerande kan du till exempel visa hur personen rättar till föremålen på ett bord innan ett svårt samtal.\n\nEn väl vald detalj kan säga mer än en lång förklaring.\n\nFråga dig: Kan jag visa den här egenskapen genom en handling eller detalj?"
+        body: "Du behöver inte alltid beskriva en persons egenskaper rakt ut. Ofta blir karaktären mer levande genom vad personen gör, säger eller lägger märke till.",
+        steps: [
+          {
+            heading: "Visa egenskapen genom en handling",
+            body: "I stället för att skriva att en person är kontrollerande kan du till exempel visa hur personen rättar till föremålen på ett bord innan ett svårt samtal."
+          }
+        ],
+        tip: "En väl vald detalj kan säga mer än en lång förklaring. Fråga dig: Kan jag visa den här egenskapen genom en handling eller detalj?"
       },
       "opening-save-the-surprises": {
         heading: "Spara på överraskningarna",
-        body: "Det kan vara lockande att börja med berättelsens mest dramatiska händelse för att fånga läsaren.\n\nMen om du avslöjar för mycket för tidigt riskerar senare vändningar att förlora sin effekt.\n\nEn prolog eller en tillbakablick kan fungera utmärkt, så länge den tillför något mer än en förhandsvisning av det som ska hända.\n\nFråga dig: Väcker min öppning nyfikenhet, eller avslöjar den sådant som hade varit mer spännande att upptäcka senare?"
+        body: "Det kan vara lockande att börja med berättelsens mest dramatiska händelse för att fånga läsaren.",
+        steps: [
+          {
+            heading: "Att avslöja för mycket för tidigt kostar senare",
+            body: "Om du avslöjar för mycket för tidigt riskerar senare vändningar att förlora sin effekt."
+          },
+          {
+            heading: "En prolog eller tillbakablick kan ändå fungera",
+            body: "Så länge den tillför något mer än en förhandsvisning av det som ska hända."
+          }
+        ],
+        tip: "Fråga dig: Väcker min öppning nyfikenhet, eller avslöjar den sådant som hade varit mer spännande att upptäcka senare?"
       },
       "voice-overexplaining": {
         heading: "Ge din text en personlig röst",
-        body: "AI-verktyg kan hjälpa dig att skriva och bearbeta text. Men resultatet behöver fortfarande kännas som din berättelse.\n\nNär du använder Draft, Recast eller Polish kan det vara bra att se över några återkommande mönster.\n\nFörklarar texten för mycket?\nIbland säger berättaren rakt ut vad en händelse betyder eller vad läsaren ska känna.\n\nLåt gärna handlingen, dialogen och karaktärernas val tala för sig själva. Läsaren behöver inte få allt förklarat."
+        body: "AI-verktyg kan hjälpa dig att skriva och bearbeta text. Men resultatet behöver fortfarande kännas som din berättelse. När du använder Draft, Recast eller Polish kan det vara bra att se över några återkommande mönster — det här kapitlet och de tre efter går igenom fyra av dem.",
+        steps: [
+          {
+            heading: "Förklarar texten för mycket?",
+            body: "Ibland säger berättaren rakt ut vad en händelse betyder eller vad läsaren ska känna."
+          },
+          {
+            heading: "Låt berättelsen tala för sig själv",
+            body: "Låt gärna handlingen, dialogen och karaktärernas val tala för sig själva. Läsaren behöver inte få allt förklarat."
+          }
+        ]
       },
       "voice-too-predictable": {
         heading: "Är berättelsen för förutsägbar?",
-        body: "Om varje händelse leder direkt till nästa kan berättelsen kännas väl tillrättalagd.\n\nFundera på om karaktärerna har egna mål, om det finns konflikter vid sidan av huvudhandlingen och om något kan utvecklas på ett oväntat men trovärdigt sätt."
+        body: "Om varje händelse leder direkt till nästa kan berättelsen kännas väl tillrättalagd.",
+        steps: [
+          {
+            heading: "Frågor värda att ställa",
+            body: "Fundera på om karaktärerna har egna mål, om det finns konflikter vid sidan av huvudhandlingen och om något kan utvecklas på ett oväntat men trovärdigt sätt."
+          }
+        ]
       },
       "voice-varied-emotion": {
         heading: "Beskrivs känslor på samma sätt?",
-        body: "En klump i magen, ett hjärta som rusar eller händer som skakar kan fungera bra. Men om varje känsla beskrivs genom en kroppslig reaktion blir språket lätt enformigt.\n\nVariera mellan handlingar, tankar, dialog, kroppsliga reaktioner och direkta känsloord."
+        body: "En klump i magen, ett hjärta som rusar eller händer som skakar kan fungera bra. Men om varje känsla beskrivs genom en kroppslig reaktion blir språket lätt enformigt.",
+        steps: [
+          {
+            heading: "Variera sättet",
+            body: "Variera mellan handlingar, tankar, dialog, kroppsliga reaktioner och direkta känsloord."
+          }
+        ]
       },
       "voice-straight-timeline": {
         heading: "Följer allt en rak tidslinje?",
-        body: "En berättelse behöver inte alltid följa händelserna i exakt den ordning de inträffar.\n\nTillbakablickar, tidshopp och förändringar i perspektiv kan ibland skapa spänning eller ge en händelse ny betydelse.\n\nMen använd dem när de stärker berättelsen, inte bara för variationens skull.\n\nKom ihåg: Det här är inga regler för hur en berättelse måste skrivas. Se dem som frågor att ställa när du bearbetar din text. Det viktigaste är att språket, strukturen och berättarstilen passar just din historia."
+        body: "En berättelse behöver inte alltid följa händelserna i exakt den ordning de inträffar.",
+        steps: [
+          {
+            heading: "Tillbakablickar och tidshopp kan ge ny betydelse",
+            body: "Tillbakablickar, tidshopp och förändringar i perspektiv kan ibland skapa spänning eller ge en händelse ny betydelse."
+          },
+          {
+            heading: "Använd dem medvetet",
+            body: "Använd dem när de stärker berättelsen — inte bara för variationens skull."
+          }
+        ],
+        tip: "Det här är inga regler för hur en berättelse måste skrivas. Se dem som frågor att ställa när du bearbetar din text. Det viktigaste är att språket, strukturen och berättarstilen passar just din historia."
       },
       "writing-tips-sources": {
         heading: "Källor och vidare läsning",
-        body: "Tipsen bygger på följande forskning och litteratur om skrivvanor, kreativitet, språkutveckling och berättarteknik.\n\nSkrivvanor och kreativitet\nBoice, R. (1990). Procrastination, busyness and bingeing. Behaviour Research and Therapy, 27(6), 605–611.\nKellogg, R. T. (1996). A model of working memory in writing. Memory & Cognition, 24(3), 318–329.\nGollwitzer, P. M. (1999). Implementation intentions: Strong effects of simple plans. American Psychologist, 54(7), 493–503.\nSio, U. N. & Ormerod, T. C. (2009). Does incubation enhance problem solving? Psychological Bulletin, 135(1), 94–120.\nKrashen, S. (2004). The Power of Reading: Insights from the Research. Libraries Unlimited.\n\nBerättarteknik och AI-genererad text\nEphron, H. The Importance of a Strong Opening Scene. Writer's Digest.\nStoryScope. Forskning från University of Maryland och Google DeepMind om berättarmönster i AI-genererad text (arxiv.org/html/2604.03136v6).\n\nTipsen är praktiska rekommendationer, inte absoluta regler. Anpassa dem efter ditt eget skrivande."
+        body: "Tipsen bygger på följande forskning och litteratur om skrivvanor, kreativitet, språkutveckling och berättarteknik.",
+        steps: [
+          {
+            heading: "Skrivvanor och kreativitet",
+            body: "Boice, R. (1990). Procrastination, busyness and bingeing. Behaviour Research and Therapy, 27(6), 605–611. Kellogg, R. T. (1996). A model of working memory in writing. Memory & Cognition, 24(3), 318–329. Gollwitzer, P. M. (1999). Implementation intentions: Strong effects of simple plans. American Psychologist, 54(7), 493–503. Sio, U. N. & Ormerod, T. C. (2009). Does incubation enhance problem solving? Psychological Bulletin, 135(1), 94–120. Krashen, S. (2004). The Power of Reading: Insights from the Research. Libraries Unlimited."
+          },
+          {
+            heading: "Berättarteknik och AI-genererad text",
+            body: "Ephron, H. The Importance of a Strong Opening Scene. Writer's Digest. StoryScope. Forskning från University of Maryland och Google DeepMind om berättarmönster i AI-genererad text (arxiv.org/html/2604.03136v6)."
+          }
+        ],
+        tip: "Tipsen är praktiska rekommendationer, inte absoluta regler. Anpassa dem efter ditt eget skrivande."
       }
     }
   },

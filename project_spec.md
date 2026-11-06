@@ -11794,6 +11794,60 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.295 → v1.0.296 (2026-11-06): De sista fyra
+kategorierna omskrivna — femte och avslutande omgången av
+Guide-ombyggnaden.** Mats: "Kör de sista 4 kapitlen" — bekräftade (i
+linje med mönstret från de två föregående omgångarna) att alla fyra
+återstående kategorierna skulle köras i en enda körning.
+
+30 kapitel omskrivna från täta paragrafer till `steps`-strukturen,
+fördelade på fyra kategorier: "Revise the Manuscript" i sin helhet,
+8 kapitel (`analyze-chapter`, `polish`, `continuity`,
+`ask-manuscript`, `ask-about-passage`, `history`, `proofread`,
+`developmental-analysis`); "Images, Publishing & Backup" i sin
+helhet, 5 kapitel (`images-illustrations`, `typography`,
+`language-versions`, `publish`, `backup`); "Writing Tips" i sin
+helhet, 14 kapitel (de fem skrivrutin-kapitlen, de fyra
+inlednings-kapitlen, de fyra berättarröst-kapitlen, samt
+`writing-tips-sources`); och "Help & Troubleshooting" i sin helhet,
+3 kapitel (`network-ai-server`, `ai-writing-wrong-things`,
+`marker-conversion-no-match`).
+
+Det här var den sista omgången i hela Guide-ombyggnaden som startade
+med v1.0.292. Samtliga 78 kapitel i kaampi Writes Guide är nu
+omskrivna till det stegindelade, pedagogiska formatet som matchar
+kaampi Explores egen Guide — layouten, innehållsdjupet och den
+visuella känslan Mats efterfrågade i sin ursprungliga instruktion.
+
+Ingen ny fakta uppfunnen — allt härstammar från den redan existerande
+guide-texten, bara djupare strukturerad. Skrivet och översatt för
+hand på alla tre språk i samma commit. Extra sökning efter
+språkläckor kördes över hela det omskrivna avsnittet i båda
+filerna — inga faktiska läckor hittades (en falsk positiv, "historien"
+som är korrekt även på svenska, kontrollerades och avfärdades).
+
+Verifierat live med Playwright på alla tre språk, med fokus på att
+bekräfta att hela kategoriträdet — alla 9 kategorier, alla 78
+kapitel — nu visas och navigeras korrekt: "Developmental analysis"
+(sista kapitlet i Revise the Manuscript), "Typography", "Sources and
+further reading" (sista kapitlet i hela Guiden, inget Next-kort
+visas) och "An AI server on another computer on the network" på
+engelska; motsvarande kapitel på svenska och norska, inklusive att
+kategorirubrikerna ("7. BILDER, PUBLICERING & BACKUP",
+"8. SKRIVTIPS", "9. HJÄLP & FELSÖKNING" osv.) och kapitelräknarna
+stämmer i alla tre språk.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna
+(ingen ny testtäckning — rent innehåll/text, täckt av den visuella
+Playwright-verifieringen).
+
+**Kvarstår:** inget. Hela Guide-redesignen Mats bad om — "Kan du
+kolla på hur Expore har sin Guide. Jag vill att Write får en likadan
+både visuellt och upplägget" — är nu komplett: layout omgjord till
+modal (v1.0.292), och allt innehåll genom samtliga 9 kategorier
+omskrivet till det superpedagogiska, lättlästa formatet (v1.0.293
+genom v1.0.296).
+
 **Ändringslogg v1.0.294 → v1.0.295 (2026-11-06): "Story Bible & World"
 och "Writing" omskrivna — fjärde omgången av flerstegsjobbet.**
 Mats: "Ta nästa två kapitel" — bekräftade (i linje med mönstret från
