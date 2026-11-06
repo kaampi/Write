@@ -1220,21 +1220,28 @@ export const nb: Messages = {
       },
       "brainstorm-free": {
         heading: "Brainstorm – tenk fritt",
-        body: "Brainstorm er din private kladdeblokk. Ingenting du legger her behøver være bestemt ennå — det er et sted å prøve en idé høyt før du vet om den hører til historien.",
+        body: "Brainstorm er din private kladdeblokk — en fri korktavle med lapper, ikke et skjema å fylle ut. Ingenting her trenger å være bestemt ennå.",
         steps: [
           {
-            heading: "Skriv én lapp per idé",
-            body: "”Tenk om kvinnen på toget egentlig kjenner Eriks far?” ”Kanskje fyrtårnet ikke er forlatt?” ”Ville historien fungere bedre om broren fortsatt lever?” Hver idé får sin egen lapp, slik at du kan flytte dem rundt og sammenligne side ved side."
+            heading: "Legg til en lapp",
+            body: "Klikk på ”Ny lapp” i bunnteksten, eller klikk hvor som helst på en tom flate på brettet — begge måtene gir en tom lapp nøyaktig der du forventer den. (Hvis en lapp allerede er markert, avmarkerer det første klikket på tom flate bare den — klikk igjen for å legge til en ny.)"
           },
           {
-            heading: "Brainstorm påvirker ikke automatisk historien",
-            body: "Dette er den viktige delen. En idé som ligger i Brainstorm blir ikke automatisk en del av historien, og den skal ikke stille og rolig begynne å styre vanlige kapitelutkast bare fordi den finnes."
+            heading: "Fargekod, flytt og skaler fritt",
+            body: "Hver lapp har fem fargeprikker øverst — Papir, Rust, Salvie, Gull, Lilla — klikk på en for å bytte; fargene er bare til din egen sortering, ingenting leser dem. Dra i det stripete håndtaket i lappens header for å flytte den hvor som helst på brettet, også oppå en annen lapp — det finnes ikke noe rutenett eller tvungen rekkefølge. Dra langs høyrekanten for å gjøre den bredere eller smalere.",
+            image: { src: "/handbook/brainstorm-free/note-detail.png", alt: "En brainstorm-lapp som viser drahåndtaket, fem fargeprikker med Rust valgt, fjern-knappen og snarveien Hent ut fakta" }
           },
           {
-            heading: "Du bestemmer hvilke idéer som forlater kladdebordet",
-            body: "Når du bestemmer at en idé skal gå videre, drar du den til Send til synopsis. Til du gjør det, er den akkurat det den er — et kanskje."
+            heading: "Brainstorm påvirker ikke historien automatisk",
+            body: "Dette er den viktige delen. En idé som ligger i Brainstorm blir ikke automatisk en del av historien, og den skal ikke i det stille begynne å styre vanlige kapittelutkast bare fordi den finnes."
+          },
+          {
+            heading: "Køe idéer, send dem så til Synopsis",
+            body: "Dra en lapps håndtak inn i kolonnen «Til synopsis» til høyre — plasseringen der blir dens avsnittsrekkefølge, og ingenting er endret i historien ennå. Først når du trykker «Send til synopsis» skrives de køede lappene faktisk inn i Synopsis, i den rekkefølgen; frem til da kan du fortsette å omorganisere, bytte lapper inn og ut, eller bare la dem ligge køet og komme tilbake senere.",
+            image: { src: "/handbook/brainstorm-free/send-lane.png", alt: "To lapper på brainstorm-brettet som overlapper hverandre, og en tredje lapp køet i kolonnen Til synopsis ved siden av knappen Send til synopsis" }
           }
-        ]
+        ],
+        tip: "Hver lapp har også sin egen «Hent ut fakta»-knapp — en snarvei for å hente mulige Story Bible-fakta direkte ut av én idé, uten å forlate Brainstorm."
       },
       "synopsis-short": {
         heading: "Synopsis – historien i kortform",

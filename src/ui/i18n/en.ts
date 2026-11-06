@@ -311,21 +311,28 @@ const handbookSections: Record<
   },
   "brainstorm-free": {
     heading: "Brainstorm – think freely",
-    body: "Brainstorm is your private scratchpad. Nothing you put here needs to be decided yet — it's a place to try an idea out loud before you know if it belongs in the story.",
+    body: "Brainstorm is your private scratchpad — a free corkboard of notes, not a form to fill in. Nothing here needs to be decided yet.",
     steps: [
       {
-        heading: "Write one note per idea",
-        body: "\"What if the woman on the train actually knows Erik's father?\" \"Maybe the lighthouse isn't abandoned?\" \"Would the story work better if the brother were still alive?\" Each goes on its own note, so you can move them around and compare them side by side."
+        heading: "Add a note",
+        body: "Click \"New note\" in the footer, or click any empty spot on the board — either way, a blank note appears right where you'd expect it. (If a note is already selected, that first click on empty space just deselects it — click again to add one.)"
+      },
+      {
+        heading: "Color-code, move, and resize freely",
+        body: "Every note has five color dots across its top — Paper, Rust, Sage, Gold, Lilac — click one to switch; the colors are only for your own sorting, nothing reads them. Drag the striped handle in a note's header to move it anywhere on the board, even on top of another note — there's no grid or forced order. Drag along its right edge to make it wider or narrower.",
+        image: { src: "/handbook/brainstorm-free/note-detail.png", alt: "A brainstorm note showing its drag handle, five color dots with Rust selected, the remove button, and the Extract facts shortcut" }
       },
       {
         heading: "Brainstorm doesn't automatically affect the story",
-        body: "This is the important part. An idea sitting in Brainstorm doesn't automatically become part of the story, and it shouldn't start quietly steering ordinary chapter drafts just because it exists."
+        body: "This is important. An idea sitting in Brainstorm doesn't automatically become part of the story, and it shouldn't start quietly steering ordinary chapter drafts just because it exists."
       },
       {
-        heading: "You decide which ideas leave the corkboard",
-        body: "When you decide an idea should move forward, drag it onto Send to Synopsis. Until you do that, it stays exactly what it is — a maybe."
+        heading: "Queue ideas, then send them to Synopsis",
+        body: "Drag a note's handle into the \"To synopsis\" column on the right — its position there becomes its paragraph order, and nothing has changed in the story yet. Only pressing \"Send to synopsis\" actually writes the queued notes into Synopsis, in that order; until then you can keep reordering, swap notes in and out, or just leave them queued and come back later.",
+        image: { src: "/handbook/brainstorm-free/send-lane.png", alt: "Two notes on the brainstorm board overlapping each other, and a third note queued in the To synopsis column next to the Send to synopsis button" }
       }
-    ]
+    ],
+    tip: "Each note also has its own \"Extract facts\" button — a shortcut to pull possible Story Bible facts straight out of one idea, without leaving Brainstorm."
   },
   "synopsis-short": {
     heading: "Synopsis – the story in short form",

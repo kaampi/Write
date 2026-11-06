@@ -9,7 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
-## [1.0.300] - 2026-11-06
+## [1.0.301] - 2026-11-06
+
+### Changed
+- Rewrote the Guide's "Brainstorm" chapter (Plan the Story) as a pilot for making the whole Guide more hands-on: alongside the existing "why" and "when," it now explains the actual mechanics — adding a note (button or click on the board), the five color dots for your own sorting, dragging the striped handle to move a note anywhere (including on top of another), resizing by its right edge, and the two-step hand-off into Synopsis (queue in the "To synopsis" column, then press "Send to synopsis" to commit). Two new real screenshots illustrate it. All three languages.
+
+
 
 ### Added
 - A new Guide chapter, "Formatting as you write" (Writing): covers the editor's live, as-you-type behaviors that weren't documented anywhere — bold/italic/underline via the floating toolbar or Ctrl/Cmd+B/I/U, a `---` paragraph turning into a scene break, a `> ` paragraph turning into a quoted block, and the drop cap following whichever paragraph is currently the chapter's first. Cross-references the existing Smart quotes chapter. All three languages.

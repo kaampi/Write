@@ -11794,6 +11794,66 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.300 → v1.0.301 (2026-11-06): Brainstorm-kapitlet
+skrivet om som pilot för mer handgriplig Guide.** Mats: "Det är rätt
+bra guide men jag saknar lite mer om hur man praktiskt gör saker. T a
+Brainstorm som exemple. ... Alltså hur man jobbar rent praktiskt med
+de olika delarna. Håller du med?" — ett berättigat gap: hela Guiden
+förklarar genomgående VAD ett verktyg är och VARFÖR, men sällan HUR
+man faktiskt gör det konkreta handgreppet (dra, klicka, färgväljare,
+knappar).
+
+Verifierade de konkreta mekanikerna i `BrainstormBoard.tsx` och
+`brainstormNotes.ts` innan något skrevs, snarare än att gissa:
+bekräftade "New note"-knappen plus klick-på-tom-yta-skapande (med
+avmarkerings-specialfallet när en lapp redan är vald), de fem
+färgerna (`NOTE_COLORS`: paper/rust/sage/gold/lilac), det randiga
+dra-handtaget (`idea-note-handle`) som flyttar en lapp fritt
+(inklusive ovanpå andra — ingen särskild "stapla"-funktion, bara fri
+positionering), höger-kant-resize (bredd only), och den tvåstegs
+överlämningen till Synopsis: dra till "To synopsis"-kolumnen
+(positionen där blir styckeordningen) och sedan ett separat tryck på
+"Send to synopsis" som faktiskt commitar texten. Hittade även en
+bonus-mekanik som inte efterfrågades: en per-lapp "Extract facts"-
+knapp, lades till som en tips-rad.
+
+Mats bad uttryckligen om skärmbilder "om du kan och det behövs".
+Byggde två riktiga skärmdumpar med Playwright mot den faktiska
+körande appen (ljust tema, efter Mats instruktion "Använd ljust
+tema" — localStorage-nyckeln är `storybook-ai.theme`, inte den
+gissade `theme`): en närbild på en enskild lapp som visar
+handtaget, de fem färgprickarna (Rost vald), bort-knappen och
+Extract facts-genvägen; och en bild av brädet som visar två lappar
+som överlappar varandra plus en tredje köad i "To synopsis"-kolumnen
+bredvid den aktiva "Send to synopsis"-knappen — samma bild
+demonstrerar alltså både överlappning och köning i ett enda skott.
+Sparade som `public/handbook/brainstorm-free/note-detail.png` och
+`send-lane.png`, samma mönster som de tidigare `write-with-ai`-
+bilderna (en bildmapp per kapitel-id), återanvända oförändrade över
+alla tre språkfilerna.
+
+Skrev om kapitlet från tre koncept-fokuserade steg till fyra
+handgripliga steg (Lägg till en lapp / Färgkoda-flytta-skala om fritt
+med bild / den viktiga sandlåde-varningen bevarad oförändrad i sak /
+Köa och skicka till Synopsis med bild), skrivet och översatt för hand
+på alla tre språk med exakt samma UI-terminologi som den riktiga
+appen använder (”lapp” inte ”kort” eller ”anteckning”, ”Till
+synopsis”/”Send to synopsis” exakt som action-knapparna heter).
+
+`tsc --noEmit` rent, `npm run build` rent (bilderna bekräftat
+kopierade till `dist/handbook/brainstorm-free/`), 1281/1281 tester
+gröna. Verifierat live med Playwright på både engelska och svenska:
+båda bilderna renderar korrekt i sina steg, tips-raden om Extract
+facts, och pagineringen till grannkapitlen.
+
+**Kvarstår:** om Mats godkänner stilen och nivån på det här
+pilotkapitlet väntar en genomgång av resten av Guiden (sannolikt
+kategori för kategori, som tidigare omgångar) för att lägga till
+samma typ av konkreta handgrepp där de saknas — inte alla 78 kapitel
+har lika mycket "hur", men många av de som beskriver interaktiva
+verktyg (Scener, Trådar, Timeline, Story Bible-kort, etc.) gör
+sannolikt samma misstag som Brainstorm gjorde.
+
 **Ändringslogg v1.0.299 → v1.0.300 (2026-11-06): Skrivtips blev en
 lång sida, plus ett nytt kapitel om editorns live-formatering.**
 Två separata förfrågningar i samma körning.
