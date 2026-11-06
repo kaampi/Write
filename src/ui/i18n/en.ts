@@ -870,15 +870,15 @@ const handbookSections: Record<
   },
   darlings: {
     heading: "Darlings — kill your darlings, keep the bodies",
-    body: "A passage can be wrong for this draft without being worth losing for good.",
+    body: "\"Kill your darlings\" — but a passage that's wrong here isn't necessarily wrong everywhere. Cut it without destroying it.",
     steps: [
       {
-        heading: "Cutting without deleting",
-        body: "Select the passage and choose \"Cut to Darlings\" from the right-click menu, and it's pulled out of the chapter without being deleted — it lands in a \"N darlings kept\" tray shared across the whole book."
+        heading: "Cut without deleting",
+        body: "Select the passage and choose \"Cut to Darlings\" from the right-click menu. The passage is pulled out of the chapter and placed on the book's shared darlings tray — \"N darlings kept.\" It's still there, searchable and restorable, but no longer in the draft's way."
       },
       {
-        heading: "Restore it, or let it go",
-        body: "From the tray, restore a darling to its original spot, or discard it for good once you're sure you won't need it. A cut or a restore gets its own row in the chapter's History too, so there's always a record of what moved where."
+        heading: "Restore it — or bury it for real",
+        body: "From the tray, move a darling back to where it was cut, or discard it for good once you're sure. Every cut and restore gets its own row in the chapter's History, so you can always trace what moved where."
       }
     ]
   },

@@ -1779,15 +1779,15 @@ export const nb: Messages = {
       },
       darlings: {
         heading: "Darlings — drep dine kjæledyr, behold likene",
-        body: "En passasje kan være feil for akkurat dette utkastet uten å være verdt å miste for godt.",
+        body: "”Kill your darlings” — men en passasje som er feil her er ikke nødvendigvis feil overalt. Klipp den uten å ødelegge den.",
         steps: [
           {
-            heading: "Å klippe uten å slette",
-            body: "Marker passasjen og velg ”Cut to Darlings” fra høyreklikk-menyen, så løftes den ut av kapittelet uten å slettes — den havner i en felles hylle, ”N darlings kept”, delt av hele boken."
+            heading: "Klipp uten å slette",
+            body: "Marker passasjen og velg ”Cut to Darlings” i høyreklikk-menyen. Passasjen løftes ut av kapittelet og legges på bokens felles darlings-hylle — ”N darlings kept”. Den finnes fortsatt, søkbar og gjenopprettbar, men er ikke lenger i veien for utkastet."
           },
           {
-            heading: "Gjenopprett den, eller la den gå",
-            body: "Fra hyllen kan du gjenopprette en darling til sin opprinnelige plass, eller forkaste den for godt når du er sikker på at du ikke trenger den. Både en klipping og en gjenoppretting får sin egen rad i kapittelets Historikk, så det alltid finnes et spor av hva som flyttet hvor."
+            heading: "Gjenopprett — eller begrav den for godt",
+            body: "Fra hyllen kan du flytte en darling tilbake dit den ble klippet, eller forkaste den for godt når du er sikker. Hver klipping og gjenoppretting får sin egen rad i kapittelets Historikk, så du alltid kan spore hva som flyttet hvor."
           }
         ]
       },

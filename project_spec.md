@@ -11794,6 +11794,23 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.297 → v1.0.298 (2026-11-06): Darlings-kapitlet
+skrivet om efter Mats egen text.** Mats skickade en färdig, stramare
+formulering direkt i chatten: "Kan vi skriva så här" följt av hela
+kapitlet — rubrik, intro och båda stegen. Samma fakta och struktur
+som innan, men vassare formuleringar ("Klipp utan att radera" /
+"Återställ — eller begrava den på riktigt" istället för "Att klippa
+utan att radera" / "Återställ den, eller låt den gå").
+
+Applicerade Mats text ordagrant på svenska (med raka citattecken för
+konsekvens med övrig text), och översatte samma skärpta ton till
+engelska och norska för att hålla alla tre språk i synk, som vanligt
+i den här filen. Ingen ny fakta — ren omformulering.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna.
+Verifierat live med Playwright på svenska: kapitlet renderar korrekt
+med ny rubrik, intro och båda stegen.
+
 **Ändringslogg v1.0.296 → v1.0.297 (2026-11-06): Förtydligade "Välj
 minsta verktyget" efter feedback från Mats.** Mats: "Avsnittet Välj
 minsta verktyget tror jag behöver förtydligas. Vad menas med 'minsta'

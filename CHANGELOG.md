@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.298] - 2026-11-06
+
+### Changed
+- Rewrote the Guide's "Darlings" chapter (Writing) to Mats's own tighter phrasing — same structure and facts, sharper wording ("Cut without deleting" / "Restore it — or bury it for real"). All three languages.
+
 ## [1.0.297] - 2026-11-06
 
 ### Changed

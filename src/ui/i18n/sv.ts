@@ -1779,15 +1779,15 @@ export const sv: Messages = {
       },
       darlings: {
         heading: "Darlings — döda dina älsklingar, behåll kropparna",
-        body: "En passage kan vara fel för just detta utkast utan att vara värd att förlora för gott.",
+        body: "”Kill your darlings” — men en passage som är fel här är inte nödvändigtvis fel överallt. Klipp den utan att förstöra den.",
         steps: [
           {
-            heading: "Att klippa utan att radera",
-            body: "Markera passagen och välj ”Cut to Darlings” från högerklicksmenyn, så lyfts den ut ur kapitlet utan att raderas — den hamnar i en gemensam hylla, ”N darlings kept”, som delas av hela boken."
+            heading: "Klipp utan att radera",
+            body: "Markera passagen och välj ”Cut to Darlings” i högerklicksmenyn. Passagen lyfts ur kapitlet och läggs på bokens gemensamma darlinghylla — ”N darlings kept”. Den finns kvar, sökbar och återställningsbar, men stör inte utkastet längre."
           },
           {
-            heading: "Återställ den, eller låt den gå",
-            body: "Från hyllan kan du återställa en darling till sin ursprungliga plats, eller kasta den för gott när du är säker på att du inte behöver den. Både en klippning och en återställning får en egen rad i kapitlets Historik, så det alltid finns ett spår av vad som flyttats vart."
+            heading: "Återställ — eller begrava den på riktigt",
+            body: "Från hyllan kan du flytta tillbaka en darling till där den klipptes, eller kasta den för gott när du är säker. Varje klippning och återställning får en egen rad i kapitlets Historik, så du kan alltid spåra vad som flyttats vart."
           }
         ]
       },
