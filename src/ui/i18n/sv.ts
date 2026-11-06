@@ -1808,40 +1808,47 @@ export const sv: Messages = {
       },
       "pov-tense-voice": {
         heading: "Perspektiv, tempus och berättarröst",
-        body: "kaampi Write kan få information om hur berättelsen ska berättas.",
+        body: "En roman vet hur den ska berättas. kaampi Write kan veta det med den.",
         steps: [
           {
-            heading: "Vad det här täcker",
-            body: "Perspektiv, tempus, synvinkel och berättarröst."
+            heading: "Bokens berättarkonvention",
+            body: "Välj på boknivå hur berättelsen ska låta: perspektiv (första, andra eller tredje person), tempus (dåtid eller nutid), synvinkel (vem som ser och vet) och berättarröst (den ton och det avstånd som bär hela verket). Inställningarna gäller hela boken — korrekturläsningen använder dem, och AI:n håller sig till dem när den föreslår text."
           },
           {
-            heading: "Enskilda kapitel kan avvika",
-            body: "Enskilda kapitel kan vid behov avvika från bokens grundinställningar. Det kan vara användbart om huvuddelen av romanen exempelvis berättas i tredje person men ett särskilt kapitel behöver en annan synvinkel."
+            heading: "Kapitel som bryter mönstret — med vilje",
+            body: "En prolog i jag-form i en roman som är i tredje person. Ett finalkapitel som hoppar till nutid i en bok som annars är berättad i dåtid. Sätt avvikelsen på det enskilda kapitlet, och resten av boken märker ingenting: huvudinställningarna gäller alla andra kapitel som vanligt."
+          },
+          {
+            heading: "Perspektivbyte är mer än pronomen",
+            body: "Att flytta en roman från ”hon” till ”jag” handlar inte om sök-och-ersätt — det handlar om vem som får veta vad, vilka tankar som syns och var skuggorna faller. kaampi Write håller reda på konventionerna, men efter en större omskrivning i nytt perspektiv bör du alltid läsa resultatet noggrant — särskilt om AI:n fått göra grovjobbet."
           }
-        ],
-        tip: "Perspektiv handlar om mer än att byta pronomen. Om du använder AI för större omskrivningar efter en sådan förändring bör du alltid läsa resultatet noggrant."
+        ]
       },
       reader: {
         heading: "Läsare",
-        body: "Du kan ange vilken typ av läsare berättelsen riktar sig till. Det kan hjälpa AI anpassa exempelvis ordval och meningsbyggnad när den skriver tillsammans med dig.",
+        body: "Säg vem berättelsen är för, så skriver AI:n mot den läsaren — inte mot en genomsnittsperson.",
         steps: [
           {
-            heading: "Skrivstöd, inte en bedömning",
-            body: "Det är ett skrivstöd. Det är inte en automatisk bedömning av vilken ålder den färdiga boken passar för — det bestämmer du fortfarande själv."
+            heading: "En målgrupp förändrar prosan",
+            body: "En ungdomsroman i jag-form tål korta, riviga meningar och ett rakt tonläge. En psykologisk thriller för vuxna bär längre, tyngre repliker. När du anger berättelsens läsare använder AI:n det som vägledning — ordval, meningsbyggnad, ton — när den skriver tillsammans med dig, och lämnar det som inte passar den läsaren på hyllan."
+          },
+          {
+            heading: "Ett skrivstöd, inte en åldersmärkning",
+            body: "Det här är stöd för skrivandet, ingen åldersgräns. Läsarinställningen bestämmer inte vilken ålder den färdiga boken passar för — det avgör du fortfarande själv, kapitel för kapitel."
           }
         ]
       },
       "author-voice": {
         heading: "Författarröst",
-        body: "Två författare kan beskriva samma händelse på helt olika sätt. Författarrösten hjälper AI förstå hur du vill att prosan ska kännas.",
+        body: "Två författare som beskriver samma händelse skriver två olika böcker. Författarrösten är hur din prosa ska kännas — och den hjälper AI:n att skriva som du, inte som en genomsnittsförfattare.",
         steps: [
           {
-            heading: "Vad det kan handla om",
-            body: "Meningslängd, mängden miljöbeskrivning, dialog, rytm, direkt eller återhållsamt språk, och andra stilistiska egenskaper."
+            heading: "Vad du kan styra",
+            body: "Meningslängd och rytm. Hur mycket miljö som får synas innan handlingen går vidare. Hur tät dialogen är, hur mycket som lämnas osagt mellan raderna. Direkt eller återhållsamt språk, nakna verb eller blommande metaforer. Allt som gör att en läsare känner igen en sida utan att se ditt namn på den."
           },
           {
-            heading: "Vägledning, inte en regel",
-            body: "Det är vägledning för AI. Inte regler för hur du måste skriva. Din egen text har alltid sista ordet."
+            heading: "Vägledning, inte regel",
+            body: "Författarrösten styr vad AI:n strävar mot när den föreslår text — den styr aldrig vad du får skriva. En mening som bryter mot din egen stil är inte ett fel, det är ett val. Din text har alltid sista ordet."
           }
         ]
       },

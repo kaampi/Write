@@ -899,40 +899,47 @@ const handbookSections: Record<
   },
   "pov-tense-voice": {
     heading: "Point of view, tense, and narrative voice",
-    body: "kaampi Write can be given information about how the story should be told.",
+    body: "A novel knows how it should be told. kaampi Write can know it along with the book.",
     steps: [
       {
-        heading: "What this covers",
-        body: "Point of view, tense, viewpoint, and narrative voice."
+        heading: "The book's narrative convention",
+        body: "Choose, at the book level, how the story should sound: point of view (first, second, or third person), tense (past or present), viewpoint (who sees and knows), and narrative voice (the tone and distance that carries the whole work). These settings apply to the whole book — Proofread uses them, and the AI sticks to them when it suggests text."
       },
       {
-        heading: "Individual chapters can deviate",
-        body: "Individual chapters can, when needed, deviate from the book's overall settings. That can be useful if most of the novel is told in third person but one particular chapter needs a different viewpoint."
+        heading: "Chapters that break the pattern — on purpose",
+        body: "A first-person prologue in a novel otherwise told in third person. A final chapter that jumps to present tense in a book otherwise told in past tense. Set the deviation on that one chapter, and the rest of the book notices nothing: the main settings still apply to every other chapter as usual."
+      },
+      {
+        heading: "A point-of-view change is more than pronouns",
+        body: "Moving a novel from \"she\" to \"I\" isn't a find-and-replace — it's about who gets to know what, which thoughts show, and where the shadows fall. kaampi Write keeps track of the conventions, but after a major rewrite into a new point of view, always read the result carefully — especially if the AI did the heavy lifting."
       }
-    ],
-    tip: "Point of view is about more than swapping pronouns. If you use AI for larger rewrites after such a change, always read the result carefully."
+    ]
   },
   reader: {
     heading: "Reader",
-    body: "You can specify what kind of reader the story is aimed at. This can help AI adapt, for example, word choice and sentence structure when it writes together with you.",
+    body: "Say who the story is for, and the AI writes toward that reader — not toward an average person.",
     steps: [
       {
-        heading: "Writing support, not a rating",
-        body: "It's writing support. It is not an automatic rating of what age the finished book is suitable for — you still decide that yourself."
+        heading: "A target reader changes the prose",
+        body: "A first-person YA novel can carry short, snappy sentences and a blunt tone. A psychological thriller for adults carries longer, heavier lines. When you set the story's reader, the AI uses it as guidance — word choice, sentence structure, tone — when it writes together with you, and leaves what doesn't fit that reader on the shelf."
+      },
+      {
+        heading: "Writing support, not an age rating",
+        body: "This is support for the writing, not an age limit. The Reader setting doesn't decide what age the finished book is suitable for — you still decide that yourself, chapter by chapter."
       }
     ]
   },
   "author-voice": {
     heading: "Author voice",
-    body: "Two authors can describe the same event in completely different ways. Author voice helps AI understand how you want the prose to feel.",
+    body: "Two authors describing the same event write two different books. Author voice is how your prose should feel — and it helps the AI write like you, not like an average author.",
     steps: [
       {
-        heading: "What it can involve",
-        body: "Sentence length, amount of setting description, dialogue, rhythm, direct or restrained language, and other stylistic traits."
+        heading: "What you can steer",
+        body: "Sentence length and rhythm. How much setting gets to show before the plot moves on. How dense the dialogue is, how much stays unsaid between the lines. Direct or restrained language, bare verbs or blooming metaphors. Everything that makes a reader recognize a page without seeing your name on it."
       },
       {
         heading: "Guidance, not a rule",
-        body: "It's guidance for AI. Not rules for how you must write. Your own text always has the final word."
+        body: "Author voice steers what the AI aims for when it suggests text — it never steers what you're allowed to write. A sentence that breaks your own style isn't a mistake, it's a choice. Your text always has the final word."
       }
     ]
   },

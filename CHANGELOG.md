@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.299] - 2026-11-06
+
+### Changed
+- Rewrote three more Guide chapters (Writing) to Mats's own sharper phrasing: "Point of view, tense, and narrative voice" (now explains the book-level narrative convention, intentional per-chapter deviations, and why a POV change is more than pronouns), "Reader" (now explains concretely how the target reader shapes the prose, not just that it can), and "Author voice" (now gives concrete, controllable levers instead of a flat list, and states plainly that it guides the AI, never restricts the author). All three languages.
+
 ## [1.0.298] - 2026-11-06
 
 ### Changed

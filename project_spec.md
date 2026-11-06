@@ -11794,6 +11794,41 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.298 → v1.0.299 (2026-11-06): Tre till Writing-
+kapitel skrivna om efter Mats egen text.** Samma mönster som
+Darlings-omgången: Mats skickade färdiga, stramare formuleringar
+direkt i chatten för tre kapitel i rad — "Perspektiv, tempus och
+berättarröst" ("Vad säger du om denna" med hela kapitlet bifogat),
+"Läsare" ("Är detta en bättre text?"), och "Författarröst" ("Vad
+säger du om denna").
+
+Perspektiv-kapitlet fick tre tydliga steg istället för två: bokens
+berättarkonvention (perspektiv, tempus, synvinkel, berättarröst allt
+på boknivå), medvetna per-kapitel-avvikelser (prolog i jag-form,
+finalkapitel i nutid), och varför ett perspektivbyte är mer än
+pronomen. Läsare-kapitlet fick en konkret förklaring av HUR
+läsarinställningen faktiskt påverkar prosan (ungdomsroman vs.
+vuxenthriller som exempel) istället för att bara säga ATT den gör
+det, plus en skarpare distinktion mot åldersmärkning.
+Författarröst-kapitlet fick konkreta, styrbara spakar istället för en
+platt lista, och ett tydligare påstående om att rösten styr AI:n,
+aldrig författaren.
+
+Två skrivfel rättades tyst i Mats ursprungstext för
+Författarröst-kapitlet innan det applicerades: "är hur den dina ska
+kännas" → "är hur din prosa ska kännas", och "en genomsnittslikör" →
+"en genomsnittsförfattare" (tydliga stavfel/autokorrigeringar, inte
+avsiktliga formuleringar).
+
+Applicerade Mats text ordagrant (med rättningarna) på svenska, och
+översatte samma skärpta ton och struktur till engelska och norska för
+att hålla alla tre språk i synk. Ingen ny fakta i något av de tre
+kapitlen — ren omformulering och förtydligande.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna.
+Verifierat live med Playwright på svenska: alla tre kapitel renderar
+korrekt med ny rubrik, intro och samtliga steg.
+
 **Ändringslogg v1.0.297 → v1.0.298 (2026-11-06): Darlings-kapitlet
 skrivet om efter Mats egen text.** Mats skickade en färdig, stramare
 formulering direkt i chatten: "Kan vi skriva så här" följt av hela
