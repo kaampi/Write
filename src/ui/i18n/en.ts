@@ -841,6 +841,14 @@ const handbookSections: Record<
     body: "The writing tools scale down as well as up — matching the tool to the size of the actual gap gives you more control than regenerating large amounts of text.",
     steps: [
       {
+        heading: "What \"smallest\" actually means",
+        body: "Not least effort, and not simplest to use — smallest means how much existing text the tool touches. Draft can fill or rewrite a whole chapter. Write a beat drops in a short paragraph at your cursor and leaves everything else untouched. Elaborate expands a single passage you've selected, without moving the story forward around it. The smaller the tool, the less of your own prose gets regenerated — and the less you have to re-read afterward to make sure nothing unwanted changed."
+      },
+      {
+        heading: "How to judge which one you need",
+        body: "Ask yourself: how much of the existing text does this problem actually require changing? A missing beat needs one new paragraph, not a rewritten chapter. A thin passage needs expanding in place, not continuing forward. Reach for the smallest tool that can solve what's actually in front of you, and only step up to a bigger one — Extend, Rewrite, or Draft — when the problem genuinely needs that much touched."
+      },
+      {
         heading: "Match the tool to the problem",
         body: "Completely empty chapter → Draft. A smaller event is missing → Write a beat. The passage is too thin → Elaborate. I need to move forward → Extend. I know what I want to change → Rewrite. I want to know if the chapter works → Analyze."
       }

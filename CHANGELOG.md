@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.297] - 2026-11-06
+
+### Changed
+- Clarified the Guide's "Choose the smallest tool" chapter (Writing): it never explained what "smallest" actually meant. Added two new steps — what the size axis actually is (how much existing text a tool touches/regenerates, not effort or ease of use) and a concrete way to judge which tool a given problem needs. All three languages.
+
 ## [1.0.296] - 2026-11-06
 
 ### Changed

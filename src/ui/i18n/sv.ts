@@ -1750,6 +1750,14 @@ export const sv: Messages = {
         body: "Skrivverktygen skalar nedåt lika väl som uppåt — att matcha verktyget mot storleken på det faktiska behovet ger dig mer kontroll än att generera om stora mängder text.",
         steps: [
           {
+            heading: "Vad \"minst\" faktiskt betyder",
+            body: "Inte minst ansträngning, och inte enklast att använda — minst betyder hur mycket befintlig text verktyget rör vid. Skriv utkast kan fylla eller skriva om ett helt kapitel. Skriv en beat släpper in ett kort stycke vid markören och lämnar allt annat orört. Brodera ut utvidgar en enskild passage du markerat, utan att driva berättelsen framåt runt den. Ju mindre verktyget är, desto mindre av din egen prosa genereras om — och desto mindre behöver du läsa igenom efteråt för att vara säker på att inget oönskat ändrades."
+          },
+          {
+            heading: "Hur du avgör vilket du behöver",
+            body: "Fråga dig själv: hur mycket av den befintliga texten kräver problemet egentligen att du ändrar? En saknad beat behöver ett nytt stycke, inte ett omskrivet kapitel. En tunn passage behöver utvidgas på plats, inte fortsättas framåt. Ta till det minsta verktyget som kan lösa det som faktiskt ligger framför dig, och gå bara upp till ett större — Förläng, Skriv om eller Skriv utkast — när problemet verkligen kräver att så mycket rörs vid."
+          },
+          {
             heading: "Matcha verktyget mot problemet",
             body: "Helt tomt kapitel → Skriv utkast. En mindre händelse saknas → Skriv en beat. Passagen är för tunn → Brodera ut. Jag behöver komma vidare → Förläng. Jag vet vad jag vill förändra → Skriv om. Jag vill veta om kapitlet fungerar → Analysera."
           }

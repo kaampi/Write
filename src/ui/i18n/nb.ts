@@ -1750,6 +1750,14 @@ export const nb: Messages = {
         body: "Skriveverktøyene skalerer nedover like godt som oppover — å matche verktøyet mot størrelsen på det faktiske behovet gir deg mer kontroll enn å generere om store mengder tekst.",
         steps: [
           {
+            heading: "Hva \"minst\" faktisk betyr",
+            body: "Ikke minst innsats, og ikke enklest å bruke — minst betyr hvor mye eksisterende tekst verktøyet rører ved. Skriv utkast kan fylle eller skrive om et helt kapittel. Skriv en beat slipper inn et kort avsnitt ved markøren og lar alt annet være urørt. Utdyp utvider en enkelt passasje du har markert, uten å drive historien videre rundt den. Jo mindre verktøyet er, desto mindre av din egen prosa blir generert på nytt — og desto mindre må du lese gjennom etterpå for å være sikker på at ingenting uønsket endret seg."
+          },
+          {
+            heading: "Hvordan du avgjør hvilket du trenger",
+            body: "Spør deg selv: hvor mye av den eksisterende teksten krever problemet egentlig at du endrer? En manglende beat trenger ett nytt avsnitt, ikke et omskrevet kapittel. En tynn passasje trenger å utvides på stedet, ikke å fortsettes videre. Bruk det minste verktøyet som kan løse det som faktisk ligger foran deg, og gå bare opp til et større — Forleng, Skriv om eller Skriv utkast — når problemet virkelig krever at så mye røres ved."
+          },
+          {
             heading: "Match verktøyet mot problemet",
             body: "Helt tomt kapittel → Skriv utkast. En mindre hendelse mangler → Skriv en beat. Passasjen er for tynn → Utdyp. Jeg trenger å komme videre → Forleng. Jeg vet hva jeg vil forandre → Skriv om. Jeg vil vite om kapittelet fungerer → Analyser."
           }

@@ -11794,6 +11794,26 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.296 → v1.0.297 (2026-11-06): Förtydligade "Välj
+minsta verktyget" efter feedback från Mats.** Mats: "Avsnittet Välj
+minsta verktyget tror jag behöver förtydligas. Vad menas med 'minsta'
+i det här sammanhanget och hur kan jag som användare avgöra vilket
+som är minst?" — ett konkret gap i ett kapitel som redan skeppats i
+den förra omgången: det listade bara en matchningstabell utan att
+någonsin definiera vad måttstocken "storlek" faktiskt mäter.
+
+Lade till två nya steg före den befintliga matchningstabellen: ett som
+definierar axeln — "minst" syftar på hur mycket befintlig text
+verktyget rör vid/genererar om, inte ansträngning eller hur enkelt
+verktyget är att använda — och ett som ger en konkret tumregel (fråga
+dig: hur mycket av den befintliga texten kräver problemet egentligen
+att du ändrar?). Skrivet och översatt för hand på alla tre språk i
+samma commit.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna.
+Verifierat live med Playwright på svenska: det nya innehållet och
+stegen renderar korrekt i det befintliga `steps`-formatet.
+
 **Ändringslogg v1.0.295 → v1.0.296 (2026-11-06): De sista fyra
 kategorierna omskrivna — femte och avslutande omgången av
 Guide-ombyggnaden.** Mats: "Kör de sista 4 kapitlen" — bekräftade (i
