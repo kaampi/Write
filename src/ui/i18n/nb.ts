@@ -1852,6 +1852,29 @@ export const nb: Messages = {
           }
         ]
       },
+      "live-formatting": {
+        heading: "Formatering mens du skriver",
+        body: "Tre ting skjer automatisk mens du skriver — ingen av dem krever en meny, og én av dem krever en verktøylinje i stedet.",
+        steps: [
+          {
+            heading: "Fet, kursiv, understreket",
+            body: "Marker tekst og klikk enten på den flytende verktøylinjen som vises over markeringen, eller bruk Ctrl/Cmd+B, Ctrl/Cmd+I eller Ctrl/Cmd+U. I motsetning til de to andre tingene her er dette et bevisst valg — ingenting du skriver blir fet eller kursiv av seg selv."
+          },
+          {
+            heading: "Scenebrudd",
+            body: "Skriv tre eller flere bindestreker — «---» — alene i et eget avsnitt, så gjøres det om til et scenebrudd i stedet for bokstavelige streker så snart du avslutter linjen. Hvilket ornament som vises (en vanlig kort strek, eller en av fire dekorative stiler) stilles inn én gang for hele manuset i Settings → Typography → Scene break."
+          },
+          {
+            heading: "Siterte passasjer",
+            body: "Begynn et avsnitt med «> » så gjøres det om til en innrykket blokk med en strek nedover siden — omtrent som et brev eller en melding inni historien kan se ut. Selve «>»-tegnet forsvinner fra visningen; bare teksten vises."
+          },
+          {
+            heading: "Anfangen følger det første avsnittet automatisk",
+            body: "Hvis Settings → Typography → Drop cap er satt til noe annet enn Off, får den åpnende bokstaven i det som akkurat nå er kapittelets første avsnitt, den forstørrede behandlingen. Ingenting å skrive — den følger bare hvilket avsnitt som tilfeldigvis er først."
+          }
+        ],
+        tip: "Har du allerede tekst med rette anførselstegn fra et annet sted? Se Smarte anførselstegn (Skriving) — samme type levende konvertering, med et samlet «Smarten quotes in whole manuscript» for alt som er limt inn eller importert før denne oppførselen fantes."
+      },
       "smart-quotes": {
         heading: "Smarte anførselstegn",
         body: "Et rett \" du skriver i kapittelredigeringen blir automatisk et ekte åpnende eller lukkende, kurvet anførselstegn, avhengig av hva som kommer rett før — ingenting å tenke på, ingenting å slå på.",

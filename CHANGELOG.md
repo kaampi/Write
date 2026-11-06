@@ -9,7 +9,13 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
-## [1.0.299] - 2026-11-06
+## [1.0.300] - 2026-11-06
+
+### Added
+- A new Guide chapter, "Formatting as you write" (Writing): covers the editor's live, as-you-type behaviors that weren't documented anywhere — bold/italic/underline via the floating toolbar or Ctrl/Cmd+B/I/U, a `---` paragraph turning into a scene break, a `> ` paragraph turning into a quoted block, and the drop cap following whichever paragraph is currently the chapter's first. Cross-references the existing Smart quotes chapter. All three languages.
+
+### Changed
+- The Guide's "Writing Tips" category now renders as one continuous scrollable page instead of one chapter at a time — the sidebar list still works the same way, it jumps straight to that tip's place on the page instead of switching panes. Previous/Next paging is gone for this one category, since everything is already on the page. No other category changed.
 
 ### Changed
 - Rewrote three more Guide chapters (Writing) to Mats's own sharper phrasing: "Point of view, tense, and narrative voice" (now explains the book-level narrative convention, intentional per-chapter deviations, and why a POV change is more than pronouns), "Reader" (now explains concretely how the target reader shapes the prose, not just that it can), and "Author voice" (now gives concrete, controllable levers instead of a flat list, and states plainly that it guides the AI, never restricts the author). All three languages.

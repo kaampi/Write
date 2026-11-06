@@ -79,6 +79,7 @@ export const HANDBOOK_SECTION_IDS = [
   "pov-tense-voice",
   "reader",
   "author-voice",
+  "live-formatting",
   "smart-quotes",
   "analyze-chapter",
   "polish",
@@ -176,6 +177,7 @@ export const HANDBOOK_SECTION_CATEGORY: Record<HandbookSectionId, HandbookCatego
   "pov-tense-voice": "writing",
   reader: "writing",
   "author-voice": "writing",
+  "live-formatting": "writing",
   "smart-quotes": "writing",
   "analyze-chapter": "revise",
   polish: "revise",
@@ -209,6 +211,16 @@ export const HANDBOOK_SECTION_CATEGORY: Record<HandbookSectionId, HandbookCatego
   "writing-tips-sources": "writing-tips"
 };
 
+/**
+ * Writing Tips reads as a reference list of short, standalone tips rather
+ * than a sequential walkthrough (Mats, 2026-11-06: "Ska vi låta skrivtips
+ * vara en lång sida med tips? ... så hoppar man direkt till det tipset"),
+ * so this one category renders as a single scrollable page instead of one
+ * chapter at a time — the sidebar list still works, it jumps to an anchor
+ * on the page instead of switching the pane. No other category changed.
+ */
+const LONG_PAGE_CATEGORY: HandbookCategoryId = "writing-tips";
+
 export function HandbookPanel({ onClose, initialTopic }: { onClose: () => void; initialTopic?: HandbookSectionId }) {
   const { messages: m } = useLocale();
   const startId = initialTopic ?? HANDBOOK_SECTION_IDS[0]!;
@@ -216,13 +228,22 @@ export function HandbookPanel({ onClose, initialTopic }: { onClose: () => void; 
   const [openCategories, setOpenCategories] = useState<Set<HandbookCategoryId>>(() => new Set([HANDBOOK_SECTION_CATEGORY[startId]]));
   const [aiSetupOpen, setAiSetupOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const longPageSectionRefs = useRef<Partial<Record<HandbookSectionId, HTMLDivElement | null>>>({});
 
   function setActive(id: HandbookSectionId) {
     setActiveState(id);
     const category = HANDBOOK_SECTION_CATEGORY[id];
     setOpenCategories((current) => (current.has(category) ? current : new Set(current).add(category)));
-    contentRef.current?.scrollTo({ top: 0 });
+    if (category !== LONG_PAGE_CATEGORY) contentRef.current?.scrollTo({ top: 0 });
   }
+
+  const activeCategory = HANDBOOK_SECTION_CATEGORY[active];
+  const isLongPage = activeCategory === LONG_PAGE_CATEGORY;
+
+  useEffect(() => {
+    if (!isLongPage) return;
+    longPageSectionRefs.current[active]?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, [active, isLongPage]);
 
   function toggleCategory(id: HandbookCategoryId) {
     setOpenCategories((current) => {
@@ -309,53 +330,89 @@ export function HandbookPanel({ onClose, initialTopic }: { onClose: () => void; 
           </nav>
 
           <section className="handbook-modal-content" ref={contentRef} aria-live="polite">
-            <div className="handbook-modal-content-inner" key={active}>
-              <h2>{entry.heading}</h2>
-              <p className="handbook-body handbook-modal-intro">{entry.body}</p>
+            {isLongPage ? (
+              <div className="handbook-modal-content-inner handbook-long-page">
+                {HANDBOOK_SECTION_IDS.filter((id) => HANDBOOK_SECTION_CATEGORY[id] === LONG_PAGE_CATEGORY).map((id) => {
+                  const tipEntry = m.handbook.sections[id];
+                  return (
+                    <div
+                      key={id}
+                      ref={(el) => {
+                        longPageSectionRefs.current[id] = el;
+                      }}
+                      className="handbook-long-page-section"
+                    >
+                      <h2>{tipEntry.heading}</h2>
+                      <p className="handbook-body handbook-modal-intro">{tipEntry.body}</p>
 
-              {active === "connect-local-ai" ? (
-                <section className="guide-block guide-quickstart-block">
-                  <button type="button" className="primary" onClick={() => setAiSetupOpen(true)}>
-                    {m.guide.connectAiButton}
-                  </button>
-                </section>
-              ) : null}
-
-              {entry.steps ? (
-                <ol className="handbook-steps">
-                  {entry.steps.map((step, stepIndex) => (
-                    <li key={stepIndex} className="handbook-step">
-                      <h4>{step.heading}</h4>
-                      <p className="handbook-body">{step.body}</p>
-                      {step.image ? (
-                        <img className="handbook-step-image" src={step.image.src} alt={step.image.alt} loading="lazy" />
+                      {tipEntry.steps ? (
+                        <ol className="handbook-steps">
+                          {tipEntry.steps.map((step, stepIndex) => (
+                            <li key={stepIndex} className="handbook-step">
+                              <h4>{step.heading}</h4>
+                              <p className="handbook-body">{step.body}</p>
+                              {step.image ? (
+                                <img className="handbook-step-image" src={step.image.src} alt={step.image.alt} loading="lazy" />
+                              ) : null}
+                            </li>
+                          ))}
+                        </ol>
                       ) : null}
-                    </li>
-                  ))}
-                </ol>
-              ) : null}
 
-              {entry.tip ? <p className="handbook-tip">{entry.tip}</p> : null}
+                      {tipEntry.tip ? <p className="handbook-tip">{tipEntry.tip}</p> : null}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="handbook-modal-content-inner" key={active}>
+                <h2>{entry.heading}</h2>
+                <p className="handbook-body handbook-modal-intro">{entry.body}</p>
 
-              <nav className="handbook-modal-paging" aria-label={m.handbook.title}>
-                {prevId ? (
-                  <button type="button" onClick={() => setActive(prevId)}>
-                    <span className="handbook-modal-paging-dir">← {m.common.previous}</span>
-                    {m.handbook.sections[prevId].heading}
-                  </button>
-                ) : (
-                  <span />
-                )}
-                {nextId ? (
-                  <button type="button" className="handbook-modal-paging-next" onClick={() => setActive(nextId)}>
-                    <span className="handbook-modal-paging-dir">{m.common.next} →</span>
-                    {m.handbook.sections[nextId].heading}
-                  </button>
-                ) : (
-                  <span />
-                )}
-              </nav>
-            </div>
+                {active === "connect-local-ai" ? (
+                  <section className="guide-block guide-quickstart-block">
+                    <button type="button" className="primary" onClick={() => setAiSetupOpen(true)}>
+                      {m.guide.connectAiButton}
+                    </button>
+                  </section>
+                ) : null}
+
+                {entry.steps ? (
+                  <ol className="handbook-steps">
+                    {entry.steps.map((step, stepIndex) => (
+                      <li key={stepIndex} className="handbook-step">
+                        <h4>{step.heading}</h4>
+                        <p className="handbook-body">{step.body}</p>
+                        {step.image ? (
+                          <img className="handbook-step-image" src={step.image.src} alt={step.image.alt} loading="lazy" />
+                        ) : null}
+                      </li>
+                    ))}
+                  </ol>
+                ) : null}
+
+                {entry.tip ? <p className="handbook-tip">{entry.tip}</p> : null}
+
+                <nav className="handbook-modal-paging" aria-label={m.handbook.title}>
+                  {prevId ? (
+                    <button type="button" onClick={() => setActive(prevId)}>
+                      <span className="handbook-modal-paging-dir">← {m.common.previous}</span>
+                      {m.handbook.sections[prevId].heading}
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                  {nextId ? (
+                    <button type="button" className="handbook-modal-paging-next" onClick={() => setActive(nextId)}>
+                      <span className="handbook-modal-paging-dir">{m.common.next} →</span>
+                      {m.handbook.sections[nextId].heading}
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                </nav>
+              </div>
+            )}
           </section>
         </div>
       </div>

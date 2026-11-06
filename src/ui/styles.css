@@ -8741,6 +8741,22 @@ button.illustration-genre-item:focus-visible {
   border-top: 1px solid var(--border-soft);
 }
 
+/* Writing Tips renders as one scrollable page of short, standalone tips
+   instead of one chapter at a time — the sidebar still jumps straight to
+   a tip's anchor here (Mats, 2026-11-06). */
+.handbook-long-page-section {
+  scroll-margin-top: 0.5rem;
+  padding-bottom: 1.8rem;
+  margin-bottom: 1.8rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.handbook-long-page-section:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
 .handbook-modal-paging button {
   font: inherit;
   font-family: var(--font-ui);

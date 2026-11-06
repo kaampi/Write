@@ -11794,6 +11794,58 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.299 → v1.0.300 (2026-11-06): Skrivtips blev en
+lång sida, plus ett nytt kapitel om editorns live-formatering.**
+Två separata förfrågningar i samma körning.
+
+**Del 1 — Skrivtips som enkelsidans-referens.** Mats: "Ska vi låta
+skrivtips vara en lång sida med tips? Vi kan ändå ha kvar rubrikerna
+i listan och så hoppar man direkt till det tipset." Fråga ställd via
+AskUserQuestion om omfattning (bara Skrivtips, eller fler
+referens-liknande kategorier som Hjälp & Felsökning) och vad som ska
+hända med Previous/Next-paginering. Mats svarade: bara Skrivtips,
+och ta bort Previous/Next helt för den kategorin.
+
+Implementerat i `HandbookPanel.tsx`: en ny `LONG_PAGE_CATEGORY`-
+konstant pekar på `"writing-tips"`. När aktivt kapitel tillhör den
+kategorin renderas alla 14 kapitlen i kategorin som sektioner på en
+enda scrollbar sida (`handbook-long-page-section`, med ref per
+kapitel-id), istället för ett kapitel i taget. Klick i
+sidopanelslistan fungerar precis som innan (`setActive`), men en ny
+`useEffect` scrollar till rätt sektions ref med `scrollIntoView`
+istället för att byta hela innehållspanelen. Previous/Next-navet
+renderas inte alls i long-page-grenen. Ingen annan kategori
+påverkad — allt annat kör kvar i det gamla ett-kapitel-i-taget-läget.
+
+**Del 2 — nytt kapitel om live-formatering.** Mats: "Vi tar aldrig
+upp editorns wysiwyg element? Fet stil, --- blir HR, Anfang etc
+Eller har jag missat det?" — ett berättigat gap: Typography-kapitlet
+beskriver bara INSTÄLLNINGARNA för Drop cap och Scene break, aldrig
+att de faktiskt triggas automatiskt av vad man skriver.
+
+Verifierade själva beteendet i koden innan något skrevs: `HR_BLOCK`
+(`/^-{3,}$/`) och `QUOTE_PREFIX` (`/^>[ \t]?/`) i `proseFlow.ts`
+bekräftar att ett `---`-stycke blir en scenbrytning och ett
+`>`-prefix blir ett citatblock, båda live medan man skriver
+(`blockMarkupNeedsSync` i `proseDom.ts`). Hittade dessutom citatblock-
+beteendet som en helt odokumenterad bonus Mats inte ens nämnde.
+Bold/Italic/Underline bekräftades som ett medvetet val (markering +
+flytande verktygsfält eller Ctrl/Cmd+B/I/U), inte en live-konvertering
+som de andra två.
+
+Nytt kapitel `live-formatting` i kategorin Writing, placerat mellan
+Author voice och Smart quotes (både i `HANDBOOK_SECTION_IDS` och
+`HANDBOOK_SECTION_CATEGORY`), med fyra steg: fetstil/kursiv/
+understruket, scenbrytningar, citerade passager, och anfanget som
+automatiskt beteende. Korsreferens till det befintliga
+Smart-quotes-kapitlet i tipsen. Skrivet och översatt för hand på
+alla tre språk.
+
+`tsc --noEmit` rent, `npm run build` rent, 1281/1281 tester gröna.
+Verifierat live med Playwright: long-page-läget för Skrivtips (ingen
+Previous/Next-nav, 14 sektioner på en sida, klick i listan scrollar
+till rätt plats) och det nya kapitlet, på både engelska och svenska.
+
 **Ändringslogg v1.0.298 → v1.0.299 (2026-11-06): Tre till Writing-
 kapitel skrivna om efter Mats egen text.** Samma mönster som
 Darlings-omgången: Mats skickade färdiga, stramare formuleringar

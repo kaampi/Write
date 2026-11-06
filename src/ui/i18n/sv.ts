@@ -1852,6 +1852,29 @@ export const sv: Messages = {
           }
         ]
       },
+      "live-formatting": {
+        heading: "Formatering medan du skriver",
+        body: "Tre saker händer automatiskt medan du skriver — ingen av dem kräver en meny, och en av dem kräver ett verktygsfält istället.",
+        steps: [
+          {
+            heading: "Fet, kursiv, understruken",
+            body: "Markera text och klicka antingen på det flytande verktygsfältet som visas ovanför markeringen, eller använd Ctrl/Cmd+B, Ctrl/Cmd+I eller Ctrl/Cmd+U. Till skillnad från de andra två sakerna här är det här ett medvetet val — inget du skriver blir fetstilt eller kursivt av sig självt."
+          },
+          {
+            heading: "Scenbrytningar",
+            body: "Skriv tre eller fler bindestreck — ”---” — ensamma i ett eget stycke, så renderas det som en scenbrytning istället för bokstavliga streck så snart du avslutar raden. Vilket ornament som visas (en vanlig kort linje, eller en av fyra dekorativa stilar) ställs in en gång för hela manuset i Settings → Typography → Scene break."
+          },
+          {
+            heading: "Citerade passager",
+            body: "Börja ett stycke med ”> ” så renderas det som ett indraget block med en linje nerför sidan — ungefär som ett brev eller ett meddelande inuti berättelsen kan se ut. Själva ”>”-tecknet försvinner från vyn; bara texten visas."
+          },
+          {
+            heading: "Anfanget följer första stycket automatiskt",
+            body: "Om Settings → Typography → Drop cap är satt till något annat än Off får den öppnande bokstaven i det som för tillfället är kapitlets första stycke den förstorade behandlingen. Inget att skriva — det följer bara vilket stycke som råkar vara först."
+          }
+        ],
+        tip: "Har du redan text med raka citattecken någon annanstans ifrån? Se Smarta citattecken (Skriva) — samma sorts levande konvertering, med ett samlat ”Smarten quotes in whole manuscript” för allt som klistrats in eller importerats innan det här beteendet fanns."
+      },
       "smart-quotes": {
         heading: "Smarta citattecken",
         body: "Ett rakt \" du skriver i kapitelredigeraren blir automatiskt ett riktigt öppnande eller stängande kurvigt citattecken, beroende på vad som kommer precis innan — inget att tänka på, inget att slå på.",

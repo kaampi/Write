@@ -943,6 +943,29 @@ const handbookSections: Record<
       }
     ]
   },
+  "live-formatting": {
+    heading: "Formatting as you write",
+    body: "Three things happen automatically as you type — none of them need a menu, and one of them needs a toolbar instead.",
+    steps: [
+      {
+        heading: "Bold, italic, underline",
+        body: "Select text and either click the floating toolbar that appears above the selection, or use Ctrl/Cmd+B, Ctrl/Cmd+I, or Ctrl/Cmd+U. Unlike the other two behaviors here, this one is a deliberate action — nothing you type turns bold or italic on its own."
+      },
+      {
+        heading: "Scene breaks",
+        body: "Type three or more hyphens — \"---\" — alone on their own paragraph, and it renders as a scene break instead of literal dashes the moment you finish the line. Which ornament it shows (a plain short rule, or one of four decorative styles) is set once for the whole manuscript in Settings → Typography → Scene break."
+      },
+      {
+        heading: "Quoted passages",
+        body: "Start a paragraph with \"> \" and it renders as an indented block with a rule down the side — the way a letter or a message within the story might look. The \">\" itself disappears from the display; only the text shows."
+      },
+      {
+        heading: "The drop cap follows the first paragraph automatically",
+        body: "If Settings → Typography → Drop cap is set to anything but Off, the opening letter of whatever is currently the chapter's first paragraph gets the enlarged treatment. Nothing to type — it just follows which paragraph happens to be first."
+      }
+    ],
+    tip: "Already have text with straight quotes from somewhere else? See Smart quotes (Writing) — the same kind of live conversion, with a one-pass \"Smarten quotes in whole manuscript\" for anything pasted or imported in before this behavior existed."
+  },
   "smart-quotes": {
     heading: "Smart quotes",
     body: "A straight \" typed in the chapter editor becomes a real opening or closing curly quote automatically, based on what comes right before it — nothing to think about, nothing to switch on.",
