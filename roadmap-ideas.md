@@ -3631,6 +3631,63 @@ spaning.
 
 ---
 
+### 59. Computational narratology — statistisk textanalys helt utan AI
+
+Mats, efter ett resonemang om hur Guiden skulle kunna svara på fria
+frågor utan AI: "Vad kan vi säga om detta och är det något vi ska
+titta på för att kunna ge mer hjälp utan AI? ... computational
+narratology. Där använder man traditionell NLP, ordlistor och
+statistiska mätvärden. Man kan till exempel mäta tempo genom att
+titta på förhållandet mellan dialog och beskrivande text, spåra
+karaktärsnätverk genom att räkna hur ofta namn nämns tillsammans,
+eller plotta 'känslokurvor' genom sentimentlexikon (vilket exempelvis
+R-paketet Syuzhet gjorde redan för tio år sedan)."
+
+**Varför det är intressant specifikt för Write:** allt det här går
+att göra deterministiskt, lokalt och momentant — utan att en AI-modell
+ens behöver vara ansluten. Det skiljer sig kategoriskt från Analysera/
+Polish/Developmental analysis, som alla kräver en kopplad lokal
+modell. En statistisk analyslager skulle alltså vara tillgängligt
+redan för en helt ny användare som ännu inte satt upp Ollama/LM
+Studio — exakt den grupp som idag möts av en röd "The local server did
+not accept the browser"-banner och annars inte har några
+analysverktyg alls att tillgå.
+
+**Tre konkreta kandidater, olika tillförlitlighet:**
+- **Dialog/beskrivning-förhållande (tempo).** Robustast av alla —
+  bara en fråga om att räkna citattecken mot löptext, ingen tolkning
+  inblandad.
+- **Karaktärsnätverk (samförekomst av namn).** Kan återanvända Story
+  Bibles redan byggda alias-/undantagssystem för namnigenkänning
+  istället för att uppfinna det på nytt. Gör samma observation
+  Trådar-kapitlet redan beskriver göra för hand ("om en viktig
+  sidohandling plötsligt försvinner i tio kapitel blir det lättare att
+  upptäcka") automatisk.
+- **Känslokurvor via sentimentlexikon.** Svagast av de tre — lexikon-
+  baserad sentimentanalys är akademiskt kritiserad för att missa ironi,
+  underdrift och fri indirekt anföring, precis den typ av prosa
+  skönlitteratur ofta består av. Bör i så fall presenteras tydligt som
+  en ungefärlig, grov signal — aldrig som ett facit.
+
+**Två saker att väga in:**
+1. **Språkberoende.** Ordlistor, meningsgränser och vad som ens räknas
+   som "dialog" skiljer sig åt mellan svenska, norska och engelska —
+   samma typ av per-språk-grundningsarbete som Guide-översättningarna
+   i den här sessionen, fast i kodform.
+2. **Skala.** Det här är en egen funktionspelare vid sidan av Story
+   Bible och de AI-baserade granskningsverktygen, inte en liten
+   utökning av något befintligt.
+
+**Bedömning:** värt att titta vidare på. Börja i så fall med
+dialog/beskrivning-förhållandet och karaktärsnätverket — båda robusta
+och grundade i data som redan finns — och spara sentimentkurvan till
+sist (om alls), tydligt flaggad som ungefärlig. Inget byggbeslut än;
+ren spaning på Mats initiativ, sparad här så den inte glöms bort.
+
+Inte påbörjad.
+
+---
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**
