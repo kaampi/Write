@@ -3736,6 +3736,37 @@ textutdrag i en separat rapportvy (`ProofreadCard.tsx`), ingen nål i
 själva kapitlet. Att återanvända Platshållar-mekaniken för AI-
 genererade fynd kopplar ihop två saker vi redan har byggt separat.
 
+**Uppdatering (Mats, skärmdump av egen editor):** "Vi har rätt bra
+med plats att visa kommentarer utanför manuskriptet. Tänk att man kan
+markera en plats eller ett ord an ge en kommentar (lite som PDF
+kommentarer)". En konkretare, bättre mekanik än nål-i-texten:
+marginal-kommentarer i PDF/Google Docs-stil, förankrade vid markerad
+text men renderade utanför själva manusspalten. Bekräftat i koden att
+ytan är helt ledig idag — manusspalten har en `max-width` beräknad
+från Settings → Typography → Page size/margin
+(`ProseCanvas.tsx`, rad ~674) och centreras i en bredare container;
+resten är ren bakgrund, inget reserverat. Fördelar över dagens nål:
+ambient synlighet (ser vilka passager som har kommentarer utan att
+klicka på varje en), mer plats att läsa kommentaren direkt utan
+popup, och ett redan bekant mönster från Word/Docs/PDF. Knyter ihop
+tre saker:
+1. **Platshållare** — författarens egna flaggor skulle kunna rendera
+   i marginalen istället för som nål-i-texten.
+2. **AI-genererade fynd** (Proofread/Continuity) — skulle kunna visas
+   förankrade direkt vid passagen, inte bara i en separat rapportvy.
+3. **Fråga om en passage** — idag ett engångssvar som försvinner
+   ("Nothing is changed or saved"). Skulle kunna få en valfri "spara
+   som marginalkommentar"-knapp istället för att bara vara en popup.
+
+Två saker att tänka igenom innan det blir en byggplan: vänster eller
+höger marginal (PDF/Docs använder oftast bara en sida konsekvent,
+troligen höger efter konventionen, snarare än att fylla båda sidorna
+symmetriskt), och vad som händer på smala skärmar där marginalerna
+krymper bort vid samma typ av responsiva brytpunkt som redan finns på
+flera ställen i appen (t.ex. Guide-modalens 48rem) — behöver ett
+fallback, typ att kommentarerna faller tillbaka till nålar eller en
+bottenpanel där, likt hur Docs gör på mobil.
+
 **4. En enda prioriterad åtgärdslista, tvärs över flera analyser.**
 Deras "Revision list, in order of priority" blandar struktur, pacing,
 redundanta kapitel och en pekare till continuity-rapporten i EN
@@ -3748,12 +3779,13 @@ redan har.
 **Bedömning:** idé 1 (fix-förslag för fler steg) och idé 2 (trait-
 motsägelser) är de mest välgrundade och minst riskfyllda att börja
 med — båda är förlängningar av mönster som redan finns i koden, inte
-nya system. Idé 3 (ankrade anteckningar) är arkitektoniskt enkel men
-berör fler ställen (Proofread-flaggor behöver kunna peka på en
-textposition, inte bara ett kapitel-id). Idé 4 (enhetlig
-prioriteringslista) är den mest öppna och skulle behöva mer
-designtanke innan den är byggbar. Inget byggbeslut än; sparad här på
-Mats initiativ.
+nya system. Idé 3 (marginal-kommentarer) är visuellt den mest
+lovande efter Mats egen uppföljning, men berör fler ställen
+(Proofread-flaggor behöver kunna peka på en textposition, inte bara
+ett kapitel-id, plus ett nytt layout-lager och ett fallback för smala
+skärmar). Idé 4 (enhetlig prioriteringslista) är den mest öppna och
+skulle behöva mer designtanke innan den är byggbar. Inget byggbeslut
+än; sparad här på Mats initiativ.
 
 Inte påbörjad.
 
