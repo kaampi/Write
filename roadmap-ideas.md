@@ -3688,6 +3688,77 @@ Inte påbörjad.
 
 ---
 
+### 60. Fyra idéer från The Author Desks sample report (människodriven granskningstjänst, AI bara för continuity)
+
+Mats delade en skärmbild av en konkurrents (The Author Desk) exempel-
+rapport: "Jag delar en skärmbild på deras Review app. Kanske finns det
+något vi kan ta till oss från den". Tjänsten är en människoskriven
+manusbedömning ("The assessment itself is read, written and signed
+off by a person") där AI bara används för ett specifikt jobb:
+continuity-kontroll över hela manuset. Affärsmodellen (betald
+människogranskning) är inte relevant för Write, men **formatet** på
+deras continuity-rapport och revisionslista gav fyra konkreta,
+kodgrundade idéer.
+
+**1. Konkreta fix-förslag, inte bara "det här stämmer inte".**
+Deras rapport ger alltid ett konkret alternativ: "Change chapter 7 to
+'fourteen years ago', or move the fire to 2012." Vårt Proofread har
+redan exakt det mönstret — men bara för grammatik-steget
+(`quote`/`observation`/**`suggestion`** i `src/core/proofread.ts`,
+rad ~201). Continuity-, Scenes- och Setups & payoffs-stegen har bara
+`observation`, inget `suggestion`-fält. Att lägga till samma fält där
+är en liten, redan beprövad utökning av prompten — ingen ny
+arkitektur.
+
+**2. Fler typer av motsägelser, inte bara plats.** Deras exempel:
+ögonfärg som skiftar (grå→brun), ett föremål kastat i floden men
+tillbaka i fickan, en "måndagsmarknad" dagen efter en tisdagskväll.
+Vår Continuity-kontroll är idag hårdkodat begränsad till `core.place`
+(`manuscriptPlaceChains` i `proofread.ts` filtrerar explicit på det
+predikatet). Det underliggande kedje-maskineriet
+(`chainsWithHistory`) är redan predikat-agnostiskt, och vi har redan
+ett `core.trait`-predikat (`predicates.ts`) som skulle täcka exakt
+ögonfärg-fallet — en naturlig, välgrundad förlängning. Tidslinje-
+matematik ("elva år sedan" mot ett angivet årtal) och veckodagslogik
+är klurigare — kräver fritext-resonemang om datum, inte bara
+faktakedjor — intressanta men inte lika enkla som trait-utökningen.
+Föremåls-permanens (kastad i floden → tillbaka i fickan) ligger
+mellan de två: samma familj av idé som plats-kedjor, men behöver
+troligen ett nytt begrepp för "tillstånd" utöver plats.
+
+**3. Anteckningar direkt i manuset, inte bara en separat rapport.**
+Deras "Annotated manuscript"-sektion visar en marginalanteckning
+exakt vid det stycke den gäller. Vi har redan precis den UI-
+mekaniken — Platshållare (en nål förankrad vid en exakt textposition
+i kapitlet, klicka för att läsa/redigera/markera löst). Idag används
+den bara av författaren själv; Proofreads fynd visar bara ett
+textutdrag i en separat rapportvy (`ProofreadCard.tsx`), ingen nål i
+själva kapitlet. Att återanvända Platshållar-mekaniken för AI-
+genererade fynd kopplar ihop två saker vi redan har byggt separat.
+
+**4. En enda prioriterad åtgärdslista, tvärs över flera analyser.**
+Deras "Revision list, in order of priority" blandar struktur, pacing,
+redundanta kapitel och en pekare till continuity-rapporten i EN
+rangordnad lista. Vi har inget sånt idag — Developmental analysis,
+Continuity och Proofread lever som separata rapporter utan
+inbördes prioritering. Mest öppen av de fyra idéerna; inget uppenbart
+kodfäste att utgå från, snarare ett nytt syntes-lager ovanpå det vi
+redan har.
+
+**Bedömning:** idé 1 (fix-förslag för fler steg) och idé 2 (trait-
+motsägelser) är de mest välgrundade och minst riskfyllda att börja
+med — båda är förlängningar av mönster som redan finns i koden, inte
+nya system. Idé 3 (ankrade anteckningar) är arkitektoniskt enkel men
+berör fler ställen (Proofread-flaggor behöver kunna peka på en
+textposition, inte bara ett kapitel-id). Idé 4 (enhetlig
+prioriteringslista) är den mest öppna och skulle behöva mer
+designtanke innan den är byggbar. Inget byggbeslut än; sparad här på
+Mats initiativ.
+
+Inte påbörjad.
+
+---
+
 ## Medvetet nedprioriterat just nu (inte avvisat)
 
 - **Mer polish på illustrationsbiblioteket och Publish-exporterna.**
