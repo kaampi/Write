@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { isTauri } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   createBook,
   createChapter,
@@ -127,6 +129,7 @@ import {
 import { readContextWindow, writeContextWindow } from "@llm/contextWindow";
 import { withReasoningHeadroom } from "@llm/tokenBudget";
 import { BookNotFoundError, BookRepository } from "@persistence/Repository";
+import { BookSaveQueue, type SaveState } from "@persistence/BookSaveQueue";
 import { coreBookSink, coreSnapshotOutbox, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
 import type { CoreBookRevision } from "@core/coreRevisionRestore";
 import { persistCoreImport, persistCoreRestore } from "@core/coreRestoreWorkflow";
@@ -134,8 +137,11 @@ import { corePrivateRevision, corePrivateVersions } from "@persistence/CoreDeskt
 import { SeriesRepository } from "@persistence/SeriesRepository";
 import {
   ManuscriptBackupError,
+  manuscriptBackupFilename,
+  packManuscriptBackup,
   parseManuscriptBackup
 } from "@core/manuscriptBackup";
+import { downloadJson } from "./downloadJson";
 import { forgetLastJsonBackup, recordLastJsonBackup } from "./jsonBackupStamp";
 import { estimateTokens, type PromptDebugEntry, type PromptDebugMessage, type PromptOperation, type PromptDebugTarget } from "./promptDebug";
 import { BookStoreContext, type BookStoreValue, type Busy, type PolishDraft } from "./useBookStore";
@@ -264,6 +270,25 @@ export function ollamaHint(error: unknown): string {
  * cold model load, short of "may as well be broken."
  */
 const LOCAL_MODEL_TIMEOUT_MS = 120_000;
+
+/** How long the desktop window waits for the last save before asking the author whether to close anyway. */
+const CLOSE_FLUSH_DEADLINE_MS = 5_000;
+
+function withDeadline<T>(work: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const id = window.setTimeout(() => reject(new Error("Timed out waiting for the save")), ms);
+    work.then(
+      (value) => {
+        window.clearTimeout(id);
+        resolve(value);
+      },
+      (error) => {
+        window.clearTimeout(id);
+        reject(error);
+      }
+    );
+  });
+}
 
 function withRequestTimeout(abort: AbortController): { timedOut: () => boolean; clear: () => void } {
   let timedOut = false;
@@ -417,6 +442,40 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const proofreadLock = useRef(false);
   const developmentalLock = useRef(false);
   const saveTimer = useRef<number | null>(null);
+  /**
+   * The manuscript state `saveTimer` is waiting to write. Kept separately
+   * from `bookRef` so a flush writes exactly what the debounce was holding,
+   * even if the author has opened a different manuscript inside the 400 ms
+   * window.
+   */
+  const pendingSave = useRef<Book | null>(null);
+  /**
+   * Whether the newest text is on disk. "failed" is the one the author must
+   * see (SaveFailedBanner): before this existed a rejected save was simply
+   * discarded and the editor went on showing text that was no longer being
+   * written anywhere.
+   */
+  const [saveState, setSaveState] = useState<SaveState>("saved");
+  const saveQueue = useMemo(
+    () =>
+      new BookSaveQueue((next) => repo.save(next), {
+        // An edit still waiting on its debounce is not on disk yet, so an
+        // older write finishing must not report "saved" over it.
+        onState: (state) => setSaveState(state === "saved" && saveTimer.current !== null ? "saving" : state)
+      }),
+    [repo]
+  );
+  useEffect(() => () => saveQueue.dispose(), [saveQueue]);
+  /** Cancels the debounce and hands back the manuscript it was holding, if any. */
+  const takePendingSave = useCallback((): Book | null => {
+    if (saveTimer.current !== null) {
+      window.clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+    }
+    const waiting = pendingSave.current;
+    pendingSave.current = null;
+    return waiting;
+  }, []);
   const writingPrimerRef = useRef(writingPrimer);
   const historyLimitRef = useRef(historyLimit);
   const engineRef = useRef(engine);
@@ -496,12 +555,19 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     return { ...b, facts: mergeInheritedFacts(b.facts, seriesFactsRef.current) };
   }
 
+  /**
+   * Every write of a manuscript goes through `saveQueue` (one at a time,
+   * newest state wins, a failure is held and retried — see BookSaveQueue).
+   * Rejects when the write failed, same as the bare `repo.save` it replaced;
+   * callers that don't await it must `.catch()` — the failure itself is
+   * still reported, through `saveState`.
+   */
   const persist = useCallback(
     async (next: Book) => {
-      await repo.save(next);
+      await saveQueue.enqueue(next);
       setSummaries(await repo.list());
     },
-    [repo]
+    [repo, saveQueue]
   );
 
   const refresh = useCallback(async () => {
@@ -562,14 +628,110 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   }, [engine, baseUrl]);
 
   const flushSave = useCallback(async (next: Book) => {
-    if (saveTimer.current !== null) {
-      window.clearTimeout(saveTimer.current);
-      saveTimer.current = null;
-    }
+    const waiting = takePendingSave();
+    // `next` supersedes a debounced edit of the same manuscript. One held
+    // for a different manuscript still has to be written, not dropped.
+    if (waiting && waiting.id !== next.id) void persist(waiting).catch(() => {});
     bookRef.current = next;
     setBook(next);
     await persist(next);
-  }, [persist]);
+  }, [persist, takePendingSave]);
+
+  /**
+   * Writes everything not yet on disk: the debounced edit, anything queued,
+   * and anything held after a failed write. Rejects if some of it still
+   * cannot be written. Used when the app is about to go away.
+   */
+  const flushPendingSaves = useCallback(async () => {
+    const waiting = takePendingSave();
+    if (waiting) void saveQueue.enqueue(waiting).catch(() => {});
+    await saveQueue.flush();
+  }, [saveQueue, takePendingSave]);
+
+  const retrySave = useCallback(() => {
+    saveQueue.retry();
+  }, [saveQueue]);
+
+  /**
+   * The way out when saving keeps failing: hand the author the unsaved
+   * manuscript as a backup file. Deliberately skips schema validation
+   * (`packManuscriptBackup` only wraps the book) — if validation is what's
+   * rejecting the save, the text still has to be gettable.
+   */
+  const downloadUnsavedBackup = useCallback(async () => {
+    const open = bookRef.current;
+    const failed = saveQueue.failedBooks();
+    const targets = failed.length > 0 ? failed : open ? [open] : [];
+    for (const held of targets) {
+      // The open manuscript in memory is at least as new as the copy held for retry.
+      const target = open && open.id === held.id ? open : held;
+      const packed = packManuscriptBackup(target);
+      await downloadJson(manuscriptBackupFilename(target, packed.exportedAt), packed);
+    }
+  }, [saveQueue]);
+
+  /**
+   * The debounce in `patchBook` leaves a 400 ms window where the newest
+   * keystrokes exist only in memory, and nothing used to close that window
+   * when the app went away. Hiding the tab or window writes immediately;
+   * leaving the page while something is unwritten starts the write and
+   * asks the browser for its "leave site?" prompt, which holds the page
+   * open long enough for it to finish.
+   */
+  useEffect(() => {
+    const flushQuietly = () => {
+      void flushPendingSaves().catch(() => {});
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flushQuietly();
+    };
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (saveTimer.current === null && !saveQueue.hasUnsaved()) return;
+      flushQuietly();
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("pagehide", flushQuietly);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("pagehide", flushQuietly);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [flushPendingSaves, saveQueue]);
+
+  /**
+   * Desktop app: closing the window destroys the webview, so the last save
+   * has to finish first. Tauri waits for this handler and then closes the
+   * window itself unless `preventDefault()` was called (needs
+   * `core:window:allow-destroy` in capabilities/default.json). If the save
+   * fails or takes too long the author chooses whether to close anyway.
+   */
+  useEffect(() => {
+    if (!isTauri()) return;
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    void getCurrentWindow()
+      .onCloseRequested(async (event) => {
+        try {
+          await withDeadline(flushPendingSaves(), CLOSE_FLUSH_DEADLINE_MS);
+        } catch {
+          if (!window.confirm(getMessages().app.closeUnsavedConfirm)) event.preventDefault();
+        }
+      })
+      .then((stop) => {
+        if (disposed) stop();
+        else unlisten = stop;
+      })
+      .catch(() => {
+        /* Listener could not be registered — closing behaves as it did before. */
+      });
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [flushPendingSaves]);
 
   const checkpointBook = useCallback(async () => {
     const current = bookRef.current;
@@ -756,13 +918,19 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       });
       bookRef.current = next;
       setBook(next);
-      if (saveTimer.current !== null) window.clearTimeout(saveTimer.current);
+      setSaveState((state) => (state === "failed" ? state : "saving"));
+      const waiting = takePendingSave();
+      if (waiting && waiting.id !== next.id) void persist(waiting).catch(() => {});
+      pendingSave.current = next;
       saveTimer.current = window.setTimeout(() => {
-        void persist(next);
         saveTimer.current = null;
+        pendingSave.current = null;
+        // Not swallowed: on failure the queue holds this manuscript, retries
+        // it, and reports "failed" through saveState.
+        void persist(next).catch(() => {});
       }, 400);
     },
-    [persist]
+    [persist, takePendingSave]
   );
 
   /**
@@ -836,12 +1004,10 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     abortRef.current?.abort();
     abortRef.current = null;
     setBusy(null);
-    if (saveTimer.current !== null) {
-      window.clearTimeout(saveTimer.current);
-      saveTimer.current = null;
-    }
+    const waiting = takePendingSave();
     const current = bookRef.current;
-    if (current) void persist(current);
+    if (waiting && waiting.id !== current?.id) void persist(waiting).catch(() => {});
+    if (current) void persist(current).catch(() => {});
     withViewTransition(() => {
       setBook(null);
       setChapterIdState(null);
@@ -851,7 +1017,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     });
     localStorage.removeItem(LAST_BOOK_KEY);
     void refresh();
-  }, [persist, refresh]);
+  }, [persist, refresh, takePendingSave]);
 
   /**
    * A book added to an existing series (Mats, 2026-11-03: "Kanske ska bok 2
@@ -1012,13 +1178,12 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       }
       if (exists && !window.confirm(format(getMessages().home.replaceConfirm, { title: backup.book.title }))) return;
       const current = bookRef.current;
-      if (current && current.id !== backup.book.id) {
-        if (saveTimer.current !== null) {
-          window.clearTimeout(saveTimer.current);
-          saveTimer.current = null;
-        }
-        await persist(current);
-      }
+      const waiting = takePendingSave();
+      if (waiting && waiting.id !== backup.book.id && waiting.id !== current?.id) void persist(waiting).catch(() => {});
+      if (current && current.id !== backup.book.id) await persist(current);
+      // The author just confirmed replacing this manuscript. Any unwritten
+      // or retry-held state of it must not land after the import and undo it.
+      await saveQueue.discard(backup.book.id);
       abortRef.current?.abort();
       abortRef.current = null;
       setBusy(null);
@@ -1036,7 +1201,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       recordLastJsonBackup(backup.book.id, new Date().toISOString());
       setError(null);
     },
-    [persist, repo]
+    [persist, repo, saveQueue, takePendingSave]
   );
 
   /**
@@ -1079,7 +1244,13 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
 
   const deleteBook = useCallback(
     async (id: string) => {
+      // A debounced or retry-held write of this manuscript would bring it
+      // straight back after the delete.
+      const waiting = takePendingSave();
+      if (waiting && waiting.id !== id) void persist(waiting).catch(() => {});
+      await saveQueue.discard(id);
       await repo.delete(id);
+      setSaveState(saveQueue.currentState());
       forgetLastJsonBackup(id);
       localStorage.removeItem(lastPositionKey(id));
       if (bookRef.current?.id === id) {
@@ -1093,7 +1264,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       }
       await refresh();
     },
-    [refresh, repo]
+    [persist, refresh, repo, saveQueue, takePendingSave]
   );
 
   const setModel = useCallback((name: string) => {
@@ -3674,6 +3845,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     importLoreProgress,
     seriesFacts,
     seriesMissing,
+    saveState,
+    retrySave,
+    downloadUnsavedBackup,
     refresh,
     openBook,
     closeBook,

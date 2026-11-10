@@ -26,7 +26,11 @@ export const nb: Messages = {
   app: {
     crash: "Appen støtte på en feil.",
     tryAgain: "Prøv på nytt",
-    missingRoot: "Mangler elementet #root"
+    missingRoot: "Mangler elementet #root",
+    saveFailed: "De siste endringene dine kunne ikke lagres. kaampi Write fortsetter å prøve — ikke lukk appen før denne meldingen er borte.",
+    saveRetry: "Prøv på nytt nå",
+    saveDownloadBackup: "Last ned en sikkerhetskopi",
+    closeUnsavedConfirm: "De siste endringene dine kunne ikke lagres. Lukke likevel og miste dem?"
   },
   chrome: {
     language: "Språk",

@@ -12,6 +12,7 @@ import { Editor } from "./Editor";
 import { Home } from "./Home";
 import { SeriesWorkspace } from "./SeriesWorkspace";
 import { HandbookPanel } from "./HandbookPanel";
+import { SaveFailedBanner } from "./SaveFailedBanner";
 import { LocaleProvider, getMessages } from "./i18n";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { message: string | null; retry: number }> {
@@ -73,6 +74,7 @@ function Shell() {
   return (
     <div className="app-shell">
       <AppTopBar />
+      <SaveFailedBanner />
       {book ? <Editor /> : seriesId ? <SeriesWorkspace /> : <Home />}
       {handbookOpen ? <HandbookPanel onClose={closeHandbook} /> : null}
     </div>

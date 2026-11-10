@@ -26,7 +26,11 @@ export const sv: Messages = {
   app: {
     crash: "Appen stötte på ett fel.",
     tryAgain: "Försök igen",
-    missingRoot: "Saknar elementet #root"
+    missingRoot: "Saknar elementet #root",
+    saveFailed: "Dina senaste ändringar kunde inte sparas. kaampi Write fortsätter försöka — stäng inte appen förrän det här meddelandet är borta.",
+    saveRetry: "Försök igen nu",
+    saveDownloadBackup: "Ladda ner en säkerhetskopia",
+    closeUnsavedConfirm: "Dina senaste ändringar kunde inte sparas. Stänga ändå och förlora dem?"
   },
   chrome: {
     language: "Språk",

@@ -17,6 +17,7 @@ import type { TextSpan } from "@core/textSpan";
 import type { PromptDebugEntry } from "./promptDebug";
 import type { LlmEngine } from "@llm/provider";
 import type { CoreBookRevision } from "@core/coreRevisionRestore";
+import type { SaveState } from "@persistence/BookSaveQueue";
 
 export type Busy =
   | "draft"
@@ -89,6 +90,12 @@ export type BookStoreValue = {
   seriesFacts: NarrativeFact[];
   /** True when `book.series_id` is set but that series couldn't be read (deleted, or never synced here). */
   seriesMissing: boolean;
+  /** Whether the newest text is on disk. "failed" means a write was rejected and is being retried — shown by SaveFailedBanner. */
+  saveState: SaveState;
+  /** Try the failed write again now instead of waiting for the automatic retry. */
+  retrySave: () => void;
+  /** Downloads the manuscript(s) that could not be saved as backup files. */
+  downloadUnsavedBackup: () => Promise<void>;
   refresh: () => Promise<void>;
   openBook: (id: string) => Promise<void>;
   closeBook: () => void;

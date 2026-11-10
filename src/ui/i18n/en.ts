@@ -1465,7 +1465,11 @@ export const en = {
   app: {
     crash: "The app hit an error.",
     tryAgain: "Try again",
-    missingRoot: "Missing #root element"
+    missingRoot: "Missing #root element",
+    saveFailed: "Your latest changes could not be saved. kaampi Write keeps trying — don’t close the app until this message is gone.",
+    saveRetry: "Try again now",
+    saveDownloadBackup: "Download a backup",
+    closeUnsavedConfirm: "Your latest changes could not be saved. Close anyway and lose them?"
   },
   chrome: {
     language: "Language",

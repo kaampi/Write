@@ -2838,6 +2838,21 @@ button:disabled {
   flex: 0 0 auto;
 }
 
+/* "Your latest changes could not be saved" (SaveFailedBanner.tsx) — the one banner that must not be missed, so its actions read as links in the banner's own text color rather than the dim default .text-button gray. */
+.save-failed-banner {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  font-weight: 600;
+}
+
+.save-failed-banner .text-button {
+  color: inherit;
+  flex: 0 0 auto;
+  text-decoration: underline;
+}
+
 .editor-body {
   display: grid;
   grid-template-columns: var(--rail-left-w, 15rem) minmax(0, 1fr) var(--rail-right-w, 28rem);

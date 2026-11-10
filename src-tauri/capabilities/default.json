@@ -7,6 +7,7 @@
   ],
   "permissions": [
     "core:default",
+    "core:window:allow-destroy",
     {
       "identifier": "http:default",
       "allow": [{ "url": "http://*:*" }]
