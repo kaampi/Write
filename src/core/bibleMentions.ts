@@ -1,7 +1,7 @@
 import { sortedChapters, type Book } from "./BookSchema";
 import { snippetAround } from "./findReplace";
 import { entityNameTokens } from "./proseStats";
-import { excludedSpans, overlapsAny, trackingFor } from "./entityTracking";
+import { excludedSpans, overlapsAny, trackingFor, type EntityTracking } from "./entityTracking";
 
 export type MentionHit = {
   chapterId: string;
@@ -45,6 +45,17 @@ function matchesFor(text: string, pattern: RegExp): { start: number; end: number
     if (start === undefined || !match[0]) return [];
     return [{ start, end: start + match[0].length }];
   });
+}
+
+export function trackedMentionMatcher(label: string, tracking: EntityTracking) {
+  const pattern = mentionPattern(label, tracking.aliases);
+  return (text: string) => {
+    if (!pattern) return [];
+    const matches = matchesFor(text, pattern);
+    if (matches.length === 0 || tracking.exclusions.length === 0) return matches;
+    const excluded = excludedSpans(text, tracking.exclusions);
+    return matches.filter((match) => !overlapsAny(match, excluded));
+  };
 }
 
 export type NameHit = { start: number; end: number; entityRef: string; entityLabel: string };
@@ -91,15 +102,10 @@ export function findNameHitsInText(
  * later step.
  */
 export function mentionsForEntity(book: Book, entityRef: string, entityLabel: string): MentionHit[] {
-  const tracking = trackingFor(book.entity_tracking, entityRef);
-  const pattern = mentionPattern(entityLabel, tracking.aliases);
-  if (!pattern) return [];
+  const findMentions = trackedMentionMatcher(entityLabel, trackingFor(book.entity_tracking, entityRef));
   const hits: MentionHit[] = [];
   for (const chapter of sortedChapters(book)) {
-    const allMatches = matchesFor(chapter.prose, pattern);
-    if (allMatches.length === 0) continue;
-    const excluded = tracking.exclusions.length > 0 ? excludedSpans(chapter.prose, tracking.exclusions) : [];
-    const matches = excluded.length > 0 ? allMatches.filter((match) => !overlapsAny(match, excluded)) : allMatches;
+    const matches = findMentions(chapter.prose);
     if (matches.length === 0) continue;
     hits.push({
       chapterId: chapter.id,

@@ -137,6 +137,8 @@ import { DevelopmentalSetupCard } from "./DevelopmentalSetupCard";
 import { ProgressCard } from "./ProgressCard";
 import { PromptInspectorCard } from "./PromptInspector";
 import type { FindOccurrence } from "@core/findReplace";
+import type { ManuscriptPassage } from "@core/manuscriptReport";
+import type { ManuscriptStatsView } from "./ManuscriptStatsReport";
 import { count, format, STORE_ERROR, translateError, type Messages, useLocale } from "./i18n";
 import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 
@@ -700,6 +702,9 @@ export function Editor() {
   const leftRailExpanded = leftRailPinned || leftRailHovering;
   const rightRailExpanded = rightRailPinned || rightRailHovering;
   const [statsOpen, setStatsOpen] = useState(false);
+  const [statsManuscript, setStatsManuscript] = useState(false);
+  const [statsReportView, setStatsReportView] = useState<ManuscriptStatsView>("dialogue");
+  const [statsCharacterRef, setStatsCharacterRef] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
   const [criticsSetupOpen, setCriticsSetupOpen] = useState(false);
   const [criticNotesOpen, setCriticNotesOpen] = useState(false);
@@ -738,6 +743,7 @@ export function Editor() {
   const [findLaunch, setFindLaunch] = useState<FindLaunch>({});
   const [findKey, setFindKey] = useState(0);
   const [findHighlight, setFindHighlight] = useState<FindHighlight | null>(null);
+  const [statsPassage, setStatsPassage] = useState<ManuscriptPassage>();
   const [lastJsonBackupAt, setLastJsonBackupAt] = useState(() => readLastJsonBackup(book.id));
   const [aiFree, setAiFree] = useState(readAiFreeMode);
   useEffect(() => subscribeAiFreeMode(setAiFree), []);
@@ -857,7 +863,13 @@ export function Editor() {
           findFlags: findHighlight.flags,
           ...(findHighlight.activeStart !== undefined ? { findActiveStart: findHighlight.activeStart } : {})
         }
-      : {};
+      : !findOpen && !onBrainstorm && !onSynopsis && statsPassage?.chapterId === chapter.id
+        ? {
+            findNeedle: statsPassage.text,
+            findFlags: { matchCase: true, wholeWord: true },
+            findActiveStart: statsPassage.start
+          }
+        : {};
 
   const partnerBusy = busy === "extend" || busy === "elaborate" || busy === "instruct" || busy === "brainstorm-chat";
   const jsonBackupDue = manuscriptNeedsJsonBackup(book.updated_at, lastJsonBackupAt);
@@ -2048,7 +2060,10 @@ export function Editor() {
             </div>
             <ProseCanvas
               value={chapter.prose}
-              onChange={(next) => void store.patchBook((current) => updateChapter(current, chapter.id, { prose: next }))}
+              onChange={(next) => {
+                setStatsPassage(undefined);
+                void store.patchBook((current) => updateChapter(current, chapter.id, { prose: next }));
+              }}
               formatting={chapter.formatting ?? []}
               onFormatChange={(next) => void store.patchBook((current) => updateChapter(current, chapter.id, { formatting: next }))}
               onToggleFormat={(span, style) =>
@@ -2369,6 +2384,21 @@ export function Editor() {
           onSuggestSplit={(sentence, signal) => store.suggestSentenceSplit(sentence, signal)}
           onSuggestBreak={(paragraph, signal) => store.suggestParagraphBreak(paragraph, signal)}
           onFindPhrase={findPhrase}
+          book={book}
+          characterRef={statsCharacterRef}
+          onSelectCharacter={setStatsCharacterRef}
+          showManuscript={statsManuscript}
+          onChangeView={setStatsManuscript}
+          reportView={statsReportView}
+          onChangeReportView={setStatsReportView}
+          onOpenChapter={(id, passage) => {
+            setStatsOpen(false);
+            setFindOpen(false);
+            setFindHighlight(null);
+            setStatsPassage(passage);
+            setBoardOpen(false);
+            store.setChapterId(id);
+          }}
           {...(onBrainstorm || onSynopsis ? {} : { craft: resolveCraft(book, chapter) })}
           {...(activeReaderAge !== undefined ? { readerAge: activeReaderAge } : {})}
           cast={characterCast(book.facts, book.entity_kinds, book.profiles)}
