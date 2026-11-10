@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.302] - 2026-11-10
+
+### Added
+- Proofread's "Continuity" stage now also flags contradicting character/object traits — e.g. one chapter says a character is left-handed, a later one says right-handed — with a suggested fix, computed instantly with no AI call. It fires alongside the existing (AI-based) place-contradiction check, in the same stage.
+
 ## [1.0.301] - 2026-11-06
 
 ### Changed

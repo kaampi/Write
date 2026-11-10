@@ -3787,7 +3787,24 @@ skärmar). Idé 4 (enhetlig prioriteringslista) är den mest öppna och
 skulle behöva mer designtanke innan den är byggbar. Inget byggbeslut
 än; sparad här på Mats initiativ.
 
-Inte påbörjad.
+**Idé 2 ✅ byggd (v1.0.302), helt utan AI.** Mats: "Koda ide 2." En
+ny `manuscriptTraitContradictions(book)` i `proofread.ts` hittar par
+av levande (låsta, icke-supersederade) `core.trait`-fakta för samma
+entitet som delar minst ett meningsbärande ord men ändå säger emot
+varandra ("left-handed" vs "right-handed") — återanvänder
+`ConsistencyGate.ts`s egen `isPossibleEnrichment`/`normalizeValue`,
+samma tröskel som redan avgör nya faktas öde. Eftersom en
+`core.trait`-fakta aldrig ändras tyst (bara via explicit
+`superseded_by`, se NarrativeFact.ts), är två motstridiga levande
+fakta alltid ett misstag — inget AI-omdöme om rimlighet behövs, till
+skillnad från plats. Flaggan dyker upp direkt i Continuity-steget,
+vid sidan av det befintliga AI-baserade platskontroll-anropet, och
+fyller — till skillnad från dagens plats-flaggor — även i
+`suggestion` med en mallbaserad konkret åtgärd. Delat-ord-kravet
+finns specifikt för att INTE flagga två olika, orelaterade drag på
+samma entitet (normalt och vanligt, se bibleHistory.ts) som en
+motsägelse. Idé 1, 3 och 4 kvarstår inte påbörjade — "Bygg inte 59
+eller 60 innan jag säger till" gäller fortfarande för dem.
 
 ---
 

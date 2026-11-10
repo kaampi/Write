@@ -2,13 +2,15 @@ import type { Book, Chapter } from "./BookSchema";
 import { POV_LABELS, TENSE_LABELS, resolveCraft, summarizeCraft } from "./craft";
 import { recoverJsonObject } from "./extractFacts";
 import { formatBibleForPrompt, resolveVoice } from "./generateProse";
-import { newId, nowIso } from "./ids";
+import { newId, nowIso, normalizeValue } from "./ids";
 import { analyzeProse, entityNameTokens } from "./proseStats";
 import { tallyRareWords } from "./rareWords";
 import { formatReaderForReview, kidlitReader, readerTuning, resolveReader } from "./reader";
 import { splitFlowParagraphs } from "./proseFlow";
 import { entityLabels } from "./bibleGroups";
+import { lockedFacts } from "./NarrativeFact";
 import { bookFactChains, chainsWithHistory } from "./bibleHistory";
+import { isPossibleEnrichment, meaningfulTokens } from "./ConsistencyGate";
 import { timelineEntries } from "./timeline";
 import {
   ProofreadFlagSchema,
@@ -530,6 +532,66 @@ export function manuscriptPlaceChains(book: Book): ContinuityChain[] {
     if (entries.length > 1) result.push({ entityRef: head.entity_ref, entityLabel: head.entity_label, entries });
   }
   return result;
+}
+
+/**
+ * Pairs of locked `core.trait` facts for the same entity that share a
+ * meaningful word (so they read as the same specific attribute — "left-
+ * handed" vs "right-handed") yet neither match nor look like the same
+ * trait restated with more detail (reuses ConsistencyGate's own
+ * `isPossibleEnrichment` bar, the same test already trusted when a new
+ * fact is proposed). An entity normally carries several unrelated trait
+ * facts at once (see bibleHistory.ts) — "left-handed" and "quick temper"
+ * are not a contradiction — so the shared-word requirement is what tells
+ * a real conflict apart from two different traits coexisting; it will
+ * miss a contradiction phrased with no shared vocabulary ("shy" vs
+ * "confident"), which is the conservative, false-alarm-averse trade-off.
+ * Unlike `core.place`, a trait has no legitimate silent change outside an
+ * explicit supersession (see NarrativeFact.ts) — so once two live facts
+ * clear that bar, this is always a mistake, never a judgment call, and
+ * needs no AI pass to flag.
+ */
+export function manuscriptTraitContradictions(book: Book): Omit<ProofreadFlag, "id" | "stage">[] {
+  const storyTimeRank = new Map(timelineEntries(book).map((entry) => [entry.chapterId, entry]));
+  const traitFacts = lockedFacts(book.facts).filter((fact) => fact.predicate === "core.trait" && fact.chapter_id);
+  const byEntity = new Map<string, typeof traitFacts>();
+  for (const fact of traitFacts) {
+    const bucket = byEntity.get(fact.entity_ref);
+    if (bucket) bucket.push(fact);
+    else byEntity.set(fact.entity_ref, [fact]);
+  }
+  const items: (Omit<ProofreadFlag, "id" | "stage"> & { rank: number })[] = [];
+  for (const facts of byEntity.values()) {
+    for (let i = 0; i < facts.length; i += 1) {
+      for (let j = i + 1; j < facts.length; j += 1) {
+        const left = facts[i];
+        const right = facts[j];
+        if (!left || !right) continue;
+        if (normalizeValue(left.value) === normalizeValue(right.value)) continue;
+        if (isPossibleEnrichment(left.value, right.value)) continue;
+        const sharesWord = [...meaningfulTokens(left.value)].some((token) => meaningfulTokens(right.value).has(token));
+        if (!sharesWord) continue;
+        const leftPos = storyTimeRank.get(left.chapter_id!);
+        const rightPos = storyTimeRank.get(right.chapter_id!);
+        if (!leftPos || !rightPos) continue;
+        const [a, b] = leftPos.storyTimeRank <= rightPos.storyTimeRank ? [left, right] : [right, left];
+        const [aPos, bPos] = leftPos.storyTimeRank <= rightPos.storyTimeRank ? [leftPos, rightPos] : [rightPos, leftPos];
+        items.push({
+          chapterId: aPos.chapterId,
+          chapterIdB: bPos.chapterId,
+          quote: a.value,
+          quoteB: b.value,
+          observation: `${left.entity_label} is described as "${a.value}" (chapter ${aPos.sequenceIndex + 1}) and "${b.value}" (chapter ${bPos.sequenceIndex + 1}) — these don't read as the same trait.`,
+          suggestion: `Confirm whether ${left.entity_label} is "${a.value}" or "${b.value}", or record this as a change between chapter ${aPos.sequenceIndex + 1} and chapter ${bPos.sequenceIndex + 1}.`,
+          rank: aPos.storyTimeRank
+        });
+      }
+    }
+  }
+  return items
+    .sort((x, y) => x.rank - y.rank)
+    .slice(0, 6)
+    .map(({ rank: _rank, ...item }) => item);
 }
 
 export const CONTINUITY_SYSTEM = `You check a manuscript's Story Bible for one specific error: an entity (a person or an object) recorded at a place that contradicts where it was recorded earlier, given no established travel or explanation.

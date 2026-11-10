@@ -19,7 +19,7 @@ const MERGE_STOP_WORDS = new Set([
   "with", "for", "as", "by", "from", "that", "this", "his", "her", "their", "its"
 ]);
 
-function meaningfulTokens(value: string): Set<string> {
+export function meaningfulTokens(value: string): Set<string> {
   const tokens = new Set<string>();
   for (const raw of value.split(/[^\p{L}\p{N}]+/u)) {
     const token = raw.toLowerCase();

@@ -11794,6 +11794,63 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.301 → v1.0.302 (2026-11-10): Deterministisk
+drag-motsägelse-koll i Proofread, roadmap #60 idé 2.** Del av en
+längre tråd om fyra idéer från The Author Desks sample report
+(roadmap-ideas.md #60) och om vad av det som går att bygga helt utan
+AI (roadmap #59/#60 fick explicit hold: "Bygg inte 59 eller 60 innan
+jag säger till"). Mats bad sedan specifikt om idé 2: "Koda ide 2."
+
+Research innan något skrevs: läste `NarrativeFact.ts`, `ConsistencyGate.ts`
+och `bibleHistory.ts` i detalj. Nyckelinsikten: en `core.trait`-fakta
+har ingen legitim "tyst ändring" utanför en explicit `superseded_by`-
+länk (fakta raderas aldrig, bara efterträds) — till skillnad från
+`core.place`, där resor ofta sker utan någon registrerad ändring och
+därför kräver AI:ns omdöme om rimlighet. Två levande, olänkade
+`core.trait`-fakta för samma entitet som säger emot varandra är
+därför alltid ett misstag, aldrig ett omdömesfall — ingen AI-fråga
+behövs.
+
+Men en första naiv implementation (alla par av olika, icke-berikande
+värden flaggas) gav falska positiva direkt i testet: "left-handed"
+och "quick temper" på samma entitet flaggades som motsägelse, trots
+att `bibleHistory.ts`s egen kommentar varnar för exakt detta — en
+entitet bär normalt flera samtidiga, orelaterade `core.trait`-fakta
+(vänsterhänt + snabb i humöret är båda sanna samtidigt). Lösningen:
+kräv att de två värdena delar minst ett meningsbärande ord (”handed”
+i "left-handed"/"right-handed") innan de räknas som samma specifika
+drag med motstridig detalj — annars ses de som två olika, orelaterade
+drag. Detta missar en motsägelse formulerad utan delat ordförråd
+("shy" vs "confident"), en medveten försiktig avvägning i linje med
+resten av Proofreads säkra-hellre-än-falskt-larm-filosofi.
+
+Byggde `manuscriptTraitContradictions(book)` i `proofread.ts`,
+återanvänder `isPossibleEnrichment`/`normalizeValue` (från
+`ConsistencyGate.ts`/`ids.ts` — exakt samma tröskel som redan
+används när en ny fakta provas mot Story Bible) samt en nyexporterad
+`meaningfulTokens` för det delade-ord-kravet. Grupperar levande,
+låsta `core.trait`-fakta per entitet, testar alla par, bygger
+flaggor i samma form som `parseContinuityResult` redan etablerat
+(`chapterId`/`chapterIdB`/`quote`/`quoteB`/`observation`) men
+fyller dessutom i `suggestion` — något de befintliga plats-flaggorna
+inte gör — med en mallbaserad konkret åtgärd ("Confirm whether X is
+... or ..., or record this as a change between chapter A and B.").
+Kopplades in i `proofreadRun.ts`s `runContinuity` som en andra,
+helt lokal källa till flaggor i samma "continuity"-steg, vid sidan
+av det befintliga AI-baserade platskontroll-anropet — inget extra
+LLM-anrop, ingen extra latens.
+
+Nya tester i `tests/core/proofread.test.ts`: fångar en genuin
+motsägelse (vänster-/högerhänt) med rätt kapitel-ordning och
+suggestion-text; verifierar att två orelaterade drag INTE flaggas;
+att en supersederad (medvetet ändrad) fakta inte flaggas; att en
+berikande omformulering ("captain" → "captain on a space ship")
+inte flaggas; samt ett fullt `runProofread`-integrationstest som
+bekräftar att flaggan faktiskt dyker upp i jobbets `flags`-lista
+under "continuity"-steget utan att något AI-svar krävdes för den
+specifika flaggan. `tsc --noEmit` rent, 1286/1286 tester gröna (fem
+nya), `npm run build` rent.
+
 **Ändringslogg v1.0.300 → v1.0.301 (2026-11-06): Brainstorm-kapitlet
 skrivet om som pilot för mer handgriplig Guide.** Mats: "Det är rätt
 bra guide men jag saknar lite mer om hur man praktiskt gör saker. T a

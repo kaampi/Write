@@ -8,6 +8,7 @@ import {
   grammarUserPrompt,
   manuscriptAgeStats,
   manuscriptPlaceChains,
+  manuscriptTraitContradictions,
   parseAgeResult,
   parseContinuityResult,
   parseGrammarItems,
@@ -392,6 +393,152 @@ describe("manuscriptPlaceChains", () => {
   });
 });
 
+describe("manuscriptTraitContradictions", () => {
+  it("flags two live trait facts for the same entity whose values genuinely disagree", () => {
+    const { book, first, second } = twoChapters();
+    const withFacts: Book = {
+      ...book,
+      facts: [
+        {
+          id: "a",
+          entity_ref: "jeff",
+          entity_label: "Jeff",
+          predicate: "core.trait",
+          value: "left-handed",
+          sequence_index: 0,
+          chapter_id: first,
+          status: "locked",
+          source: "author",
+          created_at: "2026-09-14T00:00:00.000Z"
+        },
+        {
+          id: "b",
+          entity_ref: "jeff",
+          entity_label: "Jeff",
+          predicate: "core.trait",
+          value: "right-handed",
+          sequence_index: 1,
+          chapter_id: second,
+          status: "locked",
+          source: "author",
+          created_at: "2026-09-14T00:00:00.000Z"
+        }
+      ] as NarrativeFact[]
+    };
+    const items = manuscriptTraitContradictions(withFacts);
+    expect(items).toHaveLength(1);
+    expect(items[0]?.chapterId).toBe(first);
+    expect(items[0]?.chapterIdB).toBe(second);
+    expect(items[0]?.quote).toBe("left-handed");
+    expect(items[0]?.quoteB).toBe("right-handed");
+    expect(items[0]?.observation).toContain("Jeff");
+    expect(items[0]?.suggestion).toContain("left-handed");
+  });
+
+  it("does not flag two unrelated traits on the same entity", () => {
+    const { book, first, second } = twoChapters();
+    const withFacts: Book = {
+      ...book,
+      facts: [
+        {
+          id: "a",
+          entity_ref: "jeff",
+          entity_label: "Jeff",
+          predicate: "core.trait",
+          value: "left-handed",
+          sequence_index: 0,
+          chapter_id: first,
+          status: "locked",
+          source: "author",
+          created_at: "2026-09-14T00:00:00.000Z"
+        },
+        {
+          id: "b",
+          entity_ref: "jeff",
+          entity_label: "Jeff",
+          predicate: "core.trait",
+          value: "quick temper",
+          sequence_index: 1,
+          chapter_id: second,
+          status: "locked",
+          source: "author",
+          created_at: "2026-09-14T00:00:00.000Z"
+        }
+      ] as NarrativeFact[]
+    };
+    expect(manuscriptTraitContradictions(withFacts)).toEqual([]);
+  });
+
+  it("does not flag a trait that was superseded (a deliberate change)", () => {
+    const { book, first, second } = twoChapters();
+    const withFacts: Book = {
+      ...book,
+      facts: [
+        {
+          id: "a",
+          entity_ref: "jeff",
+          entity_label: "Jeff",
+          predicate: "core.trait",
+          value: "shy",
+          sequence_index: 0,
+          chapter_id: first,
+          status: "locked",
+          source: "author",
+          superseded_by: "b",
+          created_at: "2026-09-14T00:00:00.000Z"
+        },
+        {
+          id: "b",
+          entity_ref: "jeff",
+          entity_label: "Jeff",
+          predicate: "core.trait",
+          value: "confident",
+          sequence_index: 1,
+          chapter_id: second,
+          status: "locked",
+          source: "author",
+          created_at: "2026-09-14T00:00:00.000Z"
+        }
+      ] as NarrativeFact[]
+    };
+    expect(manuscriptTraitContradictions(withFacts)).toEqual([]);
+  });
+
+  it("does not flag an enrichment-like restatement of the same trait", () => {
+    const { book, first, second } = twoChapters();
+    const withFacts: Book = {
+      ...book,
+      facts: [
+        {
+          id: "a",
+          entity_ref: "jeff",
+          entity_label: "Jeff",
+          predicate: "core.trait",
+          value: "captain",
+          sequence_index: 0,
+          chapter_id: first,
+          status: "locked",
+          source: "author",
+          created_at: "2026-09-14T00:00:00.000Z"
+        },
+        {
+          id: "b",
+          entity_ref: "jeff",
+          entity_label: "Jeff",
+          predicate: "core.trait",
+          value: "captain on a space ship",
+          sequence_index: 1,
+          chapter_id: second,
+          status: "locked",
+          source: "author",
+          created_at: "2026-09-14T00:00:00.000Z"
+        }
+      ] as NarrativeFact[]
+    };
+    expect(manuscriptTraitContradictions(withFacts)).toEqual([]);
+  });
+});
+
 describe("parseContinuityResult", () => {
   it("maps a flagged entity + chapter pair back to chapter ids", () => {
     const chains = [
@@ -513,6 +660,59 @@ describe("runProofread", () => {
     expect(saved.at(-1)).toBe("done");
     expect(prompts.some((prompt) => prompt.includes("stowaway"))).toBe(false);
     expect(latest.proofread?.flags.some((flag) => flag.stage === "scenes")).toBe(true);
+  });
+
+  it("surfaces a trait contradiction as a continuity flag, with no AI call needed for it", async () => {
+    const { book, first, second } = twoChapters();
+    const withFacts: Book = {
+      ...book,
+      facts: [
+        {
+          id: "a",
+          entity_ref: "jeff",
+          entity_label: "Jeff",
+          predicate: "core.trait",
+          value: "left-handed",
+          sequence_index: 0,
+          chapter_id: first,
+          status: "locked",
+          source: "author",
+          created_at: "2026-09-14T00:00:00.000Z"
+        },
+        {
+          id: "b",
+          entity_ref: "jeff",
+          entity_label: "Jeff",
+          predicate: "core.trait",
+          value: "right-handed",
+          sequence_index: 1,
+          chapter_id: second,
+          status: "locked",
+          source: "author",
+          created_at: "2026-09-14T00:00:00.000Z"
+        }
+      ] as NarrativeFact[]
+    };
+    let latest = withFacts;
+    const job = startProofreadJob(withFacts);
+    await runProofread(
+      job,
+      {
+        complete: async () => '{"items":[]}',
+        getBook: () => latest,
+        save: async (next) => {
+          latest = { ...latest, proofread: next };
+        },
+        saveFacts: async (facts) => {
+          latest = { ...latest, facts };
+        }
+      },
+      new AbortController().signal
+    );
+    const flag = latest.proofread?.flags.find((candidate) => candidate.stage === "continuity" && candidate.quoteB === "right-handed");
+    expect(flag?.chapterId).toBe(first);
+    expect(flag?.chapterIdB).toBe(second);
+    expect(flag?.suggestion).toContain("left-handed");
   });
 
   it("throws AbortError before it writes a later stage", async () => {

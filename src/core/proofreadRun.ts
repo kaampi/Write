@@ -20,6 +20,7 @@ import {
   makeFlag,
   manuscriptAgeStats,
   manuscriptPlaceChains,
+  manuscriptTraitContradictions,
   parseAgeResult,
   parseContinuityResult,
   parseGrammarItems,
@@ -223,10 +224,15 @@ async function runContinuity(job: ProofreadJob, io: ProofreadIO, signal: AbortSi
     const raw = await io.complete(CONTINUITY_SYSTEM, continuityUserPrompt(book, chains), signal);
     items = parseContinuityResult(raw, chains);
   }
+  const traitItems = manuscriptTraitContradictions(book);
   current = touchProofread(current, {
     flags: [
       ...current.flags,
       ...items.map((item) => {
+        const { chapterId, ...rest } = item;
+        return makeFlag("continuity", chapterId, rest);
+      }),
+      ...traitItems.map((item) => {
         const { chapterId, ...rest } = item;
         return makeFlag("continuity", chapterId, rest);
       })
