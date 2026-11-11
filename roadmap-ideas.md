@@ -3700,6 +3700,72 @@ lokalt utan AI och har fyra flikar:
 Rapporten beskriver vad som går att observera i texten. Författaren
 avgör hur mönstret fungerar i berättelsen och om något ska ändras.
 
+**Uppföljning 2026-11-11 — fler AI-fria analyser, och en språklucka i
+de som redan finns.** Mats frågade efter kodgranskningen (`REVIEW.md`):
+"Ser du några fler smarta sätt att analysera texter utan att koppla in
+AI?" Svaret blev två delar. Inget av det nedan är byggt.
+
+**Del 1 — gör befintliga mätningar rättvisande för svenska och norska
+först.** Flera mätvärden i `src/core/proseStats.ts` är skrivna för
+engelska. Bekräftat i koden; övriga Stats-moduler (eko, ovanliga ord,
+klichéer, POV-läckor) är inte genomlästa för detta och kan ha samma
+sak.
+
+- **Dialog** (`dialogueSpans`, rad ~330) känner bara igen `"…"` och
+  `“…”`. Raka citattecken fungerar, och Smarta citattecken gör om dem
+  till `“…”`, så text skriven så räknas rätt. Men svensk sättning med
+  `”…”` (samma tecken före och efter), pratminus (`– Hej, sa hon.`) och
+  norska `«…»` räknas inte alls — dialogandelen blir nära noll för ett
+  sådant manus. Det påverkar både kapitlets Stats och Dialog-fliken i
+  rapporten ovan.
+- **Adverb** (`isMannerAdverb`, rad ~341) är ord som slutar på `-ly`.
+- **Passiv form** (`countPassives`, rad ~347) letar efter engelska
+  `was/were/been` + particip. Svensk s-passiv och "blev + particip"
+  syns inte.
+- **Läsbarhet och tempoprofil.** `fleschReadingEase` är ett engelskt
+  mått, och `countSyllables` (rad ~358) tar bort allt utom a–z, alltså
+  även å, ä och ö. Tempoprofilen ("Fast & breezy" … "Heavy") och
+  andelen långa ord bygger på samma stavelseräkning. För svenska och
+  norska är **LIX** standardmåttet: genomsnittlig meningslängd plus
+  andelen ord längre än sex bokstäver. Det behöver ingen
+  stavelseräkning och båda delarna räknas i praktiken redan.
+- **Meningsdelning.** Förkortningslistan (rad ~7) är engelsk (`mr`,
+  `dr`, `etc`), så "t.ex.", "bl.a." och "dvs." kan dela en mening i
+  två. `isAbbreviation` tittar dessutom bara på A–Z.
+
+Det här hänger ihop med punkt 1 under "Två saker att väga in" ovan
+(språkberoende): prosaspråket finns redan som inställning per manus,
+så mätningarna kan välja regler efter det.
+
+**Del 2 — nya analyser, sorterade efter hur pålitliga de är.**
+
+| Analys | Vad författaren får se | Pålitlighet |
+| --- | --- | --- |
+| Karaktärsnätverk | Vilka som delar scener, vilka som aldrig möts | Hög — återanvänder namn/alias/undantag från Story Bible. Redan nämnd ovan, inte byggd. |
+| Meningsstarter och kapitelöppningar | "Hon… Hon… Hon…" i rad; hur varje kapitel börjar och slutar (dialog, väder, uppvaknande, fråga) | Hög — ren räkning. |
+| Gester och kroppstics | Hur ofta någon nickar, suckar, ler, rycker på axlarna, per kapitel och per 10 000 ord | Hög — liten ordlista per språk. |
+| Sägeverb | Andelen "sa" mot "utbrast/väste/fräste", och adverb efter taggen ("sa hon argt") | Hög–medel — ordlista per språk, kräver fungerande dialogigenkänning (del 1). |
+| Namnkoll | Förväxlingsbara namn (Maria, Marie, Mira), stavningsvarianter (Katarina/Katrina), och namn i texten som saknar kort i Story Bible | Hög — bokstavsavstånd och versaler; inga ordlistor. |
+| Tidsmarkörer | Veckodagar, klockslag, årstider och "tre dagar senare" per scen, som en remsa över boken | Hög för att lista, låg för att dra slutsatser. Ger underlag till veckodagslogiken i #60 idé 2. |
+| Filterord och förstärkare | "såg, kände, märkte, tycktes" och "väldigt, ganska, lite" per tusen ord | Medel — ordlista; kan överlappa Directness (inte kontrollerat). |
+| Röstskillnad mellan karaktärer | Om talarna låter olika: meningslängd och favoritord per karaktär | Medel–låg — bygger på att gissa rätt vem som säger repliken. |
+| Sinnesbalans | Fördelning mellan syn, hörsel, lukt, känsel och smak per kapitel | Låg–medel — ordlista, grov signal. |
+
+Känslokurvan ligger kvar sist, av samma skäl som i bedömningen ovan.
+
+**Föreslagen ordning:**
+1. Dialogtecken för svenska/norska plus LIX — gör siffror som redan
+   visas rättvisande, och är en förutsättning för sägeverb och
+   röstskillnad.
+2. Namnkoll — håller Story Bible korrekt utan AI, och passar "the
+   Bible holds truth" bäst av alla nio.
+3. Meningsstarter och gester — små att bygga, och ger fynd en
+   författare känner igen direkt.
+
+Samma hållning som rapporten ovan: visa vad som går att observera och
+låt författaren avgöra. Ordlistebaserade mått ska märkas som
+ungefärliga, aldrig som facit.
+
 ---
 
 ### 60. Fyra idéer från The Author Desks sample report (människodriven granskningstjänst, AI bara för continuity)
