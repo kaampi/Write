@@ -2924,7 +2924,18 @@ export const nb: Messages = {
       networkHint: "Klikk på et navn for å se nøyaktig hva det er nærmest, og hvorfor.",
       networkFocus: "{name} deler flest scener med {list}.",
       networkLegendSize: "Sirkelens størrelse = scener karakteren forekommer i",
-      networkLegendLine: "Linjens tykkelse = scener delt med den karakteren"
+      networkLegendLine: "Linjens tykkelse = scener delt med den karakteren",
+      networkFocusQuestions: [
+        "Hva skjer mellom dem selv når de ikke snakker med hverandre?",
+        "Hvem blir sett i disse scenene, og av hvem?",
+        "Hva ville endret seg hvis en av dem ikke var der?"
+      ],
+      networkPatternIntro: "Når du ser på mønsteret over hele manuset:",
+      networkPatternQuestions: [
+        "Hvilken relasjon overrasker deg mest her?",
+        "Hvordan endrer karakterenes oppmerksomhet mot hverandre seg gjennom historien?",
+        "Hvor godt stemmer mønsteret med relasjonen du vil skildre?"
+      ]
     },
     label: "Statistikk",
     wordsShort: { one: "{count} ord", other: "{count} ord" },

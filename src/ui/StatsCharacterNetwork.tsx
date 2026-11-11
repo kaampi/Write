@@ -242,9 +242,24 @@ export function StatsCharacterNetwork({ book, chapters }: { book: Book; chapters
             })
           : copy.networkHint}
       </p>
+      {focusRef && focusItems.length > 0 ? (
+        <ul className="stats-network-questions" aria-label={copy.network}>
+          {copy.networkFocusQuestions.map((question) => (
+            <li key={question}>{question}</li>
+          ))}
+        </ul>
+      ) : null}
       <div className="stats-network-legend">
         <span>{copy.networkLegendSize}</span>
         <span>{copy.networkLegendLine}</span>
+      </div>
+      <div className="stats-network-pattern">
+        <p>{copy.networkPatternIntro}</p>
+        <ul className="stats-network-questions">
+          {copy.networkPatternQuestions.map((question) => (
+            <li key={question}>{question}</li>
+          ))}
+        </ul>
       </div>
     </article>
   );

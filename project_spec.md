@@ -11794,6 +11794,39 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.302 → v1.0.303 (2026-11-11): Öppna
+reflektionsfrågor i Karaktärsnätverket.** Direkt uppföljning på
+nätverksfliken. Mats föreslog tre kategorier av öppna frågor att visa
+bredvid kartan — "När någon ofta blir tänkt på", "När karaktärer ofta
+delar scen", "När du ser på mönstret över hela manuset" — och frågade
+"Ska vi i samband med denna statistik ge några öppna frågor?". Jag
+flaggade att kategori 1 inte går att grunda än (kräver "tänker på"-
+lexikonet, obyggt), och frågade om form (en rad som resten av appen,
+eller Mats tre punkter per kategori) och placering (global rad eller
+kopplad till vad man fokuserat på). Mats bad om min rekommendation;
+jag föreslog att koppla frågorna till `focusRef` (starkare när de
+syftar på en specifik relation, och gratis att bygga eftersom
+fokus-tillståndet redan finns) och att bryta mot appens vanliga
+enrads-norm här eftersom det här är reflekterande skrivarbete, inte
+en bugg-flagga. Mats: "japp".
+
+Byggde kategori 2 (delar scen) som tre punkter under fokus-raden,
+synliga bara när en karaktär är vald (`networkFocusQuestions`), och
+kategori 3 (mönster över manuset) som en egen, alltid synlig sektion
+under legenden (`networkPatternIntro` + `networkPatternQuestions`) —
+oberoende av fokus, eftersom den frågar om helheten. Kategori 1
+sparad till "tänker på"-signalen finns. Ren textlista, ingen ny logik;
+återanvänder `copy.network*`-mönstret från i18n (en/sv/nb) och
+`.stats-report ul`s existerande list-reset, med en liten egen
+`–`-markör (`.stats-network-questions`) för att skilja reflekterande
+frågor från appens vanliga åtgärdsrader.
+
+`tsc --noEmit` rent, 1291/1291 tester gröna (oförändrat — ren text,
+inga nya beteenden att testa utöver det som redan täcks), `npm run
+build` rent. Live-verifierat med Playwright: fokuserad vy visar båda
+radgrupperna i rätt ordning, ofokuserad vy visar bara mönster-
+frågorna.
+
 **Ändringslogg v1.0.301 → v1.0.302 (2026-11-11): Karaktärsnätverk i
 Stats, byggt på en separat branch.** Del av en längre tråd: Mats
 föreslog en "semantic cloud"/"proximity map" för karaktärer (med

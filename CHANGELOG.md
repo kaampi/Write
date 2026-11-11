@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.303] - 2026-11-11
+
+### Added
+- The Character network tab now surfaces open reflection questions alongside the map, not just the raw pattern: three always-visible questions about the whole-manuscript pattern ("Which relationship surprises you the most here?"), plus three more tied to whichever character is focused ("What happens between them even when they aren't talking?"). Never a verdict — same "the author decides" stance as the rest of Proofread and Stats.
+
 ## [1.0.302] - 2026-11-11
 
 ### Added

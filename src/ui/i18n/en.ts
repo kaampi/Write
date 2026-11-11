@@ -2937,7 +2937,18 @@ export const en = {
       networkHint: "Click a name to see exactly what it's closest to, and why.",
       networkFocus: "{name} shares the most scenes with {list}.",
       networkLegendSize: "Circle size = scenes the character appears in",
-      networkLegendLine: "Line weight = scenes shared with that character"
+      networkLegendLine: "Line weight = scenes shared with that character",
+      networkFocusQuestions: [
+        "What happens between them even when they aren't talking?",
+        "Who gets noticed in these scenes, and by whom?",
+        "What would change if one of them wasn't there?"
+      ],
+      networkPatternIntro: "Looking at the pattern across the whole manuscript:",
+      networkPatternQuestions: [
+        "Which relationship surprises you the most here?",
+        "How does the characters' attention to each other change through the story?",
+        "How well does the pattern match the relationship you want to portray?"
+      ]
     },
     label: "Stats",
     wordsShort: { one: "{count} word", other: "{count} words" },
