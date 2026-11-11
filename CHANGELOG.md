@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.302] - 2026-11-11
+
+### Added
+- Stats' manuscript report has a new "Character network" tab: a constellation-style map of which characters share scenes, independent of whether they actually speak to each other. Distance encodes how closely two characters are bound (based on shared scenes), circle size shows how often a character appears at all, and clicking a name shows exactly what it's closest to and why. Computed entirely locally — no AI call.
+
 ## [1.0.301] - 2026-11-06
 
 ### Changed

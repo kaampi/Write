@@ -2930,7 +2930,14 @@ export const en = {
       chapterLengthMedian: "The median chapter length is {count}.",
       chapterLengthRange: "Chapter lengths range from {shortest} to {longest}.",
       chapterLengthHint: "Chapters with prose appear in manuscript order. Select a row to open the chapter.",
-      chapterLengthMedianLine: "The line marks the median"
+      chapterLengthMedianLine: "The line marks the median",
+      network: "Character network",
+      networkMethod: "Distance stands for how closely two characters are bound in the manuscript: the more scenes they share, the closer together they sit — whether or not they actually speak to each other. Circle size shows how many scenes a character appears in at all.",
+      networkEmpty: "Add at least two characters who share a scene to see a network.",
+      networkHint: "Click a name to see exactly what it's closest to, and why.",
+      networkFocus: "{name} shares the most scenes with {list}.",
+      networkLegendSize: "Circle size = scenes the character appears in",
+      networkLegendLine: "Line weight = scenes shared with that character"
     },
     label: "Stats",
     wordsShort: { one: "{count} word", other: "{count} words" },

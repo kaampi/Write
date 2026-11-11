@@ -2917,7 +2917,14 @@ export const nb: Messages = {
       chapterLengthMedian: "Medianen for kapittellengde er {count}.",
       chapterLengthRange: "Kapittellengden varierer fra {shortest} til {longest}.",
       chapterLengthHint: "Kapitler med prosa vises i manusrekkefølge. Velg en rad for å åpne kapittelet.",
-      chapterLengthMedianLine: "Streken viser medianen"
+      chapterLengthMedianLine: "Streken viser medianen",
+      network: "Karakternettverk",
+      networkMethod: "Avstanden viser hvor nært bundet to karakterer er i manuset: desto flere scener de deler, desto nærmere hverandre plasseres de — uansett om de faktisk snakker med hverandre eller ikke. Sirkelens størrelse viser hvor mange scener karakteren forekommer i totalt.",
+      networkEmpty: "Legg til minst to karakterer som deler en scene for å se et nettverk.",
+      networkHint: "Klikk på et navn for å se nøyaktig hva det er nærmest, og hvorfor.",
+      networkFocus: "{name} deler flest scener med {list}.",
+      networkLegendSize: "Sirkelens størrelse = scener karakteren forekommer i",
+      networkLegendLine: "Linjens tykkelse = scener delt med den karakteren"
     },
     label: "Statistikk",
     wordsShort: { one: "{count} ord", other: "{count} ord" },

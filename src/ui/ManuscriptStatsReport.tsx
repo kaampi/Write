@@ -3,10 +3,11 @@ import { sortedChapters, type Book, type Chapter } from "@core/BookSchema";
 import { manuscriptReport, type ManuscriptPassage } from "@core/manuscriptReport";
 import { format, useLocale } from "./i18n";
 import { StatsCharacterMentions } from "./StatsCharacterMentions";
+import { StatsCharacterNetwork } from "./StatsCharacterNetwork";
 import { StatsDialogueChart } from "./StatsDialogueChart";
 import { StatsChapterLength } from "./StatsChapterLength";
 
-const REPORT_VIEWS = ["dialogue", "repetitions", "characters", "length"] as const;
+const REPORT_VIEWS = ["dialogue", "repetitions", "characters", "network", "length"] as const;
 export type ManuscriptStatsView = typeof REPORT_VIEWS[number];
 
 export function ManuscriptStatsReport({
@@ -26,6 +27,7 @@ export function ManuscriptStatsReport({
     dialogue: copy.dialogue,
     repetitions: copy.repetitions,
     characters: copy.characterMentions,
+    network: copy.network,
     length: copy.chapterLength
   };
   const chapters = useMemo(() => sortedChapters(book), [book]);
@@ -160,6 +162,8 @@ export function ManuscriptStatsReport({
               onOpen={onOpen}
             />
           </article>
+        ) : view === "network" ? (
+          <StatsCharacterNetwork book={book} chapters={chapters} />
         ) : (
           <StatsChapterLength chapters={report.dialogue} titles={titles} onOpen={onOpen} />
         )}

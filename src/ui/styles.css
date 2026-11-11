@@ -6633,6 +6633,35 @@ button:disabled {
   max-width: 100%;
 }
 
+.stats-network-chart {
+  width: 100%;
+  max-width: 32rem;
+  height: auto;
+  display: block;
+  margin-block: 0.5rem;
+}
+
+.stats-network-chart g[role="button"]:focus-visible {
+  outline: 2px solid var(--stats-button-color);
+  outline-offset: 2px;
+}
+
+.stats-network-hint {
+  color: var(--text-dim);
+  font-size: 0.92rem;
+  min-height: 1.4em;
+}
+
+.stats-network-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border-soft);
+  padding-top: 0.6rem;
+}
+
 .stats-report-character details {
   margin-top: 1rem;
 }

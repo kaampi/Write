@@ -11794,6 +11794,67 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.301 → v1.0.302 (2026-11-11): Karaktärsnätverk i
+Stats, byggt på en separat branch.** Del av en längre tråd: Mats
+föreslog en "semantic cloud"/"proximity map" för karaktärer (med
+music-map.com som visuell referens — avstånd i stället för en nod-
+kant-graf), vi testade konceptet i en fristående artefakt
+(konstellationsdiagram, avatarer med silhuett-fallback, en "glid ut
+från mitten"-animation — justerad till långsammare efter Mats
+rättelse: "Eventuellt kan man lägga in bilder... En snygg effekt på
+Music-map är att bollarna startar i mitten och 'exploderar' sakta ut
+till sina positioner" följt av "ska nog vara mycket långsammare...
+mer som att de glider ut. Fel av mig att säga explosion"). Mats
+bekräftade sedan explicit att scen-samförekomst (oavsett dialog)
+är rätt mått: "Ska/kan man lägga till när karaktärer finns i samma
+scen (oavsett om de pratar med varandra)?" — och gav slutligen
+klartecken att bygga det på riktigt: "Ja se det som att jag säger
+till :) Jag var lite exkluderande innan men det var för att jag
+visste att vi hade kod som varken du eller jag hittade just då"
+(syftar på `codex/stats-manuscript-report`-grenen, redan granskad
+och godkänd tidigare).
+
+Byggde på en ny branch (`feature/character-proximity-map`) ovanpå
+`codex/stats-manuscript-report` snarare än `main`, eftersom namn-
+matchningen (`trackedMentionMatcher`, `bibleMentions.ts`) och Stats-
+rapportens flik-mönster (`ManuscriptStatsReport.tsx`) redan finns
+där — naturlig plats för en ny flik, inte ett skäl att duplicera
+infrastruktur. Ny kärnfunktion `characterCooccurrence.ts`: går
+igenom varje scen (samma scen-gränser som `manuscriptCharacterMentions.ts`
+redan använder) och samlar vilka spårade karaktärer nämns i den,
+bygger sedan ett Jaccard-mått (delade scener / unionen av bådas
+scener) per karaktärspar — symmetriskt, 0–1, och helt oberoende av
+om karaktärerna faktiskt har dialog med varandra. Ny UI-komponent
+`StatsCharacterNetwork.tsx`: SVG-baserad kraft-simulering (repulsion
+mellan alla noder + fjäder-dragning per par mot ett målavstånd satt
+av Jaccard-värdet), noder börjar klumpade i mitten och glider ut med
+en sinus-easead hastighetstopp (långsam start, långsam avslutning —
+inte en "explosion"), klick på ett namn fokuserar och visar de tre
+starkaste kopplingarna. Karaktärsfärger återanvänder appens egna
+`PLOTLINE_COLORS` (samma "skilj N saker åt"-palett som Timeline redan
+har) i stället för att hitta på en ny, och CSS-tokens är `--text`/
+`--border`/`--stats-button-color` (samma neutrala Stats-identitet som
+Dialogue/Chapter length-flikarna), inte artefaktens egna provisoriska
+färger.
+
+Ny testfil `tests/core/character-cooccurrence.test.ts` (3 tester):
+riktig scen-samförekomst över kapitelgräns, inget-par-flaggas när två
+karaktärer aldrig delar scen, alias/undantag fungerar identiskt med
+Story Bibles egen mention-tracking. `tsc --noEmit` rent, 1291/1291
+tester gröna (fem nya jämfört med den redan existerande
+`stats-manuscript-report`-grenen), `npm run build` rent. Live-
+verifierat med Playwright: skapade en riktig bok, skrev prosa med två
+scener (en `---`-scenbrytning), låste in två karaktärer i Story
+Bible, öppnade Stats → Whole manuscript → Character network — båda
+namnen renderades med silhuett-avatarer, en linje mellan dem, och
+klick på ett namn gav rätt fokus-text ("Kael shares the most scenes
+with Melanie"). Verifierat i både ljust och mörkt tema.
+
+**Kvarstår, inte byggt:** "tänker på varandra"-signalen (kräver ett
+fraslexikon per språk, separat från detta) och sammanslagning av den
+här branchen med `main` — Mats har inte gett klartecken för det
+ännu, bara för att bygga karaktärsnätverket.
+
 **Ändringslogg v1.0.300 → v1.0.301 (2026-11-06): Brainstorm-kapitlet
 skrivet om som pilot för mer handgriplig Guide.** Mats: "Det är rätt
 bra guide men jag saknar lite mer om hur man praktiskt gör saker. T a

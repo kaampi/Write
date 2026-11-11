@@ -3685,7 +3685,7 @@ sist (om alls), tydligt flaggad som ungefärlig. Idén började som en
 spaning på Mats initiativ.
 
 **Första versionen byggd i Stats → Hela manuset.** Rapporten körs
-lokalt utan AI och har fyra flikar:
+lokalt utan AI och har fem flikar:
 
 - **Dialog** visar andelen ord inom igenkända citattecken, skiften
   mellan kapitel och en utfällbar graf per kapitel.
@@ -3694,11 +3694,28 @@ lokalt utan AI och har fyra flikar:
 - **Karaktärernas omnämnanden** använder namn, alias och undantag från
   Story Bible. Författaren kan öppna textbeläggen och se scenerna
   på var sin sida av längre uppehåll mellan träffarna.
+- **Karaktärsnätverk** (byggt v1.0.302, egen branch
+  `feature/character-proximity-map`) — karaktärsnätverk-kandidaten
+  ovan, som en konstellationskarta: avstånd mellan två karaktärer
+  står för hur många scener de delar (oavsett om de faktiskt pratar
+  med varandra — Mats bekräftade explicit att det är rätt mått),
+  cirkelstorlek för hur ofta karaktären förekommer totalt. Byggd på
+  Mats initiativ efter att han visade music-map.com som visuell
+  referens (avstånd i stället för en nod-kant-graf) och testade
+  konceptet i en fristående artefakt först. Återanvänder samma
+  namn-/alias-matchning som Karaktärernas omnämnanden
+  (`trackedMentionMatcher`), ny funktion `characterCooccurrence.ts`
+  grupperar per scen och räknar ett Jaccard-mått per karaktärspar.
 - **Kapitellängd** visar ordantal i manusordning och markerar medianen
   för kapitel med prosa.
 
 Rapporten beskriver vad som går att observera i texten. Författaren
 avgör hur mönstret fungerar i berättelsen och om något ska ändras.
+
+Kvar av karaktärsnätverk-kandidaten: "tänker på varandra" som en andra
+signal (kräver ett fraslexikon per språk, inte byggt än — se Mats
+exempel "Kael kunde inte sluta tänka på Melanie" i tråden som ledde
+hit). Känslokurvor via sentimentlexikon är fortfarande helt obyggd.
 
 ---
 
