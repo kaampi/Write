@@ -65,6 +65,8 @@ export type BookStoreValue = {
   historyLimit: number;
   ollamaError: string | null;
   busy: Busy;
+  /** Seconds left before the current local-model request times out, or null when nothing is waiting on one. */
+  timeoutCountdown: number | null;
   draftAwaiting: boolean;
   error: string | null;
   chapterFeedback: ChapterFeedback | null;

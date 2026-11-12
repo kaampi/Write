@@ -11794,6 +11794,80 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.302 → v1.0.303 (2026-11-12): Timeout på alla
+lokala modell-anrop, plus en nedräkning + avbryt-knapp i gränssnittet.**
+Mats delade en användarkommentar: "the Write app in unresponsive...
+infinite loading cursor", med en egen gissning om en API-nyckel i en
+modell-app. Grävde i koden och hittade en redan dokumenterad, delvis
+åtgärdad bugg: en kommentar i `BookStore.tsx` beskrev exakt
+"request just waits on fetch forever... no finally block ever runs"
+— en `withRequestTimeout`-mekanism fanns, men var bara inkopplad på
+3 av ~25 ställen som anropar en lokal modell. Värst av alla: det
+ovillkorliga `useEffect`-blocket som listar modeller VARJE
+appstart hade ingen timeout alls — exakt matchande symptomet.
+Föreslog ett diagnostiskt svar till användaren (bad om mer info:
+skrivbordsapp/webbläsare, vilken modell-app, konsol-fel) som Mats
+godkände efter en egen rättning (mitt förslag "ändra serveradressen"
+som test förutsatte att appen inte var helt fryst — Mats påpekade
+motsägelsen, uppdaterade till "stäng ner modell-appen helt innan
+Write startas" istället, som inte kräver ett responsivt gränssnitt).
+
+Mats bad sedan explicit: "Ska vi också uppdatera så att timeout
+funkar på alla 25 ställen. Sedan känns 2 minuter som länge eller?
+Och skulle man kunna ha en ruta som visar att Write försöker koppla
+upp sig men en klocka som räknar ner... samt en knapp som avbryter?"
+
+Valde att INTE patcha 25 enskilda try/catch-block (risk för
+inkonsekvens) utan flytta timeout-ansvaret till rätt lager: en ny
+`withTimeoutGuard(provider, onTick?)` i `provider.ts` som slår in
+VILKEN `LocalModelProvider` som helst, så `makeProvider()` (den enda
+fabriksfunktionen, ~30 anropsställen) automatiskt skyddar allt —
+noll ändringar behövdes på de flesta av de 25 ursprungliga
+ställena. Två olika tidsgränser, vilket också svarar på "känns som
+länge": `LOCAL_MODEL_TIMEOUT_MS` (120 s, oförändrad för chat/
+streamChat/embed — en kall modell-laddning kan legitimt ta den
+tiden) och en ny, mycket kortare `LOCAL_SERVER_PROBE_TIMEOUT_MS`
+(15 s) för `listModels`/`healthCheck`, som bara är en metadata-GET
+utan modell-laddning inblandad — exakt den som orsakade den
+ursprungliga buggen. En strömmande (`streamChat`) begäran river av
+sin egen deadline vid varje mottagen bit (`poke()`), så ett
+legitimt långsamt (men fungerande) utkast aldrig kapas — bara
+genuin tystnad räknas som hängning. En anroparens egen avbryt-signal
+(Stopp-knappen) lager ovanpå internt, utan att ersättas: den ger
+fortfarande en vanlig `AbortError` precis som förut; bara den egna
+deadline-bevakningen ger en ny, distinkt `LocalModelTimeoutError`,
+som `ollamaHint()` nu känner igen på EN plats — alla ~25 ställens
+redan befintliga `setError(ollamaHint(err))`-catch fick alltså det
+vänliga timeout-felmeddelandet gratis, utan att röras.
+
+Byggde en nedräkning + avbryt-UI genom att återanvända den redan
+befintliga `BusyDialog`-komponenten (redan visad för "tysta" AI-jobb
+som Extract/Analyze/Polish, redan med en Cancel-knapp kopplad till
+`stopDraft`): la till en `timeoutLabel`-prop som visar "{sekunder}s
+till timeout", fylld från ett nytt delat `timeoutCountdown`-fält i
+Store (appen kör bara ett AI-anrop åt gången, så ett delat fält
+räcker). Krävde att widgade `LocalModelProvider`-interfacet så
+`listModels`/`healthCheck` kan ta emot en signal (saknades helt
+innan — annars går det inte att faktiskt avbryta den begäran).
+
+Nya tester: `tests/llm/provider-timeout.test.ts` (6 nya, med
+`vi.useFakeTimers()`) — bekräftar att chat() tar 120 s, listModels()
+bara 15 s, att en användarens egen avbryt fortfarande ger en vanlig
+AbortError (inte timeout), att streaming-poke verkligen förhindrar
+falska timeouts för en långsam-men-fungerande ström, och att
+nedräkningen tickar och blir `null` vid avslut. `tsc --noEmit` rent,
+1292/1292 tester gröna, `npm run build` rent.
+
+Live-verifierat med Playwright mot en riktig, medvetet hängande
+Node-server (tar emot TCP-anslutningen, svarar aldrig): den
+ovillkorliga startup-kontrollen återhämtade sig korrekt efter exakt
+~15 sekunder istället för att hänga appen för alltid (bekräftat med
+skärmdump av det vänliga felmeddelandet, helt responsivt gränssnitt
+runt omkring); och en riktig "Extract facts"-körning mot samma
+hängande server visade "Working / Extracting…"-dialogen med en
+levande nedräkning ("89s to timeout" → "87s to timeout" 2,5 sekunder
+senare) och en fungerande Cancel-knapp, exakt den UI Mats bad om.
+
 **Ändringslogg v1.0.301 → v1.0.302 (2026-11-10): Deterministisk
 drag-motsägelse-koll i Proofread, roadmap #60 idé 2.** Del av en
 längre tråd om fyra idéer från The Author Desks sample report

@@ -2278,6 +2278,9 @@ export function Editor() {
             title={silentBusy.title}
             status={silentBusy.status}
             help={m.busy.help}
+            timeoutLabel={
+              store.timeoutCountdown !== null ? format(m.busy.timeoutCountdown, { seconds: store.timeoutCountdown }) : null
+            }
             cancelLabel={m.common.cancel}
             onCancel={store.stopDraft}
           />

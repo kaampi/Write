@@ -8989,6 +8989,13 @@ button.illustration-genre-item:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+.busy-dialog-timeout {
+  font-size: 0.85rem;
+  color: #6b5f52;
+  font-variant-numeric: tabular-nums;
+  margin-top: -0.4rem;
+}
+
 .busy-dialog-cancel {
   margin-top: 0.75rem;
   min-width: 7.5rem;

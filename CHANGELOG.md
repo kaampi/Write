@@ -9,6 +9,15 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.303] - 2026-11-12
+
+### Fixed
+- Every local-model request is now bounded by a timeout, not just a handful of call sites — including the one made unconditionally at every app start to list available models, which used to hang forever (no error, nothing clearing) if the configured server accepted the connection but never responded. That start-up check now fails after 15 seconds instead of hanging the app's AI features indefinitely.
+- A long-running AI action (Extract facts, Analyze, Polish, and others that show a "Working" dialog) now shows a live countdown to its timeout and lets you cancel it at any point, instead of only a spinner with no way to tell "still thinking" from "will never respond."
+
+### Changed
+- A streaming reply's timeout now resets on every chunk it receives, so a legitimately slow (but working) generation is never cut off — only genuine silence counts as a hang.
+
 ## [1.0.302] - 2026-11-10
 
 ### Added

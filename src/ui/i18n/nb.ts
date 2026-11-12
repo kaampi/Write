@@ -21,7 +21,8 @@ export const nb: Messages = {
     polishing: "Pusser…",
     illustrating: "Skriver en illustrasjonsprompt…",
     developing: "Utvikler…",
-    importing: "Importerer {current} av {total}…"
+    importing: "Importerer {current} av {total}…",
+    timeoutCountdown: "{seconds} s til tidsavbrudd"
   },
   app: {
     crash: "Appen støtte på en feil.",

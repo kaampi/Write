@@ -31,8 +31,8 @@ export interface LocalModelProvider {
   streamChat(request: CompletionRequest): AsyncGenerator<StreamChunk>;
   embed(request: EmbeddingRequest): Promise<number[][]>;
   supportsEmbeddings(): boolean;
-  listModels(): Promise<string[]>;
-  healthCheck(): Promise<boolean>;
+  listModels(signal?: AbortSignal): Promise<string[]>;
+  healthCheck(signal?: AbortSignal): Promise<boolean>;
 }
 
 export class LocalProviderConfigError extends Error {
@@ -81,6 +81,124 @@ export function assertLocalOnlyBaseUrl(baseUrl: string, providerName: string): v
       `${providerName}: "${hostname}" is a cloud API host. kaampi Write only talks to local model servers.`
     );
   }
+}
+
+export class LocalModelTimeoutError extends Error {
+  constructor(
+    public readonly providerName: string,
+    public readonly timeoutMs: number
+  ) {
+    super(`${providerName} didn't respond within ${Math.round(timeoutMs / 1000)}s.`);
+    this.name = "LocalModelTimeoutError";
+  }
+}
+
+/** chat/streamChat/embed — a cold model load can legitimately take a while. Reset on every streamed chunk, so this only ever catches genuine silence, never a slow-but-working reply. */
+export const LOCAL_MODEL_TIMEOUT_MS = 120_000;
+/** listModels/healthCheck — a metadata GET with no model load involved, so it should answer almost immediately. This is also the one call every app start makes unconditionally, so a hung server here used to freeze that check forever with no error (see BookStore.tsx's historical note on the bug this guard replaces). */
+export const LOCAL_SERVER_PROBE_TIMEOUT_MS = 15_000;
+
+function isAbortError(err: unknown): boolean {
+  return Boolean(err) && typeof err === "object" && (err as { name?: unknown }).name === "AbortError";
+}
+
+/**
+ * Bounds one request to `timeoutMs` against an internal AbortController that
+ * layers on top of the caller's own signal rather than replacing it — either
+ * one aborts the underlying call, but only the internal deadline produces a
+ * `timedOut()` of true. `poke()` pushes the deadline back out, for a
+ * streaming reply that should only time out on silence, not on total
+ * duration. `onTick` (optional) reports the live countdown once a second,
+ * for a UI that wants to show it; it's called with `null` once the request
+ * settles, as a clear "stop showing a countdown" signal.
+ */
+function makeTimeoutController(
+  callerSignal: AbortSignal | undefined,
+  timeoutMs: number,
+  onTick?: (secondsLeft: number | null) => void
+): { signal: AbortSignal; timedOut: () => boolean; poke: () => void; cleanup: () => void } {
+  const internal = new AbortController();
+  let timedOut = false;
+  let deadline = Date.now() + timeoutMs;
+
+  const fire = () => {
+    timedOut = true;
+    internal.abort();
+  };
+  let deadlineId = setTimeout(fire, timeoutMs);
+  const tick = () => onTick?.(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+  const tickId = onTick ? setInterval(tick, 1000) : undefined;
+  if (onTick) tick();
+
+  const onCallerAbort = () => internal.abort();
+  if (callerSignal?.aborted) internal.abort();
+  else callerSignal?.addEventListener("abort", onCallerAbort);
+
+  return {
+    signal: internal.signal,
+    timedOut: () => timedOut,
+    poke: () => {
+      deadline = Date.now() + timeoutMs;
+      clearTimeout(deadlineId);
+      deadlineId = setTimeout(fire, timeoutMs);
+    },
+    cleanup: () => {
+      clearTimeout(deadlineId);
+      if (tickId !== undefined) clearInterval(tickId);
+      callerSignal?.removeEventListener("abort", onCallerAbort);
+      onTick?.(null);
+    }
+  };
+}
+
+/**
+ * Wraps any LocalModelProvider so every call is bounded, regardless of
+ * whether its caller remembers to add its own timeout — the root fix for
+ * "No call into LocalModelProvider ever had a client-side timeout" (see
+ * BookStore.tsx's historical note; this replaces the handful of call sites
+ * that used to wrap themselves individually). A caller's own cancellation
+ * (e.g. a Stop button) still works exactly as before and still surfaces as
+ * a plain AbortError — only a guard-triggered abort becomes a distinct
+ * LocalModelTimeoutError, so existing "was this the user cancelling?" catch
+ * blocks elsewhere in the app don't need to change at all.
+ */
+export function withTimeoutGuard(provider: LocalModelProvider, onTick?: (secondsLeft: number | null) => void): LocalModelProvider {
+  async function guardOnce<T>(run: (signal: AbortSignal) => Promise<T>, callerSignal: AbortSignal | undefined, timeoutMs: number): Promise<T> {
+    const ctl = makeTimeoutController(callerSignal, timeoutMs, onTick);
+    try {
+      return await run(ctl.signal);
+    } catch (err) {
+      if (ctl.timedOut() && isAbortError(err)) throw new LocalModelTimeoutError(provider.name, timeoutMs);
+      throw err;
+    } finally {
+      ctl.cleanup();
+    }
+  }
+
+  async function* guardStream(request: CompletionRequest): AsyncGenerator<StreamChunk> {
+    const ctl = makeTimeoutController(request.signal, LOCAL_MODEL_TIMEOUT_MS, onTick);
+    try {
+      for await (const chunk of provider.streamChat({ ...request, signal: ctl.signal })) {
+        ctl.poke();
+        yield chunk;
+      }
+    } catch (err) {
+      if (ctl.timedOut() && isAbortError(err)) throw new LocalModelTimeoutError(provider.name, LOCAL_MODEL_TIMEOUT_MS);
+      throw err;
+    } finally {
+      ctl.cleanup();
+    }
+  }
+
+  return {
+    name: provider.name,
+    supportsEmbeddings: () => provider.supportsEmbeddings(),
+    chat: (request) => guardOnce((signal) => provider.chat({ ...request, signal }), request.signal, LOCAL_MODEL_TIMEOUT_MS),
+    streamChat: (request) => guardStream(request),
+    embed: (request) => guardOnce((signal) => provider.embed({ ...request, signal }), request.signal, LOCAL_MODEL_TIMEOUT_MS),
+    listModels: (signal) => guardOnce((s) => provider.listModels(s), signal, LOCAL_SERVER_PROBE_TIMEOUT_MS),
+    healthCheck: (signal) => guardOnce((s) => provider.healthCheck(s), signal, LOCAL_SERVER_PROBE_TIMEOUT_MS)
+  };
 }
 
 /**
@@ -132,16 +250,17 @@ export class OllamaModelProvider implements LocalModelProvider {
     return provider.streamCompletion(request);
   }
 
-  listModels(): Promise<string[]> {
+  listModels(signal?: AbortSignal): Promise<string[]> {
     return listOllamaModels({
       ...(this.baseUrl ? { baseUrl: this.baseUrl } : {}),
-      ...(this.fetchImpl ? { fetchImpl: this.fetchImpl } : {})
+      ...(this.fetchImpl ? { fetchImpl: this.fetchImpl } : {}),
+      ...(signal ? { signal } : {})
     });
   }
 
-  async healthCheck(): Promise<boolean> {
+  async healthCheck(signal?: AbortSignal): Promise<boolean> {
     try {
-      await this.listModels();
+      await this.listModels(signal);
       return true;
     } catch {
       return false;
@@ -327,8 +446,8 @@ export class OpenAICompatibleLocalProvider implements LocalModelProvider {
     return undefined;
   }
 
-  async listModels(): Promise<string[]> {
-    const response = await this.fetchImpl(`${this.baseUrl}/v1/models`, { method: "GET" });
+  async listModels(signal?: AbortSignal): Promise<string[]> {
+    const response = await this.fetchImpl(`${this.baseUrl}/v1/models`, { method: "GET", signal: signal ?? null });
     if (!response.ok) {
       throw new LocalProviderRequestError(this.name, response.status, response.statusText);
     }
@@ -340,9 +459,9 @@ export class OpenAICompatibleLocalProvider implements LocalModelProvider {
       .filter((id): id is string => typeof id === "string" && id.length > 0);
   }
 
-  async healthCheck(): Promise<boolean> {
+  async healthCheck(signal?: AbortSignal): Promise<boolean> {
     try {
-      await this.listModels();
+      await this.listModels(signal);
       return true;
     } catch {
       return false;

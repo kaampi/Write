@@ -1460,7 +1460,8 @@ export const en = {
     polishing: "Polishing…",
     illustrating: "Writing an illustration prompt…",
     developing: "Developing…",
-    importing: "Importing {current} of {total}…"
+    importing: "Importing {current} of {total}…",
+    timeoutCountdown: "{seconds}s to timeout"
   },
   app: {
     crash: "The app hit an error.",

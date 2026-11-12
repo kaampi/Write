@@ -14,6 +14,7 @@ export function BusyDialog({
   title,
   status,
   help,
+  timeoutLabel,
   cancelLabel,
   onCancel,
   returnFocus
@@ -21,6 +22,8 @@ export function BusyDialog({
   title: string;
   status: string;
   help: string;
+  /** "{seconds}s to timeout", already formatted — omitted once the request settles or hasn't started counting down yet. */
+  timeoutLabel?: string | null;
   cancelLabel: string;
   onCancel: () => void;
   returnFocus?: HTMLElement | null;
@@ -91,6 +94,11 @@ export function BusyDialog({
         <p id={`${id}-help`} className="quiet">
           {help}
         </p>
+        {timeoutLabel ? (
+          <p className="busy-dialog-timeout" role="status" aria-live="polite">
+            {timeoutLabel}
+          </p>
+        ) : null}
         <button ref={button} type="button" className="busy-dialog-cancel" onClick={onCancel}>
           {cancelLabel}
         </button>

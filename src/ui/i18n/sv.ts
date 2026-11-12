@@ -21,7 +21,8 @@ export const sv: Messages = {
     polishing: "Putsar…",
     illustrating: "Skriver en illustrationsprompt…",
     developing: "Utvecklar…",
-    importing: "Importerar {current} av {total}…"
+    importing: "Importerar {current} av {total}…",
+    timeoutCountdown: "{seconds} s till timeout"
   },
   app: {
     crash: "Appen stötte på ett fel.",

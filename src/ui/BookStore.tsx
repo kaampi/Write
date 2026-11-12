@@ -118,9 +118,11 @@ import {
 } from "@llm/ollama";
 import {
   DEFAULT_OPENAI_COMPATIBLE_BASE_URL,
+  LocalModelTimeoutError,
   LocalProviderConfigError,
   OllamaModelProvider,
   OpenAICompatibleLocalProvider,
+  withTimeoutGuard,
   type LlmEngine,
   type LocalModelProvider
 } from "@llm/provider";
@@ -242,6 +244,9 @@ function withViewTransition(update: () => void, durationMs = 320): void {
 }
 
 export function ollamaHint(error: unknown): string {
+  if (error instanceof LocalModelTimeoutError) {
+    return STORE_ERROR.timeout;
+  }
   if (error instanceof LocalProviderConfigError && error.message === STORE_ERROR.serverUrlMissing) {
     return STORE_ERROR.serverUrlMissing;
   }
@@ -250,28 +255,6 @@ export function ollamaHint(error: unknown): string {
     return STORE_ERROR.ollamaOrigins;
   }
   return message;
-}
-
-/**
- * No call into `LocalModelProvider` ever had a client-side timeout — a
- * request just waits on `fetch` forever. Most of the time that's fine (a
- * slow local model is still working), but if the server hangs (still
- * loading a model, a stalled connection, a wrong port that accepts TCP but
- * never answers) the UI has no way to tell "still thinking" from "will
- * never respond," and — since nothing ever settles — no `finally` block
- * ever runs to clear `busy` either, so the calling control stays dimmed
- * forever with no error. Two minutes is generous for a slow machine or a
- * cold model load, short of "may as well be broken."
- */
-const LOCAL_MODEL_TIMEOUT_MS = 120_000;
-
-function withRequestTimeout(abort: AbortController): { timedOut: () => boolean; clear: () => void } {
-  let timedOut = false;
-  const id = window.setTimeout(() => {
-    timedOut = true;
-    abort.abort();
-  }, LOCAL_MODEL_TIMEOUT_MS);
-  return { timedOut: () => timedOut, clear: () => window.clearTimeout(id) };
 }
 
 /**
@@ -297,9 +280,9 @@ async function listEngineModels(engine: LlmEngine, baseUrl: string): Promise<str
   const trimmed = baseUrl.trim();
   if (engine === "openai-compatible") {
     if (!trimmed) return Promise.reject(new LocalProviderConfigError(STORE_ERROR.serverUrlMissing));
-    return new OpenAICompatibleLocalProvider({ model: "", baseUrl: trimmed }).listModels();
+    return withTimeoutGuard(new OpenAICompatibleLocalProvider({ model: "", baseUrl: trimmed })).listModels();
   }
-  return new OllamaModelProvider({ model: "", ...(trimmed ? { baseUrl: trimmed } : {}) }).listModels();
+  return withTimeoutGuard(new OllamaModelProvider({ model: "", ...(trimmed ? { baseUrl: trimmed } : {}) })).listModels();
 }
 
 function activeVoice(book: Book, surface: EditorSurface, chapterId: string | null): string {
@@ -345,6 +328,14 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const [historyLimit, setHistoryLimitState] = useState(() => readProseHistoryLimit());
   const [ollamaError, setOllamaError] = useState<string | null>(null);
   const [busy, setBusy] = useState<Busy>(null);
+  /**
+   * Live countdown (seconds) to the current local-model request's timeout,
+   * fed by the same withTimeoutGuard every makeProvider() call already goes
+   * through — null whenever nothing is waiting on a response. Only one AI
+   * call ever runs at a time (every action already guards on `busy`), so a
+   * single shared field is enough; no per-call bookkeeping needed.
+   */
+  const [timeoutCountdown, setTimeoutCountdown] = useState<number | null>(null);
   /**
    * True only for the stretch of a Draft between clicking the button and
    * the model's first token arriving — nothing is visible to watch yet
@@ -435,20 +426,20 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const writingSystem = (job: string) => withWritingPrimer(job, writingPrimerRef.current);
 
   function makeProvider(modelName: string, name?: string): LocalModelProvider {
-    if (engineRef.current === "openai-compatible") {
-      return new OpenAICompatibleLocalProvider({
-        model: modelName,
-        baseUrl: baseUrlRef.current.trim() || DEFAULT_OPENAI_COMPATIBLE_BASE_URL,
-        ...(name ? { name } : {})
-      });
-    }
-    const ollamaBaseUrl = baseUrlRef.current.trim();
-    return new OllamaModelProvider({
-      model: modelName,
-      contextWindow: contextWindowRef.current,
-      ...(ollamaBaseUrl ? { baseUrl: ollamaBaseUrl } : {}),
-      ...(name ? { name } : {})
-    });
+    const raw =
+      engineRef.current === "openai-compatible"
+        ? new OpenAICompatibleLocalProvider({
+            model: modelName,
+            baseUrl: baseUrlRef.current.trim() || DEFAULT_OPENAI_COMPATIBLE_BASE_URL,
+            ...(name ? { name } : {})
+          })
+        : new OllamaModelProvider({
+            model: modelName,
+            contextWindow: contextWindowRef.current,
+            ...(baseUrlRef.current.trim() ? { baseUrl: baseUrlRef.current.trim() } : {}),
+            ...(name ? { name } : {})
+          });
+    return withTimeoutGuard(raw, setTimeoutCountdown);
   }
 
   useEffect(() => {
@@ -2088,7 +2079,6 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       abortRef.current = abort;
       setBusy("brainstorm-chat");
       setError(null);
-      const requestTimeout = withRequestTimeout(abort);
 
       try {
         const provider = makeProvider(model);
@@ -2114,13 +2104,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         }
         setBrainstormChatHistory([...priorTurns, userTurn, { role: "assistant", content: raw.trim() }]);
       } catch (err) {
-        if ((err as { name?: string }).name === "AbortError") {
-          if (requestTimeout.timedOut()) setError(STORE_ERROR.timeout);
-          return;
-        }
+        if ((err as { name?: string }).name === "AbortError") return;
         setError(ollamaHint(err));
       } finally {
-        requestTimeout.clear();
         setBusy(null);
         abortRef.current = null;
       }
@@ -2752,7 +2738,6 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       abortRef.current = abort;
       setBusy("interview");
       setError(null);
-      const requestTimeout = withRequestTimeout(abort);
 
       try {
         const provider = makeProvider(model);
@@ -2794,13 +2779,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
         }
         setInterviewHistory([...priorTurns, userTurn, { role: "assistant", content: raw.trim() }]);
       } catch (err) {
-        if ((err as { name?: string }).name === "AbortError") {
-          if (requestTimeout.timedOut()) setError(STORE_ERROR.timeout);
-          return;
-        }
+        if ((err as { name?: string }).name === "AbortError") return;
         setError(ollamaHint(err));
       } finally {
-        requestTimeout.clear();
         setBusy(null);
         abortRef.current = null;
       }
@@ -2828,7 +2809,6 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     abortRef.current = abort;
     setBusy("extract-interview");
     setError(null);
-    const requestTimeout = withRequestTimeout(abort);
     try {
       const transcript = interviewHistory
         .map((turn) => `${turn.role === "user" ? "Author" : target.label}: ${turn.content}`)
@@ -2875,13 +2855,9 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
       const nextFacts = applyExtractorDrafts(current.facts, drafts, chapter.sequence_index, chapter.id, sceneId, "interview");
       await flushSave(touch(current, { facts: nextFacts }));
     } catch (err) {
-      if ((err as { name?: string }).name === "AbortError") {
-        if (requestTimeout.timedOut()) setError(STORE_ERROR.timeout);
-        return;
-      }
+      if ((err as { name?: string }).name === "AbortError") return;
       setError(ollamaHint(err));
     } finally {
-      requestTimeout.clear();
       setBusy(null);
       abortRef.current = null;
     }
@@ -3654,6 +3630,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     historyLimit,
     ollamaError,
     busy,
+    timeoutCountdown,
     draftAwaiting,
     error,
     chapterFeedback,
