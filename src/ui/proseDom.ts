@@ -1,4 +1,4 @@
-import { HR_BLOCK, joinFlowParagraphs, QUOTE_PREFIX, splitFlowParagraphs } from "@core/proseFlow";
+import { HR_BLOCK, joinFlowParagraphs, OPENING_CURLY_QUOTE, QUOTE_PREFIX, splitFlowParagraphs } from "@core/proseFlow";
 import { normalizeSpan, type TextSpan } from "@core/textSpan";
 import {
   FORMATTING_STYLES,
@@ -117,6 +117,7 @@ export function flowBlocks(root: HTMLElement): HTMLElement[] {
  * catch that case and force a rebuild.
  */
 export function blockMarkupNeedsSync(root: HTMLElement): boolean {
+  let isFirstBlock = true;
   for (const block of flowBlocks(root)) {
     // Collapsed but NOT trimmed — a trailing space the author just typed
     // (the optional space in "> ") is real, current DOM content, not
@@ -134,6 +135,28 @@ export function blockMarkupNeedsSync(root: HTMLElement): boolean {
     // still-empty paragraph) that erased the split the browser had just
     // made, so Enter right after an hr/quote line silently did nothing.
     if (!text) continue;
+    // Only the manuscript's very first paragraph ever gets the hanging-quote
+    // drop-cap treatment — same reason as the checks below: typing the
+    // opening curly quote by hand would otherwise never pick up
+    // `.drop-cap-lead-quote` until some unrelated full rebuild came along.
+    if (isFirstBlock) {
+      isFirstBlock = false;
+      const isDropCapLeadQuote = block.classList.contains("drop-cap-lead-quote");
+      if (text.startsWith(OPENING_CURLY_QUOTE) !== isDropCapLeadQuote) return true;
+      if (isDropCapLeadQuote) {
+        // The class alone isn't enough to tell the markup is still right:
+        // typing the opening quote with nothing after it yet correctly
+        // renders with no `.drop-cap-letter` at all (nothing to make one
+        // of), and the class check above is already satisfied once body
+        // text follows — so without this, typing the rest of the line
+        // right after the quote would never go back and wrap the real
+        // first letter. Same idea as the quote-marker check below: compare
+        // what the span actually holds against what it should.
+        const expectedLetter = [...text.slice(OPENING_CURLY_QUOTE.length)][0];
+        const letterSpan = block.querySelector(":scope > .drop-cap-letter");
+        if ((letterSpan?.textContent ?? undefined) !== expectedLetter) return true;
+      }
+    }
     const isHrBlock = block.classList.contains("prose-hr");
     if (HR_BLOCK.test(text) !== isHrBlock) return true;
     const isQuoteBlock = block.classList.contains("prose-quote");

@@ -117,6 +117,33 @@ describe("htmlFromProse", () => {
     const html = htmlFromProse(text, formatting);
     expect(html).toBe('<p class="prose-quote"><span class="prose-quote-marker">&gt; </span><b>Dear</b> Sir,</p>');
   });
+
+  it("splits a chapter opening with dialogue into a hanging quote and a drop-cap letter", () => {
+    const html = htmlFromProse("“Come in,” she said.");
+    expect(html).toBe(
+      '<p class="drop-cap-lead-quote"><span class="drop-cap-quote">“</span><span class="drop-cap-letter">C</span>ome in,” she said.</p>'
+    );
+  });
+
+  it("only treats the manuscript's first paragraph this way, not a later one that also opens with dialogue", () => {
+    const html = htmlFromProse("He walked in.\n\n“Come in,” she said.");
+    expect(html).toBe(
+      "<p>He walked in.</p>" + '<p>“Come in,” she said.</p>'
+    );
+  });
+
+  it("still applies formatting across the split quote and drop-cap letter", () => {
+    const text = "“Come in,” she said.";
+    const formatting: ProseFormattingRange[] = [{ start: 0, end: 2, style: "bold" }];
+    const html = htmlFromProse(text, formatting);
+    expect(html).toBe(
+      '<p class="drop-cap-lead-quote"><span class="drop-cap-quote"><b>“</b></span><span class="drop-cap-letter"><b>C</b></span>ome in,” she said.</p>'
+    );
+  });
+
+  it("falls back to plain markup when the first paragraph is only the quote mark", () => {
+    expect(htmlFromProse("“")).toBe('<p class="drop-cap-lead-quote">“</p>');
+  });
 });
 
 describe("peelModelAsides", () => {

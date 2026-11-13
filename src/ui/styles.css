@@ -5380,7 +5380,35 @@ button:disabled {
  * confirmed live (a tester's screenshot: a flat-topped "O" with a gap
  * below it) before landing on 1.
  */
-.prose.has-drop-cap > p:first-child::first-letter {
+.prose.has-drop-cap > p:first-child:not(.drop-cap-lead-quote)::first-letter {
+  float: left;
+  font-weight: 600;
+  font-size: calc(var(--drop-cap-lines, 3) * 1.5em);
+  line-height: 1;
+  padding: 0 0.08em 0 0;
+}
+
+/*
+ * A chapter opening with dialogue — `::first-letter` would otherwise make
+ * the opening curly quote itself the whole drop cap (either alone, or
+ * fused with the real first letter depending on the engine), which isn't
+ * how books set this: the quote hangs in the margin at normal size, and
+ * the real letter gets the drop cap. `:not(.drop-cap-lead-quote)` above
+ * stands the usual rule down for this one paragraph so the two treatments
+ * never compete; `markupDropCapLeadQuote` (proseFlow.ts) is what actually
+ * splits the quote and the letter into their own spans. Both rules below
+ * are harmless no-ops when no drop cap is set (`.has-drop-cap` absent) —
+ * the quote and letter just render as plain inline text.
+ */
+.prose.has-drop-cap > p:first-child.drop-cap-lead-quote .drop-cap-quote {
+  float: left;
+  font-weight: 400;
+  font-size: 1em;
+  line-height: 1;
+  margin-left: -0.5em;
+}
+
+.prose.has-drop-cap > p:first-child.drop-cap-lead-quote .drop-cap-letter {
   float: left;
   font-weight: 600;
   font-size: calc(var(--drop-cap-lines, 3) * 1.5em);

@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.304] - 2026-11-13
+
+### Fixed
+- A chapter opening with dialogue no longer makes the opening quotation mark itself the drop cap. The quote now hangs at normal size to the left of the text block, the way books set it, and the real first letter gets the drop-cap treatment instead. Only changes how it's displayed — the manuscript's stored text (what Codex and every export reads) is unaffected.
+
 ## [1.0.303] - 2026-11-12
 
 ### Fixed

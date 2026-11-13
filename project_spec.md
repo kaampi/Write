@@ -11794,6 +11794,77 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.303 → v1.0.304 (2026-11-13): Hängande citattecken
+när anfang möter ett kapitel som börjar med dialog.** Mats: "Om
+Kapitlet inleds med ett citat blir första tecknet ". Jag tror att det
+är vanligt för böcker att det ligger ett citatecken utanför till
+vänster och att den först bokstaven ligger på sin plats. Eller hur
+tycker du att vi löser det?" — klassisk boksättning (hanging
+punctuation/optical margin alignment). Innan jag föreslog något
+kollade jag vad som faktiskt orsakade buggen: anfanget görs med ren
+CSS `::first-letter` på första stycket (`styles.css`), och enligt
+CSS-spekens egna regler ska ett ledande skiljetecken ("“") slås ihop
+med bokstaven efter till EN enhet som förstoras tillsammans — inte
+det Mats beskrev (bara citatet blir jätteanfanget). Föreslog att
+bryta ut citatet i en egen `<span>` som hänger i marginalen i normal
+storlek, och låta den riktiga bokstaven bli anfanget — grundat mot
+koden, inte bara en estetisk gissning.
+
+Mats frågade sedan explicit vad som händer när en annan app (deras
+ljudboksapp) läser manuset via Codex — bekräftade att fixen bara
+ändrar HUR stycket visas, aldrig den lagrade `chapter.prose`-strängen
+(Codex delar den rå texten oförändrad, bekräftat av Mats: "Den hämtar
+din text via Codex och skapar en egen arbetsfil"). Mats: "Ja gör det."
+
+Byggde i `proseFlow.ts`: `htmlFromProse` kollar nu om manuskriptets
+FÖRSTA stycke (bara det, aldrig senare dialog-stycken) börjar med
+`smartQuotes.ts`s öppningscitat ("“", nu exporterad konstant
+`OPENING_CURLY_QUOTE`), och delar i så fall upp citatet och den
+riktiga första bokstaven i varsin `<span>`
+(`markupDropCapLeadQuote`), med en `drop-cap-lead-quote`-klass på
+`<p>`:n som i CSS stänger av den vanliga `::first-letter`-regeln för
+just det stycket (`:not(.drop-cap-lead-quote)`) så de två aldrig
+konkurrerar — två nya CSS-regler ger citatet normal storlek hängande
+i marginalen (`margin-left: -0.5em`) och bokstaven den vanliga
+anfang-storleken. Helt overksamt (ren text) när anfang är avstängt.
+
+**En verklig bugg hittad och fixad under live-verifieringen, inte
+bara designat på papper:** `blockMarkupNeedsSync` (proseDom.ts, redan
+den mekanism som låter `---` och `>` uppgraderas medan man skriver)
+behövde samma tillägg — annars skriver man in "“" ensamt (ingen
+bokstav än, korrekt utan span), appen synkar klassen EN gång, och
+sedan skriver man resten av meningen rakt in i den levande DOM:en
+utan att någonsin trigga om en full ombyggnad, eftersom klass-checken
+redan var nöjd. Upptäckt genom att faktiskt skriva in text live i en
+riktig körande app (inte bara läsa koden) och se att den slutgiltiga
+markupen saknade span-uppdelningen trots korrekt `htmlFromProse`-
+output isolerat testat. Fixen: jämför `.drop-cap-letter`-spannets
+faktiska innehåll mot den riktiga aktuella första bokstaven, samma
+mönster som det befintliga citat-markör-innehålls-checken strax
+under gör för `>`-citat.
+
+**Avsiktligt avgränsat:** rör bara den levande redigeraren
+(`ProseCanvas.tsx`/`proseFlow.ts`). Publish-exporten (HTML/ePub) har
+sin egen, helt separata parallella rendering-pipeline
+(`manuscriptExport.ts`s `htmlParagraphs`/`dropCapCss`) med exakt
+samma `::first-letter`-mekanism och alltså troligen samma bugg där —
+men IDML/ODT-exporterna använder sina respektive programs egna,
+icke-CSS-baserade anfang-mekanismer och berörs inte alls. Inte
+byggt än; flaggat för Mats som en separat, medveten lucka snarare
+än att tyst utöka omfattningen.
+
+Nya tester i `tests/core/prose-flow.test.ts` (4 nya): korrekt
+uppdelning av citat+bokstav, att bara första stycket påverkas (ett
+senare dialog-stycke lämnas orört), att formatering (fet/kursiv) på
+den uppdelade citat+bokstav-biten fortfarande fungerar, och
+degenererade fallet där hela stycket bara är citattecknet. `tsc
+--noEmit` rent, 1296/1296 tester gröna, `npm run build` rent.
+Live-verifierat med Playwright: skrev in dialog live i en riktig
+körande app med anfang påslaget — skärmdump visar citatet hängande
+till vänster i normal storlek och ett stort "C" som anfang; med
+anfang avstängt renderas exakt samma text helt normalt, inga spår
+av uppdelningen.
+
 **Ändringslogg v1.0.302 → v1.0.303 (2026-11-12): Timeout på alla
 lokala modell-anrop, plus en nedräkning + avbryt-knapp i gränssnittet.**
 Mats delade en användarkommentar: "the Write app in unresponsive...

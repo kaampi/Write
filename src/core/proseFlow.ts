@@ -147,11 +147,14 @@ function tidyPeeledProse(text: string): string {
     .trim();
 }
 
+/** The curly opening double quote `smartQuotes.ts` produces — the one case a chapter's first paragraph can start with that calls for hanging punctuation (see `markupDropCapLeadQuote`). Exported so `proseDom.ts` can tell whether a live-typed first paragraph still needs upgrading to that markup, the same reason `HR_BLOCK`/`QUOTE_PREFIX` are. */
+export const OPENING_CURLY_QUOTE = "“";
+
 export function htmlFromProse(text: string, formatting: ProseFormattingRange[] = []): string {
   const paras = splitFlowParagraphsWithOffsets(text);
   if (paras.length === 0) return "<p><br></p>";
   return paras
-    .map((para) => {
+    .map((para, index) => {
       // The hr class sits on the <p> itself, not a <span> inside it — a
       // <span> forced to display:block to render as a line silently broke
       // the browser's own Enter-key paragraph split (execCommand
@@ -160,10 +163,40 @@ export function htmlFromProse(text: string, formatting: ProseFormattingRange[] =
       // The <p> is block-level by its tag already, so none of this CSS
       // needs forcing an inline element's display, and Enter keeps working.
       if (HR_BLOCK.test(para.text)) return `<p class="prose-hr">${escapeHtml(para.text)}</p>`;
+      if (index === 0 && para.text.startsWith(OPENING_CURLY_QUOTE)) {
+        return `<p class="drop-cap-lead-quote">${markupDropCapLeadQuote(para.text, para.start, formatting)}</p>`;
+      }
       const cls = QUOTE_PREFIX.test(para.text) ? ' class="prose-quote"' : "";
       return `<p${cls}>${markupProseBlock(para.text, para.start, formatting)}</p>`;
     })
     .join("");
+}
+
+/**
+ * A chapter opening with dialogue — `“Come in," she said.` — used to make
+ * the opening curly quote itself the whole drop cap whenever one is active:
+ * not how books do it (Mats: "jag tror att det är vanligt för böcker att
+ * det ligger ett citattecken utanför till vänster och att den först
+ * bokstaven ligger på sin plats"). Peels the quote into its own span so
+ * `styles.css` can hang it in the left margin at normal size, and the real
+ * first letter into its own span so it gets the drop-cap treatment instead
+ * — `.drop-cap-lead-quote` on the `<p>` tells that CSS to stand down its
+ * usual `::first-letter` rule so the two don't double up. Harmless when no
+ * drop cap is set: both spans then render as plain inline text. Only ever
+ * touches how the manuscript's very first paragraph is DISPLAYED — the
+ * stored text itself (what Codex and every export reads) is untouched.
+ */
+function markupDropCapLeadQuote(block: string, blockStart: number, formatting: ProseFormattingRange[]): string {
+  const rest = block.slice(OPENING_CURLY_QUOTE.length);
+  const letter = [...rest][0];
+  if (!letter) return markupProseBlockBody(block, blockStart, formatting);
+  const letterStart = blockStart + OPENING_CURLY_QUOTE.length;
+  const afterLetter = rest.slice(letter.length);
+  return (
+    `<span class="drop-cap-quote">${markupFormattedSlice(OPENING_CURLY_QUOTE, blockStart, formatting)}</span>` +
+    `<span class="drop-cap-letter">${markupFormattedSlice(letter, letterStart, formatting)}</span>` +
+    markupProseBlockBody(afterLetter, letterStart + letter.length, formatting)
+  );
 }
 
 function markupProseBlock(block: string, blockStart: number, formatting: ProseFormattingRange[]): string {
