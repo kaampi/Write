@@ -23,5 +23,5 @@
       "@ui/*": ["src/ui/*"]
     }
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "e2e", "playwright.config.ts"]
 }

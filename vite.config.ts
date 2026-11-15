@@ -1,5 +1,6 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from "vite";
+import { configDefaults } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 
@@ -19,6 +20,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    globals: true
+    globals: true,
+    // e2e/ belongs to Playwright (npm run test:e2e), not vitest.
+    exclude: [...configDefaults.exclude, "e2e/**"]
   }
 });

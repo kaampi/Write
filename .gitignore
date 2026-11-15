@@ -11,3 +11,5 @@ coverage/
 .env.*
 !.env.example
 .scratch/
+test-results/
+playwright-report/

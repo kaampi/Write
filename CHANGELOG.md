@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.310] - 2026-11-15
+
+### Added
+- A fixed end-to-end suite for the core author flows, run in a real browser with `npm run test:e2e` (Playwright, in `e2e/`): create a book, write prose and find it after a reload, lock a character into the Story Bible, open Stats (open text and whole manuscript), and export HTML. It builds the app and serves the production build itself, and each test starts from an empty browser profile. It is separate from `npm test`, which stays browser-free and fast; vitest ignores `e2e/`. Needs a Chromium install (`npx playwright install chromium`). No app code changed.
+
 ## [1.0.309] - 2026-11-15
 
 ### Fixed

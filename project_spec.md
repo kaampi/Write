@@ -11794,6 +11794,47 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.309 → v1.0.310 (2026-11-15): Fast Playwright-svit
+för kärnflödena.** Uppgift 5 i samma arbetsinstruktion: "Fast
+Playwright-svit för kärnflödena ... föreslå hur och var först, vitest
+har ingen DOM-miljö." Mats godkände förslaget ("Ja") efter att ha frågat
+vad jag rekommenderade; jag rekommenderade A `@playwright/test` som
+devDependency, B fem flöden, C CI orört, och det blev så.
+
+Upplägg: `e2e/` (egen mapp, vitest utesluter den via `test.exclude`),
+`playwright.config.ts` (bygger och kör `vite preview` på port 4180, ny
+webbläsarprofil per test, retry bara i CI), skriptet `npm run test:e2e`
+som INTE ingår i `npm test`. `@playwright/test` är pinnat till 1.63.0 så
+det matchar den förinstallerade Chromium här. `tsconfig.json` tar med
+`e2e` och `playwright.config.ts`. `.gitignore` fick `test-results/` och
+`playwright-report/`.
+
+Fem tester i `e2e/core-flows.spec.ts`: skapa bok; skriv prosa och hitta
+den efter omladdning; lås en karaktär och se fliken "Characters 1" även
+efter omladdning; öppna Stats (Open text + Whole manuscript); exportera
+HTML och kontrollera att filen innehåller titel och prosa. Inga falska
+modellservrar behövdes: inget av flödena anropar modellen.
+
+Saker jag lärde mig av appen som sviten måste hantera: (1) en ny, tom
+bok öppnar Handboken som modal över editorn, så `createBook` stänger den;
+(2) editorn har ingen tillgänglig etikett, så den väljs som
+`[role=textbox][contenteditable]`; (3) Publish-panelen är ingen
+`role=dialog`; (4) Chromium har `showSaveFilePicker` (inbyggd dialog som
+Playwright inte kan styra), så exporttestet tar bort den och appen tar då
+den vanliga nedladdningsvägen — samma som Firefox/Safari; (5) Stats-flikarna
+är `role=tab`.
+
+Verifierat: 5/5 gröna, 15/15 med `--repeat-each=3` (inget flimmer),
+vitest 1335/1335 oförändrat och ignorerar `e2e/`, `tsc` ren. Mutationskoll:
+när jag tillfälligt tömde HTML-exportens textkörningar föll exporttestet
+med "Expected substring: Emma låste dörren…" — alltså larmar sviten på
+riktigt (ändringen återställd). Inte gjort: CI-koppling (Mats val: orört
+tills sviten gått stabilt några gånger; ett manuellt workflow kan läggas
+till senare), och Anfang-/anslutningskontrollerna från uppgift 3–4 är inte
+flyttade in som tester ännu.
+
+v1.0.309 → v1.0.310.
+
 **Ändringslogg v1.0.308 → v1.0.309 (2026-11-15): Anfang över två tecken
 i ODT och IDML.** Uppföljning på uppgift 4. Mats efter min rapport om att
 ODT (`style:length="1"`) och IDML (`DropCapCharacters="1"`) släpper bara
