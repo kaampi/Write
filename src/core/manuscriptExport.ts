@@ -1441,8 +1441,15 @@ function idmlBlockStyleName(block: IdmlBlock): string {
   return block.kind === "sceneBreak" ? IDML_STYLE_SCENE_BREAK : block.styleName;
 }
 
+/** How many characters a drop cap covers: 2 when the paragraph opens with a curly “, so the quote and the real first letter drop together instead of the quote standing alone as the cap. */
+function dropCapCharacters(text: string): 1 | 2 {
+  return text.startsWith(OPENING_CURLY_QUOTE) && [...text.slice(OPENING_CURLY_QUOTE.length)].length > 0 ? 2 : 1;
+}
+
 function idmlBlockExtraAttrs(block: IdmlBlock): string {
-  return block.kind === "paragraph" && block.dropCapLines > 0 ? ` DropCapCharacters="1" DropCapLines="${block.dropCapLines}"` : "";
+  return block.kind === "paragraph" && block.dropCapLines > 0
+    ? ` DropCapCharacters="${dropCapCharacters(block.text)}" DropCapLines="${block.dropCapLines}"`
+    : "";
 }
 
 /**
@@ -1454,7 +1461,7 @@ function idmlBlockExtraAttrs(block: IdmlBlock): string {
  */
 function idmlBlockGroupKey(block: IdmlBlock): string {
   if (block.kind === "sceneBreak") return "scene";
-  return `${block.styleName}|${block.dropCapLines > 0 ? "drop" : ""}|${block.forceBold ? "bold" : ""}`;
+  return `${block.styleName}|${block.dropCapLines > 0 ? `drop${dropCapCharacters(block.text)}` : ""}|${block.forceBold ? "bold" : ""}`;
 }
 
 /** Groups `blocks` into the runs of consecutive same-style paragraphs real InDesign itself collapses into one `<ParagraphStyleRange>` (see `idmlBlockRuns`'s comment), then renders each group once. */
@@ -2259,7 +2266,7 @@ function odtProse(
       .map((line) => {
         if (!line.text) return `<text:p text:style-name="Standard"/>`;
         if (HR_BLOCK.test(line.text)) return `<text:p text:style-name="SceneBreak">${xmlEscape(sceneBreakSymbol(sceneBreakStyle))}</text:p>`;
-        const lineStyle = firstUsed || !dropCap ? "Standard" : "StandardDropCap";
+        const lineStyle = firstUsed || !dropCap ? "Standard" : dropCapCharacters(line.text) === 2 ? "StandardDropCapQuote" : "StandardDropCap";
         firstUsed = true;
         const body = formattedRuns(line.text, line.start, formatting).map(odtRun).join("");
         return `<text:p text:style-name="${lineStyle}">${body}</text:p>`;
@@ -2269,7 +2276,7 @@ function odtProse(
   return splitFlowParagraphsWithOffsets(text)
     .map((paragraph, index) => {
       if (HR_BLOCK.test(paragraph.text)) return `<text:p text:style-name="SceneBreak">${xmlEscape(sceneBreakSymbol(sceneBreakStyle))}</text:p>`;
-      const firstStyle = dropCap ? "IndentedFirstDropCap" : "IndentedFirst";
+      const firstStyle = dropCap ? (dropCapCharacters(paragraph.text) === 2 ? "IndentedFirstDropCapQuote" : "IndentedFirstDropCap") : "IndentedFirst";
       const body = formattedRuns(paragraph.text, paragraph.start, formatting).map(odtRun).join("");
       return `<text:p text:style-name="${index === 0 ? firstStyle : "Indented"}">${body}</text:p>`;
     })
@@ -2346,6 +2353,12 @@ function odtStyles(
     </style:style>
     <style:style style:name="IndentedFirstDropCap" style:family="paragraph" style:parent-style-name="IndentedFirst">
       <style:paragraph-properties><style:drop-cap style:lines="${dropCapLines}" style:length="1"/></style:paragraph-properties>
+    </style:style>
+    <style:style style:name="StandardDropCapQuote" style:family="paragraph" style:parent-style-name="Standard">
+      <style:paragraph-properties><style:drop-cap style:lines="${dropCapLines}" style:length="2"/></style:paragraph-properties>
+    </style:style>
+    <style:style style:name="IndentedFirstDropCapQuote" style:family="paragraph" style:parent-style-name="IndentedFirst">
+      <style:paragraph-properties><style:drop-cap style:lines="${dropCapLines}" style:length="2"/></style:paragraph-properties>
     </style:style>`
       : "";
   const sceneBreakColor = sceneBreakStyle === "plain" ? "" : ` fo:color="${SCENE_BREAK_ORNAMENTS[sceneBreakStyle].symbol}"`;

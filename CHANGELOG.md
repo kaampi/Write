@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.309] - 2026-11-15
+
+### Fixed
+- Drop cap (Anfang) in Publish → ODT and IDML now covers two characters when a chapter opens with a curly “, so the quote and the first letter drop together instead of the quote standing alone as the cap. ODT gets separate `…DropCapQuote` paragraph styles with `style:length="2"`; IDML sets `DropCapCharacters="2"` on that paragraph. Chapters without an opening quote keep one character. (HTML/ePub hang the quote in the margin instead, since 1.0.308.)
+
 ## [1.0.308] - 2026-11-15
 
 ### Fixed

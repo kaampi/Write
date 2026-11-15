@@ -1069,6 +1069,34 @@ describe("drop cap", () => {
       expect(html.match(/drop-cap-lead-quote"/g)).toHaveLength(1);
     });
 
+    it("makes the ODT drop cap cover the quote and the letter (length 2), only for that paragraph's style", () => {
+      const doc = buildManuscriptExport(bookOpeningWithQuote());
+      const spaced = new TextDecoder().decode(packOdt(doc));
+      expect(spaced).toContain('<text:p text:style-name="StandardDropCapQuote">“Come in,” she said.</text:p>');
+      expect(spaced).toContain('<style:style style:name="StandardDropCapQuote" style:family="paragraph" style:parent-style-name="Standard">');
+      expect(spaced).toContain('style:lines="3" style:length="2"');
+      const indented = new TextDecoder().decode(packOdt(doc, undefined, "indented"));
+      expect(indented).toContain('<text:p text:style-name="IndentedFirstDropCapQuote">“Come in,” she said.</text:p>');
+      // A quote-less opening keeps the one-character styles.
+      expect(new TextDecoder().decode(packOdt(buildManuscriptExport(bookWithDropCap(3))))).toContain(
+        '<text:p text:style-name="StandardDropCap">Emma'
+      );
+    });
+
+    it("makes the IDML drop cap cover two characters for a quote opening, one otherwise", async () => {
+      const storiesOf = async (book: ReturnType<typeof bookWithDropCap>) => {
+        const files = unzipStore(await packIdml(buildManuscriptExport(book)));
+        return Object.entries(files)
+          .filter(([name]) => name.startsWith("Stories/"))
+          .map(([, bytes]) => new TextDecoder().decode(bytes))
+          .join("\n");
+      };
+      expect(await storiesOf(bookOpeningWithQuote())).toContain('DropCapCharacters="2" DropCapLines="3"');
+      const plain = await storiesOf(bookWithDropCap(3));
+      expect(plain).toContain('DropCapCharacters="1" DropCapLines="3"');
+      expect(plain).not.toContain('DropCapCharacters="2"');
+    });
+
     it("leaves a quote-less opening on the plain ::first-letter path", () => {
       const html = formatExportHtml(buildManuscriptExport(bookWithDropCap(3)));
       expect(html).not.toContain("drop-cap-lead-quote\"");

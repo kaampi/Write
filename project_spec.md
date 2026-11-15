@@ -11794,6 +11794,29 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.308 → v1.0.309 (2026-11-15): Anfang över två tecken
+i ODT och IDML.** Uppföljning på uppgift 4. Mats efter min rapport om att
+ODT (`style:length="1"`) och IDML (`DropCapCharacters="1"`) släpper bara
+citattecknet: "Sätt längd 2".
+
+Ändrat i `manuscriptExport.ts`: ny `dropCapCharacters(text)` (2 om stycket
+börjar med “ och har minst ett tecken efter, annars 1). ODT: nya
+styles `StandardDropCapQuote` och `IndentedFirstDropCapQuote` med
+`style:length="2"`, valda för just det första stycket (längden sitter i
+stilen, inte i stycket). IDML: `DropCapCharacters` sätts per stycke, och
+grupperingsnyckeln fick med teckenantalet så att ett stycke med 2 aldrig
+slås ihop med ett med 1. Skillnad mot HTML/ePub (v1.0.308): där hänger
+citattecknet i marginalen och bara bokstaven droppas; i ODT/IDML finns
+inget motsvarande hängande tecken i formatet, så citattecken och bokstav
+droppas ihop — det är vad "längd 2" betyder. Lagrad text rörs inte.
+
+Verifierat: 2 nya tester (ODT-stilar/stycken i båda lägen, IDML 2 resp. 1
+tecken), 1335/1335 gröna, `tsc` och bygge rena. Inte verifierat: jag har
+inte öppnat ODT/IDML-filerna i LibreOffice eller InDesign här, så hur de
+renderar tvåteckens-Anfangen är otestat.
+
+v1.0.308 → v1.0.309.
+
 **Ändringslogg v1.0.307 → v1.0.308 (2026-11-15): Anfang med
 citattecken i Publish-exporten.** Uppgift 4 i samma arbetsinstruktion:
 "Anfang/drop cap i Publish-exporten ... bekräfta felet först, fixa
