@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.314] - 2026-11-15
+
+### Changed
+- Internal, no visible change: everything `BookStore.tsx` keeps about the local model — engine, server address, the writing/review/translate model choices, context window, history limit, the connection check and the one `makeProvider` that builds a configured provider — moved into its own hook, `src/ui/bookStore/useModelSettings.ts`. `BookStore.tsx` is now about 340 lines shorter than before the split started.
+
 ## [1.0.313] - 2026-11-15
 
 ### Changed

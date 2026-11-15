@@ -11794,6 +11794,29 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.313 → v1.0.314 (2026-11-15): Uppgift 7, del A
+steg 2 — modell och anslutning som egen hook.** Allt som
+`BookStoreProvider` höll om den lokala modellen flyttade verbatim till
+`src/ui/bookStore/useModelSettings.ts`: tillstånden (models, model,
+writingPrimer, reviewModel, translateModel, engine, baseUrl,
+contextWindow, historyLimit, ollamaError, connection, timeoutCountdown),
+speglingsrefarna, `writingSystem`, `makeProvider`, `checkConnection` med
+fokus-omkontrollen, och alla set*-funktioner inklusive
+`suggestContextWindow`. Hooken returnerar även `historyLimitRef` och
+`contextWindowRef`, eftersom BookStores memoiserade callbacks läser dem
+som refs (utan att lista dem som beroenden) — det beteendet är bevarat
+exakt. Ordningen i hooken håller refarna före `checkConnection` och
+`makeProvider`, som läser dem. Oanvända importer i BookStore städades.
+`BookStore.tsx` 3639 → 3444 rader.
+
+Verifierat: `tsc` ren, 1343/1343 tester, Playwright 6/6, bygge rent, och
+live-kontrollerna från v1.0.307 körda om (nothing/blocked/no-models/401/
+ansluten/AI-fritt + fokus-omkontroll) med identiskt resultat — den
+logiken var den som flyttade, och den har inget vitest-skyddsnät, så det
+var den kontroll som räknades. Ingen beteendeändring.
+
+v1.0.313 → v1.0.314.
+
 **Ändringslogg v1.0.312 → v1.0.313 (2026-11-15): Uppgift 7, del A
 steg 1 — rena hjälpfunktioner ut ur BookStore.** Enligt planen Mats
 godkände: de rena delarna överst i `BookStore.tsx` (rad 147–293:

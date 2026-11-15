@@ -79,15 +79,7 @@ import {
   translateChapterUserPrompt
 } from "@core/generateProse";
 import { createLanguageVersion } from "@core/translation";
-import {
-  readProseHistoryLimit,
-  recordProseRevision,
-  restoreProseRevision,
-  rewriteHistoryOp,
-  writeProseHistoryLimit,
-  type ProseHistoryOp
-} from "@core/proseHistory";
-import { clearWritingPrimer, readWritingPrimer, withWritingPrimer, writeWritingPrimer } from "@core/writingPrimer";
+import { recordProseRevision, restoreProseRevision, rewriteHistoryOp, type ProseHistoryOp } from "@core/proseHistory";
 import { peelModelAsides } from "@core/proseFlow";
 import { resolveReader, kidlitReader } from "@core/reader";
 import { applyExtend, applyReplace, normalizeSpan, surroundingPassage, type TextSpan } from "@core/textSpan";
@@ -107,24 +99,6 @@ import { SPLIT_SYSTEM, parseSplitSuggestion, splitUserPrompt } from "@core/sente
 import { nowIso, slugify } from "@core/ids";
 import type { CorePredicate } from "@core/predicates";
 import { mergeInheritedFacts, type FactDraft, type FactOrigin, type NarrativeFact } from "@core/NarrativeFact";
-import {
-  DEFAULT_OLLAMA_MODEL,
-  DEFAULT_REVIEW_MODEL,
-  getOllamaModelContextLength,
-  listOllamaModels,
-  pickListedOllamaModel,
-  pickListedReviewModel
-} from "@llm/ollama";
-import {
-  DEFAULT_OPENAI_COMPATIBLE_BASE_URL,
-  OllamaModelProvider,
-  OpenAICompatibleLocalProvider,
-  withTimeoutGuard,
-  type LlmEngine,
-  type LocalModelProvider
-} from "@llm/provider";
-import { readContextWindow, writeContextWindow } from "@llm/contextWindow";
-import { probeConnection, type ConnectionStatus } from "@llm/connectionStatus";
 import { BookNotFoundError, BookRepository } from "@persistence/Repository";
 import { coreBookSink, coreSnapshotOutbox, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
 import type { CoreBookRevision } from "@core/coreRevisionRestore";
@@ -139,7 +113,8 @@ import { forgetLastJsonBackup, recordLastJsonBackup } from "./jsonBackupStamp";
 import { type PromptDebugEntry, type PromptDebugMessage, type PromptOperation, type PromptDebugTarget } from "./promptDebug";
 import { BookStoreContext, type BookStoreValue, type Busy, type PolishDraft } from "./useBookStore";
 import { count, format, getMessages, STORE_ERROR } from "./i18n";
-import { ANALYZE_MAX_TOKENS, BASE_URL_KEY, CRITIC_MAX_TOKENS, ENGINE_KEY, EXTRACTOR_MAX_TOKENS, LAST_BOOK_KEY, MODEL_KEY, RELATIONSHIP_MIRROR_MAX_TOKENS, REVIEW_MODEL_KEY, TRANSLATE_MODEL_KEY, activeReader, activeVoice, connectionErrorCode, lastPositionKey, ollamaHint, polishMaxTokens, readEngine, readLastPosition, withViewTransition } from "./bookStore/helpers";
+import { useModelSettings } from "./bookStore/useModelSettings";
+import { ANALYZE_MAX_TOKENS, CRITIC_MAX_TOKENS, EXTRACTOR_MAX_TOKENS, LAST_BOOK_KEY, RELATIONSHIP_MIRROR_MAX_TOKENS, activeReader, activeVoice, lastPositionKey, ollamaHint, polishMaxTokens, readLastPosition, withViewTransition } from "./bookStore/helpers";
 
 export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const repo = useMemo(() => new BookRepository(undefined, coreBookSink), []);
@@ -148,39 +123,36 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const [book, setBook] = useState<Book | null>(null);
   const [chapterId, setChapterIdState] = useState<string | null>(null);
   const [surface, setSurface] = useState<EditorSurface>("brainstorm");
-  const [models, setModels] = useState<string[]>([]);
-  const [model, setModelState] = useState(() => localStorage.getItem(MODEL_KEY) ?? DEFAULT_OLLAMA_MODEL);
-  const [writingPrimer, setWritingPrimerState] = useState(() =>
-    readWritingPrimer(localStorage.getItem(MODEL_KEY) ?? DEFAULT_OLLAMA_MODEL)
-  );
-  const [reviewModel, setReviewModelState] = useState(
-    () => localStorage.getItem(REVIEW_MODEL_KEY) ?? DEFAULT_REVIEW_MODEL
-  );
-  /**
-   * AI model for chapter translation (roadmap-ideas.md #43). Empty string
-   * means "use the Writing model" — unlike `reviewModel`, this has no
-   * hardcoded default of its own and no auto-pick-on-model-list-load
-   * logic, since falling back to whatever `model` already resolved to is
-   * simpler and always valid.
-   */
-  const [translateModel, setTranslateModelState] = useState(
-    () => localStorage.getItem(TRANSLATE_MODEL_KEY) ?? ""
-  );
-  const [engine, setEngineState] = useState<LlmEngine>(readEngine);
-  const [baseUrl, setBaseUrlState] = useState(() => localStorage.getItem(BASE_URL_KEY) ?? "");
-  const [contextWindow, setContextWindowState] = useState(() => readContextWindow());
-  const [historyLimit, setHistoryLimitState] = useState(() => readProseHistoryLimit());
-  const [ollamaError, setOllamaError] = useState<string | null>(null);
-  const [connection, setConnection] = useState<ConnectionStatus>({ kind: "checking" });
+  const {
+    models,
+    model,
+    writingPrimer,
+    reviewModel,
+    translateModel,
+    engine,
+    baseUrl,
+    contextWindow,
+    historyLimit,
+    ollamaError,
+    connection,
+    timeoutCountdown,
+    historyLimitRef,
+    contextWindowRef,
+    writingSystem,
+    makeProvider,
+    checkConnection,
+    setModel,
+    setWritingPrimer,
+    resetWritingPrimer,
+    setReviewModel,
+    setTranslateModel,
+    setEngine,
+    setBaseUrl,
+    setContextWindow,
+    suggestContextWindow,
+    setHistoryLimit
+  } = useModelSettings();
   const [busy, setBusy] = useState<Busy>(null);
-  /**
-   * Live countdown (seconds) to the current local-model request's timeout,
-   * fed by the same withTimeoutGuard every makeProvider() call already goes
-   * through — null whenever nothing is waiting on a response. Only one AI
-   * call ever runs at a time (every action already guards on `busy`), so a
-   * single shared field is enough; no per-call bookkeeping needed.
-   */
-  const [timeoutCountdown, setTimeoutCountdown] = useState<number | null>(null);
   /**
    * True only for the stretch of a Draft between clicking the button and
    * the model's first token arriving — nothing is visible to watch yet
@@ -253,39 +225,11 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const proofreadLock = useRef(false);
   const developmentalLock = useRef(false);
   const saveTimer = useRef<number | null>(null);
-  const writingPrimerRef = useRef(writingPrimer);
-  const historyLimitRef = useRef(historyLimit);
-  const engineRef = useRef(engine);
-  const baseUrlRef = useRef(baseUrl);
-  const contextWindowRef = useRef(contextWindow);
 
   bookRef.current = book;
   chapterRef.current = chapterId;
   surfaceRef.current = surface;
-  writingPrimerRef.current = writingPrimer;
-  historyLimitRef.current = historyLimit;
-  engineRef.current = engine;
-  baseUrlRef.current = baseUrl;
-  contextWindowRef.current = contextWindow;
 
-  const writingSystem = (job: string) => withWritingPrimer(job, writingPrimerRef.current);
-
-  function makeProvider(modelName: string, name?: string): LocalModelProvider {
-    const raw =
-      engineRef.current === "openai-compatible"
-        ? new OpenAICompatibleLocalProvider({
-            model: modelName,
-            baseUrl: baseUrlRef.current.trim() || DEFAULT_OPENAI_COMPATIBLE_BASE_URL,
-            ...(name ? { name } : {})
-          })
-        : new OllamaModelProvider({
-            model: modelName,
-            contextWindow: contextWindowRef.current,
-            ...(baseUrlRef.current.trim() ? { baseUrl: baseUrlRef.current.trim() } : {}),
-            ...(name ? { name } : {})
-          });
-    return withTimeoutGuard(raw, setTimeoutCountdown);
-  }
 
   useEffect(() => {
     const seriesId = book?.series_id;
@@ -366,70 +310,6 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(lastPositionKey(book.id), JSON.stringify({ surface, chapterId }));
   }, [book?.id, surface, chapterId]);
 
-  const connectionRef = useRef(connection);
-  connectionRef.current = connection;
-  const probeSeq = useRef(0);
-  const lastProbeAt = useRef(0);
-
-  /**
-   * Asks the configured server what it has and records the honest answer —
-   * see connectionStatus.ts for why "nothing answered" and "answered but
-   * blocked us" are told apart. `quiet` is for the background re-check
-   * when the window regains focus: no "checking" flash, and nothing is
-   * touched if the answer is the same as before. A newer check always
-   * wins over an older one still in flight.
-   */
-  const checkConnection = useCallback(async (options: { quiet?: boolean } = {}): Promise<ConnectionStatus> => {
-    const seq = ++probeSeq.current;
-    lastProbeAt.current = Date.now();
-    if (!options.quiet) setConnection({ kind: "checking" });
-    const status = await probeConnection(engineRef.current, baseUrlRef.current);
-    if (seq !== probeSeq.current) return status;
-    if (options.quiet && JSON.stringify(status) === JSON.stringify(connectionRef.current)) return status;
-    setConnection(status);
-    setModels(status.kind === "connected" ? status.models : []);
-    setOllamaError(connectionErrorCode(status));
-    if (status.kind === "connected") {
-      const names = status.models;
-      const preferred = localStorage.getItem(MODEL_KEY) ?? DEFAULT_OLLAMA_MODEL;
-      const picked = pickListedOllamaModel(preferred, names);
-      if (picked) {
-        setModelState(picked);
-        localStorage.setItem(MODEL_KEY, picked);
-        setWritingPrimerState(readWritingPrimer(picked));
-      }
-      const reviewPreferred = localStorage.getItem(REVIEW_MODEL_KEY) ?? DEFAULT_REVIEW_MODEL;
-      const reviewPicked = pickListedReviewModel(reviewPreferred, names);
-      if (reviewPicked) {
-        setReviewModelState(reviewPicked);
-        localStorage.setItem(REVIEW_MODEL_KEY, reviewPicked);
-      }
-    }
-    return status;
-  }, []);
-
-  useEffect(() => {
-    void checkConnection();
-  }, [engine, baseUrl, checkConnection]);
-
-  // Start Ollama in another window, come back, and it just works — no
-  // polling, only a re-check when the window regains focus, and only while
-  // there is nothing connected to lose.
-  useEffect(() => {
-    function recheck() {
-      if (document.visibilityState === "hidden") return;
-      const kind = connectionRef.current.kind;
-      if (kind === "connected" || kind === "checking" || kind === "no-address") return;
-      if (Date.now() - lastProbeAt.current < 3000) return;
-      void checkConnection({ quiet: true });
-    }
-    window.addEventListener("focus", recheck);
-    document.addEventListener("visibilitychange", recheck);
-    return () => {
-      window.removeEventListener("focus", recheck);
-      document.removeEventListener("visibilitychange", recheck);
-    };
-  }, [checkConnection]);
 
   const flushSave = useCallback(async (next: Book) => {
     if (saveTimer.current !== null) {
@@ -966,77 +846,6 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     [refresh, repo]
   );
 
-  const setModel = useCallback((name: string) => {
-    setModelState(name);
-    localStorage.setItem(MODEL_KEY, name);
-    setWritingPrimerState(readWritingPrimer(name));
-  }, []);
-
-  const setWritingPrimer = useCallback((text: string) => {
-    setWritingPrimerState(text);
-    writeWritingPrimer(model, text);
-  }, [model]);
-
-  const resetWritingPrimer = useCallback(() => {
-    clearWritingPrimer(model);
-    setWritingPrimerState(readWritingPrimer(model));
-  }, [model]);
-
-  const setReviewModel = useCallback((name: string) => {
-    setReviewModelState(name);
-    localStorage.setItem(REVIEW_MODEL_KEY, name);
-  }, []);
-
-  const setTranslateModel = useCallback((name: string) => {
-    setTranslateModelState(name);
-    localStorage.setItem(TRANSLATE_MODEL_KEY, name);
-  }, []);
-
-  const setEngine = useCallback((next: LlmEngine) => {
-    setEngineState(next);
-    localStorage.setItem(ENGINE_KEY, next);
-    if (next === "openai-compatible" && !localStorage.getItem(BASE_URL_KEY)) {
-      setBaseUrlState(DEFAULT_OPENAI_COMPATIBLE_BASE_URL);
-      localStorage.setItem(BASE_URL_KEY, DEFAULT_OPENAI_COMPATIBLE_BASE_URL);
-    }
-  }, []);
-
-  const setBaseUrl = useCallback((url: string) => {
-    setBaseUrlState(url);
-    localStorage.setItem(BASE_URL_KEY, url);
-  }, []);
-
-  const setContextWindow = useCallback((n: number) => {
-    writeContextWindow(n);
-    setContextWindowState(readContextWindow());
-  }, []);
-
-  /**
-   * Pre-fills the context-window field from the connected model's own
-   * reported maximum (Ollama only — an OpenAI-compatible server's context
-   * length is set when the author loads the model there, not per request,
-   * so there is nothing equivalent to ask it for here). Returns the value
-   * on success so Settings can show what it found; null on failure or when
-   * Ollama doesn't report one, so Settings can say so rather than silently
-   * doing nothing.
-   */
-  const suggestContextWindow = useCallback(async (): Promise<number | null> => {
-    if (engineRef.current !== "ollama") return null;
-    try {
-      const found = await getOllamaModelContextLength({ model });
-      if (found === undefined) return null;
-      setContextWindow(found);
-      return found;
-    } catch {
-      return null;
-    }
-  }, [model, setContextWindow]);
-
-  const setHistoryLimit = useCallback((n: number) => {
-    const next = Number.isFinite(n) ? n : readProseHistoryLimit();
-    writeProseHistoryLimit(next);
-    setHistoryLimitState(readProseHistoryLimit());
-  }, []);
 
   const setChapterId = useCallback((id: string) => {
     withViewTransition(() => {
