@@ -11794,6 +11794,20 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.312 → v1.0.313 (2026-11-15): Uppgift 7, del A
+steg 1 — rena hjälpfunktioner ut ur BookStore.** Enligt planen Mats
+godkände: de rena delarna överst i `BookStore.tsx` (rad 147–293:
+localStorage-nycklar, token-budgetar, `readEngine`, `readLastPosition`,
+`withViewTransition`, `connectionErrorCode`, `ollamaHint`, `activeVoice`,
+`activeReader`) flyttade till `src/ui/bookStore/helpers.ts` utan att
+ändras. `SeriesStore.tsx` importerar `EXTRACTOR_MAX_TOKENS` och
+`ollamaHint` därifrån direkt i stället för via BookStore. Oanvända
+importer i BookStore städades. `BookStore.tsx` 3786 → 3639 rader.
+Verifierat: `tsc` ren, 1343/1343 tester, Playwright 6/6, bygge rent. Ingen
+beteendeändring.
+
+v1.0.312 → v1.0.313.
+
 **Ändringslogg v1.0.311 → v1.0.312 (2026-11-15): Uppgift 7, del B
 steg 2 — gemensam delning efter formatering.** Planen sa att
 `markupFormattedSlice` (editorn) och `formattedRuns` (exporten) var två

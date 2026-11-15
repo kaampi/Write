@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.313] - 2026-11-15
+
+### Changed
+- Internal, no visible change: the pure helpers and constants of `BookStore.tsx` (storage keys, per-operation token budgets, last-position persistence, the connection-error mapping, voice/reader lookups) moved to `src/ui/bookStore/helpers.ts`. First step of splitting the 3,700-line store file; `BookStore.tsx` is about 150 lines shorter.
+
 ## [1.0.312] - 2026-11-15
 
 ### Changed

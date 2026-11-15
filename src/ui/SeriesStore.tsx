@@ -36,7 +36,7 @@ import {
   type LocalModelProvider
 } from "@llm/provider";
 import { STORE_ERROR } from "./i18n";
-import { EXTRACTOR_MAX_TOKENS, ollamaHint } from "./BookStore";
+import { EXTRACTOR_MAX_TOKENS, ollamaHint } from "./bookStore/helpers";
 import { useBookStore } from "./useBookStore";
 import { SeriesStoreContext, type SeriesBusy, type SeriesStoreValue } from "./useSeriesStore";
 
