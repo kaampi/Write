@@ -114,6 +114,7 @@ import { type PromptDebugEntry, type PromptDebugMessage, type PromptOperation, t
 import { BookStoreContext, type BookStoreValue, type Busy, type PolishDraft } from "./useBookStore";
 import { count, format, getMessages, STORE_ERROR } from "./i18n";
 import { useModelSettings } from "./bookStore/useModelSettings";
+import { useSurfaceNavigation } from "./bookStore/useSurfaceNavigation";
 import { ANALYZE_MAX_TOKENS, CRITIC_MAX_TOKENS, EXTRACTOR_MAX_TOKENS, LAST_BOOK_KEY, RELATIONSHIP_MIRROR_MAX_TOKENS, activeReader, activeVoice, lastPositionKey, ollamaHint, polishMaxTokens, readLastPosition, withViewTransition } from "./bookStore/helpers";
 
 export function BookStoreProvider({ children }: { children: React.ReactNode }) {
@@ -121,8 +122,27 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const seriesRepo = useMemo(() => new SeriesRepository(), []);
   const [summaries, setSummaries] = useState<BookSummary[]>([]);
   const [book, setBook] = useState<Book | null>(null);
-  const [chapterId, setChapterIdState] = useState<string | null>(null);
-  const [surface, setSurface] = useState<EditorSurface>("brainstorm");
+  const {
+    chapterId,
+    setChapterIdState,
+    surface,
+    setSurface,
+    chapterRef,
+    surfaceRef,
+    setChapterId,
+    selectChapter,
+    showSettings,
+    showBrainstorm,
+    showSynopsis,
+    showAsk,
+    showTimeline,
+    showPlotlines,
+    showMethod,
+    showGuide,
+    handbookOpen,
+    openHandbook,
+    closeHandbook
+  } = useSurfaceNavigation(book?.id);
   const {
     models,
     model,
@@ -219,16 +239,12 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
    * `setBookSeries(book.id, undefined)` to make the book standalone again.
    */
   const [seriesMissing, setSeriesMissing] = useState(false);
-  const chapterRef = useRef<string | null>(null);
-  const surfaceRef = useRef<EditorSurface>("brainstorm");
   const abortRef = useRef<AbortController | null>(null);
   const proofreadLock = useRef(false);
   const developmentalLock = useRef(false);
   const saveTimer = useRef<number | null>(null);
 
   bookRef.current = book;
-  chapterRef.current = chapterId;
-  surfaceRef.current = surface;
 
 
   useEffect(() => {
@@ -305,10 +321,6 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     });
   }, [repo]);
 
-  useEffect(() => {
-    if (!book) return;
-    localStorage.setItem(lastPositionKey(book.id), JSON.stringify({ surface, chapterId }));
-  }, [book?.id, surface, chapterId]);
 
 
   const flushSave = useCallback(async (next: Book) => {
@@ -847,65 +859,6 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   );
 
 
-  const setChapterId = useCallback((id: string) => {
-    withViewTransition(() => {
-      setChapterIdState(id);
-      setSurface("chapter");
-    }, 160);
-  }, []);
-
-  const selectChapter = useCallback((id: string) => {
-    setChapterIdState(id);
-  }, []);
-
-  const showSettings = useCallback(() => {
-    withViewTransition(() => setSurface("settings"), 160);
-  }, []);
-
-  const showBrainstorm = useCallback(() => {
-    withViewTransition(() => setSurface("brainstorm"), 160);
-  }, []);
-
-  const showSynopsis = useCallback(() => {
-    withViewTransition(() => setSurface("synopsis"), 160);
-  }, []);
-
-  const showAsk = useCallback(() => {
-    withViewTransition(() => setSurface("ask"), 160);
-  }, []);
-
-  const showTimeline = useCallback(() => {
-    withViewTransition(() => setSurface("timeline"), 160);
-  }, []);
-
-  const showPlotlines = useCallback(() => {
-    withViewTransition(() => setSurface("plotlines"), 160);
-  }, []);
-
-  const showMethod = useCallback(() => {
-    withViewTransition(() => setSurface("method"), 160);
-  }, []);
-
-  const showGuide = useCallback(() => {
-    withViewTransition(() => setSurface("guide"), 160);
-  }, []);
-
-  /**
-   * The Handbook is a modal now (Mats, 2026-11-05: wants it to match kaampi
-   * Explore's own Guide — a modal with a chapter register, not a page you
-   * navigate away to), not an EditorSurface — it opens over whatever
-   * surface is already showing and closes back to exactly that, from
-   * Home, a series workspace, or any Editor surface alike. `"handbook"`
-   * stays a legal EditorSurface value purely for backward compatibility
-   * with already-saved "last position" data and `openingSurface`'s own
-   * blank-book default (BookSchema.ts) — Editor.tsx's own effect catches
-   * that value and redirects to a real surface underneath while opening
-   * this modal, so old saved state and a fresh book both still land
-   * somewhere sensible instead of a surface nothing renders for.
-   */
-  const [handbookOpen, setHandbookOpen] = useState(false);
-  const openHandbook = useCallback(() => setHandbookOpen(true), []);
-  const closeHandbook = useCallback(() => setHandbookOpen(false), []);
 
   const dismissModelAside = useCallback(() => setModelAsides([]), []);
 

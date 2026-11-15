@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.315] - 2026-11-15
+
+### Changed
+- Internal, no visible change: navigation inside an open book (current surface and chapter, the `show*` transitions, the Handbook modal, and remembering the last position per book) moved from `BookStore.tsx` into `src/ui/bookStore/useSurfaceNavigation.ts`.
+
 ## [1.0.314] - 2026-11-15
 
 ### Changed

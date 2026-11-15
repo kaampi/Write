@@ -11794,6 +11794,26 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.314 → v1.0.315 (2026-11-15): Uppgift 7, del A
+steg 3 — navigering som egen hook.** `useSurfaceNavigation(bookId)` i
+`src/ui/bookStore/useSurfaceNavigation.ts` äger nu `surface`,
+`chapterId`, deras refs, `setChapterId`/`selectChapter`, alla `show*`,
+handboksmodalen (`handbookOpen`/`openHandbook`/`closeHandbook`) och
+effekten som sparar senaste position per bok. Den öppna boken ligger kvar
+i BookStore; hooken behöver bara dess id. `setSurface` och
+`setChapterIdState` returneras eftersom `openBook`, `newBook`, import
+m.fl. i BookStore sätter dem direkt. `BookStore.tsx` 3444 → 3397 rader.
+Vinsten är mindre än i steg 2 (navigeringen var redan liten och
+frikopplad), men gränsen är nu tydlig.
+
+Verifierat: `tsc` ren, 1343/1343 tester, Playwright 6/6, bygge rent, och
+live (navigeringen har inget testskydd): byt till Synopsis → position
+sparad i localStorage → omladdning landar på Synopsis → Guide öppnar och
+stänger handboksmodalen → byte till Brainstorm sparas. Ingen
+beteendeändring.
+
+v1.0.314 → v1.0.315.
+
 **Ändringslogg v1.0.313 → v1.0.314 (2026-11-15): Uppgift 7, del A
 steg 2 — modell och anslutning som egen hook.** Allt som
 `BookStoreProvider` höll om den lokala modellen flyttade verbatim till
