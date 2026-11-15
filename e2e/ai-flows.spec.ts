@@ -170,3 +170,21 @@ test("choosing a development method sticks across a reload", async ({ page }) =>
   await page.getByRole("button", { name: "Development method", exact: true }).click();
   await expect(page.getByRole("button", { name: "Use this method" })).toHaveCount(0);
 });
+
+test("History keeps the text from before a Draft, and restoring it brings it back", async ({ page }) => {
+  server = await startFakeModelServer({ reply: () => "Emma stood on the quay as the tide turned." });
+  await useModelServer(page, server.url);
+  await createBook(page, "Nattnycklar");
+  await writeProse(page, PROSE);
+  await page.waitForTimeout(1200);
+  await page.getByRole("button", { name: "Draft", exact: true }).click();
+  const editor = page.locator('[role="textbox"][contenteditable="true"]');
+  await expect(editor).toContainText("Emma stood on the quay as the tide turned.");
+  await page.waitForTimeout(1200);
+  await page.getByRole("button", { name: "History", exact: true }).click();
+  const history = page.getByRole("dialog");
+  await expect(history.getByText(/^Draft ·/i).first()).toBeVisible();
+  await history.getByRole("button", { name: "Restore" }).first().click();
+  await expect(editor).toContainText(PROSE);
+  await expect(editor).not.toContainText("Emma stood on the quay");
+});

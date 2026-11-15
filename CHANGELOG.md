@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.319] - 2026-11-15
+
+### Changed
+- Internal, no visible change: the AI actions that write or rewrite the manuscript's own prose — Draft, Recast and Translate (chapter and scene), rewriting a selected span, Polish with its review step, merging scenes, darlings, restoring an earlier version and stopping a Draft — moved out of `BookStore.tsx` into `src/ui/bookStore/useWritingActions.ts`. `BookStore.tsx` is down to about 2,100 lines (from 3,786).
+
+### Added
+- An end-to-end test for History: the text a Draft built on is kept, and Restore brings it back (19 end-to-end tests in total).
+
 ## [1.0.318] - 2026-11-15
 
 ### Changed

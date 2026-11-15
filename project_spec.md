@@ -11794,6 +11794,33 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.318 → v1.0.319 (2026-11-15): Uppgift 7, del A
+steg 6b — `useWritingActions`.** Andra av de tre AI-hookarna.
+`src/ui/bookStore/useWritingActions.ts` äger Draft, Recast och Translate
+(kapitel och scen), `mergeScene`, `rewriteSpan`, `restoreChapterProse`,
+darlings (cut/restore/discard), `stopDraft` samt Polish
+(`polishChapter`/`acceptPolish`/`discardPolish`), och tillstånden
+`draftAwaiting` och `polishDraft`. Funktionskropparna är flyttade
+ordagrant; beroendelistorna är oförändrade eftersom hooken destrukturerar
+`AiContext` överst.
+
+`AiContext` utökades med det skrivfunktionerna behövde: `repo`, `setBook`,
+`setModelAsides`, `surfaceRef`, `historyLimitRef`, `translateModel`,
+`persistProseWrite` och `manuscriptFromModel`. Två av dem (`surfaceRef`,
+`reviewModel`) visade sig inte behövas av skrivhooken och togs bort ur
+dess destrukturering, men finns kvar i kontexten för Review-hooken.
+`BookStore.tsx` 2935 → 2108 rader (3786 vid start).
+
+Skyddsnät: nytt e2e-test för History (Draft → History → Restore) utöver
+Draft och Polish som redan fanns. Hela AI-specen (13 tester) kördes mot
+både nya och föregående version (v1.0.318, separat worktree): 13/13 på
+båda. Totalt 19 e2e-tester, vitest 1343/1343, `tsc` och bygge rena. Inte
+täckt av test: Recast, Translate, scenvarianterna, `rewriteSpan`
+(Extend/Elaborate/Instruct/Beat) och darlings — flyttade
+ordagrant men utan automatiskt skydd; det vilar på att koden är identisk.
+
+v1.0.318 → v1.0.319.
+
 **Ändringslogg v1.0.317 → v1.0.318 (2026-11-15): Uppgift 7, del A
 steg 5 + första AI-hooken (`useConversationActions`).** Mats godkände
 designen ("Ja"): ett internt `AiContext` och tre hooks för

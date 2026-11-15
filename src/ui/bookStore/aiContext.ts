@@ -1,6 +1,11 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
-import type { Book } from "@core/BookSchema";
+import type { Book, EditorSurface } from "@core/BookSchema";
+import type { ProseFormattingRange } from "@core/proseFormatting";
+import type { Darling } from "@core/darlings";
+import type { Placeholder } from "@core/placeholders";
+import type { ProseHistoryOp } from "@core/proseHistory";
 import type { LocalModelProvider } from "@llm/provider";
+import type { BookRepository } from "@persistence/Repository";
 import type { PromptDebugMessage, PromptDebugTarget, PromptOperation } from "../promptDebug";
 import type { Busy } from "../useBookStore";
 
@@ -17,8 +22,13 @@ import type { Busy } from "../useBookStore";
  * the dependencies it always did.
  */
 export type AiContext = {
+  repo: BookRepository;
   bookRef: MutableRefObject<Book | null>;
+  setBook: Dispatch<SetStateAction<Book | null>>;
+  setModelAsides: Dispatch<SetStateAction<string[]>>;
   chapterRef: MutableRefObject<string | null>;
+  surfaceRef: MutableRefObject<EditorSurface>;
+  historyLimitRef: MutableRefObject<number>;
   abortRef: MutableRefObject<AbortController | null>;
   busy: Busy;
   setBusy: Dispatch<SetStateAction<Busy>>;
@@ -27,8 +37,20 @@ export type AiContext = {
   ollamaError: string | null;
   model: string;
   reviewModel: string;
+  translateModel: string;
   flushSave: (next: Book) => Promise<void>;
   patchBook: (mutate: (current: Book) => Book) => Promise<void>;
+  persistProseWrite: (
+    latest: Book,
+    id: string,
+    assembled: string,
+    op: ProseHistoryOp,
+    before: string,
+    formatting?: ProseFormattingRange[],
+    placeholders?: Placeholder[],
+    darlings?: Darling[]
+  ) => Promise<void>;
+  manuscriptFromModel: (raw: string, fallback: string) => string;
   recordPrompt: (operation: PromptOperation, model: string, messages: PromptDebugMessage[], target?: PromptDebugTarget) => void;
   recordPromptResponse: (response: string) => void;
   makeProvider: (modelName: string, name?: string) => LocalModelProvider;
