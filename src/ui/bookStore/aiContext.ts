@@ -1,6 +1,8 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import type { Book, EditorSurface } from "@core/BookSchema";
 import type { ProseFormattingRange } from "@core/proseFormatting";
+import type { ChapterFeedback } from "@core/chapterFeedback";
+import type { CriticItem } from "@core/critics";
 import type { Darling } from "@core/darlings";
 import type { Placeholder } from "@core/placeholders";
 import type { ProseHistoryOp } from "@core/proseHistory";
@@ -23,16 +25,20 @@ import type { Busy } from "../useBookStore";
  */
 export type AiContext = {
   repo: BookRepository;
+  book: Book | null;
   bookRef: MutableRefObject<Book | null>;
   setBook: Dispatch<SetStateAction<Book | null>>;
   setModelAsides: Dispatch<SetStateAction<string[]>>;
   chapterRef: MutableRefObject<string | null>;
   surfaceRef: MutableRefObject<EditorSurface>;
   historyLimitRef: MutableRefObject<number>;
+  contextWindowRef: MutableRefObject<number>;
   abortRef: MutableRefObject<AbortController | null>;
   busy: Busy;
   setBusy: Dispatch<SetStateAction<Busy>>;
   setError: Dispatch<SetStateAction<string | null>>;
+  setChapterFeedback: Dispatch<SetStateAction<ChapterFeedback | null>>;
+  setCriticFeedback: Dispatch<SetStateAction<{ chapterId: string; items: CriticItem[] } | null>>;
   models: string[];
   ollamaError: string | null;
   model: string;

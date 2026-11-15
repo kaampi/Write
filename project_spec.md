@@ -11794,6 +11794,40 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.319 → v1.0.320 (2026-11-15): Uppgift 7, del A
+steg 6c — `useReviewActions`; uppdelningen av BookStore klar.** Sista av
+de tre AI-hookarna. `src/ui/bookStore/useReviewActions.ts` äger
+analyzeScene, ordalternativ/meningsdelning/styckebrytning,
+extractChapter, analyzeChapter, runCritics (+dismiss), illustrationsprompt,
+askManuscript, askAboutPassage, extractBrainstormNote/Synopsis/Brief,
+summarizeChapter, importLoreArticles, importSeriesFacts samt de
+självåterupptagande Proofread- och Developmental-körningarna med sina
+effekter och lås, och tillstånden askManuscriptAnswer,
+askPassageAnswer och importLoreProgress.
+
+Två saker som inte gick som planerat: (1) `chapterFeedback` och
+`criticFeedback` fick ligga kvar i BookStore med sina setters i
+`AiContext`, eftersom bokens livscykel (öppna/stäng/ny/import) nollställer
+dem — tsc visade det direkt när jag först flyttade dem; (2) kontextet
+behövde ytterligare `book`, `contextWindowRef`, `setChapterFeedback` och
+`setCriticFeedback`. `liftToSynopsis` och `sendBrainstormToSynopsis` är
+inte AI och ligger kvar i BookStore.
+
+Resultat för hela uppgift 7 del A: `BookStore.tsx` 3786 → cirka 1056
+rader, uppdelad i `bookStore/helpers.ts`, `useModelSettings`,
+`useSurfaceNavigation`, `useFacts`, `useConversationActions`,
+`useWritingActions`, `useReviewActions` och `aiContext.ts`.
+
+Skyddsnät: två nya e2e-tester (Analyze, Ask about chapter). Hela
+AI-specen (15 tester) kördes mot både nya och föregående version
+(v1.0.319, separat worktree): 15/15 på båda. Totalt 21 e2e-tester, vitest
+1343/1343, `tsc` och bygge rena. Inte täckt av test: Critics, Summarize,
+Ask manuscript (RAG), lore-import, ordalternativ/meningsdelning/
+styckebrytning, extractBrainstormNote/Synopsis/Brief och
+Proofread/Developmental — flyttade ordagrant, utan automatiskt skydd.
+
+v1.0.319 → v1.0.320.
+
 **Ändringslogg v1.0.318 → v1.0.319 (2026-11-15): Uppgift 7, del A
 steg 6b — `useWritingActions`.** Andra av de tre AI-hookarna.
 `src/ui/bookStore/useWritingActions.ts` äger Draft, Recast och Translate

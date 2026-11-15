@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.320] - 2026-11-15
+
+### Changed
+- Internal, no visible change: the AI actions that read and judge the manuscript — Analyze, Critics, Extract facts (chapter, brainstorm note, synopsis, brief), Summarize, Ask about the manuscript or a passage, lore import, the illustration prompt, word/sentence/paragraph suggestions, and the self-resuming Proofread and Developmental passes — moved out of `BookStore.tsx` into `src/ui/bookStore/useReviewActions.ts`. This finishes splitting the store: `BookStore.tsx` went from 3,786 lines to about 1,060, now a thin composition of seven hooks plus book lifecycle and persistence.
+
+### Added
+- End-to-end tests for Analyze and for Ask about chapter (21 in total).
+
 ## [1.0.319] - 2026-11-15
 
 ### Changed

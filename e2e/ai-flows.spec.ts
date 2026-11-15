@@ -188,3 +188,30 @@ test("History keeps the text from before a Draft, and restoring it brings it bac
   await expect(editor).toContainText(PROSE);
   await expect(editor).not.toContainText("Emma stood on the quay");
 });
+
+test("Analyze shows the model's observations about the chapter", async ({ page }) => {
+  server = await startFakeModelServer({
+    reply: () =>
+      JSON.stringify({ items: [{ category: "show_vs_tell", quote: "Emma felt sad", observation: "Names the feeling instead of showing it." }] })
+  });
+  await useModelServer(page, server.url);
+  await createBook(page, "Nattnycklar");
+  await writeProse(page, "Emma felt sad when the tide went out.");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  const notes = page.getByRole("dialog");
+  await expect(notes.getByRole("heading", { name: "Chapter notes" })).toBeVisible();
+  await expect(notes.getByText("Show vs tell")).toBeVisible();
+  await expect(notes.getByText("Emma felt sad")).toBeVisible();
+});
+
+test("Ask about chapter answers a question about the text", async ({ page }) => {
+  server = await startFakeModelServer({ reply: () => "She locked it before leaving." });
+  await useModelServer(page, server.url);
+  await createBook(page, "Nattnycklar");
+  await writeProse(page, PROSE);
+  await page.getByRole("button", { name: "Ask about chapter…" }).click();
+  await page.getByPlaceholder(/Does this build toward/).fill("Did she lock the door?");
+  await page.getByRole("button", { name: "Ask", exact: true }).click();
+  await expect(page.getByText("She locked it before leaving.")).toBeVisible();
+  expect(JSON.stringify(server.chats[0]!.messages)).toContain("Did she lock the door?");
+});
