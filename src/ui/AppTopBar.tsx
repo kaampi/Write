@@ -237,6 +237,8 @@ export function AppTopBar() {
           writingPrimer={store.writingPrimer}
           historyLimit={store.historyLimit}
           ollamaError={store.ollamaError}
+          connection={store.connection}
+          onCheckConnection={store.checkConnection}
           onModel={store.setModel}
           onReviewModel={store.setReviewModel}
           onTranslateModel={store.setTranslateModel}

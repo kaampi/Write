@@ -9,6 +9,16 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.307] - 2026-11-15
+
+### Changed
+- First contact without a local model is no longer shown as an error. When nothing answers at the configured address, or the server runs but has no models installed, the editor shows a calm note ("No local AI model is connected yet. Writing works as usual…") with **Check again** and the quickstart guide, instead of the red banner. The note is hidden in AI-free mode, which now also silences the red banner.
+- The app tells apart what a bare "Failed to fetch" used to cover: nothing listening, a server that is up but blocks the browser (CORS, web app only), a server that refuses the request (HTTP 401/403, usually an API key), a timeout, and an empty model list. Each gets its own advice. The browser case is told apart with a `no-cors` follow-up request; the desktop app has no CORS and never needs it.
+- The connection is re-checked when the window regains focus, so starting Ollama in another window and coming back is enough. No polling, and it only runs while nothing is connected.
+
+### Added
+- **Test connection** button in Settings → AI, with the result shown next to it.
+
 ## [1.0.306] - 2026-11-15
 
 ### Fixed

@@ -635,7 +635,7 @@ function silentBusyCopy(
 export function Editor() {
   const store = useBookStore();
   const { messages: m } = useLocale();
-  const { book, chapterId, surface, busy, error, ollamaError, chapterFeedback, criticFeedback, modelAsides } = store;
+  const { book, chapterId, surface, busy, error, ollamaError, chapterFeedback, criticFeedback, modelAsides, connection } = store;
   if (!book) return null;
 
   const chapters = sortedChapters(book);
@@ -1403,7 +1403,18 @@ export function Editor() {
         </div>
       </header>
 
-      {(error || ollamaError) && (
+      {!error && !ollamaError && !aiFree && (connection.kind === "unreachable" || connection.kind === "no-models") ? (
+        <p className="banner banner-notice" role="status">
+          <span>{connection.kind === "no-models" ? m.editor.noModelsNotice : m.editor.noLocalAiNotice}</span>
+          <button type="button" className="text-button" onClick={() => void store.checkConnection()}>
+            {m.editor.connectionCheckAgain}
+          </button>
+          <button type="button" className="text-button" onClick={() => openGuide("no-model")}>
+            {m.guide.fromErrorLink}
+          </button>
+        </p>
+      ) : null}
+      {(error || (ollamaError && !aiFree)) && (
         <p className="banner" role="status">
           {translateError(error ?? ollamaError ?? "", m)}
           {([STORE_ERROR.noModel, STORE_ERROR.ollamaOrigins, STORE_ERROR.serverUrlMissing] as string[]).includes(

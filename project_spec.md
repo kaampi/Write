@@ -11794,6 +11794,42 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.306 → v1.0.307 (2026-11-15): Första mötet utan
+modell är en lugn notis, inte ett fel.** Uppgift 3 i samma
+arbetsinstruktion: "Första mötet utan modell. ... skilj på 'ingen modell
+än' och ett riktigt anslutningsfel, och ge ett sätt att testa
+uppsättningen." Mats godkände förslaget med "Ja" (lugn notis i editorn,
+omkontroll vid fokus, 401/403 som eget läge, texterna).
+
+Läsning av koden visade fyra saker: (1) en vanlig `fetch` ger exakt samma
+`TypeError: Failed to fetch` om ingenting lyssnar som om servern är uppe
+men saknar CORS-huvuden, så den gamla texten (OLLAMA_ORIGINS) gavs även
+när Ollama inte var startad; (2) en server utan modeller gav ingen banner
+alls; (3) AI-fritt läge påverkade inte bannern; (4) anslutningen
+kontrollerades bara en gång vid start.
+
+Ny `src/llm/connectionStatus.ts` (`probeConnection`) returnerar
+`connected | no-models | unreachable | blocked | refused | timeout |
+no-address | error`. Efter ett nätverksfel i webbläsaren görs en
+uppföljning med `fetch(url, {mode:"no-cors"})`: den lyckas (opak) om något
+lyssnar och kastar om inget gör det — kontrollerat live. I desktopappen
+(Rust-fetch, ingen CORS) räknas varje transportfel som `unreachable`;
+den exakta felformuleringen därifrån har jag inte kunnat prova här
+(ingen Tauri-miljö), så den delen vilar på kod, inte körning.
+`BookStore` har nu `connection` och `checkConnection()`; omkontroll sker
+när fönstret får fokus, bara om inget är anslutet, högst var tredje
+sekund. Editorn visar en lugn notis (Kontrollera igen + guide) för
+`unreachable`/`no-models`; settings har knappen "Testa anslutningen".
+
+Verifierat live (Playwright, ljust tema, falska servrar): inget lyssnar →
+lugn notis; server utan CORS → OLLAMA_ORIGINS-texten; tom modellista →
+"inga modeller installerade"; 401 → "servern avvisade förfrågan";
+ansluten → ingen banner; AI-fritt läge → ingen banner; servern startad
+efter appen + fokus → notisen försvinner. 12 nya tester, 1329/1329 gröna,
+`tsc` och bygge rena.
+
+v1.0.306 → v1.0.307.
+
 **Ändringslogg v1.0.305 → v1.0.306 (2026-11-15): Dialogmätningen
 förstår svenska och norska typsättningar.** Uppgift 2 i samma
 arbetsinstruktion: "Stöd för replikstreck i dialogmätningen.

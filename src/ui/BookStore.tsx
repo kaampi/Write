@@ -127,6 +127,7 @@ import {
   type LocalModelProvider
 } from "@llm/provider";
 import { readContextWindow, writeContextWindow } from "@llm/contextWindow";
+import { probeConnection, type ConnectionStatus } from "@llm/connectionStatus";
 import { withReasoningHeadroom } from "@llm/tokenBudget";
 import { BookNotFoundError, BookRepository } from "@persistence/Repository";
 import { coreBookSink, coreSnapshotOutbox, flushCoreSnapshots } from "@persistence/CoreSharingRuntime";
@@ -243,6 +244,28 @@ function withViewTransition(update: () => void, durationMs = 320): void {
   }
 }
 
+/**
+ * The red banner's text for a connection state — null for the states that are
+ * not an error but a calm "no local AI yet" (nothing answering, or a server
+ * with no models), which Editor.tsx shows as a quiet notice instead.
+ */
+function connectionErrorCode(status: ConnectionStatus): string | null {
+  switch (status.kind) {
+    case "blocked":
+      return STORE_ERROR.ollamaOrigins;
+    case "refused":
+      return STORE_ERROR.serverRefused;
+    case "timeout":
+      return STORE_ERROR.timeout;
+    case "no-address":
+      return STORE_ERROR.serverUrlMissing;
+    case "error":
+      return status.message;
+    default:
+      return null;
+  }
+}
+
 export function ollamaHint(error: unknown): string {
   if (error instanceof LocalModelTimeoutError) {
     return STORE_ERROR.timeout;
@@ -255,34 +278,6 @@ export function ollamaHint(error: unknown): string {
     return STORE_ERROR.ollamaOrigins;
   }
   return message;
-}
-
-/**
- * Lists models from whichever engine is configured — Ollama's own API, or
- * the OpenAI-compatible one LM Studio and llama.cpp-server share. Both
- * engines now take the same configured address: empty means "this
- * computer's default port," anything else (e.g. another machine's address
- * on the local network) is used as given. Routed through the Provider
- * classes rather than calling listOllamaModels directly so Ollama gets the
- * same assertLocalOnlyBaseUrl guard OpenAI-compatible already had.
- *
- * `async` is load-bearing here, not style: the Provider constructors call
- * assertLocalOnlyBaseUrl synchronously, which throws immediately (not as a
- * rejected promise) for a malformed address. A plain function would let
- * that throw escape this call entirely, past the `.catch()` at the one
- * call site, straight into the app's top-level ErrorBoundary — and since
- * the bad address is the one already persisted in localStorage, it would
- * re-crash on every single app start, before Settings (where it could be
- * fixed) ever gets to render. `async` catches a synchronous throw from its
- * own body and turns it into a normal rejection instead.
- */
-async function listEngineModels(engine: LlmEngine, baseUrl: string): Promise<string[]> {
-  const trimmed = baseUrl.trim();
-  if (engine === "openai-compatible") {
-    if (!trimmed) return Promise.reject(new LocalProviderConfigError(STORE_ERROR.serverUrlMissing));
-    return withTimeoutGuard(new OpenAICompatibleLocalProvider({ model: "", baseUrl: trimmed })).listModels();
-  }
-  return withTimeoutGuard(new OllamaModelProvider({ model: "", ...(trimmed ? { baseUrl: trimmed } : {}) })).listModels();
 }
 
 function activeVoice(book: Book, surface: EditorSurface, chapterId: string | null): string {
@@ -327,6 +322,7 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
   const [contextWindow, setContextWindowState] = useState(() => readContextWindow());
   const [historyLimit, setHistoryLimitState] = useState(() => readProseHistoryLimit());
   const [ollamaError, setOllamaError] = useState<string | null>(null);
+  const [connection, setConnection] = useState<ConnectionStatus>({ kind: "checking" });
   const [busy, setBusy] = useState<Busy>(null);
   /**
    * Live countdown (seconds) to the current local-model request's timeout,
@@ -521,36 +517,70 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(lastPositionKey(book.id), JSON.stringify({ surface, chapterId }));
   }, [book?.id, surface, chapterId]);
 
+  const connectionRef = useRef(connection);
+  connectionRef.current = connection;
+  const probeSeq = useRef(0);
+  const lastProbeAt = useRef(0);
+
+  /**
+   * Asks the configured server what it has and records the honest answer —
+   * see connectionStatus.ts for why "nothing answered" and "answered but
+   * blocked us" are told apart. `quiet` is for the background re-check
+   * when the window regains focus: no "checking" flash, and nothing is
+   * touched if the answer is the same as before. A newer check always
+   * wins over an older one still in flight.
+   */
+  const checkConnection = useCallback(async (options: { quiet?: boolean } = {}): Promise<ConnectionStatus> => {
+    const seq = ++probeSeq.current;
+    lastProbeAt.current = Date.now();
+    if (!options.quiet) setConnection({ kind: "checking" });
+    const status = await probeConnection(engineRef.current, baseUrlRef.current);
+    if (seq !== probeSeq.current) return status;
+    if (options.quiet && JSON.stringify(status) === JSON.stringify(connectionRef.current)) return status;
+    setConnection(status);
+    setModels(status.kind === "connected" ? status.models : []);
+    setOllamaError(connectionErrorCode(status));
+    if (status.kind === "connected") {
+      const names = status.models;
+      const preferred = localStorage.getItem(MODEL_KEY) ?? DEFAULT_OLLAMA_MODEL;
+      const picked = pickListedOllamaModel(preferred, names);
+      if (picked) {
+        setModelState(picked);
+        localStorage.setItem(MODEL_KEY, picked);
+        setWritingPrimerState(readWritingPrimer(picked));
+      }
+      const reviewPreferred = localStorage.getItem(REVIEW_MODEL_KEY) ?? DEFAULT_REVIEW_MODEL;
+      const reviewPicked = pickListedReviewModel(reviewPreferred, names);
+      if (reviewPicked) {
+        setReviewModelState(reviewPicked);
+        localStorage.setItem(REVIEW_MODEL_KEY, reviewPicked);
+      }
+    }
+    return status;
+  }, []);
+
   useEffect(() => {
-    let cancelled = false;
-    void listEngineModels(engine, baseUrl)
-      .then((names) => {
-        if (cancelled) return;
-        setModels(names);
-        setOllamaError(null);
-        const preferred = localStorage.getItem(MODEL_KEY) ?? DEFAULT_OLLAMA_MODEL;
-        const picked = pickListedOllamaModel(preferred, names);
-        if (picked) {
-          setModelState(picked);
-          localStorage.setItem(MODEL_KEY, picked);
-          setWritingPrimerState(readWritingPrimer(picked));
-        }
-        const reviewPreferred = localStorage.getItem(REVIEW_MODEL_KEY) ?? DEFAULT_REVIEW_MODEL;
-        const reviewPicked = pickListedReviewModel(reviewPreferred, names);
-        if (reviewPicked) {
-          setReviewModelState(reviewPicked);
-          localStorage.setItem(REVIEW_MODEL_KEY, reviewPicked);
-        }
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setModels([]);
-        setOllamaError(ollamaHint(err));
-      });
+    void checkConnection();
+  }, [engine, baseUrl, checkConnection]);
+
+  // Start Ollama in another window, come back, and it just works — no
+  // polling, only a re-check when the window regains focus, and only while
+  // there is nothing connected to lose.
+  useEffect(() => {
+    function recheck() {
+      if (document.visibilityState === "hidden") return;
+      const kind = connectionRef.current.kind;
+      if (kind === "connected" || kind === "checking" || kind === "no-address") return;
+      if (Date.now() - lastProbeAt.current < 3000) return;
+      void checkConnection({ quiet: true });
+    }
+    window.addEventListener("focus", recheck);
+    document.addEventListener("visibilitychange", recheck);
     return () => {
-      cancelled = true;
+      window.removeEventListener("focus", recheck);
+      document.removeEventListener("visibilitychange", recheck);
     };
-  }, [engine, baseUrl]);
+  }, [checkConnection]);
 
   const flushSave = useCallback(async (next: Book) => {
     if (saveTimer.current !== null) {
@@ -3629,6 +3659,8 @@ export function BookStoreProvider({ children }: { children: React.ReactNode }) {
     contextWindow,
     historyLimit,
     ollamaError,
+    connection,
+    checkConnection,
     busy,
     timeoutCountdown,
     draftAwaiting,

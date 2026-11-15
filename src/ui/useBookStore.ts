@@ -16,6 +16,7 @@ import type { ImportedChapterCandidate } from "@core/manuscriptImport";
 import type { TextSpan } from "@core/textSpan";
 import type { PromptDebugEntry } from "./promptDebug";
 import type { LlmEngine } from "@llm/provider";
+import type { ConnectionStatus } from "@llm/connectionStatus";
 import type { CoreBookRevision } from "@core/coreRevisionRestore";
 
 export type Busy =
@@ -64,6 +65,10 @@ export type BookStoreValue = {
   contextWindow: number;
   historyLimit: number;
   ollamaError: string | null;
+  /** What the local model server answered, in the states the UI can give different advice for (see connectionStatus.ts). */
+  connection: ConnectionStatus;
+  /** Asks the server again right now. Resolves with what it found. */
+  checkConnection: () => Promise<ConnectionStatus>;
   busy: Busy;
   /** Seconds left before the current local-model request times out, or null when nothing is waiting on one. */
   timeoutCountdown: number | null;

@@ -23,6 +23,7 @@ export const STORE_ERROR = {
   translateSourceEmpty: "store:translate-source-empty",
   translateSourceMissing: "store:translate-source-missing",
   serverUrlMissing: "store:server-url-missing",
+  serverRefused: "store:server-refused",
   busy: "store:busy",
   timeout: "store:timeout"
 } as const;
@@ -54,6 +55,7 @@ const STORE_ERROR_KEYS: Record<StoreErrorCode, keyof import("./en").Messages["er
   [STORE_ERROR.translateSourceEmpty]: "translateSourceEmpty",
   [STORE_ERROR.translateSourceMissing]: "translateSourceMissing",
   [STORE_ERROR.serverUrlMissing]: "serverUrlMissing",
+  [STORE_ERROR.serverRefused]: "serverRefused",
   [STORE_ERROR.busy]: "busy",
   [STORE_ERROR.timeout]: "timeout"
 };

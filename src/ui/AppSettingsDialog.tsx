@@ -3,6 +3,7 @@ import { CloseIconButton } from "./CloseIconButton";
 import { MIN_PROSE_HISTORY_LIMIT, MAX_PROSE_HISTORY_LIMIT } from "@core/proseHistory";
 import { DEFAULT_WRITING_PRIMER } from "@core/writingPrimer";
 import { DEFAULT_OPENAI_COMPATIBLE_BASE_URL, type LlmEngine } from "@llm/provider";
+import type { ConnectionStatus } from "@llm/connectionStatus";
 import { DEFAULT_OLLAMA_BASE_URL } from "@llm/ollama";
 import { MIN_CONTEXT_WINDOW, MAX_CONTEXT_WINDOW } from "@llm/contextWindow";
 import {
@@ -55,6 +56,8 @@ export function AppSettingsDialog({
   writingPrimer,
   historyLimit,
   ollamaError,
+  connection,
+  onCheckConnection,
   onModel,
   onReviewModel,
   onTranslateModel,
@@ -77,6 +80,8 @@ export function AppSettingsDialog({
   writingPrimer: string;
   historyLimit: number;
   ollamaError: string | null;
+  connection: ConnectionStatus;
+  onCheckConnection: () => Promise<ConnectionStatus>;
   onModel: (name: string) => void;
   onReviewModel: (name: string) => void;
   onTranslateModel: (name: string) => void;
@@ -162,6 +167,23 @@ export function AppSettingsDialog({
               <p className={ollamaError ? "banner home-banner" : "quiet"} role={ollamaError ? "status" : undefined}>
                 {ollamaError ? translateError(ollamaError, m) : null}
               </p>
+              <div className="settings-connection-test">
+                <button
+                  type="button"
+                  className="text-button"
+                  disabled={connection.kind === "checking"}
+                  onClick={() => void onCheckConnection()}
+                >
+                  {connection.kind === "checking" ? m.editor.testingConnection : m.editor.testConnection}
+                </button>
+                {connection.kind === "connected" ? (
+                  <span className="quiet" role="status">{format(m.editor.connectionOk, { count: connection.models.length })}</span>
+                ) : connection.kind === "unreachable" ? (
+                  <span className="quiet" role="status">{m.editor.noLocalAiNotice}</span>
+                ) : connection.kind === "no-models" ? (
+                  <span className="quiet" role="status">{m.editor.noModelsNotice}</span>
+                ) : null}
+              </div>
               {isDesktopApp() && !connected ? (
                 <div className="home-connect-desktop">
                   <button type="button" className="home-guide-button" onClick={() => void openOllamaDownloadPage()}>
