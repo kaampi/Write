@@ -11794,6 +11794,44 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.317 → v1.0.318 (2026-11-15): Uppgift 7, del A
+steg 5 + första AI-hooken (`useConversationActions`).** Mats godkände
+designen ("Ja"): ett internt `AiContext` och tre hooks för
+AI-funktionerna, i ordningen Conversation → Writing → Review, och att jag
+kör vidare efter varje men stannar om något skiljer sig.
+
+`src/ui/bookStore/aiContext.ts` definierar `AiContext`: bookRef,
+chapterRef, abortRef, busy/setBusy, setError, models, ollamaError,
+model, reviewModel, flushSave, patchBook, recordPrompt,
+recordPromptResponse, makeProvider, writingSystem, withInheritedFacts.
+`BookStoreProvider` bygger det varje rendering och ger det till hookarna.
+Hookarna destrukturerar det överst, så varje `useCallback` listar exakt
+samma beroenden som förut — den enda sortens fel typkontrollen inte ser
+(föråldrade värden) undviks genom att funktionskropparna är ordagrant
+oförändrade.
+
+`useConversationActions` äger brainstorm-chatten (start/close/ask),
+karaktärsintervjun (start/close/spara personlighet/fråga/
+`setInterviewExtractPosition`/`extractInterview`) och
+utvecklingsmetodens `setDevelopmentMethod`/`developExpand`/
+`dismissDevelopSuggestion`, samt deras tillstånd (historik,
+extraktionsposition, förslag). Avvikelse från planen: `extractInterview`
+ligger här, inte i Review-hooken, eftersom den läser intervjutillståndet
+direkt. `BookStore.tsx` 3302 → 2935 rader.
+
+Importstädning gjordes med ett skript (tsc `--noUnusedLocals`, upprepat tills
+rent) i stället för för hand, eftersom hooken fick BookStores hela
+importhuvud som utgångspunkt.
+
+Skyddsnät: eftersom brainstorm-chatt, intervju och utvecklingsmetod saknade
+test skrev jag tre Playwright-tester först och körde dem mot BÅDE den nya
+koden och föregående version (v1.0.317, separat worktree): samma resultat
+på båda. Dessutom 15 tidigare tester oförändrat gröna. Totalt 18 e2e-tester,
+vitest 1343/1343, `tsc` och bygge rena. Inte täckt: `developExpand` (AI-delen
+av utvecklingsmetoden) har fortfarande inget test.
+
+v1.0.317 → v1.0.318.
+
 **Ändringslogg v1.0.316 → v1.0.317 (2026-11-15): Falsk modellserver i
 Playwright-sviten.** Steget som planen för uppgift 7 lade före del A
 steg 5–6: AI-funktionerna i BookStore hade inget skyddsnät alls (vitest

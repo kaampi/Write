@@ -115,3 +115,58 @@ test("when the server is started after the app, coming back to the window connec
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.getByText(/No local AI model is connected yet/i)).toHaveCount(0);
 });
+
+test.describe("AI conversations", () => {
+  test("the brainstorm chat sends your message and shows the model's answer", async ({ page }) => {
+    server = await startFakeModelServer({ reply: () => "What if the tide is the real antagonist?" });
+    await useModelServer(page, server.url);
+    await createBook(page, "Nattnycklar");
+    await page.getByRole("button", { name: "Brainstorm", exact: true }).click();
+    await page.getByRole("button", { name: "Talk it through…" }).click();
+    const chat = page.getByRole("dialog");
+    await chat.getByRole("textbox", { name: "Talk it through" }).fill("How can the quay feel threatening?");
+    await chat.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(chat.getByText("What if the tide is the real antagonist?")).toBeVisible();
+    expect(server.chats.length).toBe(1);
+    expect(JSON.stringify(server.chats[0]!.messages)).toContain("How can the quay feel threatening?");
+  });
+
+  test("interviewing a character answers in character, and the exchange can be turned into facts", async ({ page }) => {
+    server = await startFakeModelServer({
+      reply: (body) =>
+        /Return JSON only, shaped as/.test(JSON.stringify(body.messages))
+          ? JSON.stringify({ facts: [{ entity_label: "Emma", predicate: "core.identity", value: "Emma smuggles at night." }] })
+          : "Emma stood on the quay as the tide turned."
+    });
+    await useModelServer(page, server.url);
+    await createBook(page, "Nattnycklar");
+    await page.getByRole("button", { name: "New character" }).click();
+    const card = page.getByRole("dialog");
+    await card.getByRole("textbox", { name: "Name", exact: true }).fill("Emma");
+    await card.getByRole("textbox", { name: "The claim, in one line" }).fill("Emma is a smuggler.");
+    await card.getByRole("button", { name: "Lock into Story Bible" }).click();
+    await card.getByRole("button", { name: "Interview" }).click();
+    const interview = page.getByRole("dialog");
+    await interview.getByPlaceholder(/Ask Emma something/i).fill("What do you do at night?");
+    await interview.getByRole("button", { name: "Ask", exact: true }).click();
+    await expect(interview.getByText("Emma stood on the quay as the tide turned.")).toBeVisible();
+    expect(JSON.stringify(server.chats[0]!.messages)).toContain("What do you do at night?");
+
+    await interview.getByRole("button", { name: "Extract facts" }).click();
+    await expect(page.getByText("Review facts", { exact: false }).first()).toBeVisible();
+  });
+});
+
+test("choosing a development method sticks across a reload", async ({ page }) => {
+  await createBook(page, "Nattnycklar");
+  await page.getByRole("button", { name: "Development method", exact: true }).click();
+  const choose = page.getByRole("button", { name: "Use this method" });
+  await expect(choose).toHaveCount(4);
+  await choose.first().click();
+  // The list of methods is replaced by the chosen method's own steps.
+  await expect(choose).toHaveCount(0);
+  await page.waitForTimeout(1200);
+  await page.reload();
+  await page.getByRole("button", { name: "Development method", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Use this method" })).toHaveCount(0);
+});

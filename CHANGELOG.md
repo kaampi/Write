@@ -9,6 +9,14 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.318] - 2026-11-15
+
+### Changed
+- Internal, no visible change: the conversational AI actions — the brainstorm chat, the character interview (including extracting facts from it) and the development-method helpers — moved out of `BookStore.tsx` into `src/ui/bookStore/useConversationActions.ts`. They share a small internal `AiContext` (`src/ui/bookStore/aiContext.ts`) with the rest of the store: the open book, the running request, where errors go, the configured provider and the save/record helpers. `BookStore.tsx` is down from 3,786 to about 2,935 lines.
+
+### Added
+- Three more end-to-end tests: the brainstorm chat, interviewing a character and extracting facts from the interview, and choosing a development method that survives a reload (18 in total).
+
 ## [1.0.317] - 2026-11-15
 
 ### Added
