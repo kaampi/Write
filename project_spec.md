@@ -11794,6 +11794,27 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.315 → v1.0.316 (2026-11-15): Uppgift 7, del A
+steg 4 — Story Bible-fakta som egen hook.** `useFacts` i
+`src/ui/bookStore/useFacts.ts` äger `mirrorRelationshipFact`, `addFact`,
+`revise`, `retract`, `approve`, `reject` och `keepSeparate`, flyttade
+verbatim. Hooken tar ett explicit `FactsDeps`-objekt (`bookRef`,
+`chapterRef`, `flushSave`, `makeProvider`, `reviewModel`) — det är första
+förhandsvisningen av det delade kontext-objektet som steg 5 ska formalisera
+för AI-funktionerna; här räcker fem namngivna värden. Oanvända importer i
+BookStore städades. `BookStore.tsx` 3397 → 3302 rader (3786 vid start).
+
+Verifierat: `tsc` ren, 1343/1343 tester, Playwright 6/6 (där ingår
+`addFact` via "lås karaktär"), bygge rent. För revise/retract, som inget
+test täcker, körde jag samma live-skript mot både nya och föregående
+version (v1.0.315, byggd i en separat worktree) och fick identiskt
+resultat i alla utskrifter. Skriptet modellerar redigeringsvyn
+ofullständigt (efter "Save" fanns det gamla påståendet kvar i dess
+räkning), så det bevisar att beteendet är oförändrat — inte att
+redigeringsflödet är fel eller rätt i sig. Ingen beteendeändring.
+
+v1.0.315 → v1.0.316.
+
 **Ändringslogg v1.0.314 → v1.0.315 (2026-11-15): Uppgift 7, del A
 steg 3 — navigering som egen hook.** `useSurfaceNavigation(bookId)` i
 `src/ui/bookStore/useSurfaceNavigation.ts` äger nu `surface`,

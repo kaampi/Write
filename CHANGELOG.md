@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.316] - 2026-11-15
+
+### Changed
+- Internal, no visible change: the Story Bible fact actions (add, revise, retract, approve, reject, keep separate, and the relationship-mirror helper they share with the Bible panel) moved from `BookStore.tsx` into `src/ui/bookStore/useFacts.ts`. `BookStore.tsx` is now about 480 lines shorter than before the split started.
+
 ## [1.0.315] - 2026-11-15
 
 ### Changed
