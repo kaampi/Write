@@ -11794,6 +11794,36 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.316 → v1.0.317 (2026-11-15): Falsk modellserver i
+Playwright-sviten.** Steget som planen för uppgift 7 lade före del A
+steg 5–6: AI-funktionerna i BookStore hade inget skyddsnät alls (vitest
+har ingen DOM, och Playwright-sviten täckte bara de fem
+kärnflödena). Ingen appkod ändrades.
+
+`e2e/fakeModelServer.ts` är en liten HTTP-server som talar de två
+Ollama-ändpunkter appen använder: `GET /api/tags` och `POST /api/chat`
+(strömmad NDJSON eller ett enda JSON-svar beroende på `stream`). Den har
+CORS på/av, valfri statuskod (för 401), valfri modellista (tom = körs men
+inget installerat), programmerbart svar per request, och kan startas om på
+samma port. Slumpad port per test, så testerna kan köra parallellt.
+`defaultReply` känner igen extraktorns prompt ("Return JSON only, shaped
+as") och svarar med giltig faktaJSON, annars prosa.
+
+`e2e/ai-flows.spec.ts`, 9 nya tester: fem anslutningslägen (ansluten →
+ingen banner; tom lista → "inga modeller installerade"; ingen lyssnar →
+lugn notis; utan CORS → "tog inte emot webbläsaren"; 401 → "avvisade
+förfrågan"), Draft strömmar in i kapitlet och finns kvar efter omladdning,
+Extract facts → Lock → "Characters 1", Polish (förkasta lämnar texten,
+behåll ersätter den), och omkontrollen vid fokus när servern startas efter
+appen. Det är de live-kontroller jag gjort för hand sedan uppgift 3, nu som
+tester.
+
+Verifierat: 15/15, och 45/45 med `--repeat-each=3` (inget flimmer).
+Mutationskoll: när jag tillfälligt tog bort `ollamaOrigins`-mappningen i
+`helpers.ts` föll just "blocked"-testet (ändringen återställd).
+
+v1.0.316 → v1.0.317.
+
 **Ändringslogg v1.0.315 → v1.0.316 (2026-11-15): Uppgift 7, del A
 steg 4 — Story Bible-fakta som egen hook.** `useFacts` i
 `src/ui/bookStore/useFacts.ts` äger `mirrorRelationshipFact`, `addFact`,

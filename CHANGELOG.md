@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.317] - 2026-11-15
+
+### Added
+- The end-to-end suite now has a fake local model server (`e2e/fakeModelServer.ts`, a stand-in for Ollama's `/api/tags` and `/api/chat`), so the AI features can be driven deterministically without a real model. New tests in `e2e/ai-flows.spec.ts` cover the connection states (connected, no models installed, nothing listening, blocked by CORS, refused with 401), Draft streaming into the chapter and surviving a reload, Extract facts followed by locking a row, Polish (discard and keep), and the automatic re-check when the window regains focus after the server is started. 15 end-to-end tests in total. No app code changed.
+
 ## [1.0.316] - 2026-11-15
 
 ### Changed

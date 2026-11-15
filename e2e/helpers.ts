@@ -27,3 +27,8 @@ export async function writeProse(page: Page, text: string): Promise<void> {
   await page.keyboard.type(text);
   await expect(editor).toContainText(text.slice(0, 20));
 }
+
+/** Points the app at a server before it loads — the same setting Settings → Server address writes. */
+export async function useModelServer(page: Page, url: string): Promise<void> {
+  await page.addInitScript((address) => localStorage.setItem("storybook-ai.base-url", address), url);
+}
