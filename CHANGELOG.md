@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.321] - 2026-11-15
+
+### Added
+- Four more end-to-end tests for AI features that moved in the BookStore split and had no automatic coverage: Recast, Critics, Summarize, and rewriting a selection with Extend from the right-click menu (25 in total). The README now says how to run the end-to-end suite and to install Chromium first (`npx playwright install chromium`). No app code changed.
+
 ## [1.0.320] - 2026-11-15
 
 ### Changed

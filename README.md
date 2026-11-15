@@ -55,6 +55,8 @@ npm run dev
 
 Opens on [http://localhost:5175](http://localhost:5175) so it does not collide with kaampi Explore (5173). See [Running kaampi Write](docs/running.md) for the Ollama origin setting, the Codex-pairing limitation, and how Backup/Publish get your work out.
 
+**Tests.** `npm test` runs the unit tests (no browser). `npm run test:e2e` runs the end-to-end suite in a real browser against the production build, with a fake local model server standing in for Ollama; install the browser once first with `npx playwright install chromium`.
+
 ## Documentation
 
 - [Running kaampi Write](docs/running.md) — install, start, local AI server, backup and publish

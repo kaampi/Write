@@ -215,3 +215,57 @@ test("Ask about chapter answers a question about the text", async ({ page }) => 
   await expect(page.getByText("She locked it before leaving.")).toBeVisible();
   expect(JSON.stringify(server.chats[0]!.messages)).toContain("Did she lock the door?");
 });
+
+test("Recast rewrites the chapter from the model's new version", async ({ page }) => {
+  server = await startFakeModelServer({ reply: () => "I locked the door and walked down to the quay." });
+  await useModelServer(page, server.url);
+  await createBook(page, "Nattnycklar");
+  await writeProse(page, PROSE);
+  await page.waitForTimeout(1200);
+  await page.getByRole("button", { name: "Chapter settings for Chapter 1" }).click();
+  await page.getByRole("button", { name: "Recast prose", exact: true }).click();
+  const editor = page.locator('[role="textbox"][contenteditable="true"]');
+  await expect(editor).toContainText("I locked the door and walked down to the quay.");
+  expect(JSON.stringify(server.chats[0]!.messages)).toContain(PROSE);
+});
+
+test("Critics runs the chosen readers and lists their notes", async ({ page }) => {
+  server = await startFakeModelServer({
+    reply: () => JSON.stringify({ items: [{ quote: "gick ner till kajen", observation: "The move to the quay is abrupt." }] })
+  });
+  await useModelServer(page, server.url);
+  await createBook(page, "Nattnycklar");
+  await writeProse(page, PROSE);
+  await page.getByRole("button", { name: "Critics", exact: true }).click();
+  const picker = page.getByRole("dialog");
+  await picker.getByRole("checkbox").first().check();
+  await picker.getByRole("button", { name: "Run critics" }).click();
+  // Like Analyze, the notes list the quoted line; the observation opens on click.
+  await expect(page.getByRole("dialog").getByText("gick ner till kajen")).toBeVisible();
+  expect(server.chats.length).toBe(1);
+});
+
+test("Summarize proposes a one-line chapter summary", async ({ page }) => {
+  server = await startFakeModelServer({ reply: () => "Emma locks up and heads for the quay." });
+  await useModelServer(page, server.url);
+  await createBook(page, "Nattnycklar");
+  await writeProse(page, PROSE);
+  await page.waitForTimeout(1200);
+  await page.getByRole("button", { name: "Show brief for Chapter 1" }).click();
+  await page.getByRole("button", { name: "Summarize", exact: true }).click();
+  await expect(page.getByText("Emma locks up and heads for the quay.")).toBeVisible();
+});
+
+test("selecting a sentence and choosing Extend adds the model's continuation after it", async ({ page }) => {
+  server = await startFakeModelServer({ reply: () => " The tide had already begun to turn." });
+  await useModelServer(page, server.url);
+  await createBook(page, "Nattnycklar");
+  await writeProse(page, PROSE);
+  await page.waitForTimeout(1200);
+  const paragraph = page.locator('[role="textbox"][contenteditable="true"] > p').first();
+  await paragraph.click({ clickCount: 3 });
+  // Rewriting a selection lives on the right-click menu.
+  await paragraph.click({ button: "right" });
+  await page.getByRole("menuitem", { name: "Extend", exact: true }).click();
+  await expect(page.locator('[role="textbox"][contenteditable="true"]')).toContainText("The tide had already begun to turn.");
+});

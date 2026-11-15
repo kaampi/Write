@@ -11794,6 +11794,34 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.320 → v1.0.321 (2026-11-15): Tester för de
+otäckta AI-funktionerna.** Efter att jag rapporterat vilka AI-funktioner
+som flyttats utan testskydd rekommenderade jag att täcka dem först; Mats
+svarade "Kör". Ingen appkod ändrades.
+
+Nya e2e-tester (alla mot den falska modellservern): Recast (kapitlets
+inställningar → "Recast prose" → texten ersätts och prompten innehåller
+originaltexten), Critics (välj en kritiker → Run critics → det citerade
+stället listas), Summarize (kapitlets brief → Summarize → förslaget
+visas), och `rewriteSpan` via Extend (markera stycket, högerklicka,
+"Extend" → fortsättningen läggs till). Fyra saker jag fick lära mig om
+UI:t: markeringsmenyn öppnas med högerklick, inte som flytande knappar;
+Critics visar liksom Analyze det citerade stället, observationen visas
+först vid klick; Ask-formuläret är ingen `dialog`; Recast ligger i
+kapitlets inställningspopover.
+
+README fick ett stycke om tester: `npm test` (utan webbläsare) och
+`npm run test:e2e` med `npx playwright install chromium` först.
+
+Verifierat: 25/25 e2e och 50/50 med `--repeat-each=2` (inget flimmer),
+vitest 1343/1343, `tsc` rent. Fortfarande utan automatiskt test:
+Translate, scenvarianterna av Draft/Recast, darlings, Ask manuscript (RAG),
+lore-import, ordalternativ/meningsdelning/styckebrytning,
+extractBrainstormNote/Synopsis/Brief, Proofread, Developmental och
+`developExpand`.
+
+v1.0.320 → v1.0.321.
+
 **Ändringslogg v1.0.319 → v1.0.320 (2026-11-15): Uppgift 7, del A
 steg 6c — `useReviewActions`; uppdelningen av BookStore klar.** Sista av
 de tre AI-hookarna. `src/ui/bookStore/useReviewActions.ts` äger
