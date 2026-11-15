@@ -11794,6 +11794,20 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.311 → v1.0.312 (2026-11-15): Uppgift 7, del B
+steg 2 — gemensam delning efter formatering.** Planen sa att
+`markupFormattedSlice` (editorn) och `formattedRuns` (exporten) var två
+implementationer av samma sak. Vid läsning visade det sig att båda redan
+byggde på `formattingSegments`; det som var duplicerat var bara själva
+slicing-slingan (cirka sex rader). Alltså ett litet steg, inte det större
+jag antydde i planen: `formattedRuns` och `FormattedRun` flyttades till
+`proseFormatting.ts`, `manuscriptExport.ts` importerar och återexporterar
+typen, och `markupFormattedSlice` i `proseFlow.ts` är nu en `map` över
+`formattedRuns`. Ingen beteendeändring. Verifierat: 1343/1343 tester
+gröna (2 nya för `formattedRuns`), Playwright 6/6, `tsc` och bygge rena.
+
+v1.0.311 → v1.0.312.
+
 **Ändringslogg v1.0.310 → v1.0.311 (2026-11-15): Uppgift 7, del B
 steg 1 — Anfang-regeln på ett ställe.** Uppgift 7 (plan för att dela
 `BookStore.tsx` och dela renderingskod) lades fram som skriven plan;

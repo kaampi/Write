@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.312] - 2026-11-15
+
+### Changed
+- Internal, no visible change: splitting prose into bold/italic/underline runs (`formattedRuns`) now lives next to `formattingSegments` in `proseFormatting.ts` and is used by both the live editor's HTML and every export format, instead of the editor carrying its own copy of the loop.
+
 ## [1.0.311] - 2026-11-15
 
 ### Changed

@@ -169,6 +169,25 @@ export function formattingSegments(ranges: ProseFormattingRange[], from: number,
   return segments;
 }
 
+export type FormattedRun = { text: string; styles: ProseFormattingStyle[] };
+
+/**
+ * Splits `text` — a slice of `rawProse` starting at `offset` within it — into
+ * runs of constant bold/italic/underline, by walking `formattingSegments` and
+ * slicing. Every surface that renders formatted prose calls this once per
+ * paragraph (or per PDF text line) to know where styling turns on and off: the
+ * live editor's HTML (proseFlow.ts) and every export format
+ * (manuscriptExport.ts), so they cannot disagree about where a run ends.
+ */
+export function formattedRuns(text: string, offset: number, formatting: ProseFormattingRange[]): FormattedRun[] {
+  if (!text) return [];
+  if (formatting.length === 0) return [{ text, styles: [] }];
+  return formattingSegments(formatting, offset, offset + text.length).map((segment) => ({
+    text: text.slice(segment.start - offset, segment.end - offset),
+    styles: segment.styles
+  }));
+}
+
 export function formattingRangesEqual(a: ProseFormattingRange[], b: ProseFormattingRange[]): boolean {
   if (a.length !== b.length) return false;
   const sortedA = [...a].sort(compareRanges);

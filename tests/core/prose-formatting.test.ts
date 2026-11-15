@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formattedRuns,
   formattingRangesEqual,
   formattingSegments,
   isFullyStyled,
@@ -134,5 +135,21 @@ describe("formattingRangesEqual", () => {
 
   it("is false when a range differs", () => {
     expect(formattingRangesEqual([range(0, 5)], [range(0, 6)])).toBe(false);
+  });
+});
+
+describe("formattedRuns", () => {
+  it("returns no runs for empty text and one plain run when nothing is formatted", () => {
+    expect(formattedRuns("", 0, [])).toEqual([]);
+    expect(formattedRuns("Emma", 5, [])).toEqual([{ text: "Emma", styles: [] }]);
+  });
+
+  it("slices a paragraph into runs by where styling turns on and off, using the paragraph's offset in the chapter", () => {
+    // "Emma locked" sits at offset 10 in the chapter; italic covers chapter offsets 15..21 = "locked".
+    const runs = formattedRuns("Emma locked", 10, [{ start: 15, end: 21, style: "italic" }]);
+    expect(runs).toEqual([
+      { text: "Emma ", styles: [] },
+      { text: "locked", styles: ["italic"] }
+    ]);
   });
 });

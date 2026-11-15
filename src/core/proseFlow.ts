@@ -1,5 +1,5 @@
 import { DROP_CAP_LEAD_QUOTE_CLASS, dropCapLeadQuoteMarkup, opensWithLeadQuote, splitDropCapLeadQuote } from "./dropCap";
-import { formattingSegments, type ProseFormattingRange, type ProseFormattingStyle } from "./proseFormatting";
+import { formattedRuns, type ProseFormattingRange, type ProseFormattingStyle } from "./proseFormatting";
 
 export function splitFlowParagraphs(text: string): string[] {
   return text
@@ -223,14 +223,9 @@ function markupProseBlockBody(block: string, blockStart: number, formatting: Pro
 }
 
 function markupFormattedSlice(text: string, offset: number, formatting: ProseFormattingRange[]): string {
-  if (text.length === 0) return "";
-  if (formatting.length === 0) return escapeHtml(text);
-  let out = "";
-  for (const segment of formattingSegments(formatting, offset, offset + text.length)) {
-    const piece = text.slice(segment.start - offset, segment.end - offset);
-    out += wrapStyles(escapeHtml(piece), segment.styles);
-  }
-  return out;
+  return formattedRuns(text, offset, formatting)
+    .map((run) => wrapStyles(escapeHtml(run.text), run.styles))
+    .join("");
 }
 
 export function wrapStyles(html: string, styles: ProseFormattingStyle[]): string {

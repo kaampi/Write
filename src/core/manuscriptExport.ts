@@ -6,7 +6,7 @@ import { profileFor } from "./characterProfile";
 import { PREDICATE_LABELS } from "./predicates";
 import { DROP_CAP_LEAD_QUOTE_CLASS, dropCapCharacters, dropCapLeadQuoteMarkup, splitDropCapLeadQuote } from "./dropCap";
 import { HR_BLOCK, peelModelAsides, splitFlowParagraphs, splitFlowParagraphsWithOffsets, wrapStyles } from "./proseFlow";
-import { formattingSegments, type ProseFormattingRange, type ProseFormattingStyle } from "./proseFormatting";
+import { formattedRuns, type FormattedRun, type ProseFormattingRange, type ProseFormattingStyle } from "./proseFormatting";
 import { newId } from "./ids";
 
 export type PublishFont = {
@@ -339,23 +339,8 @@ function sceneBreakSymbol(style: Book["scene_break_style"]): string {
   return style === "plain" ? "* * *" : SCENE_BREAK_ORNAMENTS[style].char;
 }
 
-export type FormattedRun = { text: string; styles: ProseFormattingStyle[] };
-
-/**
- * Splits `text` — a slice of `rawProse` starting at `offset` within it — into
- * runs of constant bold/italic/underline, by walking `formattingSegments`
- * (the same engine proseFlow.ts's live HTML renderer already uses) and
- * slicing. Every rich format (RTF, ODT, HTML, ePub, PDF) calls this once per
- * paragraph, or per PDF text line, to know where to turn styling on and off.
- */
-function formattedRuns(text: string, offset: number, formatting: ProseFormattingRange[]): FormattedRun[] {
-  if (!text) return [];
-  if (formatting.length === 0) return [{ text, styles: [] }];
-  return formattingSegments(formatting, offset, offset + text.length).map((segment) => ({
-    text: text.slice(segment.start - offset, segment.end - offset),
-    styles: segment.styles
-  }));
-}
+// FormattedRun and formattedRuns live in proseFormatting.ts, shared with the live editor's renderer.
+export type { FormattedRun };
 
 /**
  * Same split as `text.split(/\r\n|\n|\r/)` — one entry per raw line, blank
