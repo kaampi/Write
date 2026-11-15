@@ -11794,6 +11794,42 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.307 → v1.0.308 (2026-11-15): Anfang med
+citattecken i Publish-exporten.** Uppgift 4 i samma arbetsinstruktion:
+"Anfang/drop cap i Publish-exporten ... bekräfta felet först, fixa
+HTML/ePub, rapportera bara hur IDML/ODT beter sig." Mats svarade "Kör
+igång".
+
+Felet bekräftat före ändring: `dropCapCss` använde bara
+`p.drop-cap::first-letter`, och `::first-letter` tar med inledande
+skiljetecken, så ett kapitel som börjar med “ fick både “ och bokstaven
+som en enda jätteversal (skärmdump i Chromium av riktig export-HTML).
+Editorn hade redan rätt (`markupDropCapLeadQuote`, v1.0.297-spåret) men
+exporten delade inte den koden.
+
+Fix i `manuscriptExport.ts`: `htmlDropCapLeadQuoteBody` delar första
+stycket i `<span class="drop-cap-quote">` (hänger i marginalen, normal
+storlek, margin-left -0.5em) och `<span class="drop-cap-letter">`
+(Anfangen); stycket får klassen `drop-cap-lead-quote` och
+`::first-letter`-regeln står ner för just det stycket. Gäller både
+mellanrums- och indragsläget och ePub (delar CSS och
+`htmlParagraphs`). Formatering (kursiv/fet) bevaras per del via
+`formattedRuns`. Bara “ hanteras, som i editorn; andra inledande tecken
+(", «, ”, ») ligger kvar på `::first-letter`-vägen. Lagrad
+`chapter.prose` rörs aldrig. Efter ändring: skärmdump visar “ i
+marginalen och K som Anfang, i båda stilarna. 4 nya tester, 3 gamla
+CSS-förväntningar uppdaterade; 1333/1333 gröna, `tsc` och bygge rena.
+
+Rapport, ej ändrat: **ODT** skriver `style:drop-cap style:length="1"` och
+**IDML** `DropCapCharacters="1"` — båda släpper alltså första tecknet,
+vilket för ett kapitel som börjar med “ blir just citattecknet (samma fel
+som HTML hade). Jag har inte öppnat filerna i LibreOffice/InDesign här,
+så det är läst ur koden, inte sett. RTF och PDF har ingen Anfang. Vill
+Mats ha det fixat där också behöver ODT/IDML bara få längd 2 när
+stycket börjar med “ — säg till.
+
+v1.0.307 → v1.0.308.
+
 **Ändringslogg v1.0.306 → v1.0.307 (2026-11-15): Första mötet utan
 modell är en lugn notis, inte ett fel.** Uppgift 3 i samma
 arbetsinstruktion: "Första mötet utan modell. ... skilj på 'ingen modell

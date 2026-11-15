@@ -1020,14 +1020,14 @@ describe("drop cap", () => {
     expect(html).toContain('<body class="has-drop-cap">');
     expect(html).toContain('<p class="drop-cap">Emma locked the door.</p>');
     expect(html).toContain("<p>She waited for the tide.</p>");
-    expect(html).toContain(".has-drop-cap p.drop-cap::first-letter{float:left;font-weight:700;font-size:4.50em");
+    expect(html).toContain(".has-drop-cap p.drop-cap:not(.drop-cap-lead-quote)::first-letter{float:left;font-weight:700;font-size:4.50em");
   });
 
   it("combines with the first-paragraph-flush indented style instead of replacing it", () => {
     const doc = buildManuscriptExport(bookWithDropCap(4));
     const html = formatExportHtml(doc, undefined, "indented");
     expect(html).toContain('<p class="first drop-cap">Emma locked the door.</p>');
-    expect(html).toContain(".has-drop-cap p.drop-cap::first-letter{float:left;font-weight:700;font-size:6.00em");
+    expect(html).toContain(".has-drop-cap p.drop-cap:not(.drop-cap-lead-quote)::first-letter{float:left;font-weight:700;font-size:6.00em");
   });
 
   it("does the same in ePub, with the rule in the shared stylesheet", () => {
@@ -1035,7 +1035,44 @@ describe("drop cap", () => {
     const text = new TextDecoder().decode(packEpub(doc));
     expect(text).toContain('<body class="has-drop-cap">');
     expect(text).toContain('<p class="drop-cap">Emma locked the door.</p>');
-    expect(text).toContain(".has-drop-cap p.drop-cap::first-letter{float:left;font-weight:700;font-size:3.00em");
+    expect(text).toContain(".has-drop-cap p.drop-cap:not(.drop-cap-lead-quote)::first-letter{float:left;font-weight:700;font-size:3.00em");
+  });
+
+  describe("a first paragraph that opens with a curly quote", () => {
+    function bookOpeningWithQuote() {
+      let book = { ...createBook("Night Keys"), drop_cap_lines: 3 };
+      book = updateChapter(book, book.chapters[0]!.id, {
+        title: "The quay",
+        prose: "“Come in,” she said.\n\nShe waited for the tide."
+      });
+      return book;
+    }
+
+    it("hangs the quote and drops the real letter in HTML, instead of enlarging both", () => {
+      const html = formatExportHtml(buildManuscriptExport(bookOpeningWithQuote()));
+      expect(html).toContain(
+        '<p class="drop-cap drop-cap-lead-quote"><span class="drop-cap-quote">“</span><span class="drop-cap-letter">C</span>ome in,” she said.</p>'
+      );
+      expect(html).toContain(".has-drop-cap p.drop-cap-lead-quote .drop-cap-letter{float:left;font-weight:700;font-size:4.50em");
+      expect(html).toContain(".drop-cap-quote{float:left;font-weight:400;font-size:1em");
+    });
+
+    it("does the same in the indented style and in ePub", () => {
+      const doc = buildManuscriptExport(bookOpeningWithQuote());
+      expect(formatExportHtml(doc, undefined, "indented")).toContain('<p class="first drop-cap drop-cap-lead-quote"><span class="drop-cap-quote">“</span>');
+      expect(new TextDecoder().decode(packEpub(doc))).toContain('<span class="drop-cap-letter">C</span>');
+    });
+
+    it("keeps the stored prose and later paragraphs untouched", () => {
+      const html = formatExportHtml(buildManuscriptExport(bookOpeningWithQuote()));
+      expect(html).toContain("<p>She waited for the tide.</p>");
+      expect(html.match(/drop-cap-lead-quote"/g)).toHaveLength(1);
+    });
+
+    it("leaves a quote-less opening on the plain ::first-letter path", () => {
+      const html = formatExportHtml(buildManuscriptExport(bookWithDropCap(3)));
+      expect(html).not.toContain("drop-cap-lead-quote\"");
+    });
   });
 
   it("uses ODF's own style:drop-cap element on the first paragraph's style only, in spaced mode", () => {

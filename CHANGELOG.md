@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.308] - 2026-11-15
+
+### Fixed
+- Drop cap (Anfang) in Publish → HTML and ePub no longer turns a hanging opening quote into part of the drop cap. A chapter that opens with “ used to get both the quote and the first letter enlarged together (CSS `::first-letter` includes leading punctuation). The quote now hangs in the margin at normal size and only the real first letter is dropped, the same as in the editor. Chapters that open without a quote are unchanged, and the stored prose is never touched.
+
 ## [1.0.307] - 2026-11-15
 
 ### Changed

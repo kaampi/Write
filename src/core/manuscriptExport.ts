@@ -4,7 +4,7 @@ import { groupBibleEntities } from "./bibleGroups";
 import { sortedChapters, type Book } from "./BookSchema";
 import { profileFor } from "./characterProfile";
 import { PREDICATE_LABELS } from "./predicates";
-import { HR_BLOCK, peelModelAsides, splitFlowParagraphs, splitFlowParagraphsWithOffsets, wrapStyles } from "./proseFlow";
+import { HR_BLOCK, OPENING_CURLY_QUOTE, peelModelAsides, splitFlowParagraphs, splitFlowParagraphsWithOffsets, wrapStyles } from "./proseFlow";
 import { formattingSegments, type ProseFormattingRange, type ProseFormattingStyle } from "./proseFormatting";
 import { newId } from "./ids";
 
@@ -259,7 +259,13 @@ const HTML_DEFAULT_STACK = `Georgia, "Times New Roman", serif`;
 function dropCapCss(lines: number): string {
   if (lines <= 0) return "";
   const size = (lines * 1.5).toFixed(2);
-  return `.has-drop-cap p.drop-cap::first-letter{float:left;font-weight:700;font-size:${size}em;line-height:1;padding:0 0.08em 0 0}`;
+  // `:not(.drop-cap-lead-quote)`: a first paragraph opening with “ is split into spans by htmlDropCapBody instead,
+  // because ::first-letter would swallow the quote into the drop cap. Same split as the live editor's.
+  return (
+    `.has-drop-cap p.drop-cap:not(.drop-cap-lead-quote)::first-letter{float:left;font-weight:700;font-size:${size}em;line-height:1;padding:0 0.08em 0 0}` +
+    `.has-drop-cap p.drop-cap-lead-quote .drop-cap-quote{float:left;font-weight:400;font-size:1em;line-height:1;margin-left:-0.5em}` +
+    `.has-drop-cap p.drop-cap-lead-quote .drop-cap-letter{float:left;font-weight:700;font-size:${size}em;line-height:1;padding:0 0.08em 0 0}`
+  );
 }
 
 /**
@@ -401,6 +407,25 @@ function htmlRun(run: FormattedRun): string {
   return wrapStyles(xmlEscape(run.text), run.styles);
 }
 
+/**
+ * A drop-cap paragraph that opens with a curly “ — book typography hangs the quote in the margin at normal size and
+ * drops the real first letter (the live editor does the same, see proseFlow.ts markupDropCapLeadQuote). Returns the
+ * inner HTML, or null when the paragraph doesn't start that way and the plain ::first-letter rule applies.
+ */
+function htmlDropCapLeadQuoteBody(text: string, start: number, formatting: ProseFormattingRange[]): string | null {
+  if (!text.startsWith(OPENING_CURLY_QUOTE)) return null;
+  const rest = text.slice(OPENING_CURLY_QUOTE.length);
+  const letter = [...rest][0];
+  if (!letter) return null;
+  const letterStart = start + OPENING_CURLY_QUOTE.length;
+  const part = (slice: string, at: number) => formattedRuns(slice, at, formatting).map(htmlRun).join("");
+  return (
+    `<span class="drop-cap-quote">${part(OPENING_CURLY_QUOTE, start)}</span>` +
+    `<span class="drop-cap-letter">${part(letter, letterStart)}</span>` +
+    part(rest.slice(letter.length), letterStart + letter.length)
+  );
+}
+
 function htmlParagraphs(
   text: string,
   formatting: ProseFormattingRange[],
@@ -414,8 +439,9 @@ function htmlParagraphs(
     return splitFlowParagraphsWithOffsets(text)
       .map((paragraph, index) => {
         if (HR_BLOCK.test(paragraph.text)) return sceneBreakHtml(sceneBreakStyle, sceneBreakWidth, sceneBreakSpacing);
-        const classes = [index === 0 ? "first" : "", index === 0 && dropCap ? "drop-cap" : ""].filter(Boolean);
-        const body = formattedRuns(paragraph.text, paragraph.start, formatting).map(htmlRun).join("");
+        const leadQuote = index === 0 && dropCap ? htmlDropCapLeadQuoteBody(paragraph.text, paragraph.start, formatting) : null;
+        const classes = [index === 0 ? "first" : "", index === 0 && dropCap ? "drop-cap" : "", leadQuote ? "drop-cap-lead-quote" : ""].filter(Boolean);
+        const body = leadQuote ?? formattedRuns(paragraph.text, paragraph.start, formatting).map(htmlRun).join("");
         return `<p${classes.length > 0 ? ` class="${classes.join(" ")}"` : ""}>${body}</p>`;
       })
       .join("\n");
@@ -427,9 +453,11 @@ function htmlParagraphs(
     .map((line) => {
       if (!line.text) return "<p><br/></p>";
       if (HR_BLOCK.test(line.text)) return sceneBreakHtml(sceneBreakStyle, sceneBreakWidth, sceneBreakSpacing);
-      const cls = dropCapUsed ? "" : ' class="drop-cap"';
+      const isDropCapLine = !dropCapUsed;
       dropCapUsed = true;
-      const body = formattedRuns(line.text, line.start, formatting).map(htmlRun).join("");
+      const leadQuote = isDropCapLine ? htmlDropCapLeadQuoteBody(line.text, line.start, formatting) : null;
+      const cls = isDropCapLine ? ` class="drop-cap${leadQuote ? " drop-cap-lead-quote" : ""}"` : "";
+      const body = leadQuote ?? formattedRuns(line.text, line.start, formatting).map(htmlRun).join("");
       return `<p${cls}>${body}</p>`;
     })
     .join("\n");
