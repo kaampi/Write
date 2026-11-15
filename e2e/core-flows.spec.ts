@@ -64,3 +64,15 @@ test("exports the manuscript as an HTML file that contains the prose", async ({ 
   expect(html).toContain("Nattnycklar");
   expect(html).toContain(PROSE);
 });
+
+test("hangs a typed opening quote and marks the real first letter, then keeps it right as typing goes on", async ({ page }) => {
+  await createBook(page, "Nattnycklar");
+  await writeProse(page, "“");
+  const first = page.locator('[role="textbox"][contenteditable="true"] > p').first();
+  // Nothing follows the quote yet, so there is no letter to mark.
+  await expect(first).toHaveClass(/drop-cap-lead-quote/);
+  await expect(first.locator(".drop-cap-letter")).toHaveCount(0);
+  await page.keyboard.type("Kom in,” sa hon.");
+  await expect(first.locator(".drop-cap-quote")).toHaveText("“");
+  await expect(first.locator(".drop-cap-letter")).toHaveText("K");
+});

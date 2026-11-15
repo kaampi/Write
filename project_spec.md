@@ -11794,6 +11794,37 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.310 → v1.0.311 (2026-11-15): Uppgift 7, del B
+steg 1 — Anfang-regeln på ett ställe.** Uppgift 7 (plan för att dela
+`BookStore.tsx` och dela renderingskod) lades fram som skriven plan;
+Mats svarade "Kör på din rekommendation": del B först (steg 1–2), sedan
+del A steg 1–4, sedan en falsk modellserver i Playwright-sviten, sedan
+del A steg 5–6; uppdelningen av `manuscriptExport.ts` per format (B
+steg 3) skjuts upp.
+
+Det här steget (B1): regeln "börjar första stycket med “ → hängande
+citattecken + droppad bokstav" fanns i tre kopior (`proseFlow.ts`
+`markupDropCapLeadQuote`, `manuscriptExport.ts`
+`htmlDropCapLeadQuoteBody`, `dropCapCharacters` för ODT/IDML) plus
+`proseDom.ts` som räknade ut förväntad bokstav själv. Nu äger
+`src/core/dropCap.ts` regeln: `opensWithLeadQuote`,
+`splitDropCapLeadQuote` (citattecken/bokstav/rest med förskjutningar, null
+för ensamt “), `dropCapCharacters`, `dropCapLeadQuoteMarkup` (spanmarkup
+med en `render`-callback per yta) och klassnamnskonstanterna. Editorn
+(`proseFlow`), `proseDom`, HTML/ePub och ODT/IDML anropar den.
+`OPENING_CURLY_QUOTE` återexporteras från `proseFlow` så gamla importer
+funkar. Ingen beteendeändring: CSS-reglerna i `styles.css` och
+`dropCapCss` är orörda (de är CSS, inte TS, och delar bara klassnamn).
+
+Verifierat: alla 1335 befintliga tester gröna oförändrade (prose-flow-,
+export- och Anfang-testerna är beteendekontrakten), 6 nya enhetstester för
+`dropCap.ts`, `tsc` och bygge rena, och ett nytt Playwright-test (6:e) för
+editorsidan som `proseDom.ts` annars inte har något test för: ett
+inskrivet “ markeras, ingen bokstavsspan finns innan något följer, och
+bokstaven plockas upp när man skriver vidare. Sviten 6/6 gröna.
+
+v1.0.310 → v1.0.311.
+
 **Ändringslogg v1.0.309 → v1.0.310 (2026-11-15): Fast Playwright-svit
 för kärnflödena.** Uppgift 5 i samma arbetsinstruktion: "Fast
 Playwright-svit för kärnflödena ... föreslå hur och var först, vitest

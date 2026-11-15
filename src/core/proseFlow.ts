@@ -1,3 +1,4 @@
+import { DROP_CAP_LEAD_QUOTE_CLASS, dropCapLeadQuoteMarkup, opensWithLeadQuote, splitDropCapLeadQuote } from "./dropCap";
 import { formattingSegments, type ProseFormattingRange, type ProseFormattingStyle } from "./proseFormatting";
 
 export function splitFlowParagraphs(text: string): string[] {
@@ -141,8 +142,8 @@ function tidyPeeledProse(text: string): string {
     .trim();
 }
 
-/** The curly opening double quote `smartQuotes.ts` produces — the one case a chapter's first paragraph can start with that calls for hanging punctuation (see `markupDropCapLeadQuote`). Exported so `proseDom.ts` can tell whether a live-typed first paragraph still needs upgrading to that markup, the same reason `HR_BLOCK`/`QUOTE_PREFIX` are. */
-export const OPENING_CURLY_QUOTE = "“";
+// Re-exported so existing importers (proseDom.ts) keep working; the rule itself lives in dropCap.ts.
+export { OPENING_CURLY_QUOTE } from "./dropCap";
 
 export function htmlFromProse(text: string, formatting: ProseFormattingRange[] = []): string {
   const paras = splitFlowParagraphsWithOffsets(text);
@@ -157,8 +158,8 @@ export function htmlFromProse(text: string, formatting: ProseFormattingRange[] =
       // The <p> is block-level by its tag already, so none of this CSS
       // needs forcing an inline element's display, and Enter keeps working.
       if (HR_BLOCK.test(para.text)) return `<p class="prose-hr">${escapeHtml(para.text)}</p>`;
-      if (index === 0 && para.text.startsWith(OPENING_CURLY_QUOTE)) {
-        return `<p class="drop-cap-lead-quote">${markupDropCapLeadQuote(para.text, para.start, formatting)}</p>`;
+      if (index === 0 && opensWithLeadQuote(para.text)) {
+        return `<p class="${DROP_CAP_LEAD_QUOTE_CLASS}">${markupDropCapLeadQuote(para.text, para.start, formatting)}</p>`;
       }
       const cls = QUOTE_PREFIX.test(para.text) ? ' class="prose-quote"' : "";
       return `<p${cls}>${markupProseBlock(para.text, para.start, formatting)}</p>`;
@@ -181,15 +182,10 @@ export function htmlFromProse(text: string, formatting: ProseFormattingRange[] =
  * stored text itself (what Codex and every export reads) is untouched.
  */
 function markupDropCapLeadQuote(block: string, blockStart: number, formatting: ProseFormattingRange[]): string {
-  const rest = block.slice(OPENING_CURLY_QUOTE.length);
-  const letter = [...rest][0];
-  if (!letter) return markupProseBlockBody(block, blockStart, formatting);
-  const letterStart = blockStart + OPENING_CURLY_QUOTE.length;
-  const afterLetter = rest.slice(letter.length);
-  return (
-    `<span class="drop-cap-quote">${markupFormattedSlice(OPENING_CURLY_QUOTE, blockStart, formatting)}</span>` +
-    `<span class="drop-cap-letter">${markupFormattedSlice(letter, letterStart, formatting)}</span>` +
-    markupProseBlockBody(afterLetter, letterStart + letter.length, formatting)
+  const parts = splitDropCapLeadQuote(block);
+  if (!parts) return markupProseBlockBody(block, blockStart, formatting);
+  return dropCapLeadQuoteMarkup(parts, blockStart, (slice, at, part) =>
+    part === "rest" ? markupProseBlockBody(slice, at, formatting) : markupFormattedSlice(slice, at, formatting)
   );
 }
 

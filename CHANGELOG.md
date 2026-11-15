@@ -9,6 +9,12 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.311] - 2026-11-15
+
+### Changed
+- Internal, no visible change: the rule for a drop cap on a chapter that opens with a curly “ now lives in one module (`src/core/dropCap.ts`) instead of being copied into the editor, the HTML/ePub export and the ODT/IDML export. All three call it, so they can no longer drift apart (which is how the Publish export once enlarged the quote together with the letter). The editor's markup, the exports and their CSS are unchanged.
+- The end-to-end suite got a sixth test for the editor side of that rule: a typed opening quote is marked, and the real first letter is picked up as typing continues.
+
 ## [1.0.310] - 2026-11-15
 
 ### Added

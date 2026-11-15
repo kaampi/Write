@@ -1,4 +1,5 @@
-import { HR_BLOCK, joinFlowParagraphs, OPENING_CURLY_QUOTE, QUOTE_PREFIX, splitFlowParagraphs } from "@core/proseFlow";
+import { DROP_CAP_LEAD_QUOTE_CLASS, DROP_CAP_LETTER_CLASS, opensWithLeadQuote, splitDropCapLeadQuote } from "@core/dropCap";
+import { HR_BLOCK, joinFlowParagraphs, QUOTE_PREFIX, splitFlowParagraphs } from "@core/proseFlow";
 import { normalizeSpan, type TextSpan } from "@core/textSpan";
 import {
   FORMATTING_STYLES,
@@ -141,8 +142,8 @@ export function blockMarkupNeedsSync(root: HTMLElement): boolean {
     // `.drop-cap-lead-quote` until some unrelated full rebuild came along.
     if (isFirstBlock) {
       isFirstBlock = false;
-      const isDropCapLeadQuote = block.classList.contains("drop-cap-lead-quote");
-      if (text.startsWith(OPENING_CURLY_QUOTE) !== isDropCapLeadQuote) return true;
+      const isDropCapLeadQuote = block.classList.contains(DROP_CAP_LEAD_QUOTE_CLASS);
+      if (opensWithLeadQuote(text) !== isDropCapLeadQuote) return true;
       if (isDropCapLeadQuote) {
         // The class alone isn't enough to tell the markup is still right:
         // typing the opening quote with nothing after it yet correctly
@@ -152,8 +153,8 @@ export function blockMarkupNeedsSync(root: HTMLElement): boolean {
         // right after the quote would never go back and wrap the real
         // first letter. Same idea as the quote-marker check below: compare
         // what the span actually holds against what it should.
-        const expectedLetter = [...text.slice(OPENING_CURLY_QUOTE.length)][0];
-        const letterSpan = block.querySelector(":scope > .drop-cap-letter");
+        const expectedLetter = splitDropCapLeadQuote(text)?.letter;
+        const letterSpan = block.querySelector(`:scope > .${DROP_CAP_LETTER_CLASS}`);
         if ((letterSpan?.textContent ?? undefined) !== expectedLetter) return true;
       }
     }

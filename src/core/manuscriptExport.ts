@@ -4,7 +4,8 @@ import { groupBibleEntities } from "./bibleGroups";
 import { sortedChapters, type Book } from "./BookSchema";
 import { profileFor } from "./characterProfile";
 import { PREDICATE_LABELS } from "./predicates";
-import { HR_BLOCK, OPENING_CURLY_QUOTE, peelModelAsides, splitFlowParagraphs, splitFlowParagraphsWithOffsets, wrapStyles } from "./proseFlow";
+import { DROP_CAP_LEAD_QUOTE_CLASS, dropCapCharacters, dropCapLeadQuoteMarkup, splitDropCapLeadQuote } from "./dropCap";
+import { HR_BLOCK, peelModelAsides, splitFlowParagraphs, splitFlowParagraphsWithOffsets, wrapStyles } from "./proseFlow";
 import { formattingSegments, type ProseFormattingRange, type ProseFormattingStyle } from "./proseFormatting";
 import { newId } from "./ids";
 
@@ -413,17 +414,9 @@ function htmlRun(run: FormattedRun): string {
  * inner HTML, or null when the paragraph doesn't start that way and the plain ::first-letter rule applies.
  */
 function htmlDropCapLeadQuoteBody(text: string, start: number, formatting: ProseFormattingRange[]): string | null {
-  if (!text.startsWith(OPENING_CURLY_QUOTE)) return null;
-  const rest = text.slice(OPENING_CURLY_QUOTE.length);
-  const letter = [...rest][0];
-  if (!letter) return null;
-  const letterStart = start + OPENING_CURLY_QUOTE.length;
-  const part = (slice: string, at: number) => formattedRuns(slice, at, formatting).map(htmlRun).join("");
-  return (
-    `<span class="drop-cap-quote">${part(OPENING_CURLY_QUOTE, start)}</span>` +
-    `<span class="drop-cap-letter">${part(letter, letterStart)}</span>` +
-    part(rest.slice(letter.length), letterStart + letter.length)
-  );
+  const parts = splitDropCapLeadQuote(text);
+  if (!parts) return null;
+  return dropCapLeadQuoteMarkup(parts, start, (slice, at) => formattedRuns(slice, at, formatting).map(htmlRun).join(""));
 }
 
 function htmlParagraphs(
@@ -440,7 +433,7 @@ function htmlParagraphs(
       .map((paragraph, index) => {
         if (HR_BLOCK.test(paragraph.text)) return sceneBreakHtml(sceneBreakStyle, sceneBreakWidth, sceneBreakSpacing);
         const leadQuote = index === 0 && dropCap ? htmlDropCapLeadQuoteBody(paragraph.text, paragraph.start, formatting) : null;
-        const classes = [index === 0 ? "first" : "", index === 0 && dropCap ? "drop-cap" : "", leadQuote ? "drop-cap-lead-quote" : ""].filter(Boolean);
+        const classes = [index === 0 ? "first" : "", index === 0 && dropCap ? "drop-cap" : "", leadQuote ? DROP_CAP_LEAD_QUOTE_CLASS : ""].filter(Boolean);
         const body = leadQuote ?? formattedRuns(paragraph.text, paragraph.start, formatting).map(htmlRun).join("");
         return `<p${classes.length > 0 ? ` class="${classes.join(" ")}"` : ""}>${body}</p>`;
       })
@@ -456,7 +449,7 @@ function htmlParagraphs(
       const isDropCapLine = !dropCapUsed;
       dropCapUsed = true;
       const leadQuote = isDropCapLine ? htmlDropCapLeadQuoteBody(line.text, line.start, formatting) : null;
-      const cls = isDropCapLine ? ` class="drop-cap${leadQuote ? " drop-cap-lead-quote" : ""}"` : "";
+      const cls = isDropCapLine ? ` class="drop-cap${leadQuote ? ` ${DROP_CAP_LEAD_QUOTE_CLASS}` : ""}"` : "";
       const body = leadQuote ?? formattedRuns(line.text, line.start, formatting).map(htmlRun).join("");
       return `<p${cls}>${body}</p>`;
     })
@@ -1439,11 +1432,6 @@ function idmlBibleBlocks(bible: ManuscriptExportSection[]): IdmlBlock[] {
 
 function idmlBlockStyleName(block: IdmlBlock): string {
   return block.kind === "sceneBreak" ? IDML_STYLE_SCENE_BREAK : block.styleName;
-}
-
-/** How many characters a drop cap covers: 2 when the paragraph opens with a curly “, so the quote and the real first letter drop together instead of the quote standing alone as the cap. */
-function dropCapCharacters(text: string): 1 | 2 {
-  return text.startsWith(OPENING_CURLY_QUOTE) && [...text.slice(OPENING_CURLY_QUOTE.length)].length > 0 ? 2 : 1;
 }
 
 function idmlBlockExtraAttrs(block: IdmlBlock): string {
