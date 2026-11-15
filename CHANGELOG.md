@@ -9,6 +9,13 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.305] - 2026-11-15
+
+### Added
+- Stats has a new whole-manuscript report (Stats → Whole manuscript), computed entirely locally with no AI call: **Dialogue** (share of words inside quotation marks, shifts between chapters, and a per-chapter bar chart), **Repeated phrases** (the same four-word phrase repeated within 120 words, even across a chapter break), **Character mentions** (uses the Story Bible's names, aliases and exclusions, and shows the longest gap between a character's mentions) and **Chapter length** (words per chapter with the median marked). Clicking an excerpt opens the chapter at that exact passage.
+- A **Character network** tab: a constellation-style map of which characters share scenes, independent of whether they actually speak to each other. Distance encodes how closely two characters are bound, circle size shows how often a character appears at all, and clicking a name shows what it is closest to. The nodes glide out from the center instead of snapping into place.
+- The Character network also surfaces open reflection questions: three always-visible ones about the whole-manuscript pattern ("Which relationship surprises you the most here?") and three tied to whichever character is focused ("What happens between them even when they aren't talking?"). Never a verdict, in line with the rest of Proofread and Stats.
+
 ## [1.0.304] - 2026-11-13
 
 ### Fixed

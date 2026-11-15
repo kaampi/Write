@@ -2,7 +2,6 @@ import { isLiveChapter, sortedChapters, touch, type Book, type Chapter, type Edi
 import { replaceInBrainstormNotes } from "./brainstormNotes";
 import { flagEchoes } from "./echoDetect";
 import { flagPhraseReuse } from "./phraseReuse";
-import { splitFlowParagraphs } from "./proseFlow";
 
 export type FindFlags = {
   matchCase: boolean;
@@ -156,25 +155,23 @@ export function findMarksByParagraph(
   activeStart?: number
 ): OverlayMark[][] {
   const matches = matchesInText(text, needle, flags);
-  const paras = splitFlowParagraphs(text);
-  let searchFrom = 0;
-  return paras.map((block) => {
-    let origin = text.indexOf(block, searchFrom);
-    if (origin < 0) {
-      return matchesInText(block, needle, flags).map((match) => ({
-        start: match.start,
-        end: match.end,
-        current: false
-      }));
+  return Array.from(text.matchAll(/[^\n]+/g)).flatMap((line) => {
+    const raw = line[0].trim();
+    if (!raw) return [];
+    const origin = line.index + line[0].indexOf(raw);
+    const block = raw.replace(/[ \t]+/g, " ");
+    const localMatches = matches.filter((match) => match.start >= origin && match.start < origin + raw.length);
+    if (localMatches.length === 0 && block !== raw) {
+      return [matchesInText(block, needle, flags).map(({ start, end }) => ({ start, end, current: false }))];
     }
-    searchFrom = origin + block.length;
-    return matches
-      .filter((match) => match.start >= origin && match.start < origin + block.length)
-      .map((match) => ({
-        start: match.start - origin,
-        end: Math.min(match.end - origin, block.length),
-        current: activeStart !== undefined && match.start === activeStart
-      }));
+    const displayOffset = (offset: number) => block === raw
+      ? Math.min(offset, block.length)
+      : raw.slice(0, offset).replace(/[ \t]+/g, " ").length;
+    return [localMatches.map((match) => ({
+      start: displayOffset(match.start - origin),
+      end: displayOffset(match.end - origin),
+      current: activeStart !== undefined && match.start === activeStart
+    }))];
   });
 }
 

@@ -3681,10 +3681,44 @@ analysverktyg alls att tillgå.
 **Bedömning:** värt att titta vidare på. Börja i så fall med
 dialog/beskrivning-förhållandet och karaktärsnätverket — båda robusta
 och grundade i data som redan finns — och spara sentimentkurvan till
-sist (om alls), tydligt flaggad som ungefärlig. Inget byggbeslut än;
-ren spaning på Mats initiativ, sparad här så den inte glöms bort.
+sist (om alls), tydligt flaggad som ungefärlig. Idén började som en
+spaning på Mats initiativ.
 
-Inte påbörjad.
+**Första versionen byggd i Stats → Hela manuset.** Rapporten körs
+lokalt utan AI och har fem flikar:
+
+- **Dialog** visar andelen ord inom igenkända citattecken, skiften
+  mellan kapitel och en utfällbar graf per kapitel.
+- **Upprepade fraser** visar närliggande upprepningar, även över en
+  kapitelgräns, med klickbara citat och frivilliga läsförslag.
+- **Karaktärernas omnämnanden** använder namn, alias och undantag från
+  Story Bible. Författaren kan öppna textbeläggen och se scenerna
+  på var sin sida av längre uppehåll mellan träffarna.
+- **Karaktärsnätverk** (✅ byggt, ingår i main från v1.0.305; utvecklat
+  på grenen `feature/character-proximity-map`) — karaktärsnätverk-kandidaten
+  ovan, som en konstellationskarta: avstånd mellan två karaktärer
+  står för hur många scener de delar (oavsett om de faktiskt pratar
+  med varandra — Mats bekräftade explicit att det är rätt mått),
+  cirkelstorlek för hur ofta karaktären förekommer totalt. Byggd på
+  Mats initiativ efter att han visade music-map.com som visuell
+  referens (avstånd i stället för en nod-kant-graf) och testade
+  konceptet i en fristående artefakt först. Återanvänder samma
+  namn-/alias-matchning som Karaktärernas omnämnanden
+  (`trackedMentionMatcher`), ny funktion `characterCooccurrence.ts`
+  grupperar per scen och räknar ett Jaccard-mått per karaktärspar.
+  Fliken har också öppna reflektionsfrågor: tre om mönstret över hela
+  manuset (alltid synliga) och tre som följer med den karaktär man
+  fokuserat på.
+- **Kapitellängd** visar ordantal i manusordning och markerar medianen
+  för kapitel med prosa.
+
+Rapporten beskriver vad som går att observera i texten. Författaren
+avgör hur mönstret fungerar i berättelsen och om något ska ändras.
+
+Kvar av karaktärsnätverk-kandidaten: "tänker på varandra" som en andra
+signal (kräver ett fraslexikon per språk, inte byggt än — se Mats
+exempel "Kael kunde inte sluta tänka på Melanie" i tråden som ledde
+hit). Känslokurvor via sentimentlexikon är fortfarande helt obyggd.
 
 ---
 

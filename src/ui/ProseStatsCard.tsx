@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { analyzeProse, entityNameTokens, type ProseStats } from "@core/proseStats";
 import { CloseIconButton } from "./CloseIconButton";
+import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 import {
   scoreDirectness,
   scorePacing,
@@ -11,13 +12,15 @@ import { readerTuning } from "@core/reader";
 import type { CastMember } from "@core/characterProfile";
 import type { CraftFields } from "@core/craft";
 import { flagEchoes } from "@core/echoDetect";
-import { readAiFreeMode, subscribeAiFreeMode } from "./aiFreeMode";
 import { flagPhraseReuse } from "@core/phraseReuse";
 import { htmlFromProse } from "@core/proseFlow";
 import { flagPovLeaks } from "@core/povLeak";
 import { tallyRareWords } from "@core/rareWords";
 import { proseFromElement } from "./proseDom";
 import { useLocale, format, count, type Messages } from "./i18n";
+import { ManuscriptStatsReport, type ManuscriptStatsView } from "./ManuscriptStatsReport";
+import type { Book } from "@core/BookSchema";
+import type { ManuscriptPassage } from "@core/manuscriptReport";
 
 const MIN_SPLIT_WORDS = 12;
 const GAUGE_ORDER: GaugeId[] = ["directness", "pacing", "vocabulary"];
@@ -88,6 +91,14 @@ export function ProseStatsCard({
   onSuggestBreak,
   onApplySplit,
   onFindPhrase,
+  book,
+  characterRef,
+  onSelectCharacter,
+  showManuscript,
+  onChangeView,
+  reportView,
+  onChangeReportView,
+  onOpenChapter,
   onClose
 }: {
   text: string;
@@ -101,6 +112,14 @@ export function ProseStatsCard({
   onSuggestBreak: (paragraph: string, signal: AbortSignal) => Promise<string>;
   onApplySplit: (sentence: string, split: string) => boolean;
   onFindPhrase: (phrase: string) => void;
+  book: Book;
+  characterRef: string;
+  onSelectCharacter: (ref: string) => void;
+  showManuscript: boolean;
+  onChangeView: (showManuscript: boolean) => void;
+  reportView: ManuscriptStatsView;
+  onChangeReportView: (view: ManuscriptStatsView) => void;
+  onOpenChapter: (chapterId: string, passage?: ManuscriptPassage) => void;
   onClose: () => void;
 }) {
   const { messages: m } = useLocale();
@@ -274,7 +293,7 @@ export function ProseStatsCard({
 
   return (
     <div
-      className="edit-overlay"
+      className="edit-overlay stats-overlay"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
@@ -282,234 +301,288 @@ export function ProseStatsCard({
     >
       <div className="edit-card stats-card" role="dialog" aria-modal="true" aria-labelledby="stats-title">
         <div className="stats-card-head">
-          <p className="chapter-craft-label">{m.stats.label}</p>
+          <h2 id="stats-title">{m.stats.label}</h2>
           <CloseIconButton onClick={onClose} label={m.common.close} />
         </div>
-        <h2 id="stats-title">{stats.words > 0 ? m.stats.title : m.stats.emptyTitle}</h2>
+        <div className="guide-tabs stats-view-switch" role="tablist" aria-label={m.stats.label}>
+          <button
+            type="button"
+            role="tab"
+            id="stats-open-text-tab"
+            aria-controls="stats-view-panel"
+            aria-selected={!showManuscript}
+            className={showManuscript ? "guide-tab" : "guide-tab is-active"}
+            onClick={() => onChangeView(false)}
+          >
+            {m.stats.report.current}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="stats-manuscript-tab"
+            aria-controls="stats-view-panel"
+            aria-selected={showManuscript}
+            className={showManuscript ? "guide-tab is-active" : "guide-tab"}
+            onClick={() => onChangeView(true)}
+          >
+            {m.stats.report.manuscript}
+          </button>
+        </div>
+        <div
+          className="stats-card-body"
+          id="stats-view-panel"
+          role="tabpanel"
+          aria-labelledby={showManuscript ? "stats-manuscript-tab" : "stats-open-text-tab"}
+          key={String(showManuscript)}
+        >
+          {showManuscript ? (
+            <ManuscriptStatsReport
+              book={book}
+              names={names}
+              view={reportView}
+              onChangeView={onChangeReportView}
+              characterRef={characterRef}
+              onSelectCharacter={onSelectCharacter}
+              onOpen={onOpenChapter}
+            />
+          ) : (
+            <div className="stats-current">
+              <section className="stats-group">
+                <h3>{stats.words > 0 ? m.stats.title : m.stats.emptyTitle}</h3>
 
-        {stats.sentenceLengths.length > 0 ? (
-          <SentenceSparkline stats={stats} selected={selected} onSelect={pickBar} />
-        ) : (
-          <p className="quiet">{m.stats.writeSome}</p>
-        )}
+                {stats.sentenceLengths.length > 0 ? (
+                  <SentenceSparkline stats={stats} selected={selected} onSelect={pickBar} />
+                ) : (
+                  <p className="quiet">{m.stats.writeSome}</p>
+                )}
 
-        {sentence ? (
-          <div className="stats-sentence">
-            <p className="chapter-craft-label">
-              {format(m.stats.sentence, {
-                n: selected === null ? 0 : selected + 1,
-                words: count(sentenceWords, m.stats.wordsShort)
-              })}
-            </p>
-            <blockquote>{sentence}</blockquote>
-            {sentenceWords < MIN_SPLIT_WORDS ? (
-              <p className="quiet">{m.stats.alreadyShort}</p>
-            ) : (
-              <div className="stats-sentence-actions">
-                <button
-                  type="button"
-                  onClick={() => void suggestSplit()}
-                  disabled={splitBusy || aiFree}
-                  title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
-                >
-                  {splitBusy ? m.stats.looking : m.stats.suggestSplit}
-                </button>
-              </div>
-            )}
-            {splitError ? <p className="quiet">{m.stats.noSplit}</p> : null}
-            {suggestion ? (
-              <>
-                <p className="chapter-craft-label">{m.stats.split}</p>
-                <textarea
-                  className="stats-split"
-                  value={suggestion}
-                  onChange={(event) => setSuggestion(event.target.value)}
-                  rows={3}
-                  autoFocus
-                  aria-label={m.stats.editSplit}
-                />
-                <div className="stats-sentence-actions">
-                  <button type="button" className="primary" onClick={applySplit} disabled={!suggestion.trim()}>
-                    {m.stats.useSplit}
-                  </button>
-                </div>
-              </>
-            ) : null}
-          </div>
-        ) : packedFlag ? (
-          <div className="stats-sentence">
-            <p className="chapter-craft-label">
-              {format(m.stats.paragraph, {
-                n: packedFlag.index + 1,
-                words: count(packedFlag.words, m.stats.wordsShort)
-              })}
-            </p>
-            <blockquote>{packedFlag.text}</blockquote>
-            <p className="quiet">{m.stats.packedHint}</p>
-            <div className="stats-sentence-actions">
-              <button
-                type="button"
-                onClick={() => void suggestBreak()}
-                disabled={splitBusy || aiFree}
-                title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
-              >
-                {splitBusy ? m.stats.looking : m.stats.suggestBreak}
-              </button>
-            </div>
-            {splitError ? <p className="quiet">{m.stats.noBreak}</p> : null}
-            {suggestion ? (
-              <>
-                <p className="chapter-craft-label">{m.stats.break}</p>
-                <BreakDraft value={suggestion} onChange={setSuggestion} />
-                <div className="stats-sentence-actions">
-                  <button type="button" className="primary" onClick={applyBreak} disabled={!suggestion.trim()}>
-                    {m.stats.useBreak}
-                  </button>
-                </div>
-              </>
-            ) : null}
-          </div>
-        ) : stats.sentenceLengths.length > 0 ? (
-          <p className="quiet stats-spark-hint">{m.stats.clickBar}</p>
-        ) : null}
+                {sentence ? (
+                  <div className="stats-sentence">
+                    <p className="chapter-craft-label">
+                      {format(m.stats.sentence, {
+                        n: selected === null ? 0 : selected + 1,
+                        words: count(sentenceWords, m.stats.wordsShort)
+                      })}
+                    </p>
+                    <blockquote>{sentence}</blockquote>
+                    {sentenceWords < MIN_SPLIT_WORDS ? (
+                      <p className="quiet">{m.stats.alreadyShort}</p>
+                    ) : (
+                      <div className="stats-sentence-actions">
+                        <button
+                          type="button"
+                          onClick={() => void suggestSplit()}
+                          disabled={splitBusy || aiFree}
+                          title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+                        >
+                          {splitBusy ? m.stats.looking : m.stats.suggestSplit}
+                        </button>
+                      </div>
+                    )}
+                    {splitError ? <p className="quiet">{m.stats.noSplit}</p> : null}
+                    {suggestion ? (
+                      <>
+                        <p className="chapter-craft-label">{m.stats.split}</p>
+                        <textarea
+                          className="stats-split"
+                          value={suggestion}
+                          onChange={(event) => setSuggestion(event.target.value)}
+                          rows={3}
+                          autoFocus
+                          aria-label={m.stats.editSplit}
+                        />
+                        <div className="stats-sentence-actions">
+                          <button type="button" className="primary" onClick={applySplit} disabled={!suggestion.trim()}>
+                            {m.stats.useSplit}
+                          </button>
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                ) : packedFlag ? (
+                  <div className="stats-sentence">
+                    <p className="chapter-craft-label">
+                      {format(m.stats.paragraph, {
+                        n: packedFlag.index + 1,
+                        words: count(packedFlag.words, m.stats.wordsShort)
+                      })}
+                    </p>
+                    <blockquote>{packedFlag.text}</blockquote>
+                    <p className="quiet">{m.stats.packedHint}</p>
+                    <div className="stats-sentence-actions">
+                      <button
+                        type="button"
+                        onClick={() => void suggestBreak()}
+                        disabled={splitBusy || aiFree}
+                        title={aiFree ? m.editor.aiFreeModeDisabledHint : undefined}
+                      >
+                        {splitBusy ? m.stats.looking : m.stats.suggestBreak}
+                      </button>
+                    </div>
+                    {splitError ? <p className="quiet">{m.stats.noBreak}</p> : null}
+                    {suggestion ? (
+                      <>
+                        <p className="chapter-craft-label">{m.stats.break}</p>
+                        <BreakDraft value={suggestion} onChange={setSuggestion} />
+                        <div className="stats-sentence-actions">
+                          <button type="button" className="primary" onClick={applyBreak} disabled={!suggestion.trim()}>
+                            {m.stats.useBreak}
+                          </button>
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                ) : stats.sentenceLengths.length > 0 ? (
+                  <p className="quiet stats-spark-hint">{m.stats.clickBar}</p>
+                ) : null}
+              </section>
 
-        {stats.words > 0 ? (
-          <>
-            <div className="stats-gauges">
-              {GAUGE_ORDER.map((id) => {
-                const copy = m.stats.gauges[id];
-                const expanded = detail === id;
-                return (
-                  <div key={id} className={expanded ? "stats-accordion is-open" : "stats-accordion"}>
-                    <GaugeRow
-                      id={id}
-                      label={copy.label}
-                      score={gauges[id]}
-                      {...(id === "pacing"
-                        ? {
-                            note: stats.profile.id === "short" ? mixCopy(stats.mix, m) : profileCopy(stats, m)
-                          }
-                        : {})}
-                      expanded={expanded}
-                      onToggle={() => toggleDetail(id)}
-                    />
-                    {expanded ? (
-                      <GaugeDetail
-                        id={id}
-                        detail={copy}
-                        stats={stats}
-                        rare={rare}
-                        longSentence={tuning.longSentence}
-                        plainVocabulary={tuning.plainScore >= 85}
-                        highlighting={highlighting}
-                        onHighlight={() => {
+              {stats.words > 0 ? (
+                <>
+                  <section className="stats-group">
+                    <h3>{m.stats.report.textMeasures}</h3>
+                    <div className="stats-gauges">
+                      {GAUGE_ORDER.map((id) => {
+                        const copy = m.stats.gauges[id];
+                        const expanded = detail === id;
+                        return (
+                          <div key={id} className={expanded ? "stats-accordion is-open" : "stats-accordion"}>
+                            <GaugeRow
+                              id={id}
+                              label={copy.label}
+                              score={gauges[id]}
+                              {...(id === "pacing"
+                                ? {
+                                    note: stats.profile.id === "short" ? mixCopy(stats.mix, m) : profileCopy(stats, m)
+                                  }
+                                : {})}
+                              expanded={expanded}
+                              onToggle={() => toggleDetail(id)}
+                            />
+                            {expanded ? (
+                              <GaugeDetail
+                                id={id}
+                                detail={copy}
+                                stats={stats}
+                                rare={rare}
+                                longSentence={tuning.longSentence}
+                                plainVocabulary={tuning.plainScore >= 85}
+                                highlighting={highlighting}
+                                onHighlight={() => {
+                                  onHighlight();
+                                  onClose();
+                                }}
+                                onShowSentence={showBar}
+                              />
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <p className="quiet stats-foot">
+                      {format(m.stats.foot, {
+                        words: stats.words,
+                        sentences: stats.sentences,
+                        spoken: Math.round(stats.dialogueShare * 100)
+                      })}
+                    </p>
+                  </section>
+                  <section className="stats-group">
+                    <h3>{m.stats.report.passages}</h3>
+                    {stats.mixedParagraphs.length > 0 ? (
+                      <div className="stats-long stats-packed">
+                        <p className="chapter-craft-label">{m.stats.mixedFocus}</p>
+                        <p className="quiet">
+                          {stats.mixedParagraphs.length === 1 ? m.stats.mixedOne : m.stats.mixedMany}
+                        </p>
+                        <ul>
+                          {stats.mixedParagraphs.map((item, index) => (
+                            <li key={item.index} className={packed === index ? "is-selected" : undefined}>
+                              <button type="button" className="stats-long-pick" onClick={() => pickPacked(index)}>
+                                {clip(item.text, 140)}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    {echoes.length > 0 ? (
+                      <div className="stats-long stats-packed">
+                        <p className="chapter-craft-label">{m.stats.echo}</p>
+                        <p className="quiet">{m.stats.echoBody}</p>
+                        <ul>
+                          {echoes.map((hit) => (
+                            <li key={hit.phrase}>
+                              <button
+                                type="button"
+                                className="stats-long-pick"
+                                aria-label={format(m.stats.openFind, { phrase: hit.phrase })}
+                                onClick={() => onFindPhrase(hit.phrase)}
+                              >
+                                {hit.phrase} ×{hit.count}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    {reuseHits.length > 0 ? (
+                      <div className="stats-long stats-packed">
+                        <p className="chapter-craft-label">{m.stats.reuse}</p>
+                        <p className="quiet">{m.stats.reuseBody}</p>
+                        <ul>
+                          {reuseHits.map((hit) => (
+                            <li key={`${hit.phrase}-${hit.paragraphs.join("-")}`}>
+                              <button
+                                type="button"
+                                className="stats-long-pick"
+                                aria-label={format(m.stats.openFind, { phrase: hit.phrase })}
+                                onClick={() => onFindPhrase(hit.phrase)}
+                              >
+                                {clip(hit.phrase, 80)} · {format(m.stats.reuseWhere, {
+                                  list: hit.paragraphs.map((item) => item + 1).join(", "),
+                                  n: hit.run
+                                })}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    {leaks.length > 0 && craft ? (
+                      <div className="stats-long stats-packed">
+                        <p className="chapter-craft-label">{m.stats.povLeak}</p>
+                        <p className="quiet">{leakBlurb(craft, m)}</p>
+                        <ul>
+                          {leaks.map((hit) => (
+                            <li key={`${hit.sentenceIndex}-${hit.who}`} className={selected === hit.sentenceIndex ? "is-selected" : undefined}>
+                              <button type="button" className="stats-long-pick" onClick={() => pickBar(hit.sentenceIndex)}>
+                                {clip(hit.sentence, 140)}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    <div className="edit-actions">
+                      <button
+                        type="button"
+                        className="primary"
+                        onClick={() => {
                           onHighlight();
                           onClose();
                         }}
-                        onShowSentence={showBar}
-                      />
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-            {stats.mixedParagraphs.length > 0 ? (
-              <div className="stats-long stats-packed">
-                <p className="chapter-craft-label">{m.stats.mixedFocus}</p>
-                <p className="quiet">
-                  {stats.mixedParagraphs.length === 1 ? m.stats.mixedOne : m.stats.mixedMany}
-                </p>
-                <ul>
-                  {stats.mixedParagraphs.map((item, index) => (
-                    <li key={item.index} className={packed === index ? "is-selected" : undefined}>
-                      <button type="button" className="stats-long-pick" onClick={() => pickPacked(index)}>
-                        {clip(item.text, 140)}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            {echoes.length > 0 ? (
-              <div className="stats-long stats-packed">
-                <p className="chapter-craft-label">{m.stats.echo}</p>
-                <p className="quiet">{m.stats.echoBody}</p>
-                <ul>
-                  {echoes.map((hit) => (
-                    <li key={hit.phrase}>
-                      <button
-                        type="button"
-                        className="stats-long-pick"
-                        aria-label={format(m.stats.openFind, { phrase: hit.phrase })}
-                        onClick={() => onFindPhrase(hit.phrase)}
+                        disabled={rare.count === 0 && !highlighting}
                       >
-                        {hit.phrase} ×{hit.count}
+                        {highlighting ? m.stats.keepHighlight : m.stats.highlight}
                       </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            {reuseHits.length > 0 ? (
-              <div className="stats-long stats-packed">
-                <p className="chapter-craft-label">{m.stats.reuse}</p>
-                <p className="quiet">{m.stats.reuseBody}</p>
-                <ul>
-                  {reuseHits.map((hit) => (
-                    <li key={`${hit.phrase}-${hit.paragraphs.join("-")}`}>
-                      <button
-                        type="button"
-                        className="stats-long-pick"
-                        aria-label={format(m.stats.openFind, { phrase: hit.phrase })}
-                        onClick={() => onFindPhrase(hit.phrase)}
-                      >
-                        {clip(hit.phrase, 80)} · {format(m.stats.reuseWhere, {
-                          list: hit.paragraphs.map((item) => item + 1).join(", "),
-                          n: hit.run
-                        })}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            {leaks.length > 0 && craft ? (
-              <div className="stats-long stats-packed">
-                <p className="chapter-craft-label">{m.stats.povLeak}</p>
-                <p className="quiet">{leakBlurb(craft, m)}</p>
-                <ul>
-                  {leaks.map((hit) => (
-                    <li key={`${hit.sentenceIndex}-${hit.who}`} className={selected === hit.sentenceIndex ? "is-selected" : undefined}>
-                      <button type="button" className="stats-long-pick" onClick={() => pickBar(hit.sentenceIndex)}>
-                        {clip(hit.sentence, 140)}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            <p className="quiet stats-foot">
-              {format(m.stats.foot, {
-                words: stats.words,
-                sentences: stats.sentences,
-                spoken: Math.round(stats.dialogueShare * 100)
-              })}
-            </p>
-            <div className="edit-actions">
-              <button
-                type="button"
-                className="primary"
-                onClick={() => {
-                  onHighlight();
-                  onClose();
-                }}
-                disabled={rare.count === 0 && !highlighting}
-              >
-                {highlighting ? m.stats.keepHighlight : m.stats.highlight}
-              </button>
+                    </div>
+                  </section>
+                </>
+              ) : null}
             </div>
-          </>
-        ) : null}
+          )}
+        </div>
       </div>
     </div>
   );

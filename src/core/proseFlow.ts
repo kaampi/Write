@@ -19,18 +19,12 @@ export function splitFlowParagraphs(text: string): string[] {
  * against.
  */
 export function splitFlowParagraphsWithOffsets(text: string): { text: string; start: number }[] {
-  const normalized = text.replace(/\r\n/g, "\n");
   const result: { text: string; start: number }[] = [];
-  let index = 0;
-  for (const part of normalized.split(/(\n+)/)) {
-    if (part === "" || /^\n+$/.test(part)) {
-      index += part.length;
-      continue;
-    }
-    const leading = part.match(/^[ \t]*/)?.[0].length ?? 0;
+  for (const match of text.matchAll(/[^\n]+/g)) {
+    const part = match[0];
+    const leading = part.length - part.trimStart().length;
     const collapsed = part.replace(/[ \t]+/g, " ").trim();
-    if (collapsed) result.push({ text: collapsed, start: index + leading });
-    index += part.length;
+    if (collapsed) result.push({ text: collapsed, start: match.index + leading });
   }
   return result;
 }

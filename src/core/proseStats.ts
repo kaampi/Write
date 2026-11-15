@@ -323,15 +323,19 @@ export function wordsIn(text: string): string[] {
   return text.match(WORD_RE) ?? [];
 }
 
-function countDialogueWords(text: string): number {
-  let total = 0;
-  const patterns = [/"([^"]*)"/g, /“([^”]*)”/g];
-  for (const pattern of patterns) {
-    for (const match of text.matchAll(pattern)) {
-      total += wordsIn(match[1] ?? "").length;
-    }
-  }
-  return total;
+export function wordMatches(text: string) {
+  return text.matchAll(WORD_RE);
+}
+
+export function dialogueSpans(text: string): { start: number; end: number }[] {
+  return Array.from(text.matchAll(/"[^"]*"|“[^”]*”/g), (match) => ({
+    start: match.index + 1,
+    end: match.index + match[0].length - 1
+  }));
+}
+
+export function countDialogueWords(text: string): number {
+  return dialogueSpans(text).reduce((total, { start, end }) => total + countWords(text.slice(start, end)), 0);
 }
 
 function isMannerAdverb(word: string): boolean {

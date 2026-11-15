@@ -11794,6 +11794,47 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.304 → v1.0.305 (2026-11-15): Stats-grenen slogs
+ihop med main.** Uppgift 1 i en arbetsinstruktion Mats gav (efter en
+ärlig genomgång av appens styrkor och svagheter): "Slå ihop
+Stats-arbetet till main." Grenen `feature/character-proximity-map`
+innehöll tre commits ovanpå `codex/stats-manuscript-report`: manus-
+rapporten (Dialog, Upprepade fraser, Karaktärernas omnämnanden,
+Kapitellängd), karaktärsnätverket och reflektionsfrågorna. `main` hade
+under tiden gått från v1.0.302 till v1.0.304 (egenskapskontroll i
+Proofread, timeouts på alla lokala modell-anrop, hängande citattecken
+vid anfang).
+
+Provkörde sammanslagningen i en tillfällig worktree innan något rördes
+i `main`: bara fem filer krockade (versionsraden i `package.json`,
+`package-lock.json` och `tauri.conf.json`, samt nya poster överst i
+`CHANGELOG.md` och `project_spec.md`, där båda sidor lagt till). All
+kod slogs ihop automatiskt, även `proseFlow.ts`, `Editor.tsx`,
+`styles.css` och i18n där båda sidor ändrat samma filer.
+
+Grenens versionsnummer (1.0.302 och 1.0.303) var redan upptagna på
+`main`, så `main`s poster står kvar orörda och grenens arbete är i
+stället en ny post, v1.0.305. Grenens två poster nedan behålls men
+har fått rubrikerna "Gren-logg" så att de inte förväxlas med `main`s
+egna 1.0.302/1.0.303. Manusrapporten hade dessutom aldrig fått någon
+CHANGELOG-post alls (Codex-commiten skrev bara i roadmapen); den ingår
+nu i 1.0.305.
+
+Efter sammanslagningen: `tsc --noEmit` rent, 1306/1306 tester gröna
+(1296 från `main` plus grenens tio), `npm run build` rent. Live-
+verifierat med Playwright i en riktig körande app, eftersom båda
+sidor ändrat `proseFlow.ts`: en bok med anfang påslaget och ett första
+stycke som börjar med dialog fick fortfarande det uppdelade citatet
+och den stora bokstaven; Stats → Hela manuset visade alla fem flikar
+(Dialog, Upprepade fraser, Karaktärernas omnämnanden, Karaktärsnätverk,
+Kapitellängd); nätverket ritade två karaktärer och både
+fokus-frågorna och mönster-frågorna visades; inga sidfel.
+
+**Observerat men inte rört:** en ny användare utan lokal modell möter
+fortfarande den röda OLLAMA_ORIGINS-bannern direkt (syns i
+verifieringens skärmdump) — det är uppgift 3 i samma arbetsinstruktion.
+
+
 **Ändringslogg v1.0.303 → v1.0.304 (2026-11-13): Hängande citattecken
 när anfang möter ett kapitel som börjar med dialog.** Mats: "Om
 Kapitlet inleds med ett citat blir första tecknet ". Jag tror att det
@@ -11995,6 +12036,99 @@ bekräftar att flaggan faktiskt dyker upp i jobbets `flags`-lista
 under "continuity"-steget utan att något AI-svar krävdes för den
 specifika flaggan. `tsc --noEmit` rent, 1286/1286 tester gröna (fem
 nya), `npm run build` rent.
+**Gren-logg (på feature/character-proximity-map, då numrerad v1.0.302 → v1.0.303, 2026-11-11): Öppna
+reflektionsfrågor i Karaktärsnätverket.** Direkt uppföljning på
+nätverksfliken. Mats föreslog tre kategorier av öppna frågor att visa
+bredvid kartan — "När någon ofta blir tänkt på", "När karaktärer ofta
+delar scen", "När du ser på mönstret över hela manuset" — och frågade
+"Ska vi i samband med denna statistik ge några öppna frågor?". Jag
+flaggade att kategori 1 inte går att grunda än (kräver "tänker på"-
+lexikonet, obyggt), och frågade om form (en rad som resten av appen,
+eller Mats tre punkter per kategori) och placering (global rad eller
+kopplad till vad man fokuserat på). Mats bad om min rekommendation;
+jag föreslog att koppla frågorna till `focusRef` (starkare när de
+syftar på en specifik relation, och gratis att bygga eftersom
+fokus-tillståndet redan finns) och att bryta mot appens vanliga
+enrads-norm här eftersom det här är reflekterande skrivarbete, inte
+en bugg-flagga. Mats: "japp".
+
+Byggde kategori 2 (delar scen) som tre punkter under fokus-raden,
+synliga bara när en karaktär är vald (`networkFocusQuestions`), och
+kategori 3 (mönster över manuset) som en egen, alltid synlig sektion
+under legenden (`networkPatternIntro` + `networkPatternQuestions`) —
+oberoende av fokus, eftersom den frågar om helheten. Kategori 1
+sparad till "tänker på"-signalen finns. Ren textlista, ingen ny logik;
+återanvänder `copy.network*`-mönstret från i18n (en/sv/nb) och
+`.stats-report ul`s existerande list-reset, med en liten egen
+`–`-markör (`.stats-network-questions`) för att skilja reflekterande
+frågor från appens vanliga åtgärdsrader.
+
+`tsc --noEmit` rent, 1291/1291 tester gröna (oförändrat — ren text,
+inga nya beteenden att testa utöver det som redan täcks), `npm run
+build` rent. Live-verifierat med Playwright: fokuserad vy visar båda
+radgrupperna i rätt ordning, ofokuserad vy visar bara mönster-
+frågorna.
+
+**Gren-logg (på feature/character-proximity-map, då numrerad v1.0.301 → v1.0.302, 2026-11-11): Karaktärsnätverk i
+Stats, byggt på en separat branch.** Del av en längre tråd: Mats
+föreslog en "semantic cloud"/"proximity map" för karaktärer (med
+music-map.com som visuell referens — avstånd i stället för en nod-
+kant-graf), vi testade konceptet i en fristående artefakt
+(konstellationsdiagram, avatarer med silhuett-fallback, en "glid ut
+från mitten"-animation — justerad till långsammare efter Mats
+rättelse: "Eventuellt kan man lägga in bilder... En snygg effekt på
+Music-map är att bollarna startar i mitten och 'exploderar' sakta ut
+till sina positioner" följt av "ska nog vara mycket långsammare...
+mer som att de glider ut. Fel av mig att säga explosion"). Mats
+bekräftade sedan explicit att scen-samförekomst (oavsett dialog)
+är rätt mått: "Ska/kan man lägga till när karaktärer finns i samma
+scen (oavsett om de pratar med varandra)?" — och gav slutligen
+klartecken att bygga det på riktigt: "Ja se det som att jag säger
+till :) Jag var lite exkluderande innan men det var för att jag
+visste att vi hade kod som varken du eller jag hittade just då"
+(syftar på `codex/stats-manuscript-report`-grenen, redan granskad
+och godkänd tidigare).
+
+Byggde på en ny branch (`feature/character-proximity-map`) ovanpå
+`codex/stats-manuscript-report` snarare än `main`, eftersom namn-
+matchningen (`trackedMentionMatcher`, `bibleMentions.ts`) och Stats-
+rapportens flik-mönster (`ManuscriptStatsReport.tsx`) redan finns
+där — naturlig plats för en ny flik, inte ett skäl att duplicera
+infrastruktur. Ny kärnfunktion `characterCooccurrence.ts`: går
+igenom varje scen (samma scen-gränser som `manuscriptCharacterMentions.ts`
+redan använder) och samlar vilka spårade karaktärer nämns i den,
+bygger sedan ett Jaccard-mått (delade scener / unionen av bådas
+scener) per karaktärspar — symmetriskt, 0–1, och helt oberoende av
+om karaktärerna faktiskt har dialog med varandra. Ny UI-komponent
+`StatsCharacterNetwork.tsx`: SVG-baserad kraft-simulering (repulsion
+mellan alla noder + fjäder-dragning per par mot ett målavstånd satt
+av Jaccard-värdet), noder börjar klumpade i mitten och glider ut med
+en sinus-easead hastighetstopp (långsam start, långsam avslutning —
+inte en "explosion"), klick på ett namn fokuserar och visar de tre
+starkaste kopplingarna. Karaktärsfärger återanvänder appens egna
+`PLOTLINE_COLORS` (samma "skilj N saker åt"-palett som Timeline redan
+har) i stället för att hitta på en ny, och CSS-tokens är `--text`/
+`--border`/`--stats-button-color` (samma neutrala Stats-identitet som
+Dialogue/Chapter length-flikarna), inte artefaktens egna provisoriska
+färger.
+
+Ny testfil `tests/core/character-cooccurrence.test.ts` (3 tester):
+riktig scen-samförekomst över kapitelgräns, inget-par-flaggas när två
+karaktärer aldrig delar scen, alias/undantag fungerar identiskt med
+Story Bibles egen mention-tracking. `tsc --noEmit` rent, 1291/1291
+tester gröna (fem nya jämfört med den redan existerande
+`stats-manuscript-report`-grenen), `npm run build` rent. Live-
+verifierat med Playwright: skapade en riktig bok, skrev prosa med två
+scener (en `---`-scenbrytning), låste in två karaktärer i Story
+Bible, öppnade Stats → Whole manuscript → Character network — båda
+namnen renderades med silhuett-avatarer, en linje mellan dem, och
+klick på ett namn gav rätt fokus-text ("Kael shares the most scenes
+with Melanie"). Verifierat i både ljust och mörkt tema.
+
+**Kvarstår, inte byggt:** "tänker på varandra"-signalen (kräver ett
+fraslexikon per språk, separat från detta) och sammanslagning av den
+här branchen med `main` — Mats har inte gett klartecken för det
+ännu, bara för att bygga karaktärsnätverket.
 
 **Ändringslogg v1.0.300 → v1.0.301 (2026-11-06): Brainstorm-kapitlet
 skrivet om som pilot för mer handgriplig Guide.** Mats: "Det är rätt
