@@ -11794,6 +11794,69 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.305 → v1.0.306 (2026-11-15): Dialogmätningen
+förstår svenska och norska typsättningar.** Uppgift 2 i samma
+arbetsinstruktion: "Stöd för replikstreck i dialogmätningen.
+`dialogueSpans` ... räknar bara citattecken. Svenska och norska manus
+använder ofta replikstreck. Föreslå en regel innan du bygger."
+Underlaget var Mats egen roadmap-notis (grenen docs/roadmap-ai-free-
+analysis, nu i main) som redan pekat ut luckan.
+
+Mätte först skadan med den gamla regexen på samma replik i fyra
+typsättningar: engelskt “…” gav 6 av 8 ord som dialog, men svenskt ”…”,
+norskt «…» och pratminus gav **0**. Luckan slår mot två ställen: Dialog-
+fliken i manusrapporten och "% spoken" i kapitlets egen Stats (pacing-
+profilen använder inte måttet). Appens smarta citattecken ger “…” även
+för svenska, så den som skriver direkt i appen märker sällan något;
+det drabbar importerade manus (Word med svensk autokorrigering ger ”…”)
+och den som skriver pratminus för hand.
+
+Föreslog en regel, Mats svarade "Ja" på båda besluten: (1) ett stycke
+som inleds med tankstreck/pratminus räknas hela vägen till slutet,
+inklusive anföringen ("sa hon"), eftersom det krävs grammatik för att
+skilja replik från anföring — felet är några ord per replik och
+överdriver dialogandelen något, vilket texten nu säger rakt ut;
+(2) samma regler för alla språk, utan koppling till manusets
+språkinställning, eftersom tecknen är entydiga nog och ett nytt läge
+bara är ett nytt ställe att välja fel.
+
+Byggde om `dialogueSpans` (proseStats.ts) från en regex till en
+teckenläsare från vänster till höger: `"…"`, `“…”`, svenskt `”…”`,
+`«…»`, `»…»` och `»…«`, plus pratminus-stycken. Spannen är fortfarande
+sorterade, icke-överlappande och utan själva citattecknen, och ett
+citat får fortfarande korsa stycken, så `chapterDialogue` och det
+befintliga testet fungerar oförändrade. `”` och `»` räknas bara som
+öppnare i "öppningsläge" (textstart, efter blanksteg, parentes eller
+tankstreck — samma tanke som `smartQuoteFor`), annars är det en vanlig
+avslutning, så ett engelskt `“Hej,” sa hon` aldrig misstolkas. Ett
+öppningstecken utan stängning ger inget span och sväljer inget. `---`
+(scenbrytning), `> ` (citatblock) och ett streck utan blanksteg efter
+räknas inte som pratminus.
+
+Metodtexten `dialogueMethod`, sammanfattningen och diagramtexten är
+omskrivna på en/sv/nb: de sa tidigare att dialog med replikstreck
+"ligger utanför". Under en live-körning syntes att `“…”` och svenskt
+`”…”` ser nästan identiska ut i appens typsnitt, så formerna är
+benämnda med språk (svenska ”…”, norska «…») för att läsaren ska se att
+båda känns igen.
+
+Nya tester i `tests/core/dialogue-spans.test.ts` (11): varje
+typsättning, att ett engelskt avslutande ” inte tolkas som öppnare,
+pratminus med `–`, `—` och `-`, att `---`/`> `/`-bra` inte räknas,
+ingen dubbelräkning av citat inuti ett pratminus-stycke, oparade tecken,
+sorterade och icke-överlappande spann över blandad typsättning, och att
+`chapterDialogue` fördelar pratminus per stycke. `tsc` rent, 1317/1317
+tester gröna (1306 + 11), bygget rent. Live-verifierat med Playwright:
+fyra kapitel med samma replik i varsin typsättning gav svenskt ”…”
+75 %, norskt «…» 75 %, pratminus 100 % (hela stycket, som utlovat) och
+engelskt “…” 75 % som kontroll, totalt 81 % (26 av 32 ord) — de två
+första hade tidigare gett 0 %.
+
+**Inte ändrat, nämnt i roadmap-notisen:** adverb (`-ly`), passiv,
+Flesch och stavelseräkning är fortfarande skrivna för engelska, och
+förkortningslistan för meningsdelning är engelsk. Det är separata
+mätningar och ingick inte i uppgiften.
+
 **Ändringslogg v1.0.304 → v1.0.305 (2026-11-15): Stats-grenen slogs
 ihop med main.** Uppgift 1 i en arbetsinstruktion Mats gav (efter en
 ärlig genomgång av appens styrkor och svagheter): "Slå ihop

@@ -327,11 +327,61 @@ export function wordMatches(text: string) {
   return text.matchAll(WORD_RE);
 }
 
+/** Where a `”` or `»` can open a quote rather than close one — same idea as `smartQuoteFor` (smartQuotes.ts): start of text, or right after whitespace, a bracket or a dash. */
+const OPENING_CONTEXT = /[\s([{\-–—]/;
+/** A paragraph that starts with a dash and a space is spoken from there to its end ("pratminus"). A bare `---` scene break and a `> ` quote block don't match. */
+const DASH_DIALOGUE = /[ \t]*[–—-][ \t ]+/y;
+
+/**
+ * The spoken stretches of `text`, as offsets that exclude the quote marks
+ * themselves, sorted and never overlapping. Recognized, in any language:
+ * `"…"` and `“…”`; Swedish `”…”`; `«…»` (Norwegian); `»…»` and `»…«`
+ * (Swedish/Danish); and a paragraph opened with a dash — `– Hej, sa hon.`
+ * — which counts to the end of the paragraph, including the "sa hon",
+ * since telling speech from tag needs grammar this deliberately doesn't
+ * have. A quote may run across paragraphs. An opening mark with no closing
+ * one yields no span and swallows nothing.
+ */
 export function dialogueSpans(text: string): { start: number; end: number }[] {
-  return Array.from(text.matchAll(/"[^"]*"|“[^”]*”/g), (match) => ({
-    start: match.index + 1,
-    end: match.index + match[0].length - 1
-  }));
+  const spans: { start: number; end: number }[] = [];
+  let i = 0;
+  while (i < text.length) {
+    if (i === 0 || text[i - 1] === "\n") {
+      DASH_DIALOGUE.lastIndex = i;
+      const dash = DASH_DIALOGUE.exec(text);
+      if (dash) {
+        const start = i + dash[0].length;
+        const newline = text.indexOf("\n", start);
+        const end = newline === -1 ? text.length : newline;
+        if (start < end) spans.push({ start, end });
+        i = end;
+        continue;
+      }
+    }
+    const ch = text[i]!;
+    let close = -1;
+    if (ch === '"') close = text.indexOf('"', i + 1);
+    else if (ch === "“") close = text.indexOf("”", i + 1);
+    else if (ch === "«") close = text.indexOf("»", i + 1);
+    else if ((ch === "”" || ch === "»") && (i === 0 || OPENING_CONTEXT.test(text[i - 1]!))) {
+      close = ch === "”" ? text.indexOf("”", i + 1) : nextOf(text, i + 1, "»", "«");
+    }
+    if (close === -1) {
+      i += 1;
+      continue;
+    }
+    spans.push({ start: i + 1, end: close });
+    i = close + 1;
+  }
+  return spans;
+}
+
+function nextOf(text: string, from: number, a: string, b: string): number {
+  const first = text.indexOf(a, from);
+  const second = text.indexOf(b, from);
+  if (first === -1) return second;
+  if (second === -1) return first;
+  return Math.min(first, second);
 }
 
 export function countDialogueWords(text: string): number {

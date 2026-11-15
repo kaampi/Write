@@ -3739,6 +3739,9 @@ sak.
   norska `«…»` räknas inte alls — dialogandelen blir nära noll för ett
   sådant manus. Det påverkar både kapitlets Stats och Dialog-fliken i
   rapporten ovan.
+  ✅ **Byggt i v1.0.306:** svenskt `”…”`, `«…»`, `»…»`/`»…«` och
+  pratminus räknas nu som dialog, för alla språk (pratminus-stycken
+  räknas hela vägen till slutet, inklusive anföringen).
 - **Adverb** (`isMannerAdverb`, rad ~341) är ord som slutar på `-ly`.
 - **Passiv form** (`countPassives`, rad ~347) letar efter engelska
   `was/were/been` + particip. Svensk s-passiv och "blev + particip"

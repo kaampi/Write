@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.306] - 2026-11-15
+
+### Fixed
+- Dialogue is now measured for the way Swedish and Norwegian manuscripts are actually typeset. Stats used to recognize only straight and English curly quotes, so a manuscript using Swedish ”…”, Norwegian «…», »…» or »…«, or dialogue marked with a dash, showed close to 0% dialogue. All of those now count, in every language. A paragraph that opens with a dash counts to its end, including a tag like "sa hon", since telling speech from tag would need grammar. This affects the Dialogue tab in the manuscript report and the "% spoken" line in a chapter's Stats; the explanatory text is updated in English, Swedish and Norwegian.
+
 ## [1.0.305] - 2026-11-15
 
 ### Added
