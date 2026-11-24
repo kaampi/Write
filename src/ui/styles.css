@@ -308,7 +308,7 @@
   src: url("../assets/fonts/rubik/Rubik-Bold.ttf") format("truetype");
 }
 
-/* Crossfades Home <-> Editor and the editor's rail surfaces (see withViewTransition in BookStore.tsx, which sets --vt-duration per call). Browsers without support just skip straight to the new page. */
+/* Crossfades Home <-> Editor and the editor's rail surfaces (see withViewTransition in bookStore/helpers.ts, which sets --vt-duration per call). Browsers without support, and WebKitGTK where the transition crashes the UI process, just skip straight to the new page. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: var(--vt-duration, 320ms);

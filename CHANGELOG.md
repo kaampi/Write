@@ -9,6 +9,11 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.322] - 2026-11-24
+
+### Fixed
+- The Linux desktop build (AppImage/.deb) no longer crashes with SIGSEGV on every screen change — opening a manuscript, switching editor tabs, or closing one. View Transitions are skipped on WebKitGTK, the engine inside Tauri on Linux, where starting one crashes the UI process (WebKit #321683, #323949, #324730). Chromium and macOS keep the crossfade; Linux gets the same instant switch Firefox already had. `isWebKitGtk` has unit tests for the user-agent strings of every engine the app runs in.
+
 ## [1.0.321] - 2026-11-15
 
 ### Added

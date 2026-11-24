@@ -101,13 +101,29 @@ export function readLastPosition(book: Book): { surface: EditorSurface; chapterI
 }
 
 /**
+ * WebKitGTK — the engine behind every Tauri/wry window on Linux — SIGSEGVs
+ * its UI process when `document.startViewTransition()` is the first thing to
+ * switch on accelerated compositing: a null AcceleratedBackingStore
+ * dereference that release builds don't guard (WebKit #321683, #323949,
+ * #324730). Chromium (WebView2/Chrome/Edge) and macOS's WKWebView are fine,
+ * so this only matches the WebKitGTK combination: AppleWebKit, no Chrome/,
+ * and Linux. Revisit once a WebKitGTK release with the upstream fix can be
+ * required.
+ */
+export function isWebKitGtk(userAgent: string): boolean {
+  return /AppleWebKit\//.test(userAgent) && !/Chrome\//.test(userAgent) && /Linux/.test(userAgent);
+}
+
+/**
  * Crossfades between pages via the browser's View Transitions API — Home vs.
  * Editor at the default duration, and the editor's own rail surfaces
  * (Brainstorm, Synopsis, ...) faster since those are clicked far more often.
- * Falls back to a plain state update where unsupported (e.g. Firefox).
+ * Falls back to a plain state update where unsupported (e.g. Firefox) or
+ * unsafe (WebKitGTK, see `isWebKitGtk`).
  */
 export function withViewTransition(update: () => void, durationMs = 320): void {
-  if (typeof document.startViewTransition === "function") {
+  const supported = typeof document.startViewTransition === "function";
+  if (supported && !isWebKitGtk(navigator.userAgent)) {
     document.documentElement.style.setProperty("--vt-duration", `${durationMs}ms`);
     document.startViewTransition(() => flushSync(update));
   } else {
