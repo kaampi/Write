@@ -10,6 +10,8 @@ export type FakeModelOptions = {
   models?: string[];
   /** Send CORS headers. Without them a browser can reach the server but not read its answers. */
   cors?: boolean;
+  /** Require `Authorization: Bearer <this>`; anything else gets 401, like a server started with an API key. */
+  requireKey?: string;
   /** Answer every request with this HTTP status instead (e.g. 401 for a server that wants an API key). */
   status?: number;
   /** Decides the reply text for one /api/chat request. */
@@ -20,6 +22,8 @@ export type FakeModelServer = {
   url: string;
   /** Every /api/chat request body received, in order. */
   chats: ChatBody[];
+  /** The Authorization header of every request (tags and chat), in order; null when absent. */
+  authorizations: (string | null)[];
   close: () => Promise<void>;
 };
 
@@ -39,8 +43,9 @@ export function defaultReply(body: ChatBody): string {
  * a single JSON reply, depending on the request's `stream` flag).
  */
 export async function startFakeModelServer(options: FakeModelOptions = {}): Promise<FakeModelServer> {
-  const { models = ["fake-model:latest"], cors = true, status, reply = defaultReply, port: wantedPort = 0 } = options;
+  const { models = ["fake-model:latest"], cors = true, status, requireKey, reply = defaultReply, port: wantedPort = 0 } = options;
   const chats: ChatBody[] = [];
+  const authorizations: (string | null)[] = [];
   const server = http.createServer((req, res) => {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (cors) {
@@ -51,6 +56,12 @@ export async function startFakeModelServer(options: FakeModelOptions = {}): Prom
     if (req.method === "OPTIONS") {
       res.writeHead(204, headers);
       res.end();
+      return;
+    }
+    authorizations.push(req.headers.authorization ?? null);
+    if (requireKey && req.headers.authorization !== `Bearer ${requireKey}`) {
+      res.writeHead(401, headers);
+      res.end("{}");
       return;
     }
     if (status) {
@@ -90,6 +101,7 @@ export async function startFakeModelServer(options: FakeModelOptions = {}): Prom
   return {
     url: `http://127.0.0.1:${port}`,
     chats,
+    authorizations,
     close: () => new Promise<void>((resolve) => server.close(() => resolve()))
   };
 }

@@ -62,6 +62,8 @@ export type BookStoreValue = {
   translateModel: string;
   engine: LlmEngine;
   baseUrl: string;
+  /** Optional access token for a local server that requires one. Device-local; see llm/apiKey.ts. */
+  apiKey: string;
   contextWindow: number;
   historyLimit: number;
   ollamaError: string | null;
@@ -144,6 +146,7 @@ export type BookStoreValue = {
   setTranslateModel: (name: string) => void;
   setEngine: (engine: LlmEngine) => void;
   setBaseUrl: (url: string) => void;
+  setApiKey: (value: string) => void;
   setContextWindow: (n: number) => void;
   suggestContextWindow: () => Promise<number | null>;
   setHistoryLimit: (n: number) => void;

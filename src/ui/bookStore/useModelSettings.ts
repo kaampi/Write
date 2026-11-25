@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { normalizeApiKey, withApiKey } from "@llm/apiKey";
 import { readContextWindow, writeContextWindow } from "@llm/contextWindow";
+import { localServerFetch } from "@llm/tauriFetch";
 import { probeConnection, type ConnectionStatus } from "@llm/connectionStatus";
 import {
   DEFAULT_OLLAMA_MODEL,
@@ -19,6 +21,7 @@ import {
 import { readProseHistoryLimit, writeProseHistoryLimit } from "@core/proseHistory";
 import { clearWritingPrimer, readWritingPrimer, withWritingPrimer, writeWritingPrimer } from "@core/writingPrimer";
 import {
+  API_KEY_KEY,
   BASE_URL_KEY,
   ENGINE_KEY,
   MODEL_KEY,
@@ -61,6 +64,7 @@ export function useModelSettings() {
   );
   const [engine, setEngineState] = useState<LlmEngine>(readEngine);
   const [baseUrl, setBaseUrlState] = useState(() => localStorage.getItem(BASE_URL_KEY) ?? "");
+  const [apiKey, setApiKeyState] = useState(() => normalizeApiKey(localStorage.getItem(API_KEY_KEY)));
   const [contextWindow, setContextWindowState] = useState(() => readContextWindow());
   const [historyLimit, setHistoryLimitState] = useState(() => readProseHistoryLimit());
   const [ollamaError, setOllamaError] = useState<string | null>(null);
@@ -79,12 +83,14 @@ export function useModelSettings() {
   const historyLimitRef = useRef(historyLimit);
   const engineRef = useRef(engine);
   const baseUrlRef = useRef(baseUrl);
+  const apiKeyRef = useRef(apiKey);
   const contextWindowRef = useRef(contextWindow);
 
   writingPrimerRef.current = writingPrimer;
   historyLimitRef.current = historyLimit;
   engineRef.current = engine;
   baseUrlRef.current = baseUrl;
+  apiKeyRef.current = apiKey;
   contextWindowRef.current = contextWindow;
 
 
@@ -96,12 +102,14 @@ export function useModelSettings() {
         ? new OpenAICompatibleLocalProvider({
             model: modelName,
             baseUrl: baseUrlRef.current.trim() || DEFAULT_OPENAI_COMPATIBLE_BASE_URL,
+            ...(apiKeyRef.current ? { apiKey: apiKeyRef.current } : {}),
             ...(name ? { name } : {})
           })
         : new OllamaModelProvider({
             model: modelName,
             contextWindow: contextWindowRef.current,
             ...(baseUrlRef.current.trim() ? { baseUrl: baseUrlRef.current.trim() } : {}),
+            ...(apiKeyRef.current ? { apiKey: apiKeyRef.current } : {}),
             ...(name ? { name } : {})
           });
     return withTimeoutGuard(raw, setTimeoutCountdown);
@@ -124,7 +132,7 @@ export function useModelSettings() {
     const seq = ++probeSeq.current;
     lastProbeAt.current = Date.now();
     if (!options.quiet) setConnection({ kind: "checking" });
-    const status = await probeConnection(engineRef.current, baseUrlRef.current);
+    const status = await probeConnection(engineRef.current, baseUrlRef.current, { apiKey: apiKeyRef.current });
     if (seq !== probeSeq.current) return status;
     if (options.quiet && JSON.stringify(status) === JSON.stringify(connectionRef.current)) return status;
     setConnection(status);
@@ -151,7 +159,7 @@ export function useModelSettings() {
 
   useEffect(() => {
     void checkConnection();
-  }, [engine, baseUrl, checkConnection]);
+  }, [engine, baseUrl, apiKey, checkConnection]);
 
   // Start Ollama in another window, come back, and it just works — no
   // polling, only a re-check when the window regains focus, and only while
@@ -207,6 +215,13 @@ export function useModelSettings() {
     }
   }, []);
 
+  const setApiKey = useCallback((value: string) => {
+    const next = normalizeApiKey(value);
+    setApiKeyState(next);
+    if (next) localStorage.setItem(API_KEY_KEY, next);
+    else localStorage.removeItem(API_KEY_KEY);
+  }, []);
+
   const setBaseUrl = useCallback((url: string) => {
     setBaseUrlState(url);
     localStorage.setItem(BASE_URL_KEY, url);
@@ -229,7 +244,11 @@ export function useModelSettings() {
   const suggestContextWindow = useCallback(async (): Promise<number | null> => {
     if (engineRef.current !== "ollama") return null;
     try {
-      const found = await getOllamaModelContextLength({ model });
+      const found = await getOllamaModelContextLength({
+        model,
+        ...(baseUrlRef.current.trim() ? { baseUrl: baseUrlRef.current.trim() } : {}),
+        fetchImpl: withApiKey(localServerFetch(), apiKeyRef.current)
+      });
       if (found === undefined) return null;
       setContextWindow(found);
       return found;
@@ -253,6 +272,7 @@ export function useModelSettings() {
     translateModel,
     engine,
     baseUrl,
+    apiKey,
     contextWindow,
     historyLimit,
     ollamaError,
@@ -270,6 +290,7 @@ export function useModelSettings() {
     setTranslateModel,
     setEngine,
     setBaseUrl,
+    setApiKey,
     setContextWindow,
     suggestContextWindow,
     setHistoryLimit

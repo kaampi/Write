@@ -33,6 +33,8 @@ export type ConnectionStatus =
   | { kind: "error"; message: string };
 
 export type ProbeOptions = {
+  /** Access token for a server that requires one — see apiKey.ts. */
+  apiKey?: string;
   /** Replaces the transport, for tests. */
   fetchImpl?: typeof fetch;
   /** The desktop app routes requests through Rust, where CORS does not exist. Defaults to `isTauri()`. */
@@ -61,7 +63,10 @@ export async function probeConnection(
   const trimmed = baseUrl.trim();
   if (engine === "openai-compatible" && !trimmed) return { kind: "no-address" };
   try {
-    const transport = options.fetchImpl ? { fetchImpl: options.fetchImpl } : {};
+    const transport = {
+      ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {}),
+      ...(options.apiKey ? { apiKey: options.apiKey } : {})
+    };
     const raw =
       engine === "openai-compatible"
         ? new OpenAICompatibleLocalProvider({ model: "", baseUrl: trimmed, ...transport })

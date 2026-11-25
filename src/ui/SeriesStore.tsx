@@ -51,7 +51,7 @@ import { SeriesStoreContext, type SeriesBusy, type SeriesStoreValue } from "./us
  * provider must sit inside `BookStoreProvider` for either.
  */
 export function SeriesStoreProvider({ children }: { children: React.ReactNode }) {
-  const { summaries: bookSummaries, engine, baseUrl, reviewModel, models, ollamaError, contextWindow } = useBookStore();
+  const { summaries: bookSummaries, engine, baseUrl, apiKey, reviewModel, models, ollamaError, contextWindow } = useBookStore();
   const repo = useMemo(() => new SeriesRepository(), []);
   const bookRepo = useMemo(() => new BookRepository(), []);
   const [summaries, setSummaries] = useState<SeriesStoreValue["summaries"]>([]);
@@ -251,10 +251,19 @@ export function SeriesStoreProvider({ children }: { children: React.ReactNode })
 
   function makeProvider(modelName: string): LocalModelProvider {
     if (engine === "openai-compatible") {
-      return new OpenAICompatibleLocalProvider({ model: modelName, baseUrl: baseUrl.trim() || DEFAULT_OPENAI_COMPATIBLE_BASE_URL });
+      return new OpenAICompatibleLocalProvider({
+        model: modelName,
+        baseUrl: baseUrl.trim() || DEFAULT_OPENAI_COMPATIBLE_BASE_URL,
+        ...(apiKey ? { apiKey } : {})
+      });
     }
     const ollamaBaseUrl = baseUrl.trim();
-    return new OllamaModelProvider({ model: modelName, contextWindow, ...(ollamaBaseUrl ? { baseUrl: ollamaBaseUrl } : {}) });
+    return new OllamaModelProvider({
+      model: modelName,
+      contextWindow,
+      ...(ollamaBaseUrl ? { baseUrl: ollamaBaseUrl } : {}),
+      ...(apiKey ? { apiKey } : {})
+    });
   }
 
   const extractSynopsis = useCallback(async () => {

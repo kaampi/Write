@@ -9,6 +9,15 @@ history before that — every incremental step, in detail — lives in
 `project_spec.md`'s changelog (in Swedish; it's the project's internal
 working log).
 
+## [1.0.322] - 2026-11-25
+
+### Added
+- **API key for local servers.** Settings → AI now has an optional **API key** field under the server address, for local servers that require a token: llama.cpp started with `--api-key`, LM Studio's API tokens, vLLM, LocalAI, Jan, or Ollama behind a reverse proxy. The key is sent as `Authorization: Bearer …` with every request to that server (model list, chat, embeddings, the connection check and Test connection), for both engines, including the Series workspace's AI calls. It is stored per saved connection, so switching connections switches the key, and is saved on this device only, in plain text next to the server address; it is never part of a book, backup, export or Codex checkpoint. The field is masked.
+- The "server refused the request" message (HTTP 401/403) now points at the new field. In the browser app the server must also allow the `Authorization` header in its CORS answer; the desktop app has no such limit.
+
+### Fixed
+- "Suggest context window" asked Ollama's default address even when a different server address was configured; it now asks the configured server.
+
 ## [1.0.321] - 2026-11-15
 
 ### Added

@@ -11794,6 +11794,70 @@ v1.0.244 → v1.0.245.
 
 v1.0.245 → v1.0.246.
 
+**Ändringslogg v1.0.321 → v1.0.322 (2026-11-25): API-nyckel för lokala
+servrar.** Fråga från "vår mest trogna användare", vidarebefordrad av
+Mats: "Is it possible to add API key insert fields for llama.cpp and LM
+Studio? And basically all the local servers that could theoretically use
+tokens/API for access?" Mats godkände mitt förslag ("Ja, bygg det") med
+mina val: nyckel per sparad anslutning (A) och lokal lagring i klartext
+med tydlig hjälptext (B).
+
+Läsning av koden först: appen hade inget nyckelstöd alls; alla anrop
+skickade bara `Content-Type`, på åtta ställen plus
+anslutningskontrollen, och en 401/403 sedan v1.0.307 gav "avvisade
+förfrågan, behöver troligen nyckel" men utan ställe att skriva den.
+
+Lösning: `src/llm/apiKey.ts` (`normalizeApiKey` som trimmar och tar bort
+ett inklistrat "Bearer ", och `withApiKey` som lindar en fetch och lägger
+till `Authorization: Bearer …`, utan att skriva över en header anroparen
+satt, och returnerar samma fetch om nyckeln är tom). Båda providerna
+(`OllamaModelProvider`, `OpenAICompatibleLocalProvider`) tar `apiKey` och
+bygger sin `fetchImpl` med det, så all trafik — modelllista, chatt,
+strömning, embeddings — får headern utan att varje anropsställe ändras.
+`probeConnection` tar `apiKey` (no-cors-uppföljningen skickar den
+medvetet inte). `useModelSettings` har `apiKey`/`setApiKey`
+(localStorage `storybook-ai.api-key`, ref för de memoiserade
+callbackarna) och kollar anslutningen på nytt när nyckeln ändras.
+`SeriesStore` bygger egna providers och fick nyckeln också.
+Anslutningspresets (`connectionPresets.ts`) kan bära `apiKey`; att välja
+en preset sätter nyckeln, "Update" och "ny anslutning" sparar den; äldre
+presets utan nyckel läses som förut. Fältet "API key (optional)" är
+maskerat och ligger under serveradressen i både aktuell anslutning och
+öppen preset; hjälptexten (en/sv/nb) säger var nyckeln sparas, att den
+aldrig ingår i bok/backup/export, och CORS-kravet i webbläsaren.
+
+Granskning av läckage: ingen kod i `manuscriptBackup`,
+`manuscriptAppExport` eller `src/persistence` läser localStorage i bulk,
+och promptinspektorn loggar meddelanden, inte headers — så nyckeln kan
+inte följa med i backup, export eller Codex-synk. Det är läst ur koden,
+inte provkört mot en riktig Codex.
+
+Sidoeffekt som jag rättade medvetet: `suggestContextWindow` anropade
+Ollamas `/api/show` utan serveradress och frågade alltså standardadressen
+även när en annan server var konfigurerad. Nyckeln behövde adressen för att
+vara meningsfull, så den skickas nu med — en liten bugg fixad på köpet,
+noterad i CHANGELOG.
+
+Verifierat: 10 nya enhetstester (`tests/llm/api-key.test.ts`: normalisering,
+wrapper, båda providers på alla anropstyper, ingen header utan nyckel,
+probe utan/med nyckel, presets och bakåtkompatibilitet), 3 nya e2e-tester
+mot en falsk server som kräver nyckel (`requireKey`, loggar
+Authorization-headers): avvisad tills nyckeln skrivs i Settings → då
+ansluten; sparad nyckel följer med varje anrop inklusive Draft; ingen
+header utan nyckel och fältet är maskerat. Mutationskoll: när jag stängde
+av skickandet föll de två första. Totalt vitest 1353/1353, e2e 28/28,
+`tsc` och bygge rena, och en skärmdump av fältet i Settings.
+
+Miljönotering: containern hade bytts och `node_modules` saknades (npx föll
+tillbaka på en global TypeScript 6 med ett falskt `baseUrl`-fel); `npm ci`
+återställde det, lockfilen oförändrad. Inte gjort: nyckelring i
+skrivbordsappen (kräver Rust-plugin, medvetet uppskjutet), val av annat
+headernamn än `Authorization` (t.ex. `x-api-key`), och ingen provkörning
+mot en verklig llama.cpp- eller LM Studio-server med nyckel — den
+verifieringen har jag inte kunnat göra härifrån.
+
+v1.0.321 → v1.0.322.
+
 **Ändringslogg v1.0.320 → v1.0.321 (2026-11-15): Tester för de
 otäckta AI-funktionerna.** Efter att jag rapporterat vilka AI-funktioner
 som flyttats utan testskydd rekommenderade jag att täcka dem först; Mats

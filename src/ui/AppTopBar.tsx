@@ -233,6 +233,7 @@ export function AppTopBar() {
           translateModel={store.translateModel}
           engine={store.engine}
           baseUrl={store.baseUrl}
+          apiKey={store.apiKey}
           contextWindow={store.contextWindow}
           writingPrimer={store.writingPrimer}
           historyLimit={store.historyLimit}
@@ -244,6 +245,7 @@ export function AppTopBar() {
           onTranslateModel={store.setTranslateModel}
           onEngine={store.setEngine}
           onBaseUrl={store.setBaseUrl}
+          onApiKey={store.setApiKey}
           onContextWindow={store.setContextWindow}
           onSuggestContextWindow={store.suggestContextWindow}
           onPrimer={store.setWritingPrimer}

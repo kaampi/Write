@@ -1,3 +1,4 @@
+import { normalizeApiKey, withApiKey } from "./apiKey";
 import type { ChatMessage, CompletionRequest, StreamChunk } from "./types";
 import {
   completeOllamaChat,
@@ -218,11 +219,13 @@ export class OllamaModelProvider implements LocalModelProvider {
     name?: string;
     fetchImpl?: typeof fetch;
     contextWindow?: number;
+    /** Access token for a server that requires one (see apiKey.ts). */
+    apiKey?: string;
   }) {
     if (config.baseUrl) assertLocalOnlyBaseUrl(config.baseUrl, config.name ?? "Ollama");
     this.model = config.model;
     this.baseUrl = config.baseUrl;
-    this.fetchImpl = config.fetchImpl;
+    this.fetchImpl = normalizeApiKey(config.apiKey) ? withApiKey(config.fetchImpl ?? localServerFetch(), config.apiKey) : config.fetchImpl;
     this.contextWindow = config.contextWindow;
     this.name = config.name ?? `ollama:${config.model}`;
   }
@@ -306,12 +309,12 @@ export class OpenAICompatibleLocalProvider implements LocalModelProvider {
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
 
-  constructor(config: { model: string; baseUrl: string; name?: string; fetchImpl?: typeof fetch }) {
+  constructor(config: { model: string; baseUrl: string; name?: string; fetchImpl?: typeof fetch; apiKey?: string }) {
     assertLocalOnlyBaseUrl(config.baseUrl, config.name ?? "Local OpenAI-compatible server");
     this.model = config.model;
     this.baseUrl = config.baseUrl.replace(/\/$/, "");
     this.name = config.name ?? `local-openai:${config.model}`;
-    this.fetchImpl = config.fetchImpl ?? localServerFetch();
+    this.fetchImpl = withApiKey(config.fetchImpl ?? localServerFetch(), config.apiKey);
   }
 
   private chatBody(messages: ChatMessage[], stream: boolean, temperature?: number, maxTokens?: number) {

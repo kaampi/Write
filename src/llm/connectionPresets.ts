@@ -5,6 +5,8 @@ export type ConnectionPreset = {
   name: string;
   engine: LlmEngine;
   baseUrl: string;
+  /** Access token for this connection, if its server needs one. Stays on this device with the other presets. */
+  apiKey?: string;
 };
 
 export const CONNECTION_PRESETS_KEY = "storybook-ai.connection-presets";
@@ -25,8 +27,8 @@ export function saveConnectionPresets(presets: ConnectionPreset[], store: Pick<S
   store.setItem(CONNECTION_PRESETS_KEY, JSON.stringify(presets));
 }
 
-export function newConnectionPreset(engine: LlmEngine, baseUrl: string, existingNames: string[]): ConnectionPreset {
-  return { id: crypto.randomUUID(), name: uniqueDefaultName(existingNames), engine, baseUrl };
+export function newConnectionPreset(engine: LlmEngine, baseUrl: string, existingNames: string[], apiKey = ""): ConnectionPreset {
+  return { id: crypto.randomUUID(), name: uniqueDefaultName(existingNames), engine, baseUrl, ...(apiKey ? { apiKey } : {}) };
 }
 
 /**
@@ -56,6 +58,7 @@ function isConnectionPreset(value: unknown): value is ConnectionPreset {
     typeof rec.id === "string" &&
     typeof rec.name === "string" &&
     (rec.engine === "ollama" || rec.engine === "openai-compatible") &&
-    typeof rec.baseUrl === "string"
+    typeof rec.baseUrl === "string" &&
+    (rec.apiKey === undefined || typeof rec.apiKey === "string")
   );
 }

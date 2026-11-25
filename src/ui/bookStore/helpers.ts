@@ -21,6 +21,8 @@ export const TRANSLATE_MODEL_KEY = "storybook-ai.translate-model";
 export const LAST_BOOK_KEY = "storybook-ai.last-book";
 export const ENGINE_KEY = "storybook-ai.engine";
 export const BASE_URL_KEY = "storybook-ai.base-url";
+/** Optional access token for the local server — device-local, never part of a book or backup (see llm/apiKey.ts). */
+export const API_KEY_KEY = "storybook-ai.api-key";
 /**
  * A whole unsplit chapter (or a long interview) can hold many facts to
  * enumerate in one JSON response — 1200 was tight enough that a dense

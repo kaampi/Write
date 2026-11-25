@@ -52,6 +52,7 @@ export function AppSettingsDialog({
   translateModel,
   engine,
   baseUrl,
+  apiKey,
   contextWindow,
   writingPrimer,
   historyLimit,
@@ -63,6 +64,7 @@ export function AppSettingsDialog({
   onTranslateModel,
   onEngine,
   onBaseUrl,
+  onApiKey,
   onContextWindow,
   onSuggestContextWindow,
   onPrimer,
@@ -76,6 +78,7 @@ export function AppSettingsDialog({
   translateModel: string;
   engine: LlmEngine;
   baseUrl: string;
+  apiKey: string;
   contextWindow: number;
   writingPrimer: string;
   historyLimit: number;
@@ -87,6 +90,7 @@ export function AppSettingsDialog({
   onTranslateModel: (name: string) => void;
   onEngine: (engine: LlmEngine) => void;
   onBaseUrl: (url: string) => void;
+  onApiKey: (value: string) => void;
   onContextWindow: (n: number) => void;
   onSuggestContextWindow: () => Promise<number | null>;
   onPrimer: (text: string) => void;
@@ -200,7 +204,14 @@ export function AppSettingsDialog({
                 </div>
               ) : null}
               <div className="settings-engine">
-                <ConnectionPresetList engine={engine} baseUrl={baseUrl} onEngine={onEngine} onBaseUrl={onBaseUrl} />
+                <ConnectionPresetList
+                  engine={engine}
+                  baseUrl={baseUrl}
+                  apiKey={apiKey}
+                  onEngine={onEngine}
+                  onBaseUrl={onBaseUrl}
+                  onApiKey={onApiKey}
+                />
               </div>
               <div className="settings-models">
                 <ModelSelect label={m.editor.writing} value={model} models={models} emptyLabel={m.editor.noModels} onChange={onModel} />
@@ -398,13 +409,17 @@ export function AppSettingsDialog({
 function ConnectionPresetList({
   engine,
   baseUrl,
+  apiKey,
   onEngine,
-  onBaseUrl
+  onBaseUrl,
+  onApiKey
 }: {
   engine: LlmEngine;
   baseUrl: string;
+  apiKey: string;
   onEngine: (engine: LlmEngine) => void;
   onBaseUrl: (url: string) => void;
+  onApiKey: (value: string) => void;
 }) {
   const { messages: m } = useLocale();
   const [presets, setPresets] = useState<ConnectionPreset[]>(() => loadConnectionPresets());
@@ -426,6 +441,7 @@ function ConnectionPresetList({
     setExpandedId(preset.id);
     onEngine(preset.engine);
     onBaseUrl(preset.baseUrl);
+    onApiKey(preset.apiKey ?? "");
   };
 
   const hasActivePreset = presets.some((preset) => matchesPreset(preset, engine, baseUrl));
@@ -462,6 +478,24 @@ function ConnectionPresetList({
     </label>
   );
 
+  const apiKeyField = (
+    <label className="voice-field">
+      <span className="field-label-row">
+        {m.editor.apiKeyLabel}
+        <HelpTip body={m.editor.apiKeyLede} ariaLabel={format(m.common.infoAbout, { field: m.editor.apiKeyLabel })} />
+      </span>
+      <input
+        type="password"
+        value={apiKey}
+        onChange={(event) => onApiKey(event.target.value)}
+        placeholder={m.editor.apiKeyPlaceholder}
+        aria-label={m.editor.apiKeyLabel}
+        autoComplete="off"
+        spellCheck={false}
+      />
+    </label>
+  );
+
   return (
     <div className="connection-presets">
       {hasActivePreset ? null : (
@@ -472,6 +506,7 @@ function ConnectionPresetList({
           <div className="connection-preset-body">
             {engineField}
             {baseUrlField}
+            {apiKeyField}
           </div>
         </div>
       )}
@@ -527,6 +562,7 @@ function ConnectionPresetList({
               <div className="connection-preset-body">
                 {engineField}
                 {baseUrlField}
+                {apiKeyField}
                 <div className="connection-preset-actions">
                   <button
                     type="button"
@@ -544,7 +580,13 @@ function ConnectionPresetList({
                     type="button"
                     className="text-button"
                     onClick={() =>
-                      updatePresets(presets.map((item) => (item.id === preset.id ? { ...item, engine, baseUrl } : item)))
+                      updatePresets(
+                        presets.map((item) => {
+                          if (item.id !== preset.id) return item;
+                          const { apiKey: _previous, ...rest } = item;
+                          return { ...rest, engine, baseUrl, ...(apiKey ? { apiKey } : {}) };
+                        })
+                      )
                     }
                   >
                     {m.editor.connectionPresetUpdate}
@@ -562,7 +604,8 @@ function ConnectionPresetList({
           const preset = newConnectionPreset(
             engine,
             baseUrl,
-            presets.map((item) => item.name)
+            presets.map((item) => item.name),
+            apiKey
           );
           updatePresets([...presets, preset]);
           setExpandedId(preset.id);
